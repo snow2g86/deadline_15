@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>⚔ 캐릭터 밸런스 분석표</title>
+<script src="js/data.js"></script>
 <script src="js/classes.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -102,6 +103,10 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
 .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;float:right;margin-top:2px}
 .badge-rec{background:rgba(34,197,94,.15);color:var(--green)}
 .badge-opt{background:rgba(100,116,139,.15);color:var(--dim)}
+
+/* Class Icon Sprite */
+.cls-icon{display:inline-block;background-image:url('image/icon/64x64.png');image-rendering:pixelated;
+  vertical-align:middle;width:24px;height:24px;background-size:1024px 8768px}
 
 /* Skill preview */
 .skill-row{display:flex;gap:8px;align-items:flex-start;padding:10px;background:rgba(0,0,0,.2);
@@ -463,8 +468,9 @@ function renderStatsTable(){
     const ri=RES[c.res];
     const tr=document.createElement('tr');
     tr.style.cursor='pointer';
+    const iconHtml=`<span class="cls-icon" style="background-position:-${CD[c.key].iconCol*64}px -${CD[c.key].iconRow*64}px"></span>`;
     tr.innerHTML=`
-      <td class="t-icon">${c.icon}</td>
+      <td class="t-icon">${iconHtml}</td>
       <td class="t-name">${c.name}</td>
       <td class="t-hp">${c.hp}</td>
       <td class="t-atk">${c.atk}</td>
@@ -479,8 +485,9 @@ function renderStatsTable(){
       const d=document.getElementById('stat-detail');
       if(d.dataset.key===c.key){d.innerHTML='';d.dataset.key='';return}
       d.dataset.key=c.key;
+      const iconDetailHtml=`<span class="cls-icon" style="font-size:32px;width:32px;height:32px;background-position:-${CD[c.key].iconCol*64}px -${CD[c.key].iconRow*64}px"></span>`;
       d.innerHTML=`<div class="detail">
-        <div class="detail-head"><span class="icon">${c.icon}</span><span class="name">${c.name}</span><span class="desc">— ${c.desc}</span></div>
+        <div class="detail-head">${iconDetailHtml}<span class="name">${c.name}</span><span class="desc">— ${c.desc}</span></div>
         <div class="detail-body"><span style="color:${ri.color};font-weight:700">[${ri.label}]</span> ${ri.desc}<br><span style="color:var(--dim)">${ri.auto}</span></div>
       </div>`;
     };
@@ -505,8 +512,9 @@ function renderAnalysis(){
     const diff=((a.power-avg)/avg*100).toFixed(0);
     const grade=+diff>15?'🔴 과잉':+diff<-15?'🔵 약함':'🟢 적정';
     const tr=document.createElement('tr');
+    const iconHtml=`<span class="cls-icon" style="background-position:-${CD[c.key].iconCol*64}px -${CD[c.key].iconRow*64}px;margin-right:6px"></span>`;
     tr.innerHTML=`
-      <td class="t-name">${c.icon} ${c.name}</td>
+      <td class="t-name">${iconHtml}${c.name}</td>
       <td class="t-hp">${a.effHP}</td>
       <td class="t-atk">${a.dps}</td>
       <td>${a.threat}</td>
@@ -522,8 +530,9 @@ function renderAnalysis(){
   CHARS.forEach(c=>{
     const a=calcA(c);
     const pct=(a.power/maxPow*100).toFixed(1);
+    const iconHtml=`<span class="cls-icon" style="background-position:-${CD[c.key].iconCol*64}px -${CD[c.key].iconRow*64}px;margin-right:4px"></span>`;
     bc.innerHTML+=`<div class="bar-row">
-      <span class="bar-label">${c.icon}${c.name}</span>
+      <span class="bar-label">${iconHtml}${c.name}</span>
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[c.role]}">${a.power}</div></div>
     </div>`;
   });
@@ -532,10 +541,14 @@ function renderAnalysis(){
 function renderMatchup(){
   const t=document.getElementById('matchup-table');
   let h='<thead><tr><th style="text-align:left;font-size:10px;color:var(--dim)">공격↓ 방어→</th>';
-  CHARS.forEach(d=>h+=`<th>${d.icon}<div style="font-size:10px;color:var(--dim)">${d.name}</div></th>`);
+  CHARS.forEach(d=>{
+    const iconHtml=`<span class="cls-icon" style="background-position:-${CD[d.key].iconCol*64}px -${CD[d.key].iconRow*64}px"></span>`;
+    h+=`<th>${iconHtml}<div style="font-size:10px;color:var(--dim)">${d.name}</div></th>`;
+  });
   h+='</tr></thead><tbody>';
   CHARS.forEach(a=>{
-    h+=`<tr><td class="mu-atker">${a.icon} ${a.name}</td>`;
+    const iconHtml=`<span class="cls-icon" style="background-position:-${CD[a.key].iconCol*64}px -${CD[a.key].iconRow*64}px;margin-right:4px"></span>`;
+    h+=`<tr><td class="mu-atker">${iconHtml}${a.name}</td>`;
     CHARS.forEach(d=>{
       const dmg=Math.max(1,a.atk-d.def);
       const hits=Math.ceil(d.hp/dmg);
@@ -560,8 +573,9 @@ function renderResource(){
     users.forEach(u=>{
       const fillPct=u.resRec>0?Math.min(100,u.resRec/u.maxRes*100*4):15;
       const fillTurns=u.resRec>0?Math.ceil(u.maxRes/u.resRec)+'턴 풀충':'공격으로 획득';
+      const iconHtml=`<span class="cls-icon" style="background-position:-${CD[u.key].iconCol*64}px -${CD[u.key].iconRow*64}px;margin-right:4px"></span>`;
       inner+=`<div class="res-meter">
-        <span class="res-meter-label">${u.icon} ${u.name}</span>
+        <span class="res-meter-label">${iconHtml}${u.name}</span>
         <div class="res-meter-track"><div class="res-meter-fill" style="width:${fillPct}%;background:${ri.color}44;color:${ri.color}">${u.resRec||0}/턴</div></div>
         <span class="res-meter-info">MAX ${u.maxRes} · ${fillTurns}</span>
       </div>`;
