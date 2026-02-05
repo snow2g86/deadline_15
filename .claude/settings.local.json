@@ -9,7 +9,9 @@
       "Bash(pip3 list:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git -C /Users/2z/Desktop/workspace/game/deadline_15 commit --allow-empty -m \"$\\(cat <<''EOF''\nUpdate memory: 10-stage scenario system added\n\nDocumented:\n- 12-class system with active skills & passives\n- 10-stage progression with Defense/Offense themes\n- Scenario-based narrative structure\n- Difficulty scaling from beginner to endgame\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C /Users/2z/Desktop/workspace/game/deadline_15 commit --allow-empty -m \"$\\(cat <<''EOF''\nUpdate memory: 10-stage scenario system added\n\nDocumented:\n- 12-class system with active skills & passives\n- 10-stage progression with Defense/Offense themes\n- Scenario-based narrative structure\n- Difficulty scaling from beginner to endgame\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(ls:*)",
+      "Bash(node -c:*)"
     ]
   }
 }
