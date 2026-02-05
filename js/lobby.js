@@ -314,6 +314,20 @@ Object.assign(G,{
           `<div class="cc-exp"><div class="cc-exp-bar"><div class="cc-exp-fill" style="width:${expPct}%"></div></div><span class="cc-exp-txt">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span></div>`+
           `<div class="cc-stats">HP <b>${ch.hp}</b> ATK <b>${ch.atk}</b> DEF <b>${ch.def}</b><br>MOV <b>${ch.move}</b> RNG <b>${ch.range}</b></div>`+
           `<div class="cc-pot">잠재 <span style="font-size:10px;color:#94a3b8">HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</span></div>`;
+
+        // 방출 버튼 추가 (파티 미편성 캐릭터만)
+        if(!sel){
+          const price=30+ch.lv*5;
+          const releaseBtn=document.createElement('button');
+          releaseBtn.className='cc-release-btn';
+          releaseBtn.textContent=`방출 ${price}G`;
+          releaseBtn.onclick=(e)=>{
+            e.stopPropagation();
+            this.releaseChar(ch.uid);
+          };
+          c.appendChild(releaseBtn);
+        }
+
         c.onclick=()=>{
           if(sel)this.party=this.party.filter(u=>u!==ch.uid);
           else if(this.party.length<MAX_P)this.party.push(ch.uid);
@@ -599,5 +613,54 @@ Object.assign(G,{
     const n=document.createElement('button');n.className='modal-btn secondary';n.textContent='취소';
     n.onclick=()=>{ov.classList.remove('show');if(onNo)onNo()};bt.appendChild(n);
     ov.classList.add('show');
+  },
+
+  // ══ 파티원 방출 ══
+  releaseChar(uid){
+    const ch=ROSTER.getChar(uid);
+    if(!ch) return;
+
+    // 1. 최소 보유 수 체크 (5명 미만 방출 불가)
+    const alive=ROSTER.getAlive();
+    if(alive.length<=5){
+      this._showConfirm(
+        '⚠️ 최소 5명의 캐릭터를 유지해야 합니다.\n방출할 수 없습니다.',
+        null,
+        null
+      );
+      return;
+    }
+
+    // 2. 파티 편성 체크 (편성된 캐릭터 방출 불가)
+    if(this.party.includes(uid)){
+      this._showConfirm(
+        '⚠️ 파티에 편성된 캐릭터는 방출할 수 없습니다.\n먼저 파티에서 제거해주세요.',
+        null,
+        null
+      );
+      return;
+    }
+
+    // 3. 방출 가격 계산
+    const price=30+ch.lv*5;
+    const grade=ROSTER.potGrade(uid);
+    const d=CD[ch.cls];
+
+    // 4. 확인 모달
+    this._showConfirm(
+      `${d.icon} ${ch.name||d.name} (Lv.${ch.lv} ${grade}등급)\n\n` +
+      `정말로 방출하시겠습니까?\n+${price}G을 받습니다.`,
+      ()=>{
+        // 로스터에서 삭제
+        ROSTER.removeChar(uid);
+
+        // 골드 지급
+        this.addGold(price);
+
+        // 재렌더링
+        this.rP();
+      },
+      null
+    );
   },
 });
