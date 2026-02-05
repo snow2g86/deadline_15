@@ -163,16 +163,19 @@ const G={
     }
     const u={id:this.nid++,uid,team,cls,lv,x,y,hp,mhp,atk,def,move:mv,range:rng,role,
       res:initRes,maxRes,resType,resRec,
-      hm:false,ha:false,waited:false,mo:false,furyBuff:0};
+      hm:false,ha:false,waited:false,mo:false,furyBuff:0,stunned:0};
     if(team==='enemy'){u.origSpawn={x,y}}
     this.units.push(u);return u},
-  uAt(x,y){return this.units.find(u=>u.x===x&&u.y===y&&u.hp>0)},
+  uAt(x,y){const all=this.units.filter(u=>u.x===x&&u.y===y&&u.hp>0);
+    if(all.length<=1)return all[0]||null;
+    // 겹침: 은신 암살자보다 적을 우선 반환
+    return all.find(u=>u.team==='enemy')||all[0]},
   alive(t){return this.units.filter(u=>u.team===t&&u.hp>0)},
   // Trap system
   chkTrap(u){
     if(u.team==='ally'){
       const trap=this.traps.find(t=>t.x===u.x&&t.y===u.y);
-      if(trap){u.hp=Math.max(0,u.hp-trap.dmg);this.floatT(u.x,u.y,`함정! -${trap.dmg}`,'damage');this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:8,colors:['#f84','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:2});return true}
+      if(trap){u.hp=Math.max(0,u.hp-trap.dmg);u.stunned=Math.max(u.stunned,2);this.floatT(u.x,u.y,`함정! -${trap.dmg}`,'damage');this.floatT(u.x,u.y,'2턴 이동불가','damage');this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:8,colors:['#f84','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:2});return true}
     }
     return false
   },
@@ -203,12 +206,22 @@ const G={
     }},
 
   // Pathfinding
-  mvC(u){const res=[],vis=new Map(),q=[{x:u.x,y:u.y,c:0}],K=(a,b)=>a+','+b;vis.set(K(u.x,u.y),0);
+  mvC(u){if(u.stunned>0)return[];const res=[],vis=new Map(),q=[{x:u.x,y:u.y,c:0}],K=(a,b)=>a+','+b;
+    const isStealth=u.cls==='assassin'&&u.team==='ally'&&this.ter[u.y]&&this.ter[u.y][u.x]==='forest';
+    vis.set(K(u.x,u.y),0);
     while(q.length){const{x,y,c}=q.shift();
-      const occ=this.uAt(x,y);if(c>0&&!occ)res.push({x,y});
+      const occ=this.uAt(x,y);
+      if(c>0&&!occ)res.push({x,y});
+      // 은신 암살자: 적이 있는 숲 타일도 이동 가능 (겹침)
+      if(c>0&&occ&&occ.team!==u.team&&isStealth&&this.ter[y]&&this.ter[y][x]==='forest')res.push({x,y});
       for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]]){const nx=x+dx,ny=y+dy;
         if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;const ti=TI[this.ter[ny][nx]];if(!ti.pass)continue;
-        const o=this.uAt(nx,ny);if(o&&o.team!==u.team)continue;
+        const o=this.uAt(nx,ny);
+        if(o&&o.team!==u.team){
+          // 은신 암살자: 적이 있는 숲으로의 진입은 허용 (경로 확장은 차단)
+          if(isStealth&&this.ter[ny][nx]==='forest'){
+            const nc=c+ti.cost;if(nc<=u.move){const k=K(nx,ny);if(!vis.has(k)||vis.get(k)>nc){vis.set(k,nc)}}}
+          continue}
         const nc=c+ti.cost;if(nc>u.move)continue;
         const k=K(nx,ny);if(!vis.has(k)||vis.get(k)>nc){vis.set(k,nc);q.push({x:nx,y:ny,c:nc})}}}return res},
   atkC(u){const c=[];for(let r=0;r<ROWS;r++)for(let x=0;x<COLS;x++)if(mh(u.x,u.y,x,r)<=u.range&&!(x===u.x&&r===u.y))c.push({x,y:r});return c},

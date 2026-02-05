@@ -70,7 +70,10 @@ Object.assign(G, {
       mpFill.style.width=`${u.maxRes?(u.res/u.maxRes)*100:0}%`;
       mpFill.style.background=resClr(u);
       const isSel=this.sel&&this.sel.id===u.id;
-      el.classList.toggle('acted',u.team==='ally'&&u.ha&&!isSel);el.classList.remove('ally','enemy');el.classList.add(u.team)});
+      el.classList.toggle('acted',u.team==='ally'&&u.ha&&!isSel);el.classList.remove('ally','enemy');el.classList.add(u.team);
+      el.classList.toggle('stealthed',isStealthed(u));el.classList.toggle('stunned',u.stunned>0);
+      // stunned 카운트 표시
+      let stunLabel=el.querySelector('.stun-label');if(u.stunned>0){if(!stunLabel){stunLabel=document.createElement('div');stunLabel.className='stun-label';el.appendChild(stunLabel)}stunLabel.textContent=u.stunned}else if(stunLabel)stunLabel.remove()});
     [...w.querySelectorAll('.unit-sprite')].forEach(el=>{if(!ids.has(el.id))el.remove()});
     this.rMM();this.rNav()},
 
@@ -80,8 +83,25 @@ Object.assign(G, {
   showAM(u){const m=document.getElementById('action-menu');m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
     m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
     document.getElementById('btn-cancel').style.display=this.preMv?'':'none';
-    const sb=document.getElementById('btn-skill');const sk=SKILLS[u.cls];
-    if(sk&&u.res>=sk.cost&&!u.ha){sb.style.display='';sb.textContent=sk.icon+' '+sk.name}else{sb.style.display='none'}
+    // 기존 단일 스킬 버튼 숨김
+    document.getElementById('btn-skill').style.display='none';
+    // 동적 스킬 버튼 제거 후 재생성
+    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
+    const skills=getSkills(u.cls);const wait=document.getElementById('btn-wait');
+    skills.forEach((sk,idx)=>{
+      const btn=document.createElement('button');btn.className='am-skill';
+      btn.textContent=sk.icon+' '+sk.name;
+      // 활성화 조건
+      let enabled=u.res>=sk.cost&&!u.ha;
+      // 암살: 은신+겹침 추가 조건
+      if(sk.id==='assassin_assassinate'){
+        const overlapping=isStealthed(u)&&this.units.some(v=>v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
+        enabled=enabled&&overlapping;
+      }
+      btn.disabled=!enabled;
+      btn.onclick=()=>G.actSkill(idx);
+      m.insertBefore(btn,wait);
+    });
     m.classList.add('show')},
   hideAM(){document.getElementById('action-menu').classList.remove('show')},
 });

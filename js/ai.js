@@ -17,6 +17,7 @@ Object.assign(G, {
     if(s&&this.turn%s.si===0&&this.eSpwn<s.tot){this.showWv(`웨이브 — 남은 적 ${s.tot-this.eSpwn}체`);this.sfxWave();this.spawnW();this.rUnits();await sl(600);this.hideWv()}
     // Enemy resource recovery
     this.alive('enemy').forEach(u=>{
+      if(u.stunned>0)u.stunned--;
       tickBuffs(u);
       if(u.resType==='mana'){u.res=Math.min(u.maxRes,u.res+u.resRec)}
       else if(u.resType==='energy'){
@@ -36,6 +37,8 @@ Object.assign(G, {
     if(!this.over){this.turn++;this.phase='player';this.turnFlash('player');this.sfxTurnPlayer();
       this.alive('ally').forEach(u=>{
         u.hm=false;u.ha=false;u.waited=false;u.mo=false;
+        // Stunned recovery
+        if(u.stunned>0)u.stunned--;
         tickBuffs(u);
         // Resource recovery
         if(u.resType==='mana'){u.res=Math.min(u.maxRes,u.res+u.resRec)}

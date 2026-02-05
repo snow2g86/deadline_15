@@ -20,7 +20,7 @@ Object.assign(G, {
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
     else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
-  clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
+  clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this._curSkill=null;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
   cellCk(x,y){if(this.phase!=='player'||this.over||this.anim)return;const cl=this.uAt(x,y),s=this.sel;
     if(this.awPM&&s){
       // Skill targeting
@@ -30,6 +30,8 @@ Object.assign(G, {
         if(s.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==s.id})}
         else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}
         this.rTer();this.showAM(s);return}
+      // In awPM: stealth movement (assassin into enemy-occupied forest)
+      if(cl&&cl.team==='enemy'&&s.cls==='assassin'&&s.team==='ally'&&!s.ha&&this.ter[y]&&this.ter[y][x]==='forest'&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
       // In awPM: attack/heal targets
       if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
       if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
@@ -38,6 +40,8 @@ Object.assign(G, {
       if(cl&&cl.team!=='enemy'){const nu=this.uAt(x,y);if(nu)this.selU(nu)}
       this.chkAutoEnd();return}
     if(!s){if(cl)this.selU(cl);return}
+    // Stealth movement (assassin into enemy-occupied forest)
+    if(cl&&cl.team==='enemy'&&s.cls==='assassin'&&s.team==='ally'&&!s.ha&&this.ter[y]&&this.ter[y][x]==='forest'&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
     if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
     if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
     if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
@@ -67,27 +71,90 @@ Object.assign(G, {
   actWait(){if(!this.sel)return;this.sel.ha=true;this.sel.waited=true;this.awPM=false;this.hideAM();this.sfxWait();this.rUnits();this.clrSel();this.chkAutoEnd()},
   actCancel(){if(!this.sel||!this.preMv)return;const u=this.sel;u.x=this.preMv.x;u.y=this.preMv.y;u.hm=false;u.mo=false;
     this.animU(u.id,u.x,u.y);this.awPM=false;this.preMv=null;this.skillMode=false;this.hideAM();this.sfxUIClick();setTimeout(()=>{this.rTer();this.clrSel()},340)},
-  actSkill(){if(!this.sel||!this.awPM)return;const u=this.sel;const sk=SKILLS[u.cls];if(!sk||u.res<sk.cost)return;
-    this.skillMode=true;
+  actSkill(idx){if(!this.sel||!this.awPM)return;const u=this.sel;
+    const skills=getSkills(u.cls);const sk=skills[idx||0];
+    if(!sk||u.res<sk.cost)return;
+    this._curSkill=sk;this.skillMode=true;
     if(sk.id==='knight_switch'){
-      // 스위치: 이동 범위 내 아군 표시
       this.atkT=this.mvC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.id!==u.id});
       this.healT=[]
     }else if(sk.id==='archer_dash'){
-      // 도약: dashRange 거리 내 빈 공간 표시
       this.atkT=[];for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
         if(mh(u.x,u.y,x,y)<=sk.dashRange&&mh(u.x,u.y,x,y)>0&&!this.uAt(x,y)){this.atkT.push({x,y})}}
       this.healT=[]
+    }else if(sk.id==='assassin_ambush'){
+      // 습격: 맵 전체 적 위치
+      this.atkT=this.units.filter(v=>v.team==='enemy'&&v.hp>0).map(v=>({x:v.x,y:v.y}));
+      this.healT=[]
+    }else if(sk.id==='assassin_assassinate'){
+      // 암살: 즉시 실행 (타겟팅 불필요)
+      this.skillMode=false;this.doSkill(u,u.x,u.y);return
     }else{
-      // 기본: 공격 범위 내 표시
       const dirs=[{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
       this.atkT=dirs.map(d=>({x:u.x+d.x,y:u.y+d.y})).filter(p=>p.x>=0&&p.x<COLS&&p.y>=0&&p.y<ROWS);
       this.healT=[]
     }
     this.hideAM();this.rTer()},
-  doSkill(u,tx,ty){const sk=SKILLS[u.cls];if(!sk)return;u.res-=sk.cost;
+  _findAdj(x,y,u){
+    // 인접 빈 타일 찾기 (4방향)
+    const dirs=[{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+    const cands=[];
+    for(const d of dirs){const nx=x+d.x,ny=y+d.y;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
+      const ti=TI[this.ter[ny][nx]];if(!ti.pass)continue;
+      if(!this.uAt(nx,ny))cands.push({x:nx,y:ny});}
+    if(!cands.length)return null;
+    if(u){cands.sort((a,b)=>mh(a.x,a.y,u.x,u.y)-mh(b.x,b.y,u.x,u.y))}
+    return cands[0];
+  },
+  doSkill(u,tx,ty){const sk=this._curSkill||SKILLS[u.cls];if(!sk)return;
+    // 배열인 경우 첫 번째 스킬 사용 (fallback)
+    const skObj=Array.isArray(sk)?sk[0]:sk;
+    if(u.res<skObj.cost)return;u.res-=skObj.cost;
+    // 습격: 맵 전체 적 대상 → 인접 이동 → ATK×2 공격
+    if(skObj.id==='assassin_ambush'){
+      const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
+      if(!t){u.res+=skObj.cost;return}
+      const adj=this._findAdj(t.x,t.y,u);
+      if(!adj){u.res+=skObj.cost;this.floatT(u.x,u.y,'빈 칸 없음!','damage');return}
+      u.x=adj.x;u.y=adj.y;u.mo=true;
+      this.animU(u.id,adj.x,adj.y);
+      setTimeout(()=>{
+        const dmg=Math.max(1,u.atk*2-t.def);
+        t.hp=Math.max(0,t.hp-dmg);
+        this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:12,colors:['#a855f7','#fff','#c4b5fd'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
+        this.sfxAtk(u.cls);this.shakeU(t.id);
+        this.floatT(t.x,t.y,`-${dmg}`,'damage');
+        this.floatT(u.x,u.y,'습격!','heal');
+        if(t.hp<=0){
+          u.res=Math.min(u.maxRes,u.res+20);
+          this.floatT(u.x,u.y,'+20 EP','exp');
+          this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);
+        }
+        this._grantExp(u,'attack');
+        u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+        setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);
+      },360);return
+    }
+    // 암살: 겹친 적에 ATK×5 → 이탈
+    if(skObj.id==='assassin_assassinate'){
+      const t=this.units.find(v=>v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
+      if(!t){u.res+=skObj.cost;return}
+      const dmg=Math.max(1,u.atk*5-t.def);
+      t.hp=Math.max(0,t.hp-dmg);
+      this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:20,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
+      this.screenShake();this.sfxAtk(u.cls);this.shakeU(t.id);
+      this.floatT(t.x,t.y,`-${dmg}`,'damage');
+      this.floatT(u.x,u.y,'암살!','heal');
+      if(t.hp<=0){this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
+      this._grantExp(u,'attack');
+      const esc=this._findAdj(u.x,u.y,null);
+      if(esc){u.x=esc.x;u.y=esc.y;u.mo=true;this.animU(u.id,esc.x,esc.y)}
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+    }
     // 스위치: 아군과 위치 교환
-    if(sk.id==='knight_switch'){
+    if(skObj.id==='knight_switch'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='ally'&&v.hp>0&&v.id!==u.id);
       if(!t)return;
       [u.x,u.y,t.x,t.y]=[t.x,t.y,u.x,u.y];
@@ -95,21 +162,21 @@ Object.assign(G, {
       this.floatT(u.x,u.y,'스위치!','heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:0.02,size:8});
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:0.02,size:8});
-      this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this.hideAM();
+      this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.rUnits();this.clrSel();this.chkAutoEnd()},340);return
     }
     // 도약: 지정 위치로 빠르게 이동
-    if(sk.id==='archer_dash'){
+    if(skObj.id==='archer_dash'){
       if(this.uAt(tx,ty))return;
       u.x=tx;u.y=ty;u.mo=true;
       this.animU(u.id,tx,ty);
       this.floatT(u.x,u.y,'도약!','heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:0.02,size:3});
-      this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this.hideAM();
+      this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.rUnits();this.clrSel();this.chkAutoEnd()},340);return
     }
     // 강타: ATK × 1.5 데미지 공격
-    if(sk.id==='warrior_powersmash'){
+    if(skObj.id==='warrior_powersmash'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.hp>0&&v.team!==u.team);
       if(!t)return;
       const dmg=Math.max(1,Math.round(u.atk*1.5-t.def));
@@ -119,12 +186,12 @@ Object.assign(G, {
       procFury(u,t,this);
       this.floatT(u.x,u.y,'강타!','heal');
       if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);}
-      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this.hideAM();
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
     // 관통: 일직선 관통 공격
     const dx=tx-u.x,dy=ty-u.y;
-    for(let i=1;i<=sk.pierceLen;i++){const px=u.x+dx*i,py=u.y+dy*i;
+    for(let i=1;i<=skObj.pierceLen;i++){const px=u.x+dx*i,py=u.y+dy*i;
       if(px<0||px>=COLS||py<0||py>=ROWS)continue;
       const t=this.units.find(v=>v.hp>0&&v.x===px&&v.y===py&&v.team!==u.team);
       if(t){const dmg=Math.max(1,u.atk-t.def);t.hp=Math.max(0,t.hp-dmg);
@@ -134,7 +201,7 @@ Object.assign(G, {
     this.sfxAtk(u.cls);this._grantExp(u,'attack');
     this.floatT(u.x,u.y,'관통!','heal');
     this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:12,colors:['#6af','#48f','#aaf'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
-    u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this.hideAM();
+    u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
     setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500)},
 
 });
