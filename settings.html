@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>턴제 디펜스 RPG</title>
+<link rel="stylesheet" href="css/style.css">
+<script defer src="js/data.js"></script>
+<script defer src="js/classes.js"></script>
+<script defer src="js/roster.js"></script>
+<script defer src="js/skills.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/combat.js"></script>
+<script defer src="js/vfx.js"></script>
+<script defer src="js/audio.js"></script>
+<script defer src="js/ai.js"></script>
+<script defer src="js/render.js"></script>
+<script defer src="js/ui.js"></script>
+<script defer src="js/lobby.js"></script>
+<script defer src="js/boot.js"></script>
+</head>
+<body data-page="settings">
+<header id="top-nav">
+  <button id="nav-back" onclick="location.href='index.html'">←</button>
+  <div id="nav-title">설정</div>
+  <button id="nav-settings" class="hidden">⚙</button>
+</header>
+<main id="content">
+  <div id="lset-content" class="settings-content"></div>
+</main>
+<nav id="bottom-nav">
+  <button class="bnav-tab" data-tab="stage" onclick="G.openStage()">
+    <span class="bnav-icon">⚔</span><span class="bnav-label">스테이지</span>
+  </button>
+  <button class="bnav-tab" data-tab="party" onclick="G.openParty()">
+    <span class="bnav-icon">👥</span><span class="bnav-label">파티</span>
+  </button>
+  <button class="bnav-tab" data-tab="sanctuary" onclick="location.href='sanctuary.html'">
+    <span class="bnav-icon">⛪</span><span class="bnav-label">성소</span>
+  </button>
+  <button class="bnav-tab" data-tab="shop" onclick="location.href='shop.html'">
+    <span class="bnav-icon">🏪</span><span class="bnav-label">상점</span>
+  </button>
+</nav>
+<div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sub"></div><div id="modal-buttons"></div></div></div>
+</body>
+</html>

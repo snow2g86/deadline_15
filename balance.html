@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚔ 캐릭터 밸런스 분석표</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--card:#111827;--border:#1e293b;
+  --text:#e2e8f0;--dim:#64748b;--gold:#f0c040;
+  --red:#f87171;--green:#4ade80;--blue:#60a5fa;--purple:#a78bfa;
+  --fury:#ff6644;--energy:#f0c040;--mana:#4488ff;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;padding:0;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--bg)}
+
+/* Header */
+.header{text-align:center;padding:32px 16px 0;position:relative}
+.header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
+  text-shadow:0 0 40px rgba(240,192,64,.25)}
+.header .sub{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;position:sticky;top:0;
+  z-index:10;background:linear-gradient(var(--bg) 60%,transparent)}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s}
+.tab-btn:hover{border-color:var(--gold);color:var(--text)}
+.tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
+  box-shadow:0 0 20px rgba(240,192,64,.3)}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{color:var(--dim);font-size:11px;font-weight:700;padding:8px 6px;text-align:center;
+  border-bottom:2px solid var(--border);position:sticky;top:52px;background:var(--bg);letter-spacing:.5px}
+tbody td{padding:8px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(240,192,64,.04)}
+.t-icon{font-size:20px}
+.t-name{font-weight:900;color:var(--gold);text-align:left;white-space:nowrap}
+.t-hp{color:var(--green)}
+.t-atk{color:var(--red)}
+.t-def{color:var(--blue)}
+.t-role{color:var(--dim);font-size:11px}
+.t-res{font-weight:700;font-size:11px}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;
+  transition:border-color .2s}
+.card:hover{border-color:rgba(240,192,64,.2)}
+.card-title{font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card-body{font-size:13px;color:#cbd5e1;line-height:1.7}
+
+/* Formula box */
+.formula-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:16px}
+.formula-row{display:flex;gap:12px;padding:4px 0;align-items:center}
+.formula-label{color:var(--dim);width:160px;flex-shrink:0;font-size:12px}
+.formula-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green);
+  background:rgba(74,222,128,.06);padding:2px 8px;border-radius:4px}
+
+/* Bar chart */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bar-label{width:72px;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;white-space:nowrap}
+.bar-track{flex:1;background:rgba(255,255,255,.04);border-radius:6px;height:22px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;
+  padding-right:8px;font-size:11px;font-weight:700;transition:width .6s ease}
+
+/* Matchup table */
+.mu-table td,.mu-table th{padding:6px 4px;font-size:12px}
+.mu-table .mu-fast{background:rgba(239,68,68,.15);color:var(--red)}
+.mu-table .mu-mid{background:rgba(251,191,36,.08);color:#fbbf24}
+.mu-table .mu-slow{background:rgba(59,130,246,.1);color:var(--blue)}
+.mu-table .mu-wall{background:rgba(147,51,234,.1);color:var(--purple)}
+.mu-dmg{font-size:10px;color:var(--dim)}
+.mu-atker{text-align:left;font-weight:900;color:var(--gold);white-space:nowrap}
+.legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:var(--dim)}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
+
+/* Resource section */
+.res-block{border-left:3px solid;padding:12px 16px;background:var(--card);border-radius:0 12px 12px 0;margin-bottom:12px}
+.res-meter{display:flex;align-items:center;gap:8px;margin:4px 0}
+.res-meter-label{width:64px;font-size:12px;font-weight:700;flex-shrink:0}
+.res-meter-track{flex:1;background:rgba(255,255,255,.04);border-radius:4px;height:16px;overflow:hidden}
+.res-meter-fill{height:100%;border-radius:4px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.res-meter-info{font-size:11px;color:var(--dim);width:100px;text-align:right;flex-shrink:0}
+
+/* Issue cards */
+.issue{padding:12px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:8px}
+.issue-title{font-weight:900;color:#fbbf24;font-size:13px;margin-bottom:4px}
+.issue-desc{font-size:12px;color:var(--dim);line-height:1.6}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;float:right;margin-top:2px}
+.badge-rec{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-opt{background:rgba(100,116,139,.15);color:var(--dim)}
+
+/* Skill preview */
+.skill-row{display:flex;gap:8px;align-items:flex-start;padding:10px;background:rgba(0,0,0,.2);
+  border-radius:8px;margin-bottom:6px}
+.skill-icon{font-size:24px;flex-shrink:0}
+.skill-name{font-weight:900;font-size:13px}
+.skill-cost{font-size:11px;font-weight:700}
+.skill-desc{font-size:12px;color:var(--dim);margin-top:2px}
+
+/* Section headers */
+.sec-head{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;
+  padding-bottom:8px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+
+/* Detail panel */
+.detail{margin-top:12px;padding:12px;background:rgba(240,192,64,.03);border:1px solid rgba(240,192,64,.12);
+  border-radius:8px;cursor:pointer;transition:all .2s}
+.detail:hover{border-color:rgba(240,192,64,.3)}
+.detail-head{display:flex;align-items:center;gap:8px}
+.detail-head .icon{font-size:24px}
+.detail-head .name{font-weight:900;color:var(--gold);font-size:15px}
+.detail-head .desc{color:var(--dim);font-size:12px}
+.detail-body{margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.7}
+
+/* Comparison highlight */
+.cmp-row{display:flex;gap:4px;align-items:center;font-size:12px;margin:2px 0}
+.cmp-old{color:var(--dim);text-decoration:line-through}
+.cmp-arrow{color:var(--gold)}
+.cmp-new{color:var(--green);font-weight:700}
+
+/* Responsive */
+@media(max-width:640px){
+  .header h1{font-size:22px}
+  table{font-size:11px}
+  thead th{font-size:10px;padding:6px 3px}
+  tbody td{padding:6px 3px}
+  .tab-btn{padding:6px 10px;font-size:11px}
+  .bar-label{width:56px;font-size:11px}
+  .mu-table td,.mu-table th{padding:4px 2px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚔ 캐릭터 밸런스 분석표</h1>
+  <div class="sub">스킬 구현 전 현재 스펙 리뷰 · Defense RPG</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="stats">📊 기본 스탯</button>
+  <button class="tab-btn" data-tab="analysis">🔍 밸런스 분석</button>
+  <button class="tab-btn" data-tab="matchup">⚔ 상성표</button>
+  <button class="tab-btn" data-tab="resource">⚡ 자원 시스템</button>
+  <button class="tab-btn" data-tab="issues">⚠ 문제점 &amp; 제안</button>
+</div>
+
+<div class="content">
+
+<!-- ==================== 기본 스탯 ==================== -->
+<div class="panel active" id="p-stats">
+  <div class="sec-head">CHARACTER STATS OVERVIEW</div>
+  <div style="overflow-x:auto">
+  <table>
+    <thead>
+      <tr>
+        <th></th><th>클래스</th><th>HP</th><th>ATK</th><th>DEF</th><th>이동</th><th>사거리</th>
+        <th>역할</th><th>자원</th><th>최대</th><th>회복/턴</th>
+      </tr>
+    </thead>
+    <tbody id="stats-body"></tbody>
+  </table>
+  </div>
+
+  <div id="stat-detail"></div>
+
+  <div class="formula-box">
+    <div style="font-weight:900;font-size:13px;color:var(--gold);margin-bottom:8px">📐 데미지 공식</div>
+    <div class="formula-row"><span class="formula-label">일반 공격 데미지</span><span class="formula-code">max(1, ATK - DEF)</span></div>
+    <div class="formula-row"><span class="formula-label">치유량 (사제)</span><span class="formula-code">round(ATK × 1.5)</span></div>
+    <div class="formula-row"><span class="formula-label">몸부림 반격</span><span class="formula-code">max(1, round(ATK×0.5) - 적DEF)</span></div>
+    <div class="formula-row"><span class="formula-label">적 스탯 배율</span><span class="formula-code">HP×sm.hp, ATK×sm.atk (스테이지별)</span></div>
+  </div>
+</div>
+
+<!-- ==================== 밸런스 분석 ==================== -->
+<div class="panel" id="p-analysis">
+  <div class="sec-head">BALANCE ANALYSIS</div>
+  <div style="overflow-x:auto">
+  <table>
+    <thead>
+      <tr><th>클래스</th><th>유효HP</th><th>턴 데미지</th><th>위협반경</th><th>종합 점수</th><th>평가</th></tr>
+    </thead>
+    <tbody id="analysis-body"></tbody>
+  </table>
+  </div>
+
+  <div style="margin-top:20px" id="bar-chart"></div>
+
+  <div class="formula-box" style="margin-top:16px">
+    <div style="font-size:12px;color:var(--dim);line-height:1.7">
+      종합 점수 = HP×0.3 + ATK×2 + DEF×1.5 + 이동×5 + 사거리×8<br>
+      유효HP = HP ÷ (1 - DEF÷(DEF+30)) — 방어력을 고려한 실질 체력
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 상성표 ==================== -->
+<div class="panel" id="p-matchup">
+  <div class="sec-head">MATCHUP TABLE — HITS TO KILL</div>
+  <p style="text-align:center;font-size:11px;color:var(--dim);margin-bottom:12px">숫자 = 처치 필요 타수 (기본 DEF 기준)</p>
+  <div style="overflow-x:auto">
+    <table class="mu-table" id="matchup-table"></table>
+  </div>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:rgba(239,68,68,.4)"></span>1~2타 킬</span>
+    <span><span class="legend-dot" style="background:rgba(251,191,36,.3)"></span>3~4타</span>
+    <span><span class="legend-dot" style="background:rgba(59,130,246,.3)"></span>5~7타</span>
+    <span><span class="legend-dot" style="background:rgba(147,51,234,.3)"></span>8타 이상</span>
+  </div>
+</div>
+
+<!-- ==================== 자원 시스템 ==================== -->
+<div class="panel" id="p-resource">
+  <div class="sec-head">RESOURCE SYSTEM</div>
+  <div id="res-blocks"></div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title" style="color:var(--gold)">🔄 현재 자원 메카닉 요약</div>
+    <div class="card-body">
+      <span style="color:var(--fury);font-weight:700">분노</span> — 공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" (인접 적에게 ATK×50% 반격 후 리셋)<br>
+      <span style="color:var(--energy);font-weight:700">기력</span> — 매 턴 시작 시 +resRec. 암살자는 숲에서 2배 회복<br>
+      <span style="color:var(--mana);font-weight:700">마나</span> — 전투 시작 시 MAX. 매 턴 +resRec
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 문제점 & 제안 ==================== -->
+<div class="panel" id="p-issues">
+  <div class="sec-head">ISSUES &amp; SUGGESTIONS</div>
+
+  <div class="card" style="border-left:3px solid var(--red)">
+    <div class="card-title" style="color:var(--red)">🔴 주요 밸런스 문제</div>
+    <div class="card-body">
+      <div class="issue">
+        <div class="issue-title">1. 궁수가 너무 약함</div>
+        <div class="issue-desc">HP 60 / DEF 3 = 최저 생존력. 사거리 4의 이점이 ATK 28로는 부족. 암살자(ATK 35)에게 2타 사망.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-title">2. 자원이 스킬 없이 무의미</div>
+        <div class="issue-desc">마나/기력이 쌓이기만 하고 소모처가 없음. 분노의 "몸부림"만 유일한 자원 활용.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-title">3. 탱커 공격력 너무 낮음</div>
+        <div class="issue-desc">ATK 15 → 적 탱커(DEF 20) 상대 시 데미지 1. 위협감 제로.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-title">4. 사제 ATK의 이중성</div>
+        <div class="issue-desc">치유량(30) 적절하나, 공격 시 데미지 대비 리스크 높음. 고립 시 무력.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--gold);margin-top:16px">
+    <div class="card-title" style="color:var(--gold)">🟡 스킬 도입 전 밸런스 조정 제안</div>
+    <div class="card-body">
+      <div class="issue">
+        <span class="badge badge-rec">추천</span>
+        <div class="issue-title">궁수 HP 60 → 70</div>
+        <div class="issue-desc">최소한의 생존력 확보. 암살자에게 2타→3타 사망으로 개선.
+          <div class="cmp-row"><span class="cmp-old">HP 60 / DEF 3</span><span class="cmp-arrow">→</span><span class="cmp-new">HP 70 / DEF 3</span></div>
+        </div>
+      </div>
+      <div class="issue">
+        <span class="badge badge-rec">추천</span>
+        <div class="issue-title">탱커 ATK 15 → 18</div>
+        <div class="issue-desc">최소 위협감 부여. 궁수(DEF 3) 상대 시 15→18 데미지.
+          <div class="cmp-row"><span class="cmp-old">ATK 15 / DEF 20</span><span class="cmp-arrow">→</span><span class="cmp-new">ATK 18 / DEF 20</span></div>
+        </div>
+      </div>
+      <div class="issue">
+        <span class="badge badge-opt">선택</span>
+        <div class="issue-title">마법사 HP 65 → 70</div>
+        <div class="issue-desc">궁수와의 차별성 유지 + 약간의 생존 버퍼.
+          <div class="cmp-row"><span class="cmp-old">HP 65 / DEF 4</span><span class="cmp-arrow">→</span><span class="cmp-new">HP 70 / DEF 4</span></div>
+        </div>
+      </div>
+      <div class="issue">
+        <span class="badge badge-opt">선택</span>
+        <div class="issue-title">사제 ATK 20 → 22</div>
+        <div class="issue-desc">치유량 30→33으로 소폭 상승. 생존 시 가치 증가.
+          <div class="cmp-row"><span class="cmp-old">ATK 20 / 치유 30</span><span class="cmp-arrow">→</span><span class="cmp-new">ATK 22 / 치유 33</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--blue);margin-top:16px">
+    <div class="card-title" style="color:var(--blue)">🔵 스킬 설계 방향 제안</div>
+    <div class="card-body">
+      <div class="skill-row">
+        <div class="skill-icon">⚔️</div>
+        <div>
+          <div class="skill-name">전사 — 강타</div>
+          <div class="skill-cost" style="color:var(--fury)">분노 10 소모</div>
+          <div class="skill-desc">범위 1, ATK×1.8 데미지. 분노를 리스크&리워드로 활용.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">🛡️</div>
+        <div>
+          <div class="skill-name">탱커 — 도발</div>
+          <div class="skill-cost" style="color:var(--fury)">분노 10 소모</div>
+          <div class="skill-desc">범위 2 이내 적 1턴간 자신만 공격하도록 유도. 진정한 탱킹 역할.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">🗡️</div>
+        <div>
+          <div class="skill-name">암살자 — 암습</div>
+          <div class="skill-cost" style="color:var(--energy)">기력 60 소모</div>
+          <div class="skill-desc">ATK×2.0 데미지. 처치 시 기력 30 환급 + 추가 행동 가능.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">🔮</div>
+        <div>
+          <div class="skill-name">마법사 — 화염폭발</div>
+          <div class="skill-cost" style="color:var(--mana)">마나 60 소모</div>
+          <div class="skill-desc">타겟 중심 십자 범위 ATK×1.2 광역 데미지.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">🏹</div>
+        <div>
+          <div class="skill-name">궁수 — 관통사격</div>
+          <div class="skill-cost" style="color:var(--energy)">기력 45 소모</div>
+          <div class="skill-desc">일직선 관통, 경로상 모든 적에게 ATK×1.0 데미지.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">✝️</div>
+        <div>
+          <div class="skill-name">사제 — 집단 치유</div>
+          <div class="skill-cost" style="color:var(--mana)">마나 50 소모</div>
+          <div class="skill-desc">범위 2 내 아군 전원 ATK×1.0 회복.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<script>
+const CHARS=[
+  {key:'warrior',name:'전사',icon:'⚔️',hp:100,atk:25,def:10,move:3,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'균형 근접 딜러'},
+  {key:'tanker',name:'탱커',icon:'🛡️',hp:150,atk:15,def:20,move:2,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'고체력 방어'},
+  {key:'assassin',name:'암살자',icon:'🗡️',hp:70,atk:35,def:5,move:4,range:1,role:'melee',res:'energy',maxRes:80,resRec:15,desc:'고공 고기동'},
+  {key:'mage',name:'마법사',icon:'🔮',hp:65,atk:30,def:4,move:3,range:3,role:'ranged',res:'mana',maxRes:120,resRec:12,desc:'원거리 마법'},
+  {key:'archer',name:'궁수',icon:'🏹',hp:60,atk:28,def:3,move:3,range:4,role:'ranged',res:'energy',maxRes:60,resRec:12,desc:'최장 사거리'},
+  {key:'priest',name:'사제',icon:'✝️',hp:70,atk:20,def:5,move:3,range:3,role:'healer',res:'mana',maxRes:100,resRec:10,desc:'아군 치유'}
+];
+const RES={
+  fury:{label:'분노',color:'#ff6644',desc:'공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" 반격 (ATK×0.5)',auto:'자동 회복 없음'},
+  energy:{label:'기력',color:'#f0c040',desc:'매 턴 자동 회복, 숲에서 2배 회복 (암살자)',auto:'매 턴 +resRec'},
+  mana:{label:'마나',color:'#4488ff',desc:'매 턴 자동 회복, 스킬 사용 시 소모',auto:'매 턴 +resRec, 시작 시 MAX'}
+};
+
+// Build stats table
+(()=>{
+  const tb=document.getElementById('stats-body');
+  CHARS.forEach(c=>{
+    const ri=RES[c.res];
+    const tr=document.createElement('tr');
+    tr.style.cursor='pointer';
+    tr.innerHTML=`
+      <td class="t-icon">${c.icon}</td>
+      <td class="t-name">${c.name}</td>
+      <td class="t-hp">${c.hp}</td>
+      <td class="t-atk">${c.atk}</td>
+      <td class="t-def">${c.def}</td>
+      <td>${c.move}</td>
+      <td>${c.range}</td>
+      <td class="t-role">${c.role}</td>
+      <td class="t-res" style="color:${ri.color}">${ri.label}</td>
+      <td>${c.maxRes}</td>
+      <td>${c.resRec||'-'}</td>`;
+    tr.onclick=()=>{
+      const d=document.getElementById('stat-detail');
+      if(d.dataset.key===c.key){d.innerHTML='';d.dataset.key='';return}
+      d.dataset.key=c.key;
+      d.innerHTML=`<div class="detail">
+        <div class="detail-head"><span class="icon">${c.icon}</span><span class="name">${c.name}</span><span class="desc">— ${c.desc}</span></div>
+        <div class="detail-body"><span style="color:${ri.color};font-weight:700">[${ri.label}]</span> ${ri.desc}<br><span style="color:var(--dim)">${ri.auto}</span></div>
+      </div>`;
+    };
+    tb.appendChild(tr);
+  });
+})();
+
+// Analysis
+function calcA(c){
+  const effHP=Math.round(c.hp/(1-c.def/(c.def+30)));
+  const power=+(c.hp*0.3+c.atk*2+c.def*1.5+c.move*5+c.range*8).toFixed(0);
+  return{effHP,dps:c.atk,threat:c.move+c.range,power};
+}
+(()=>{
+  const tb=document.getElementById('analysis-body');
+  const scores=CHARS.map(c=>calcA(c).power);
+  const avg=scores.reduce((a,b)=>a+b,0)/scores.length;
+  const maxPow=Math.max(...scores);
+
+  CHARS.forEach(c=>{
+    const a=calcA(c);
+    const diff=((a.power-avg)/avg*100).toFixed(0);
+    const grade=+diff>15?'🔴 과잉':+diff<-15?'🔵 약함':'🟢 적정';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="t-name">${c.icon} ${c.name}</td>
+      <td class="t-hp">${a.effHP}</td>
+      <td class="t-atk">${a.dps}</td>
+      <td>${a.threat}</td>
+      <td style="font-weight:900">${a.power}</td>
+      <td style="font-size:11px">${grade} (${+diff>0?'+':''}${diff}%)</td>`;
+    tb.appendChild(tr);
+  });
+
+  // Bar chart
+  const bc=document.getElementById('bar-chart');
+  const colors={melee:'linear-gradient(90deg,#f87171,#ef4444)',ranged:'linear-gradient(90deg,#60a5fa,#3b82f6)',healer:'linear-gradient(90deg,#4ade80,#22c55e)'};
+  CHARS.forEach(c=>{
+    const a=calcA(c);
+    const pct=(a.power/maxPow*100).toFixed(1);
+    bc.innerHTML+=`<div class="bar-row">
+      <span class="bar-label">${c.icon}${c.name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[c.role]}">${a.power}</div></div>
+    </div>`;
+  });
+})();
+
+// Matchup
+(()=>{
+  const t=document.getElementById('matchup-table');
+  let h='<thead><tr><th style="text-align:left;font-size:10px;color:var(--dim)">공격↓ 방어→</th>';
+  CHARS.forEach(d=>h+=`<th>${d.icon}<div style="font-size:10px;color:var(--dim)">${d.name}</div></th>`);
+  h+='</tr></thead><tbody>';
+  CHARS.forEach(a=>{
+    h+=`<tr><td class="mu-atker">${a.icon} ${a.name}</td>`;
+    CHARS.forEach(d=>{
+      const dmg=Math.max(1,a.atk-d.def);
+      const hits=Math.ceil(d.hp/dmg);
+      const cls=hits<=2?'mu-fast':hits<=4?'mu-mid':hits>=8?'mu-wall':'mu-slow';
+      h+=`<td class="${cls}"><div style="font-weight:700">${hits}타</div><div class="mu-dmg">${dmg}dmg</div></td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  t.innerHTML=h;
+})();
+
+// Resource
+(()=>{
+  const rb=document.getElementById('res-blocks');
+  ['fury','energy','mana'].forEach(key=>{
+    const ri=RES[key];
+    const users=CHARS.filter(c=>c.res===key);
+    let inner=`<div style="font-weight:900;font-size:14px;color:${ri.color};margin-bottom:8px">⚡ ${ri.label} <span style="font-size:11px;color:var(--dim);font-weight:400">(${key})</span></div>`;
+    inner+=`<div style="font-size:12px;color:#cbd5e1;margin-bottom:4px">${ri.desc}</div>`;
+    inner+=`<div style="font-size:11px;color:var(--dim);margin-bottom:10px">${ri.auto}</div>`;
+    users.forEach(u=>{
+      const fillPct=u.resRec>0?Math.min(100,u.resRec/u.maxRes*100*4):15;
+      const fillTurns=u.resRec>0?Math.ceil(u.maxRes/u.resRec)+'턴 풀충':'공격으로 획득';
+      inner+=`<div class="res-meter">
+        <span class="res-meter-label">${u.icon} ${u.name}</span>
+        <div class="res-meter-track"><div class="res-meter-fill" style="width:${fillPct}%;background:${ri.color}44;color:${ri.color}">${u.resRec||0}/턴</div></div>
+        <span class="res-meter-info">MAX ${u.maxRes} · ${fillTurns}</span>
+      </div>`;
+    });
+    rb.innerHTML+=`<div class="res-block" style="border-color:${ri.color}">${inner}</div>`;
+  });
+})();
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-'+btn.dataset.tab).classList.add('active');
+  };
+});
+
+// Animate bars on first view
+let barAnimated=false;
+const obs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting&&!barAnimated){
+    barAnimated=true;
+    document.querySelectorAll('.bar-fill').forEach((el,i)=>{
+      const w=el.style.width;el.style.width='0';
+      setTimeout(()=>el.style.width=w,i*80);
+    });
+  }
+},{threshold:0.3});
+const bc=document.getElementById('bar-chart');
+if(bc)obs.observe(bc);
+</script>
+</body>
+</html>

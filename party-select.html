@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>턴제 디펜스 RPG</title>
+<link rel="stylesheet" href="css/style.css">
+<script defer src="js/data.js"></script>
+<script defer src="js/classes.js"></script>
+<script defer src="js/roster.js"></script>
+<script defer src="js/skills.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/combat.js"></script>
+<script defer src="js/vfx.js"></script>
+<script defer src="js/audio.js"></script>
+<script defer src="js/ai.js"></script>
+<script defer src="js/render.js"></script>
+<script defer src="js/ui.js"></script>
+<script defer src="js/lobby.js"></script>
+<script defer src="js/boot.js"></script>
+</head>
+<body data-page="party-select">
+<header id="top-nav">
+  <button id="nav-back" onclick="G.partyBack()">←</button>
+  <div id="nav-title">파티 편성</div>
+  <button id="nav-settings" onclick="location.href='settings.html'">⚙</button>
+</header>
+<main id="content">
+  <div class="ps-sub">5~9명의 유닛을 편성하세요</div>
+  <div class="ps-counter" id="ps-counter">0 / 9</div>
+  <div class="ps-roster" id="ps-roster"></div>
+  <div style="font-size:10px;color:var(--dim);margin-bottom:6px">편성된 파티 (클릭하여 제거)</div>
+  <div class="ps-party" id="ps-party"></div>
+  <button class="ps-start" id="ps-start" disabled onclick="G.confirmP()">▶ 출격</button>
+</main>
+<nav id="bottom-nav">
+  <button class="bnav-tab" data-tab="stage" onclick="G.openStage()">
+    <span class="bnav-icon">⚔</span><span class="bnav-label">스테이지</span>
+  </button>
+  <button class="bnav-tab active" data-tab="party" onclick="G.openParty()">
+    <span class="bnav-icon">👥</span><span class="bnav-label">파티</span>
+  </button>
+  <button class="bnav-tab" data-tab="sanctuary" onclick="location.href='sanctuary.html'">
+    <span class="bnav-icon">⛪</span><span class="bnav-label">성소</span>
+  </button>
+  <button class="bnav-tab" data-tab="shop" onclick="location.href='shop.html'">
+    <span class="bnav-icon">🏪</span><span class="bnav-label">상점</span>
+  </button>
+</nav>
+<div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sub"></div><div id="modal-buttons"></div></div></div>
+</body>
+</html>
