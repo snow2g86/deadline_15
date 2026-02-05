@@ -40,10 +40,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* Tables */
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{color:var(--dim);font-size:11px;font-weight:700;padding:8px 6px;text-align:center;
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{color:var(--dim);font-size:10px;font-weight:700;padding:6px 4px;text-align:center;
   border-bottom:2px solid var(--border);position:sticky;top:52px;background:var(--bg);letter-spacing:.5px}
-tbody td{padding:8px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+tbody td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);word-break:keep-all}
 tbody tr{transition:background .15s}
 tbody tr:hover{background:rgba(240,192,64,.04)}
 .t-icon{font-size:20px}
@@ -76,13 +76,13 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
   padding-right:8px;font-size:11px;font-weight:700;transition:width .6s ease}
 
 /* Matchup table */
-.mu-table td,.mu-table th{padding:6px 4px;font-size:12px}
+.mu-table td,.mu-table th{padding:4px 2px;font-size:10px}
 .mu-table .mu-fast{background:rgba(239,68,68,.15);color:var(--red)}
 .mu-table .mu-mid{background:rgba(251,191,36,.08);color:#fbbf24}
 .mu-table .mu-slow{background:rgba(59,130,246,.1);color:var(--blue)}
 .mu-table .mu-wall{background:rgba(147,51,234,.1);color:var(--purple)}
-.mu-dmg{font-size:10px;color:var(--dim)}
-.mu-atker{text-align:left;font-weight:900;color:var(--gold);white-space:nowrap}
+.mu-dmg{font-size:8px;color:var(--dim)}
+.mu-atker{text-align:left;font-weight:700;color:var(--gold);white-space:nowrap;font-size:11px}
 .legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:var(--dim)}
 .legend-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
 
@@ -131,14 +131,23 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
 .cmp-new{color:var(--green);font-weight:700}
 
 /* Responsive */
-@media(max-width:640px){
+@media(max-width:768px){
   .header h1{font-size:22px}
+  .content{padding:20px 12px 60px}
   table{font-size:11px}
-  thead th{font-size:10px;padding:6px 3px}
-  tbody td{padding:6px 3px}
+  thead th{font-size:9px;padding:5px 3px}
+  tbody td{padding:5px 3px}
   .tab-btn{padding:6px 10px;font-size:11px}
-  .bar-label{width:56px;font-size:11px}
-  .mu-table td,.mu-table th{padding:4px 2px;font-size:10px}
+  .bar-label{width:48px;font-size:10px}
+  .mu-table td,.mu-table th{padding:3px 1px;font-size:8px}
+  .mu-dmg{font-size:7px}
+  .mu-atker{font-size:9px}
+  .t-icon{font-size:16px}
+}
+@media(max-width:600px){
+  .mu-table td,.mu-table th{padding:2px 1px;font-size:7px}
+  .mu-dmg{font-size:6px}
+  .mu-atker{font-size:8px}
 }
 </style>
 </head>
@@ -228,11 +237,13 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
   <div id="res-blocks"></div>
 
   <div class="card" style="margin-top:16px">
-    <div class="card-title" style="color:var(--gold)">🔄 현재 자원 메카닉 요약</div>
+    <div class="card-title" style="color:var(--gold)">🔄 자원 시스템 상세</div>
     <div class="card-body">
-      <span style="color:var(--fury);font-weight:700">분노</span> — 공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" (인접 적에게 ATK×50% 반격 후 리셋)<br>
-      <span style="color:var(--energy);font-weight:700">기력</span> — 매 턴 시작 시 +resRec. 암살자는 숲에서 2배 회복<br>
-      <span style="color:var(--mana);font-weight:700">마나</span> — 전투 시작 시 MAX. 매 턴 +resRec
+      <span style="color:var(--fury);font-weight:700">분노 (Fury)</span> — MAX: 10~5 | 공격 시 +1, 피격 시 +2 | 스킬: 강타(3), 스위치(1), 관통(5)<br>
+      패시브: warrior 광폭(ATK×1.5), knight 몸부림(인접 적 ATK×50% 반격)<br><br>
+      <span style="color:var(--energy);font-weight:700">기력 (Energy)</span> — MAX: 100 (통일) | 매 턴 +resRec 자동 회복 | 스킬: 도약(20)<br>
+      부가: 암살자는 숲에서 기력 회복 2배<br><br>
+      <span style="color:var(--mana);font-weight:700">마나 (Mana)</span> — MAX: 100~120 | 전투 시작 시 MAX로 시작 | 매 턴 +resRec 회복
     </div>
   </div>
 </div>
@@ -242,23 +253,23 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
   <div class="sec-head">ISSUES &amp; SUGGESTIONS</div>
 
   <div class="card" style="border-left:3px solid var(--red)">
-    <div class="card-title" style="color:var(--red)">🔴 주요 밸런스 문제</div>
+    <div class="card-title" style="color:var(--red)">🔴 진행 중인 밸런스 개선</div>
     <div class="card-body">
       <div class="issue">
-        <div class="issue-title">1. 궁수가 너무 약함</div>
-        <div class="issue-desc">HP 60 / DEF 3 = 최저 생존력. 사거리 4의 이점이 ATK 28로는 부족. 암살자(ATK 35)에게 2타 사망.</div>
+        <div class="issue-title">✅ 자원 시스템 활성화</div>
+        <div class="issue-desc">분노: 강타(3비용), 스위치(1비용), 관통(5비용) | 기력: 도약(20비용) 스킬 추가</div>
       </div>
       <div class="issue">
-        <div class="issue-title">2. 자원이 스킬 없이 무의미</div>
-        <div class="issue-desc">마나/기력이 쌓이기만 하고 소모처가 없음. 분노의 "몸부림"만 유일한 자원 활용.</div>
+        <div class="issue-title">✅ 기력 최대값 통일</div>
+        <div class="issue-desc">암살자, 궁수, 노비스, 무투가, 공병 → 모두 기력 100으로 표준화</div>
       </div>
       <div class="issue">
-        <div class="issue-title">3. 탱커 공격력 너무 낮음</div>
-        <div class="issue-desc">ATK 15 → 적 탱커(DEF 20) 상대 시 데미지 1. 위협감 제로.</div>
+        <div class="issue-title">✅ 클래스명 정리</div>
+        <div class="issue-desc">tanker → knight (기사) 변경. 2차 전직 시 직군으로 활용 가능</div>
       </div>
       <div class="issue">
-        <div class="issue-title">4. 사제 ATK의 이중성</div>
-        <div class="issue-desc">치유량(30) 적절하나, 공격 시 데미지 대비 리스크 높음. 고립 시 무력.</div>
+        <div class="issue-title">✅ 캐릭터 개성화</div>
+        <div class="issue-desc">생성 시 스탯에 ±20% 랜덤 변동 추가. 같은 클래스여도 개별 특성</div>
       </div>
     </div>
   </div>
@@ -298,24 +309,46 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
   </div>
 
   <div class="card" style="border-left:3px solid var(--blue);margin-top:16px">
-    <div class="card-title" style="color:var(--blue)">🔵 스킬 설계 방향 제안</div>
+    <div class="card-title" style="color:var(--blue)">🔵 구현된 액티브 스킬</div>
     <div class="card-body">
       <div class="skill-row">
-        <div class="skill-icon">⚔️</div>
+        <div class="skill-icon">⚡</div>
         <div>
           <div class="skill-name">전사 — 강타</div>
-          <div class="skill-cost" style="color:var(--fury)">분노 10 소모</div>
-          <div class="skill-desc">범위 1, ATK×1.8 데미지. 분노를 리스크&리워드로 활용.</div>
+          <div class="skill-cost" style="color:var(--fury)">분노 3 소모 ✅</div>
+          <div class="skill-desc">공격력 1.5배의 데미지로 공격. 분노를 전투 활용으로 변환.</div>
         </div>
       </div>
       <div class="skill-row">
-        <div class="skill-icon">🛡️</div>
+        <div class="skill-icon">🔄</div>
         <div>
-          <div class="skill-name">탱커 — 도발</div>
-          <div class="skill-cost" style="color:var(--fury)">분노 10 소모</div>
-          <div class="skill-desc">범위 2 이내 적 1턴간 자신만 공격하도록 유도. 진정한 탱킹 역할.</div>
+          <div class="skill-name">기사 — 스위치</div>
+          <div class="skill-cost" style="color:var(--fury)">분노 1 소모 ✅</div>
+          <div class="skill-desc">이동 범위 내 아군과 위치 교환. 포지셔닝 전술 지원.</div>
         </div>
       </div>
+      <div class="skill-row">
+        <div class="skill-icon">💨</div>
+        <div>
+          <div class="skill-name">궁수 — 도약</div>
+          <div class="skill-cost" style="color:var(--energy)">기력 20 소모 ✅</div>
+          <div class="skill-desc">이동 범위의 1.5배를 즉각 이동. 기동성 극대화.</div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-icon">🔱</div>
+        <div>
+          <div class="skill-name">창술사 — 관통</div>
+          <div class="skill-cost" style="color:var(--fury)">분노 5 소모 ✅</div>
+          <div class="skill-desc">일직선 3칸 관통 공격. 다중 적 처리 가능.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--purple);margin-top:16px">
+    <div class="card-title" style="color:var(--purple)">🟣 향후 스킬 제안</div>
+    <div class="card-body">
       <div class="skill-row">
         <div class="skill-icon">🗡️</div>
         <div>
@@ -330,14 +363,6 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
           <div class="skill-name">마법사 — 화염폭발</div>
           <div class="skill-cost" style="color:var(--mana)">마나 60 소모</div>
           <div class="skill-desc">타겟 중심 십자 범위 ATK×1.2 광역 데미지.</div>
-        </div>
-      </div>
-      <div class="skill-row">
-        <div class="skill-icon">🏹</div>
-        <div>
-          <div class="skill-name">궁수 — 관통사격</div>
-          <div class="skill-cost" style="color:var(--energy)">기력 45 소모</div>
-          <div class="skill-desc">일직선 관통, 경로상 모든 적에게 ATK×1.0 데미지.</div>
         </div>
       </div>
       <div class="skill-row">
@@ -357,11 +382,17 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
 <script>
 const CHARS=[
   {key:'warrior',name:'전사',icon:'⚔️',hp:100,atk:25,def:10,move:3,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'균형 근접 딜러'},
-  {key:'tanker',name:'탱커',icon:'🛡️',hp:150,atk:15,def:20,move:2,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'고체력 방어'},
-  {key:'assassin',name:'암살자',icon:'🗡️',hp:70,atk:35,def:5,move:4,range:1,role:'melee',res:'energy',maxRes:80,resRec:15,desc:'고공 고기동'},
+  {key:'knight',name:'기사',icon:'🛡️',hp:150,atk:15,def:20,move:2,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'고체력 방어'},
+  {key:'assassin',name:'암살자',icon:'🗡️',hp:70,atk:35,def:5,move:4,range:1,role:'melee',res:'energy',maxRes:100,resRec:15,desc:'고공 고기동'},
   {key:'mage',name:'마법사',icon:'🔮',hp:65,atk:30,def:4,move:3,range:3,role:'ranged',res:'mana',maxRes:120,resRec:12,desc:'원거리 마법'},
-  {key:'archer',name:'궁수',icon:'🏹',hp:60,atk:28,def:3,move:3,range:4,role:'ranged',res:'energy',maxRes:60,resRec:12,desc:'최장 사거리'},
-  {key:'priest',name:'사제',icon:'✝️',hp:70,atk:20,def:5,move:3,range:3,role:'healer',res:'mana',maxRes:100,resRec:10,desc:'아군 치유'}
+  {key:'archer',name:'궁수',icon:'🏹',hp:60,atk:28,def:3,move:3,range:4,role:'ranged',res:'energy',maxRes:100,resRec:12,desc:'최장 사거리'},
+  {key:'priest',name:'사제',icon:'✝️',hp:70,atk:20,def:5,move:3,range:3,role:'healer',res:'mana',maxRes:100,resRec:10,desc:'아군 치유'},
+  {key:'novice',name:'노비스',icon:'🔰',hp:85,atk:22,def:8,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:10,desc:'초보 근접 딜러'},
+  {key:'summoner',name:'소환사',icon:'📖',hp:60,atk:26,def:4,move:3,range:3,role:'ranged',res:'mana',maxRes:110,resRec:11,desc:'소환 원거리'},
+  {key:'shaman',name:'주술사',icon:'🎭',hp:70,atk:28,def:6,move:3,range:3,role:'ranged',res:'mana',maxRes:100,resRec:10,desc:'저주 원거리'},
+  {key:'brawler',name:'무투가',icon:'👊',hp:90,atk:32,def:7,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:12,desc:'격투 근접 딜러'},
+  {key:'lancer',name:'창술사',icon:'🔱',hp:95,atk:28,def:12,move:3,range:1,role:'melee',res:'fury',maxRes:5,resRec:0,desc:'창 근접 딜러'},
+  {key:'sapper',name:'공병',icon:'💣',hp:75,atk:30,def:6,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:8,desc:'폭발 근접 딜러'}
 ];
 const RES={
   fury:{label:'분노',color:'#ff6644',desc:'공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" 반격 (ATK×0.5)',auto:'자동 회복 없음'},
