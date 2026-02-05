@@ -74,7 +74,7 @@ Object.assign(G, {
       // Attack gate
       this.gateHP[k]--;
       this.floatT(nx,ny,`성문 피격!`,'damage');this.sfxAtk(u.cls);
-      this.vfxSpawn(this.uSX(nx,ny)+20,this.uSY(nx,ny)+10,{count:12,colors:['#aa8844','#ffcc66','#fff'],shape:'spark',speed:2,spread:12,decay:0.025,size:3});
+      this.vfxSpawn(this.uSX(nx,ny)+UCX,this.uSY(nx,ny)+UCY,{count:12,colors:['#aa8844','#ffcc66','#fff'],shape:'spark',speed:2,spread:12,decay:0.025,size:3});
       if(this.gateHP[k]<=0){
         // Gate destroyed - becomes passable plain
         this.ter[ny][nx]='plain';this.ter[ny][nx]='plain';
@@ -115,20 +115,63 @@ Object.assign(G, {
     if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
     else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
     else this.rUnits()},
-  async eMv(u,al){const mc=this.eMvC(u);if(!mc.length)return;let bt=null,bd=Infinity;
-    // Target closest ally, or aim for ally gate/wall if no allies in range
+  async eMv(u,al){
+    // Defensive AI: 5-cell advance limit from formation position
+    const origPos=u.origSpawn||{x:u.x,y:u.y};
+    const advLimit=5;
+    const advDist=mh(u.x,u.y,origPos.x,origPos.y);
+    // If already at advance limit, don't move further
+    if(advDist>=advLimit&&!u.isBoss){return}
+
+    const mc=this.eMvC(u);if(!mc.length)return;
+    // Filter moves to respect 5-cell limit
+    const validMoves=mc.filter(m=>mh(m.x,m.y,origPos.x,origPos.y)<=advLimit||u.isBoss);
+    if(!validMoves.length)return;
+
+    let bt=null,bd=Infinity;
     for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<bd){bd=d;bt=a}}
-    // If no close ally, target ally gate area (row 13, cols 4-5)
+
+    // Special unit logic: assassins prefer forests
+    if(u.cls==='assassin'){
+      let bestMove=null,bestScore=-Infinity;
+      for(const m of validMoves){
+        const t=this.ter[m.y]?this.ter[m.y][m.x]:null;
+        let score=0;
+        if(t==='forest')score+=50;
+        if(bt)score+=(mh(u.x,u.y,bt.x,bt.y)-mh(m.x,m.y,bt.x,bt.y))*10;
+        score+=(m.y-u.y)*3;
+        if(score>bestScore){bestScore=score;bestMove=m}
+      }
+      if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+        if(bestMove.y===14){this.onBreach(u)};return}
+    }
+
+    // Sapper: place traps at current position before moving
+    if(u.cls==='sapper'&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
+      this.traps.push({x:u.x,y:u.y,dmg:15,id:this.traps.length});
+      this.floatT(u.x,u.y,'함정 설치','heal')
+    }
+
+    // Normal movement: target closest ally or gate
     if(!bt||bd>8){const gateTarget={x:u.x<=4?4:5,y:13};
-      let bc2=null,bs2=-Infinity;for(const c of mc){
+      let bc2=null,bs2=-Infinity;
+      for(const c of validMoves){
         const s=-(mh(c.x,c.y,gateTarget.x,gateTarget.y))*10+(c.y-u.y)*5;
-        if(s>bs2){bs2=s;bc2=c}}
-      if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);return}}
-    let bc=null,bs=-Infinity;for(const c of mc){let s=0;if(bt)s+=(mh(u.x,u.y,bt.x,bt.y)-mh(c.x,c.y,bt.x,bt.y))*10;
-      s+=(c.y-u.y)*3;if(s>bs){bs=s;bc=c}}
+        if(s>bs2){bs2=s;bc2=c}
+      }
+      if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);return}
+    }
+
+    let bc=null,bs=-Infinity;
+    for(const c of validMoves){
+      let s=0;if(bt)s+=(mh(u.x,u.y,bt.x,bt.y)-mh(c.x,c.y,bt.x,bt.y))*10;
+      s+=(c.y-u.y)*3;if(s>bs){bs=s;bc=c}
+    }
+
     if(bc){u.x=bc.x;u.y=bc.y;this.animU(u.id,bc.x,bc.y);await sl(340);
-      // Check if enemy reached ally wall row through destroyed gate
-      if(bc.y===14){this.onBreach(u)}}},
+      if(bc.y===14){this.onBreach(u)}
+    }
+  },
 
   chkEnd(){if(this.over)return;const al=this.alive('ally'),en=this.alive('enemy');
     if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,'아군이 전멸했습니다.');return}

@@ -151,11 +151,11 @@ Object.assign(G,{
     const alive=ROSTER.getAll().filter(c=>!c.dead);
     // 죽은 유닛 제거
     this.party=this.party.filter(uid=>{const ch=ROSTER.getChar(uid);return ch&&!ch.dead});
-    // 파티가 비어있으면 자동 편성
-    if(!this.party.length){
-      this.party=alive.slice(0,Math.min(MAX_P,alive.length)).map(c=>c.uid);
-      this._saveParty();
-    }
+    // // 파티가 비어있으면 자동 편성
+    // if(!this.party.length){
+    //   this.party=alive.slice(0,Math.min(MAX_P,alive.length)).map(c=>c.uid);
+    //   this._saveParty();
+    // }
     this.rP();
   },
 
@@ -245,7 +245,7 @@ Object.assign(G,{
         const expNeed=atMax?1:(expForLevel(ch.lv));
         const expPct=atMax?100:Math.min(100,Math.round(((ch.exp||0)/expNeed)*100));
         c.innerHTML=`<div class="cc-grade" style="color:${gClr}">${grade}</div>`+
-          `<div class="cc-icon">${d.icon}</div>`+
+          `<div class="cc-icon">${clsIcon(cls,28)}</div>`+
           `<div class="cc-name">${ch.name||d.name} <span style="font-size:10px;color:#64748b">Lv.${ch.lv}</span></div>`+
           `<div class="cc-role">${d.desc}</div>`+
           `<div class="cc-exp"><div class="cc-exp-bar"><div class="cc-exp-fill" style="width:${expPct}%"></div></div><span class="cc-exp-txt">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span></div>`+
@@ -260,7 +260,7 @@ Object.assign(G,{
     for(let i=0;i<MAX_P;i++){const s=document.createElement('div');s.className='party-slot';
       if(i<this.party.length){
         const ch=ROSTER.getChar(this.party[i]);
-        if(ch){const d=CD[ch.cls];s.classList.add('filled');s.innerHTML=`${d.icon}<span class="ps-lv">Lv${ch.lv}</span><span class="ps-x">✕</span>`;
+        if(ch){const d=CD[ch.cls];s.classList.add('filled');s.innerHTML=`${clsIcon(ch.cls,22)}<span class="ps-lv">Lv${ch.lv}</span><span class="ps-x">✕</span>`;
           s.onclick=()=>{this.pRemAt(i)}}}
       pp.appendChild(s)}
     const n=this.party.length;
@@ -345,7 +345,7 @@ Object.assign(G,{
       const cost=this._reviveCost(ch);
       const canAfford=this.gold>=cost;
       const el=document.createElement('div');el.className='sanc-card';
-      el.innerHTML=`<div class="sanc-icon">${d.icon}</div>`+
+      el.innerHTML=`<div class="sanc-icon">${clsIcon(ch.cls,28)}</div>`+
         `<div class="sanc-info"><div class="sanc-name">${ch.name||d.name} <span style="color:#64748b;font-size:10px">Lv.${ch.lv}</span></div>`+
         `<div class="sanc-stats">HP ${ch.hp} · ATK ${ch.atk} · DEF ${ch.def}</div></div>`+
         `<button class="sanc-btn${canAfford?'':' disabled'}" ${canAfford?'':'disabled'}>${cost}G 부활</button>`;
@@ -418,7 +418,7 @@ Object.assign(G,{
         const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
         const el=document.createElement('div');el.className='shop-card'+(item.sold?' sold':'');
         el.innerHTML=`<div class="shop-grade" style="color:${gClr}">${grade}</div>`+
-          `<div class="shop-icon">${d.icon}</div>`+
+          `<div class="shop-icon">${clsIcon(item.cls,28)}</div>`+
           `<div class="shop-name">${item.name}</div>`+
           `<div class="shop-cls">${d.name} · ${d.desc}</div>`+
           `<div class="shop-stats">HP ${d.base.hp} ATK ${d.base.atk} DEF ${d.base.def}</div>`+
@@ -463,7 +463,7 @@ Object.assign(G,{
       const expNeed=atMax?0:expForLevel(ch.lv);
       const expPct=atMax?100:Math.min(100,Math.round((ch.exp||0)/expNeed*100));
       h+=`<div class="pt-btn${atMax?' pt-max':''}" data-uid="${ch.uid}">`+
-        `<span class="pt-icon">${d.icon}</span>`+
+        `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
         `<span class="pt-info">${ch.name||d.name} Lv.${ch.lv}</span>`+
         `<span class="pt-exp">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span>`+
         `</div>`;

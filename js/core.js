@@ -1,9 +1,9 @@
 const G={
   ter:[],units:[],nid:1,turn:1,phase:'player',
   sel:null,mvT:[],atkT:[],healT:[],
-  awPM:false,preMv:null,over:false,anim:false,
+  awPM:false,skillMode:false,preMv:null,over:false,anim:false,
   cStage:null,eSpwn:0,eQ:[],cleared:new Set(),
-  party:[],camDir:0,battleExp:{},
+  party:[],camDir:0,battleExp:{},traps:[],eFormPos:[],
 
   // Camera: remap grid(c,r) to view-space(vc,vr) based on rotation
   g2v(c,r){switch(this.camDir){
@@ -14,7 +14,7 @@ const G={
     case 2:return{c:COLS-1-vc,r:ROWS-1-vr};case 3:return{c:COLS-1-vr,r:vc}}},
   vDim(){return this.camDir%2===0?{c:COLS,r:ROWS}:{c:ROWS,r:COLS}},
   isoX(vc,vr){return(vc-vr)*TW+this.vDim().r*TW},
-  isoY(vc,vr,z){return(vc+vr)*TH-(z||0)*6},
+  isoY(vc,vr,z){return(vc+vr)*TH-(z||0)*ZH},
   // Pixel (relative to iso-world) -> grid(c,r), diamond hit test
   isoHit(px,py){
     const d=this.vDim(),oX=d.r*TW;
@@ -40,7 +40,7 @@ const G={
   },
   tSX(c,r){const v=this.g2v(c,r);return this.isoX(v.vc,v.vr)},
   tSY(c,r,z){const v=this.g2v(c,r);return this.isoY(v.vc,v.vr,z)},
-  uSX(c,r){return this.tSX(c,r)+TW-18},
+  uSX(c,r){return this.tSX(c,r)+TW-UCX},
   uSY(c,r){const t=this.ter[r]?this.ter[r][c]:null;return this.tSY(c,r,t?TI[t].z:0)-22},
 
   rotCam(d){
@@ -55,7 +55,7 @@ const G={
     if(this.awPM&&this.sel)this.showAM(this.sel);
   },
   layW(){
-    const d=this.vDim(),wW=(d.c+d.r)*TW+4,wH=(d.c+d.r)*TH+60;
+    const d=this.vDim(),wW=(d.c+d.r)*TW+4,wH=(d.c+d.r)*TH+80;
     const w=document.getElementById('iso-world');w.style.width=wW+'px';w.style.height=wH+'px';
     const ct=document.getElementById('map-container'),cW=ct.clientWidth,cH=ct.clientHeight;
     w.style.left=Math.max(0,(cW-wW)/2)+'px';w.style.top=Math.max(0,(cH-wH)/2)+'px';
@@ -67,8 +67,8 @@ const G={
   // Init
   init(){
     this.genT();this.units=[];this.nid=1;this.turn=1;this.phase='player';
-    this.sel=null;this.over=false;this.awPM=false;this.anim=false;this.camDir=0;
-    this.breached=0;this.battleExp={};
+    this.sel=null;this.over=false;this.awPM=false;this.skillMode=false;this.anim=false;this.camDir=0;
+    this.breached=0;this.battleExp={};this.traps=[];this.eFormPos=[];
     document.querySelector('#cam-dir .cd-arrow').textContent=CARR[0];
     document.querySelector('#cam-dir .cd-label').textContent=CLAB[0];
     const w=document.getElementById('iso-world');
@@ -85,16 +85,47 @@ const G={
     const ct=document.getElementById('map-container');
     const w=document.getElementById('iso-world');
     const oL=parseFloat(w.style.left||0),oT=parseFloat(w.style.top||0);
-    ct.scrollLeft=oL+sx-ct.clientWidth/2+20;
-    ct.scrollTop=oT+sy-ct.clientHeight/2+20;
+    ct.scrollLeft=oL+sx-ct.clientWidth/2+UCX;
+    ct.scrollTop=oT+sy-ct.clientHeight/2+UCX;
   },
   scrollToUnit(u){
     const ct=document.getElementById('map-container');
     const w=document.getElementById('iso-world');
     const oL=parseFloat(w.style.left||0),oT=parseFloat(w.style.top||0);
-    const ux=this.uSX(u.x,u.y)+20, uy=this.uSY(u.x,u.y)+25;
+    const ux=this.uSX(u.x,u.y)+UCX, uy=this.uSY(u.x,u.y)+UCY*2;
     const tX=oL+ux-ct.clientWidth/2, tY=oT+uy-ct.clientHeight/2;
     ct.scrollTo({left:tX,top:tY,behavior:'smooth'});
+  },
+  // Enemy formation: defensive positioning based on class
+  eFormation(enemies,boss){
+    const form=[];
+    let knights=[],melee=[],ranged=[],heal=[],sappers=[];
+    // Categorize enemies
+    enemies.forEach(cls=>{
+      const d=CD[cls];
+      if(cls==='knight')knights.push(cls);
+      else if(d.role==='melee')melee.push(cls);
+      else if(d.role==='ranged')ranged.push(cls);
+      else if(d.role==='healer')heal.push(cls);
+      if(cls==='sapper')sappers.push(cls)
+    });
+    // Formation rows from top (row 0-1: spawn) - enemies defend from row 2-4
+    // Front line: row 4 (knights first, then melee)
+    const frontLine=[];
+    for(let c=2;c<=7;c++){if(!this.uAt(c,4)&&frontLine.length<(knights.length+melee.length))frontLine.push({x:c,y:4})}
+    let idx=0;
+    knights.forEach(k=>{if(idx<frontLine.length)form.push({cls:k,pos:frontLine[idx++]})});
+    melee.forEach(m=>{if(idx<frontLine.length)form.push({cls:m,pos:frontLine[idx++]})});
+    // Mid line: row 3 (remaining units)
+    const midLine=[];
+    for(let c=2;c<=7;c++){if(!this.uAt(c,3)&&midLine.length<ranged.length+heal.length+sappers.length)midLine.push({x:c,y:3})}
+    idx=0;
+    ranged.forEach(r=>{if(idx<midLine.length)form.push({cls:r,pos:midLine[idx++]})});
+    heal.forEach(h=>{if(idx<midLine.length)form.push({cls:h,pos:midLine[idx++]})});
+    sappers.forEach(s=>{if(idx<midLine.length)form.push({cls:s,pos:midLine[idx++]})});
+    // Boss at center-back: row 2-3, col 4-5
+    if(boss){form.push({cls:boss.cls,pos:{x:5,y:2},isBoss:true})}
+    return form
   },
   genT(){this.ter=[];this.gateHP={};this.wallHP={};this.breached=0;
     // Ally wall row (row 14): cols 2-3,6-7 = wall, cols 4-5 = gate, rest = water
@@ -133,18 +164,40 @@ const G={
     const u={id:this.nid++,uid,team,cls,lv,x,y,hp,mhp,atk,def,move:mv,range:rng,role,
       res:initRes,maxRes,resType,resRec,
       hm:false,ha:false,waited:false,mo:false,furyBuff:0};
+    if(team==='enemy'){u.origSpawn={x,y}}
     this.units.push(u);return u},
   uAt(x,y){return this.units.find(u=>u.x===x&&u.y===y&&u.hp>0)},
   alive(t){return this.units.filter(u=>u.team===t&&u.hp>0)},
+  // Trap system
+  chkTrap(u){
+    if(u.team==='ally'){
+      const trap=this.traps.find(t=>t.x===u.x&&t.y===u.y);
+      if(trap){u.hp=Math.max(0,u.hp-trap.dmg);this.floatT(u.x,u.y,`함정! -${trap.dmg}`,'damage');this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:8,colors:['#f84','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:2});return true}
+    }
+    return false
+  },
 
   spawnW(){if(!this.cStage)return;const s=this.cStage,rem=s.tot-this.eSpwn;if(rem<=0)return;
-    const cnt=Math.min(s.spw,rem,this.eQ.length),op=[];
-    // Spawn at top rows (open field)
-    for(let c=0;c<COLS;c++)if(!this.uAt(c,0))op.push({x:c,y:0});
-    if(op.length<cnt)for(let c=0;c<COLS;c++)if(!this.uAt(c,1))op.push({x:c,y:1});
-    shuffle(op);
-    for(let i=0;i<Math.min(cnt,op.length);i++){const c=this.eQ.shift();if(!c)break;
-      this.addU('enemy',c,op[i].x,op[i].y);this.eSpwn++}},
+    const cnt=Math.min(s.spw,rem,this.eQ.length);
+    // First wave: Use formation-based placement with boss
+    if(this.eSpwn===0&&s.boss){
+      const form=this.eFormation(s.en.slice(0,s.en.length),s.boss);this.eFormPos=form;
+      let spawned=0;
+      // Spawn boss first
+      const bossForm=form.find(f=>f.isBoss);
+      if(bossForm){const bu=this.addU('enemy',bossForm.cls,bossForm.pos.x,bossForm.pos.y);if(bu){bu.isBoss=true;bu.name=s.boss.name;bu.origSpawn=bossForm.pos}spawned++}
+      // Spawn regular units
+      for(let i=0;i<form.length&&spawned<cnt;i++){const f=form[i];if(!f.isBoss){const u=this.addU('enemy',f.cls,f.pos.x,f.pos.y);if(u)spawned++}}
+      this.eSpwn+=spawned
+    }else{
+      // Subsequent waves: random spawn at rows 0-1
+      const op=[];
+      for(let c=0;c<COLS;c++)if(!this.uAt(c,0))op.push({x:c,y:0});
+      if(op.length<cnt)for(let c=0;c<COLS;c++)if(!this.uAt(c,1))op.push({x:c,y:1});
+      shuffle(op);
+      for(let i=0;i<Math.min(cnt,op.length);i++){const c=this.eQ.shift();if(!c)break;
+        this.addU('enemy',c,op[i].x,op[i].y);this.eSpwn++}
+    }},
 
   // Pathfinding
   mvC(u){const res=[],vis=new Map(),q=[{x:u.x,y:u.y,c:0}],K=(a,b)=>a+','+b;vis.set(K(u.x,u.y),0);

@@ -10,14 +10,15 @@ Object.assign(G, {
       const svg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed);
       const tile=document.createElement('div');tile.className='iso-tile';
       tile.style.left=this.tSX(c,r)+'px';tile.style.top=this.tSY(c,r,ti.z)+'px';
-      tile.style.width=(TW*2)+'px';tile.style.height=(TH*2+ti.z*6+2)+'px';
+      tile.style.width=(TW*2)+'px';tile.style.height=(TH*2+ti.z*ZH+2)+'px';
       const v=this.g2v(c,r);tile.style.zIndex=v.vc+v.vr;tile.innerHTML=svg;
       if(hl==='move')tile.classList.add('hl-move');
       else if(hl==='attack')tile.classList.add('hl-attack');
       else if(hl==='heal')tile.classList.add('hl-heal');
       w.appendChild(tile)}
-    // Tree objects on forest tiles
+    // Tree objects on forest tiles (skip if tileset loaded — forest tiles include vegetation)
     w.querySelectorAll('.tree-obj').forEach(e=>e.remove());
+    if(tileImgsLoaded)return;
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(this.ter[r][c]!=='forest')continue;
       const seed=r*COLS+c;const sr=s=>{s=(s*9301+49297)%233280;return s/233280};
       let s0=seed+77,rn=()=>{s0=sr(s0+31);return s0};
@@ -60,9 +61,9 @@ Object.assign(G, {
     al.forEach(u=>{ids.add('u-'+u.id);let el=document.getElementById('u-'+u.id);
       if(!el){el=document.createElement('div');el.id='u-'+u.id;el.className=`unit-sprite ${u.team} spawning`;
         setTimeout(()=>el.classList.remove('spawning'),450);
-        el.innerHTML=`<div class="u-icon">${CD[u.cls].icon}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
+        el.innerHTML=`<div class="u-icon">${clsIcon(u.cls,28)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
         w.appendChild(el)}
-      el.style.width='38px';el.style.height='50px';el.style.left=this.uSX(u.x,u.y)+'px';el.style.top=this.uSY(u.x,u.y)+'px';
+      el.style.width=UW+'px';el.style.height=UH+'px';el.style.left=this.uSX(u.x,u.y)+'px';el.style.top=this.uSY(u.x,u.y)+'px';
       const v=this.g2v(u.x,u.y);el.style.zIndex=100+v.vc+v.vr;
       el.querySelector('.hp-fill').style.width=`${(u.hp/u.mhp)*100}%`;
       const mpFill=el.querySelector('.mp-fill');
@@ -74,11 +75,13 @@ Object.assign(G, {
     this.rMM();this.rNav()},
 
   floatT(x,y,t,tp){const w=document.getElementById('iso-world'),el=document.createElement('div');
-    el.className=`float-text ${tp}`;el.textContent=t;el.style.left=(this.uSX(x,y)+10)+'px';el.style.top=(this.uSY(x,y)-6)+'px';el.style.zIndex=500;
+    el.className=`float-text ${tp}`;el.textContent=t;el.style.left=(this.uSX(x,y)+UCX/2)+'px';el.style.top=(this.uSY(x,y)-8)+'px';el.style.zIndex=500;
     w.appendChild(el);setTimeout(()=>el.remove(),950)},
-  showAM(u){const m=document.getElementById('action-menu');m.style.left=(this.uSX(u.x,u.y)+42)+'px';
+  showAM(u){const m=document.getElementById('action-menu');m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
     m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
     document.getElementById('btn-cancel').style.display=this.preMv?'':'none';
+    const sb=document.getElementById('btn-skill');const sk=SKILLS[u.cls];
+    if(sk&&u.res>=sk.cost&&!u.ha){sb.style.display='';sb.textContent=sk.icon+' '+sk.name}else{sb.style.display='none'}
     m.classList.add('show')},
   hideAM(){document.getElementById('action-menu').classList.remove('show')},
 });

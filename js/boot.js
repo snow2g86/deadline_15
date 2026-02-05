@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(page==='lobby')G._initLobbyPage();
   else if(page==='stage-select')G._initStageSelectPage();
   else if(page==='party-select')G._initPartySelectPage();
-  else if(page==='battle')G._initBattlePage();
+  else if(page==='battle'){loadTilesets().then(()=>G._initBattlePage())}
   else if(page==='sanctuary'){G._updGoldUI();G._renderSanctuary()}
   else if(page==='shop'){G._updGoldUI();G._loadShop();G._renderShop()}
   else if(page==='settings')G._renderLobbySettings();

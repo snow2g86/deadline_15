@@ -40,7 +40,7 @@ Object.assign(G, {
     this.sfxNoise(c,t,0.12,0.25,{type:'bandpass',freq:2000,Q:2});
     this.sfxOsc(c,'sawtooth',200,t,0.08,0.12);
     this.sfxNoise(c,t+0.03,0.08,0.15,{type:'highpass',freq:3000})},
-  sfxAtkTanker(){const c=this.sfxCtx(),t=c.currentTime;
+  sfxAtkKnight(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxNoise(c,t,0.18,0.3,{type:'lowpass',freq:600,Q:3});
     this.sfxOsc(c,'sine',80,t,0.15,0.2);this.sfxOsc(c,'sine',60,t+0.05,0.12,0.15);
     this.sfxNoise(c,t+0.04,0.1,0.12,{type:'bandpass',freq:400,Q:1})},
@@ -67,7 +67,7 @@ Object.assign(G, {
     this.sfxOsc(c,'sine',600,t,0.15,0.08);this.sfxOsc(c,'sine',900,t+0.05,0.12,0.06)},
 
   sfxAtk(cls){
-    const m={warrior:'sfxAtkWarrior',tanker:'sfxAtkTanker',assassin:'sfxAtkAssassin',
+    const m={warrior:'sfxAtkWarrior',knight:'sfxAtkKnight',assassin:'sfxAtkAssassin',
       mage:'sfxAtkMage',archer:'sfxAtkArcher',priest:'sfxAtkPriest'};
     if(m[cls])this[m[cls]]()},
 

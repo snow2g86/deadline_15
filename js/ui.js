@@ -42,7 +42,7 @@ Object.assign(G, {
       const resPct=dead?0:(u.maxRes?Math.round(u.res/u.maxRes*100):0);
 
       const buffsDiv=bh?`<div class="an-buffs">${bh}</div>`:'';
-      el.innerHTML=`${buffsDiv}<div class="an-vres"><div class="an-vres-fill" style="height:${resPct}%;background:${resColor}"></div></div><div class="an-vhp"><div class="an-vhp-fill" style="height:${pct}%;background:${hpColor}"></div></div><div class="an-icon">${d.icon}</div>`;
+      el.innerHTML=`${buffsDiv}<div class="an-vres"><div class="an-vres-fill" style="height:${resPct}%;background:${resColor}"></div></div><div class="an-vhp"><div class="an-vhp-fill" style="height:${pct}%;background:${hpColor}"></div></div><div class="an-icon">${clsIcon(u.cls,18)}</div>`;
       
       if(!dead)el.onclick=()=>{if(this.awPM)return;this.selU(u)};
       nav.appendChild(el);
@@ -60,7 +60,7 @@ Object.assign(G, {
     // min isoY when vc=0,vr=0 => 0
     // max isoY when vc=d.c-1,vr=d.r-1 => (d.c+d.r-2)*TH
     const wW=(d.c+d.r)*TW+4;
-    const wH=(d.c+d.r)*TH+60;
+    const wH=(d.c+d.r)*TH+80;
     // minimap scale: fit to ~80px wide
     const mmMaxW=80;
     const sc=mmMaxW/wW;
@@ -145,7 +145,7 @@ Object.assign(G, {
     const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
     const rn=rl[u.resType]||'',rpct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
     return`<div class="info-card ${cc}" ${m?'style="border-width:2px"':''}>
-      <div class="ic-top"><span class="ic-icon">${d.icon}</span><span class="ic-name">${d.name}</span><span class="ic-class">${u.team==='ally'?'아군':'적군'}</span></div>
+      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${d.name}</span><span class="ic-class">${u.team==='ally'?'아군':'적군'}</span></div>
       <div class="ic-stats"><span>HP <b>${u.hp}/${u.mhp}</b></span><span style="color:${rc[u.resType]}">${rn} <b>${u.res}/${u.maxRes}</b></span><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div></div>`},
   defI(){const a=this.alive('ally').length,e=this.alive('enemy').length;
     document.getElementById('info-panel').innerHTML=`<div style="display:flex;gap:12px;align-items:center;font-size:11px"><span style="color:var(--blue)">🛡 아군 ${a}명</span><span style="color:var(--red)">⚔ 적군 ${e}명</span><span style="color:var(--dim)">유닛을 터치하여 선택</span></div>`},

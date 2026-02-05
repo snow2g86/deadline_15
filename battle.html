@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>턴제 디펜스 RPG</title>
+<title>DEADLINE 15</title>
 <link rel="stylesheet" href="css/style.css">
 <script defer src="js/data.js"></script>
 <script defer src="js/classes.js"></script>
@@ -34,6 +34,7 @@
     <div id="iso-world">
       <canvas id="vfx-canvas"></canvas>
       <div id="action-menu" onclick="event.stopPropagation()">
+        <button id="btn-skill" onclick="G.actSkill()" style="display:none">🔱 스킬</button>
         <button id="btn-wait" onclick="G.actWait()">⏸ 대기</button>
         <button id="btn-cancel" onclick="G.actCancel()">↩ 취소</button>
       </div>

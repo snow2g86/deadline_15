@@ -41,12 +41,12 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 .unit-sprite{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
   pointer-events:none;z-index:10;
   transition:left .32s cubic-bezier(.4,0,.2,1),top .32s cubic-bezier(.4,0,.2,1)}
-.unit-sprite .u-icon{font-size:22px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));line-height:1}
+.unit-sprite .u-icon{font-size:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));line-height:1}
 .unit-sprite.acted{opacity:.45}
-.unit-sprite .u-shadow{width:22px;height:6px;background:rgba(0,0,0,.35);border-radius:50%;margin-top:1px}
-.hp-bg{width:34px;height:4px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
+.unit-sprite .u-shadow{width:26px;height:7px;background:rgba(0,0,0,.35);border-radius:50%;margin-top:1px}
+.hp-bg{width:44px;height:4px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
 .hp-fill{height:100%;border-radius:2px;transition:width .3s}
-.mp-bg{width:34px;height:3px;background:#181818;border-radius:2px;margin-top:2px;overflow:hidden}
+.mp-bg{width:44px;height:3px;background:#181818;border-radius:2px;margin-top:2px;overflow:hidden}
 .mp-fill{height:100%;border-radius:2px;transition:width .3s}
 .unit-sprite.ally .hp-fill{background:#22c55e}
 .unit-sprite.enemy .hp-fill{background:var(--red)}
@@ -447,6 +447,9 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .pt-icon{font-size:18px}.pt-info{flex:1;font-size:11px;font-weight:700;text-align:left}
 .pt-exp{font-size:9px;color:#a78bfa}
 
+/* ═══ Class Icon Sprite ═══ */
+.cls-icon{display:inline-block;background-image:url('../image/icon/64x64.png');image-rendering:pixelated;vertical-align:middle}
+
 /* ═══ EXP Float Text ═══ */
 .float-text.exp{color:#a78bfa}
 
@@ -454,6 +457,7 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .settings-content{width:100%;max-width:300px;display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
 
 @media(min-width:1024px){
+  #nav-settings{font-size:26px;cursor:pointer}
   #top-nav{height:56px;padding:0 16px}
   #nav-title{font-size:20px}
   #bottom-nav{height:64px}

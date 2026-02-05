@@ -60,13 +60,13 @@ Object.assign(G, {
 
   // Class-specific attack VFX
   vfxAtk(attacker,target){
-    const ax=this.uSX(attacker.x,attacker.y)+20,ay=this.uSY(attacker.x,attacker.y)+10;
-    const tx=this.uSX(target.x,target.y)+20,ty=this.uSY(target.x,target.y)+10;
+    const ax=this.uSX(attacker.x,attacker.y)+UCX,ay=this.uSY(attacker.x,attacker.y)+UCY;
+    const tx=this.uSX(target.x,target.y)+UCX,ty=this.uSY(target.x,target.y)+UCY;
     const cls=attacker.cls;
     if(cls==='warrior'){// Slash
       this.vfxSpawn(tx,ty,{count:12,colors:['#fff','#aaddff','#88bbff'],shape:'slash',speed:3,spread:12,decay:0.04,size:4});
       this.vfxSpawn(tx,ty,{count:6,colors:['#ffffffcc','#aaddffcc'],shape:'spark',speed:4,spread:8,decay:0.03,size:2});
-    }else if(cls==='tanker'){// Heavy impact
+    }else if(cls==='knight'){// Heavy impact
       this.vfxSpawn(tx,ty,{count:15,colors:['#ffcc44','#ff8800','#ffffff'],shape:'circle',speed:2,spread:6,decay:0.02,size:4,gravity:0.1});
       this.vfxSpawn(tx,ty,{count:3,colors:['#ffffff88'],shape:'ring',speed:0,spread:2,decay:0.02,size:12});
     }else if(cls==='assassin'){// Quick multi-slash + afterimage
@@ -90,7 +90,7 @@ Object.assign(G, {
 
   // Heal VFX
   vfxHeal(target){
-    const tx=this.uSX(target.x,target.y)+20,ty=this.uSY(target.x,target.y)+10;
+    const tx=this.uSX(target.x,target.y)+UCX,ty=this.uSY(target.x,target.y)+UCY;
     this.vfxSpawn(tx,ty,{count:18,colors:['#44ff88','#88ffaa','#aaffcc','#ffffff'],shape:'circle',
       speed:1.5,spread:14,decay:0.018,size:3,vy:-1.5,gravity:-0.02});
     this.vfxSpawn(tx,ty,{count:5,colors:['#44ff8844'],shape:'ring',speed:0,spread:3,decay:0.015,size:14});
@@ -99,7 +99,7 @@ Object.assign(G, {
 
   // Death dissolve particles
   vfxDeath(unit){
-    const tx=this.uSX(unit.x,unit.y)+20,ty=this.uSY(unit.x,unit.y)+10;
+    const tx=this.uSX(unit.x,unit.y)+UCX,ty=this.uSY(unit.x,unit.y)+UCY;
     const baseColor=unit.team==='ally'?['#3b82f6','#60a5fa','#93c5fd','#bfdbfe']:['#ef4444','#f87171','#fca5a5','#fecaca'];
     this.vfxSpawn(tx,ty,{count:25,colors:[...baseColor,'#ffffff88'],shape:'diamond',speed:1.5,spread:16,decay:0.012,size:3,gravity:0.03,vy:-.5});
     this.vfxSpawn(tx,ty,{count:10,colors:['#ffffff44'],shape:'circle',speed:.8,spread:12,decay:0.01,size:2,vy:-1,gravity:-0.01});
@@ -109,7 +109,7 @@ Object.assign(G, {
   vfxBuff(unit){
     const el=document.getElementById('u-'+unit.id);
     if(el){el.classList.add('buff-glow');setTimeout(()=>el.classList.remove('buff-glow'),500)}
-    const tx=this.uSX(unit.x,unit.y)+20,ty=this.uSY(unit.x,unit.y)+10;
+    const tx=this.uSX(unit.x,unit.y)+UCX,ty=this.uSY(unit.x,unit.y)+UCY;
     this.vfxSpawn(tx,ty,{count:8,colors:['#22c55e','#4ade80','#ffffff'],shape:'star',speed:1.5,spread:12,decay:0.025,size:2.5,vy:-1});
   },
 

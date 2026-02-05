@@ -6,12 +6,22 @@
 // ── 스킬 데이터 정의 ──────────────────────
 // 향후 액티브 스킬 추가 시 여기에 등록
 const SKILLS = {
-  // warrior: { id:'warrior_rage', name:'강타', cost:10, costType:'fury', ... },
-  // tanker:  { id:'tanker_taunt', name:'도발', cost:10, costType:'fury', ... },
-  // assassin:{ id:'assassin_ambush', name:'암습', cost:60, costType:'energy', ... },
-  // mage:    { id:'mage_fireball', name:'화염폭발', cost:60, costType:'mana', ... },
-  // archer:  { id:'archer_pierce', name:'관통사격', cost:45, costType:'energy', ... },
-  // priest:  { id:'priest_aoe_heal', name:'집단 치유', cost:50, costType:'mana', ... },
+  warrior: {
+    id: 'warrior_powersmash', name: '강타', icon: '⚡',
+    desc: '공격력 1.5배의 데미지로 공격', cost: 3, costType: 'fury'
+  },
+  knight: {
+    id: 'knight_switch', name: '스위치', icon: '🔄',
+    desc: '이동 범위 내 아군과 위치 교환', cost: 1, costType: 'fury', switchRange: 2
+  },
+  archer: {
+    id: 'archer_dash', name: '도약', icon: '💨',
+    desc: '이동 범위의 1.5배를 즉각 이동', cost: 20, costType: 'energy', dashRange: 4
+  },
+  lancer: {
+    id: 'lancer_pierce', name: '관통', icon: '🔱',
+    desc: '일직선 3칸 관통 데미지', cost: 5, costType: 'fury', pierceLen: 3
+  }
 };
 
 // ── 패시브: 분노 MAX 트리거 ───────────────
@@ -26,14 +36,14 @@ const FURY_PASSIVES = {
       defender.res = 0;
       G.floatT(defender.x, defender.y, '광폭 발동!', 'heal');
       G.vfxSpawn(
-        G.uSX(defender.x, defender.y) + 20,
-        G.uSY(defender.x, defender.y) + 10,
+        G.uSX(defender.x, defender.y) + UCX,
+        G.uSY(defender.x, defender.y) + UCY,
         { count: 15, colors: ['#ff4400','#ff8800','#ffcc00'], shape: 'spark',
           speed: 4, spread: 14, decay: 0.025, size: 4 }
       );
     }
   },
-  tanker: {
+  knight: {
     name: '몸부림',
     icon: '🔥',
     desc: '인접 공격자에게 ATK×50% 반격',
@@ -45,8 +55,8 @@ const FURY_PASSIVES = {
       G.shakeU(attacker.id);
       G.sfxAtk(defender.cls);
       G.vfxSpawn(
-        G.uSX(attacker.x, attacker.y) + 20,
-        G.uSY(attacker.x, attacker.y) + 10,
+        G.uSX(attacker.x, attacker.y) + UCX,
+        G.uSY(attacker.x, attacker.y) + UCY,
         { count: 10, colors: ['#ff8800','#ffcc44','#fff'], shape: 'spark',
           speed: 3, spread: 10, decay: 0.03, size: 3 }
       );

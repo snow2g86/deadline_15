@@ -24,7 +24,7 @@ const ROSTER = {
 
   // ── 첫 실행 기본 지급 ──────────────────
   grantStarter() {
-    const starters = ['warrior','warrior','tanker','tanker','assassin','mage','archer','priest','archer'];
+    const starters = ['novice','novice','novice','novice','novice'];
     starters.forEach(cls => this.addChar(cls));
   },
 
@@ -33,6 +33,8 @@ const ROSTER = {
     const d = CD[cls];
     if (!d) return null;
     const pot = this._rollPotential(cls);
+    // 기본 스탯에 ±20% 랜덤 변동 추가 (개성화)
+    const vary = (val) => Math.round(val * (0.8 + Math.random() * 0.4));
     const ch = {
       uid: this._data.nextId++,
       cls,
@@ -40,9 +42,9 @@ const ROSTER = {
       lv: 1,
       exp: 0,
       dead: false,
-      hp:   d.base.hp,
-      atk:  d.base.atk,
-      def:  d.base.def,
+      hp:   vary(d.base.hp),
+      atk:  vary(d.base.atk),
+      def:  vary(d.base.def),
       move: d.base.move,
       range:d.base.range,
       pot
