@@ -450,6 +450,13 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 /* ═══ Class Icon Sprite ═══ */
 .cls-icon{display:inline-block;background-image:url('../image/icon/64x64.png');image-rendering:pixelated;vertical-align:middle}
 
+/* ═══ Stealth (Assassin) ═══ */
+.unit-sprite.stealthed{opacity:.5;filter:drop-shadow(0 0 6px rgba(139,92,246,.5))}
+.unit-sprite.stealthed .u-icon{animation:stealthPulse 2s ease-in-out infinite}
+@keyframes stealthPulse{0%,100%{opacity:.4}50%{opacity:.7}}
+#action-menu .am-skill{background:#7c3aed}
+#action-menu .am-skill:disabled{opacity:.35;cursor:default}
+
 /* ═══ EXP Float Text ═══ */
 .float-text.exp{color:#a78bfa}
 

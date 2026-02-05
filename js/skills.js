@@ -21,8 +21,25 @@ const SKILLS = {
   lancer: {
     id: 'lancer_pierce', name: '관통', icon: '🔱',
     desc: '일직선 3칸 관통 데미지', cost: 5, costType: 'fury', pierceLen: 3
-  }
+  },
+  assassin: [
+    { id: 'assassin_ambush', name: '습격', icon: '⚡',
+      desc: '맵 전체 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy' },
+    { id: 'assassin_assassinate', name: '암살', icon: '💀',
+      desc: '은신 겹침 상태에서 ATK×5 즉사급 공격', cost: 60, costType: 'energy' }
+  ]
 };
+
+// ── 다중 스킬 헬퍼 ────────────────────────
+function getSkills(cls) {
+  const sk = SKILLS[cls];
+  return !sk ? [] : Array.isArray(sk) ? sk : [sk];
+}
+
+// ── 은신 판정 ──────────────────────────────
+function isStealthed(u) {
+  return u.cls === 'assassin' && G.ter[u.y] && G.ter[u.y][u.x] === 'forest';
+}
 
 // ── 패시브: 분노 MAX 트리거 ───────────────
 // 분노 10 도달 시 클래스별 자동 발동

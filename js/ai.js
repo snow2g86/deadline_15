@@ -22,7 +22,14 @@ Object.assign(G, {
       else if(u.resType==='energy'){
         let rec=u.resRec;
         if(u.cls==='assassin'){const t=this.ter[u.y]?this.ter[u.y][u.x]:null;if(t==='forest')rec*=2}
-        u.res=Math.min(u.maxRes,u.res+rec)}
+        const oldRes=u.res;
+        u.res=Math.min(u.maxRes,u.res+rec);
+        // Sapper: place trap if energy recovered by 20+
+        if(u.cls==='sapper'&&u.res-oldRes>=20&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
+          this.traps.push({x:u.x,y:u.y,dmg:u.atk*2,id:this.traps.length});
+          this.floatT(u.x,u.y,'⚠ 함정','heal');
+        }
+      }
     });this.rUnits();
     this.anim=true;for(const e of[...this.alive('enemy')]){if(this.over)break;await this.eAI(e);await sl(500)}
     this.anim=false;document.getElementById('enemy-banner').classList.remove('show');this.chkEnd();
@@ -144,12 +151,6 @@ Object.assign(G, {
       }
       if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
         if(bestMove.y===14){this.onBreach(u)};return}
-    }
-
-    // Sapper: place traps at current position before moving
-    if(u.cls==='sapper'&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
-      this.traps.push({x:u.x,y:u.y,dmg:15,id:this.traps.length});
-      this.floatT(u.x,u.y,'함정 설치','heal')
     }
 
     // Normal movement: target closest ally or gate
