@@ -458,7 +458,14 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .screen-sub{font-size:11px;color:var(--dim);margin-bottom:8px;text-align:center}
 .screen-gold{font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;
   background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.15);border-radius:14px;padding:3px 12px}
-.card-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:330px;margin:0 auto 16px;min-height:60px}
+/* ═══ Card List (Generic) ═══ */
+.card-list{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:400px;margin-bottom:16px;min-height:60px}
+
+/* ═══ Shop List (2-column grid) ═══ */
+#shop-list{display:grid !important;grid-template-columns:repeat(2,1fr);gap:10px;max-width:330px;margin:0 auto 16px;min-height:60px}
+
+/* ═══ Sanctuary List (Vertical flex) ═══ */
+#sanc-list{display:flex !important;flex-direction:column;align-items:center;gap:10px;max-width:360px;margin:0 auto 16px}
 
 /* ═══ Sanctuary ═══ */
 .sanc-card{width:100%;max-width:340px;display:flex;align-items:center;gap:10px;
@@ -548,7 +555,8 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
   .hideout-unit .hu-name{font-size:8px}
   .hideout-label{font-size:11px}
   .screen-title{font-size:26px}.screen-sub{font-size:14px}
-  .card-list{max-width:560px}
+  #shop-list{max-width:420px}
+  #sanc-list{max-width:480px}
   .shop-card{width:200px;padding:14px 10px}
   .shop-icon{font-size:36px}.shop-name{font-size:14px}
   .sanc-card{max-width:460px;padding:14px 16px}
