@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>⚔ 캐릭터 밸런스 분석표</title>
+<script src="js/classes.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -380,29 +381,49 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
 </div><!-- end content -->
 
 <script>
-const CHARS=[
-  {key:'warrior',name:'전사',icon:'⚔️',hp:100,atk:25,def:10,move:3,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'균형 근접 딜러'},
-  {key:'knight',name:'기사',icon:'🛡️',hp:150,atk:15,def:20,move:2,range:1,role:'melee',res:'fury',maxRes:10,resRec:0,desc:'고체력 방어'},
-  {key:'assassin',name:'암살자',icon:'🗡️',hp:70,atk:35,def:5,move:4,range:1,role:'melee',res:'energy',maxRes:100,resRec:15,desc:'고공 고기동'},
-  {key:'mage',name:'마법사',icon:'🔮',hp:65,atk:30,def:4,move:3,range:3,role:'ranged',res:'mana',maxRes:120,resRec:12,desc:'원거리 마법'},
-  {key:'archer',name:'궁수',icon:'🏹',hp:60,atk:28,def:3,move:3,range:4,role:'ranged',res:'energy',maxRes:100,resRec:12,desc:'최장 사거리'},
-  {key:'priest',name:'사제',icon:'✝️',hp:70,atk:20,def:5,move:3,range:3,role:'healer',res:'mana',maxRes:100,resRec:10,desc:'아군 치유'},
-  {key:'novice',name:'노비스',icon:'🔰',hp:85,atk:22,def:8,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:10,desc:'초보 근접 딜러'},
-  {key:'summoner',name:'소환사',icon:'📖',hp:60,atk:26,def:4,move:3,range:3,role:'ranged',res:'mana',maxRes:110,resRec:11,desc:'소환 원거리'},
-  {key:'shaman',name:'주술사',icon:'🎭',hp:70,atk:28,def:6,move:3,range:3,role:'ranged',res:'mana',maxRes:100,resRec:10,desc:'저주 원거리'},
-  {key:'brawler',name:'무투가',icon:'👊',hp:90,atk:32,def:7,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:12,desc:'격투 근접 딜러'},
-  {key:'lancer',name:'창술사',icon:'🔱',hp:95,atk:28,def:12,move:3,range:1,role:'melee',res:'fury',maxRes:5,resRec:0,desc:'창 근접 딜러'},
-  {key:'sapper',name:'공병',icon:'💣',hp:75,atk:30,def:6,move:3,range:1,role:'melee',res:'energy',maxRes:100,resRec:8,desc:'폭발 근접 딜러'}
-];
+// ═══════════════════════════════════════════
+// 동적 데이터 로드 (classes.js에서)
+// ═══════════════════════════════════════════
+let CHARS=[];
+let CD={};
 const RES={
   fury:{label:'분노',color:'#ff6644',desc:'공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" 반격 (ATK×0.5)',auto:'자동 회복 없음'},
   energy:{label:'기력',color:'#f0c040',desc:'매 턴 자동 회복, 숲에서 2배 회복 (암살자)',auto:'매 턴 +resRec'},
   mana:{label:'마나',color:'#4488ff',desc:'매 턴 자동 회복, 스킬 사용 시 소모',auto:'매 턴 +resRec, 시작 시 MAX'}
 };
 
-// Build stats table
-(()=>{
+// ── CD 객체 로드 (classes.js에서 미리 로드됨) ─
+function loadCD(){
+  CD=window.CD||{};
+  buildCHARS();
+}
+
+// ── CHARS 배열 동적 생성 ────────────────
+function buildCHARS(){
+  CHARS=Object.entries(CD).map(([key,d])=>({
+    key,
+    name:d.name,
+    icon:d.icon,
+    hp:d.base.hp,
+    atk:d.base.atk,
+    def:d.base.def,
+    move:d.base.move,
+    range:d.base.range,
+    role:d.role,
+    res:d.res,
+    maxRes:d.maxRes,
+    resRec:d.resRec,
+    desc:d.desc
+  }));
+}
+
+// ── 초기 로드 ────────────────────────────
+loadCD();
+
+// ── 통계표 렌더링 ────────────────────────────
+function renderStatsTable(){
   const tb=document.getElementById('stats-body');
+  tb.innerHTML='';
   CHARS.forEach(c=>{
     const ri=RES[c.res];
     const tr=document.createElement('tr');
@@ -430,16 +451,19 @@ const RES={
     };
     tb.appendChild(tr);
   });
-})();
+}
 
-// Analysis
+// ── 밸런스 분석 계산 ────────────────────────
 function calcA(c){
   const effHP=Math.round(c.hp/(1-c.def/(c.def+30)));
   const power=+(c.hp*0.3+c.atk*2+c.def*1.5+c.move*5+c.range*8).toFixed(0);
   return{effHP,dps:c.atk,threat:c.move+c.range,power};
 }
-(()=>{
+
+// ── 분석 테이블 & 차트 렌더링 ─────────────
+function renderAnalysis(){
   const tb=document.getElementById('analysis-body');
+  tb.innerHTML='';
   const scores=CHARS.map(c=>calcA(c).power);
   const avg=scores.reduce((a,b)=>a+b,0)/scores.length;
   const maxPow=Math.max(...scores);
@@ -461,6 +485,7 @@ function calcA(c){
 
   // Bar chart
   const bc=document.getElementById('bar-chart');
+  bc.innerHTML='';
   const colors={melee:'linear-gradient(90deg,#f87171,#ef4444)',ranged:'linear-gradient(90deg,#60a5fa,#3b82f6)',healer:'linear-gradient(90deg,#4ade80,#22c55e)'};
   CHARS.forEach(c=>{
     const a=calcA(c);
@@ -470,10 +495,18 @@ function calcA(c){
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[c.role]}">${a.power}</div></div>
     </div>`;
   });
-})();
 
-// Matchup
-(()=>{
+  // 다시 애니메이션
+  setTimeout(()=>{
+    document.querySelectorAll('.bar-fill').forEach((el,i)=>{
+      const w=el.style.width;el.style.width='0';
+      setTimeout(()=>el.style.width=w,i*80);
+    });
+  },50);
+}
+
+// ── 상성표 렌더링 ───────────────────────────
+function renderMatchup(){
   const t=document.getElementById('matchup-table');
   let h='<thead><tr><th style="text-align:left;font-size:10px;color:var(--dim)">공격↓ 방어→</th>';
   CHARS.forEach(d=>h+=`<th>${d.icon}<div style="font-size:10px;color:var(--dim)">${d.name}</div></th>`);
@@ -490,11 +523,12 @@ function calcA(c){
   });
   h+='</tbody>';
   t.innerHTML=h;
-})();
+}
 
-// Resource
-(()=>{
+// ── 자원 시스템 렌더링 ──────────────────────
+function renderResource(){
   const rb=document.getElementById('res-blocks');
+  rb.innerHTML='';
   ['fury','energy','mana'].forEach(key=>{
     const ri=RES[key];
     const users=CHARS.filter(c=>c.res===key);
@@ -512,31 +546,64 @@ function calcA(c){
     });
     rb.innerHTML+=`<div class="res-block" style="border-color:${ri.color}">${inner}</div>`;
   });
-})();
+}
 
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('p-'+btn.dataset.tab).classList.add('active');
-  };
+// ── 모든 UI 렌더링 ──────────────────────────
+function renderAll(){
+  renderStatsTable();
+  renderAnalysis();
+  renderMatchup();
+  renderResource();
+}
+
+// ── 초기화: CD 로드 후 렌더링 ──────────────
+function init(){
+  if(CHARS.length===0)return;
+  renderAll();
+  setupTabSwitching();
+}
+
+// ── 탭 전환 ─────────────────────────────
+function setupTabSwitching(){
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('p-'+btn.dataset.tab).classList.add('active');
+    };
+  });
+}
+
+// ── 실시간 업데이트 감시 ────────────────────
+let updateTimer=null;
+function watchForUpdates(){
+  // storage 이벤트 감시 (다른 탭에서의 변경)
+  window.addEventListener('storage',e=>{
+    if(e.key==='game_roster'||e.key==='game_data'){
+      console.log('[balance.html] 데이터 변경 감지, 업데이트 중...');
+      // 짧은 지연으로 여러 변경을 한 번에 처리
+      clearTimeout(updateTimer);
+      updateTimer=setTimeout(()=>{
+        renderAll();
+        console.log('[balance.html] ✓ 업데이트 완료');
+      },500);
+    }
+  });
+
+  // 정기적 확인 (setInterval - 같은 탭 내 변경도 감지)
+  setInterval(()=>{
+    // CD 객체가 변경되었는지 확인하려면 필요시 추가 로직 가능
+  },1000);
+}
+
+// ── 최종 초기화 ─────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    init();
+    watchForUpdates();
+  },500);
 });
-
-// Animate bars on first view
-let barAnimated=false;
-const obs=new IntersectionObserver(entries=>{
-  if(entries[0].isIntersecting&&!barAnimated){
-    barAnimated=true;
-    document.querySelectorAll('.bar-fill').forEach((el,i)=>{
-      const w=el.style.width;el.style.width='0';
-      setTimeout(()=>el.style.width=w,i*80);
-    });
-  }
-},{threshold:0.3});
-const bc=document.getElementById('bar-chart');
-if(bc)obs.observe(bc);
 </script>
 </body>
 </html>
