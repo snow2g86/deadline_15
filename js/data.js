@@ -4,8 +4,8 @@
 
 const COLS=10, ROWS=15, TW=48, TH=24;
 const ZH=6, UW=48, UH=60, UCX=24, UCY=12;
-const MIN_P=5, MAX_P=9;
-const DEPLOY=[{x:4,y:12},{x:5,y:12},{x:3,y:12},{x:6,y:12},{x:4,y:11},{x:5,y:11},{x:3,y:11},{x:6,y:11},{x:7,y:12}];
+const MIN_P=5, MAX_P=10;
+const DEPLOY=[{x:4,y:12},{x:5,y:12},{x:3,y:12},{x:6,y:12},{x:4,y:11},{x:5,y:11},{x:3,y:11},{x:6,y:11},{x:7,y:12},{x:7,y:11}];
 const CLAB=['N','E','S','W'], CARR=['▲','▶','▼','◀'];
 
 function mh(a,b,c,d){return Math.abs(a-c)+Math.abs(b-d)}
@@ -30,11 +30,10 @@ const EXP_POTIONS=[
   {id:'exp_l',name:'대형 경험치 물약',icon:'🏺',exp:400,cost:240,weight:15},
 ];
 
-// ── 클래스 아이콘 스프라이트 ──────────────
+// ── 클래스 아이콘 (이모지) ──────────────
 function clsIcon(cls,size){
-  const d=CD[cls];if(!d||d.iconRow===undefined)return d?d.icon:'';
-  const px=-d.iconCol*size,py=-d.iconRow*size;
-  return `<span class="cls-icon" style="width:${size}px;height:${size}px;background-position:${px}px ${py}px;background-size:${16*size}px ${137*size}px"></span>`;
+  const d=CD[cls];if(!d)return '';
+  return `<span class="cls-icon" style="font-size:${size}px">${d.icon}</span>`;
 }
 
 // ── 타일셋 이미지 시스템 ──────────────────
@@ -61,7 +60,7 @@ function loadTilesets(){
   return Promise.all(proms).then(()=>{tileImgsLoaded=Object.keys(TILE_SHEETS).length>0});
 }
 
-function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed){
+function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
   const h=z*ZH,W=tw*2,H=th*2+h+2;
   const cx=tw,cy=th;
   const top=`${tw},1 ${W-1},${th} ${tw},${th*2-1} 1,${th}`;
@@ -74,8 +73,8 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed){
   const useImg=tileImgsLoaded&&tm&&TILE_SHEETS[tm.sheet];
 
   if(useImg){
-    // 이미지 기반 타일
-    const vi=seed%tm.variants.length;
+    // 이미지 기반 타일 — 스테이지별 고정 variant
+    if(vi===undefined)vi=0;
     const row=tm.variants[vi][0],col=tm.variants[vi][1];
     // 시트: 384x384, 3열x6행, 각 타일 128x64
     // 스케일: TW*2=96px 폭에 맞춰 128→96, 비율 0.75

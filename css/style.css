@@ -537,8 +537,8 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .pt-icon{font-size:18px}.pt-info{flex:1;font-size:11px;font-weight:700;text-align:left}
 .pt-exp{font-size:9px;color:#a78bfa}
 
-/* ═══ Class Icon Sprite ═══ */
-.cls-icon{display:inline-block;background-image:url('../image/icon/64x64.png');image-rendering:pixelated;vertical-align:middle}
+/* ═══ Class Icon (Emoji) ═══ */
+.cls-icon{display:inline-block;vertical-align:middle;line-height:1}
 
 /* ═══ Stealth (Assassin) ═══ */
 .unit-sprite.stealthed{opacity:.5;filter:drop-shadow(0 0 6px rgba(139,92,246,.5))}

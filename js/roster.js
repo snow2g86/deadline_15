@@ -11,7 +11,20 @@ const ROSTER = {
   load() {
     try {
       const raw = localStorage.getItem(this._key);
-      if (raw) { this._data = JSON.parse(raw); return }
+      if (raw) {
+        this._data = JSON.parse(raw);
+        // 이름 없는 캐릭터에 랜덤 이름 부여 (마이그레이션)
+        const used = new Set(this._data.chars.filter(c=>c.name).map(c=>c.name));
+        this._data.chars.forEach(c=>{
+          if(!c.name){
+            let nm;
+            do{nm=NAMES[Math.floor(Math.random()*NAMES.length)]}while(used.has(nm));
+            used.add(nm);c.name=nm;
+          }
+        });
+        this.save();
+        return;
+      }
     } catch(e) {}
     // 첫 실행: 기본 캐릭터 지급
     this._data = { chars: [], nextId: 1 };
@@ -25,7 +38,13 @@ const ROSTER = {
   // ── 첫 실행 기본 지급 ──────────────────
   grantStarter() {
     const starters = ['novice','novice','novice','novice','novice'];
-    starters.forEach(cls => this.addChar(cls));
+    const used = new Set();
+    starters.forEach(cls => {
+      let name;
+      do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
+      used.add(name);
+      this.addChar(cls, name);
+    });
   },
 
   // ── 캐릭터 추가 (뽑기/보상) ─────────────

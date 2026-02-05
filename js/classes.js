@@ -5,7 +5,7 @@
 
 const CD = {
   warrior: {
-    name:'전사', icon:'⚔️', iconRow:90, iconCol:0, role:'melee', desc:'균형 근접 딜러',
+    name:'전사', icon:'⚔️', role:'melee', desc:'균형 근접 딜러',
     res:'fury', maxRes:10, resRec:0,
     // Lv1 기본 스탯
     base: { hp:100, atk:25, def:10, move:3, range:1 },
@@ -13,80 +13,80 @@ const CD = {
     growth: { hp:[8,14], atk:[2,4], def:[1,2] }
   },
   knight: {
-    name:'기사', icon:'🛡️', iconRow:41, iconCol:7, role:'melee', desc:'고체력 방어',
+    name:'기사', icon:'🛡️', role:'melee', desc:'고체력 방어',
     res:'fury', maxRes:10, resRec:0,
     base: { hp:150, atk:15, def:20, move:2, range:1 },
     growth: { hp:[12,18], atk:[1,2], def:[2,4] }
   },
   assassin: {
-    name:'암살자', icon:'🗡️', iconRow:94, iconCol:3, role:'melee', desc:'고공 고기동',
+    name:'암살자', icon:'🗡️', role:'melee', desc:'고공 고기동',
     res:'energy', maxRes:100, resRec:15,
     base: { hp:70, atk:35, def:5, move:4, range:1 },
     growth: { hp:[5,9], atk:[3,5], def:[0,1] }
   },
   mage: {
-    name:'마법사', icon:'🔮', iconRow:98, iconCol:2, role:'ranged', desc:'원거리 마법',
+    name:'마법사', icon:'🔮', role:'ranged', desc:'원거리 마법',
     res:'mana', maxRes:120, resRec:12,
     base: { hp:65, atk:30, def:4, move:3, range:3 },
     growth: { hp:[5,8], atk:[2,5], def:[0,1] }
   },
   archer: {
-    name:'궁수', icon:'🏹', iconRow:93, iconCol:10, role:'ranged', desc:'최장 사거리',
+    name:'궁수', icon:'🏹', role:'ranged', desc:'최장 사거리',
     res:'energy', maxRes:100, resRec:12,
     base: { hp:60, atk:28, def:3, move:3, range:4 },
     growth: { hp:[5,9], atk:[2,4], def:[0,2] }
   },
   priest: {
-    name:'사제', icon:'✝️', iconRow:103, iconCol:15, role:'healer', desc:'아군 치유',
+    name:'사제', icon:'✝️', role:'healer', desc:'아군 치유',
     res:'mana', maxRes:100, resRec:10,
     base: { hp:70, atk:20, def:5, move:3, range:3 },
     growth: { hp:[6,10], atk:[1,3], def:[1,2] }
   },
   novice: {
-    name:'노비스', icon:'🗡️', iconRow:90, iconCol:1, role:'melee', desc:'초보 근접 딜러',
+    name:'노비스', icon:'🔰', role:'melee', desc:'초보 근접 딜러',
     res:'energy', maxRes:100, resRec:10,
     base: { hp:85, atk:22, def:8, move:3, range:1 },
     growth: { hp:[7,12], atk:[2,3], def:[1,2] }
   },
   summoner: {
-    name:'소환사', icon:'📖', iconRow:18, iconCol:0, role:'ranged', desc:'소환 원거리',
+    name:'소환사', icon:'📖', role:'ranged', desc:'소환 원거리',
     res:'mana', maxRes:110, resRec:11,
     base: { hp:60, atk:26, def:4, move:3, range:3 },
     growth: { hp:[4,8], atk:[2,4], def:[0,1] }
   },
   shaman: {
-    name:'주술사', icon:'🎭', iconRow:46, iconCol:2, role:'ranged', desc:'저주 원거리',
+    name:'주술사', icon:'🎭', role:'ranged', desc:'저주 원거리',
     res:'mana', maxRes:100, resRec:10,
     base: { hp:70, atk:28, def:6, move:3, range:3 },
     growth: { hp:[5,9], atk:[2,4], def:[1,2] }
   },
   brawler: {
-    name:'무투가', icon:'👊', iconRow:102, iconCol:15, role:'melee', desc:'격투 근접 딜러',
+    name:'무투가', icon:'👊', role:'melee', desc:'격투 근접 딜러',
     res:'energy', maxRes:100, resRec:12,
     base: { hp:90, atk:32, def:7, move:3, range:1 },
     growth: { hp:[7,11], atk:[3,5], def:[0,2] }
   },
   lancer: {
-    name:'창술사', icon:'🔱', iconRow:110, iconCol:0, role:'melee', desc:'창 근접 딜러',
+    name:'창술사', icon:'🔱', role:'melee', desc:'창 근접 딜러',
     res:'fury', maxRes:5, resRec:0,
     base: { hp:95, atk:28, def:12, move:3, range:1 },
     growth: { hp:[8,13], atk:[2,4], def:[1,3] }
   },
   sapper: {
-    name:'공병', icon:'💣', iconRow:47, iconCol:3, role:'melee', desc:'폭발 근접 딜러',
+    name:'공병', icon:'💣', role:'melee', desc:'폭발 근접 딜러',
     res:'energy', maxRes:100, resRec:8,
     base: { hp:75, atk:30, def:6, move:3, range:1 },
     growth: { hp:[5,9], atk:[2,5], def:[0,1] }
   },
   // ═════ 소환수 클래스 (임시 유닛) ═════
   'summon_spirit': {
-    name:'정령', icon:'✨', iconRow:19, iconCol:3, role:'ranged', desc:'소환된 마법 정령 (5턴)',
+    name:'정령', icon:'✨', role:'ranged', desc:'소환된 마법 정령 (5턴)',
     res:'none', maxRes:0, resRec:0,
     base: { hp:15, atk:15, def:0, move:3, range:3 },
     growth: { hp:[0,0], atk:[0,0], def:[0,0] }
   },
   'summon_golem': {
-    name:'골램', icon:'🗿', iconRow:19, iconCol:4, role:'melee', desc:'소환된 마법 골램 (5턴)',
+    name:'골램', icon:'🗿', role:'melee', desc:'소환된 마법 골램 (5턴)',
     res:'none', maxRes:0, resRec:0,
     base: { hp:30, atk:12, def:5, move:2, range:1 },
     growth: { hp:[0,0], atk:[0,0], def:[0,0] }

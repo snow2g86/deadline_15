@@ -26,11 +26,17 @@
   <button id="nav-settings" onclick="location.href='settings.html'">⚙</button>
 </header>
 <main id="content">
-  <div class="ps-sub">5~9명의 유닛을 편성하세요</div>
-  <div class="ps-counter" id="ps-counter">0 / 9</div>
-  <div class="ps-roster" id="ps-roster"></div>
-  <div style="font-size:10px;color:var(--dim);margin-bottom:6px">편성된 파티 (클릭하여 제거)</div>
-  <div class="ps-party" id="ps-party"></div>
+  <div class="ps-sub">5~10명의 클랜원을 편성하세요</div>
+  <div class="ps-layout">
+    <div class="ps-left">
+      <div class="ps-counter" id="ps-counter">0 / 10</div>
+      <div class="ps-party" id="ps-party"></div>
+    </div>
+    <div class="ps-right">
+      <div class="ps-tabs" id="ps-tabs"></div>
+      <div class="ps-roster" id="ps-roster"></div>
+    </div>
+  </div>
   <button class="ps-start" id="ps-start" disabled onclick="G.confirmP()">▶ 출격</button>
 </main>
 <nav id="bottom-nav">

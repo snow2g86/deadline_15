@@ -291,53 +291,75 @@ Object.assign(G,{
   // ══════════════════════════════════
   //  파티 편성
   // ══════════════════════════════════
+  _pFilter:'all',
+  _roleMap:{melee:'근접',ranged:'원거리',healer:'힐러'},
   rP(){
-    const ro=document.getElementById('ps-roster');ro.innerHTML='';
     const inParty=new Set(this.party);
-    const alive=ROSTER.getAll().filter(c=>!c.dead);
-    const groups={};alive.forEach(ch=>{if(!groups[ch.cls])groups[ch.cls]=[];groups[ch.cls].push(ch)});
-    Object.keys(CD).forEach(cls=>{
-      const chars=groups[cls]||[];if(!chars.length)return;
-      const d=CD[cls];
-      chars.forEach(ch=>{
-        const sel=inParty.has(ch.uid);
-        const grade=ROSTER.potGrade(ch.uid);
-        const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
-        const c=document.createElement('div');c.className='class-card'+(sel?' selected':'');
-        const atMax=ch.lv>=MAX_LEVEL;
-        const expNeed=atMax?1:(expForLevel(ch.lv));
-        const expPct=atMax?100:Math.min(100,Math.round(((ch.exp||0)/expNeed)*100));
-        c.innerHTML=`<div class="cc-grade" style="color:${gClr}">${grade}</div>`+
-          `<div class="cc-icon">${clsIcon(cls,28)}</div>`+
-          `<div class="cc-name">${ch.name||d.name} <span style="font-size:10px;color:#64748b">Lv.${ch.lv}</span></div>`+
-          `<div class="cc-role">${d.desc}</div>`+
-          `<div class="cc-exp"><div class="cc-exp-bar"><div class="cc-exp-fill" style="width:${expPct}%"></div></div><span class="cc-exp-txt">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span></div>`+
-          `<div class="cc-stats">HP <b>${ch.hp}</b> ATK <b>${ch.atk}</b> DEF <b>${ch.def}</b><br>MOV <b>${ch.move}</b> RNG <b>${ch.range}</b></div>`+
-          `<div class="cc-pot">잠재 <span style="font-size:10px;color:#94a3b8">HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</span></div>`;
-
-        // 방출 버튼 추가 (파티 미편성 캐릭터만)
-        if(!sel){
-          const price=30+ch.lv*5;
-          const releaseBtn=document.createElement('button');
-          releaseBtn.className='cc-release-btn';
-          releaseBtn.textContent=`방출 ${price}G`;
-          releaseBtn.onclick=(e)=>{
-            e.stopPropagation();
-            this.releaseChar(ch.uid);
-          };
-          c.appendChild(releaseBtn);
-        }
-
-        c.onclick=()=>{
-          if(sel)this.party=this.party.filter(u=>u!==ch.uid);
-          else if(this.party.length<MAX_P)this.party.push(ch.uid);
-          this.rP()};
-        ro.appendChild(c)})});
+    const alive=ROSTER.getAll().filter(c=>!c.dead&&!c.cls.startsWith('summon_'));
+    // ── 탭 렌더링 ──
+    const tabEl=document.getElementById('ps-tabs');
+    if(tabEl){
+      const ownedRoles=new Set(alive.map(c=>CD[c.cls].role));
+      const ownedClasses=[...new Set(alive.map(c=>c.cls))];
+      tabEl.innerHTML='';
+      const roleTabs=[{key:'all',label:'전체'}];
+      ['melee','ranged','healer'].forEach(r=>{if(ownedRoles.has(r))roleTabs.push({key:'role_'+r,label:this._roleMap[r]})});
+      const clsTabs=[];
+      Object.keys(CD).forEach(cls=>{if(ownedClasses.includes(cls)&&!cls.startsWith('summon_'))clsTabs.push({key:'cls_'+cls,label:CD[cls].name})});
+      [...roleTabs,...clsTabs].forEach(t=>{
+        const btn=document.createElement('button');btn.className='ps-tab'+(this._pFilter===t.key?' active':'');
+        btn.textContent=t.label;
+        btn.onclick=()=>{this._pFilter=t.key;this.rP()};
+        tabEl.appendChild(btn);
+      });
+    }
+    // ── 필터링 ──
+    let filtered=alive;
+    if(this._pFilter.startsWith('role_')){const role=this._pFilter.slice(5);filtered=alive.filter(c=>CD[c.cls].role===role)}
+    else if(this._pFilter.startsWith('cls_')){const cls=this._pFilter.slice(4);filtered=alive.filter(c=>c.cls===cls)}
+    // ── 정렬: 클래스별 → 레벨 내림차순 → 이름순 ──
+    const clsOrder=Object.keys(CD);
+    filtered.sort((a,b)=>{
+      const ci=clsOrder.indexOf(a.cls)-clsOrder.indexOf(b.cls);if(ci!==0)return ci;
+      if(b.lv!==a.lv)return b.lv-a.lv;
+      return(a.name||'').localeCompare(b.name||'');
+    });
+    // ── 로스터 리스트 렌더링 ──
+    const ro=document.getElementById('ps-roster');ro.innerHTML='';
+    filtered.forEach(ch=>{
+      const sel=inParty.has(ch.uid);
+      const d=CD[ch.cls];
+      const grade=ROSTER.potGrade(ch.uid);
+      const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
+      const atMax=ch.lv>=MAX_LEVEL;
+      const expNeed=atMax?1:expForLevel(ch.lv);
+      const expPct=atMax?100:Math.min(100,Math.round(((ch.exp||0)/expNeed)*100));
+      const row=document.createElement('div');row.className='rl-row'+(sel?' selected':'');
+      row.innerHTML=
+        `<div class="rl-icon">${clsIcon(ch.cls,30)}</div>`+
+        `<div class="rl-info">`+
+          `<div class="rl-top"><span class="rl-name">${ch.name||d.name}</span><span class="rl-lv">Lv.${ch.lv}</span>`+
+          `<span class="rl-grade" style="color:${gClr}">${grade}</span></div>`+
+          `<div class="rl-stats">HP <b>${ch.hp}</b> ATK <b>${ch.atk}</b> DEF <b>${ch.def}</b> MOV <b>${ch.move}</b> RNG <b>${ch.range}</b></div>`+
+          `<div class="rl-pot">잠재 HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</div>`+
+          `<div class="rl-exp"><div class="rl-exp-fill" style="width:${expPct}%"></div></div>`+
+        `</div>`+
+        `<div class="rl-btn ${sel?'chk':'add'}">${sel?'✓':'+'}</div>`;
+      row.onclick=()=>{
+        if(sel)this.party=this.party.filter(u=>u!==ch.uid);
+        else if(this.party.length<MAX_P)this.party.push(ch.uid);
+        this.rP()};
+      ro.appendChild(row);
+    });
+    // ── 파티 슬롯 (좌측) ──
     const pp=document.getElementById('ps-party');pp.innerHTML='';
-    for(let i=0;i<MAX_P;i++){const s=document.createElement('div');s.className='party-slot';
+    for(let i=0;i<MAX_P;i++){
+      const s=document.createElement('div');s.className='party-slot';
+      s.innerHTML=`<span class="ps-num">${i+1}</span>`;
       if(i<this.party.length){
         const ch=ROSTER.getChar(this.party[i]);
-        if(ch){const d=CD[ch.cls];s.classList.add('filled');s.innerHTML=`${clsIcon(ch.cls,22)}<span class="ps-lv">Lv${ch.lv}</span><span class="ps-x">✕</span>`;
+        if(ch){s.classList.add('filled');
+          s.innerHTML=`<span class="ps-num">${i+1}</span>${clsIcon(ch.cls,20)}<span class="ps-lv">Lv${ch.lv}</span><span class="ps-x">✕</span>`;
           s.onclick=()=>{this.pRemAt(i)}}}
       pp.appendChild(s)}
     const n=this.party.length;

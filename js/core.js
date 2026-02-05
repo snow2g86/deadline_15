@@ -128,6 +128,12 @@ const G={
     return form
   },
   genT(){this.ter=[];this.gateHP={};this.wallHP={};this.breached=0;
+    // 스테이지별 타일 종류당 1개 variant 선택
+    this.tileVar={};
+    Object.keys(TILE_MAP).forEach(t=>{
+      const v=TILE_MAP[t].variants;
+      this.tileVar[t]=Math.floor(Math.random()*v.length);
+    });
     // Ally wall row (row 14): cols 2-3,6-7 = wall, cols 4-5 = gate, rest = water
     const wallRow=(row)=>{const r=[];for(let c=0;c<COLS;c++){
       if(c>=2&&c<=3||c>=6&&c<=7){r.push('wall');this.wallHP[c+','+row]=200}

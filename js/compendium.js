@@ -22,8 +22,6 @@ function buildCHARS() {
     key,
     name: d.name,
     icon: d.icon,
-    iconRow: d.iconRow,
-    iconCol: d.iconCol,
     hp: d.base.hp,
     atk: d.base.atk,
     def: d.base.def,
