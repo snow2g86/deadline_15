@@ -179,16 +179,19 @@ const G={
 
   spawnW(){if(!this.cStage)return;const s=this.cStage,rem=s.tot-this.eSpwn;if(rem<=0)return;
     const cnt=Math.min(s.spw,rem,this.eQ.length);
-    // First wave: Use formation-based placement with boss
+    // First wave: Boss + formation positioning (rows 2-4)
     if(this.eSpwn===0&&s.boss){
-      const form=this.eFormation(s.en.slice(0,s.en.length),s.boss);this.eFormPos=form;
-      let spawned=0;
-      // Spawn boss first
-      const bossForm=form.find(f=>f.isBoss);
-      if(bossForm){const bu=this.addU('enemy',bossForm.cls,bossForm.pos.x,bossForm.pos.y);if(bu){bu.isBoss=true;bu.name=s.boss.name;bu.origSpawn=bossForm.pos}spawned++}
-      // Spawn regular units
-      for(let i=0;i<form.length&&spawned<cnt;i++){const f=form[i];if(!f.isBoss){const u=this.addU('enemy',f.cls,f.pos.x,f.pos.y);if(u)spawned++}}
-      this.eSpwn+=spawned
+      // Spawn boss at center-back (row 2, col 4-5)
+      const bu=this.addU('enemy',s.boss.cls,5,2);
+      if(bu){bu.isBoss=true;bu.name=s.boss.name;bu.origSpawn={x:5,y:2};}this.eSpwn++;
+      // Spawn regular enemies in formation rows (2-4)
+      const posL=[[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3]];
+      let pidx=0;
+      while(this.eSpwn<cnt&&pidx<posL.length&&this.eQ.length){
+        const c=this.eQ.shift();if(!c)break;
+        const p=posL[pidx++];
+        if(!this.uAt(p[0],p[1])){this.addU('enemy',c,p[0],p[1]);this.eSpwn++}
+      }
     }else{
       // Subsequent waves: random spawn at rows 0-1
       const op=[];
