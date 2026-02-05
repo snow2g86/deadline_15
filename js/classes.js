@@ -95,22 +95,22 @@ const TI = {
 // 테마별 스타일: defense(성벽있음) | offense(성벽없음,적장)
 const STAGES = [
   // ═══ 마을 방어 (DEFENSE) ═══
-  { id:1, name:'초원의 경비',  theme:'마을지킴', style:'defense', story:'산적의 약탈을 저지하라', tot:6,  spw:2, si:2, en:['novice','novice','novice','novice','novice','novice'], sm:{hp:.65,atk:.65} },
-  { id:2, name:'마을 제2경비', theme:'마을지킴', style:'defense', story:'더 강한 산적단 습격 격퇴', tot:8,  spw:2, si:2, en:['novice','novice','novice','novice','warrior','warrior','novice','novice'], sm:{hp:.75,atk:.75} },
+  { id:1, name:'초원의 경비',  theme:'마을지킴', style:'defense', story:'산적의 약탈을 저지하라', tot:6,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','novice','novice'], sm:{hp:.65,atk:.65} },
+  { id:2, name:'마을 제2경비', theme:'마을지킴', style:'defense', story:'더 강한 산적단 습격 격퇴', tot:8,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','warrior','warrior','novice','novice'], sm:{hp:.75,atk:.75} },
 
   // ═══ 산적 소굴 (OFFENSE) ═══
-  { id:3, name:'산적 소굴',    theme:'산적소굴', style:'offense', story:'산적단의 본거지 잠입', tot:10, spw:3, si:2, en:['novice','warrior','novice','warrior','novice','warrior','warrior','novice','warrior','assassin'], sm:{hp:.8,atk:.8} },
-  { id:4, name:'산적단 거점',  theme:'산적소굴', style:'offense', story:'산적단 거점 격파', tot:12, spw:3, si:2, en:['warrior','warrior','assassin','novice','warrior','brawler','warrior','assassin','warrior','brawler','warrior','warrior'], sm:{hp:.9,atk:.9} },
+  { id:3, name:'산적 소굴',    theme:'산적소굴', style:'offense', story:'산적단의 본거지 잠입', tot:10, spw:3, si:2, boss:null, en:['novice','warrior','novice','warrior','novice','warrior','warrior','novice','warrior','assassin'], sm:{hp:.8,atk:.8} },
+  { id:4, name:'산적단 거점',  theme:'산적소굴', style:'offense', story:'산적단 거점 격파', tot:12, spw:3, si:2, boss:{cls:'warrior',name:'산적 우두머리'}, en:['warrior','warrior','assassin','novice','warrior','brawler','warrior','assassin','warrior','brawler','warrior'], sm:{hp:.9,atk:.9} },
 
   // ═══ 성채 방어 (DEFENSE) ═══
-  { id:5, name:'성채 제1경비', theme:'성채방어', style:'defense', story:'성채 침입 적군 격퇴', tot:10, spw:3, si:2, en:['warrior','assassin','warrior','knight','warrior','archer','warrior','novice','brawler','warrior'], sm:{hp:.85,atk:.85} },
-  { id:6, name:'성채 제2경비', theme:'성채방어', style:'defense', story:'적군의 대규모 침략 저지', tot:12, spw:3, si:2, en:['warrior','knight','assassin','archer','brawler','warrior','knight','assassin','archer','warrior','brawler','warrior'], sm:{hp:.95,atk:.95} },
+  { id:5, name:'성채 제1경비', theme:'성채방어', style:'defense', story:'성채 침입 적군 격퇴', tot:10, spw:3, si:2, boss:null, en:['warrior','assassin','warrior','knight','warrior','archer','warrior','novice','brawler','warrior'], sm:{hp:.85,atk:.85} },
+  { id:6, name:'성채 제2경비', theme:'성채방어', style:'defense', story:'적군의 대규모 침략 저지', tot:12, spw:3, si:2, boss:null, en:['warrior','knight','assassin','archer','brawler','warrior','knight','assassin','archer','warrior','brawler','warrior'], sm:{hp:.95,atk:.95} },
 
   // ═══ 강도단 본거지 (OFFENSE) ═══
-  { id:7, name:'강도단 본거지', theme:'강도단', style:'offense', story:'강도단 최후의 거점 진격', tot:14, spw:3, si:2, en:['knight','lancer','warrior','assassin','archer','brawler','knight','assassin','shaman','sapper','warrior','lancer','warrior','brawler'], sm:{hp:1,atk:1} },
-  { id:8, name:'강도단 보스전', theme:'강도단', style:'offense', story:'강도단 두목 격파', tot:16, spw:4, si:2, en:['knight','knight','lancer','assassin','brawler','summoner','shaman','archer','sapper','sapper','warrior','warrior','lancer','brawler','archer','warrior'], sm:{hp:1.05,atk:1.05} },
+  { id:7, name:'강도단 본거지', theme:'강도단', style:'offense', story:'강도단 최후의 거점 진격', tot:14, spw:3, si:2, boss:{cls:'lancer',name:'강도단 사령관'}, en:['knight','warrior','assassin','archer','brawler','knight','assassin','shaman','sapper','warrior','lancer','warrior','brawler'], sm:{hp:1,atk:1} },
+  { id:8, name:'강도단 보스전', theme:'강도단', style:'offense', story:'강도단 두목 격파', tot:16, spw:4, si:2, boss:{cls:'knight',name:'강도단 두목'}, en:['knight','lancer','assassin','brawler','summoner','shaman','archer','sapper','sapper','warrior','warrior','lancer','brawler','archer','warrior'], sm:{hp:1.05,atk:1.05} },
 
   // ═══ 마계 침공 (SPECIAL/MIXED) ═══
-  { id:9, name:'마계의 입구',  theme:'마계', style:'mixed', story:'마계 생물 침입 저지', tot:14, spw:3, si:2, en:['knight','lancer','lancer','assassin','brawler','brawler','summoner','shaman','mage','archer','sapper','sapper','warrior','warrior'], sm:{hp:1.1,atk:1.05} },
-  { id:10, name:'최후의 결전', theme:'마계', style:'mixed', story:'마계의 왕 격파', tot:16, spw:4, si:2, en:['knight','lancer','lancer','assassin','brawler','brawler','summoner','shaman','mage','archer','sapper','sapper','warrior','warrior','novice','warrior'], sm:{hp:1.15,atk:1.1} }
+  { id:9, name:'마계의 입구',  theme:'마계', style:'mixed', story:'마계 생물 침입 저지', tot:14, spw:3, si:2, boss:{cls:'brawler',name:'마계 선봉대장'}, en:['knight','lancer','assassin','brawler','summoner','shaman','mage','archer','sapper','sapper','warrior','warrior'], sm:{hp:1.1,atk:1.05} },
+  { id:10, name:'최후의 결전', theme:'마계', style:'mixed', story:'마계의 왕 격파', tot:16, spw:4, si:2, boss:{cls:'summoner',name:'마계의 왕'}, en:['knight','lancer','lancer','assassin','brawler','brawler','shaman','mage','archer','sapper','sapper','warrior','warrior','novice','warrior'], sm:{hp:1.15,atk:1.1} }
 ];
