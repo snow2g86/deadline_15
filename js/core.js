@@ -171,12 +171,16 @@ const G={
     // 겹침: 은신 암살자보다 적을 우선 반환
     return all.find(u=>u.team==='enemy')||all[0]},
   alive(t){return this.units.filter(u=>u.team===t&&u.hp>0)},
-  // Trap system
+  // Trap system — team field: 'enemy' traps hit allies, 'ally' traps hit enemies
   chkTrap(u){
-    if(u.team==='ally'){
-      const trap=this.traps.find(t=>t.x===u.x&&t.y===u.y);
-      if(trap){u.hp=Math.max(0,u.hp-trap.dmg);u.stunned=Math.max(u.stunned,2);this.floatT(u.x,u.y,`함정! -${trap.dmg}`,'damage');this.floatT(u.x,u.y,'2턴 이동불가','damage');this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:8,colors:['#f84','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:2});return true}
-    }
+    const enemy=u.team==='ally'?'enemy':'ally';
+    const trap=this.traps.find(t=>t.x===u.x&&t.y===u.y&&t.team===enemy);
+    if(trap){
+      u.hp=Math.max(0,u.hp-trap.dmg);u.stunned=Math.max(u.stunned,2);
+      this.traps=this.traps.filter(t=>t!==trap);
+      this.floatT(u.x,u.y,`함정! -${trap.dmg}`,'damage');this.floatT(u.x,u.y,'2턴 이동불가','damage');
+      this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:8,colors:['#f84','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:2});
+      return true}
     return false
   },
 

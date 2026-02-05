@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📖 직업 도감</title>
+<script src="js/classes.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--card:#111827;--border:#1e293b;
+  --text:#e2e8f0;--dim:#64748b;--gold:#f0c040;
+  --red:#f87171;--green:#4ade80;--blue:#60a5fa;--purple:#a78bfa;
+  --fury:#ff6644;--energy:#f0c040;--mana:#4488ff;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;padding:0;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--bg)}
+
+/* Header */
+.header{text-align:center;padding:32px 16px 0;position:relative}
+.header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
+  text-shadow:0 0 40px rgba(240,192,64,.25)}
+.header .sub{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;position:sticky;top:0;
+  z-index:10;background:linear-gradient(var(--bg) 60%,transparent)}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s}
+.tab-btn:hover{border-color:var(--gold);color:var(--text)}
+.tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
+  box-shadow:0 0 20px rgba(240,192,64,.3)}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section Header */
+.sec-head{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;
+  padding-bottom:8px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+
+/* Card Grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+
+/* Class Card */
+.class-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:12px;transition:all .2s;cursor:pointer}
+.class-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
+
+.class-card-header{display:flex;gap:12px;align-items:flex-start}
+.class-icon{font-size:48px;line-height:1;flex-shrink:0}
+.class-meta{flex:1;min-width:0}
+.class-name{font-size:18px;font-weight:900;color:var(--gold);margin:0}
+.class-desc{font-size:12px;color:var(--dim);margin-top:4px}
+
+.role-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-top:4px}
+
+/* Stat Box */
+.stat-box{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:8px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:12px}
+
+.stat-item{text-align:center}
+.stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-weight:900;color:var(--gold);font-size:16px}
+
+/* Resource Info */
+.res-info{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:8px;
+  display:flex;justify-content:space-between;align-items:center;font-size:11px}
+
+/* Growth Info */
+.growth-info{border-top:1px solid var(--border);padding-top:8px}
+.growth-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px}
+
+/* Resource System */
+.res-block{border-left:3px solid;padding:12px 16px;background:var(--card);border-radius:0 12px 12px 0;margin-bottom:12px}
+.res-meter{display:flex;align-items:center;gap:8px;margin:8px 0}
+.res-meter-label{width:80px;font-size:12px;font-weight:700;flex-shrink:0;color:var(--text)}
+.res-meter-track{flex:1;background:rgba(255,255,255,.04);border-radius:4px;height:16px;overflow:hidden}
+.res-meter-fill{height:100%;border-radius:4px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.res-meter-info{font-size:11px;color:var(--dim);width:120px;text-align:right;flex-shrink:0}
+
+/* Responsive */
+@media(max-width:768px){
+  .header h1{font-size:22px}
+  .content{padding:20px 12px 60px}
+  .card-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📖 직업 도감</h1>
+  <div class="sub">12개 직업의 상세 정보 · Defense RPG</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="cards">🎴 카드 뷰</button>
+  <button class="tab-btn" data-tab="resource">⚡ 자원 시스템</button>
+</div>
+
+<div class="content">
+
+  <!-- 카드 뷰 패널 -->
+  <div class="panel active" id="p-cards">
+    <div class="sec-head">CLASSES OVERVIEW</div>
+    <div id="class-cards" class="card-grid"></div>
+  </div>
+
+  <!-- 자원 시스템 패널 -->
+  <div class="panel" id="p-resource">
+    <div class="sec-head">RESOURCE SYSTEM</div>
+    <div id="res-blocks"></div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px">
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        🔄 자원 시스템 상세
+      </div>
+      <div style="font-size:13px;color:#cbd5e1;line-height:1.7">
+        <span style="color:var(--fury);font-weight:700">분노 (Fury)</span> — MAX: 10~5 | 공격 시 +1, 피격 시 +2 | 스킬: 강타(3), 스위치(1), 관통(5)<br>
+        패시브: warrior 광폭(ATK×1.5), knight 몸부림(인접 적 ATK×50% 반격)<br><br>
+        <span style="color:var(--energy);font-weight:700">기력 (Energy)</span> — MAX: 100 | 매 턴 +resRec 자동 회복 | 스킬: 도약(20), 습격(40), 암살(60)<br>
+        부가: 암살자는 숲에서 기력 회복 2배<br><br>
+        <span style="color:var(--mana);font-weight:700">마나 (Mana)</span> — MAX: 100~120 | 전투 시작 시 MAX로 시작 | 매 턴 +resRec 회복<br>
+        사용: 화염폭발(40), 집단치유(50)
+      </div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
+  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
+  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+  <button onclick="location.href='compendium-stage.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🗺 스테이지</button>
+  <button onclick="location.href='compendium-item.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🧪 아이템</button>
+</nav>
+
+<script src="js/compendium.js"></script>
+<script>
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-' + btn.dataset.tab).classList.add('active');
+  };
+});
+</script>
+</body>
+</html>

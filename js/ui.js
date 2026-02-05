@@ -158,7 +158,7 @@ Object.assign(G, {
     document.getElementById('modal-title').className=win?'win':'lose';
     const deadAllies=this.units.filter(u=>u.team==='ally'&&u.hp<=0);
     let sub=msg;
-    if(win&&reward)sub+=`\n💰 보상: ${reward} Gold`;
+    if(win&&reward)sub+=`\n🏅 보상: ${reward} Gold`;
     if(deadAllies.length)sub+=`\n💀 전사자: ${deadAllies.length}명 (성소에서 부활 가능)`;
     // 경험치 결과
     if(this._expResults&&this._expResults.length){

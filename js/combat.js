@@ -89,6 +89,29 @@ Object.assign(G, {
     }else if(sk.id==='assassin_assassinate'){
       // 암살: 즉시 실행 (타겟팅 불필요)
       this.skillMode=false;this.doSkill(u,u.x,u.y);return
+    }else if(sk.id==='priest_massheal'){
+      // 집단 치유: 즉시 실행 (타겟팅 불필요)
+      this.skillMode=false;this.doSkill(u,u.x,u.y);return
+    }else if(sk.id==='sapper_trap'){
+      // 함정 설치: trapRange 내 빈 통행가능 타일 (유닛/함정 없음)
+      this.atkT=[];const tr=sk.trapRange||3;
+      for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
+        if(mh(u.x,u.y,x,y)<=tr&&mh(u.x,u.y,x,y)>0){
+          const ti=TI[this.ter[y][x]];if(!ti.pass)continue;
+          if(this.uAt(x,y))continue;
+          if(this.traps.find(t=>t.x===x&&t.y===y))continue;
+          this.atkT.push({x,y})}}
+      this.healT=[]
+    }else if(sk.id==='mage_fireburst'){
+      // 화염폭발: 공격 범위 내 타일 (적 존재 여부 무관 — 플레이어가 판단)
+      this.atkT=[];
+      for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
+        if(mh(u.x,u.y,x,y)<=u.range&&mh(u.x,u.y,x,y)>0)this.atkT.push({x,y})}
+      this.healT=[]
+    }else if(sk.id==='novice_throw'){
+      // 돌던지기: throwRange 내 적 위치
+      this.atkT=this.units.filter(v=>v.team==='enemy'&&v.hp>0&&mh(u.x,u.y,v.x,v.y)<=sk.throwRange).map(v=>({x:v.x,y:v.y}));
+      this.healT=[]
     }else{
       const dirs=[{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
       this.atkT=dirs.map(d=>({x:u.x+d.x,y:u.y+d.y})).filter(p=>p.x>=0&&p.x<COLS&&p.y>=0&&p.y<ROWS);
@@ -150,6 +173,68 @@ Object.assign(G, {
       this._grantExp(u,'attack');
       const esc=this._findAdj(u.x,u.y,null);
       if(esc){u.x=esc.x;u.y=esc.y;u.mo=true;this.animU(u.id,esc.x,esc.y)}
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+    }
+    // 집단 치유: 6칸 내 모든 아군 HP 회복
+    if(skObj.id==='priest_massheal'){
+      const hr=skObj.healRange||6;
+      const targets=this.units.filter(v=>v.team==='ally'&&v.hp>0&&v.hp<v.mhp&&mh(u.x,u.y,v.x,v.y)<=hr);
+      if(!targets.length){u.res+=skObj.cost;this.floatT(u.x,u.y,'대상 없음','damage');return}
+      const amt=u.atk;
+      targets.forEach(t=>{
+        t.hp=Math.min(t.mhp,t.hp+amt);
+        this.floatT(t.x,t.y,`+${amt}`,'heal');
+        this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#4f4','#8f8','#fff'],shape:'ring',speed:2,spread:8,decay:0.025,size:6});
+      });
+      this.sfxHeal();this.floatT(u.x,u.y,'집단 치유!','heal');
+      this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#4f4','#ff8','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:8});
+      this._grantExp(u,'heal');
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
+    // 함정 설치: 지정 타일에 아군 함정 배치
+    if(skObj.id==='sapper_trap'){
+      if(this.uAt(tx,ty)||this.traps.find(t=>t.x===tx&&t.y===ty)){u.res+=skObj.cost;return}
+      this.traps.push({x:tx,y:ty,dmg:u.atk*2,id:this.traps.length,team:'ally'});
+      this.floatT(tx,ty,'⚠ 함정 설치!','heal');
+      this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:10,colors:['#f80','#ff4','#fa0'],shape:'spark',speed:2,spread:10,decay:0.025,size:3});
+      this.sfxUIClick();this._grantExp(u,'attack');
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
+    // 화염폭발: 3×3 범위 AoE
+    if(skObj.id==='mage_fireburst'){
+      let hitAny=false;
+      for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+        const px=tx+dx,py=ty+dy;
+        if(px<0||px>=COLS||py<0||py>=ROWS)continue;
+        const t=this.units.find(v=>v.hp>0&&v.x===px&&v.y===py&&v.team==='enemy');
+        if(t){
+          const dmg=Math.max(1,u.atk-t.def);t.hp=Math.max(0,t.hp-dmg);
+          this.floatT(t.x,t.y,`-${dmg}`,'damage');this.shakeU(t.id);
+          this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#f44','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+          if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
+          hitAny=true}}
+      this.sfxAtk(u.cls);this._grantExp(u,'attack');
+      this.floatT(u.x,u.y,'화염폭발!','heal');
+      // 중앙 VFX
+      this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:20,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:5,spread:18,decay:0.02,size:5});
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+    }
+    // 돌던지기: throwRange 내 적에게 ATK×0.8 데미지
+    if(skObj.id==='novice_throw'){
+      const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
+      if(!t){u.res+=skObj.cost;return}
+      const dmg=Math.max(1,Math.round(u.atk*0.8)-t.def);
+      t.hp=Math.max(0,t.hp-dmg);
+      this.sfxAtk(u.cls);this.shakeU(t.id);
+      this.floatT(t.x,t.y,`-${dmg}`,'damage');
+      this.floatT(u.x,u.y,'돌던지기!','heal');
+      this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#a88','#ccc','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+      if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
+      this._grantExp(u,'attack');
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }

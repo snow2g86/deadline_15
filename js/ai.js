@@ -23,11 +23,11 @@ Object.assign(G, {
       else if(u.resType==='energy'){
         let rec=u.resRec;
         if(u.cls==='assassin'){const t=this.ter[u.y]?this.ter[u.y][u.x]:null;if(t==='forest')rec*=2}
-        const oldRes=u.res;
         u.res=Math.min(u.maxRes,u.res+rec);
-        // Sapper: place trap if energy recovered by 20+
-        if(u.cls==='sapper'&&u.res-oldRes>=20&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
-          this.traps.push({x:u.x,y:u.y,dmg:u.atk*2,id:this.traps.length});
+        // Sapper: place trap if energy >= 20 (spend 20)
+        if(u.cls==='sapper'&&u.res>=20&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
+          u.res-=20;
+          this.traps.push({x:u.x,y:u.y,dmg:u.atk*2,id:this.traps.length,team:'enemy'});
           this.floatT(u.x,u.y,'⚠ 함정','heal');
         }
       }
@@ -153,6 +153,7 @@ Object.assign(G, {
         if(score>bestScore){bestScore=score;bestMove=m}
       }
       if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
         if(bestMove.y===14){this.onBreach(u)};return}
     }
 
@@ -163,7 +164,9 @@ Object.assign(G, {
         const s=-(mh(c.x,c.y,gateTarget.x,gateTarget.y))*10+(c.y-u.y)*5;
         if(s>bs2){bs2=s;bc2=c}
       }
-      if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);return}
+      if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);
+        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
+        return}
     }
 
     let bc=null,bs=-Infinity;
@@ -173,6 +176,7 @@ Object.assign(G, {
     }
 
     if(bc){u.x=bc.x;u.y=bc.y;this.animU(u.id,bc.x,bc.y);await sl(340);
+      this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
       if(bc.y===14){this.onBreach(u)}
     }
   },

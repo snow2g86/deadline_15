@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🗺 스테이지 도감</title>
+<script src="js/classes.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--card:#111827;--border:#1e293b;
+  --text:#e2e8f0;--dim:#64748b;--gold:#f0c040;
+  --red:#f87171;--green:#4ade80;--blue:#60a5fa;--purple:#a78bfa;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;padding:0;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--bg)}
+
+/* Header */
+.header{text-align:center;padding:32px 16px 0;position:relative}
+.header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
+  text-shadow:0 0 40px rgba(240,192,64,.25)}
+.header .sub{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;position:sticky;top:0;
+  z-index:10;background:linear-gradient(var(--bg) 60%,transparent)}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s}
+.tab-btn:hover{border-color:var(--gold);color:var(--text)}
+.tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
+  box-shadow:0 0 20px rgba(240,192,64,.3)}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section Header */
+.sec-head{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;
+  padding-bottom:8px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+
+/* Card Grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px}
+
+/* Stage Card */
+.stage-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:8px;transition:all .2s;cursor:pointer}
+.stage-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
+
+.stage-name{font-size:16px;font-weight:900;color:var(--gold)}
+.stage-info{display:flex;flex-direction:column;gap:6px}
+
+/* Difficulty Bar */
+.difficulty-bar{display:flex;align-items:center;gap:8px;font-size:11px}
+.difficulty-fill{width:80px;height:12px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;position:relative}
+.difficulty-fill-inner{height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:4px}
+
+/* Responsive */
+@media(max-width:768px){
+  .header h1{font-size:22px}
+  .content{padding:20px 12px 60px}
+  .card-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗺 스테이지 도감</h1>
+  <div class="sub">10개 스테이지의 상세 정보 · Defense RPG</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="stages">📋 스테이지 목록</button>
+  <button class="tab-btn" data-tab="difficulty">📈 난이도 분석</button>
+</div>
+
+<div class="content">
+
+  <!-- 스테이지 목록 패널 -->
+  <div class="panel active" id="p-stages">
+    <div class="sec-head">STAGE LIST</div>
+    <div id="stage-cards" class="card-grid"></div>
+  </div>
+
+  <!-- 난이도 분석 패널 -->
+  <div class="panel" id="p-difficulty">
+    <div class="sec-head">DIFFICULTY PROGRESSION</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+      <div id="difficulty-chart"></div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        📊 난이도 정보
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
+        난이도는 스테이지의 적 스탯 배율(sm.hp, sm.atk)과 적 개수를 기반으로 계산됩니다.<br>
+        점진적으로 증가하는 난이도로 설계되었으며, 마지막 스테이지(Stage 10)가 가장 어렵습니다.<br>
+        <br>
+        <span style="color:var(--gold);font-weight:700">Stage 1-2:</span> 초급 난이도 (0.65배)<br>
+        <span style="color:var(--gold);font-weight:700">Stage 3-4:</span> 중급 난이도 (0.8~0.9배)<br>
+        <span style="color:var(--gold);font-weight:700">Stage 5-6:</span> 중급~상급 난이도 (0.95배)<br>
+        <span style="color:var(--gold);font-weight:700">Stage 7-8:</span> 상급 난이도 (1.0배)<br>
+        <span style="color:var(--gold);font-weight:700">Stage 9-10:</span> 극상급 난이도 (1.1~1.15배)
+      </div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
+  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
+  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+  <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">📚 직업</button>
+  <button onclick="location.href='compendium-item.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🧪 아이템</button>
+</nav>
+
+<script src="js/compendium.js"></script>
+<script>
+// 스테이지 데이터 로드 및 렌더링
+function initStage() {
+  const STAGES = window.STAGES || [];
+  const CD = window.CD || {};
+
+  // 스테이지 카드 렌더링
+  const container = document.getElementById('stage-cards');
+  container.innerHTML = '';
+
+  STAGES.forEach(stage => {
+    const difficultyScore = ((stage.sm.hp + stage.sm.atk) / 2 * 100).toFixed(0);
+    const enemyCount = {};
+    stage.en.forEach(cls => {
+      enemyCount[cls] = (enemyCount[cls] || 0) + 1;
+    });
+
+    const enemyDisplay = Object.entries(enemyCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cls, cnt]) => `${CD[cls]?.icon || '?'}×${cnt}`)
+      .join(' ');
+
+    const card = document.createElement('div');
+    card.className = 'stage-card';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="stage-name">${stage.name}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">${stage.theme}</div>
+        </div>
+        <div style="background:var(--gold);color:var(--bg);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">Stage ${stage.id}</div>
+      </div>
+
+      <div class="stage-info">
+        <div style="display:flex;gap:6px;font-size:10px;flex-wrap:wrap">
+          <span style="background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 6px;border-radius:3px">
+            ${stage.style === 'defense' ? '🛡 방어전' : stage.style === 'offense' ? '⚔ 공격전' : '🔀 혼합'}
+          </span>
+          <span style="color:var(--dim)">난이도 ${difficultyScore}%</span>
+        </div>
+
+        <div style="font-size:11px;color:#cbd5e1;margin:4px 0">${stage.story}</div>
+
+        <div style="background:rgba(0,0,0,.3);padding:6px;border-radius:4px;font-size:10px">
+          <div style="color:var(--dim);margin-bottom:2px">👹 적 구성 (${stage.en.length})</div>
+          <div>${enemyDisplay}</div>
+        </div>
+
+        ${stage.boss ? `
+        <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);padding:6px;border-radius:4px;font-size:10px">
+          <div style="color:var(--purple);font-weight:700">💀 보스: ${stage.boss.name}</div>
+          <div style="color:var(--dim);margin-top:2px">${CD[stage.boss.cls]?.icon} ${CD[stage.boss.cls]?.name}</div>
+        </div>
+        ` : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // 난이도 차트 렌더링
+  const diffChart = document.getElementById('difficulty-chart');
+  diffChart.innerHTML = '';
+
+  STAGES.forEach(s => {
+    const score = ((s.sm.hp + s.sm.atk) / 2 * 100).toFixed(0);
+    const percent = Math.min(100, score);
+
+    const row = document.createElement('div');
+    row.style.marginBottom = '12px';
+    row.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:2px;font-size:12px">
+        <span style="color:var(--gold);font-weight:700">Stage ${s.id}</span>
+        <span style="color:var(--dim)">${score}%</span>
+      </div>
+      <div style="width:100%;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
+        <div style="width:${percent}%;height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:4px;transition:width 0.6s ease"></div>
+      </div>
+    `;
+    diffChart.appendChild(row);
+  });
+}
+
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-' + btn.dataset.tab).classList.add('active');
+  };
+});
+
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    initStage();
+  }, 300);
+});
+</script>
+</body>
+</html>

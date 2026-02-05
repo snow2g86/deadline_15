@@ -27,7 +27,23 @@ const SKILLS = {
       desc: '맵 전체 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy' },
     { id: 'assassin_assassinate', name: '암살', icon: '💀',
       desc: '은신 겹침 상태에서 ATK×5 즉사급 공격', cost: 60, costType: 'energy' }
-  ]
+  ],
+  priest: {
+    id: 'priest_massheal', name: '집단 치유', icon: '✨',
+    desc: '6칸 내 모든 아군 체력 회복', cost: 50, costType: 'mana', healRange: 6
+  },
+  sapper: {
+    id: 'sapper_trap', name: '함정 설치', icon: '⚠',
+    desc: 'ATK×2 피해 + 2턴 이동불가 함정 설치', cost: 20, costType: 'energy', trapRange: 1
+  },
+  mage: {
+    id: 'mage_fireburst', name: '화염폭발', icon: '🔥',
+    desc: '대상 중심 3×3 범위 적 전체에 공격', cost: 40, costType: 'mana'
+  },
+  novice: {
+    id: 'novice_throw', name: '돌던지기', icon: '🪨',
+    desc: '4칸 내 적에게 ATK×0.8 데미지', cost: 5, costType: 'energy', throwRange: 4
+  }
 };
 
 // ── 다중 스킬 헬퍼 ────────────────────────

@@ -385,7 +385,6 @@ tbody tr:hover{background:rgba(240,192,64,.04)}
 // 동적 데이터 로드 (classes.js에서)
 // ═══════════════════════════════════════════
 let CHARS=[];
-let CD={};
 const RES={
   fury:{label:'분노',color:'#ff6644',desc:'공격 시 +1, 피격 시 +2 → 10 도달 시 "몸부림" 반격 (ATK×0.5)',auto:'자동 회복 없음'},
   energy:{label:'기력',color:'#f0c040',desc:'매 턴 자동 회복, 숲에서 2배 회복 (암살자)',auto:'매 턴 +resRec'},
@@ -394,13 +393,16 @@ const RES={
 
 // ── CD 객체 로드 (classes.js에서 미리 로드됨) ─
 function loadCD(){
-  CD=window.CD||{};
+  if(!window.CD) {
+    console.error('CD 객체를 찾을 수 없습니다. classes.js가 로드되었는지 확인하세요.');
+    return;
+  }
   buildCHARS();
 }
 
 // ── CHARS 배열 동적 생성 ────────────────
 function buildCHARS(){
-  CHARS=Object.entries(CD).map(([key,d])=>({
+  CHARS=Object.entries(window.CD||{}).map(([key,d])=>({
     key,
     name:d.name,
     icon:d.icon,
@@ -575,26 +577,9 @@ function setupTabSwitching(){
   });
 }
 
-// ── 실시간 업데이트 감시 ────────────────────
-let updateTimer=null;
+// ── 업데이트 기능 비활성화 (현재 상태만 반영) ────────────────────
 function watchForUpdates(){
-  // storage 이벤트 감시 (다른 탭에서의 변경)
-  window.addEventListener('storage',e=>{
-    if(e.key==='game_roster'||e.key==='game_data'){
-      console.log('[balance.html] 데이터 변경 감지, 업데이트 중...');
-      // 짧은 지연으로 여러 변경을 한 번에 처리
-      clearTimeout(updateTimer);
-      updateTimer=setTimeout(()=>{
-        renderAll();
-        console.log('[balance.html] ✓ 업데이트 완료');
-      },500);
-    }
-  });
-
-  // 정기적 확인 (setInterval - 같은 탭 내 변경도 감지)
-  setInterval(()=>{
-    // CD 객체가 변경되었는지 확인하려면 필요시 추가 로직 가능
-  },1000);
+  // 실시간 업데이트 기능 제거 - 페이지 로드 시 현재 상태만 반영
 }
 
 // ── 최종 초기화 ─────────────────────────

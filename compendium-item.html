@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🧪 아이템 도감</title>
+<script src="js/data.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--card:#111827;--border:#1e293b;
+  --text:#e2e8f0;--dim:#64748b;--gold:#f0c040;
+  --red:#f87171;--green:#4ade80;--blue:#60a5fa;--purple:#a78bfa;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;padding:0;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--bg)}
+
+/* Header */
+.header{text-align:center;padding:32px 16px 0;position:relative}
+.header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
+  text-shadow:0 0 40px rgba(240,192,64,.25)}
+.header .sub{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;position:sticky;top:0;
+  z-index:10;background:linear-gradient(var(--bg) 60%,transparent)}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s}
+.tab-btn:hover{border-color:var(--gold);color:var(--text)}
+.tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
+  box-shadow:0 0 20px rgba(240,192,64,.3)}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section Header */
+.sec-head{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;
+  padding-bottom:8px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+thead th{color:var(--dim);font-size:10px;font-weight:700;padding:8px 4px;text-align:center;
+  border-bottom:2px solid var(--border);background:var(--bg);letter-spacing:.5px}
+tbody td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr:hover{background:rgba(240,192,64,.04)}
+
+th:first-child,td:first-child{text-align:center;width:50px}
+th:nth-child(2),td:nth-child(2){text-align:left}
+
+/* Item Card */
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  margin-bottom:12px;transition:all .2s}
+.item-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
+
+.item-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.item-icon{font-size:48px;line-height:1;flex-shrink:0}
+.item-meta{flex:1}
+.item-name{font-size:16px;font-weight:900;color:var(--gold)}
+.item-info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;
+  background:rgba(0,0,0,.2);padding:12px;border-radius:8px}
+.info-box{text-align:center}
+.info-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.info-value{font-weight:900;color:var(--gold);font-size:16px;margin-top:4px}
+
+/* Responsive */
+@media(max-width:768px){
+  .header h1{font-size:22px}
+  .content{padding:20px 12px 60px}
+  table{font-size:11px}
+  thead th{font-size:9px;padding:6px 2px}
+  tbody td{padding:6px 2px}
+  .item-info{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 아이템 도감</h1>
+  <div class="sub">경험치 물약 및 아이템 정보 · Defense RPG</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="list">📋 아이템 목록</button>
+  <button class="tab-btn" data-tab="analysis">📊 효율 분석</button>
+</div>
+
+<div class="content">
+
+  <!-- 아이템 목록 패널 -->
+  <div class="panel active" id="p-list">
+    <div class="sec-head">POTION LIST</div>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>아이콘</th>
+          <th>아이템명</th>
+          <th>경험치</th>
+          <th>가격</th>
+          <th>효율 (EXP/G)</th>
+          <th>확률</th>
+        </tr>
+      </thead>
+      <tbody id="item-table-body"></tbody>
+    </table>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        💡 아이템 정보
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
+        경험치 물약은 상점에서 구매하여 캐릭터에게 직접 사용할 수 있습니다.<br>
+        각 물약의 효율(경험치 / 가격)을 비교하여 최적의 선택을 할 수 있습니다.<br>
+        <br>
+        <span style="color:var(--gold);font-weight:700">상점 구성:</span> 매 방문 시 캐릭터 3개 + 물약 2개가 렌덤으로 생성됩니다.<br>
+        물약 선택 확률은 weight 필드에 따라 결정됩니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 효율 분석 패널 -->
+  <div class="panel" id="p-analysis">
+    <div class="sec-head">EFFICIENCY RANKING</div>
+    <div id="efficiency-cards"></div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px">
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        🎯 구매 추천
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
+        <span style="color:var(--green);font-weight:700">✓ 권장:</span> 경험치 물약은 모두 효율이 우수합니다.<br>
+        충분한 골드가 있다면 대형 물약부터 구매하는 것이 좋습니다.<br>
+        <br>
+        <span style="color:var(--gold);font-weight:700">효율 기준:</span><br>
+        - 대형 (🏺): 1.67 EXP/G - 가장 효율이 좋음<br>
+        - 중형 (⚗️): 1.50 EXP/G - 중간 효율<br>
+        - 소형 (🧪): 1.25 EXP/G - 기본 효율
+      </div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
+  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
+  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+  <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">📚 직업</button>
+  <button onclick="location.href='compendium-stage.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🗺 스테이지</button>
+</nav>
+
+<script>
+// 아이템 테이블 렌더링
+function renderItemTable() {
+  const potions = window.EXP_POTIONS || [];
+  const totalWeight = potions.reduce((sum, p) => sum + p.weight, 0);
+  const tbody = document.getElementById('item-table-body');
+
+  tbody.innerHTML = '';
+  potions.forEach(p => {
+    const efficiency = (p.exp / p.cost).toFixed(2);
+    const probability = ((p.weight / totalWeight) * 100).toFixed(0);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-size:24px">${p.icon}</td>
+      <td style="text-align:left;font-weight:700;color:var(--gold)">${p.name}</td>
+      <td style="color:var(--green);font-weight:700">${p.exp}</td>
+      <td style="color:var(--blue);font-weight:700">${p.cost} G</td>
+      <td style="font-weight:700;color:var(--gold)">${efficiency}</td>
+      <td style="color:var(--dim)">${probability}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// 효율 분석 렌더링
+function renderEfficiencyAnalysis() {
+  const potions = window.EXP_POTIONS || [];
+  const totalWeight = potions.reduce((sum, p) => sum + p.weight, 0);
+  const container = document.getElementById('efficiency-cards');
+
+  const sorted = [...potions]
+    .map(p => ({
+      ...p,
+      efficiency: p.exp / p.cost,
+      probability: ((p.weight / totalWeight) * 100).toFixed(0)
+    }))
+    .sort((a, b) => b.efficiency - a.efficiency);
+
+  container.innerHTML = '';
+  sorted.forEach((item, idx) => {
+    const grades = ['S', 'A', 'B'];
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-header">
+        <div class="item-icon">${item.icon}</div>
+        <div class="item-meta">
+          <div class="item-name">
+            ${item.name}
+            <span style="margin-left:8px;background:var(--gold);color:var(--bg);padding:2px 8px;border-radius:4px;
+              font-size:11px;font-weight:700">${grades[idx] || 'C'}</span>
+          </div>
+          <div style="font-size:11px;color:var(--dim);margin-top:4px">#${idx + 1} 효율 순위</div>
+        </div>
+      </div>
+
+      <div class="item-info">
+        <div class="info-box">
+          <div class="info-label">획득 경험치</div>
+          <div class="info-value" style="color:var(--green)">${item.exp}</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">가격</div>
+          <div class="info-value" style="color:var(--blue)">${item.cost}G</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">효율</div>
+          <div class="info-value" style="color:var(--gold)">${item.efficiency.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:8px;background:rgba(0,0,0,.2);border-radius:6px;font-size:11px">
+        <div style="color:var(--dim);margin-bottom:2px">🎲 상점 등장 확률</div>
+        <div style="color:var(--text);font-weight:700">${item.probability}%</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-' + btn.dataset.tab).classList.add('active');
+  };
+});
+
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    renderItemTable();
+    renderEfficiencyAnalysis();
+  }, 300);
+});
+</script>
+</body>
+</html>
