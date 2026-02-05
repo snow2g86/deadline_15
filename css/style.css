@@ -479,10 +479,13 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .sanc-btn:hover{transform:scale(1.05)}.sanc-btn.disabled{opacity:.3;cursor:default}
 
 /* ═══ Shop HUD ═══ */
-.shop-hud{width:100%;max-width:330px;margin-bottom:4px}
+.shop-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:0}
 .shop-hud-gold{display:inline-flex;align-items:center;font-size:13px;color:var(--gold);font-weight:700;
   background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:16px;padding:3px 12px}
-.shop-hud-timer{font-size:10px;color:var(--dim);margin-bottom:6px}
+.shop-info-row{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:12px 0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:12px}
+.shop-info-title{font-size:14px;font-weight:900;color:var(--text)}
+.shop-info-timer{font-size:11px;font-weight:700;color:#60a5fa;display:none}
 
 /* ═══ Sanctuary HUD ═══ */
 .sanc-hud{display:flex;justify-content:flex-start;padding-left:16px;margin-bottom:-24px;position:relative;z-index:20}
@@ -568,7 +571,9 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
   .screen-title{font-size:26px}.screen-sub{font-size:14px}
   .shop-hud{max-width:420px}
   .shop-hud-gold{font-size:16px;padding:4px 16px}
-  .shop-hud-timer{font-size:12px}
+  .shop-info-row{max-width:420px;margin-bottom:10px}
+  .shop-info-title{font-size:17px}
+  .shop-info-timer{font-size:13px}
   #shop-list{max-width:420px}
   #sanc-list{max-width:480px}
   .shop-card{width:200px;padding:14px 10px}
