@@ -43,7 +43,7 @@ const CD = {
     growth: { hp:[6,10], atk:[1,3], def:[1,2] }
   },
   novice: {
-    name:'노비스', icon:'🔰', iconRow:90, iconCol:1, role:'melee', desc:'초보 근접 딜러',
+    name:'노비스', icon:'🗡️', iconRow:90, iconCol:1, role:'melee', desc:'초보 근접 딜러',
     res:'energy', maxRes:100, resRec:10,
     base: { hp:85, atk:22, def:8, move:3, range:1 },
     growth: { hp:[7,12], atk:[2,3], def:[1,2] }
