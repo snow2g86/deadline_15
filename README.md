@@ -1,2 +1,1 @@
-# deadline_15
-턴 디팬스 게임
+# deadline 15
