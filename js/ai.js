@@ -35,7 +35,38 @@ Object.assign(G, {
     this.anim=true;for(const e of[...this.alive('enemy')]){if(this.over)break;await this.eAI(e);await sl(500)}
     this.anim=false;document.getElementById('enemy-banner').classList.remove('show');this.chkEnd();
     if(!this.over){this.turn++;this.phase='player';this.turnFlash('player');this.sfxTurnPlayer();
+      // 채널링 효과 처리 (쇠약의 저주: 적 1명에게 최대HP% 피해)
+      this.alive('ally').filter(u=>u.channeling==='shaman_curse').forEach(u=>{
+        const enemies=this.alive('enemy');
+        if(enemies.length){
+          const t=enemies[Math.floor(Math.random()*enemies.length)];
+          const pct=t.isBoss?0.002:0.005;
+          const dmg=Math.max(1,Math.round(t.mhp*pct));
+          t.hp=Math.max(0,t.hp-dmg);
+          this.floatT(t.x,t.y,`-${dmg}`,'damage');
+          this.floatT(t.x,t.y,'저주!','damage');
+          this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:6,colors:['#9333ea','#581c87','#a855f7'],shape:'spark',speed:2,spread:8,decay:0.03,size:3});
+          if(t.hp<=0){this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);
+            setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd()},500)}
+        }
+      });
       this.alive('ally').forEach(u=>{
+        // 소환수 턴 관리
+        if(u.isSummon&&u.summonTurns!==undefined){
+          u.summonTurns--;
+          if(u.summonTurns<=0){
+            this.floatT(u.x,u.y,'소환 해제','damage');
+            this.vfxDeath(u);
+            setTimeout(()=>{
+              this.units=this.units.filter(v=>v.id!==u.id);
+              this.rUnits();
+            },500);
+            return}
+        }
+        // 채널링 유닛: 이동/행동 불가, 자원 회복 없음
+        if(u.channeling){
+          u.hm=true;u.ha=true;u.waited=true;u.mo=false;
+          return}
         u.hm=false;u.ha=false;u.waited=false;u.mo=false;
         // Stunned recovery
         if(u.stunned>0)u.stunned--;
@@ -182,6 +213,17 @@ Object.assign(G, {
   },
 
   chkEnd(){if(this.over)return;const al=this.alive('ally'),en=this.alive('enemy');
+    // 소환사 사망 시 소환수 제거
+    al.forEach(u=>{
+      if(u.cls==='summoner'){
+        const summons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
+        summons.forEach(s=>{
+          this.floatT(s.x,s.y,'소환 해제','damage');
+          this.vfxDeath(s);
+        });
+        this.units=this.units.filter(v=>!(v.isSummon&&v.summonerId===u.id));
+      }
+    });
     if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,'아군이 전멸했습니다.');return}
     // Breach check
     const s=this.cStage;if(s){const limit=Math.ceil(s.tot/4);

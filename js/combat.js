@@ -10,9 +10,10 @@ Object.assign(G, {
     if(u.team==='ally'&&u.waited){
       u.ha=false;u.waited=false;
       this.sel=u;this.awPM=true;this.mvT=[];
-      const a=this.atkC(u);
+      if(u.channeling){this.atkT=[];this.healT=[]}
+      else{const a=this.atkC(u);
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
-      else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}
+      else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
       this.rUnits();this.rTer();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect();return}
     // Normal selection
     this.sel=u;
@@ -111,6 +112,30 @@ Object.assign(G, {
     }else if(sk.id==='novice_throw'){
       // 돌던지기: throwRange 내 적 위치
       this.atkT=this.units.filter(v=>v.team==='enemy'&&v.hp>0&&mh(u.x,u.y,v.x,v.y)<=sk.throwRange).map(v=>({x:v.x,y:v.y}));
+      this.healT=[]
+    }else if(sk.id==='brawler_disarm'){
+      // 무장해제: disarmRange 내 적 위치
+      const dr=sk.disarmRange||1;
+      this.atkT=this.units.filter(v=>v.team==='enemy'&&v.hp>0&&mh(u.x,u.y,v.x,v.y)<=dr).map(v=>({x:v.x,y:v.y}));
+      this.healT=[]
+    }else if(sk.id==='shaman_curse'||sk.id==='shaman_exalt'){
+      // 채널링: 즉시 실행 (타겟팅 불필요)
+      this.skillMode=false;this.doSkill(u,u.x,u.y);return
+    }else if(sk.id.startsWith('summoner_summon_')){
+      // 소환 스킬: 소환 제한 체크 + 범위 내 빈 타일
+      const maxSummons=1;
+      const currentSummons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
+      if(currentSummons.length>=maxSummons){
+        u.res+=sk.cost;this.floatT(u.x,u.y,'소환 한계!','damage');return
+      }
+      // 소환 가능 타일 (주변 3칸, 빈 통행가능 타일)
+      const summonRange=sk.summonRange||3;
+      this.atkT=[];
+      for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
+        if(mh(u.x,u.y,x,y)<=summonRange&&mh(u.x,u.y,x,y)>0){
+          const ti=TI[this.ter[y][x]];if(!ti||!ti.pass)continue;
+          if(this.uAt(x,y))continue;
+          this.atkT.push({x,y})}}
       this.healT=[]
     }else{
       const dirs=[{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
@@ -238,6 +263,87 @@ Object.assign(G, {
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
+    // 쇠약의 저주: 채널링 시작
+    if(skObj.id==='shaman_curse'){
+      u.channeling='shaman_curse';
+      this.floatT(u.x,u.y,'쇠약의 저주!','heal');
+      this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
+      this.sfxAtk(u.cls);
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
+    // 고양: 채널링 시작
+    if(skObj.id==='shaman_exalt'){
+      u.channeling='shaman_exalt';
+      this.floatT(u.x,u.y,'고양!','heal');
+      this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
+      this.sfxHeal();
+      // 모든 아군에게 버프 VFX
+      this.alive('ally').forEach(a=>{
+        if(a.id!==u.id)this.vfxSpawn(this.uSX(a.x,a.y)+UCX,this.uSY(a.x,a.y)+UCY,{count:6,colors:['#f59e0b','#fbbf24'],shape:'spark',speed:2,spread:6,decay:0.03,size:3});
+      });
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
+    // 소환 스킬: 정령소환 & 골램소환
+    if(skObj.id==='summoner_summon_spirit'||skObj.id==='summoner_summon_golem'){
+      // 1. 위치 검증
+      const target=this.units.find(v=>v.x===tx&&v.y===ty);
+      if(target||!TI[this.ter[ty][tx]].pass){
+        u.res+=skObj.cost;this.floatT(u.x,u.y,'소환 불가!','damage');return
+      }
+      // 2. 소환수 타입별 스탯 계산
+      const isSpirit=skObj.id==='summoner_summon_spirit';
+      const summonCls=skObj.summonType;
+      let hp,atk,def,move,range,role;
+      if(isSpirit){
+        hp=Math.round(u.mhp*0.5);
+        atk=Math.round(u.atk*0.5);
+        def=0;
+        move=3;range=3;role='ranged'
+      }else{
+        hp=Math.round(u.mhp*1.2);
+        atk=Math.round(u.atk*0.5);
+        def=Math.round(u.def*1.2);
+        move=2;range=1;role='melee'
+      }
+      // 3. 소환수 유닛 생성
+      const summon={
+        id:this.nid++,uid:0,team:'ally',cls:summonCls,
+        isSummon:true,summonerId:u.id,
+        x:tx,y:ty,hp,mhp:hp,atk,def,
+        move,range,role,
+        res:0,maxRes:0,resType:'none',resRec:0,
+        summonTurns:5,
+        hm:false,ha:false,waited:false,mo:false,
+        furyBuff:0,stunned:0
+      };
+      // 4. 유닛 배열 추가
+      this.units.push(summon);
+      // 5. VFX & 피드백
+      const summonName=isSpirit?'정령':'골램';
+      this.floatT(tx,ty,`${summonName} 소환!`,'heal');
+      const colors=isSpirit?['#8b5cf6','#c084fc','#fff']:['#78716c','#a8a29e','#fff'];
+      this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:25,colors,shape:'ring',speed:5,spread:20,decay:0.02,size:8});
+      this.sfxHeal();
+      // 6. 경험치 & 턴 종료
+      this._grantExp(u,'attack');
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
+    // 무장해제: 적 ATK 50% 감소 3턴
+    if(skObj.id==='brawler_disarm'){
+      const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
+      if(!t){u.res+=skObj.cost;return}
+      t.disarmed=3;
+      this.sfxAtk(u.cls);this.shakeU(t.id);
+      this.floatT(t.x,t.y,'ATK -50%','damage');
+      this.floatT(u.x,u.y,'무장해제!','heal');
+      this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:12,colors:['#f97316','#fbbf24','#fff'],shape:'ring',speed:3,spread:12,decay:0.025,size:5});
+      this._grantExp(u,'attack');
+      u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+      this.rUnits();this.clrSel();this.chkAutoEnd();return
+    }
     // 스위치: 아군과 위치 교환
     if(skObj.id==='knight_switch'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='ally'&&v.hp>0&&v.id!==u.id);
@@ -288,5 +394,14 @@ Object.assign(G, {
     this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:12,colors:['#6af','#48f','#aaf'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
     u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
     setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500)},
+
+  // 채널링 해제
+  cancelChannel(){
+    if(!this.sel||!this.sel.channeling)return;
+    const u=this.sel;
+    this.floatT(u.x,u.y,'채널링 해제','damage');
+    u.channeling=null;
+    u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
+    this.sfxUIClick();this.rUnits();this.clrSel();this.chkAutoEnd()},
 
 });

@@ -16,7 +16,9 @@
       "Bash(do [ -f \"/Users/2z/Desktop/workspace/game/deadline_15/image/icon/64x64/$f\" ])",
       "Bash(echo:*)",
       "Bash(done)",
-      "Bash(do echo \"$f\")"
+      "Bash(do echo \"$f\")",
+      "Skill(bkit:pdca)",
+      "Skill(bkit:pdca:*)"
     ]
   }
 }

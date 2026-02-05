@@ -115,8 +115,71 @@ Object.assign(G,{
   // ══════════════════════════════════
   _initLobbyPage(){
     this._updGoldUI();
+    this._buildHideout();
     const splash=document.getElementById('splash');
     if(splash){splash.classList.add('fade-out');setTimeout(()=>splash.remove(),500)}
+  },
+
+  _buildHideout(){
+    const ct=document.getElementById('clan-hideout');
+    if(!ct)return;
+    ct.innerHTML='';
+    // 횃불 2개
+    const tl=document.createElement('div');tl.className='hideout-torch t-left';
+    const tr=document.createElement('div');tr.className='hideout-torch t-right';
+    tl.style.animationDelay='0s';tr.style.animationDelay='0.7s';
+    ct.appendChild(tl);ct.appendChild(tr);
+    // 라벨
+    const lb=document.createElement('div');lb.className='hideout-label';lb.textContent='HIDEOUT';
+    ct.appendChild(lb);
+    // 캐릭터 결정
+    this._loadParty();
+    let chars=[];
+    if(this.party&&this.party.length>0){
+      chars=this.party.map(uid=>ROSTER.getChar(uid)).filter(c=>c&&!c.dead);
+    }
+    if(!chars.length){
+      chars=ROSTER.getAlive().sort((a,b)=>b.lv-a.lv).slice(0,10);
+    }
+    if(!chars.length)return;
+    // 배치 영역
+    const n=chars.length;
+    const padX=10;
+    const zoneW=(100-padX*2)/n;
+    const huData=[];
+    chars.forEach((ch,i)=>{
+      const wrap=document.createElement('div');wrap.className='hideout-unit';
+      const cx=padX+zoneW*i+zoneW*0.5;
+      const cy=45+Math.random()*30;
+      wrap.style.left=cx+'%';wrap.style.top=cy+'%';
+      wrap.style.transform='translate(-50%,-50%)';
+      // idle 바운스만
+      const idleDur=2+Math.random()*2;
+      const idleDelay=Math.random()*2;
+      wrap.style.animation=`hideoutIdle ${idleDur.toFixed(1)}s ease-in-out ${idleDelay.toFixed(1)}s infinite`;
+      // 아이콘
+      const icon=document.createElement('div');
+      icon.innerHTML=clsIcon(ch.cls,32);
+      wrap.appendChild(icon);
+      // 그림자
+      const sh=document.createElement('div');sh.className='hu-shadow';
+      wrap.appendChild(sh);
+      // 이름 (개인 이름)
+      const nm=document.createElement('div');nm.className='hu-name';
+      nm.textContent=ch.name||'???';
+      wrap.appendChild(nm);
+      ct.appendChild(wrap);
+      huData.push({el:wrap,baseX:cx,zoneW});
+    });
+    // 돌아다니기: 주기적으로 위치 변경
+    if(this._hideoutTimer)clearInterval(this._hideoutTimer);
+    this._hideoutTimer=setInterval(()=>{
+      huData.forEach(u=>{
+        const nx=u.baseX+(Math.random()-0.5)*u.zoneW*0.8;
+        const ny=42+Math.random()*35;
+        u.el.style.left=nx+'%';u.el.style.top=ny+'%';
+      });
+    },4000);
   },
 
   _initStageSelectPage(){

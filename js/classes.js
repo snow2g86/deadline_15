@@ -77,6 +77,19 @@ const CD = {
     res:'energy', maxRes:100, resRec:8,
     base: { hp:75, atk:30, def:6, move:3, range:1 },
     growth: { hp:[5,9], atk:[2,5], def:[0,1] }
+  },
+  // ═════ 소환수 클래스 (임시 유닛) ═════
+  'summon_spirit': {
+    name:'정령', icon:'✨', iconRow:19, iconCol:3, role:'ranged', desc:'소환된 마법 정령 (5턴)',
+    res:'none', maxRes:0, resRec:0,
+    base: { hp:15, atk:15, def:0, move:3, range:3 },
+    growth: { hp:[0,0], atk:[0,0], def:[0,0] }
+  },
+  'summon_golem': {
+    name:'골램', icon:'🗿', iconRow:19, iconCol:4, role:'melee', desc:'소환된 마법 골램 (5턴)',
+    res:'none', maxRes:0, resRec:0,
+    base: { hp:30, atk:12, def:5, move:2, range:1 },
+    growth: { hp:[0,0], atk:[0,0], def:[0,0] }
   }
 };
 

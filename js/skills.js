@@ -43,7 +43,24 @@ const SKILLS = {
   novice: {
     id: 'novice_throw', name: '돌던지기', icon: '🪨',
     desc: '4칸 내 적에게 ATK×0.8 데미지', cost: 5, costType: 'energy', throwRange: 4
-  }
+  },
+  brawler: {
+    id: 'brawler_disarm', name: '무장해제', icon: '🤛',
+    desc: '1칸 내 적 공격력 3턴간 50% 감소', cost: 30, costType: 'energy', disarmRange: 1
+  },
+  shaman: [
+    { id: 'shaman_curse', name: '쇠약의 저주', icon: '☠️',
+      desc: '매턴 적 1명에게 최대HP 0.5% 피해(보스 0.2%). 해제까지 이동/행동 불가', cost: 100, costType: 'mana' },
+    { id: 'shaman_exalt', name: '고양', icon: '🔺',
+      desc: '전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가', cost: 50, costType: 'mana' }
+  ],
+  // ═════ 소환사 스킬 (2가지 소환 타입) ═════
+  summoner: [
+    { id: 'summoner_summon_spirit', name: '정령소환', icon: '✨',
+      desc: '원거리 마법 공격 정령 소환 (5턴, 공격력 50%)', cost: 80, costType: 'mana', summonRange: 3, summonType: 'summon_spirit' },
+    { id: 'summoner_summon_golem', name: '골램소환', icon: '🗿',
+      desc: '근접 공격 골램 소환 (5턴, HP/DEF 120%, 공격력 50%)', cost: 80, costType: 'mana', summonRange: 3, summonType: 'summon_golem' }
+  ]
 };
 
 // ── 다중 스킬 헬퍼 ────────────────────────
@@ -102,9 +119,16 @@ const FURY_PASSIVES = {
 // ── 데미지 계산 ───────────────────────────
 // 모든 공격 데미지는 이 함수를 통해 계산
 function calcDmg(attacker, target) {
-  let dmg = Math.max(1, attacker.atk - target.def);
+  let atk = attacker.atk;
+  // 무장해제 디버프: ATK 50% 감소
+  if (attacker.disarmed > 0) atk = Math.round(atk * 0.5);
+  let dmg = Math.max(1, atk - target.def);
   // 광폭 버프 적용
   if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
+  // 고양 버프: 같은 팀 주술사가 고양 채널링 중이면 +25%
+  if (G.units.some(u => u.team === attacker.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
+    dmg = Math.max(1, Math.round(dmg * 1.25));
+  }
   return dmg;
 }
 
@@ -130,7 +154,7 @@ function procFury(attacker, target, G) {
 // 매 턴 시작 시 호출: 버프 카운트다운
 function tickBuffs(unit) {
   if (unit.furyBuff > 0) unit.furyBuff--;
-  // 향후 추가 버프/디버프 틱은 여기에
+  if (unit.disarmed > 0) unit.disarmed--;
 }
 
 // ── 버프 아이콘 목록 ─────────────────────
@@ -145,6 +169,24 @@ function getSkillBuffs(unit) {
   if (unit.furyBuff > 0) {
     buffs.push({ icon: '💢', type: 'buff', turns: unit.furyBuff });
   }
-  // 향후 추가 버프 아이콘은 여기에
+  // 무장해제 디버프 표시
+  if (unit.disarmed > 0) {
+    buffs.push({ icon: '🤛', type: 'debuff', turns: unit.disarmed });
+  }
+  // 채널링 표시
+  if (unit.channeling === 'shaman_curse') {
+    buffs.push({ icon: '☠️', type: 'debuff', turns: 0 });
+  }
+  if (unit.channeling === 'shaman_exalt') {
+    buffs.push({ icon: '🔺', type: 'buff', turns: 0 });
+  }
+  // 고양 버프 수혜 표시 (채널링 주술사 본인 제외)
+  if (!unit.channeling && G.units.some(u => u.team === unit.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
+    buffs.push({ icon: '🔺', type: 'buff', turns: 0 });
+  }
+  // 소환수 지속 시간 표시
+  if (unit.isSummon && unit.summonTurns !== undefined) {
+    buffs.push({ icon: '⏳', type: 'buff', turns: unit.summonTurns });
+  }
   return buffs;
 }

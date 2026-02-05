@@ -73,7 +73,21 @@ Object.assign(G, {
       el.classList.toggle('acted',u.team==='ally'&&u.ha&&!isSel);el.classList.remove('ally','enemy');el.classList.add(u.team);
       el.classList.toggle('stealthed',isStealthed(u));el.classList.toggle('stunned',u.stunned>0);
       // stunned 카운트 표시
-      let stunLabel=el.querySelector('.stun-label');if(u.stunned>0){if(!stunLabel){stunLabel=document.createElement('div');stunLabel.className='stun-label';el.appendChild(stunLabel)}stunLabel.textContent=u.stunned}else if(stunLabel)stunLabel.remove()});
+      let stunLabel=el.querySelector('.stun-label');if(u.stunned>0){if(!stunLabel){stunLabel=document.createElement('div');stunLabel.className='stun-label';el.appendChild(stunLabel)}stunLabel.textContent=u.stunned}else if(stunLabel)stunLabel.remove();
+      // 소환수 턴 카운트 표시
+      if(u.isSummon&&u.summonTurns!==undefined){
+        let turnLabel=el.querySelector('.summon-turns');
+        if(!turnLabel){
+          turnLabel=document.createElement('div');
+          turnLabel.className='summon-turns';
+          turnLabel.style.cssText='position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid #fff;z-index:10;';
+          el.appendChild(turnLabel)
+        }
+        turnLabel.textContent=u.summonTurns
+      }else{
+        const turnLabel=el.querySelector('.summon-turns');
+        if(turnLabel)turnLabel.remove()
+      }});
     [...w.querySelectorAll('.unit-sprite')].forEach(el=>{if(!ids.has(el.id))el.remove()});
     this.rMM();this.rNav()},
 
@@ -87,7 +101,18 @@ Object.assign(G, {
     document.getElementById('btn-skill').style.display='none';
     // 동적 스킬 버튼 제거 후 재생성
     m.querySelectorAll('.am-skill').forEach(e=>e.remove());
-    const skills=getSkills(u.cls);const wait=document.getElementById('btn-wait');
+    const wait=document.getElementById('btn-wait');
+    // 채널링 중: "해제" 버튼만 표시
+    if(u.channeling){
+      document.getElementById('btn-cancel').style.display='none';
+      const btn=document.createElement('button');btn.className='am-skill';
+      btn.textContent='🔓 해제';
+      btn.onclick=()=>G.cancelChannel();
+      m.insertBefore(btn,wait);
+      wait.style.display='none';
+      m.classList.add('show');return}
+    wait.style.display='';
+    const skills=getSkills(u.cls);
     skills.forEach((sk,idx)=>{
       const btn=document.createElement('button');btn.className='am-skill';
       btn.textContent=sk.icon+' '+sk.name;
@@ -97,6 +122,15 @@ Object.assign(G, {
       if(sk.id==='assassin_assassinate'){
         const overlapping=isStealthed(u)&&this.units.some(v=>v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
         enabled=enabled&&overlapping;
+      }
+      // 소환 스킬: 소환 제한 체크
+      if(sk.id.startsWith('summoner_summon_')){
+        const maxSummons=1;
+        const currentSummons=G.units.filter(s=>s.isSummon&&s.summonerId===u.id);
+        if(currentSummons.length>=maxSummons){
+          enabled=false;
+          btn.title=`소환 한계 (${currentSummons.length}/${maxSummons})`;
+        }
       }
       btn.disabled=!enabled;
       btn.onclick=()=>G.actSkill(idx);
