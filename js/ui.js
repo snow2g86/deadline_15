@@ -146,7 +146,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
     const rn=rl[u.resType]||'',rpct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
     return`<div class="info-card ${cc}" ${m?'style="border-width:2px"':''}>
-      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${t('classes.' + u.cls)}</span><span class="ic-class">${u.team==='ally'?t('battle.ally'):t('battle.enemy')}</span></div>
+      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${u.name}</span><span class="ic-class">${t('classes.' + u.cls)}</span></div>
       <div class="ic-stats"><span>HP <b>${u.hp}/${u.mhp}</b></span><span style="color:${rc[u.resType]}">${rn} <b>${u.res}/${u.maxRes}</b></span><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div></div>`},
   defI(){const a=this.alive('ally').length,e=this.alive('enemy').length;
     document.getElementById('info-panel').innerHTML=`<div style="display:flex;gap:12px;align-items:center;font-size:11px"><span style="color:var(--blue)">${t('battle.allies', {count: a})}</span><span style="color:var(--red)">${t('battle.enemies', {count: e})}</span><span style="color:var(--dim)">${t('battle.select_unit_touch')}</span></div>`},
