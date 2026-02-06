@@ -29,22 +29,22 @@
       <button class="cam-btn" onclick="G.rotCam(1)" title="카메라 우회전 (E)">↷</button>
     </div>
     <div id="stage-info">STAGE 1<div class="si-turn">TURN 1</div></div>
-    <div class="tb-right"><button id="btn-end-turn" onclick="G.endTurn()">턴 종료</button></div>
+    <div class="tb-right"><button id="btn-end-turn" onclick="G.endTurn()" data-i18n="battle.end_turn">턴 종료</button></div>
   </div>
   <div id="map-container">
     <div id="iso-world">
       <canvas id="vfx-canvas"></canvas>
       <div id="action-menu" onclick="event.stopPropagation()">
-        <button id="btn-move" onclick="G.actMove()" style="display:none">👣 이동</button>
-        <button id="btn-attack" onclick="G.actAttack()" style="display:none">⚔️ 공격</button>
-        <button id="btn-skill" onclick="G.showSkillMenu()" style="display:none">🔱 스킬</button>
-        <button id="btn-item" onclick="G.actItem()" style="display:none">🎒 아이템</button>
-        <button id="btn-dash" onclick="G.actWait()">⏸ 대시</button>
-        <button id="btn-cancel" onclick="G.actCancel()" style="display:none">↩ 취소</button>
+        <button id="btn-move" onclick="G.actMove()" style="display:none" data-i18n="battle.move">👣 이동</button>
+        <button id="btn-attack" onclick="G.actAttack()" style="display:none" data-i18n="battle.attack">⚔️ 공격</button>
+        <button id="btn-skill" onclick="G.showSkillMenu()" style="display:none" data-i18n="battle.skill">🔱 스킬</button>
+        <button id="btn-item" onclick="G.actItem()" style="display:none" data-i18n="battle.item">🎒 아이템</button>
+        <button id="btn-dash" onclick="G.actWait()" data-i18n="battle.wait">⏸ 대시</button>
+        <button id="btn-cancel" onclick="G.actCancel()" style="display:none" data-i18n="battle.cancel">↩ 취소</button>
       </div>
     </div>
   </div>
-  <div id="info-panel"><div style="color:var(--dim);font-size:11px">유닛을 선택하세요</div></div>
+  <div id="info-panel"><div style="color:var(--dim);font-size:11px" data-i18n="common.select_unit">유닛을 선택하세요</div></div>
 </div>
 <div id="turn-flash"></div>
 <div id="cam-dir"><div class="cd-arrow">▲</div><div class="cd-label">N</div></div>

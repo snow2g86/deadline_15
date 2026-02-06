@@ -154,7 +154,7 @@ Object.assign(G, {
   showRes(win,msg){const ov=document.getElementById('modal-overlay');
     this.onBattleEnd(win);
     const reward=win?(50+(this.cStage?this.cStage.id*30:0)):0;
-    document.getElementById('modal-title').textContent=win?'🏆 VICTORY':'💀 DEFEAT';
+    document.getElementById('modal-title').textContent=win?t('messages.victory'):t('messages.defeat');
     document.getElementById('modal-title').className=win?'win':'lose';
     const deadAllies=this.units.filter(u=>u.team==='ally'&&u.hp<=0);
     let sub=msg;

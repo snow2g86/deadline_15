@@ -50,15 +50,15 @@ Object.assign(G, {
     if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
     if(cl){this.selU(cl);return}this.clrSel()},
   // 이동 버튼 클릭 핸들러
-  actMove(){if(!this.sel)return;this.hideAM();const u=this.sel;this.mvT=(u.hm||u.mo)?[]:this.mvC(u);this.rTer();this.floatT(u.x,u.y,'이동할 곳을 선택하세요','heal')},
+  actMove(){if(!this.sel)return;this.hideAM();const u=this.sel;this.mvT=(u.hm||u.mo)?[]:this.mvC(u);this.rTer();this.floatT(u.x,u.y,t('messages.select_move_target'),'heal')},
   // 공격/치유 버튼 클릭 핸들러
-  actAttack(){if(!this.sel)return;this.hideAM();const msg=this.sel.role==='healer'?'치유할 대상을 선택하세요':'공격할 대상을 선택하세요';this.floatT(this.sel.x,this.sel.y,msg,'heal')},
+  actAttack(){if(!this.sel)return;this.hideAM();const msg=this.sel.role==='healer'?t('messages.select_heal_target'):t('messages.select_attack_target');this.floatT(this.sel.x,this.sel.y,msg,'heal')},
   // 스킬 메뉴 표시
   showSkillMenu(){if(!this.sel||!this.awPM)return;this.skillMenuOpen=true;this.showAM(this.sel)},
   // 스킬 메뉴 숨김 (메인 메뉴로 복귀)
   hideSkillMenu(){if(!this.sel)return;this.skillMenuOpen=false;this.showAM(this.sel)},
   // 아이템 버튼 (추후 개발)
-  actItem(){if(!this.sel)return;this.floatT(this.sel.x,this.sel.y,'아이템 시스템 준비 중','damage')},
+  actItem(){if(!this.sel)return;this.floatT(this.sel.x,this.sel.y,t('messages.item_system_preparing'),'damage')},
 
   // Actions
   _grantExp(u,action){if(u.team==='ally'&&u.uid){const e=actExp(this.cStage?this.cStage.id:1,action);if(e>0)this.battleExp[u.uid]=(this.battleExp[u.uid]||0)+e;return e}return 0},
