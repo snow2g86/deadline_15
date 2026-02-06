@@ -84,6 +84,7 @@ Object.assign(G,{
   _navKey:'game_nav',
   _partyKey:'game_party',
   _currentShopTab:'mercenary',
+  _shopTimerInterval:null,
 
   // ══ 네비게이션 임시 데이터 ══
   _saveNav(data){try{localStorage.setItem(this._navKey,JSON.stringify(data))}catch(e){}},
@@ -298,7 +299,7 @@ Object.assign(G,{
   //  파티 편성
   // ══════════════════════════════════
   _pFilter:'all',
-  _roleMap:{melee:'근접',ranged:'원거리',healer:'힐러'},
+  _roleMap:{melee:'roles.melee',ranged:'roles.ranged',healer:'roles.healer'},
   rP(){
     const inParty=new Set(this.party);
     const alive=ROSTER.getAll().filter(c=>!c.dead&&!c.cls.startsWith('summon_'));
@@ -308,10 +309,10 @@ Object.assign(G,{
       const ownedRoles=new Set(alive.map(c=>CD[c.cls].role));
       const ownedClasses=[...new Set(alive.map(c=>c.cls))];
       tabEl.innerHTML='';
-      const roleTabs=[{key:'all',label:'전체'}];
-      ['melee','ranged','healer'].forEach(r=>{if(ownedRoles.has(r))roleTabs.push({key:'role_'+r,label:this._roleMap[r]})});
+      const roleTabs=[{key:'all',label:t('party.filter_all')}];
+      ['melee','ranged','healer'].forEach(r=>{if(ownedRoles.has(r))roleTabs.push({key:'role_'+r,label:t(this._roleMap[r])})});
       const clsTabs=[];
-      Object.keys(CD).forEach(cls=>{if(ownedClasses.includes(cls)&&!cls.startsWith('summon_'))clsTabs.push({key:'cls_'+cls,label:CD[cls].name})});
+      Object.keys(CD).forEach(cls=>{if(ownedClasses.includes(cls)&&!cls.startsWith('summon_'))clsTabs.push({key:'cls_'+cls,label:t('classes.'+cls)})});
       [...roleTabs,...clsTabs].forEach(t=>{
         const btn=document.createElement('button');btn.className='ps-tab'+(this._pFilter===t.key?' active':'');
         btn.textContent=t.label;
@@ -356,7 +357,7 @@ Object.assign(G,{
         `</div>`+
         `<div class="rl-actions">`+
           `<div class="rl-btn ${sel?'chk':'add'}">${sel?'✓':'+'}</div>`+
-          `<button class="rl-release" onclick="event.stopPropagation();G.releaseChar('${ch.uid}')">방출</button>`+
+          `<button class="rl-release" onclick="event.stopPropagation();G.releaseChar(${ch.uid})">${t('party.release')}</button>`+
         `</div>`;
       row.onclick=()=>{
         if(sel)this.party=this.party.filter(u=>u!==ch.uid);
@@ -490,6 +491,7 @@ Object.assign(G,{
     const classes=Object.keys(CD).filter(c=>!c.startsWith('summon'));
     const items=[];
     // 캐릭터 6개
+    const charNames = t('character.names'); // i18n에서 캐릭터 이름 가져오기
     for(let i=0;i<6;i++){
       const cls=classes[Math.floor(Math.random()*classes.length)];
       const d=CD[cls];
@@ -498,22 +500,23 @@ Object.assign(G,{
         atk: +(d.growth.atk[0]+Math.random()*(d.growth.atk[1]-d.growth.atk[0])).toFixed(1),
         def: +(d.growth.def[0]+Math.random()*(d.growth.def[1]-d.growth.def[0])).toFixed(1)
       };
-      const name=NAMES[Math.floor(Math.random()*NAMES.length)];
+      const name=charNames[Math.floor(Math.random()*charNames.length)];
       const cost=60+Math.floor(Math.random()*40);
       items.push({type:'char',cls,name,pot,cost,sold:false});
     }
     // 물약 5개 (가중치 랜덤)
+    const potionKeys={'exp_s':'potion_small','exp_m':'potion_medium','exp_l':'potion_large'};
     for(let i=0;i<5;i++){
       const totalW=EXP_POTIONS.reduce((s,p)=>s+p.weight,0);
       let r=Math.random()*totalW,pot=EXP_POTIONS[0];
       for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
-      items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
+      items.push({type:'potion',potionId:pot.id,name:pot.name,i18nNameKey:`shop.${potionKeys[pot.id]}`,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
     }
     // 각 직업 교본 (노비스 제외)
     const allClasses=Object.keys(CD).filter(c=>c!=='novice'&&!c.startsWith('summon'));
     for(const cls of allClasses){
       const d=CD[cls];
-      items.push({type:'class_change',scrollId:`cc_${cls}`,name:`${d.name} 교본`,icon:d.icon,desc:`노비스를 ${d.name}으로 전직`,classes:[cls],cost:150,sold:false});
+      items.push({type:'class_change',scrollId:`cc_${cls}`,name:`${d.name} 교본`,i18nNameKey:`classes.${cls}`,i18nSuffixKey:'shop.class_change_suffix',icon:d.icon,desc:`노비스를 ${d.name}으로 전직`,classes:[cls],cost:150,sold:false});
     }
     this._shopData={ts:Date.now(),items};
     this._saveShop();
@@ -539,7 +542,7 @@ Object.assign(G,{
     timeEl.style.display=showTimer?'block':'none';
     if(showTimer){
       const hh=String(h).padStart(2,'0');const mm=String(m).padStart(2,'0');const ss=String(s).padStart(2,'0');
-      timeEl.querySelector('span').textContent=`${t('shop.refresh_timer')} ${hh}:${mm}:${ss}`;
+      timeEl.querySelector('span').textContent=t('shop.refresh_timer',{hours:hh,minutes:mm,seconds:ss});
     }
 
     // 탭별 안내 문구
@@ -566,13 +569,14 @@ Object.assign(G,{
         const grade=avg>=0.85?'S':avg>=0.65?'A':avg>=0.35?'B':'C';
         const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
         const el=document.createElement('div');el.className='shop-card'+(item.sold?' sold':'');
+        const recruitBtn = item.sold?t('shop.recruit_complete'):t('shop.recruit',{gold:item.cost});
         el.innerHTML=`<div class="shop-grade" style="color:${gClr}">${grade}</div>`+
           `<div class="shop-icon">${clsIcon(item.cls,28)}</div>`+
           `<div class="shop-name">${item.name}</div>`+
-          `<div class="shop-cls">${d.name} · ${d.desc}</div>`+
-          `<div class="shop-stats">HP ${d.base.hp} ATK ${d.base.atk} DEF ${d.base.def}</div>`+
-          `<div class="shop-pot">잠재 HP+${item.pot.hp} ATK+${item.pot.atk} DEF+${item.pot.def}</div>`+
-          `<button class="shop-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${item.sold?'모집 완료':item.cost+'G 모집'}</button>`;
+          `<div class="shop-cls">${t('classes.'+item.cls)} · ${t('class_desc.'+item.cls)}</div>`+
+          `<div class="shop-stats">${t('common.hp')} ${d.base.hp} ${t('common.atk')} ${d.base.atk} ${t('common.def')} ${d.base.def}</div>`+
+          `<div class="shop-pot">${t('common.potential')} ${t('common.hp')}+${item.pot.hp} ${t('common.atk')}+${item.pot.atk} ${t('common.def')}+${item.pot.def}</div>`+
+          `<button class="shop-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${recruitBtn}</button>`;
         if(!item.sold)el.querySelector('.shop-btn').onclick=()=>{
           if(this.gold<item.cost)return;
           this.gold-=item.cost;this._saveGold();this._updGoldUI();
@@ -590,10 +594,12 @@ Object.assign(G,{
         // 물약
         const canAfford=this.gold>=item.cost&&!item.sold;
         const el=document.createElement('div');el.className='shop-card potion-card'+(item.sold?' sold':'');
+        const buyBtn = item.sold?t('shop.buy_complete'):t('shop.buy',{gold:item.cost});
+        const potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
         el.innerHTML=`<div class="shop-icon">${item.icon}</div>`+
-          `<div class="shop-name">${item.name}</div>`+
-          `<div class="shop-cls">EXP +${item.exp}</div>`+
-          `<button class="shop-btn potion-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${item.sold?'사용 완료':item.cost+'G 구매'}</button>`;
+          `<div class="shop-name">${potionName}</div>`+
+          `<div class="shop-cls">${t('common.exp')} +${item.exp}</div>`+
+          `<button class="shop-btn potion-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${buyBtn}</button>`;
         if(!item.sold)el.querySelector('.shop-btn').onclick=()=>{
           if(this.gold<item.cost)return;
           this._showPotionModal(item,idx);
@@ -603,11 +609,16 @@ Object.assign(G,{
         // 전직서
         const canAfford=this.gold>=item.cost&&!item.sold;
         const el=document.createElement('div');el.className='shop-card cc-card'+(item.sold?' sold':'');
+        const ccBtn = item.sold?t('shop.buy_complete'):t('shop.buy',{gold:item.cost});
+        // 전직서 이름/설명을 번역으로 동적 생성
+        const cls = item.classes[0];
+        const ccName = t('classes.'+cls) + ' ' + t('shop.class_change_suffix');
+        const ccDesc = t('shop.class_change_desc', {class: t('classes.'+cls)});
         el.innerHTML=`<div class="shop-icon">${item.icon}</div>`+
-          `<div class="shop-name">${item.name}</div>`+
-          `<div class="shop-cls">${item.desc}</div>`+
+          `<div class="shop-name">${ccName}</div>`+
+          `<div class="shop-cls">${ccDesc}</div>`+
           `<div class="shop-cls" style="margin-top:6px;color:var(--dim);font-size:8px">${item.classes.map(c=>CD[c].icon).join(' ')}</div>`+
-          `<button class="shop-btn cc-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${item.sold?'사용 완료':item.cost+'G 구매'}</button>`;
+          `<button class="shop-btn cc-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${ccBtn}</button>`;
         if(!item.sold)el.querySelector('.shop-btn').onclick=()=>{
           if(this.gold<item.cost)return;
           this._showClassChangeModal(item,idx);
@@ -615,6 +626,30 @@ Object.assign(G,{
         list.appendChild(el);
       }
     });
+    // 갱신시간 실시간 업데이트 시작
+    this._startShopTimer();
+  },
+
+  // ── 갱신시간 실시간 업데이트 ──
+  _startShopTimer(){
+    if(this._shopTimerInterval)clearInterval(this._shopTimerInterval);
+    this._shopTimerInterval=setInterval(()=>{
+      const timeEl=document.getElementById('shop-timer');
+      if(!timeEl)return;
+      const remain=Math.max(0,6*3600*1000-(Date.now()-this._shopData.ts));
+      const h=Math.floor(remain/3600000);const m=Math.floor((remain%3600000)/60000);const s=Math.floor((remain%60000)/1000);
+      const showTimer=this._currentShopTab==='mercenary'||this._currentShopTab==='item';
+      timeEl.style.display=showTimer?'block':'none';
+      if(showTimer){
+        const hh=String(h).padStart(2,'0');const mm=String(m).padStart(2,'0');const ss=String(s).padStart(2,'0');
+        timeEl.querySelector('span').textContent=t('shop.refresh_timer',{hours:hh,minutes:mm,seconds:ss});
+      }
+      // 시간이 0이 되면 상점 리셋
+      if(remain<=0){
+        this._genShop();
+        this._renderShop();
+      }
+    },1000);
   },
 
   // ── 물약 사용 모달 ──
@@ -622,7 +657,7 @@ Object.assign(G,{
     const alive=ROSTER.getAll().filter(c=>!c.dead);
     if(!alive.length)return;
     const ov=document.getElementById('modal-overlay');
-    document.getElementById('modal-title').textContent='캐릭터 선택';
+    document.getElementById('modal-title').textContent=t('shop.select_character');
     document.getElementById('modal-title').className='';
     let h='<div class="potion-target-list">';
     alive.forEach(ch=>{
@@ -634,7 +669,7 @@ Object.assign(G,{
       h+=`<div class="pt-btn${atMax?' pt-max':''}" data-uid="${ch.uid}">`+
         `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
         `<span class="pt-info">${charName} Lv.${ch.lv}</span>`+
-        `<span class="pt-exp">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span>`+
+        `<span class="pt-exp">${atMax?t('common.max'):`${ch.exp||0}/${expNeed}`}</span>`+
         `</div>`;
     });
     h+='</div>';
@@ -836,6 +871,7 @@ Object.assign(G,{
 
   // ══ 파티원 방출 ══
   releaseChar(uid){
+    uid = +uid; // 숫자로 변환
     const ch=ROSTER.getChar(uid);
     if(!ch) return;
 

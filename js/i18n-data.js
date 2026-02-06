@@ -14,6 +14,8 @@ const I18N_DATA = {
       "hp": "체력",
       "atk": "공격력",
       "def": "방어력",
+      "potential": "잠재",
+      "max": "MAX",
       "turn": "턴",
       "wave": "웨이브",
       "select_unit": "유닛을 선택하세요"
@@ -103,7 +105,9 @@ const I18N_DATA = {
       "title": "파티 편성",
       "subtitle": "5~10명의 클랜원을 편성하세요",
       "member_count": "{current} / 10",
-      "start_battle": "▶ 출격"
+      "start_battle": "▶ 출격",
+      "filter_all": "전체",
+      "release": "방출"
     },
     "stage": {
       "title": "스테이지",
@@ -124,7 +128,13 @@ const I18N_DATA = {
       "buy": "{gold}G 구매",
       "recruit_complete": "모집 완료",
       "buy_complete": "구매 완료",
-      "refresh_timer": "갱신까지 {hours}시간 {minutes}분"
+      "refresh_timer": "갱신: {hours}:{minutes}:{seconds}",
+      "select_character": "캐릭터 선택",
+      "class_change_suffix": "교본",
+      "class_change_desc": "{class}으로 전직",
+      "potion_small": "소형 경험치 물약",
+      "potion_medium": "중형 경험치 물약",
+      "potion_large": "대형 경험치 물약"
     },
     "sanctuary": {
       "title": "성소",
@@ -279,6 +289,8 @@ const I18N_DATA = {
       "exp": "Experience",
       "hp": "HP",
       "atk": "Attack",
+      "potential": "Potential",
+      "max": "MAX",
       "def": "Defense",
       "turn": "Turn",
       "wave": "Wave",
@@ -340,7 +352,9 @@ const I18N_DATA = {
       "title": "Party Composition",
       "subtitle": "Compose a party of 5-10 clan members",
       "member_count": "{current} / 10",
-      "start_battle": "▶ Engage"
+      "start_battle": "▶ Engage",
+      "filter_all": "All",
+      "release": "Release"
     },
     "stage": {
       "title": "Stage",
@@ -361,7 +375,13 @@ const I18N_DATA = {
       "buy": "Buy {gold}G",
       "recruit_complete": "Recruitment Complete",
       "buy_complete": "Purchase Complete",
-      "refresh_timer": "Refresh in {hours}h {minutes}m"
+      "refresh_timer": "Refresh: {hours}:{minutes}:{seconds}",
+      "select_character": "Select Character",
+      "class_change_suffix": "Scroll",
+      "class_change_desc": "Change to {class}",
+      "potion_small": "Small EXP Potion",
+      "potion_medium": "Medium EXP Potion",
+      "potion_large": "Large EXP Potion"
     },
     "sanctuary": {
       "title": "Sanctuary",
@@ -527,6 +547,8 @@ const I18N_DATA = {
       "hp": "Vida",
       "atk": "Ataque",
       "def": "Defensa",
+      "potential": "Potencial",
+      "max": "MAX",
       "turn": "Turno",
       "wave": "Ola",
       "select_unit": "Selecciona una unidad"
@@ -587,7 +609,9 @@ const I18N_DATA = {
       "title": "Composición del Equipo",
       "subtitle": "Compón un equipo de 5-10 miembros del clan",
       "member_count": "{current} / 10",
-      "start_battle": "▶ Atacar"
+      "start_battle": "▶ Atacar",
+      "filter_all": "Todo",
+      "release": "Liberar"
     },
     "stage": {
       "title": "Escenario",
@@ -608,7 +632,13 @@ const I18N_DATA = {
       "buy": "Comprar {gold}O",
       "recruit_complete": "Reclutamiento Completo",
       "buy_complete": "Compra Completa",
-      "refresh_timer": "Actualizar en {hours}h {minutes}m"
+      "refresh_timer": "Actualizar: {hours}:{minutes}:{seconds}",
+      "select_character": "Seleccionar Personaje",
+      "class_change_suffix": "Pergamino",
+      "class_change_desc": "Cambiar a {class}",
+      "potion_small": "Poción de EXP Pequeña",
+      "potion_medium": "Poción de EXP Mediana",
+      "potion_large": "Poción de EXP Grande"
     },
     "sanctuary": {
       "title": "Santuario",
