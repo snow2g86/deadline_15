@@ -464,8 +464,8 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 /* ═══ Shop List (3-column grid) ═══ */
 #shop-list{display:grid !important;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:330px;margin:0 auto 16px;min-height:60px}
 
-/* ═══ Sanctuary List (Vertical flex) ═══ */
-#sanc-list{display:flex !important;flex-direction:column;align-items:center;gap:10px;max-width:360px;margin:0 auto 16px}
+/* ═══ Sanctuary List (2-column grid) ═══ */
+#sanc-list{display:grid !important;grid-template-columns:repeat(2,1fr);gap:10px;max-width:360px;margin:0 auto 16px}
 
 /* ═══ Sanctuary ═══ */
 .sanc-card{width:100%;max-width:340px;display:flex;align-items:center;gap:10px;
