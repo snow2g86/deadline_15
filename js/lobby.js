@@ -265,7 +265,7 @@ Object.assign(G,{
   openStage(){
     const bs=this._loadBattle();
     if(bs){
-      this._showConfirm('이전 전투 데이터가 있습니다.\n이어서 플레이하시겠습니까?',
+      this._showConfirm(t('messages.loading_battle_data'),
         ()=>{this._saveNav({resume:true});location.href='battle.html'},
         ()=>{this._clearBattle();location.href='stage-select.html'});
       return;
@@ -783,7 +783,7 @@ Object.assign(G,{
     c.querySelector('#ls-sfxv').oninput=e=>{this._sett.sfxVol=e.target.value/100;c.querySelector('#ls-sfxv-v').textContent=e.target.value;this.saveSett()};
     c.querySelector('#ls-spd').oninput=e=>{const s=100/e.target.value;this._sett.speed=s;c.querySelector('#ls-spd-v').textContent=s.toFixed(1)+'x';this.saveSett()};
     c.querySelector('#ls-reset').onclick=()=>{
-      this._showConfirm('정말로 모든 데이터를 초기화하시겠습니까?\n모든 캐릭터, 골드, 진행 상황이 삭제됩니다.',
+      this._showConfirm(t('messages.confirm_reset_all'),
         ()=>{
           localStorage.clear();
           location.href='index.html';
@@ -814,7 +814,7 @@ Object.assign(G,{
     const alive=ROSTER.getAlive();
     if(alive.length<=5){
       this._showConfirm(
-        '⚠️ 최소 5명의 캐릭터를 유지해야 합니다.\n방출할 수 없습니다.',
+        t('messages.minimum_characters'),
         null,
         null
       );
@@ -824,7 +824,7 @@ Object.assign(G,{
     // 2. 파티 편성 체크 (편성된 캐릭터 방출 불가)
     if(this.party.includes(uid)){
       this._showConfirm(
-        '⚠️ 파티에 편성된 캐릭터는 방출할 수 없습니다.\n먼저 파티에서 제거해주세요.',
+        t('messages.cannot_release_party'),
         null,
         null
       );
