@@ -68,7 +68,7 @@ function loadTilesets(){
   return Promise.all(proms).then(()=>{tileImgsLoaded=Object.keys(TILE_SHEETS).length>0});
 }
 
-function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly){
+function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly,noImg){
   const h=z*ZH,W=tw*2,H=th*2+h+2;
   const cx=tw,cy=th;
   const top=`${tw},1 ${W-1},${th} ${tw},${th*2-1} 1,${th}`;
@@ -92,20 +92,22 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly){
     const imgTag=`<image href="image/tileset/${tm.sheet}" x="${ix}" y="${iy}" width="${shW}" height="${shH}" clip-path="url(#tc${seed})" preserveAspectRatio="none"/>`;
     details=imgTag;
     // forest 폴더의 랜덤 이미지 오버레이 (useImg가 true인 경우도 추가)
-    if(ttype==='forest'){
-      const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
-      const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
-      details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
-    }
-    // rock 폴더의 랜덤 이미지 오버레이 (회색계열은 2, 갈색/녹색계열은 1)
-    else if(ttype==='rock'){
-      const isGreyscale=/[2-6]a[2-6]a/.test(tc);
-      const rockFolder=isGreyscale?2:1;
-      const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
-      const rockTiles2=['tile_064','tile_065','tile_068'];
-      const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
-      const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
-      rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
+    if(!noImg){
+      if(ttype==='forest'){
+        const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
+        const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
+        details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
+      }
+      // rock 폴더의 랜덤 이미지 오버레이 (회색계열은 2, 갈색/녹색계열은 1)
+      else if(ttype==='rock'){
+        const isGreyscale=/[2-6]a[2-6]a/.test(tc);
+        const rockFolder=isGreyscale?2:1;
+        const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
+        const rockTiles2=['tile_064','tile_065','tile_068'];
+        const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
+        const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
+        rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
+      }
     }
   }else{
     // 프로시저럴 폴백
@@ -120,9 +122,11 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly){
         details+=`<circle cx="${px}" cy="${py-1}" r="${tr}" fill="#1a3a22" opacity=".6"/><circle cx="${px}" cy="${py-1.5}" r="${tr*.7}" fill="#245a30" opacity=".5"/>`}
       for(let i=0;i<2;i++){const px=cx+((rn()-.5)*tw*.5),py=cy+((rn()-.5)*th*.3);details+=`<ellipse cx="${px}" cy="${py}" rx="${1.5+rn()}" ry="${.6+rn()*.4}" fill="#2a5030" opacity=".35"/>`}
       // forest 폴더의 랜덤 이미지 오버레이
-      const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
-      const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
-      details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
+      if(!noImg){
+        const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
+        const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
+        details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
+      }
     }else if(ttype==='hill'){
       defs+=`<linearGradient id="${gid}" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#5a4828"/><stop offset="40%" stop-color="${tc}"/><stop offset="100%" stop-color="#3a2e18"/></linearGradient>`;
       for(let i=0;i<3;i++){const px=cx+((rn()-.5)*tw*.6),py=cy+((rn()-.5)*th*.4);const rr=1+rn()*1.5;
@@ -155,13 +159,15 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly){
       details+=`<line x1="${cx-tw*.4}" y1="${cy-th*.05}" x2="${cx}" y2="${cy-th*.35}" stroke="#2a2a40" stroke-width=".6" opacity=".35"/>`;
       details+=`<line x1="${cx}" y1="${cy-th*.35}" x2="${cx+tw*.4}" y2="${cy-th*.05}" stroke="#2a2a40" stroke-width=".5" opacity=".25"/>`;
       // rock 폴더의 랜덤 이미지 오버레이 (회색계열은 2, 갈색/녹색계열은 1)
-      const isGreyscale=/[2-6]a[2-6]a/.test(tc);
-      const rockFolder=isGreyscale?2:1;
-      const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
-      const rockTiles2=['tile_064','tile_065','tile_068'];
-      const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
-      const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
-      rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
+      if(!noImg){
+        const isGreyscale=/[2-6]a[2-6]a/.test(tc);
+        const rockFolder=isGreyscale?2:1;
+        const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
+        const rockTiles2=['tile_064','tile_065','tile_068'];
+        const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
+        const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
+        rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
+      }
     }
   }
   let r=`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>`;

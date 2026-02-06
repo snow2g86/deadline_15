@@ -17,16 +17,16 @@ Object.assign(G, {
       const seed=r*COLS+c;
       const vi=this.tileVar&&this.tileVar[t]!==undefined?this.tileVar[t]:0;
 
-      // 배경 SVG (한 번만 생성)
-      const bgSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,'',t,seed,vi,true);
+      // 배경 SVG (한 번만 생성, 이미지는 추출 후 제거)
+      let bgSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,'',t,seed,vi,true,false);
+      const objImgMatches=bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
+      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
       let bgTile=existingBgTiles.get(pos);
       if(!bgTile){bgTile=document.createElement('div');bgTile.className='iso-tile iso-tile-bg';bgTile.dataset.pos=pos;bgTile.innerHTML=bgSvg;w.appendChild(bgTile)}
+      else if(bgTile.innerHTML!==bgSvg){bgTile.innerHTML=bgSvg}
 
-      // 하이라이트 SVG (hl 변경 시만 업데이트)
-      let hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false);
-      // SVG에서 오브젝트 이미지 추출 및 제거
-      const objImgMatches=hlSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
-      hlSvg=hlSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
+      // 하이라이트 SVG (hl 변경 시만 업데이트, 오브젝트 이미지 제외)
+      const hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false,true);
 
       let hlTile=existingHlTiles.get(pos);
       if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;w.appendChild(hlTile)}
