@@ -138,7 +138,6 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
   if(h>0){r+=`<polygon points="${lf}" fill="${lc}"/><polygon points="${rf}" fill="${rc}"/>`}
   if(!useImg)r+=`<polygon points="${top}" fill="url(#${gid})"/>`;
   r+=`<g clip-path="url(#tc${seed})">${details}</g>`;
-  r+=`<polygon points="${top}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>`;
   if(hl){r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"/>`;
     if(hl==='selected')r+=`<polygon points="${top}" fill="none" stroke="${s}" stroke-width="2" stroke-opacity="1"><animate attributeName="stroke-opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/></polygon>`}
   r+=`</svg>`;return r;
