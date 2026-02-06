@@ -68,7 +68,7 @@ function loadTilesets(){
   return Promise.all(proms).then(()=>{tileImgsLoaded=Object.keys(TILE_SHEETS).length>0});
 }
 
-function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
+function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly){
   const h=z*ZH,W=tw*2,H=th*2+h+2;
   const cx=tw,cy=th;
   const top=`${tw},1 ${W-1},${th} ${tw},${th*2-1} 1,${th}`;
@@ -164,18 +164,21 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
       rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
     }
   }
-  let s='',so=0,f='';
-  if(hl==='move'){s='#3b82f6';so=.7;f='rgba(59,130,246,.15)'}
-  else if(hl==='attack'){s='#ef4444';so=.7;f='rgba(239,68,68,.15)'}
-  else if(hl==='heal'){s='#22c55e';so=.7;f='rgba(34,197,94,.15)'}
-  else if(hl==='selected'){s='#f0c040';so=.9;f='rgba(240,192,64,.12)'}
   let r=`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>`;
   r+=`<clipPath id="tc${seed}"><polygon points="${top}"/></clipPath>`;
   if(h>0){r+=`<polygon points="${lf}" fill="${lc}"/><polygon points="${rf}" fill="${rc}"/>`}
   if(!useImg)r+=`<polygon points="${top}" fill="url(#${gid})"/>`;
   r+=`<g clip-path="url(#tc${seed})">${details}</g>`;
   r+=rockImg;
-  if(hl){r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"/>`;
-    if(hl==='selected')r+=`<polygon points="${top}" fill="none" stroke="${s}" stroke-width="2" stroke-opacity="1"><animate attributeName="stroke-opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/></polygon>`}
+  // 배경만 생성하는 경우 하이라이트 스킵
+  if(!bgOnly){
+    let s='',so=0,f='';
+    if(hl==='move'){s='#3b82f6';so=.7;f='rgba(59,130,246,.15)'}
+    else if(hl==='attack'){s='#ef4444';so=.7;f='rgba(239,68,68,.15)'}
+    else if(hl==='heal'){s='#22c55e';so=.7;f='rgba(34,197,94,.15)'}
+    else if(hl==='selected'){s='#f0c040';so=.9;f='rgba(240,192,64,.12)'}
+    if(hl){r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"/>`;
+      if(hl==='selected')r+=`<polygon points="${top}" fill="none" stroke="${s}" stroke-width="2" stroke-opacity="1"><animate attributeName="stroke-opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/></polygon>`}
+  }
   r+=`</svg>`;return r;
 }
