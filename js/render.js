@@ -1,10 +1,11 @@
 Object.assign(G, {
   // Render
   rTer(){const w=document.getElementById('iso-world');
-    // 2레이어 시스템: 배경(bg)과 하이라이트(hl) 분리
-    const existingBgTiles=new Map(),existingHlTiles=new Map();
+    // 3레이어 시스템: 배경(bg), 하이라이트(hl), 오브젝트(obj) 분리
+    const existingBgTiles=new Map(),existingHlTiles=new Map(),existingObjTiles=new Map();
     w.querySelectorAll('.iso-tile-bg').forEach(el=>{const pos=el.dataset.pos;if(pos)existingBgTiles.set(pos,el)});
     w.querySelectorAll('.iso-tile-hl').forEach(el=>{const pos=el.dataset.pos;if(pos)existingHlTiles.set(pos,el)});
+    w.querySelectorAll('.iso-tile-obj').forEach(el=>{const pos=el.dataset.pos;if(pos)existingObjTiles.set(pos,el)});
     const tilesNeeded=new Set();
 
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=this.ter[r][c],ti=TI[t];
@@ -22,15 +23,27 @@ Object.assign(G, {
       if(!bgTile){bgTile=document.createElement('div');bgTile.className='iso-tile iso-tile-bg';bgTile.dataset.pos=pos;bgTile.innerHTML=bgSvg;w.appendChild(bgTile)}
 
       // 하이라이트 SVG (hl 변경 시만 업데이트)
-      const hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false);
-      let hlTile=existingHlTiles.get(pos);
-      if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;hlTile.innerHTML=hlSvg;w.appendChild(hlTile)}
-      else if(hlTile.innerHTML!==hlSvg){hlTile.innerHTML=hlSvg}
+      let hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false);
+      // SVG에서 오브젝트 이미지 추출 및 제거
+      const objImgMatches=hlSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
+      hlSvg=hlSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
 
-      // 스타일 설정 (bg, hl 모두 동일)
+      let hlTile=existingHlTiles.get(pos);
+      if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;w.appendChild(hlTile)}
+      if(hlTile.innerHTML!==hlSvg){hlTile.innerHTML=hlSvg}
+
+      // 오브젝트 이미지 레이어
+      let objTile=existingObjTiles.get(pos);
+      if(!objTile){objTile=document.createElement('div');objTile.className='iso-tile iso-tile-obj';objTile.dataset.pos=pos;w.appendChild(objTile)}
+      let objHTML='';
+      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];objHTML+=`<img src="${src}" alt="obj" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;">`});
+      if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
+
+      // 스타일 설정 (bg, hl, obj 모두 동일)
       const sx=this.tSX(c,r),sy=this.tSY(c,r,ti.z),sw=(TW*2)+'px',sh=(TH*2+ti.z*ZH+2)+'px',zix=this.g2v(c,r);
       bgTile.style.left=sx+'px';bgTile.style.top=sy+'px';bgTile.style.width=sw;bgTile.style.height=sh;bgTile.style.zIndex=zix.vc+zix.vr;
       hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr;
+      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=zix.vc+zix.vr+1;
 
       // 하이라이트 클래스 설정
       hlTile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
@@ -42,6 +55,7 @@ Object.assign(G, {
     // 불필요한 타일 삭제
     existingBgTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
     existingHlTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
+    existingObjTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
     w.querySelectorAll('.tree-obj').forEach(e=>e.remove());},
 
   rUnits(){const w=document.getElementById('iso-world'),al=this.units.filter(u=>u.hp>0),ids=new Set();
