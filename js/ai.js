@@ -237,7 +237,7 @@ Object.assign(G, {
     // Warrior 강타: 분노 3+ && 킬각 있음
     if (u.cls === 'warrior' && u.res >= 3) {
       const inR = this.atkC(u)
-        .filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally'; })
+        .filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && !isStealthed(v); })
         .map(c => this.uAt(c.x, c.y));
       for (const t of inR) {
         const dmg = Math.max(1, Math.round(u.atk * 1.5 - t.def));
@@ -276,8 +276,8 @@ Object.assign(G, {
       for (let y = u.y - 1; y <= u.y + 1; y++) {
         for (let x = u.x - 1; x <= u.x + 1; x++) {
           if (x === u.x && y === u.y) continue;
-          // 3x3 범위(정사각형) 내의 적 개수 계산
-          const cnt = al.filter(a => Math.abs(a.x - x) <= 1 && Math.abs(a.y - y) <= 1).length;
+          // 3x3 범위(정사각형) 내의 적 개수 계산 (은신한 아군 제외)
+          const cnt = al.filter(a => !isStealthed(a) && Math.abs(a.x - x) <= 1 && Math.abs(a.y - y) <= 1).length;
           if (cnt >= 2 && cnt > maxCluster) { maxCluster = cnt; targetCell = { x, y }; }
         }
       }
@@ -286,7 +286,7 @@ Object.assign(G, {
         for (let y = targetCell.y - 1; y <= targetCell.y + 1; y++) {
           for (let x = targetCell.x - 1; x <= targetCell.x + 1; x++) {
             const t = this.uAt(x, y);
-            if (t && t.team === 'ally') {
+            if (t && t.team === 'ally' && !isStealthed(t)) {
               const dmg = calcDmg(u, t);
               t.hp = Math.max(0, t.hp - dmg);
               this.floatT(t.x, t.y, `-${dmg}`, 'damage');
@@ -316,7 +316,7 @@ Object.assign(G, {
       await this.eMv(u,al);return
     }
     // Check attack from current position first
-    const inR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
+    const inR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&!isStealthed(v)}).map(c=>this.uAt(c.x,c.y));
     if(inR.length&&profile.targetPriority!=='never'){
       // 스킬 사용 시도
       if(await this.tryUseSkill(u,profile)){return}
@@ -336,7 +336,7 @@ Object.assign(G, {
     // Attack after move (지원 클래스는 스킵)
     if(profile.avoidCombat&&u.hp>u.mhp*0.7)return;
     await sl(200);
-    const postR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
+    const postR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&!isStealthed(v)}).map(c=>this.uAt(c.x,c.y));
     if(postR.length&&profile.targetPriority!=='never'){
       // 스킬 사용 시도
       if(await this.tryUseSkill(u,profile)){return}
@@ -453,7 +453,7 @@ Object.assign(G, {
     if(!validMoves.length)return;
 
     let bt=null,bd=Infinity;
-    for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<bd){bd=d;bt=a}}
+    for(const a of al){if(isStealthed(a))continue;const d=mh(u.x,u.y,a.x,a.y);if(d<bd){bd=d;bt=a}}
 
     // Special unit logic: assassins prefer forests
     if(u.cls==='assassin'){
@@ -492,7 +492,7 @@ Object.assign(G, {
 
     // Keep distance: 원거리 유닛이 거리 유지
     let cbt=null,cbd=Infinity;
-    for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<cbd){cbd=d;cbt=a}}
+    for(const a of al){if(isStealthed(a))continue;const d=mh(u.x,u.y,a.x,a.y);if(d<cbd){cbd=d;cbt=a}}
     if(profile.keepDistance&&cbt&&mh(u.x,u.y,cbt.x,cbt.y)<=2){
       let bestMove=null,bestDist=0;
       for(const m of validMoves){
