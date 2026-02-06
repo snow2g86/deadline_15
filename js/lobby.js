@@ -500,12 +500,11 @@ Object.assign(G,{
       for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
       items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
     }
-    // 전직서 5개 (가중치 랜덤)
-    for(let i=0;i<5;i++){
-      const totalW=CLASS_CHANGE_SCROLLS.reduce((s,sc)=>s+sc.weight,0);
-      let r=Math.random()*totalW,scroll=CLASS_CHANGE_SCROLLS[0];
-      for(const sc of CLASS_CHANGE_SCROLLS){r-=sc.weight;if(r<=0){scroll=sc;break}}
-      items.push({type:'class_change',scrollId:scroll.id,name:scroll.name,icon:scroll.icon,desc:scroll.desc,classes:scroll.classes,cost:scroll.cost,sold:false});
+    // 각 직업 교본 (노비스 제외)
+    const allClasses=Object.keys(CD).filter(c=>c!=='novice'&&!c.startsWith('summon'));
+    for(const cls of allClasses){
+      const d=CD[cls];
+      items.push({type:'class_change',scrollId:`cc_${cls}`,name:`${d.name} 교본`,icon:d.icon,desc:`노비스를 ${d.name}으로 전직`,classes:[cls],cost:150,sold:false});
     }
     this._shopData={ts:Date.now(),items};
     this._saveShop();
