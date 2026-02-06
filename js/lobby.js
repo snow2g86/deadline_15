@@ -184,12 +184,16 @@ Object.assign(G,{
 
   _initStageSelectPage(){
     const l=document.getElementById('stage-list');l.innerHTML='';
-    STAGES.forEach((st,i)=>{
-      const ul=i===0||this.cleared.has(i);
-      const cl=this.cleared.has(i+1);
-      const b=document.createElement('div');b.className='stage-btn'+(ul?'':' locked')+(cl?' cleared':'');
+    // unlock된 스테이지만 필터링 (아직 오픈 전인 것은 숨김)
+    const availableStages = STAGES.filter((_,i)=>i===0||this.cleared.has(i));
+    // cleared 상태로 정렬 (클리어된 것이 위로)
+    availableStages.sort((a,b)=>(this.cleared.has(b.id)-this.cleared.has(a.id)));
+
+    availableStages.forEach((st)=>{
+      const cl=this.cleared.has(st.id);
+      const b=document.createElement('div');b.className='stage-btn'+(cl?' cleared':'');
       b.innerHTML=`<div class="sb-num">${st.id}</div><div class="sb-name">${st.name}</div><div class="sb-info">적 ${st.tot}체</div><div class="sb-stars">${cl?'⭐':'☆'}</div>`;
-      if(ul)b.onclick=()=>{
+      b.onclick=()=>{
         this._loadParty();
         // 죽은 유닛 제거
         this.party=this.party.filter(uid=>{const ch=ROSTER.getChar(uid);return ch&&!ch.dead});
