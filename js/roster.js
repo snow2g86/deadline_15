@@ -37,7 +37,8 @@ const ROSTER = {
 
   // ── 첫 실행 기본 지급 ──────────────────
   grantStarter() {
-    const starters = ['novice','novice','novice','novice','novice'];
+    // 테스트용: 모든 12개 클래스 1명씩 지급
+    const starters = ['novice','warrior','knight','assassin','archer','mage','priest','sapper','summoner','shaman','brawler','lancer'];
     const used = new Set();
     starters.forEach(cls => {
       let name;
