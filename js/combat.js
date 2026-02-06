@@ -384,7 +384,10 @@ Object.assign(G, {
     // 도약: 지정 위치로 빠르게 이동
     if(skObj.id==='archer_dash'){
       if(this.uAt(tx,ty)){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
+      const startX=u.x,startY=u.y;
       u.x=tx;u.y=ty;u.mo=true;
+      // 시작 위치에 이동 흔적 남김
+      this.vfxSpawn(this.uSX(startX,startY)+UCX,this.uSY(startY,startY)+UCY,{count:12,colors:['#ccf','#99f','#66f'],shape:'spark',speed:3,spread:10,decay:0.02,size:2});
       this.animU(u.id,tx,ty);
       this.floatT(u.x,u.y,t('messages.archer_leap'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:0.02,size:3});
