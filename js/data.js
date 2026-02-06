@@ -25,17 +25,9 @@ function actExp(stageId, action) {
     return Math.floor((base[action] || 0) * (1 + stageId * 0.2));
 }
 const EXP_POTIONS = [
-    { id: 'exp_s', name: '소형 경험치 물약', icon: '🧪', exp: 50, cost: 40, weight: 50 },
-    { id: 'exp_m', name: '중형 경험치 물약', icon: '⚗️', exp: 150, cost: 100, weight: 35 },
-    { id: 'exp_l', name: '대형 경험치 물약', icon: '🏺', exp: 400, cost: 240, weight: 15 },
-];
-
-const CLASS_CHANGE_SCROLLS = [
-    { id: 'cc_melee', name: '근접 전직서', icon: '📜', desc: '노비스를 근접 직업으로 전직', classes: ['warrior', 'knight', 'assassin', 'brawler', 'lancer', 'sapper'], cost: 150, weight: 30 },
-    { id: 'cc_ranged', name: '원거리 전직서', icon: '📋', desc: '노비스를 원거리 직업으로 전직', classes: ['archer', 'mage', 'shaman'], cost: 150, weight: 30 },
-    { id: 'cc_summoner', name: '소환사 교본', icon: '📖', desc: '노비스를 소환사로 전직', classes: ['summoner'], cost: 150, weight: 30 },
-    { id: 'cc_healer', name: '힐러 전직서', icon: '📃', desc: '노비스를 사제로 전직', classes: ['priest'], cost: 120, weight: 20 },
-    { id: 'cc_universal', name: '범용 전직서', icon: '🎖️', desc: '노비스를 원하는 직업으로 전직', classes: ['warrior', 'knight', 'assassin', 'archer', 'mage', 'priest', 'summoner', 'shaman', 'brawler', 'lancer', 'sapper'], cost: 200, weight: 10 },
+    { id: 'exp_s', name: '소형 경험치 물약', icon: '🧪', exp: 50, cost: 400, weight: 50 },
+    { id: 'exp_m', name: '중형 경험치 물약', icon: '⚗️', exp: 150, cost: 1000, weight: 35 },
+    { id: 'exp_l', name: '대형 경험치 물약', icon: '🏺', exp: 400, cost: 2400, weight: 15 },
 ];
 
 // ── 클래스 아이콘 (이모지) ──────────────

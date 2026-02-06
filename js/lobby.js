@@ -490,10 +490,25 @@ Object.assign(G, {
 			const raw = localStorage.getItem(this._shopKey);
 			if (raw) {
 				const d = JSON.parse(raw);
-				if (Date.now() - d.ts < 6 * 3600 * 1000) { this._shopData = d; return }
+				if (Date.now() - d.ts < 6 * 3600 * 1000) {
+					this._shopData = d;
+					// 전직서는 항상 새로 생성
+					this._refreshClassChangeScrolls();
+					return;
+				}
 			}
 		} catch (e) { }
 		this._genShop();
+	},
+	_refreshClassChangeScrolls() {
+		// 기존 전직서 제거
+		this._shopData.items = this._shopData.items.filter(item => item.type !== 'class_change');
+		// 새로운 전직서 생성
+		const allClasses = Object.keys(CD).filter(c => c !== 'novice' && !c.startsWith('summon_'));
+		for (const cls of allClasses) {
+			const d = CD[cls];
+			this._shopData.items.push({ type: 'class_change', scrollId: `cc_${cls}`, name: t('classes.' + cls) + ' ' + t('shop.class_change_suffix'), i18nNameKey: `classes.${cls}`, i18nSuffixKey: 'shop.class_change_suffix', icon: d.icon, desc: t('shop.class_change_desc', { class: t('classes.' + cls) }), classes: [cls], cost: 500, sold: false });
+		}
 	},
 	_genShop() {
 		const classes = Object.keys(CD).filter(c => !c.startsWith('summon'));
@@ -509,7 +524,13 @@ Object.assign(G, {
 				def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1)
 			};
 			const name = charNames[Math.floor(Math.random() * charNames.length)];
-			const cost = 60 + Math.floor(Math.random() * 40);
+			// 등급과 스탯에 비례한 가격 계산
+			const g = d.growth;
+			const scores = ['hp', 'atk', 'def'].map(k => { const [mn, mx] = g[k]; const rng = mx - mn; return rng > 0 ? (pot[k] - mn) / rng : 0.5 });
+			const avg = scores.reduce((a, b) => a + b, 0) / 3;
+			const grade = avg >= 0.85 ? 'S' : avg >= 0.65 ? 'A' : avg >= 0.35 ? 'B' : 'C';
+			const baseCost = { 'S': 900, 'A': 700, 'B': 550, 'C': 450 };
+			const cost = Math.round(baseCost[grade] * (0.9 + avg * 0.2));
 			items.push({ type: 'char', cls, name, pot, cost, sold: false });
 		}
 		// 물약 5개 (가중치 랜덤)
@@ -520,13 +541,9 @@ Object.assign(G, {
 			for (const p of EXP_POTIONS) { r -= p.weight; if (r <= 0) { pot = p; break } }
 			items.push({ type: 'potion', potionId: pot.id, name: pot.name, i18nNameKey: `shop.${potionKeys[pot.id]}`, icon: pot.icon, exp: pot.exp, cost: pot.cost, sold: false });
 		}
-		// 각 직업 교본 (노비스 제외)
-		const allClasses = Object.keys(CD).filter(c => c !== 'novice' && !c.startsWith('summon_'));
-		for (const cls of allClasses) {
-			const d = CD[cls];
-			items.push({ type: 'class_change', scrollId: `cc_${cls}`, name: t('classes.' + cls) + ' ' + t('shop.class_change_suffix'), i18nNameKey: `classes.${cls}`, i18nSuffixKey: 'shop.class_change_suffix', icon: d.icon, desc: t('shop.class_change_desc', { class: t('classes.' + cls) }), classes: [cls], cost: 150, sold: false });
-		}
+		// 전직서는 _refreshClassChangeScrolls()에서 생성
 		this._shopData = { ts: Date.now(), items };
+		this._refreshClassChangeScrolls();
 		this._saveShop();
 	},
 	_saveShop() { try { localStorage.setItem(this._shopKey, JSON.stringify(this._shopData)) } catch (e) { } },
