@@ -16,10 +16,16 @@ Object.assign(G, {
       const svg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi);
 
       // 기존 요소 재사용 또는 새로 생성
-      let tile=existingTiles.get(pos);if(!tile){tile=document.createElement('div');tile.className='iso-tile';tile.dataset.pos=pos;w.appendChild(tile)}
+      let tile=existingTiles.get(pos);
+      if(!tile){
+        tile=document.createElement('div');tile.className='iso-tile';tile.dataset.pos=pos;
+        tile.dataset.svg=svg;tile.innerHTML=svg;w.appendChild(tile)
+      }else if(tile.dataset.svg!==svg){
+        tile.dataset.svg=svg;tile.innerHTML=svg  // SVG 변경 필요할 때만 업데이트
+      }
       tile.style.left=this.tSX(c,r)+'px';tile.style.top=this.tSY(c,r,ti.z)+'px';
       tile.style.width=(TW*2)+'px';tile.style.height=(TH*2+ti.z*ZH+2)+'px';
-      const v=this.g2v(c,r);tile.style.zIndex=v.vc+v.vr;tile.innerHTML=svg;
+      const v=this.g2v(c,r);tile.style.zIndex=v.vc+v.vr;
       tile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
       if(hl==='move')tile.classList.add('hl-move');
       else if(hl==='attack')tile.classList.add('hl-attack');
@@ -68,8 +74,17 @@ Object.assign(G, {
   floatT(x,y,t,tp){const w=document.getElementById('iso-world'),el=document.createElement('div');
     el.className=`float-text ${tp}`;el.textContent=t;el.style.left=(this.uSX(x,y)+UCX/2)+'px';el.style.top=(this.uSY(x,y)-8)+'px';el.style.zIndex=500;
     w.appendChild(el);setTimeout(()=>el.remove(),950)},
-  showAM(u){const m=document.getElementById('action-menu');m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
-    m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
+  showAM(u){const m=document.getElementById('action-menu');
+    const w=document.getElementById('iso-world');
+    const wLeft=parseFloat(w.style.left||0), wTop=parseFloat(w.style.top||0);
+    const ux=this.uSX(u.x,u.y)+wLeft, uy=this.uSY(u.x,u.y)+wTop;
+    const ct=document.getElementById('map-container');
+    const ctWidth=ct.clientWidth;
+    let menuLeft=ux+UW+2;
+    // 오른쪽으로 나가면 왼쪽 표시
+    if(menuLeft+140>ctWidth)menuLeft=ux-140-2;
+    menuLeft=Math.max(0,Math.min(menuLeft,ctWidth-140));
+    m.style.left=menuLeft+'px';m.style.top=Math.max(0,uy)+'px';m.style.zIndex=600;
     // 채널링 중: 해제 버튼만
     if(u.channeling){
       this.hideAllMenuButtons();
