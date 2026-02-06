@@ -43,8 +43,8 @@ Object.assign(G, {
     if(!s){if(cl)this.selU(cl);return}
     // Stealth movement (assassin into enemy-occupied forest)
     if(cl&&cl.team==='enemy'&&s.cls==='assassin'&&s.team==='ally'&&!s.ha&&this.ter[y]&&this.ter[y][x]==='forest'&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
-    if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.awPM&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
-    if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&this.awPM&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
+    if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
+    if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
     if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
     if(cl){this.selU(cl);return}this.clrSel()},
   // 이동 버튼 클릭 핸들러

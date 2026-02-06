@@ -80,16 +80,14 @@ Object.assign(G, {
     // 1. 이동 버튼 (이동 가능한 경우만)
     document.getElementById('btn-move').style.display=
       (!this.awPM&&this.mvT.length>0)?'':'none';
-    // 2. 공격 버튼 (이동했고 && 적군이 사거리에 있을 경우)
+    // 2. 공격 버튼 (적군이 사거리에 있을 경우)
     const btnAttack=document.getElementById('btn-attack');
-    if(this.awPM){
-      if(u.role==='healer'){
-        btnAttack.textContent='💚 치유';
-        btnAttack.style.display=this.healT.length>0?'':'none'}
-      else{
-        btnAttack.textContent='⚔️ 공격';
-        btnAttack.style.display=this.atkT.length>0?'':'none'}}
-    else{btnAttack.style.display='none'}
+    if(u.role==='healer'){
+      btnAttack.textContent='💚 치유';
+      btnAttack.style.display=this.healT.length>0?'':'none'}
+    else{
+      btnAttack.textContent='⚔️ 공격';
+      btnAttack.style.display=this.atkT.length>0?'':'none'}
     // 3. 스킬 버튼 (이동했고 && 사용 가능한 스킬이 있을 경우)
     const skills=getSkills(u.cls);
     const hasUsableSkill=this.awPM&&skills.some(sk=>this.canUseSkill(u,sk));
