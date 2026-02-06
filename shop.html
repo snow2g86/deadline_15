@@ -29,8 +29,16 @@
   <div class="shop-hud">
     <div class="shop-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold" style="width:18px;height:auto;vertical-align:middle;margin-right:3px"><span id="shop-gold-val">0</span> G</div>
   </div>
+  <div class="shop-tabs-wrapper">
+    <div class="shop-tabs">
+      <button class="shop-tab-btn active" data-tab="mercenary" onclick="G.switchTab('mercenary')">용병</button>
+      <button class="shop-tab-btn" data-tab="item" onclick="G.switchTab('item')">아이템</button>
+      <button class="shop-tab-btn" data-tab="job" onclick="G.switchTab('job')">직업</button>
+      <button class="shop-tab-btn" data-tab="gold" onclick="G.switchTab('gold')">골드</button>
+    </div>
+  </div>
   <div class="shop-info-row">
-    <div class="shop-info-title">전투원을 모집하세요</div>
+    <div class="shop-info-title" id="shop-info-title">용병을 모집하세요</div>
     <div class="shop-info-timer" id="shop-timer">갱신까지 --</div>
   </div>
   <div id="shop-list" class="card-list"></div>

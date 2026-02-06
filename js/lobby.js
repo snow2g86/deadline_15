@@ -83,6 +83,7 @@ Object.assign(G,{
   _shopKey:'game_shop',
   _navKey:'game_nav',
   _partyKey:'game_party',
+  _currentShopTab:'mercenary',
 
   // ══ 네비게이션 임시 데이터 ══
   _saveNav(data){try{localStorage.setItem(this._navKey,JSON.stringify(data))}catch(e){}},
@@ -508,13 +509,37 @@ Object.assign(G,{
     this._saveShop();
   },
   _saveShop(){try{localStorage.setItem(this._shopKey,JSON.stringify(this._shopData))}catch(e){}},
+
+  // ── 탭 전환 ──
+  switchTab(tab){
+    this._currentShopTab=tab;
+    const btns=document.querySelectorAll('.shop-tab-btn');
+    btns.forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab)});
+    this._renderShop();
+  },
+
   _renderShop(){
     const list=document.getElementById('shop-list');list.innerHTML='';
     const timeEl=document.getElementById('shop-timer');
+    const titleEl=document.getElementById('shop-info-title');
     const remain=Math.max(0,6*3600*1000-(Date.now()-this._shopData.ts));
     const h=Math.floor(remain/3600000);const m=Math.floor((remain%3600000)/60000);
     timeEl.textContent=`갱신까지 ${h}시간 ${m}분`;
-    this._shopData.items.forEach((item,idx)=>{
+
+    // 탭별 안내 문구
+    const tabTitles={'mercenary':'용병을 모집하세요','item':'아이템을 구매하세요','job':'직업을 선택하세요','gold':'골드를 구매하세요'};
+    titleEl.textContent=tabTitles[this._currentShopTab]||'상점';
+
+    // 현재 탭에 맞는 아이템만 필터링
+    const tabTypeMap={'mercenary':'char','item':'potion','job':'class_change','gold':null};
+    const filterType=tabTypeMap[this._currentShopTab];
+    const filteredItems=this._shopData.items.filter(item=>{
+      const iType=item.type||'char';
+      if(this._currentShopTab==='gold')return false; // 골드 탭은 추후 개발
+      return iType===filterType;
+    });
+
+    filteredItems.forEach((item,idx)=>{
       const iType=item.type||'char';
       if(iType==='char'){
         const d=CD[item.cls];
