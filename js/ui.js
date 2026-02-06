@@ -134,7 +134,7 @@ Object.assign(G, {
   uUI(){const ti=document.getElementById('turn-indicator');ti.textContent=this.phase==='player'?'PLAYER':'ENEMY';ti.className=this.phase;
     const s=this.cStage,en=this.alive('enemy').length;
     const br=s?this.breached:0,blim=s?Math.ceil(s.tot/4):0;
-    document.getElementById('stage-info').innerHTML=`STAGE ${s?s.id:1} <span style="color:var(--dim);font-size:9px">${s?s.name:''}</span>
+    document.getElementById('stage-info').innerHTML=`STAGE ${s?s.id:1} <span style="color:var(--dim);font-size:9px">${s?t('stages.stage_'+s.id+'_name'):''}</span>
       <div class="si-turn">TURN ${this.turn} · ${t('battle.summon')} ${this.eSpwn}/${s?s.tot:'?'} · ${t('battle.remaining')} ${en}체 · <span style="color:${br>0?'#ef4444':'var(--dim)'}">
 ${t('battle.breach')} ${br}/${blim}</span></div>`;
     document.getElementById('btn-end-turn').disabled=this.phase!=='player'},
