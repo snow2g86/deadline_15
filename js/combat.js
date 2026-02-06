@@ -42,7 +42,10 @@ Object.assign(G, {
       if(!cl && (this.mvT.length>0 || this.atkT.length>0 || this.healT.length>0) && !this.mvT.some(c=>c.x===x&&c.y===y) && !this.atkT.some(c=>c.x===x&&c.y===y) && !this.healT.some(c=>c.x===x&&c.y===y)){
         this.mvT=[];this.atkT=[];this.healT=[];this.rTer();this.showAM(s);return;
       }
-      // Rule 1/5: 행동 안 하고 다른곳 클릭 → 대기 상태 진입
+      // 범위가 표시되지 않은 상태에서 빈 곳 클릭 → 선택 취소만 (대기 상태 X)
+      const hasRange=this.mvT.length>0||this.atkT.length>0||this.healT.length>0;
+      if(!hasRange&&!cl){this.clrSel();return}
+      // 범위가 표시된 상태에서 유효한 타겟을 선택하지 않으면 → 대기 상태 진입
       s.ha=true;s.waited=true;this.awPM=false;this.hideAM();this.clrSel();
       if(cl&&cl.team!=='enemy'){const nu=this.uAt(x,y);if(nu)this.selU(nu)}
       this.chkAutoEnd();return}
