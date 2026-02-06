@@ -22,7 +22,8 @@
       "Bash(grep:*)",
       "Bash(git revert:*)",
       "Bash(wc:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

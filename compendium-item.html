@@ -84,13 +84,13 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 <body>
 
 <div class="header">
-  <h1>🧪 아이템 도감</h1>
-  <div class="sub">경험치 물약 및 아이템 정보 · Defense RPG</div>
+  <h1 data-i18n="compendium.title_item">${t('compendium.title_item')}</h1>
+  <div class="sub" data-i18n="compendium.subtitle_item">${t('compendium.subtitle_item')}</div>
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="list">📋 아이템 목록</button>
-  <button class="tab-btn" data-tab="analysis">📊 효율 분석</button>
+  <button class="tab-btn active" data-tab="list" data-i18n="compendium.tab_card_view" style="display:flex;align-items:center;gap:4px"><span>📋</span><span>${t('compendium.tab_card_view')}</span></button>
+  <button class="tab-btn" data-tab="analysis" data-i18n="compendium.tab_efficiency" style="display:flex;align-items:center;gap:4px"><span>💎</span><span>${t('compendium.tab_efficiency')}</span></button>
 </div>
 
 <div class="content">
@@ -116,16 +116,8 @@ th:nth-child(2),td:nth-child(2){text-align:left}
     </div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-        💡 아이템 정보
-      </div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
-        경험치 물약은 상점에서 구매하여 캐릭터에게 직접 사용할 수 있습니다.<br>
-        각 물약의 효율(경험치 / 가격)을 비교하여 최적의 선택을 할 수 있습니다.<br>
-        <br>
-        <span style="color:var(--gold);font-weight:700">상점 구성:</span> 매 방문 시 캐릭터 3개 + 물약 2개가 렌덤으로 생성됩니다.<br>
-        물약 선택 확률은 weight 필드에 따라 결정됩니다.
-      </div>
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.item_info_title">${t('guide.item_info_title')}</div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.item_info_desc">${t('guide.item_info_desc')}</div>
     </div>
   </div>
 
@@ -135,18 +127,8 @@ th:nth-child(2),td:nth-child(2){text-align:left}
     <div id="efficiency-cards"></div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-        🎯 구매 추천
-      </div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
-        <span style="color:var(--green);font-weight:700">✓ 권장:</span> 경험치 물약은 모두 효율이 우수합니다.<br>
-        충분한 골드가 있다면 대형 물약부터 구매하는 것이 좋습니다.<br>
-        <br>
-        <span style="color:var(--gold);font-weight:700">효율 기준:</span><br>
-        - 대형 (🏺): 1.67 EXP/G - 가장 효율이 좋음<br>
-        - 중형 (⚗️): 1.50 EXP/G - 중간 효율<br>
-        - 소형 (🧪): 1.25 EXP/G - 기본 효율
-      </div>
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.efficiency_title">${t('guide.efficiency_title')}</div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.efficiency_desc">${t('guide.efficiency_desc')}</div>
     </div>
   </div>
 
@@ -155,11 +137,11 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 <nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
   display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
   <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby">${t('compendium.nav_lobby')}</button>
   <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">📚 직업</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class">${t('compendium.nav_class')}</button>
   <button onclick="location.href='compendium-stage.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🗺 스테이지</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_stage">${t('compendium.nav_stage')}</button>
 </nav>
 
 <script>
@@ -253,11 +235,26 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
+// 안내문 렌더링
+function renderGuides(){
+  const itemInfoSection=document.querySelector('[data-i18n="guide.item_info_title"]')?.parentElement;
+  if(itemInfoSection){
+    itemInfoSection.querySelector('div:first-child').textContent=t('guide.item_info_title');
+    itemInfoSection.querySelector('div:last-child').innerHTML=t('guide.item_info_desc');
+  }
+  const efficiencySection=document.querySelector('[data-i18n="guide.efficiency_title"]')?.parentElement;
+  if(efficiencySection){
+    efficiencySection.querySelector('div:first-child').textContent=t('guide.efficiency_title');
+    efficiencySection.querySelector('div:last-child').innerHTML=t('guide.efficiency_desc');
+  }
+}
+
 // 초기화
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     renderItemTable();
     renderEfficiencyAnalysis();
+    renderGuides();
   }, 300);
 });
 </script>

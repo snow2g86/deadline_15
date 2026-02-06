@@ -68,7 +68,36 @@ const I18N_DATA = {
       "no_dead_units": "사망한 전투원이 없습니다",
       "reward": "🏅 보상: {gold} Gold",
       "killed": "💀 전사자: {count}명 (성소에서 부활 가능)",
-      "battle_summary": "📈 처치 {kills}체 · 총 {exp} EXP"
+      "battle_summary": "📈 처치 {kills}체 · 총 {exp} EXP",
+      "select_move_target": "이동할 곳을 선택하세요",
+      "select_attack_target": "공격할 대상을 선택하세요",
+      "select_heal_target": "치유할 대상을 선택하세요",
+      "item_system_preparing": "아이템 시스템 준비 중",
+      "heal": "💚 치유",
+      "attack": "⚔️ 공격",
+      "wait": "⏸️ 대시",
+      "cancel": "↩️ 취소",
+      "fury_buff": "광폭!",
+      "assassin_raid": "습격!",
+      "assassin_assassinate": "암살!",
+      "summoner_limit": "소환 한계!",
+      "no_empty_tile": "빈 칸 없음!",
+      "summoner_no_spawn": "소환 불가!",
+      "priest_mass_heal": "집단 치유!",
+      "trap_installed": "⚠️ 함정 설치!",
+      "mage_fireball": "화염폭발!",
+      "warrior_strike": "강타!",
+      "lancer_pierce": "관통!",
+      "knight_switch": "스위치!",
+      "archer_leap": "도약!",
+      "stone_throw": "돌던지기!",
+      "brawler_disarm": "무장해제!",
+      "atk_reduced": "ATK -50%",
+      "shaman_curse": "쇠약의 저주!",
+      "shaman_exalt": "고양!",
+      "sapper_summon": "{name} 소환!",
+      "channel_cancel": "채널링 해제",
+      "unlock": "🔓 해제"
     },
     "party": {
       "title": "파티 편성",
@@ -105,12 +134,15 @@ const I18N_DATA = {
     },
     "settings": {
       "title": "설정",
-      "language": "언어",
-      "bgm": "배경음악",
-      "sfx": "효과음",
+      "language": "🌐 언어",
+      "bgm": "🎵 배경음악",
+      "sfx": "🔊 효과음",
       "volume": "볼륨",
-      "game_speed": "게임 속도",
-      "reset_all": "⚠ 모든 데이터 초기화"
+      "game_speed": "⏩ 게임 속도",
+      "reset_all": "⚠ 모든 데이터 초기화",
+      "language_ko": "한국어 (Korean)",
+      "language_en": "English",
+      "language_es": "Español"
     },
     "compendium": {
       "title_class": "📖 직업 도감",
@@ -230,6 +262,9 @@ const I18N_DATA = {
       "stage_10_name": "마계의 군주",
       "stage_10_theme": "마계 침공",
       "stage_10_story": "마계의 군주를 무찌르고 평화를 되찾아라"
+    },
+    "character": {
+      "names": ["아서","아리엘","아르겐","아델","아스텔","아드리아","아론","아가레스","아르카","아벨","아나이스","아라곤","아르웬","아크","아틀라스","아폴로","알렉스","알리사","알버트","알타이르","알렌","알리시아","앰브로즈","앤드류","앤셀","앨리스","알란","앰버","이단","에릭","에반","에스텔","에드거","에드윈","에리스","에리카","에밀리","에이든","에이브릴","에린","에즈라","에크하르트","액시온","엘라","엘로이","엘리","엘리자","엘리자","엘릭","엘시","엘윈","엘사","엘프리데","엠마","오데트","오리온","오스카","오필리아","올리버","올리비아","와이엇","윌리엄","윈터","유니","우리엘","유스티샤","이그니스","이나","이다","이라","이리나","이반","이사벨","이졸데","이안","이오","이카로스","이트리","일리아스","자비에르","잭","진","재스퍼","잭","제레미","제로","제롬","제리","제시카","제이드","제이슨","제이크","제인","젤다","조나단","조슈아","조이","조지","줄리아","줄리안","제케","진","질","찰스","채드","첼시","카나","카디스","카라","카론","카류","카밀라","카스","카시우스","카엘","카이","카일","카트리나","칼","칼리","칼릭스","카린","캐서린","케이시","케빈","칼레","켈리","켈타스","켄","코라","코델리아","코디","코어","콜린","컴","쿠퍼","퀸","퀸시","큐","크리스","크리스티나","클라라","클라우드","클레어","클로에","클리프","키라","키리안","키아라","키안","타니아","타라","타일러","테라","테오","테오도르","테이","테일러","토마스","토비","트리스","트리스탄","티나","티라","티모시","티아","티아나","테오","파비안","파스칼","페라","페이","페이트","펠릭스","펜리르","포비","폴","프란","프란시스","프레드","프레이야","플로라","피터","핏","필립","하디","하르트","하비","하이디","하인","한나","한스","해리","헌터","헤라","헤르만","헤일리","헥터","헨리","헬가","헬렌","호크","홀리","휴","히스","힐다","가브리엘","가이","가르트","갈라드","거스","그레이","그레이스","그리핀","글렌","기디언","길","나나","나디아","나란","나르","나이","나탈리","나단","네로","네스","넬","노라","노아","녹스","니나","니콜","니키","닉","다나","다니엘","다리오","다리우스","다이애나","다크","댄","달리아","대니","다미안","데이비드","데이지","덱스","델라","도라","도리스","도미닉","돈","라나","라라","라르스","라이","라이언","라일라","라파엘","란","랜슬롯","랄프","래리","렉스","란드","레나","레오나르드","레니","레오","레온","레이","레이나","레이븐","레이첼","렉스","로라","로렌","로로","로리","로이드","카이토","렌","하루","유키","사쿠라","켄지","아키라","히카리","소라","린","리쿠","미오","나츠","루피","조로","상지","나미","우솝","초퍼","로빈","프랑키","브룩","징베","나루토","사스케","사쿠라","카카시","히나타","가아라","이타치","이치고","루키아","오리히메","우류","렌지","뱌쿠야","토시로","켄파치","긴","아이젠","탄지로","네즈코","젠이츠","이노스케","기유","시노부","렌고쿠","텐겐","미츠리","무이치로","교메이","사네미","오바나이","데쿠","바쿠고","쇼토","우라라카","이이다","츠유","키리시마","카미나리","지로","모모","토쿠야미","미나","하가쿠레","쇼타","올마이트","엔데버","호크스","에렌","미카사","아르민","리바이","에르윈","하녀","사샤","코니","장","히스토리아","라이토","엘","미사","니아","멜로","류크","렘","곤","킬루아","쿠라피카","레오리오","히소카","크로롤","네테로","메리엠","코무기","긴토키","신파치","카구라","사다하루","히지카타","오키타","콘도","카츠우라","엘리자베스","신스케","카무이","아톰","코난","란","하이바라","겐타","미츠히코","아유미","소노코","헤이지","카주하","괴도 키드","아무로","아카이","신지","레이","아스카","카오루","마리","미사토","겐도","료","카오리","코세이","츠바키","와타리","타키","미츠하","호다카","히나","소피","하울","치히로","하쿠","산","아시타카","토토로","키키","뽀녀","시타","파즈","나우시카","세일러문","턱시도가면","머큐리","마즈","주피터","비너스","치비우사","우라누스","넵튠","플루토","새턴","애쉬","피카츄","미스티","브록","로사","로이","테일","매튜","소라","한솔","미나","석이","리키","나리","류","켄","춘리","가일","달심","블랑카","장기에프","혼다","비송","베가","사가트","베가","아카리","히카루","우미","후우","목나","클램프","체리","샤오란","지수","도진","청명","에리올","크로우","유테리","유도진","오청명","루비","스피넬","케로","유에","세슈마루","이누야샤","가영","미로쿠","산고","시포","기라라","나라쿠","카라","칸나","학도시","모료마루","팬텀 박야","린","작켄","코우가","아야메","긴타","하쿠아쿠","토토사이","묘가","콩고","카에데","츠바사","샤오란","사쿠라","파이","쿠로가네","목나","유코","와타누키","도메키","히마와리","코하네","마루","모로","아라라기","센죠가하라","하치쿠지","칸바루","센고쿠","하네카와","오시노","시노부","카렌","츠키히","요츠기","오노데라","치토게","츠구미","마리카","루리","슈","라쿠","교코","강도현","강서준","강지민","고은별","구민재","권소윤","김가은","김도준","김민준","김세연","김수아","김예준","김우진","김지우","김지호","김하은","김현우","나영석","남주혁","노을","류승민","류지혜","문지수","민경훈","박건우","박서영","박수민","박연진","박지영","박현준","배수지","백승호","서동현","서지훈","성민재","손예진","송강호","송민호","신이은","신지수","안재현","양세성","오지호","우도환","유아인","유재석","윤도현","윤서아","이도현","이서진","이수혁","이승기","이정재","이중기","이지은","이현우","임시원","임지연","장기용","장동건"]
     }
   },
   en: {
@@ -336,12 +371,15 @@ const I18N_DATA = {
     },
     "settings": {
       "title": "Settings",
-      "language": "Language",
-      "bgm": "Background Music",
-      "sfx": "Sound Effects",
+      "language": "🌐 Language",
+      "bgm": "🎵 Background Music",
+      "sfx": "🔊 Sound Effects",
       "volume": "Volume",
-      "game_speed": "Game Speed",
-      "reset_all": "⚠ Reset All Data"
+      "game_speed": "⏩ Game Speed",
+      "reset_all": "⚠ Reset All Data",
+      "language_ko": "한국어 (Korean)",
+      "language_en": "English",
+      "language_es": "Español"
     },
     "compendium": {
       "title_class": "📖 Class Compendium",
@@ -461,6 +499,19 @@ const I18N_DATA = {
       "stage_10_name": "Demon Lord",
       "stage_10_theme": "Demon Invasion",
       "stage_10_story": "Defeat the demon lord and restore peace"
+    },
+    "guide": {
+      "item_info_title": "💡 Item Information",
+      "item_info_desc": "Experience potions can be purchased at the shop and used directly on your characters.<br>Compare the efficiency of each potion (experience / price) to make the best choice.<br><br><span style=\"color:var(--gold);font-weight:700\">Shop Composition:</span> Each visit generates 3 characters + 2 potions randomly.<br>Potion selection probability is determined by the weight field.",
+      "efficiency_title": "🎯 Purchase Recommendation",
+      "efficiency_desc": "<span style=\"color:var(--green);font-weight:700\">✓ Recommended:</span> All experience potions have excellent efficiency.<br>If you have enough gold, start with the large potion.<br><br><span style=\"color:var(--gold);font-weight:700\">Efficiency Standards:</span><br>- Large (🏺): 1.67 EXP/G - Best efficiency<br>- Medium (⚗️): 1.50 EXP/G - Medium efficiency<br>- Small (🧪): 1.25 EXP/G - Basic efficiency",
+      "stage_difficulty_title": "📊 Difficulty Information",
+      "stage_difficulty_desc": "Difficulty is calculated based on enemy stat scaling (sm.hp, sm.atk) and enemy count.<br>Designed with gradually increasing difficulty, with Stage 10 being the hardest.<br><br><span style=\"color:var(--gold);font-weight:700\">Stage 1-2:</span> Beginner difficulty (0.65x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 3-4:</span> Intermediate difficulty (0.8~0.9x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 5-6:</span> Intermediate-Advanced difficulty (0.95x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 7-8:</span> Advanced difficulty (1.0x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 9-10:</span> Expert difficulty (1.1~1.15x)",
+      "resource_system_title": "🔄 Resource System Details",
+      "resource_system_desc": "<span style=\"color:var(--fury);font-weight:700\">Fury</span> — MAX: 10~5 | +1 on attack, +2 on hit | Skills: Strike(3), Switch(1), Pierce(5)<br>Passive: warrior Rampage(ATK×1.5), knight Counter(Adjacent enemy ATK×50% counterattack)<br><br><span style=\"color:var(--energy);font-weight:700\">Energy</span> — MAX: 100 | Auto-recover +resRec per turn | Skills: Leap(20), Assault(40), Assassinate(60)<br>Bonus: Assassins recover 2x energy in forests<br><br><span style=\"color:var(--mana);font-weight:700\">Mana</span> — MAX: 100~120 | Starts at MAX in battle | Recover +resRec per turn<br>Uses: Fireball(40), Group Heal(50)"
+    },
+    "character": {
+      "names": ["Arthur","Ariel","Argen","Adel","Astel","Adria","Aaron","Agareth","Arca","Abel","Anais","Aragon","Arwen","Ark","Atlas","Apollo","Alex","Alisa","Albert","Altair","Allen","Alicia","Ambrose","Andrew","Ansel","Alice","Alan","Amber","Ethan","Erik","Evan","Estelle","Edgar","Edwin","Eris","Erika","Emily","Aiden","Avril","Erin","Ezra","Eckhardt","Axion","Ella","Eloi","Ellie","Elijah","Eliza","Elric","Elsie","Elwin","Elsa","Elfride","Emma","Odette","Orion","Oscar","Ophelia","Oliver","Olivia","Wyatt","William","Winter","Uni","Uriel","Justitia","Ignis","Ina","Ida","Ira","Irina","Ivan","Isabel","Isolde","Ian","Io","Icarus","Itri","Ilias","Xavier","Jack","Jean","Jasper","Jack","Jeremy","Zero","Jerome","Jerry","Jessica","Jade","Jason","Jake","Jane","Zelda","Jonathan","Joshua","Joy","George","Julia","Julian","Zeke","Jean","Jill","Charles","Chad","Chelsea","Kana","Kadis","Cara","Karon","Karyu","Camilla","Kass","Cassius","Kael","Kai","Kyle","Katrina","Cal","Cali","Calix","Carin","Catherine","Casey","Kevin","Kale","Kelly","Keltas","Ken","Cora","Cordelia","Cody","Core","Colin","Com","Cooper","Quinn","Quincy","Cue","Chris","Christina","Clara","Cloud","Claire","Chloe","Cliff","Kira","Kirian","Chiara","Kian","Tania","Tara","Tyler","Terra","Theo","Theodore","Tay","Taylor","Thomas","Toby","Tris","Tristan","Tina","Tyra","Timothy","Tia","Tiana","Theo","Fabian","Pascal","Pera","Fay","Fate","Felix","Fenrir","Phoby","Paul","Fran","Francis","Fred","Freya","Flora","Peter","Pit","Philip","Hardy","Hart","Harvey","Heidi","Hein","Hannah","Hans","Harry","Hunter","Hera","Hermann","Hailey","Hector","Henry","Helga","Helen","Hawk","Holly","Hugh","Heath","Hilda","Gabriel","Guy","Gart","Galad","Gus","Grey","Grace","Griffin","Glen","Gideon","Gil","Nana","Nadia","Naran","Nar","Nye","Natalie","Nathan","Nero","Ness","Nel","Nora","Noah","Knox","Nina","Nicole","Nicky","Nick","Dana","Daniel","Dario","Darius","Diana","Dark","Dan","Dalia","Danny","Damian","David","Daisy","Dex","Della","Dora","Doris","Dominic","Don","Lana","Lara","Lars","Rye","Ryan","Layla","Rafael","Lan","Lancelot","Ralph","Larry","Rax","Rand","Lena","Leonard","Lenny","Leo","Leon","Ray","Reina","Raven","Rachel","Rex","Laura","Lauren","Loro","Lori","Lloyd","Kaito","Ren","Haru","Yuki","Sakura","Kenji","Akira","Hikari","Sora","Rin","Riku","Mio","Natsu","Luffy","Zoro","Sanji","Nami","Usopp","Chopper","Robin","Franky","Brook","Jinbe","Naruto","Sasuke","Sakura","Kakashi","Hinata","Gaara","Itachi","Ichigo","Rukia","Orihime","Uryu","Renji","Byakuya","Toshiro","Kenpachi","Gin","Aizen","Tanjiro","Nezuko","Zenitsu","Inosuke","Giyu","Shinobu","Rengoku","Tengen","Mitsuri","Muichiro","Gyomei","Sanemi","Obanai","Deku","Bakugo","Shoto","Uraraka","Iida","Tsuyu","Kirishima","Kaminari","Jiro","Momo","Tokoyami","Mina","Hagakure","Shota","All Might","Endeavor","Hawks","Eren","Mikasa","Armin","Levi","Erwin","Hange","Sasha","Connie","Jean","Historia","Light","L","Misa","Nia","Mello","Ryuk","Rem","Gon","Killua","Kurapika","Leorio","Hisoka","Chrollo","Netero","Meriem","Komugi","Gintoki","Shinpachi","Kagura","Sadaharu","Hijikata","Okita","Kondo","Katsura","Elizabeth","Shinsuke","Kamui","Atom","Conan","Ran","Haibara","Genta","Mitsuhiko","Ayumi","Sonoko","Heiji","Kazuha","Kaitou Kid","Amuro","Akai","Shinji","Rei","Asuka","Kaoru","Mari","Misato","Gendo","Ryo","Kaori","Kousei","Tsubaki","Watari","Taki","Mitsuha","Hodaka","Hina","Sophie","Howl","Chihiro","Haku","San","Ashitaka","Totoro","Kiki","Ponyo","Shita","Pazu","Nausicaa","Sailor Moon","Tuxedo Mask","Mercury","Mars","Jupiter","Venus","Chibiusa","Uranus","Neptune","Pluto","Saturn","Ash","Pikachu","Misty","Brock","Rosa","Roy","Tail","Matthew","Sora","Hansol","Mina","Seok-i","Riki","Nari","Ryu","Ken","Chunli","Guile","Dalshim","Blanka","Zangief","Honda","Bison","Vega","Sagat","Bega","Akari","Hikaru","Umi","Fuu","Mokona","Clamp","Cherry","Xiaolan","Jisoo","Dojin","Qingming","Eriol","Crow","Yutery","Yudojin","Oqingming","Ruby","Spinel","Kero","Yue","Sesshomaru","Inuyasha","Gayoung","Miroku","Sango","Shippo","Kirara","Naraku","Cara","Kanna","Hakudoshi","Moryomaru","Phantom Bakuya","Rin","Jakken","Kouga","Ayame","Ginta","Hakkaku","Totosai","Myoga","Kongou","Kaede","Tsubasa","Xiaolan","Sakura","Phi","Kurogane","Mokona","Yuko","Watanuki","Domeki","Himawari","Kohane","Maru","Moro","Araragi","Senjougahara","Hachikuji","Kanbaru","Sengoku","Hanekawa","Oshino","Shinobu","Karen","Tsukihi","Yotsugi","Onondera","Chitoge","Tsugumi","Marika","Ruri","Shu","Raku","Kyoko","Kang Dohyun","Kang Seojun","Kang Jimin","Go Eunbyul","Gu Minjae","Kwon Soyun","Kim Gaeun","Kim Doyun","Kim Minjun","Kim Seoyeon","Kim Sua","Kim Yejun","Kim Ujin","Kim Jiwoo","Kim Jiho","Kim Haeun","Kim Hyunwoo","Na Youngseok","Nam Joohyuk","Noeul","Ryu Seungmin","Ryu Jihye","Moon Jisoo","Min Kyunghun","Park Gunwoo","Park Seoyoung","Park Sumin","Park Yeonjin","Park Jiyoung","Park Hyunjun","Bae Suji","Baek Seungho","Seo Donghyun","Seo Jihun","Seong Minjae","Son Yejin","Song Kangho","Song Minho","Shin Yeeun","Shin Jisoo","Ahn Jaehyun","Yang Seseong","Oh Jiho","Woo Dohwan","Yu Aine","Yu Jaeseok","Yoon Dohyun","Yoon Seoa","Lee Dohyun","Lee Seojin","Lee Suheok","Lee Seunggi","Lee Jeongjae","Lee Junggi","Lee Jieun","Lee Hyunwoo","Lim Siwon","Lim Jiyeon","Jang Giyong","Jang Donggun"]
     }
   },
   es: {
@@ -567,12 +618,15 @@ const I18N_DATA = {
     },
     "settings": {
       "title": "Configuración",
-      "language": "Idioma",
-      "bgm": "Música de Fondo",
-      "sfx": "Efectos de Sonido",
+      "language": "🌐 Idioma",
+      "bgm": "🎵 Música de Fondo",
+      "sfx": "🔊 Efectos de Sonido",
       "volume": "Volumen",
-      "game_speed": "Velocidad del Juego",
-      "reset_all": "⚠ Reiniciar Todos los Datos"
+      "game_speed": "⏩ Velocidad del Juego",
+      "reset_all": "⚠ Reiniciar Todos los Datos",
+      "language_ko": "한국어 (Korean)",
+      "language_en": "English",
+      "language_es": "Español"
     },
     "compendium": {
       "title_class": "📖 Compendio de Clases",
@@ -692,6 +746,19 @@ const I18N_DATA = {
       "stage_10_name": "Señor Demonio",
       "stage_10_theme": "Invasión Demoníaca",
       "stage_10_story": "Derrota al señor demonio y restaura la paz"
+    },
+    "guide": {
+      "item_info_title": "💡 Información de Ítems",
+      "item_info_desc": "Las pociones de experiencia se pueden comprar en la tienda y usar directamente en tus personajes.<br>Compara la eficiencia de cada poción (experiencia / precio) para tomar la mejor decisión.<br><br><span style=\"color:var(--gold);font-weight:700\">Composición de Tienda:</span> Cada visita genera 3 personajes + 2 pociones aleatoriamente.<br>La probabilidad de selección de pociones se determina por el campo de peso.",
+      "efficiency_title": "🎯 Recomendación de Compra",
+      "efficiency_desc": "<span style=\"color:var(--green);font-weight:700\">✓ Recomendado:</span> Todas las pociones de experiencia tienen excelente eficiencia.<br>Si tienes suficiente oro, comienza con la poción grande.<br><br><span style=\"color:var(--gold);font-weight:700\">Estándares de Eficiencia:</span><br>- Grande (🏺): 1.67 EXP/G - Mejor eficiencia<br>- Mediana (⚗️): 1.50 EXP/G - Eficiencia media<br>- Pequeña (🧪): 1.25 EXP/G - Eficiencia básica",
+      "stage_difficulty_title": "📊 Información de Dificultad",
+      "stage_difficulty_desc": "La dificultad se calcula en función del escalado de estadísticas de enemigos (sm.hp, sm.atk) y cantidad de enemigos.<br>Diseñado con dificultad progresivamente creciente, siendo la Etapa 10 la más difícil.<br><br><span style=\"color:var(--gold);font-weight:700\">Etapa 1-2:</span> Dificultad principiante (0.65x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 3-4:</span> Dificultad intermedia (0.8~0.9x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 5-6:</span> Dificultad intermedia-avanzada (0.95x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 7-8:</span> Dificultad avanzada (1.0x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 9-10:</span> Dificultad experta (1.1~1.15x)",
+      "resource_system_title": "🔄 Detalles del Sistema de Recursos",
+      "resource_system_desc": "<span style=\"color:var(--fury);font-weight:700\">Furia</span> — MÁX: 10~5 | +1 en ataque, +2 en golpe | Habilidades: Golpe(3), Cambio(1), Penetración(5)<br>Pasivo: guerrero Frenesí(ATK×1.5), caballero Contraataque(Enemigo adyacente ATK×50% contraataque)<br><br><span style=\"color:var(--energy);font-weight:700\">Energía</span> — MÁX: 100 | Auto-recuperación +resRec por turno | Habilidades: Salto(20), Asalto(40), Asesinato(60)<br>Bonificación: Los asesinos se recuperan 2x de energía en bosques<br><br><span style=\"color:var(--mana);font-weight:700\">Maná</span> — MÁX: 100~120 | Comienza en MÁX en batalla | Recupera +resRec por turno<br>Usos: Bola de Fuego(40), Curación Grupal(50)"
+    },
+    "character": {
+      "names": ["Arthur","Ariel","Argen","Adel","Astel","Adria","Aaron","Agareth","Arca","Abel","Anais","Aragon","Arwen","Ark","Atlas","Apollo","Alex","Alisa","Albert","Altair","Allen","Alicia","Ambrose","Andrew","Ansel","Alice","Alan","Amber","Ethan","Erik","Evan","Estelle","Edgar","Edwin","Eris","Erika","Emily","Aiden","Avril","Erin","Ezra","Eckhardt","Axion","Ella","Eloi","Ellie","Elijah","Eliza","Elric","Elsie","Elwin","Elsa","Elfride","Emma","Odette","Orion","Oscar","Ophelia","Oliver","Olivia","Wyatt","William","Winter","Uni","Uriel","Justitia","Ignis","Ina","Ida","Ira","Irina","Ivan","Isabel","Isolde","Ian","Io","Icarus","Itri","Ilias","Xavier","Jack","Jean","Jasper","Jack","Jeremy","Zero","Jerome","Jerry","Jessica","Jade","Jason","Jake","Jane","Zelda","Jonathan","Joshua","Joy","George","Julia","Julian","Zeke","Jean","Jill","Charles","Chad","Chelsea","Kana","Kadis","Cara","Karon","Karyu","Camilla","Kass","Cassius","Kael","Kai","Kyle","Katrina","Cal","Cali","Calix","Carin","Catherine","Casey","Kevin","Kale","Kelly","Keltas","Ken","Cora","Cordelia","Cody","Core","Colin","Com","Cooper","Quinn","Quincy","Cue","Chris","Christina","Clara","Cloud","Claire","Chloe","Cliff","Kira","Kirian","Chiara","Kian","Tania","Tara","Tyler","Terra","Theo","Theodore","Tay","Taylor","Thomas","Toby","Tris","Tristan","Tina","Tyra","Timothy","Tia","Tiana","Theo","Fabian","Pascal","Pera","Fay","Fate","Felix","Fenrir","Phoby","Paul","Fran","Francis","Fred","Freya","Flora","Peter","Pit","Philip","Hardy","Hart","Harvey","Heidi","Hein","Hannah","Hans","Harry","Hunter","Hera","Hermann","Hailey","Hector","Henry","Helga","Helen","Hawk","Holly","Hugh","Heath","Hilda","Gabriel","Guy","Gart","Galad","Gus","Grey","Grace","Griffin","Glen","Gideon","Gil","Nana","Nadia","Naran","Nar","Nye","Natalie","Nathan","Nero","Ness","Nel","Nora","Noah","Knox","Nina","Nicole","Nicky","Nick","Dana","Daniel","Dario","Darius","Diana","Dark","Dan","Dalia","Danny","Damian","David","Daisy","Dex","Della","Dora","Doris","Dominic","Don","Lana","Lara","Lars","Rye","Ryan","Layla","Rafael","Lan","Lancelot","Ralph","Larry","Rax","Rand","Lena","Leonard","Lenny","Leo","Leon","Ray","Reina","Raven","Rachel","Rex","Laura","Lauren","Loro","Lori","Lloyd","Kaito","Ren","Haru","Yuki","Sakura","Kenji","Akira","Hikari","Sora","Rin","Riku","Mio","Natsu","Luffy","Zoro","Sanji","Nami","Usopp","Chopper","Robin","Franky","Brook","Jinbe","Naruto","Sasuke","Sakura","Kakashi","Hinata","Gaara","Itachi","Ichigo","Rukia","Orihime","Uryu","Renji","Byakuya","Toshiro","Kenpachi","Gin","Aizen","Tanjiro","Nezuko","Zenitsu","Inosuke","Giyu","Shinobu","Rengoku","Tengen","Mitsuri","Muichiro","Gyomei","Sanemi","Obanai","Deku","Bakugo","Shoto","Uraraka","Iida","Tsuyu","Kirishima","Kaminari","Jiro","Momo","Tokoyami","Mina","Hagakure","Shota","All Might","Endeavor","Hawks","Eren","Mikasa","Armin","Levi","Erwin","Hange","Sasha","Connie","Jean","Historia","Light","L","Misa","Nia","Mello","Ryuk","Rem","Gon","Killua","Kurapika","Leorio","Hisoka","Chrollo","Netero","Meriem","Komugi","Gintoki","Shinpachi","Kagura","Sadaharu","Hijikata","Okita","Kondo","Katsura","Elizabeth","Shinsuke","Kamui","Atom","Conan","Ran","Haibara","Genta","Mitsuhiko","Ayumi","Sonoko","Heiji","Kazuha","Kaitou Kid","Amuro","Akai","Shinji","Rei","Asuka","Kaoru","Mari","Misato","Gendo","Ryo","Kaori","Kousei","Tsubaki","Watari","Taki","Mitsuha","Hodaka","Hina","Sophie","Howl","Chihiro","Haku","San","Ashitaka","Totoro","Kiki","Ponyo","Shita","Pazu","Nausicaa","Sailor Moon","Tuxedo Mask","Mercury","Mars","Jupiter","Venus","Chibiusa","Uranus","Neptune","Pluto","Saturn","Ash","Pikachu","Misty","Brock","Rosa","Roy","Tail","Matthew","Sora","Hansol","Mina","Seok-i","Riki","Nari","Ryu","Ken","Chunli","Guile","Dalshim","Blanka","Zangief","Honda","Bison","Vega","Sagat","Bega","Akari","Hikaru","Umi","Fuu","Mokona","Clamp","Cherry","Xiaolan","Jisoo","Dojin","Qingming","Eriol","Crow","Yutery","Yudojin","Oqingming","Ruby","Spinel","Kero","Yue","Sesshomaru","Inuyasha","Gayoung","Miroku","Sango","Shippo","Kirara","Naraku","Cara","Kanna","Hakudoshi","Moryomaru","Phantom Bakuya","Rin","Jakken","Kouga","Ayame","Ginta","Hakkaku","Totosai","Myoga","Kongou","Kaede","Tsubasa","Xiaolan","Sakura","Phi","Kurogane","Mokona","Yuko","Watanuki","Domeki","Himawari","Kohane","Maru","Moro","Araragi","Senjougahara","Hachikuji","Kanbaru","Sengoku","Hanekawa","Oshino","Shinobu","Karen","Tsukihi","Yotsugi","Onondera","Chitoge","Tsugumi","Marika","Ruri","Shu","Raku","Kyoko","Kang Dohyun","Kang Seojun","Kang Jimin","Go Eunbyul","Gu Minjae","Kwon Soyun","Kim Gaeun","Kim Doyun","Kim Minjun","Kim Seoyeon","Kim Sua","Kim Yejun","Kim Ujin","Kim Jiwoo","Kim Jiho","Kim Haeun","Kim Hyunwoo","Na Youngseok","Nam Joohyuk","Noeul","Ryu Seungmin","Ryu Jihye","Moon Jisoo","Min Kyunghun","Park Gunwoo","Park Seoyoung","Park Sumin","Park Yeonjin","Park Jiyoung","Park Hyunjun","Bae Suji","Baek Seungho","Seo Donghyun","Seo Jihun","Seong Minjae","Son Yejin","Song Kangho","Song Minho","Shin Yeeun","Shin Jisoo","Ahn Jaehyun","Yang Seseong","Oh Jiho","Woo Dohwan","Yu Aine","Yu Jaeseok","Yoon Dohyun","Yoon Seoa","Lee Dohyun","Lee Seojin","Lee Suheok","Lee Seunggi","Lee Jeongjae","Lee Junggi","Lee Jieun","Lee Hyunwoo","Lim Siwon","Lim Jiyeon","Jang Giyong","Jang Donggun"]
     }
   }
 };

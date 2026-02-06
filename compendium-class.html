@@ -97,13 +97,13 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <body>
 
 <div class="header">
-  <h1>📖 직업 도감</h1>
-  <div class="sub">12개 직업의 상세 정보 · Defense RPG</div>
+  <h1 data-i18n="compendium.title_class">${t('compendium.title_class')}</h1>
+  <div class="sub" data-i18n="compendium.subtitle_class">${t('compendium.subtitle_class')}</div>
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="cards">🎴 카드 뷰</button>
-  <button class="tab-btn" data-tab="resource">⚡ 자원 시스템</button>
+  <button class="tab-btn active" data-tab="cards" data-i18n="compendium.tab_card_view">${t('compendium.tab_card_view')}</button>
+  <button class="tab-btn" data-tab="resource" data-i18n="compendium.tab_resource_system">${t('compendium.tab_resource_system')}</button>
 </div>
 
 <div class="content">
@@ -120,17 +120,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <div id="res-blocks"></div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-        🔄 자원 시스템 상세
-      </div>
-      <div style="font-size:13px;color:#cbd5e1;line-height:1.7">
-        <span style="color:var(--fury);font-weight:700">분노 (Fury)</span> — MAX: 10~5 | 공격 시 +1, 피격 시 +2 | 스킬: 강타(3), 스위치(1), 관통(5)<br>
-        패시브: warrior 광폭(ATK×1.5), knight 몸부림(인접 적 ATK×50% 반격)<br><br>
-        <span style="color:var(--energy);font-weight:700">기력 (Energy)</span> — MAX: 100 | 매 턴 +resRec 자동 회복 | 스킬: 도약(20), 습격(40), 암살(60)<br>
-        부가: 암살자는 숲에서 기력 회복 2배<br><br>
-        <span style="color:var(--mana);font-weight:700">마나 (Mana)</span> — MAX: 100~120 | 전투 시작 시 MAX로 시작 | 매 턴 +resRec 회복<br>
-        사용: 화염폭발(40), 집단치유(50)
-      </div>
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.resource_system_title">${t('guide.resource_system_title')}</div>
+      <div style="font-size:13px;color:#cbd5e1;line-height:1.7" data-i18n="guide.resource_system_desc">${t('guide.resource_system_desc')}</div>
     </div>
   </div>
 
@@ -139,11 +130,11 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
   display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
   <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby">${t('compendium.nav_lobby')}</button>
   <button onclick="location.href='compendium-stage.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🗺 스테이지</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_stage">${t('compendium.nav_stage')}</button>
   <button onclick="location.href='compendium-item.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🧪 아이템</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_item">${t('compendium.nav_item')}</button>
 </nav>
 
 <script src="js/compendium.js"></script>
@@ -154,6 +145,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 도감 페이지는 주로 정적 콘텐츠이므로, 필요 시에만 초기화
 });
 
+// 안내문 렌더링
+function renderGuides(){
+  const resSection=document.querySelector('[data-i18n="guide.resource_system_title"]')?.parentElement;
+  if(resSection){
+    resSection.querySelector('div:first-child').textContent=t('guide.resource_system_title');
+    resSection.querySelector('div:last-child').innerHTML=t('guide.resource_system_desc');
+  }
+}
+
 // 탭 전환
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => {
@@ -162,6 +162,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('p-' + btn.dataset.tab).classList.add('active');
   };
+});
+
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    renderGuides();
+  }, 300);
 });
 </script>
 </body>

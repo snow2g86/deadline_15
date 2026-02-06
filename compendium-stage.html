@@ -72,13 +72,13 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <body>
 
 <div class="header">
-  <h1>🗺 스테이지 도감</h1>
-  <div class="sub">10개 스테이지의 상세 정보 · Defense RPG</div>
+  <h1 data-i18n="compendium.title_stage">${t('compendium.title_stage')}</h1>
+  <div class="sub" data-i18n="compendium.subtitle_stage">${t('compendium.subtitle_stage')}</div>
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="stages">📋 스테이지 목록</button>
-  <button class="tab-btn" data-tab="difficulty">📈 난이도 분석</button>
+  <button class="tab-btn active" data-tab="stages" data-i18n="compendium.tab_card_view" style="display:flex;align-items:center;gap:4px"><span>📋</span><span>${t('compendium.tab_card_view')}</span></button>
+  <button class="tab-btn" data-tab="difficulty" data-i18n="compendium.tab_analysis" style="display:flex;align-items:center;gap:4px"><span>📈</span><span>${t('compendium.tab_analysis')}</span></button>
 </div>
 
 <div class="content">
@@ -97,19 +97,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     </div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-        📊 난이도 정보
-      </div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7">
-        난이도는 스테이지의 적 스탯 배율(sm.hp, sm.atk)과 적 개수를 기반으로 계산됩니다.<br>
-        점진적으로 증가하는 난이도로 설계되었으며, 마지막 스테이지(Stage 10)가 가장 어렵습니다.<br>
-        <br>
-        <span style="color:var(--gold);font-weight:700">Stage 1-2:</span> 초급 난이도 (0.65배)<br>
-        <span style="color:var(--gold);font-weight:700">Stage 3-4:</span> 중급 난이도 (0.8~0.9배)<br>
-        <span style="color:var(--gold);font-weight:700">Stage 5-6:</span> 중급~상급 난이도 (0.95배)<br>
-        <span style="color:var(--gold);font-weight:700">Stage 7-8:</span> 상급 난이도 (1.0배)<br>
-        <span style="color:var(--gold);font-weight:700">Stage 9-10:</span> 극상급 난이도 (1.1~1.15배)
-      </div>
+      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.stage_difficulty_title">${t('guide.stage_difficulty_title')}</div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.stage_difficulty_desc">${t('guide.stage_difficulty_desc')}</div>
     </div>
   </div>
 
@@ -118,11 +107,11 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
   display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
   <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">← 로비</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby">${t('compendium.nav_lobby')}</button>
   <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">📚 직업</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class">${t('compendium.nav_class')}</button>
   <button onclick="location.href='compendium-item.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">🧪 아이템</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_item">${t('compendium.nav_item')}</button>
 </nav>
 
 <script src="js/compendium.js"></script>
@@ -218,10 +207,20 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
+// 안내문 렌더링
+function renderGuides(){
+  const diffSection=document.querySelector('[data-i18n="guide.stage_difficulty_title"]')?.parentElement;
+  if(diffSection){
+    diffSection.querySelector('div:first-child').textContent=t('guide.stage_difficulty_title');
+    diffSection.querySelector('div:last-child').innerHTML=t('guide.stage_difficulty_desc');
+  }
+}
+
 // 초기화
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     initStage();
+    renderGuides();
   }, 300);
 });
 </script>

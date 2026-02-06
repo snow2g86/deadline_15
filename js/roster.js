@@ -13,13 +13,30 @@ const ROSTER = {
       const raw = localStorage.getItem(this._key);
       if (raw) {
         this._data = JSON.parse(raw);
-        // 이름 없는 캐릭터에 랜덤 이름 부여 (마이그레이션)
-        const used = new Set(this._data.chars.filter(c=>c.name).map(c=>c.name));
+        // 마이그레이션: name (문자열) → nameId (인덱스)
+        const used = new Set();
         this._data.chars.forEach(c=>{
-          if(!c.name){
-            let nm;
-            do{nm=NAMES[Math.floor(Math.random()*NAMES.length)]}while(used.has(nm));
-            used.add(nm);c.name=nm;
+          // 기존 name 필드가 있고 nameId가 없으면 변환
+          if (c.name !== undefined && c.nameId === undefined) {
+            const idx = NAMES.indexOf(c.name);
+            if (idx >= 0) {
+              c.nameId = idx;
+            } else {
+              // 못 찾으면 랜덤 할당 (중복 방지)
+              do {
+                c.nameId = Math.floor(Math.random() * NAMES.length);
+              } while (used.has(c.nameId));
+            }
+            used.add(c.nameId);
+            delete c.name; // name 필드 완전 제거
+          }
+
+          // nameId 없으면 랜덤 할당
+          if (c.nameId === undefined) {
+            do {
+              c.nameId = Math.floor(Math.random() * NAMES.length);
+            } while (used.has(c.nameId));
+            used.add(c.nameId);
           }
         });
         this.save();
@@ -44,33 +61,37 @@ const ROSTER = {
       // 테스트 모드: 모든 12개 클래스 1명씩 지급
       const starters = ['novice','warrior','knight','assassin','archer','mage','priest','sapper','summoner','shaman','brawler','lancer'];
       starters.forEach(cls => {
-        let name;
-        do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
-        used.add(name);
-        this.addChar(cls, name);
+        let nameId;
+        do { nameId = Math.floor(Math.random() * NAMES.length); } while(used.has(nameId));
+        used.add(nameId);
+        this.addChar(cls, nameId);
       });
     } else {
       // 실제 모드: 노비스 5명 지급
       for(let i = 0; i < 5; i++) {
-        let name;
-        do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
-        used.add(name);
-        this.addChar('novice', name);
+        let nameId;
+        do { nameId = Math.floor(Math.random() * NAMES.length); } while(used.has(nameId));
+        used.add(nameId);
+        this.addChar('novice', nameId);
       }
     }
   },
 
   // ── 캐릭터 추가 (뽑기/보상) ─────────────
-  addChar(cls, name) {
+  addChar(cls, nameId) {
     const d = CD[cls];
     if (!d) return null;
+    // nameId가 없으면 랜덤 할당
+    if (nameId === undefined || nameId < 0 || nameId >= NAMES.length) {
+      nameId = Math.floor(Math.random() * NAMES.length);
+    }
     const pot = this._rollPotential(cls);
     // 기본 스탯에 ±20% 랜덤 변동 추가 (개성화)
     const vary = (val) => Math.round(val * (0.8 + Math.random() * 0.4));
     const ch = {
       uid: this._data.nextId++,
       cls,
-      name: name || '',
+      nameId, // 이름 인덱스 저장
       lv: 1,
       exp: 0,
       dead: false,

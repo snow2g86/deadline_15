@@ -177,7 +177,8 @@ Object.assign(G,{
       wrap.appendChild(sh);
       // 이름 (레벨 + 개인 이름)
       const nm=document.createElement('div');nm.className='hu-name';
-      nm.textContent=`Lv.${ch.lv} ${ch.name||'???'}`;
+      const charName = t('character.names')[ch.nameId] || '???';
+      nm.textContent=`Lv.${ch.lv} ${charName}`;
       wrap.appendChild(nm);
       ct.appendChild(wrap);
     });
@@ -324,10 +325,13 @@ Object.assign(G,{
     else if(this._pFilter.startsWith('cls_')){const cls=this._pFilter.slice(4);filtered=alive.filter(c=>c.cls===cls)}
     // ── 정렬: 클래스별 → 레벨 내림차순 → 이름순 ──
     const clsOrder=Object.keys(CD);
+    const names = t('character.names');
     filtered.sort((a,b)=>{
       const ci=clsOrder.indexOf(a.cls)-clsOrder.indexOf(b.cls);if(ci!==0)return ci;
       if(b.lv!==a.lv)return b.lv-a.lv;
-      return(a.name||'').localeCompare(b.name||'');
+      const aName = names[a.nameId] || '';
+      const bName = names[b.nameId] || '';
+      return aName.localeCompare(bName);
     });
     // ── 로스터 리스트 렌더링 ──
     const ro=document.getElementById('ps-roster');ro.innerHTML='';
@@ -340,10 +344,11 @@ Object.assign(G,{
       const expNeed=atMax?1:expForLevel(ch.lv);
       const expPct=atMax?100:Math.min(100,Math.round(((ch.exp||0)/expNeed)*100));
       const row=document.createElement('div');row.className='rl-row'+(sel?' selected':'');
+      const charName = t('character.names')[ch.nameId] || d.name;
       row.innerHTML=
         `<div class="rl-icon">${clsIcon(ch.cls,30)}</div>`+
         `<div class="rl-info">`+
-          `<div class="rl-top"><span class="rl-name">${ch.name||d.name}</span><span class="rl-lv">Lv.${ch.lv}</span>`+
+          `<div class="rl-top"><span class="rl-name">${charName}</span><span class="rl-lv">Lv.${ch.lv}</span>`+
           `<span class="rl-grade" style="color:${gClr}">${grade}</span></div>`+
           `<div class="rl-stats">HP <b>${ch.hp}</b> ATK <b>${ch.atk}</b> DEF <b>${ch.def}</b> MOV <b>${ch.move}</b> RNG <b>${ch.range}</b></div>`+
           `<div class="rl-pot">잠재 HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</div>`+
@@ -452,8 +457,9 @@ Object.assign(G,{
       const cost=this._reviveCost(ch);
       const canAfford=this.gold>=cost;
       const el=document.createElement('div');el.className='sanc-card';
+      const charName = t('character.names')[ch.nameId] || d.name;
       el.innerHTML=`<div class="sanc-icon">${clsIcon(ch.cls,28)}</div>`+
-        `<div class="sanc-info"><div class="sanc-name">${ch.name||d.name} <span style="color:#64748b;font-size:10px">Lv.${ch.lv}</span></div>`+
+        `<div class="sanc-info"><div class="sanc-name">${charName} <span style="color:#64748b;font-size:10px">Lv.${ch.lv}</span></div>`+
         `<div class="sanc-stats">HP ${ch.hp} · ATK ${ch.atk} · DEF ${ch.def}</div></div>`+
         `<button class="sanc-btn${canAfford?'':' disabled'}" ${canAfford?'':'disabled'}>${cost}G 부활</button>`;
       el.querySelector('.sanc-btn').onclick=()=>{
@@ -527,15 +533,18 @@ Object.assign(G,{
     const timeEl=document.getElementById('shop-timer');
     const titleEl=document.getElementById('shop-info-title');
     const remain=Math.max(0,6*3600*1000-(Date.now()-this._shopData.ts));
-    const h=Math.floor(remain/3600000);const m=Math.floor((remain%3600000)/60000);
+    const h=Math.floor(remain/3600000);const m=Math.floor((remain%3600000)/60000);const s=Math.floor((remain%60000)/1000);
     // 용병/아이템 탭에서만 타이머 표시
     const showTimer=this._currentShopTab==='mercenary'||this._currentShopTab==='item';
     timeEl.style.display=showTimer?'block':'none';
-    if(showTimer)timeEl.textContent=`갱신까지 ${h}시간 ${m}분`;
+    if(showTimer){
+      const hh=String(h).padStart(2,'0');const mm=String(m).padStart(2,'0');const ss=String(s).padStart(2,'0');
+      timeEl.querySelector('span').textContent=`${t('shop.refresh_timer')} ${hh}:${mm}:${ss}`;
+    }
 
     // 탭별 안내 문구
-    const tabTitles={'mercenary':'용병을 모집하세요','item':'아이템을 구매하세요','job':'직업을 선택하세요','gold':'골드를 구매하세요'};
-    titleEl.textContent=tabTitles[this._currentShopTab]||'상점';
+    const tabTitles={'mercenary':t('shop.subtitle_mercenary'),'item':t('shop.subtitle_item'),'job':t('shop.subtitle_job'),'gold':t('shop.subtitle_gold')};
+    titleEl.textContent=tabTitles[this._currentShopTab]||t('shop.title');
 
     // 현재 탭에 맞는 아이템만 필터링
     const tabTypeMap={'mercenary':'char','item':'potion','job':'class_change','gold':null};
@@ -568,7 +577,12 @@ Object.assign(G,{
           if(this.gold<item.cost)return;
           this.gold-=item.cost;this._saveGold();this._updGoldUI();
           const ch=ROSTER.addChar(item.cls);
-          if(ch){ch.name=item.name;ch.pot=item.pot;ROSTER.save()}
+          if(ch){
+            const names = t('character.names');
+            const nameIdx = names.indexOf(item.name);
+            ch.nameId = nameIdx >= 0 ? nameIdx : Math.floor(Math.random() * names.length);
+            ch.pot=item.pot;ROSTER.save();
+          }
           item.sold=true;this._saveShop();this._renderShop();
         };
         list.appendChild(el);
@@ -613,19 +627,20 @@ Object.assign(G,{
     let h='<div class="potion-target-list">';
     alive.forEach(ch=>{
       const d=CD[ch.cls];
+      const charName = t('character.names')[ch.nameId] || d.name;
       const atMax=ch.lv>=MAX_LEVEL;
       const expNeed=atMax?0:expForLevel(ch.lv);
       const expPct=atMax?100:Math.min(100,Math.round((ch.exp||0)/expNeed*100));
       h+=`<div class="pt-btn${atMax?' pt-max':''}" data-uid="${ch.uid}">`+
         `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
-        `<span class="pt-info">${ch.name||d.name} Lv.${ch.lv}</span>`+
+        `<span class="pt-info">${charName} Lv.${ch.lv}</span>`+
         `<span class="pt-exp">${atMax?'MAX':`${ch.exp||0}/${expNeed}`}</span>`+
         `</div>`;
     });
     h+='</div>';
     document.getElementById('modal-sub').innerHTML=`${item.icon} ${item.name} (EXP +${item.exp})<br><br>`+h;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
-    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent='취소';
+    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent=t('common.cancel');
     cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
     ov.classList.add('show');
     // 캐릭터 선택 이벤트
@@ -640,8 +655,9 @@ Object.assign(G,{
         // 레벨업 알림
         if(r.leveled>0){
           const ch=ROSTER.getChar(uid);const d=CD[ch.cls];
+          const charName = t('character.names')[ch.nameId] || d.name;
           setTimeout(()=>{
-            this._showConfirm(`${d.icon} ${ch.name||d.name}\nLv.${r.prevLv} → Lv.${ch.lv}${r.leveled>1?' ('+r.leveled+'단계 레벨업!)':''}`,null,null);
+            this._showConfirm(`${d.icon} ${charName}\nLv.${r.prevLv} → Lv.${ch.lv}${r.leveled>1?' ('+r.leveled+'단계 레벨업!)':''}`,null,null);
           },100);
         }
       };
@@ -662,16 +678,17 @@ Object.assign(G,{
     novices.forEach(ch=>{
       const grade=ROSTER.potGrade(ch.uid);
       const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
+      const charName = t('character.names')[ch.nameId];
       h+=`<div class="pt-btn" data-uid="${ch.uid}">`+
         `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
-        `<span class="pt-info">${ch.name} Lv.${ch.lv}</span>`+
+        `<span class="pt-info">${charName} Lv.${ch.lv}</span>`+
         `<span class="pt-exp" style="color:${gClr}">${grade}등급</span>`+
         `</div>`;
     });
     h+='</div>';
     document.getElementById('modal-sub').innerHTML=`${item.icon} ${item.name}<br>${item.desc}<br><br>`+h;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
-    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent='취소';
+    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent=t('common.cancel');
     cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
     ov.classList.add('show');
     document.querySelectorAll('.pt-btn').forEach(b=>{
@@ -701,11 +718,12 @@ Object.assign(G,{
         `</div>`;
     });
     h+='</div>';
+    const charName = t('character.names')[ch.nameId] || '???';
     document.getElementById('modal-sub').innerHTML=
-      `${clsIcon(ch.cls,24)} <b>${ch.name}</b> (Lv.${ch.lv})<br>`+
+      `${clsIcon(ch.cls,24)} <b>${charName}</b> (Lv.${ch.lv})<br>`+
       `<span style="color:var(--dim);font-size:10px">전직 후 되돌릴 수 없습니다</span><br><br>`+h;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
-    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent='취소';
+    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent=t('common.cancel');
     cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
     ov.classList.add('show');
     document.querySelectorAll('.cs-card').forEach(card=>{
@@ -725,8 +743,9 @@ Object.assign(G,{
     const newD=CD[newCls];
     const grade=ROSTER.potGrade(uid);
     const preview=ROSTER.previewClassChange(uid,newCls);
+    const charName = t('character.names')[ch.nameId] || '???';
     this._showConfirm(
-      `${oldD.icon} ${ch.name} (Lv.${ch.lv} ${grade}등급)\n`+
+      `${oldD.icon} ${charName} (Lv.${ch.lv} ${grade}등급)\n`+
       `${oldD.name} → ${newD.icon} ${newD.name}\n\n`+
       `전직 후 예상 스탯:\n`+
       `HP ${preview.hp} / ATK ${preview.atk} / DEF ${preview.def}\n`+
@@ -741,8 +760,9 @@ Object.assign(G,{
         this._renderShop();
         setTimeout(()=>{
           const updCh=ROSTER.getChar(uid);
+          const updCharName = t('character.names')[updCh.nameId] || '???';
           this._showConfirm(
-            `${newD.icon} ${updCh.name}\n`+
+            `${newD.icon} ${updCharName}\n`+
             `${oldD.name}에서 ${newD.name}(으)로 전직했습니다!\n\n`+
             `HP ${updCh.hp} / ATK ${updCh.atk} / DEF ${updCh.def}\n`+
             `MOV ${updCh.move} / RNG ${updCh.range}`,
@@ -755,9 +775,18 @@ Object.assign(G,{
   },
 
   // ══════════════════════════════════
-  // 언어 변경
+  // 언어 변경 (실시간)
   changeLang(lang){
-    I18N.setLanguage(lang);
+    I18N.currentLang = lang;
+    this._sett.language = lang;
+    this.saveSett();
+    I18N.loadLanguage(lang).then(loaded=>{
+      if(loaded){
+        I18N.translatePage();
+        this._renderLobbySettings();
+        console.log(`[settings] Language changed to: ${lang}`);
+      }
+    });
   },
 
   //  설정
@@ -765,17 +794,17 @@ Object.assign(G,{
   _renderLobbySettings(){
     const c=document.getElementById('lset-content');c.innerHTML='';
     c.innerHTML=`
-      <div class="sp-toggle"><span class="sp-tlabel">🎵 배경음악</span><label class="sp-switch"><input type="checkbox" id="ls-bgm" ${this._sett.bgmOn?'checked':''}><span class="slider"></span></label></div>
-      <div class="sp-row"><span class="sp-label">    볼륨</span><input type="range" id="ls-bgmv" min="0" max="100" value="${Math.round(this._sett.bgmVol*100)}"><span class="sp-val" id="ls-bgmv-v">${Math.round(this._sett.bgmVol*100)}</span></div>
-      <div class="sp-toggle"><span class="sp-tlabel">🔊 효과음</span><label class="sp-switch"><input type="checkbox" id="ls-sfx" ${this._sett.sfxOn?'checked':''}><span class="slider"></span></label></div>
-      <div class="sp-row"><span class="sp-label">    볼륨</span><input type="range" id="ls-sfxv" min="0" max="100" value="${Math.round(this._sett.sfxVol*100)}"><span class="sp-val" id="ls-sfxv-v">${Math.round(this._sett.sfxVol*100)}</span></div>
+      <div class="sp-toggle"><span class="sp-tlabel" data-i18n="settings.bgm">${t('settings.bgm')}</span><label class="sp-switch"><input type="checkbox" id="ls-bgm" ${this._sett.bgmOn?'checked':''}><span class="slider"></span></label></div>
+      <div class="sp-row"><span class="sp-label" data-i18n="settings.volume">${t('settings.volume')}</span><input type="range" id="ls-bgmv" min="0" max="100" value="${Math.round(this._sett.bgmVol*100)}"><span class="sp-val" id="ls-bgmv-v">${Math.round(this._sett.bgmVol*100)}</span></div>
+      <div class="sp-toggle"><span class="sp-tlabel" data-i18n="settings.sfx">${t('settings.sfx')}</span><label class="sp-switch"><input type="checkbox" id="ls-sfx" ${this._sett.sfxOn?'checked':''}><span class="slider"></span></label></div>
+      <div class="sp-row"><span class="sp-label" data-i18n="settings.volume">${t('settings.volume')}</span><input type="range" id="ls-sfxv" min="0" max="100" value="${Math.round(this._sett.sfxVol*100)}"><span class="sp-val" id="ls-sfxv-v">${Math.round(this._sett.sfxVol*100)}</span></div>
       <div class="sp-divider"></div>
-      <div class="sp-row"><span class="sp-label">⏩ 게임 속도</span><input type="range" id="ls-spd" min="50" max="200" value="${Math.round(1/this._sett.speed*100)}" step="25"><span class="sp-val" id="ls-spd-v">${this._sett.speed.toFixed(1)}x</span></div>
+      <div class="sp-row"><span class="sp-label" data-i18n="settings.game_speed">${t('settings.game_speed')}</span><input type="range" id="ls-spd" min="50" max="200" value="${Math.round(1/this._sett.speed*100)}" step="25"><span class="sp-val" id="ls-spd-v">${this._sett.speed.toFixed(1)}x</span></div>
       <div class="sp-divider"></div>
-      <div class="sp-row"><span class="sp-label">🌐 언어</span><select id="ls-lang" onchange="G.changeLang(this.value)"><option value="ko" ${this._sett.language==='ko'?'selected':''}>한국어 (Korean)</option><option value="en" ${this._sett.language==='en'?'selected':''}>English</option><option value="es" ${this._sett.language==='es'?'selected':''}>Español</option></select></div>
+      <div class="sp-row"><span class="sp-label" data-i18n="settings.language">${t('settings.language')}</span><select id="ls-lang" onchange="G.changeLang(this.value)"><option value="ko" ${this._sett.language==='ko'?'selected':''} data-i18n="settings.language_ko">${t('settings.language_ko')}</option><option value="en" ${this._sett.language==='en'?'selected':''} data-i18n="settings.language_en">${t('settings.language_en')}</option><option value="es" ${this._sett.language==='es'?'selected':''} data-i18n="settings.language_es">${t('settings.language_es')}</option></select></div>
       <div class="sp-divider"></div>
       <div style="text-align:center;margin-top:8px">
-        <button class="sp-btn danger" id="ls-reset">⚠ 모든 데이터 초기화</button>
+        <button class="sp-btn danger" id="ls-reset" data-i18n="settings.reset_all">${t('settings.reset_all')}</button>
       </div>`;
     c.querySelector('#ls-bgm').onchange=e=>{this._sett.bgmOn=e.target.checked;this.saveSett()};
     c.querySelector('#ls-bgmv').oninput=e=>{this._sett.bgmVol=e.target.value/100;c.querySelector('#ls-bgmv-v').textContent=e.target.value;this.saveSett()};
@@ -794,13 +823,13 @@ Object.assign(G,{
   // ══ 확인 다이얼로그 ══
   _showConfirm(msg,onYes,onNo){
     const ov=document.getElementById('modal-overlay');
-    document.getElementById('modal-title').textContent='확인';
+    document.getElementById('modal-title').textContent=t('common.confirm');
     document.getElementById('modal-title').className='';
     document.getElementById('modal-sub').innerHTML=msg.replace(/\n/g,'<br>');
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
-    const y=document.createElement('button');y.className='modal-btn';y.textContent='확인';
+    const y=document.createElement('button');y.className='modal-btn';y.textContent=t('common.confirm');
     y.onclick=()=>{ov.classList.remove('show');if(onYes)onYes()};bt.appendChild(y);
-    const n=document.createElement('button');n.className='modal-btn secondary';n.textContent='취소';
+    const n=document.createElement('button');n.className='modal-btn secondary';n.textContent=t('common.cancel');
     n.onclick=()=>{ov.classList.remove('show');if(onNo)onNo()};bt.appendChild(n);
     ov.classList.add('show');
   },
@@ -837,8 +866,9 @@ Object.assign(G,{
     const d=CD[ch.cls];
 
     // 4. 확인 모달
+    const dismissCharName = t('character.names')[ch.nameId] || d.name;
     this._showConfirm(
-      `${d.icon} ${ch.name||d.name} (Lv.${ch.lv} ${grade}등급)\n\n` +
+      `${d.icon} ${dismissCharName} (Lv.${ch.lv} ${grade}등급)\n\n` +
       `정말로 방출하시겠습니까?\n+${price}G을 받습니다.`,
       ()=>{
         // 로스터에서 삭제

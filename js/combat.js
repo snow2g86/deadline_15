@@ -38,6 +38,10 @@ Object.assign(G, {
       if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
       // In awPM: movement (when no unit at target)
       if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
+      // 이동/공격/치유 범위가 표시된 상태에서 범위 밖을 클릭한 경우 → 취소
+      if(!cl && (this.mvT.length>0 || this.atkT.length>0 || this.healT.length>0) && !this.mvT.some(c=>c.x===x&&c.y===y) && !this.atkT.some(c=>c.x===x&&c.y===y) && !this.healT.some(c=>c.x===x&&c.y===y)){
+        this.mvT=[];this.atkT=[];this.healT=[];this.rTer();this.showAM(s);return;
+      }
       // Rule 1/5: 행동 안 하고 다른곳 클릭 → 대기 상태 진입
       s.ha=true;s.waited=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();
       if(cl&&cl.team!=='enemy'){const nu=this.uAt(x,y);if(nu)this.selU(nu)}
@@ -71,7 +75,7 @@ Object.assign(G, {
     const dmg=calcDmg(a,t);const atkE=this._grantExp(a,'attack');
     t.hp=Math.max(0,t.hp-dmg);this.vfxAtk(a,t);this.sfxAtk(a.cls);this.shakeU(t.id);
     this.floatT(t.x,t.y,`-${dmg}`,'damage');
-    if(a.furyBuff>0)this.floatT(a.x,a.y,'광폭!','heal');
+    if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
     procFury(a,t,this);
     a.ha=true;a.hm=true;this.awPM=false;this.hideAM();
     if(t.hp<=0){if(atkE>0)this.floatT(a.x,a.y,`+${atkE} EXP`,'exp');
@@ -143,7 +147,7 @@ Object.assign(G, {
       const maxSummons=1;
       const currentSummons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
       if(currentSummons.length>=maxSummons){
-        u.res+=sk.cost;this.floatT(u.x,u.y,'소환 한계!','damage');return
+        u.res+=sk.cost;this.floatT(u.x,u.y,t('messages.summoner_limit'),'damage');return
       }
       // 소환 가능 타일 (주변 3칸, 빈 통행가능 타일)
       const summonRange=sk.summonRange||3;
@@ -181,7 +185,7 @@ Object.assign(G, {
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
       if(!t){u.res+=skObj.cost;return}
       const adj=this._findAdj(t.x,t.y,u);
-      if(!adj){u.res+=skObj.cost;this.floatT(u.x,u.y,'빈 칸 없음!','damage');return}
+      if(!adj){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.no_empty_tile'),'damage');return}
       u.x=adj.x;u.y=adj.y;u.mo=true;
       this.animU(u.id,adj.x,adj.y);
       setTimeout(()=>{
@@ -190,7 +194,7 @@ Object.assign(G, {
         this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:12,colors:['#a855f7','#fff','#c4b5fd'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
         this.sfxAtk(u.cls);this.shakeU(t.id);
         this.floatT(t.x,t.y,`-${dmg}`,'damage');
-        this.floatT(u.x,u.y,'습격!','heal');
+        this.floatT(u.x,u.y,t('messages.assassin_raid'),'heal');
         if(t.hp<=0){
           u.res=Math.min(u.maxRes,u.res+20);
           this.floatT(u.x,u.y,'+20 EP','exp');
@@ -210,7 +214,7 @@ Object.assign(G, {
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:20,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
       this.screenShake();this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
-      this.floatT(u.x,u.y,'암살!','heal');
+      this.floatT(u.x,u.y,t('messages.assassin_assassinate'),'heal');
       if(t.hp<=0){this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
       this._grantExp(u,'attack');
       const esc=this._findAdj(u.x,u.y,null);
@@ -222,14 +226,14 @@ Object.assign(G, {
     if(skObj.id==='priest_massheal'){
       const hr=skObj.healRange||6;
       const targets=this.units.filter(v=>v.team==='ally'&&v.hp>0&&v.hp<v.mhp&&mh(u.x,u.y,v.x,v.y)<=hr);
-      if(!targets.length){u.res+=skObj.cost;this.floatT(u.x,u.y,'대상 없음','damage');return}
+      if(!targets.length){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.select_heal_target'),'damage');return}
       const amt=u.atk;
       targets.forEach(t=>{
         t.hp=Math.min(t.mhp,t.hp+amt);
         this.floatT(t.x,t.y,`+${amt}`,'heal');
         this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#4f4','#8f8','#fff'],shape:'ring',speed:2,spread:8,decay:0.025,size:6});
       });
-      this.sfxHeal();this.floatT(u.x,u.y,'집단 치유!','heal');
+      this.sfxHeal();this.floatT(u.x,u.y,t('messages.priest_mass_heal'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#4f4','#ff8','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:8});
       this._grantExp(u,'heal');
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -239,7 +243,7 @@ Object.assign(G, {
     if(skObj.id==='sapper_trap'){
       if(this.uAt(tx,ty)||this.traps.find(t=>t.x===tx&&t.y===ty)){u.res+=skObj.cost;return}
       this.traps.push({x:tx,y:ty,dmg:u.atk*2,id:this.traps.length,team:'ally'});
-      this.floatT(tx,ty,'⚠ 함정 설치!','heal');
+      this.floatT(tx,ty,t('messages.trap_installed'),'heal');
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:10,colors:['#f80','#ff4','#fa0'],shape:'spark',speed:2,spread:10,decay:0.025,size:3});
       this.sfxUIClick();this._grantExp(u,'attack');
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -259,7 +263,7 @@ Object.assign(G, {
           if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
           hitAny=true}}
       this.sfxAtk(u.cls);this._grantExp(u,'attack');
-      this.floatT(u.x,u.y,'화염폭발!','heal');
+      this.floatT(u.x,u.y,t('messages.mage_fireball'),'heal');
       // 중앙 VFX
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:20,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:5,spread:18,decay:0.02,size:5});
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -273,7 +277,7 @@ Object.assign(G, {
       t.hp=Math.max(0,t.hp-dmg);
       this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
-      this.floatT(u.x,u.y,'돌던지기!','heal');
+      this.floatT(u.x,u.y,t('messages.stone_throw'),'heal');
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#a88','#ccc','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
       if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
       this._grantExp(u,'attack');
@@ -283,7 +287,7 @@ Object.assign(G, {
     // 쇠약의 저주: 채널링 시작
     if(skObj.id==='shaman_curse'){
       u.channeling='shaman_curse';
-      this.floatT(u.x,u.y,'쇠약의 저주!','heal');
+      this.floatT(u.x,u.y,t('messages.shaman_curse'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
       this.sfxAtk(u.cls);
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -292,7 +296,7 @@ Object.assign(G, {
     // 고양: 채널링 시작
     if(skObj.id==='shaman_exalt'){
       u.channeling='shaman_exalt';
-      this.floatT(u.x,u.y,'고양!','heal');
+      this.floatT(u.x,u.y,t('messages.shaman_exalt'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
       this.sfxHeal();
       // 모든 아군에게 버프 VFX
@@ -307,7 +311,7 @@ Object.assign(G, {
       // 1. 위치 검증
       const target=this.units.find(v=>v.x===tx&&v.y===ty);
       if(target||!TI[this.ter[ty][tx]].pass){
-        u.res+=skObj.cost;this.floatT(u.x,u.y,'소환 불가!','damage');return
+        u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.summoner_no_spawn'),'damage');return
       }
       // 2. 소환수 타입별 스탯 계산
       const isSpirit=skObj.id==='summoner_summon_spirit';
@@ -339,7 +343,7 @@ Object.assign(G, {
       // 4. 유닛 배열 추가
       this.units.push(summon);
       // 5. VFX & 피드백
-      this.floatT(tx,ty,`${summonName} 소환!`,'heal');
+      this.floatT(tx,ty,t('messages.sapper_summon',{name:summonName}),'heal');
       const colors=isSpirit?['#8b5cf6','#c084fc','#fff']:['#78716c','#a8a29e','#fff'];
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:25,colors,shape:'ring',speed:5,spread:20,decay:0.02,size:8});
       this.sfxHeal();
@@ -354,8 +358,8 @@ Object.assign(G, {
       if(!t){u.res+=skObj.cost;return}
       t.disarmed=3;
       this.sfxAtk(u.cls);this.shakeU(t.id);
-      this.floatT(t.x,t.y,'ATK -50%','damage');
-      this.floatT(u.x,u.y,'무장해제!','heal');
+      this.floatT(t.x,t.y,t('messages.atk_reduced'),'damage');
+      this.floatT(u.x,u.y,t('messages.brawler_disarm'),'heal');
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:12,colors:['#f97316','#fbbf24','#fff'],shape:'ring',speed:3,spread:12,decay:0.025,size:5});
       this._grantExp(u,'attack');
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -367,7 +371,7 @@ Object.assign(G, {
       if(!t)return;
       [u.x,u.y,t.x,t.y]=[t.x,t.y,u.x,u.y];
       this.animU(u.id,u.x,u.y);this.animU(t.id,t.x,t.y);
-      this.floatT(u.x,u.y,'스위치!','heal');
+      this.floatT(u.x,u.y,t('messages.knight_switch'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:0.02,size:8});
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:0.02,size:8});
       this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
@@ -378,7 +382,7 @@ Object.assign(G, {
       if(this.uAt(tx,ty))return;
       u.x=tx;u.y=ty;u.mo=true;
       this.animU(u.id,tx,ty);
-      this.floatT(u.x,u.y,'도약!','heal');
+      this.floatT(u.x,u.y,t('messages.archer_leap'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:0.02,size:3});
       this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.rUnits();this.clrSel();this.chkAutoEnd()},340);return
@@ -392,7 +396,7 @@ Object.assign(G, {
       this.vfxAtk(u,t);this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
       procFury(u,t,this);
-      this.floatT(u.x,u.y,'강타!','heal');
+      this.floatT(u.x,u.y,t('messages.warrior_strike'),'heal');
       if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);}
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
@@ -407,7 +411,7 @@ Object.assign(G, {
         this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#6af','#48f','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
         if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}}}
     this.sfxAtk(u.cls);this._grantExp(u,'attack');
-    this.floatT(u.x,u.y,'관통!','heal');
+    this.floatT(u.x,u.y,t('messages.lancer_pierce'),'heal');
     this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:12,colors:['#6af','#48f','#aaf'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
     u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
     setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500)},
@@ -416,7 +420,7 @@ Object.assign(G, {
   cancelChannel(){
     if(!this.sel||!this.sel.channeling)return;
     const u=this.sel;
-    this.floatT(u.x,u.y,'채널링 해제','damage');
+    this.floatT(u.x,u.y,t('messages.channel_cancel'),'damage');
     u.channeling=null;
     u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
     this.sfxUIClick();this.rUnits();this.clrSel();this.chkAutoEnd()},

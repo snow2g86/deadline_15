@@ -166,7 +166,8 @@ Object.assign(G, {
       this._expResults.forEach(r=>{
         const ch=ROSTER.getChar(r.uid);if(!ch)return;
         const d=CD[ch.cls];
-        let line=`\n${d.icon} ${ch.name||d.name}: +${r.exp} EXP`;
+        const charName = t('character.names')[ch.nameId] || d.name;
+        let line=`\n${d.icon} ${charName}: +${r.exp} EXP`;
         if(r.leveled>0)line+=` ⬆ Lv.${r.prevLv}→${ch.lv}`;
         sub+=line;
       });

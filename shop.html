@@ -24,7 +24,7 @@
 <body data-page="shop">
 <header id="top-nav">
   <button id="nav-back" onclick="location.href='index.html'">←</button>
-  <div id="nav-title">상점</div>
+  <div id="nav-title" data-i18n="shop.title">${t('shop.title')}</div>
   <button id="nav-settings" onclick="location.href='settings.html'">⚙</button>
 </header>
 <main id="content">
@@ -33,15 +33,15 @@
   </div>
   <div class="shop-tabs-wrapper">
     <div class="shop-tabs">
-      <button class="shop-tab-btn active" data-tab="mercenary" onclick="G.switchTab('mercenary')">용병</button>
-      <button class="shop-tab-btn" data-tab="item" onclick="G.switchTab('item')">아이템</button>
-      <button class="shop-tab-btn" data-tab="job" onclick="G.switchTab('job')">직업</button>
-      <button class="shop-tab-btn" data-tab="gold" onclick="G.switchTab('gold')">골드</button>
+      <button class="shop-tab-btn active" data-tab="mercenary" onclick="G.switchTab('mercenary')" data-i18n="shop.tab_mercenary">${t('shop.tab_mercenary')}</button>
+      <button class="shop-tab-btn" data-tab="item" onclick="G.switchTab('item')" data-i18n="shop.tab_item">${t('shop.tab_item')}</button>
+      <button class="shop-tab-btn" data-tab="job" onclick="G.switchTab('job')" data-i18n="shop.tab_job">${t('shop.tab_job')}</button>
+      <button class="shop-tab-btn" data-tab="gold" onclick="G.switchTab('gold')" data-i18n="shop.tab_gold">${t('shop.tab_gold')}</button>
     </div>
   </div>
   <div class="shop-info-row">
-    <div class="shop-info-title" id="shop-info-title">용병을 모집하세요</div>
-    <div class="shop-info-timer" id="shop-timer">갱신까지 --</div>
+    <div class="shop-info-title" id="shop-info-title" data-i18n="shop.subtitle_mercenary">${t('shop.subtitle_mercenary')}</div>
+    <div class="shop-info-timer" id="shop-timer"><span data-i18n="shop.refresh_timer">${t('shop.refresh_timer')}</span> --</div>
   </div>
   <div id="shop-list" class="card-list"></div>
 </main>

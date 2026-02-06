@@ -24,11 +24,11 @@
 <body data-page="stage-select">
 <header id="top-nav">
   <button id="nav-back" onclick="location.href='index.html'">←</button>
-  <div id="nav-title">스테이지</div>
+  <div id="nav-title" data-i18n="nav.stage">${t('nav.stage')}</div>
   <button id="nav-settings" onclick="location.href='settings.html'">⚙</button>
 </header>
 <main id="content">
-  <div class="stage-subtitle">스테이지를 선택하세요</div>
+  <div class="stage-subtitle" data-i18n="stage.subtitle">${t('stage.subtitle')}</div>
   <div id="stage-list"></div>
 </main>
 <nav id="bottom-nav">

@@ -1,7 +1,12 @@
 Object.assign(G, {
   // Render
-  rTer(){const w=document.getElementById('iso-world');w.querySelectorAll('.iso-tile').forEach(e=>e.remove());
+  rTer(){const w=document.getElementById('iso-world');
+    // 기존 타일 요소 맵핑 (DOM 재사용)
+    const existingTiles=new Map();w.querySelectorAll('.iso-tile').forEach(el=>{const pos=el.dataset.pos;if(pos)existingTiles.set(pos,el)});
+    const tilesNeeded=new Set();
+
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=this.ter[r][c],ti=TI[t];
+      const pos=`${c},${r}`;tilesNeeded.add(pos);
       let hl='';if(this.sel){if(this.mvT.some(m=>m.x===c&&m.y===r))hl='move';
         else if(this.atkT.some(a=>a.x===c&&a.y===r))hl='attack';
         else if(this.healT.some(h=>h.x===c&&h.y===r))hl='heal';
@@ -9,14 +14,20 @@ Object.assign(G, {
       const seed=r*COLS+c;
       const vi=this.tileVar&&this.tileVar[t]!==undefined?this.tileVar[t]:0;
       const svg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi);
-      const tile=document.createElement('div');tile.className='iso-tile';
+
+      // 기존 요소 재사용 또는 새로 생성
+      let tile=existingTiles.get(pos);if(!tile){tile=document.createElement('div');tile.className='iso-tile';tile.dataset.pos=pos;w.appendChild(tile)}
       tile.style.left=this.tSX(c,r)+'px';tile.style.top=this.tSY(c,r,ti.z)+'px';
       tile.style.width=(TW*2)+'px';tile.style.height=(TH*2+ti.z*ZH+2)+'px';
       const v=this.g2v(c,r);tile.style.zIndex=v.vc+v.vr;tile.innerHTML=svg;
+      tile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
       if(hl==='move')tile.classList.add('hl-move');
       else if(hl==='attack')tile.classList.add('hl-attack');
       else if(hl==='heal')tile.classList.add('hl-heal');
-      w.appendChild(tile)}
+      else if(hl==='selected')tile.classList.add('hl-selected')}
+
+    // 불필요한 타일 삭제
+    existingTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
     w.querySelectorAll('.tree-obj').forEach(e=>e.remove());},
 
   rUnits(){const w=document.getElementById('iso-world'),al=this.units.filter(u=>u.hp>0),ids=new Set();
@@ -64,7 +75,7 @@ Object.assign(G, {
       this.hideAllMenuButtons();
       document.getElementById('btn-cancel').style.display='none';
       const btn=document.createElement('button');btn.className='am-skill';
-      btn.textContent='🔓 해제';
+      btn.textContent=t('messages.unlock');
       btn.onclick=()=>G.cancelChannel();
       const btnDash=document.getElementById('btn-dash');
       m.insertBefore(btn,btnDash);
@@ -83,10 +94,10 @@ Object.assign(G, {
     // 2. 공격 버튼: 유닛이 행동 완료 상태가 아닐 경우
     const btnAttack=document.getElementById('btn-attack');
     if(u.role==='healer'){
-      btnAttack.textContent='💚 치유';
+      btnAttack.textContent=t('messages.heal');
       btnAttack.style.display=(!u.ha&&this.healT.length>0)?'':'none'}
     else{
-      btnAttack.textContent='⚔️ 공격';
+      btnAttack.textContent=t('messages.attack');
       btnAttack.style.display=(!u.ha&&this.atkT.length>0)?'':'none'}
     // 3. 스킬 버튼: 자원(마나, 기력, 분노)이 충분한 경우
     const skills=getSkills(u.cls);
@@ -96,11 +107,11 @@ Object.assign(G, {
     document.getElementById('btn-item').style.display='none';
     // 5. 대기 버튼: 상시 활성화
     const btnDash=document.getElementById('btn-dash');
-    btnDash.textContent='⏸ 대기';
+    btnDash.textContent=t('messages.wait');
     btnDash.style.display='';
     // 6. 취소 버튼: 유닛 이동 후
     const btnCancel=document.getElementById('btn-cancel');
-    btnCancel.textContent='↩ 취소';
+    btnCancel.textContent=t('messages.cancel');
     btnCancel.style.display=this.preMv?'':'none';
     btnCancel.onclick=()=>G.actCancel();
     m.classList.add('show')},
