@@ -195,7 +195,7 @@ Object.assign(G,{
     availableStages.forEach((st)=>{
       const cl=this.cleared.has(st.id);
       const b=document.createElement('div');b.className='stage-btn'+(cl?' cleared':'');
-      b.innerHTML=`<div class="sb-num">${st.id}</div><div class="sb-name">${st.name}</div><div class="sb-info">적 ${st.tot}체</div><div class="sb-stars">${cl?'⭐':'☆'}</div>`;
+      b.innerHTML=`<div class="sb-num">${st.id}</div><div class="sb-name">${t('stages.stage_'+st.id+'_name')}</div><div class="sb-info">적 ${st.tot}체</div><div class="sb-stars">${cl?'⭐':'☆'}</div>`;
       b.onclick=()=>{
         this._loadParty();
         // 죽은 유닛 제거
