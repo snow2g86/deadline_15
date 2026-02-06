@@ -165,7 +165,7 @@ function initStage() {
         ${stage.boss ? `
         <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);padding:6px;border-radius:4px;font-size:10px">
           <div style="color:var(--purple);font-weight:700">💀 보스: ${stage.boss.name}</div>
-          <div style="color:var(--dim);margin-top:2px">${CD[stage.boss.cls]?.icon} ${CD[stage.boss.cls]?.name}</div>
+          <div style="color:var(--dim);margin-top:2px">${CD[stage.boss.cls]?.icon} ${t('classes.' + stage.boss.cls)}</div>
         </div>
         ` : ''}
       </div>

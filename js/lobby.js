@@ -517,7 +517,7 @@ Object.assign(G,{
     const allClasses=Object.keys(CD).filter(c=>c!=='novice'&&!c.startsWith('summon'));
     for(const cls of allClasses){
       const d=CD[cls];
-      items.push({type:'class_change',scrollId:`cc_${cls}`,name:`${d.name} 교본`,i18nNameKey:`classes.${cls}`,i18nSuffixKey:'shop.class_change_suffix',icon:d.icon,desc:`노비스를 ${d.name}으로 전직`,classes:[cls],cost:150,sold:false});
+      items.push({type:'class_change',scrollId:`cc_${cls}`,name:t('classes.'+cls)+' '+t('shop.class_change_suffix'),i18nNameKey:`classes.${cls}`,i18nSuffixKey:'shop.class_change_suffix',icon:d.icon,desc:t('shop.class_change_desc',{class:t('classes.'+cls)}),classes:[cls],cost:150,sold:false});
     }
     this._shopData={ts:Date.now(),items};
     this._saveShop();
