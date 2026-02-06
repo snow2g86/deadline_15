@@ -254,6 +254,31 @@ const I18N_DATA = {
       "summoner_summon_spirit": "정령소환",
       "summoner_summon_golem": "골램소환"
     },
+    "skills_desc": {
+      "warrior_powersmash": "공격력 1.5배의 데미지로 공격",
+      "knight_switch": "이동 범위 내 아군과 위치 교환",
+      "archer_dash": "이동 범위의 1.5배를 즉각 이동",
+      "lancer_pierce": "일직선 3칸 관통 데미지",
+      "assassin_ambush": "2칸 범위 적 대상, 인접 이동 후 ATK×2 공격",
+      "assassin_assassinate": "은신 겹침 상태에서 ATK×5 즉사급 공격",
+      "priest_massheal": "6칸 내 모든 아군 체력 회복",
+      "sapper_trap": "ATK×2 피해 + 2턴 이동불가 함정 설치",
+      "mage_fireburst": "대상 중심 3×3 범위 적 전체에 공격",
+      "novice_throw": "4칸 내 적에게 ATK×0.5 데미지",
+      "brawler_disarm": "1칸 내 적 공격력 3턴간 50% 감소",
+      "shaman_curse": "매턴 적 1명에게 최대HP 0.5% 피해(보스 0.2%). 해제까지 이동/행동 불가",
+      "shaman_exalt": "전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가",
+      "summoner_summon_spirit": "원거리 마법 공격 정령 소환 (5턴, 공격력 50%)",
+      "summoner_summon_golem": "근접 공격 골램 소환 (5턴, HP/DEF 120%, 공격력 50%)"
+    },
+    "passives": {
+      "fury_buff": "광폭",
+      "parry": "몸부림"
+    },
+    "passives_desc": {
+      "fury_buff": "2턴간 공격 데미지 1.5배",
+      "parry": "인접 공격자에게 ATK×50% 반격"
+    },
     "items": {
       "potion_small": "소형 경험치 물약",
       "potion_medium": "중형 경험치 물약",
@@ -557,6 +582,31 @@ const I18N_DATA = {
       "shaman_exalt": "Exalt",
       "summoner_summon_spirit": "Summon Spirit",
       "summoner_summon_golem": "Summon Golem"
+    },
+    "skills_desc": {
+      "warrior_powersmash": "Attack with 1.5x attack power damage",
+      "knight_switch": "Swap positions with ally within movement range",
+      "archer_dash": "Instantly move 1.5x movement range",
+      "lancer_pierce": "Straight line 3-cell piercing damage",
+      "assassin_ambush": "Target enemies in 2-cell range, move adjacent then ATK×2 attack",
+      "assassin_assassinate": "ATK×5 instant kill attack while stealthed and overlapping",
+      "priest_massheal": "Recover HP of all allies within 6 cells",
+      "sapper_trap": "ATK×2 damage + 2-turn immobilize trap",
+      "mage_fireburst": "Attack all enemies in 3×3 area centered on target",
+      "novice_throw": "ATK×0.5 damage to enemies within 4 cells",
+      "brawler_disarm": "Reduce target's attack power by 50% for 3 turns within 1 cell",
+      "shaman_curse": "Deal 0.5% max HP damage to 1 random enemy each turn (boss 0.2%). Immobilize until removed",
+      "shaman_exalt": "Increase all allies' damage by 25%. Immobilize until removed",
+      "summoner_summon_spirit": "Summon ranged magic spirit (5 turns, 50% attack power)",
+      "summoner_summon_golem": "Summon melee golem (5 turns, 120% HP/DEF, 50% attack power)"
+    },
+    "passives": {
+      "fury_buff": "Fury",
+      "parry": "Parry"
+    },
+    "passives_desc": {
+      "fury_buff": "Increase attack damage by 1.5x for 2 turns",
+      "parry": "Counterattack adjacent attacker with ATK×50%"
     },
     "items": {
       "potion_small": "Small Experience Potion",
@@ -871,6 +921,31 @@ const I18N_DATA = {
       "shaman_exalt": "Exaltación",
       "summoner_summon_spirit": "Invocar Espíritu",
       "summoner_summon_golem": "Invocar Golem"
+    },
+    "skills_desc": {
+      "warrior_powersmash": "Atacar con daño 1.5x poder de ataque",
+      "knight_switch": "Cambiar posiciones con aliado dentro del rango de movimiento",
+      "archer_dash": "Mover instantáneamente 1.5x rango de movimiento",
+      "lancer_pierce": "Daño perforante en línea recta de 3 celdas",
+      "assassin_ambush": "Objetivos enemigos en rango de 2 celdas, mover adyacente luego ATK×2 ataque",
+      "assassin_assassinate": "Ataque ATK×5 muerte instantánea mientras sigilo y solapamiento",
+      "priest_massheal": "Recuperar HP de todos los aliados dentro de 6 celdas",
+      "sapper_trap": "Daño ATK×2 + trampa inmovilizadora de 2 turnos",
+      "mage_fireburst": "Atacar todos enemigos en área 3×3 centrada en objetivo",
+      "novice_throw": "Daño ATK×0.5 a enemigos dentro de 4 celdas",
+      "brawler_disarm": "Reducir poder de ataque objetivo en 50% durante 3 turnos dentro de 1 celda",
+      "shaman_curse": "Infligir 0.5% daño HP máximo a 1 enemigo aleatorio cada turno (jefe 0.2%). Inmovilizar hasta remover",
+      "shaman_exalt": "Aumentar daño aliados en 25%. Inmovilizar hasta remover",
+      "summoner_summon_spirit": "Invocar espíritu magia a distancia (5 turnos, 50% poder ataque)",
+      "summoner_summon_golem": "Invocar golem cuerpo a cuerpo (5 turnos, 120% HP/DEF, 50% poder ataque)"
+    },
+    "passives": {
+      "fury_buff": "Furia",
+      "parry": "Parada"
+    },
+    "passives_desc": {
+      "fury_buff": "Aumentar daño ataque 1.5x durante 2 turnos",
+      "parry": "Contraataque atacante adyacente con ATK×50%"
     },
     "items": {
       "potion_small": "Poción de Experiencia Pequeña",
