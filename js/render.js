@@ -17,10 +17,10 @@ Object.assign(G, {
       const seed=r*COLS+c;
       const vi=this.tileVar&&this.tileVar[t]!==undefined?this.tileVar[t]:0;
 
-      // 배경 SVG (한 번만 생성, 이미지는 추출 후 제거)
+      // 배경 SVG (한 번만 생성, 바위 이미지만 추출 후 제거)
       let bgSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,'',t,seed,vi,true,false);
-      const objImgMatches=bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
-      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
+      const objImgMatches=bgSvg.match(/href="(image\/tileset\/rocks\/[^"]+)"/g)||[];
+      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/rocks\/[^"]*"[^>]*>/g,'');
       let bgTile=existingBgTiles.get(pos);
       if(!bgTile){bgTile=document.createElement('div');bgTile.className='iso-tile iso-tile-bg';bgTile.dataset.pos=pos;bgTile.innerHTML=bgSvg;w.appendChild(bgTile)}
       else if(bgTile.innerHTML!==bgSvg){bgTile.innerHTML=bgSvg}
