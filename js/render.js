@@ -75,16 +75,8 @@ Object.assign(G, {
     el.className=`float-text ${tp}`;el.textContent=t;el.style.left=(this.uSX(x,y)+UCX/2)+'px';el.style.top=(this.uSY(x,y)-8)+'px';el.style.zIndex=500;
     w.appendChild(el);setTimeout(()=>el.remove(),950)},
   showAM(u){const m=document.getElementById('action-menu');
-    const w=document.getElementById('iso-world');
-    const wLeft=parseFloat(w.style.left||0), wTop=parseFloat(w.style.top||0);
-    const ux=this.uSX(u.x,u.y)+wLeft, uy=this.uSY(u.x,u.y)+wTop;
-    const ct=document.getElementById('map-container');
-    const ctWidth=ct.clientWidth;
-    let menuLeft=ux+UW+2;
-    // 오른쪽으로 나가면 왼쪽 표시
-    if(menuLeft+140>ctWidth)menuLeft=ux-140-2;
-    menuLeft=Math.max(0,Math.min(menuLeft,ctWidth-140));
-    m.style.left=menuLeft+'px';m.style.top=Math.max(0,uy)+'px';m.style.zIndex=600;
+    m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
+    m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
     // 채널링 중: 해제 버튼만
     if(u.channeling){
       this.hideAllMenuButtons();
