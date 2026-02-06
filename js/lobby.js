@@ -493,13 +493,15 @@ Object.assign(G,{
       const cost=60+Math.floor(Math.random()*40);
       items.push({type:'char',cls,name,pot,cost,sold:false});
     }
-    // 물약 1개 (가중치 랜덤)
-    const totalW=EXP_POTIONS.reduce((s,p)=>s+p.weight,0);
-    let r=Math.random()*totalW,pot=EXP_POTIONS[0];
-    for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
-    items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
-    // 전직서 2개 (가중치 랜덤)
-    for(let i=0;i<2;i++){
+    // 물약 5개 (가중치 랜덤)
+    for(let i=0;i<5;i++){
+      const totalW=EXP_POTIONS.reduce((s,p)=>s+p.weight,0);
+      let r=Math.random()*totalW,pot=EXP_POTIONS[0];
+      for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
+      items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
+    }
+    // 전직서 5개 (가중치 랜덤)
+    for(let i=0;i<5;i++){
       const totalW=CLASS_CHANGE_SCROLLS.reduce((s,sc)=>s+sc.weight,0);
       let r=Math.random()*totalW,scroll=CLASS_CHANGE_SCROLLS[0];
       for(const sc of CLASS_CHANGE_SCROLLS){r-=sc.weight;if(r<=0){scroll=sc;break}}
