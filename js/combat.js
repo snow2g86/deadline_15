@@ -98,7 +98,8 @@ Object.assign(G, {
     this.skillMenuOpen=false;
     this._curSkill=sk;this.skillMode=true;
     if(sk.id==='knight_switch'){
-      this.atkT=this.mvC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.id!==u.id});
+      const range=sk.switchRange||2;
+      this.atkT=this.units.filter(v=>v.team==='ally'&&v.hp>0&&v.id!==u.id&&mh(u.x,u.y,v.x,v.y)<=range).map(v=>({x:v.x,y:v.y}));
       this.healT=[]
     }else if(sk.id==='archer_dash'){
       this.atkT=[];for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
@@ -374,7 +375,8 @@ Object.assign(G, {
     }
     // 스위치: 아군과 위치 교환
     if(skObj.id==='knight_switch'){
-      const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='ally'&&v.hp>0&&v.id!==u.id);
+      const range=skObj.switchRange||2;
+      const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='ally'&&v.hp>0&&v.id!==u.id&&mh(u.x,u.y,v.x,v.y)<=range);
       if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       [u.x,u.y,t.x,t.y]=[t.x,t.y,u.x,u.y];
       this.animU(u.id,u.x,u.y);this.animU(t.id,t.x,t.y);
