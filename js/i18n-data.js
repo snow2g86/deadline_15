@@ -263,6 +263,12 @@ const I18N_DATA = {
       "class_change_healer": "힐러 전직서",
       "class_change_universal": "범용 전직서"
     },
+    "items_desc": {
+      "class_change_melee": "노비스를 근접 직업으로 전직",
+      "class_change_ranged": "노비스를 원거리 직업으로 전직",
+      "class_change_healer": "노비스를 사제로 전직",
+      "class_change_universal": "노비스를 원하는 직업으로 전직"
+    },
     "stages": {
       "stage_1_name": "초원의 경비",
       "stage_1_theme": "마을지킴",
@@ -560,6 +566,12 @@ const I18N_DATA = {
       "class_change_ranged": "Ranged Class Change Scroll",
       "class_change_healer": "Healer Class Change Scroll",
       "class_change_universal": "Universal Class Change Scroll"
+    },
+    "items_desc": {
+      "class_change_melee": "Change novice to melee class",
+      "class_change_ranged": "Change novice to ranged class",
+      "class_change_healer": "Change novice to priest",
+      "class_change_universal": "Change novice to desired class"
     },
     "stages": {
       "stage_1_name": "Prairie Guard",
@@ -868,6 +880,12 @@ const I18N_DATA = {
       "class_change_ranged": "Pergamino de Cambio de Clase a Distancia",
       "class_change_healer": "Pergamino de Cambio de Clase Sanador",
       "class_change_universal": "Pergamino Universal de Cambio de Clase"
+    },
+    "items_desc": {
+      "class_change_melee": "Cambiar novato a clase cuerpo a cuerpo",
+      "class_change_ranged": "Cambiar novato a clase a distancia",
+      "class_change_healer": "Cambiar novato a sacerdote",
+      "class_change_universal": "Cambiar novato a clase deseada"
     },
     "stages": {
       "stage_1_name": "Guardia de la Pradera",
