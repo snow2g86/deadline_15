@@ -43,7 +43,7 @@ Object.assign(G, {
       const sx=this.tSX(c,r),sy=this.tSY(c,r,ti.z),sw=(TW*2)+'px',sh=(TH*2+ti.z*ZH+2)+'px',zix=this.g2v(c,r);
       bgTile.style.left=sx+'px';bgTile.style.top=sy+'px';bgTile.style.width=sw;bgTile.style.height=sh;bgTile.style.zIndex=zix.vc+zix.vr;
       hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr+1;
-      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=zix.vc+zix.vr+2;
+      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=101+zix.vc+zix.vr;
 
       // 하이라이트 클래스 설정
       hlTile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
