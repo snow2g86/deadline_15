@@ -240,6 +240,7 @@ Object.assign(G,{
         this.ter=bs.ter;this.turn=bs.turn;this.eSpwn=bs.eSpwn;this.eQ=bs.eQ;
         this.breached=bs.breached;this.gateHP=bs.gateHP;this.wallHP=bs.wallHP;this.nid=bs.nid;
         this.battleExp=bs.battleExp||{};
+        this.allyPos=bs.allyPos||{};
         this.units=bs.units;this.phase='player';this.sel=null;this.over=false;
         this.awPM=false;this.anim=false;this.camDir=0;
         document.querySelector('#cam-dir .cd-arrow').textContent=CARR[0];
@@ -432,7 +433,7 @@ Object.assign(G,{
         units:this.units.map(u=>({...u})),
         ter:this.ter,turn:this.turn,eSpwn:this.eSpwn,eQ:this.eQ,
         breached:this.breached,gateHP:{...this.gateHP},wallHP:{...this.wallHP},
-        nid:this.nid,battleExp:{...this.battleExp}
+        nid:this.nid,battleExp:{...this.battleExp},allyPos:{...this.allyPos}
       };
       localStorage.setItem('game_battle',JSON.stringify(d));
     }catch(e){}

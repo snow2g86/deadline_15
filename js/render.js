@@ -1,188 +1,253 @@
 Object.assign(G, {
-  // Render
-  rTer(){const w=document.getElementById('iso-world');
-    // 3레이어 시스템: 배경(bg), 하이라이트(hl), 오브젝트(obj) 분리
-    const existingBgTiles=new Map(),existingHlTiles=new Map(),existingObjTiles=new Map();
-    w.querySelectorAll('.iso-tile-bg').forEach(el=>{const pos=el.dataset.pos;if(pos)existingBgTiles.set(pos,el)});
-    w.querySelectorAll('.iso-tile-hl').forEach(el=>{const pos=el.dataset.pos;if(pos)existingHlTiles.set(pos,el)});
-    w.querySelectorAll('.iso-tile-obj').forEach(el=>{const pos=el.dataset.pos;if(pos)existingObjTiles.set(pos,el)});
-    const tilesNeeded=new Set();
+	// Render
+	rTer() {
+		const w = document.getElementById('iso-world');
+		// 3레이어 시스템: 배경(bg), 하이라이트(hl), 오브젝트(obj) 분리
+		const existingBgTiles = new Map(), existingHlTiles = new Map(), existingObjTiles = new Map();
+		w.querySelectorAll('.iso-tile-bg').forEach(el => { const pos = el.dataset.pos; if (pos) existingBgTiles.set(pos, el) });
+		w.querySelectorAll('.iso-tile-hl').forEach(el => { const pos = el.dataset.pos; if (pos) existingHlTiles.set(pos, el) });
+		w.querySelectorAll('.iso-tile-obj').forEach(el => { const pos = el.dataset.pos; if (pos) existingObjTiles.set(pos, el) });
+		const tilesNeeded = new Set();
 
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=this.ter[r][c],ti=TI[t];
-      const pos=`${c},${r}`;tilesNeeded.add(pos);
-      let hl='';if(this.sel){if(this.mvT.some(m=>m.x===c&&m.y===r))hl='move';
-        else if(this.atkT.some(a=>a.x===c&&a.y===r))hl='attack';
-        else if(this.healT.some(h=>h.x===c&&h.y===r))hl='heal';
-        if(this.sel.x===c&&this.sel.y===r)hl='selected'}
-      const seed=r*COLS+c;
-      const vi=this.tileVar&&this.tileVar[t]!==undefined?this.tileVar[t]:0;
+		for (let r = 0; r < ROWS; r++)for (let c = 0; c < COLS; c++) {
+			const t = this.ter[r][c], ti = TI[t];
+			const pos = `${c},${r}`; tilesNeeded.add(pos);
+			let hl = ''; if (this.sel) {
+				if (this.mvT.some(m => m.x === c && m.y === r)) hl = 'move';
+				else if (this.atkT.some(a => a.x === c && a.y === r)) hl = 'attack';
+				else if (this.healT.some(h => h.x === c && h.y === r)) hl = 'heal';
+				if (this.sel.x === c && this.sel.y === r) hl = 'selected'
+			}
+			const seed = r * COLS + c;
+			const vi = this.tileVar && this.tileVar[t] !== undefined ? this.tileVar[t] : 0;
 
-      // 배경 SVG (한 번만 생성, 이미지 추출 후 제거)
-      let bgSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,'',t,seed,vi,true,false);
-      const objImgMatches=bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
-      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
-      let bgTile=existingBgTiles.get(pos);
-      if(!bgTile){bgTile=document.createElement('div');bgTile.className='iso-tile iso-tile-bg';bgTile.dataset.pos=pos;bgTile.innerHTML=bgSvg;w.appendChild(bgTile)}
-      else if(bgTile.innerHTML!==bgSvg){bgTile.innerHTML=bgSvg}
+			// 배경 SVG (한 번만 생성, 이미지 추출 후 제거)
+			let bgSvg = tSVG(TW, TH, ti.tc, ti.lc, ti.rc, ti.z, '', t, seed, vi, true, false);
+			const objImgMatches = bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g) || [];
+			bgSvg = bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g, '');
+			let bgTile = existingBgTiles.get(pos);
+			if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; bgTile.innerHTML = bgSvg; w.appendChild(bgTile) }
+			else if (bgTile.innerHTML !== bgSvg) { bgTile.innerHTML = bgSvg }
 
-      // 하이라이트 SVG (hl 변경 시만 업데이트, 오브젝트 이미지 제외)
-      const hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false,true);
+			// 하이라이트 SVG (hl 변경 시만 업데이트, 오브젝트 이미지 제외)
+			const hlSvg = tSVG(TW, TH, ti.tc, ti.lc, ti.rc, ti.z, hl, t, seed, vi, false, true);
 
-      let hlTile=existingHlTiles.get(pos);
-      if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;hlTile.style.cursor='pointer';hlTile.addEventListener('click',e=>{e.stopPropagation();const rect=w.getBoundingClientRect();const px=e.clientX-rect.left,py=e.clientY-rect.top;const hit=G.isoHit(px,py);if(!hit)return;const{c,r}=hit;if(c<0||c>=COLS||r<0||r>=ROWS)return;if(G.awPM){G.cellCk(c,r);return}const u=G.uAt(c,r);if(u&&!G.sel){G.selU(u);return}if(u&&G.sel&&u.id===G.sel.id){G.clrSel();return}G.cellCk(c,r)});w.appendChild(hlTile)}
-      if(hlTile.innerHTML!==hlSvg){hlTile.innerHTML=hlSvg}
+			let hlTile = existingHlTiles.get(pos);
+			if (!hlTile) { hlTile = document.createElement('div'); hlTile.className = 'iso-tile iso-tile-hl'; hlTile.dataset.pos = pos; hlTile.style.cursor = 'pointer'; hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && !G.sel) { G.selU(u); return } if (u && G.sel && u.id === G.sel.id) { G.clrSel(); return } G.cellCk(c, r) }); w.appendChild(hlTile) }
+			if (hlTile.innerHTML !== hlSvg) { hlTile.innerHTML = hlSvg }
 
-      // 오브젝트 이미지 레이어 (바위/숲 구분)
-      let objTile=existingObjTiles.get(pos);
-      if(!objTile){objTile=document.createElement('div');objTile.className='iso-tile iso-tile-obj';objTile.dataset.pos=pos;w.appendChild(objTile)}
-      let objHTML='';
-      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);width:auto;height:200%;max-width:120%;max-height:200%;pointer-events:none;":"position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
-      if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
+			// 오브젝트 이미지 레이어 (바위/숲 구분)
+			let objTile = existingObjTiles.get(pos);
+			if (!objTile) { objTile = document.createElement('div'); objTile.className = 'iso-tile iso-tile-obj'; objTile.dataset.pos = pos; objTile.dataset.opacity = '1'; w.appendChild(objTile) }
+			let objHTML = '';
+			objImgMatches.forEach((match) => {
+				const src = match.match(/href="([^"]+)"/)[1];
+				const isRock = src.includes('/rocks/');
+				let style = `position:absolute;top:8%;left:50%;transform:translate(-50%,-50%);width:auto;height:80%;pointer-events:none;` 
+				objHTML += `<div class=obj_box><img src="${src}" alt="obj" style="${style}">`;
+				style = `position:absolute;top:20%;left:25%;transform:translate(-50%,-50%);width:auto;height:88%;pointer-events:none;` ;
+				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
+				style = `position:absolute;top:25%;left:54%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
+				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
+				style = `position:absolute;top:25%;left:80%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
+				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
+				style = `position:absolute;top:54%;left:50%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
+				objHTML += `<img src="${src}" alt="obj" style="${style}"><div>`;
+			});
+			if (objTile.innerHTML !== objHTML) { objTile.innerHTML = objHTML }
 
-      // 스타일 설정: obj > hl > bg > SVG 순서
-      const sx=this.tSX(c,r),sy=this.tSY(c,r,ti.z),sw=(TW*2)+'px',sh=(TH*2+ti.z*ZH+2)+'px',zix=this.g2v(c,r);
-      bgTile.style.left=sx+'px';bgTile.style.top=sy+'px';bgTile.style.width=sw;bgTile.style.height=sh;bgTile.style.zIndex=zix.vc+zix.vr;
-      hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr+1;
-      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=101+zix.vc+zix.vr;
+			// 스타일 설정: obj > hl > bg > SVG 순서
+			const sx = this.tSX(c, r), sy = this.tSY(c, r, ti.z), sw = (TW * 2) + 'px', sh = (TH * 2 + ti.z * ZH + 2) + 'px', zix = this.g2v(c, r);
+			bgTile.style.left = sx + 'px'; bgTile.style.top = sy + 'px'; bgTile.style.width = sw; bgTile.style.height = sh; bgTile.style.zIndex = zix.vc + zix.vr;
+			hlTile.style.left = sx + 'px'; hlTile.style.top = sy + 'px'; hlTile.style.width = sw; hlTile.style.height = sh; hlTile.style.zIndex = zix.vc + zix.vr + 1;
+			objTile.style.left = sx + 'px'; objTile.style.top = sy + 'px'; objTile.style.width = sw; objTile.style.height = sh; objTile.style.zIndex = 101 + zix.vc + zix.vr;
 
-      // 하이라이트 클래스 설정
-      hlTile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
-      if(hl==='move')hlTile.classList.add('hl-move');
-      else if(hl==='attack')hlTile.classList.add('hl-attack');
-      else if(hl==='heal')hlTile.classList.add('hl-heal');
-      else if(hl==='selected')hlTile.classList.add('hl-selected')}
+			// 하이라이트 클래스 설정
+			hlTile.classList.remove('hl-move', 'hl-attack', 'hl-heal', 'hl-selected');
+			if (hl === 'move') hlTile.classList.add('hl-move');
+			else if (hl === 'attack') hlTile.classList.add('hl-attack');
+			else if (hl === 'heal') hlTile.classList.add('hl-heal');
+			else if (hl === 'selected') hlTile.classList.add('hl-selected')
+		}
 
-    // 불필요한 타일 삭제
-    existingBgTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
-    existingHlTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
-    existingObjTiles.forEach((el,pos)=>{if(!tilesNeeded.has(pos))el.remove()});
-    w.querySelectorAll('.tree-obj').forEach(e=>e.remove());},
+		// 불필요한 타일 삭제
+		existingBgTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
+		existingHlTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
+		existingObjTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
+		w.querySelectorAll('.tree-obj').forEach(e => e.remove());
+	},
 
-  rUnits(){const w=document.getElementById('iso-world'),al=this.units.filter(u=>u.hp>0),ids=new Set();
-    const resClr=u=>u.resType==='mana'?'#4488ff':u.resType==='energy'?'#f0c040':'#ff6644';
-    al.forEach(u=>{ids.add('u-'+u.id);let el=document.getElementById('u-'+u.id);
-      if(!el){el=document.createElement('div');el.id='u-'+u.id;el.className=`unit-sprite ${u.team} spawning`;
-        setTimeout(()=>el.classList.remove('spawning'),450);
-        el.innerHTML=`<div class="u-icon">${clsIcon(u.cls,28)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
-        w.appendChild(el)}
-      el.style.width=UW+'px';el.style.height=UH+'px';el.style.left=this.uSX(u.x,u.y)+'px';el.style.top=this.uSY(u.x,u.y)+'px';
-      const v=this.g2v(u.x,u.y);el.style.zIndex=100+v.vc+v.vr;
-      el.querySelector('.hp-fill').style.width=`${(u.hp/u.mhp)*100}%`;
-      const mpFill=el.querySelector('.mp-fill');
-      mpFill.style.width=`${u.maxRes?(u.res/u.maxRes)*100:0}%`;
-      mpFill.style.background=resClr(u);
-      const isSel=this.sel&&this.sel.id===u.id;
-      el.classList.toggle('acted',u.team==='ally'&&u.ha&&!isSel);el.classList.remove('ally','enemy');el.classList.add(u.team);
-      el.classList.toggle('stealthed',isStealthed(u));el.classList.toggle('stunned',u.stunned>0);
-      // stunned 카운트 표시
-      let stunLabel=el.querySelector('.stun-label');if(u.stunned>0){if(!stunLabel){stunLabel=document.createElement('div');stunLabel.className='stun-label';el.appendChild(stunLabel)}stunLabel.textContent=u.stunned}else if(stunLabel)stunLabel.remove();
-      // 소환수 턴 카운트 표시
-      if(u.isSummon&&u.summonTurns!==undefined){
-        let turnLabel=el.querySelector('.summon-turns');
-        if(!turnLabel){
-          turnLabel=document.createElement('div');
-          turnLabel.className='summon-turns';
-          turnLabel.style.cssText='position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid #fff;z-index:10;';
-          el.appendChild(turnLabel)
-        }
-        turnLabel.textContent=u.summonTurns
-      }else{
-        const turnLabel=el.querySelector('.summon-turns');
-        if(turnLabel)turnLabel.remove()
-      }});
-    [...w.querySelectorAll('.unit-sprite')].forEach(el=>{if(!ids.has(el.id))el.remove()});
-    this.rMM();this.rNav()},
+	rUnits() {
+		const w = document.getElementById('iso-world'), al = this.units.filter(u => u.hp > 0), ids = new Set();
+		const resClr = u => u.resType === 'mana' ? '#4488ff' : u.resType === 'energy' ? '#f0c040' : '#ff6644';
+		al.forEach(u => {
+			ids.add('u-' + u.id); let el = document.getElementById('u-' + u.id);
+			if (!el) {
+				el = document.createElement('div'); el.id = 'u-' + u.id; el.className = `unit-sprite ${u.team} spawning`;
+				if (u.team === 'ally') this.allyPos[u.id] = {x: u.x, y: u.y};
+				setTimeout(() => el.classList.remove('spawning'), 450);
+				el.innerHTML = `<div class="u-icon">${clsIcon(u.cls, 28)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
+				w.appendChild(el)
+			}
+			el.style.width = UW + 'px'; el.style.height = UH + 'px'; el.style.left = this.uSX(u.x, u.y) + 'px'; el.style.top = this.uSY(u.x, u.y) + 'px';
+			const v = this.g2v(u.x, u.y); el.style.zIndex = 100 + v.vc + v.vr;
+			el.querySelector('.hp-fill').style.width = `${(u.hp / u.mhp) * 100}%`;
+			const mpFill = el.querySelector('.mp-fill');
+			mpFill.style.width = `${u.maxRes ? (u.res / u.maxRes) * 100 : 0}%`;
+			mpFill.style.background = resClr(u);
+			const isSel = this.sel && this.sel.id === u.id;
+			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
+			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0);
+			// stunned 카운트 표시
+			let stunLabel = el.querySelector('.stun-label'); if (u.stunned > 0) { if (!stunLabel) { stunLabel = document.createElement('div'); stunLabel.className = 'stun-label'; el.appendChild(stunLabel) } stunLabel.textContent = u.stunned } else if (stunLabel) stunLabel.remove();
+			// 소환수 턴 카운트 표시
+			if (u.isSummon && u.summonTurns !== undefined) {
+				let turnLabel = el.querySelector('.summon-turns');
+				if (!turnLabel) {
+					turnLabel = document.createElement('div');
+					turnLabel.className = 'summon-turns';
+					turnLabel.style.cssText = 'position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid #fff;z-index:10;';
+					el.appendChild(turnLabel)
+				}
+				turnLabel.textContent = u.summonTurns
+			} else {
+				const turnLabel = el.querySelector('.summon-turns');
+				if (turnLabel) turnLabel.remove()
+			}
+		});
+		[...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove() });
+		// 사망한 아군 좌표 기록 (99,99)
+		this.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
+			this.allyPos[u.id] = {x: 99, y: 99};
+		});
+		// 타일 오브젝트 opacity 제어
+		const allyPosCoords = new Set(Object.values(this.allyPos).map(p => `${p.x},${p.y}`));
+		Object.values(this.allyPos).forEach(pos => {
+			if (pos.x !== 99) {
+				const tile = w.querySelector(`.iso-tile-obj[data-pos="${pos.x},${pos.y}"]`);
+				if (tile) {
+					const objBox = tile.querySelector('.obj_box');
+					if (objBox) { objBox.style.opacity = '0'; tile.dataset.opacity = '0'; }
+				}
+			}
+		});
+		w.querySelectorAll('.iso-tile-obj[data-opacity="0"]').forEach(tile => {
+			const pos = tile.dataset.pos;
+			if (!allyPosCoords.has(pos)) {
+				const objBox = tile.querySelector('.obj_box');
+				if (objBox) { objBox.style.opacity = '1'; tile.dataset.opacity = '1'; }
+			}
+		});
+		this.rMM(); this.rNav()
+	},
 
-  floatT(x,y,t,tp){const w=document.getElementById('iso-world'),el=document.createElement('div');
-    el.className=`float-text ${tp}`;el.textContent=t;el.style.left=(this.uSX(x,y)+UCX/2)+'px';el.style.top=(this.uSY(x,y)-8)+'px';el.style.zIndex=500;
-    w.appendChild(el);setTimeout(()=>el.remove(),950)},
-  showAM(u){const m=document.getElementById('action-menu');
-    m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
-    m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
-    // 채널링 중: 해제 버튼만
-    if(u.channeling){
-      this.hideAllMenuButtons();
-      document.getElementById('btn-cancel').style.display='none';
-      const btn=document.createElement('button');btn.className='am-skill';
-      btn.textContent=t('messages.unlock');
-      btn.onclick=()=>G.cancelChannel();
-      const btnDash=document.getElementById('btn-dash');
-      m.insertBefore(btn,btnDash);
-      btnDash.style.display='none';
-      m.classList.add('show');return}
-    // 스킬 서브 메뉴 상태
-    if(this.skillMenuOpen){this.showSkillSubMenu(u);return}
-    // 메인 메뉴
-    this.showMainMenu(u)},
-  showMainMenu(u){const m=document.getElementById('action-menu');
-    // 동적 스킬 버튼 제거
-    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
-    // 1. 이동 버튼: 아직 유닛이 이동하지 않았을 경우
-    document.getElementById('btn-move').style.display=
-      (!u.hm&&!u.mo)?'':'none';
-    // 2. 공격 버튼: 유닛이 행동 완료 상태가 아닐 경우
-    const btnAttack=document.getElementById('btn-attack');
-    if(u.role==='healer'){
-      btnAttack.textContent=t('messages.heal');
-      btnAttack.style.display=(!u.ha&&this.healT.length>0)?'':'none'}
-    else{
-      btnAttack.textContent=t('messages.attack');
-      btnAttack.style.display=(!u.ha&&this.atkT.length>0)?'':'none'}
-    // 3. 스킬 버튼: 자원(마나, 기력, 분노)이 충분한 경우
-    const skills=getSkills(u.cls);
-    const hasUsableSkill=!u.ha&&skills.some(sk=>this.canUseSkill(u,sk));
-    document.getElementById('btn-skill').style.display=hasUsableSkill?'':'none';
-    // 4. 아이템 버튼: 추후 개발 (비활성화)
-    document.getElementById('btn-item').style.display='none';
-    // 5. 대기 버튼: 상시 활성화
-    const btnDash=document.getElementById('btn-dash');
-    btnDash.textContent=t('messages.wait');
-    btnDash.style.display='';
-    // 6. 취소 버튼: 유닛 이동 후
-    const btnCancel=document.getElementById('btn-cancel');
-    btnCancel.textContent=t('messages.cancel');
-    btnCancel.style.display=this.preMv?'':'none';
-    btnCancel.onclick=()=>G.actCancel();
-    m.classList.add('show')},
-  showSkillSubMenu(u){const m=document.getElementById('action-menu');
-    // 기존 버튼 숨김
-    this.hideAllMenuButtons();
-    // 동적 스킬 버튼 제거 후 재생성
-    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
-    const skills=getSkills(u.cls);
-    const btnDash=document.getElementById('btn-dash');
-    // 보유 스킬: 자원이 충분한 경우 활성화, 부족한 경우 디저블 처리
-    skills.forEach((sk,idx)=>{
-      const btn=document.createElement('button');btn.className='am-skill';
-      btn.textContent=sk.icon+' '+sk.name;
-      // 자원 충분 여부 확인
-      let enabled=this.canUseSkill(u,sk);
-      btn.disabled=!enabled;
-      btn.onclick=()=>G.actSkill(idx);
-      m.insertBefore(btn,btnDash)});
-    // 대시 버튼 숨김
-    btnDash.style.display='none';
-    // 취소 버튼: 상시 활성화 - 클릭시 행동 UI로 전환
-    const btnCancel=document.getElementById('btn-cancel');
-    btnCancel.textContent='↩ 취소';
-    btnCancel.style.display='';
-    btnCancel.onclick=()=>G.hideSkillMenu();
-    m.classList.add('show')},
-  hideAllMenuButtons(){
-    ['btn-move','btn-attack','btn-skill','btn-item','btn-dash','btn-cancel'].forEach(id=>{
-      document.getElementById(id).style.display='none'})},
-  canUseSkill(u,sk){
-    let enabled=u.res>=sk.cost&&!u.ha;
-    // 암살: 은신+겹침 추가 조건
-    if(sk.id==='assassin_assassinate'){
-      const overlapping=isStealthed(u)&&this.units.some(v=>
-        v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
-      enabled=enabled&&overlapping}
-    // 소환 스킬: 소환 제한 체크
-    if(sk.id.startsWith('summoner_summon_')){
-      const maxSummons=1;
-      const currentSummons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
-      if(currentSummons.length>=maxSummons){enabled=false}}
-    return enabled},
-  hideAM(){document.getElementById('action-menu').classList.remove('show')},
+	floatT(x, y, t, tp) {
+		const w = document.getElementById('iso-world'), el = document.createElement('div');
+		el.className = `float-text ${tp}`; el.textContent = t; el.style.left = (this.uSX(x, y) + UCX / 2) + 'px'; el.style.top = (this.uSY(x, y) - 8) + 'px'; el.style.zIndex = 500;
+		w.appendChild(el); setTimeout(() => el.remove(), 950)
+	},
+	showAM(u) {
+		const m = document.getElementById('action-menu');
+		m.style.left = (this.uSX(u.x, u.y) + UW + 2) + 'px';
+		m.style.top = this.uSY(u.x, u.y) + 'px'; m.style.zIndex = 600;
+		// 채널링 중: 해제 버튼만
+		if (u.channeling) {
+			this.hideAllMenuButtons();
+			document.getElementById('btn-cancel').style.display = 'none';
+			const btn = document.createElement('button'); btn.className = 'am-skill';
+			btn.textContent = t('messages.unlock');
+			btn.onclick = () => G.cancelChannel();
+			const btnDash = document.getElementById('btn-dash');
+			m.insertBefore(btn, btnDash);
+			btnDash.style.display = 'none';
+			m.classList.add('show'); return
+		}
+		// 스킬 서브 메뉴 상태
+		if (this.skillMenuOpen) { this.showSkillSubMenu(u); return }
+		// 메인 메뉴
+		this.showMainMenu(u)
+	},
+	showMainMenu(u) {
+		const m = document.getElementById('action-menu');
+		// 동적 스킬 버튼 제거
+		m.querySelectorAll('.am-skill').forEach(e => e.remove());
+		// 1. 이동 버튼: 아직 유닛이 이동하지 않았을 경우
+		document.getElementById('btn-move').style.display =
+			(!u.hm && !u.mo) ? '' : 'none';
+		// 2. 공격 버튼: 유닛이 행동 완료 상태가 아닐 경우
+		const btnAttack = document.getElementById('btn-attack');
+		if (u.role === 'healer') {
+			btnAttack.textContent = t('battle.heal');
+			btnAttack.style.display = (!u.ha && this.healT.length > 0) ? '' : 'none'
+		}
+		else {
+			btnAttack.textContent = t('battle.attack');
+			btnAttack.style.display = (!u.ha && this.atkT.length > 0) ? '' : 'none'
+		}
+		// 3. 스킬 버튼: 자원(마나, 기력, 분노)이 충분한 경우
+		const skills = getSkills(u.cls);
+		const hasUsableSkill = !u.ha && skills.some(sk => this.canUseSkill(u, sk));
+		document.getElementById('btn-skill').style.display = hasUsableSkill ? '' : 'none';
+		// 4. 아이템 버튼: 추후 개발 (비활성화)
+		document.getElementById('btn-item').style.display = 'none';
+		// 5. 대기 버튼: 상시 활성화
+		const btnDash = document.getElementById('btn-dash');
+		btnDash.textContent = t('battle.wait');
+		btnDash.style.display = '';
+		// 6. 취소 버튼: 유닛 이동 후
+		const btnCancel = document.getElementById('btn-cancel');
+		btnCancel.textContent = t('battle.cancel');
+		btnCancel.style.display = this.preMv ? '' : 'none';
+		btnCancel.onclick = () => G.actCancel();
+		m.classList.add('show')
+	},
+	showSkillSubMenu(u) {
+		const m = document.getElementById('action-menu');
+		// 기존 버튼 숨김
+		this.hideAllMenuButtons();
+		// 동적 스킬 버튼 제거 후 재생성
+		m.querySelectorAll('.am-skill').forEach(e => e.remove());
+		const skills = getSkills(u.cls);
+		const btnDash = document.getElementById('btn-dash');
+		// 보유 스킬: 자원이 충분한 경우 활성화, 부족한 경우 디저블 처리
+		skills.forEach((sk, idx) => {
+			const btn = document.createElement('button'); btn.className = 'am-skill';
+			btn.textContent = sk.icon + ' ' + t('skills.' + sk.id);
+			// 자원 충분 여부 확인
+			let enabled = this.canUseSkill(u, sk);
+			btn.disabled = !enabled;
+			btn.onclick = () => G.actSkill(idx);
+			m.insertBefore(btn, btnDash)
+		});
+		// 대시 버튼 숨김
+		btnDash.style.display = 'none';
+		// 취소 버튼: 상시 활성화 - 클릭시 행동 UI로 전환
+		const btnCancel = document.getElementById('btn-cancel');
+		btnCancel.textContent = '↩ ' + t('battle.cancel');
+		btnCancel.style.display = '';
+		btnCancel.onclick = () => G.hideSkillMenu();
+		m.classList.add('show')
+	},
+	hideAllMenuButtons() {
+		['btn-move', 'btn-attack', 'btn-skill', 'btn-item', 'btn-dash', 'btn-cancel'].forEach(id => {
+			document.getElementById(id).style.display = 'none'
+		})
+	},
+	canUseSkill(u, sk) {
+		let enabled = u.res >= sk.cost && !u.ha;
+		// 암살: 은신+겹침 추가 조건
+		if (sk.id === 'assassin_assassinate') {
+			const overlapping = isStealthed(u) && this.units.some(v =>
+				v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
+			enabled = enabled && overlapping
+		}
+		// 소환 스킬: 소환 제한 체크
+		if (sk.id.startsWith('summoner_summon_')) {
+			const maxSummons = 1;
+			const currentSummons = this.units.filter(s => s.isSummon && s.summonerId === u.id);
+			if (currentSummons.length >= maxSummons) { enabled = false }
+		}
+		return enabled
+	},
+	hideAM() { document.getElementById('action-menu').classList.remove('show') },
 });

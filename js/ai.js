@@ -152,8 +152,8 @@ Object.assign(G, {
           this.floatT(t.x,t.y,`-${dmg}`,'damage');
           this.floatT(t.x,t.y,t('messages.curse'),'damage');
           this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:6,colors:['#9333ea','#581c87','#a855f7'],shape:'spark',speed:2,spread:8,decay:0.03,size:3});
-          if(t.hp<=0){this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);
-            setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd()},500)}
+          if(t.hp<=0){this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);this.units=this.units.filter(v=>v.hp>0);
+            setTimeout(()=>{this.rUnits();this.chkEnd()},500)}
         }
       });
       this.alive('ally').forEach(u=>{
@@ -246,8 +246,9 @@ Object.assign(G, {
           t.hp = 0;
           this.floatT(u.x, u.y, t('messages.warrior_strike'), 'heal');
           this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id);
+          this.units = this.units.filter(v => v.hp > 0);
           u.ha = true; // 행동 완료
-          setTimeout(() => { this.units = this.units.filter(v => v.hp > 0); this.rUnits(); }, 500);
+          setTimeout(() => { this.rUnits(); }, 500);
           return true;
         }
       }
@@ -293,7 +294,7 @@ Object.assign(G, {
               this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY,
                 { count: 8, colors: ['#ff6600', '#ffaa00', '#ffff00'], shape: 'spark',
                   speed: 3, spread: 10, decay: 0.03, size: 4 });
-              if (t.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id); }
+              if (t.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id); this.units = this.units.filter(v => v.hp > 0); }
             }
           }
         }
@@ -395,8 +396,8 @@ Object.assign(G, {
     t.hp=Math.max(0,t.hp-dmg);this.vfxAtk(a,t);this.sfxAtk(a.cls);this.shakeU(t.id);this.floatT(t.x,t.y,`-${dmg}`,'damage');
     if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
     procFury(a,t,this);
-    if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
-    else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
+    if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);this.units=this.units.filter(u=>u.hp>0);setTimeout(()=>{this.rUnits()},500)}
+    else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);this.units=this.units.filter(u=>u.hp>0);setTimeout(()=>{this.rUnits()},500)}
     else this.rUnits()},
   async eMv(u,al){
     // Defensive AI: 5-cell advance limit from formation position
@@ -412,7 +413,7 @@ Object.assign(G, {
       if(bestMove&&mh(bestMove.x,bestMove.y,origPos.x,origPos.y)<mh(u.x,u.y,origPos.x,origPos.y)){
         u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);
         this.floatT(u.x,u.y,t('messages.retreat'),'damage');await sl(340);
-        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500)}
+        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);this.units=this.units.filter(v=>v.hp>0);setTimeout(()=>{this.rUnits()},500)}
         return
       }
     }

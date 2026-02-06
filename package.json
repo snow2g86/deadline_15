@@ -1,0 +1,12 @@
+{
+  "name": "deadline-15-rpg",
+  "version": "1.0.0",
+  "description": "Turn-based Defense RPG Game",
+  "scripts": {
+    "generate-i18n": "node scripts/generate-i18n.js",
+    "dev": "open index.html"
+  },
+  "keywords": ["game", "rpg", "defense"],
+  "author": "",
+  "license": "MIT"
+}

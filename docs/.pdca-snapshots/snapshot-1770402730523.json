@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-02-06T09:51:23.491Z",
+  "timestamp": "2026-02-06T18:32:10.522Z",
   "reason": "compaction",
   "status": {
     "version": "2.0",
-    "lastUpdated": "2026-02-06T09:48:30.677Z",
+    "lastUpdated": "2026-02-06T18:31:24.191Z",
     "activeFeatures": [
       "js"
     ],
@@ -18,9 +18,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-05T06:16:20.882Z",
-          "lastUpdated": "2026-02-06T09:48:30.677Z"
+          "lastUpdated": "2026-02-06T18:31:24.191Z"
         },
-        "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/lobby.js"
+        "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/combat.js"
       }
     },
     "pipeline": {
@@ -31,7 +31,7 @@
     "session": {
       "startedAt": "2026-02-05T06:05:50.525Z",
       "onboardingCompleted": false,
-      "lastActivity": "2026-02-06T09:48:30.677Z"
+      "lastActivity": "2026-02-06T18:31:24.191Z"
     },
     "history": [
       {
@@ -2814,6 +2814,372 @@
       },
       {
         "timestamp": "2026-02-06T09:48:30.677Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:54:57.982Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:55:02.221Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:55:09.892Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:55:18.979Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:55:24.978Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:55:29.652Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:56:24.487Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:56:30.923Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:58:56.469Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:59:05.423Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:59:11.915Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:59:22.453Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:59:28.976Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T09:59:56.532Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T10:03:28.112Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:09:38.801Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:09:55.371Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:13:51.926Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:19:08.133Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:19:17.726Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:19:37.989Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:19:52.260Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:25:27.339Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:26:36.233Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:01.942Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:09.083Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:17.927Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:25.495Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:49.953Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:27:56.759Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:32:05.567Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:33:15.717Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:34:08.898Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:35:58.623Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:38:25.679Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:41:09.642Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:41:15.380Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:43:14.202Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:44:22.867Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:45:16.039Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T16:46:57.040Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:42:54.675Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:45:14.369Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:50:28.594Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:50:40.103Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:52:59.335Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:56:12.537Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:59:05.540Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T17:59:13.354Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:00:11.267Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:17:28.908Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:17:36.370Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:17:41.384Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:17:46.825Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:18:04.810Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:18:14.001Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:21:41.013Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:23:55.032Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:28:04.502Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:31:20.501Z",
+        "feature": "js",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-06T18:31:24.191Z",
         "feature": "js",
         "phase": "do",
         "action": "updated"

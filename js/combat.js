@@ -205,10 +205,11 @@ Object.assign(G, {
           u.res=Math.min(u.maxRes,u.res+20);
           this.floatT(u.x,u.y,'+20 EP','exp');
           this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);
+          this.units=this.units.filter(v=>v.hp>0);
         }
         this._grantExp(u,'attack');
         u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
-        setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);
+        setTimeout(()=>{this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);
       },360);return
     }
     // 암살: 겹친 적에 ATK×5 → 이탈
@@ -221,12 +222,12 @@ Object.assign(G, {
       this.screenShake();this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
       this.floatT(u.x,u.y,t('messages.assassin_assassinate'),'heal');
-      if(t.hp<=0){this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
+      if(t.hp<=0){this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);this.units=this.units.filter(v=>v.hp>0)}
       this._grantExp(u,'attack');
       const esc=this._findAdj(u.x,u.y,null);
       if(esc){u.x=esc.x;u.y=esc.y;u.mo=true;this.animU(u.id,esc.x,esc.y)}
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
-      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+      setTimeout(()=>{this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
     // 집단 치유: 6칸 내 모든 아군 HP 회복
     if(skObj.id==='priest_massheal'){
@@ -266,14 +267,14 @@ Object.assign(G, {
           const dmg=Math.max(1,u.atk-t.def);t.hp=Math.max(0,t.hp-dmg);
           this.floatT(t.x,t.y,`-${dmg}`,'damage');this.shakeU(t.id);
           this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:8,colors:['#f44','#f80','#ff4'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
-          if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id)}
+          if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);this.units=this.units.filter(v=>v.hp>0)}
           hitAny=true}}
       this.sfxAtk(u.cls);this._grantExp(u,'attack');
       this.floatT(u.x,u.y,t('messages.mage_fireball'),'heal');
       // 중앙 VFX
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:20,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:5,spread:18,decay:0.02,size:5});
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
-      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+      setTimeout(()=>{this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
     // 돌던지기: throwRange 내 적에게 ATK×0.5 데미지
     if(skObj.id==='novice_throw'){
@@ -407,9 +408,9 @@ Object.assign(G, {
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
       procFury(u,t,this);
       this.floatT(u.x,u.y,t('messages.warrior_strike'),'heal');
-      if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);}
+      if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);this.units=this.units.filter(v=>v.hp>0);}
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
-      setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
+      setTimeout(()=>{this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
     // 관통: 일직선 관통 공격
     const dx=tx-u.x,dy=ty-u.y;
