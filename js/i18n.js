@@ -45,14 +45,17 @@ const I18N = {
     return 'en';
   },
 
-  // 언어 파일 로드 (비동기)
+  // 언어 파일 로드 (비동기) - fetch 대신 i18n-data.js의 데이터 사용
   async loadLanguage(lang) {
     try {
-      const response = await fetch(`lang/${lang}.json`);
-      if (!response.ok) throw new Error('Language file not found');
-      this.translations = await response.json();
-      console.log(`[i18n] Language loaded: ${lang}`);
-      return true;
+      // I18N_DATA 객체에서 언어 데이터 직접 로드
+      if (I18N_DATA && I18N_DATA[lang]) {
+        this.translations = I18N_DATA[lang];
+        console.log(`[i18n] Language loaded: ${lang}`);
+        return true;
+      } else {
+        throw new Error('Language data not found');
+      }
     } catch (error) {
       console.error(`[i18n] Failed to load language: ${lang}`, error);
       // 폴백 언어 시도
