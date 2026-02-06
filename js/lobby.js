@@ -125,14 +125,25 @@ Object.assign(G,{
     const ct=document.getElementById('clan-hideout');
     if(!ct)return;
     ct.innerHTML='';
-    // 횃불 2개
-    const tl=document.createElement('div');tl.className='hideout-torch t-left';
-    const tr=document.createElement('div');tr.className='hideout-torch t-right';
-    tl.style.animationDelay='0s';tr.style.animationDelay='0.7s';
-    ct.appendChild(tl);ct.appendChild(tr);
-    // 라벨
-    const lb=document.createElement('div');lb.className='hideout-label';lb.textContent='HIDEOUT';
-    ct.appendChild(lb);
+    // 횃불 6개
+    const torches=[
+      {cls:'hideout-torch t-left', delay:'0s'},
+      {cls:'hideout-torch t-right', delay:'0.7s'},
+      {cls:'hideout-torch t-top-left', delay:'0.3s'},
+      {cls:'hideout-torch t-top-right', delay:'0.5s'},
+      {cls:'hideout-torch t-bottom-left', delay:'0.4s'},
+      {cls:'hideout-torch t-bottom-right', delay:'0.6s'}
+    ];
+    torches.forEach(t=>{
+      const torch=document.createElement('div');
+      torch.className=t.cls;
+      torch.style.animationDelay=t.delay;
+      ct.appendChild(torch);
+    });
+    // 가운데 원탁
+    const table=document.createElement('div');
+    table.className='hideout-table';
+    ct.appendChild(table);
     // 캐릭터 결정
     this._loadParty();
     let chars=[];
@@ -143,21 +154,20 @@ Object.assign(G,{
       chars=ROSTER.getAlive().sort((a,b)=>b.lv-a.lv).slice(0,10);
     }
     if(!chars.length)return;
-    // 배치 영역
-    const n=chars.length;
-    const padX=10;
-    const zoneW=(100-padX*2)/n;
-    const huData=[];
-    chars.forEach((ch,i)=>{
+    // 자유로운 위치에 배치 (테이블 중앙 제외)
+    chars.forEach((ch)=>{
       const wrap=document.createElement('div');wrap.className='hideout-unit';
-      const cx=padX+zoneW*i+zoneW*0.5;
-      const cy=45+Math.random()*30;
+      // 중앙 테이블 피하고 배치 (좌우상하 4영역)
+      let cx, cy;
+      const quadrant=Math.floor(Math.random()*4);
+      switch(quadrant){
+        case 0: cx=10+Math.random()*35; cy=15+Math.random()*30; break; // 좌상
+        case 1: cx=55+Math.random()*35; cy=15+Math.random()*30; break; // 우상
+        case 2: cx=10+Math.random()*35; cy=60+Math.random()*25; break; // 좌하
+        default: cx=55+Math.random()*35; cy=60+Math.random()*25; // 우하
+      }
       wrap.style.left=cx+'%';wrap.style.top=cy+'%';
       wrap.style.transform='translate(-50%,-50%)';
-      // idle 바운스만
-      const idleDur=2+Math.random()*2;
-      const idleDelay=Math.random()*2;
-      wrap.style.animation=`hideoutIdle ${idleDur.toFixed(1)}s ease-in-out ${idleDelay.toFixed(1)}s infinite`;
       // 아이콘
       const icon=document.createElement('div');
       icon.innerHTML=clsIcon(ch.cls,32);
@@ -165,22 +175,12 @@ Object.assign(G,{
       // 그림자
       const sh=document.createElement('div');sh.className='hu-shadow';
       wrap.appendChild(sh);
-      // 이름 (개인 이름)
+      // 이름 (레벨 + 개인 이름)
       const nm=document.createElement('div');nm.className='hu-name';
-      nm.textContent=ch.name||'???';
+      nm.textContent=`Lv.${ch.lv} ${ch.name||'???'}`;
       wrap.appendChild(nm);
       ct.appendChild(wrap);
-      huData.push({el:wrap,baseX:cx,zoneW});
     });
-    // 돌아다니기: 주기적으로 위치 변경
-    if(this._hideoutTimer)clearInterval(this._hideoutTimer);
-    this._hideoutTimer=setInterval(()=>{
-      huData.forEach(u=>{
-        const nx=u.baseX+(Math.random()-0.5)*u.zoneW*0.8;
-        const ny=42+Math.random()*35;
-        u.el.style.left=nx+'%';u.el.style.top=ny+'%';
-      });
-    },4000);
   },
 
   _initStageSelectPage(){
