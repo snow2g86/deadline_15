@@ -381,15 +381,15 @@ Object.assign(G, {
     }
 
     // Keep distance: 원거리 유닛이 거리 유지
-    let bt=null,bd=Infinity;
-    for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<bd){bd=d;bt=a}}
-    if(profile.keepDistance&&bt&&mh(u.x,u.y,bt.x,bt.y)<=2){
+    let cbt=null,cbd=Infinity;
+    for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<cbd){cbd=d;cbt=a}}
+    if(profile.keepDistance&&cbt&&mh(u.x,u.y,cbt.x,cbt.y)<=2){
       let bestMove=null,bestDist=0;
       for(const m of validMoves){
-        const dist=mh(m.x,m.y,bt.x,bt.y);
+        const dist=mh(m.x,m.y,cbt.x,cbt.y);
         if(dist>bestDist&&dist<=u.range){bestDist=dist;bestMove=m}
       }
-      if(bestMove&&bestDist>mh(u.x,u.y,bt.x,bt.y)){
+      if(bestMove&&bestDist>mh(u.x,u.y,cbt.x,cbt.y)){
         u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
         return
