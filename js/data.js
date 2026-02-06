@@ -183,7 +183,7 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi,bgOnly,noImg){
     else if(hl==='attack'){s='#ef4444';so=.7;f='rgba(239,68,68,.15)'}
     else if(hl==='heal'){s='#22c55e';so=.7;f='rgba(34,197,94,.15)'}
     else if(hl==='selected'){s='#f0c040';so=.9;f='rgba(240,192,64,.12)'}
-    if(hl){r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"/>`;
+    if(hl){const animMin=Math.max(0.15,so*0.35);r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"><animate attributeName="stroke-opacity" values="${so};${animMin};${so}" dur="1.2s" repeatCount="indefinite"/></polygon>`;
       if(hl==='selected')r+=`<polygon points="${top}" fill="none" stroke="${s}" stroke-width="2" stroke-opacity="1"><animate attributeName="stroke-opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/></polygon>`}
   }
   r+=`</svg>`;return r;
