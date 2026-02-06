@@ -274,7 +274,8 @@ Object.assign(G, {
       for (let y = u.y - 1; y <= u.y + 1; y++) {
         for (let x = u.x - 1; x <= u.x + 1; x++) {
           if (x === u.x && y === u.y) continue;
-          const cnt = al.filter(a => mh(a.x, a.y, x, y) <= 1).length;
+          // 3x3 범위(정사각형) 내의 적 개수 계산
+          const cnt = al.filter(a => Math.abs(a.x - x) <= 1 && Math.abs(a.y - y) <= 1).length;
           if (cnt >= 2 && cnt > maxCluster) { maxCluster = cnt; targetCell = { x, y }; }
         }
       }
