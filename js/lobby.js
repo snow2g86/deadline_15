@@ -480,8 +480,8 @@ Object.assign(G,{
   _genShop(){
     const classes=Object.keys(CD);
     const items=[];
-    // 캐릭터 2개
-    for(let i=0;i<2;i++){
+    // 캐릭터 6개
+    for(let i=0;i<6;i++){
       const cls=classes[Math.floor(Math.random()*classes.length)];
       const d=CD[cls];
       const pot={
