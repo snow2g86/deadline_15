@@ -21,7 +21,7 @@ Object.assign(G, {
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
     else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
-  clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this._curSkill=null;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
+  clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this.skillMenuOpen=false;this._curSkill=null;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
   cellCk(x,y){if(this.phase!=='player'||this.over||this.anim)return;const cl=this.uAt(x,y),s=this.sel;
     if(this.awPM&&s){
       // Skill targeting
@@ -43,10 +43,20 @@ Object.assign(G, {
     if(!s){if(cl)this.selU(cl);return}
     // Stealth movement (assassin into enemy-occupied forest)
     if(cl&&cl.team==='enemy'&&s.cls==='assassin'&&s.team==='ally'&&!s.ha&&this.ter[y]&&this.ter[y][x]==='forest'&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
-    if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
-    if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
+    if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.awPM&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
+    if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&this.awPM&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
     if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
     if(cl){this.selU(cl);return}this.clrSel()},
+  // 이동 버튼 클릭 핸들러
+  actMove(){if(!this.sel)return;this.hideAM();this.floatT(this.sel.x,this.sel.y,'이동할 곳을 선택하세요','heal')},
+  // 공격/치유 버튼 클릭 핸들러
+  actAttack(){if(!this.sel)return;this.hideAM();const msg=this.sel.role==='healer'?'치유할 대상을 선택하세요':'공격할 대상을 선택하세요';this.floatT(this.sel.x,this.sel.y,msg,'heal')},
+  // 스킬 메뉴 표시
+  showSkillMenu(){if(!this.sel||!this.awPM)return;this.skillMenuOpen=true;this.showAM(this.sel)},
+  // 스킬 메뉴 숨김 (메인 메뉴로 복귀)
+  hideSkillMenu(){if(!this.sel)return;this.skillMenuOpen=false;this.showAM(this.sel)},
+  // 아이템 버튼 (추후 개발)
+  actItem(){if(!this.sel)return;this.floatT(this.sel.x,this.sel.y,'아이템 시스템 준비 중','damage')},
 
   // Actions
   _grantExp(u,action){if(u.team==='ally'&&u.uid){const e=actExp(this.cStage?this.cStage.id:1,action);if(e>0)this.battleExp[u.uid]=(this.battleExp[u.uid]||0)+e;return e}return 0},
@@ -70,11 +80,16 @@ Object.assign(G, {
     if(he>0)this.floatT(h.x,h.y,`+${he} EXP`,'exp');
     h.ha=true;h.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.chkAutoEnd()},
   actWait(){if(!this.sel)return;this.sel.ha=true;this.sel.waited=true;this.awPM=false;this.hideAM();this.sfxWait();this.rUnits();this.clrSel();this.chkAutoEnd()},
-  actCancel(){if(!this.sel||!this.preMv)return;const u=this.sel;u.x=this.preMv.x;u.y=this.preMv.y;u.hm=false;u.mo=false;
-    this.animU(u.id,u.x,u.y);this.awPM=false;this.preMv=null;this.skillMode=false;this.hideAM();this.sfxUIClick();setTimeout(()=>{this.rTer();this.clrSel()},340)},
+  actCancel(){if(!this.sel)return;
+    // 스킬 서브 메뉴에서 돌아가기
+    if(this.skillMenuOpen){this.hideSkillMenu();return}
+    // 이동 취소
+    if(!this.preMv)return;const u=this.sel;u.x=this.preMv.x;u.y=this.preMv.y;u.hm=false;u.mo=false;
+    this.animU(u.id,u.x,u.y);this.awPM=false;this.preMv=null;this.skillMode=false;this.skillMenuOpen=false;this.hideAM();this.sfxUIClick();setTimeout(()=>{this.rTer();this.clrSel()},340)},
   actSkill(idx){if(!this.sel||!this.awPM)return;const u=this.sel;
     const skills=getSkills(u.cls);const sk=skills[idx||0];
     if(!sk||u.res<sk.cost)return;
+    this.skillMenuOpen=false;
     this._curSkill=sk;this.skillMode=true;
     if(sk.id==='knight_switch'){
       this.atkT=this.mvC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.id!==u.id});

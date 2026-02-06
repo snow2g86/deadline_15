@@ -67,7 +67,7 @@ const G={
   // Init
   init(){
     this.genT();this.units=[];this.nid=1;this.turn=1;this.phase='player';
-    this.sel=null;this.over=false;this.awPM=false;this.skillMode=false;this.anim=false;this.camDir=0;
+    this.sel=null;this.over=false;this.awPM=false;this.skillMode=false;this.skillMenuOpen=false;this.anim=false;this.camDir=0;
     this.breached=0;this.battleExp={};this.traps=[];this.eFormPos=[];
     document.querySelector('#cam-dir .cd-arrow').textContent=CARR[0];
     document.querySelector('#cam-dir .cd-label').textContent=CLAB[0];

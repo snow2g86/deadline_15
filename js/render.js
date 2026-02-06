@@ -59,46 +59,89 @@ Object.assign(G, {
     w.appendChild(el);setTimeout(()=>el.remove(),950)},
   showAM(u){const m=document.getElementById('action-menu');m.style.left=(this.uSX(u.x,u.y)+UW+2)+'px';
     m.style.top=this.uSY(u.x,u.y)+'px';m.style.zIndex=600;
-    document.getElementById('btn-cancel').style.display=this.preMv?'':'none';
-    // 기존 단일 스킬 버튼 숨김
-    document.getElementById('btn-skill').style.display='none';
-    // 동적 스킬 버튼 제거 후 재생성
-    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
-    const wait=document.getElementById('btn-wait');
-    // 채널링 중: "해제" 버튼만 표시
+    // 채널링 중: 해제 버튼만
     if(u.channeling){
+      this.hideAllMenuButtons();
       document.getElementById('btn-cancel').style.display='none';
       const btn=document.createElement('button');btn.className='am-skill';
       btn.textContent='🔓 해제';
       btn.onclick=()=>G.cancelChannel();
-      m.insertBefore(btn,wait);
-      wait.style.display='none';
+      const btnDash=document.getElementById('btn-dash');
+      m.insertBefore(btn,btnDash);
+      btnDash.style.display='none';
       m.classList.add('show');return}
-    wait.style.display='';
+    // 스킬 서브 메뉴 상태
+    if(this.skillMenuOpen){this.showSkillSubMenu(u);return}
+    // 메인 메뉴
+    this.showMainMenu(u)},
+  showMainMenu(u){const m=document.getElementById('action-menu');
+    // 동적 스킬 버튼 제거
+    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
+    // 1. 이동 버튼 (이동 가능한 경우만)
+    document.getElementById('btn-move').style.display=
+      (!this.awPM&&this.mvT.length>0)?'':'none';
+    // 2. 공격 버튼 (이동했고 && 적군이 사거리에 있을 경우)
+    const btnAttack=document.getElementById('btn-attack');
+    if(this.awPM){
+      if(u.role==='healer'){
+        btnAttack.textContent='💚 치유';
+        btnAttack.style.display=this.healT.length>0?'':'none'}
+      else{
+        btnAttack.textContent='⚔️ 공격';
+        btnAttack.style.display=this.atkT.length>0?'':'none'}}
+    else{btnAttack.style.display='none'}
+    // 3. 스킬 버튼 (이동했고 && 사용 가능한 스킬이 있을 경우)
     const skills=getSkills(u.cls);
+    const hasUsableSkill=this.awPM&&skills.some(sk=>this.canUseSkill(u,sk));
+    document.getElementById('btn-skill').style.display=hasUsableSkill?'':'none';
+    // 4. 아이템 버튼 (추후 개발, 숨김)
+    document.getElementById('btn-item').style.display='none';
+    // 5. 대시 버튼 (상시 표시)
+    document.getElementById('btn-dash').style.display='';
+    // 6. 취소 버튼 (이동했을 경우)
+    const btnCancel=document.getElementById('btn-cancel');
+    btnCancel.textContent='↩ 취소';
+    btnCancel.style.display=this.preMv?'':'none';
+    btnCancel.onclick=()=>G.actCancel();
+    m.classList.add('show')},
+  showSkillSubMenu(u){const m=document.getElementById('action-menu');
+    // 기존 버튼 숨김
+    this.hideAllMenuButtons();
+    // 동적 스킬 버튼 제거 후 재생성
+    m.querySelectorAll('.am-skill').forEach(e=>e.remove());
+    const skills=getSkills(u.cls);
+    const btnDash=document.getElementById('btn-dash');
     skills.forEach((sk,idx)=>{
       const btn=document.createElement('button');btn.className='am-skill';
       btn.textContent=sk.icon+' '+sk.name;
-      // 활성화 조건
-      let enabled=u.res>=sk.cost&&!u.ha;
-      // 암살: 은신+겹침 추가 조건
-      if(sk.id==='assassin_assassinate'){
-        const overlapping=isStealthed(u)&&this.units.some(v=>v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
-        enabled=enabled&&overlapping;
-      }
-      // 소환 스킬: 소환 제한 체크
-      if(sk.id.startsWith('summoner_summon_')){
-        const maxSummons=1;
-        const currentSummons=G.units.filter(s=>s.isSummon&&s.summonerId===u.id);
-        if(currentSummons.length>=maxSummons){
-          enabled=false;
-          btn.title=`소환 한계 (${currentSummons.length}/${maxSummons})`;
-        }
-      }
+      // 활성화 조건 체크
+      let enabled=this.canUseSkill(u,sk);
       btn.disabled=!enabled;
       btn.onclick=()=>G.actSkill(idx);
-      m.insertBefore(btn,wait);
-    });
+      m.insertBefore(btn,btnDash)});
+    // 대시 버튼 숨김
+    btnDash.style.display='none';
+    // 취소 버튼을 "돌아가기"로 변경
+    const btnCancel=document.getElementById('btn-cancel');
+    btnCancel.textContent='↩ 돌아가기';
+    btnCancel.style.display='';
+    btnCancel.onclick=()=>G.hideSkillMenu();
     m.classList.add('show')},
+  hideAllMenuButtons(){
+    ['btn-move','btn-attack','btn-skill','btn-item','btn-dash','btn-cancel'].forEach(id=>{
+      document.getElementById(id).style.display='none'})},
+  canUseSkill(u,sk){
+    let enabled=u.res>=sk.cost&&!u.ha;
+    // 암살: 은신+겹침 추가 조건
+    if(sk.id==='assassin_assassinate'){
+      const overlapping=isStealthed(u)&&this.units.some(v=>
+        v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
+      enabled=enabled&&overlapping}
+    // 소환 스킬: 소환 제한 체크
+    if(sk.id.startsWith('summoner_summon_')){
+      const maxSummons=1;
+      const currentSummons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
+      if(currentSummons.length>=maxSummons){enabled=false}}
+    return enabled},
   hideAM(){document.getElementById('action-menu').classList.remove('show')},
 });

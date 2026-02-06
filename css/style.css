@@ -79,7 +79,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 #action-menu button{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:11px;
   padding:4px 12px;border:1px solid rgba(255,255,255,.15);border-radius:4px;cursor:pointer;color:#fff;transition:all .15s}
 #action-menu button:hover{filter:brightness(1.2)}
-#btn-wait{background:var(--blue)}#btn-cancel{background:#4b5563}
+#btn-move{background:#10b981}#btn-attack{background:#ef4444}#btn-skill{background:#7c3aed}#btn-item{background:#f59e0b}#btn-dash{background:var(--blue)}#btn-cancel{background:#4b5563}
 #info-panel{height:96px;min-height:96px;background:linear-gradient(0deg,#0d1117,var(--panel));
   border-top:2px solid #1e293b;display:flex;align-items:center;padding:0 8px;gap:8px;z-index:100;overflow-x:auto}
 .info-card{min-width:115px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
