@@ -135,20 +135,21 @@ Object.assign(G, {
     const s=this.cStage,en=this.alive('enemy').length;
     const br=s?this.breached:0,blim=s?Math.ceil(s.tot/4):0;
     document.getElementById('stage-info').innerHTML=`STAGE ${s?s.id:1} <span style="color:var(--dim);font-size:9px">${s?s.name:''}</span>
-      <div class="si-turn">TURN ${this.turn} · 소환 ${this.eSpwn}/${s?s.tot:'?'} · 잔여 ${en}체 · <span style="color:${br>0?'#ef4444':'var(--dim)'}">돌파 ${br}/${blim}</span></div>`;
+      <div class="si-turn">TURN ${this.turn} · ${t('battle.summon')} ${this.eSpwn}/${s?s.tot:'?'} · ${t('battle.remaining')} ${en}체 · <span style="color:${br>0?'#ef4444':'var(--dim)'}">
+${t('battle.breach')} ${br}/${blim}</span></div>`;
     document.getElementById('btn-end-turn').disabled=this.phase!=='player'},
   showUI(u){const p=document.getElementById('info-panel'),tc=u.team==='ally'?'ally-card':'enemy-card';
     let h=this.iCard(u,tc,true);if(u.team==='ally'){(u.role==='healer'?this.healT:this.atkT).forEach(t=>{
       const tu=this.uAt(t.x,t.y);if(tu)h+=this.iCard(tu,tu.team==='ally'?'ally-card':'enemy-card',false)})}p.innerHTML=h},
-  iCard(u,cc,m){const d=CD[u.cls],p=Math.round(u.hp/u.mhp*100);
+  iCard(u,cc,m){const p=Math.round(u.hp/u.mhp*100);
     const rl={'mana':'MP','energy':'EP','fury':'FP'};
     const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
     const rn=rl[u.resType]||'',rpct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
     return`<div class="info-card ${cc}" ${m?'style="border-width:2px"':''}>
-      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${d.name}</span><span class="ic-class">${u.team==='ally'?'아군':'적군'}</span></div>
+      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${t('classes.' + u.cls)}</span><span class="ic-class">${u.team==='ally'?t('battle.ally'):t('battle.enemy')}</span></div>
       <div class="ic-stats"><span>HP <b>${u.hp}/${u.mhp}</b></span><span style="color:${rc[u.resType]}">${rn} <b>${u.res}/${u.maxRes}</b></span><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div></div>`},
   defI(){const a=this.alive('ally').length,e=this.alive('enemy').length;
-    document.getElementById('info-panel').innerHTML=`<div style="display:flex;gap:12px;align-items:center;font-size:11px"><span style="color:var(--blue)">🛡 아군 ${a}명</span><span style="color:var(--red)">⚔ 적군 ${e}명</span><span style="color:var(--dim)">유닛을 터치하여 선택</span></div>`},
+    document.getElementById('info-panel').innerHTML=`<div style="display:flex;gap:12px;align-items:center;font-size:11px"><span style="color:var(--blue)">${t('battle.allies', {count: a})}</span><span style="color:var(--red)">${t('battle.enemies', {count: e})}</span><span style="color:var(--dim)">${t('battle.select_unit_touch')}</span></div>`},
   showWv(t){const b=document.getElementById('wave-banner');b.textContent=t;b.classList.add('show')},
   hideWv(){document.getElementById('wave-banner').classList.remove('show')},
   showRes(win,msg){const ov=document.getElementById('modal-overlay');
@@ -225,5 +226,5 @@ Object.assign(G, {
     document.getElementById('sp-speed-val').textContent=spd.toFixed(1)+'x';this.saveSett()},
   surrender(){if(this.over)return;
     this.closeSettings();
-    this.over=true;this.showRes(false,'항복했습니다.')}
+    this.over=true;this.showRes(false,t('messages.surrender'))}
 });

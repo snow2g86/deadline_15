@@ -118,7 +118,8 @@ const I18N_DATA = {
       "retreat": "후퇴!",
       "all_defeated": "아군이 전멸했습니다",
       "enemy_breached": "적 {count}체가 성벽을 돌파했습니다!",
-      "stage_clear": "STAGE {stage_id} 클리어! ({turn}턴)"
+      "stage_clear": "STAGE {stage_id} 클리어! ({turn}턴)",
+      "surrender": "항복했습니다"
     },
     "party": {
       "title": "파티 편성",
@@ -414,7 +415,8 @@ const I18N_DATA = {
       "retreat": "Retreat!",
       "all_defeated": "All allies defeated",
       "enemy_breached": "{count} enemies breached the wall!",
-      "stage_clear": "STAGE {stage_id} Clear! ({turn} turns)"
+      "stage_clear": "STAGE {stage_id} Clear! ({turn} turns)",
+      "surrender": "Surrendered"
     },
     "party": {
       "title": "Party Composition",
@@ -720,7 +722,8 @@ const I18N_DATA = {
       "retreat": "¡Retirada!",
       "all_defeated": "Todos los aliados fueron derrotados",
       "enemy_breached": "¡{count} enemigos atravesaron la muralla!",
-      "stage_clear": "¡ETAPA {stage_id} Completada! ({turn} turnos)"
+      "stage_clear": "¡ETAPA {stage_id} Completada! ({turn} turnos)",
+      "surrender": "Se rindió"
     },
     "party": {
       "title": "Composición del Equipo",
