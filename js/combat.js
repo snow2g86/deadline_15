@@ -391,6 +391,7 @@ Object.assign(G, {
       this.animU(u.id,tx,ty);
       this.floatT(u.x,u.y,t('messages.archer_leap'),'heal');
       this.vfxSpawn(this.uSX(u.x,u.y)+UCX,this.uSY(u.x,u.y)+UCY,{count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:0.02,size:3});
+      this.allyPos[u.id]={x:u.x,y:u.y};
       this.sfxMove();u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.rUnits();this.clrSel();this.chkAutoEnd()},340);return
     }
