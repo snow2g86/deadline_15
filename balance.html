@@ -501,22 +501,23 @@ let CHARS = [];
 
 function buildCHARS() {
   CHARS = [];
+  const roleMap = {'melee': 'melee', 'ranged': 'ranged', 'healer': 'healer'};
   Object.entries(CD).forEach(([key, data]) => {
     if (key.startsWith('summon_')) return;
     CHARS.push({
       key,
-      name: data.name,
+      name: t('classes.' + key),
       icon: data.icon,
       hp: data.base.hp,
       atk: data.base.atk,
       def: data.base.def,
       move: data.base.move,
       range: data.base.range,
-      role: data.role,
+      role: key,
       res: data.res,
       maxRes: data.maxRes,
       resRec: data.resRec,
-      desc: data.desc
+      desc: t('class_desc.' + key)
     });
   });
 }
@@ -543,7 +544,7 @@ function renderStatsTable() {
       <td class="t-def">${c.def}</td>
       <td>${c.move}</td>
       <td>${c.range}</td>
-      <td>${c.role}</td>
+      <td>${t('roles.' + c.role)}</td>
       <td style="color:${resColor};font-weight:700">${RES_NAMES[c.res]}</td>
       <td>${c.maxRes}</td>
       <td>${c.resRec || '-'}</td>

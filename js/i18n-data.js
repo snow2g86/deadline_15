@@ -253,6 +253,31 @@ const I18N_DATA = {
       "ranged": "원거리",
       "healer": "힐러"
     },
+    "terrain": {
+      "plain": "평지",
+      "forest": "숲",
+      "hill": "언덕",
+      "rock": "바위",
+      "water": "물",
+      "wall": "벽",
+      "gate": "성문"
+    },
+    "terrain_buff": {
+      "forest": "은신",
+      "hill": "고지"
+    },
+    "terrain_buff_desc": {
+      "forest": "DEF+3",
+      "hill": "ATK+5"
+    },
+    "summon_types": {
+      "summon_spirit": "정령",
+      "summon_golem": "골램"
+    },
+    "summon_desc": {
+      "summon_spirit": "소환된 마법 정령 (5턴)",
+      "summon_golem": "소환된 마법 골램 (5턴)"
+    },
     "resources": {
       "fury": "분노",
       "energy": "에너지",
@@ -604,6 +629,31 @@ const I18N_DATA = {
       "melee": "Melee",
       "ranged": "Ranged",
       "healer": "Healer"
+    },
+    "terrain": {
+      "plain": "Plain",
+      "forest": "Forest",
+      "hill": "Hill",
+      "rock": "Rock",
+      "water": "Water",
+      "wall": "Wall",
+      "gate": "Gate"
+    },
+    "terrain_buff": {
+      "forest": "Stealth",
+      "hill": "High Ground"
+    },
+    "terrain_buff_desc": {
+      "forest": "DEF+3",
+      "hill": "ATK+5"
+    },
+    "summon_types": {
+      "summon_spirit": "Spirit",
+      "summon_golem": "Golem"
+    },
+    "summon_desc": {
+      "summon_spirit": "Summoned magic spirit (5 turns)",
+      "summon_golem": "Summoned magic golem (5 turns)"
     },
     "resources": {
       "fury": "Fury",
@@ -966,6 +1016,31 @@ const I18N_DATA = {
       "melee": "Cuerpo a Cuerpo",
       "ranged": "A Distancia",
       "healer": "Sanador"
+    },
+    "terrain": {
+      "plain": "Llanura",
+      "forest": "Bosque",
+      "hill": "Colina",
+      "rock": "Roca",
+      "water": "Agua",
+      "wall": "Muro",
+      "gate": "Puerta"
+    },
+    "terrain_buff": {
+      "forest": "Sigilo",
+      "hill": "Terreno Alto"
+    },
+    "terrain_buff_desc": {
+      "forest": "DEF+3",
+      "hill": "ATK+5"
+    },
+    "summon_types": {
+      "summon_spirit": "Espíritu",
+      "summon_golem": "Gólem"
+    },
+    "summon_desc": {
+      "summon_spirit": "Espíritu mágico invocado (5 turnos)",
+      "summon_golem": "Gólem mágico invocado (5 turnos)"
     },
     "resources": {
       "fury": "Furia",
