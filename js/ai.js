@@ -1,3 +1,109 @@
+// ═══════════════════════════════════════════
+//  AI Behavior Profiles — 클래스별 행동 특성
+// ═══════════════════════════════════════════
+const AI_PROFILES = {
+  // Aggressive (공격적) - 5개
+  warrior: {
+    style: 'aggressive',
+    targetPriority: 'low_hp',
+    advanceBonus: 10,
+    retreatThreshold: 0.2,
+    skillUseProbability: 0.7
+  },
+  assassin: {
+    style: 'aggressive',
+    targetPriority: 'low_hp',
+    advanceBonus: 15,
+    retreatThreshold: 0.25,
+    skillUseProbability: 0.8
+  },
+  brawler: {
+    style: 'aggressive',
+    targetPriority: 'random_weak',
+    advanceBonus: 12,
+    retreatThreshold: 0.15,
+    skillUseProbability: 0.6
+  },
+  mage: {
+    style: 'aggressive',
+    targetPriority: 'cluster',
+    advanceBonus: 5,
+    retreatThreshold: 0.4,
+    skillUseProbability: 0.75,
+    keepDistance: true
+  },
+  sapper: {
+    style: 'aggressive',
+    targetPriority: 'nearest',
+    advanceBonus: 8,
+    retreatThreshold: 0.3,
+    skillUseProbability: 0.9,
+    trapPlacement: true
+  },
+  // Defensive (방어적) - 2개
+  knight: {
+    style: 'defensive',
+    targetPriority: 'nearest_threat',
+    advanceBonus: -5,
+    retreatThreshold: 0.1,
+    skillUseProbability: 0.5,
+    guardMode: true
+  },
+  lancer: {
+    style: 'defensive',
+    targetPriority: 'nearest_threat',
+    advanceBonus: -3,
+    retreatThreshold: 0.15,
+    skillUseProbability: 0.65,
+    guardMode: true
+  },
+  // Support (지원) - 2개
+  priest: {
+    style: 'support',
+    targetPriority: 'never',
+    advanceBonus: -10,
+    retreatThreshold: 0.5,
+    skillUseProbability: 0.0,
+    keepDistance: true,
+    avoidCombat: true
+  },
+  shaman: {
+    style: 'support',
+    targetPriority: 'random',
+    advanceBonus: -8,
+    retreatThreshold: 0.45,
+    skillUseProbability: 0.0,
+    keepDistance: true,
+    avoidCombat: true
+  },
+  // Balanced (균형) - 3개
+  novice: {
+    style: 'balanced',
+    targetPriority: 'nearest',
+    advanceBonus: 0,
+    retreatThreshold: 0.3,
+    skillUseProbability: 0.4
+  },
+  archer: {
+    style: 'balanced',
+    targetPriority: 'low_hp',
+    advanceBonus: 2,
+    retreatThreshold: 0.35,
+    skillUseProbability: 0.5,
+    keepDistance: true
+  },
+  summoner: {
+    style: 'balanced',
+    targetPriority: 'random',
+    advanceBonus: 0,
+    retreatThreshold: 0.4,
+    skillUseProbability: 0.0,
+    keepDistance: true
+  }
+};
+
+const AI_MISTAKE_CHANCE = 0.3; // 30% 실수 확률
+
 Object.assign(G, {
   // Turns
   endTurn(){if(this.phase!=='player'||this.over||this.awPM||this.anim)return;
@@ -81,12 +187,59 @@ Object.assign(G, {
         // fury: no auto recovery
       });
       this.uUI();this.rUnits();this.rTer();this.rMM()}},
+  // ─── 타겟 선택 (클래스별 우선순위) ────
+  selectTarget(u,inRange,profile){
+    if(!inRange.length)return null;
+    // 30% 확률로 실수 (랜덤 선택)
+    if(Math.random()<AI_MISTAKE_CHANCE){
+      return inRange[Math.floor(Math.random()*inRange.length)]
+    }
+    const p=profile.targetPriority;
+    // low_hp: 킬 가능 대상 우선
+    if(p==='low_hp'){
+      const kl=inRange.filter(a=>a.hp<=Math.max(1,u.atk-a.def));
+      if(kl.length)return kl.sort((a,b)=>a.hp-b.hp)[0];
+      return inRange.sort((a,b)=>a.hp-b.hp)[0]
+    }
+    // nearest: 가장 가까운 적
+    if(p==='nearest'){
+      return inRange.sort((a,b)=>mh(u.x,u.y,a.x,a.y)-mh(u.x,u.y,b.x,b.y))[0]
+    }
+    // nearest_threat: 진형에 가까운 적
+    if(p==='nearest_threat'){
+      const o=u.origSpawn||{x:u.x,y:u.y};
+      return inRange.sort((a,b)=>mh(o.x,o.y,a.x,a.y)-mh(o.x,o.y,b.x,b.y))[0]
+    }
+    // random_weak: 약한 50% 중 랜덤
+    if(p==='random_weak'){
+      const s=[...inRange].sort((a,b)=>a.hp-b.hp);
+      const w=s.slice(0,Math.ceil(s.length/2));
+      return w[Math.floor(Math.random()*w.length)]
+    }
+    // cluster: 뭉친 적들 선호 (3×3 범위)
+    if(p==='cluster'){
+      let bt=null,bn=0;
+      for(const t of inRange){
+        const n=this.alive('ally').filter(a=>a.id!==t.id&&mh(t.x,t.y,a.x,a.y)<=2).length;
+        if(n>bn){bn=n;bt=t}
+      }
+      return bt||inRange[0]
+    }
+    // random, never: 랜덤 또는 회피
+    return inRange[Math.floor(Math.random()*inRange.length)]
+  },
   async eAI(u){const al=this.alive('ally');if(!al.length&&!this.hasAllyWall())return;
+    const profile=AI_PROFILES[u.cls]||AI_PROFILES.novice;
+    // 지원 클래스: HP 높으면 전투 회피
+    if(profile.avoidCombat&&u.hp>u.mhp*0.7){
+      await this.eMv(u,al);return
+    }
     // Check attack from current position first
     const inR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
-    if(inR.length){const kl=inR.filter(a=>a.hp<=Math.max(1,u.atk-a.def));
-      if(kl.length){await this.eAtkAsync(u,kl.sort((a,b)=>a.hp-b.hp)[0]);return}
-      await this.eAtkAsync(u,inR.sort((a,b)=>a.hp-b.hp)[0]);return}
+    if(inR.length&&profile.targetPriority!=='never'){
+      const target=this.selectTarget(u,inR,profile);
+      if(target){await this.eAtkAsync(u,target);return}
+    }
     // Try gate attack if adjacent to ally gate
     const gAtk=this.tryGateAtk(u);
     if(gAtk){await sl(250);return}
@@ -96,12 +249,14 @@ Object.assign(G, {
     // Move towards closest ally or ally wall
     await this.eMv(u,al);
     if(this.over)return;
-    // Attack after move
+    // Attack after move (지원 클래스는 스킵)
+    if(profile.avoidCombat&&u.hp>u.mhp*0.7)return;
     await sl(200);
     const postR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
-    if(postR.length){const kl2=postR.filter(a=>a.hp<=Math.max(1,u.atk-a.def));
-      if(kl2.length){await this.eAtkAsync(u,kl2.sort((a,b)=>a.hp-b.hp)[0]);return}
-      await this.eAtkAsync(u,postR.sort((a,b)=>a.hp-b.hp)[0]);return}
+    if(postR.length&&profile.targetPriority!=='never'){
+      const target=this.selectTarget(u,postR,profile);
+      if(target){await this.eAtkAsync(u,target);return}
+    }
     // Try gate attack after move
     this.tryGateAtk(u);
     },
@@ -159,13 +314,31 @@ Object.assign(G, {
   async eMv(u,al){
     // Defensive AI: 5-cell advance limit from formation position
     const origPos=u.origSpawn||{x:u.x,y:u.y};
-    const advLimit=5;
+    const profile=AI_PROFILES[u.cls]||AI_PROFILES.novice;
+    const hpPct=u.hp/u.mhp;
+    // 후퇴 조건: HP 낮으면 30% 확률로 후퇴
+    const shouldRetreat=hpPct<profile.retreatThreshold&&Math.random()<0.3;
+    if(shouldRetreat&&!u.isBoss){
+      const mc=this.eMvC(u);if(!mc.length)return;
+      let bestMove=null,bestDist=Infinity;
+      for(const m of mc){const d=mh(m.x,m.y,origPos.x,origPos.y);if(d<bestDist){bestDist=d;bestMove=m}}
+      if(bestMove&&mh(bestMove.x,bestMove.y,origPos.x,origPos.y)<mh(u.x,u.y,origPos.x,origPos.y)){
+        u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);
+        this.floatT(u.x,u.y,'후퇴!','damage');await sl(340);
+        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500)}
+        return
+      }
+    }
+    // 클래스별 전진 제한
+    let advLimit=5;
+    if(profile.style==='defensive')advLimit=3;
+    if(profile.style==='support')advLimit=2;
     const advDist=mh(u.x,u.y,origPos.x,origPos.y);
     // If already at advance limit, don't move further
     if(advDist>=advLimit&&!u.isBoss){return}
 
     const mc=this.eMvC(u);if(!mc.length)return;
-    // Filter moves to respect 5-cell limit
+    // Filter moves to respect class-based advance limit
     const validMoves=mc.filter(m=>mh(m.x,m.y,origPos.x,origPos.y)<=advLimit||u.isBoss);
     if(!validMoves.length)return;
 
@@ -188,11 +361,46 @@ Object.assign(G, {
         if(bestMove.y===14){this.onBreach(u)};return}
     }
 
+    // Guard mode: 방어형 유닛들이 아군 근처 유지
+    if(profile.guardMode&&!u.isBoss){
+      const allies=this.alive('enemy').filter(e=>e.id!==u.id);
+      if(allies.length){
+        let bestMove=null,bestScore=-Infinity;
+        for(const m of validMoves){
+          let score=0;
+          const avgAllyDist=allies.reduce((sum,a)=>sum+mh(m.x,m.y,a.x,a.y),0)/allies.length;
+          score-=avgAllyDist*5;
+          score-=mh(m.x,m.y,origPos.x,origPos.y)*profile.advanceBonus;
+          if(score>bestScore){bestScore=score;bestMove=m}
+        }
+        if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+          this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
+          return
+        }
+      }
+    }
+
+    // Keep distance: 원거리 유닛이 거리 유지
+    let bt=null,bd=Infinity;
+    for(const a of al){const d=mh(u.x,u.y,a.x,a.y);if(d<bd){bd=d;bt=a}}
+    if(profile.keepDistance&&bt&&mh(u.x,u.y,bt.x,bt.y)<=2){
+      let bestMove=null,bestDist=0;
+      for(const m of validMoves){
+        const dist=mh(m.x,m.y,bt.x,bt.y);
+        if(dist>bestDist&&dist<=u.range){bestDist=dist;bestMove=m}
+      }
+      if(bestMove&&bestDist>mh(u.x,u.y,bt.x,bt.y)){
+        u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+        this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
+        return
+      }
+    }
+
     // Normal movement: target closest ally or gate
     if(!bt||bd>8){const gateTarget={x:u.x<=4?4:5,y:13};
       let bc2=null,bs2=-Infinity;
       for(const c of validMoves){
-        const s=-(mh(c.x,c.y,gateTarget.x,gateTarget.y))*10+(c.y-u.y)*5;
+        let s=-(mh(c.x,c.y,gateTarget.x,gateTarget.y))*10+(c.y-u.y)*(5+profile.advanceBonus);
         if(s>bs2){bs2=s;bc2=c}
       }
       if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);
@@ -203,7 +411,7 @@ Object.assign(G, {
     let bc=null,bs=-Infinity;
     for(const c of validMoves){
       let s=0;if(bt)s+=(mh(u.x,u.y,bt.x,bt.y)-mh(c.x,c.y,bt.x,bt.y))*10;
-      s+=(c.y-u.y)*3;if(s>bs){bs=s;bc=c}
+      s+=(c.y-u.y)*(3+profile.advanceBonus*0.3);if(s>bs){bs=s;bc=c}
     }
 
     if(bc){u.x=bc.x;u.y=bc.y;this.animU(u.id,bc.x,bc.y);await sl(340);
