@@ -43,7 +43,7 @@ Object.assign(G, {
         this.mvT=[];this.atkT=[];this.healT=[];this.rTer();this.showAM(s);return;
       }
       // Rule 1/5: 행동 안 하고 다른곳 클릭 → 대기 상태 진입
-      s.ha=true;s.waited=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();
+      s.ha=true;s.waited=true;this.awPM=false;this.hideAM();this.clrSel();
       if(cl&&cl.team!=='enemy'){const nu=this.uAt(x,y);if(nu)this.selU(nu)}
       this.chkAutoEnd();return}
     if(!s){if(cl)this.selU(cl);return}
