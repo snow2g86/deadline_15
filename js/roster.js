@@ -193,6 +193,75 @@ const ROSTER = {
     };
   },
 
+  // ── 전직 관련 메서드 ────────────────────
+  _rollPotentialWithGrade(cls, targetGrade) {
+    const g = CD[cls].growth;
+    const targetMin = targetGrade === 'S' ? 0.85 : targetGrade === 'A' ? 0.65 : targetGrade === 'B' ? 0.35 : 0;
+    const targetMax = targetGrade === 'S' ? 1.0 : targetGrade === 'A' ? 0.85 : targetGrade === 'B' ? 0.65 : 0.35;
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const pot = this._rollPotential(cls);
+      const scores = ['hp', 'atk', 'def'].map(k => {
+        const [min, max] = g[k];
+        const range = max - min;
+        return range > 0 ? (pot[k] - min) / range : 0.5;
+      });
+      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+      if (avg >= targetMin && avg < targetMax) return pot;
+    }
+
+    const mid = (targetMin + targetMax) / 2;
+    return {
+      hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * mid).toFixed(1),
+      atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * mid).toFixed(1),
+      def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1)
+    };
+  },
+
+  previewClassChange(uid, newCls) {
+    const ch = this.getChar(uid);
+    if (!ch || ch.cls !== 'novice') return null;
+
+    const newD = CD[newCls];
+    const grade = this.potGrade(uid);
+    const newPot = this._rollPotentialWithGrade(newCls, grade);
+
+    const gradeMultiplier = grade === 'S' ? 1.1 : grade === 'A' ? 1.0 : grade === 'B' ? 0.9 : 0.8;
+    const baseHP = Math.round(newD.base.hp * gradeMultiplier);
+    const baseATK = Math.round(newD.base.atk * gradeMultiplier);
+    const baseDEF = Math.round(newD.base.def * gradeMultiplier);
+
+    const lvGain = ch.lv - 1;
+
+    return {
+      hp: Math.round(baseHP + newPot.hp * lvGain),
+      atk: Math.round(baseATK + newPot.atk * lvGain),
+      def: Math.round(baseDEF + newPot.def * lvGain),
+      move: newD.base.move,
+      range: newD.base.range,
+      pot: newPot
+    };
+  },
+
+  changeClass(uid, newCls) {
+    const ch = this.getChar(uid);
+    if (!ch || ch.cls !== 'novice') return false;
+
+    const preview = this.previewClassChange(uid, newCls);
+    if (!preview) return false;
+
+    ch.cls = newCls;
+    ch.hp = preview.hp;
+    ch.atk = preview.atk;
+    ch.def = preview.def;
+    ch.move = preview.move;
+    ch.range = preview.range;
+    ch.pot = preview.pot;
+
+    this.save();
+    return true;
+  },
+
   // ── 디버그/리셋 ────────────────────────
   reset() {
     localStorage.removeItem(this._key);

@@ -437,7 +437,7 @@ Object.assign(G,{
   // ══════════════════════════════════
   _renderSanctuary(){
     const list=document.getElementById('sanc-list');
-    const dead=ROSTER.getAll().filter(c=>c.dead);
+    const dead=ROSTER.getAll().filter(c=>c.dead&&!c.cls.startsWith('summon_'));
     list.innerHTML='';
     if(!dead.length){
       list.innerHTML='<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">사망한 전투원이 없습니다</div>';
@@ -479,8 +479,8 @@ Object.assign(G,{
   _genShop(){
     const classes=Object.keys(CD);
     const items=[];
-    // 캐릭터 3개
-    for(let i=0;i<3;i++){
+    // 캐릭터 2개
+    for(let i=0;i<2;i++){
       const cls=classes[Math.floor(Math.random()*classes.length)];
       const d=CD[cls];
       const pot={
@@ -492,12 +492,17 @@ Object.assign(G,{
       const cost=60+Math.floor(Math.random()*40);
       items.push({type:'char',cls,name,pot,cost,sold:false});
     }
-    // 물약 2개 (가중치 랜덤)
+    // 물약 1개 (가중치 랜덤)
+    const totalW=EXP_POTIONS.reduce((s,p)=>s+p.weight,0);
+    let r=Math.random()*totalW,pot=EXP_POTIONS[0];
+    for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
+    items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
+    // 전직서 2개 (가중치 랜덤)
     for(let i=0;i<2;i++){
-      const totalW=EXP_POTIONS.reduce((s,p)=>s+p.weight,0);
-      let r=Math.random()*totalW,pot=EXP_POTIONS[0];
-      for(const p of EXP_POTIONS){r-=p.weight;if(r<=0){pot=p;break}}
-      items.push({type:'potion',potionId:pot.id,name:pot.name,icon:pot.icon,exp:pot.exp,cost:pot.cost,sold:false});
+      const totalW=CLASS_CHANGE_SCROLLS.reduce((s,sc)=>s+sc.weight,0);
+      let r=Math.random()*totalW,scroll=CLASS_CHANGE_SCROLLS[0];
+      for(const sc of CLASS_CHANGE_SCROLLS){r-=sc.weight;if(r<=0){scroll=sc;break}}
+      items.push({type:'class_change',scrollId:scroll.id,name:scroll.name,icon:scroll.icon,desc:scroll.desc,classes:scroll.classes,cost:scroll.cost,sold:false});
     }
     this._shopData={ts:Date.now(),items};
     this._saveShop();
@@ -535,7 +540,7 @@ Object.assign(G,{
           item.sold=true;this._saveShop();this._renderShop();
         };
         list.appendChild(el);
-      }else{
+      }else if(iType==='potion'){
         // 물약
         const canAfford=this.gold>=item.cost&&!item.sold;
         const el=document.createElement('div');el.className='shop-card potion-card'+(item.sold?' sold':'');
@@ -546,6 +551,20 @@ Object.assign(G,{
         if(!item.sold)el.querySelector('.shop-btn').onclick=()=>{
           if(this.gold<item.cost)return;
           this._showPotionModal(item,idx);
+        };
+        list.appendChild(el);
+      }else if(iType==='class_change'){
+        // 전직서
+        const canAfford=this.gold>=item.cost&&!item.sold;
+        const el=document.createElement('div');el.className='shop-card cc-card'+(item.sold?' sold':'');
+        el.innerHTML=`<div class="shop-icon">${item.icon}</div>`+
+          `<div class="shop-name">${item.name}</div>`+
+          `<div class="shop-cls">${item.desc}</div>`+
+          `<div class="shop-cls" style="margin-top:6px;color:var(--dim);font-size:8px">${item.classes.map(c=>CD[c].icon).join(' ')}</div>`+
+          `<button class="shop-btn cc-btn${item.sold?' sold-btn':''}${canAfford?'':' disabled'}" ${canAfford&&!item.sold?'':'disabled'}>${item.sold?'사용 완료':item.cost+'G 구매'}</button>`;
+        if(!item.sold)el.querySelector('.shop-btn').onclick=()=>{
+          if(this.gold<item.cost)return;
+          this._showClassChangeModal(item,idx);
         };
         list.appendChild(el);
       }
@@ -595,6 +614,112 @@ Object.assign(G,{
         }
       };
     });
+  },
+
+  // ── 전직서 사용 모달 (노비스 선택) ──
+  _showClassChangeModal(item,idx){
+    const novices=ROSTER.getAll().filter(c=>!c.dead&&c.cls==='novice');
+    if(!novices.length){
+      this._showConfirm('전직 가능한 노비스가 없습니다.',null,null);
+      return;
+    }
+    const ov=document.getElementById('modal-overlay');
+    document.getElementById('modal-title').textContent='전직할 노비스 선택';
+    document.getElementById('modal-title').className='';
+    let h='<div class="potion-target-list">';
+    novices.forEach(ch=>{
+      const grade=ROSTER.potGrade(ch.uid);
+      const gClr=grade==='S'?'#f0c040':grade==='A'?'#60a5fa':grade==='B'?'#4ade80':'#9ca3af';
+      h+=`<div class="pt-btn" data-uid="${ch.uid}">`+
+        `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
+        `<span class="pt-info">${ch.name} Lv.${ch.lv}</span>`+
+        `<span class="pt-exp" style="color:${gClr}">${grade}등급</span>`+
+        `</div>`;
+    });
+    h+='</div>';
+    document.getElementById('modal-sub').innerHTML=`${item.icon} ${item.name}<br>${item.desc}<br><br>`+h;
+    const bt=document.getElementById('modal-buttons');bt.innerHTML='';
+    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent='취소';
+    cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
+    ov.classList.add('show');
+    document.querySelectorAll('.pt-btn').forEach(b=>{
+      b.onclick=()=>{
+        const uid=+b.dataset.uid;
+        ov.classList.remove('show');
+        this._showClassSelectModal(uid,item,idx);
+      };
+    });
+  },
+
+  // ── 전직서 사용 모달 (직업 선택) ──
+  _showClassSelectModal(uid,item,idx){
+    const ch=ROSTER.getChar(uid);
+    if(!ch)return;
+    const ov=document.getElementById('modal-overlay');
+    document.getElementById('modal-title').textContent='전직할 직업 선택';
+    document.getElementById('modal-title').className='';
+    let h='<div class="class-select-grid">';
+    item.classes.forEach(cls=>{
+      const d=CD[cls];
+      h+=`<div class="cs-card" data-cls="${cls}">`+
+        `<div class="cs-icon">${d.icon}</div>`+
+        `<div class="cs-name">${d.name}</div>`+
+        `<div class="cs-stats">HP ${d.base.hp} ATK ${d.base.atk} DEF ${d.base.def}</div>`+
+        `<div class="cs-role">${d.desc}</div>`+
+        `</div>`;
+    });
+    h+='</div>';
+    document.getElementById('modal-sub').innerHTML=
+      `${clsIcon(ch.cls,24)} <b>${ch.name}</b> (Lv.${ch.lv})<br>`+
+      `<span style="color:var(--dim);font-size:10px">전직 후 되돌릴 수 없습니다</span><br><br>`+h;
+    const bt=document.getElementById('modal-buttons');bt.innerHTML='';
+    const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent='취소';
+    cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
+    ov.classList.add('show');
+    document.querySelectorAll('.cs-card').forEach(card=>{
+      card.onclick=()=>{
+        const newCls=card.dataset.cls;
+        ov.classList.remove('show');
+        this._confirmClassChange(uid,newCls,item,idx);
+      };
+    });
+  },
+
+  // ── 전직서 사용 모달 (최종 확인) ──
+  _confirmClassChange(uid,newCls,item,idx){
+    const ch=ROSTER.getChar(uid);
+    if(!ch)return;
+    const oldD=CD[ch.cls];
+    const newD=CD[newCls];
+    const grade=ROSTER.potGrade(uid);
+    const preview=ROSTER.previewClassChange(uid,newCls);
+    this._showConfirm(
+      `${oldD.icon} ${ch.name} (Lv.${ch.lv} ${grade}등급)\n`+
+      `${oldD.name} → ${newD.icon} ${newD.name}\n\n`+
+      `전직 후 예상 스탯:\n`+
+      `HP ${preview.hp} / ATK ${preview.atk} / DEF ${preview.def}\n`+
+      `MOV ${preview.move} / RNG ${preview.range}\n\n`+
+      `${item.cost}G를 소모하여 전직하시겠습니까?\n`+
+      `(되돌릴 수 없습니다)`,
+      ()=>{
+        this.gold-=item.cost;this._saveGold();this._updGoldUI();
+        ROSTER.changeClass(uid,newCls);
+        this._shopData.items[idx].sold=true;
+        this._saveShop();
+        this._renderShop();
+        setTimeout(()=>{
+          const updCh=ROSTER.getChar(uid);
+          this._showConfirm(
+            `${newD.icon} ${updCh.name}\n`+
+            `${oldD.name}에서 ${newD.name}(으)로 전직했습니다!\n\n`+
+            `HP ${updCh.hp} / ATK ${updCh.atk} / DEF ${updCh.def}\n`+
+            `MOV ${updCh.move} / RNG ${updCh.range}`,
+            null,null
+          );
+        },100);
+      },
+      null
+    );
   },
 
   // ══════════════════════════════════

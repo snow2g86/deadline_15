@@ -510,6 +510,21 @@ body:not([data-page="battle"]){display:flex;flex-direction:column;height:100dvh;
 .shop-btn:hover{transform:scale(1.05)}.shop-btn.disabled{opacity:.3;cursor:default}
 .shop-btn.sold-btn{background:#475569}
 
+/* ═══ Class Change Scroll Card ═══ */
+.shop-card.cc-card{border-color:rgba(147,51,234,.2)}
+.shop-card.cc-card:hover{border-color:#9333ea}
+.shop-btn.cc-btn{background:linear-gradient(135deg,#9333ea,#7c3aed)}
+
+/* ═══ Class Selection Grid ═══ */
+.class-select-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:8px}
+.cs-card{background:rgba(255,255,255,.04);border:2px solid rgba(147,51,234,.15);border-radius:8px;
+  padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.cs-card:hover{border-color:#9333ea;transform:translateY(-2px);background:rgba(147,51,234,.1)}
+.cs-icon{font-size:28px;margin-bottom:4px}
+.cs-name{font-weight:900;font-size:11px;color:var(--text);margin-bottom:3px}
+.cs-stats{font-size:8px;color:var(--dim);margin-bottom:2px}
+.cs-role{font-size:7px;color:#64748b}
+
 /* ═══ EXP Bar (Party Card) ═══ */
 .cc-exp{display:flex;align-items:center;gap:4px;margin-top:3px}
 .cc-exp-bar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}

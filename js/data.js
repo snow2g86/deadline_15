@@ -4,7 +4,7 @@
 
 const COLS=10, ROWS=15, TW=48, TH=24;
 const ZH=6, UW=48, UH=60, UCX=24, UCY=12;
-const MIN_P=5, MAX_P=10;
+const MIN_P=5, MAX_P=5;
 const DEPLOY=[{x:4,y:12},{x:5,y:12},{x:3,y:12},{x:6,y:12},{x:4,y:11},{x:5,y:11},{x:3,y:11},{x:6,y:11},{x:7,y:12},{x:7,y:11}];
 const CLAB=['N','E','S','W'], CARR=['▲','▶','▼','◀'];
 
@@ -30,6 +30,13 @@ const EXP_POTIONS=[
   {id:'exp_l',name:'대형 경험치 물약',icon:'🏺',exp:400,cost:240,weight:15},
 ];
 
+const CLASS_CHANGE_SCROLLS=[
+  {id:'cc_melee',name:'근접 전직서',icon:'📜',desc:'노비스를 근접 직업으로 전직',classes:['warrior','knight','assassin','brawler','lancer','sapper'],cost:150,weight:30},
+  {id:'cc_ranged',name:'원거리 전직서',icon:'📋',desc:'노비스를 원거리 직업으로 전직',classes:['archer','mage','summoner','shaman'],cost:150,weight:30},
+  {id:'cc_healer',name:'힐러 전직서',icon:'📃',desc:'노비스를 사제로 전직',classes:['priest'],cost:120,weight:20},
+  {id:'cc_universal',name:'범용 전직서',icon:'🎖️',desc:'노비스를 원하는 직업으로 전직',classes:['warrior','knight','assassin','archer','mage','priest','summoner','shaman','brawler','lancer','sapper'],cost:200,weight:10},
+];
+
 // ── 클래스 아이콘 (이모지) ──────────────
 function clsIcon(cls,size){
   const d=CD[cls];if(!d)return '';
@@ -41,6 +48,7 @@ const TILE_SHEETS={};
 let tileImgsLoaded=false;
 const TILE_MAP={
   plain:{sheet:'Overworld - Terrain 1 - Flat 128x64.png',variants:[[4,0],[4,1],[4,2]]},
+  dungeon:{sheet:'Overworld - Terrain 1 - Flat 128x64.png',variants:[[4,0],[4,1],[4,2]]},
   forest:{sheet:'Overworld - Forest - Flat 128x64.png',variants:[[0,0],[1,0],[2,0],[3,0]]},
   hill:{sheet:'Overworld - Terrain 1 - Flat 128x64.png',variants:[[0,0],[0,1],[1,0]]},
   rock:{sheet:'Overworld - Terrain 3 - Flat 128x64.png',variants:[[0,0],[1,0],[1,1]]},
@@ -68,7 +76,7 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
   const rf=`${tw},${th*2-1} ${W-1},${th} ${W-1},${th+h} ${tw},${th*2-1+h}`;
   const sr=s=>{s=(s*9301+49297)%233280;return s/233280};
   let s0=seed||0,rn=()=>{s0=sr(s0+17);return s0};
-  let defs='',details='';const gid='tg'+seed;
+  let defs='',details='',rockImg='';const gid='tg'+seed;
   const tm=TILE_MAP[ttype];
   const useImg=tileImgsLoaded&&tm&&TILE_SHEETS[tm.sheet];
 
@@ -83,9 +91,25 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
     const ix=-col*W,iy=-row*(th*2);
     const imgTag=`<image href="image/tileset/${tm.sheet}" x="${ix}" y="${iy}" width="${shW}" height="${shH}" clip-path="url(#tc${seed})" preserveAspectRatio="none"/>`;
     details=imgTag;
+    // forest 폴더의 랜덤 이미지 오버레이 (useImg가 true인 경우도 추가)
+    if(ttype==='forest'){
+      const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
+      const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
+      details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
+    }
+    // rock 폴더의 랜덤 이미지 오버레이 (회색계열은 2, 갈색/녹색계열은 1)
+    else if(ttype==='rock'){
+      const isGreyscale=/[2-6]a[2-6]a/.test(tc);
+      const rockFolder=isGreyscale?2:1;
+      const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
+      const rockTiles2=['tile_064','tile_065','tile_068'];
+      const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
+      const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
+      rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
+    }
   }else{
     // 프로시저럴 폴백
-    if(ttype==='plain'){
+    if(ttype==='plain'||ttype==='dungeon'){
       defs+=`<linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2e4258"/><stop offset="50%" stop-color="${tc}"/><stop offset="100%" stop-color="#243848"/></linearGradient>`;
       for(let i=0;i<3;i++){const px=cx+((rn()-.5)*tw*.8),py=cy+((rn()-.5)*th*.6);const sz=1.5+rn()*1.5;
         details+=`<line x1="${px}" y1="${py}" x2="${px-sz*.3}" y2="${py-sz}" stroke="#3a5a3a" stroke-width=".6" stroke-linecap="round"/><line x1="${px}" y1="${py}" x2="${px+sz*.4}" y2="${py-sz*.8}" stroke="#3a5a3a" stroke-width=".5" stroke-linecap="round"/>`}
@@ -95,6 +119,10 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
       const trees=2+Math.floor(rn()*2);for(let i=0;i<trees;i++){const px=cx+((rn()-.5)*tw*.7),py=cy+((rn()-.5)*th*.5);const tr=2.5+rn()*2;
         details+=`<circle cx="${px}" cy="${py-1}" r="${tr}" fill="#1a3a22" opacity=".6"/><circle cx="${px}" cy="${py-1.5}" r="${tr*.7}" fill="#245a30" opacity=".5"/>`}
       for(let i=0;i<2;i++){const px=cx+((rn()-.5)*tw*.5),py=cy+((rn()-.5)*th*.3);details+=`<ellipse cx="${px}" cy="${py}" rx="${1.5+rn()}" ry="${.6+rn()*.4}" fill="#2a5030" opacity=".35"/>`}
+      // forest 폴더의 랜덤 이미지 오버레이
+      const forestTiles=['tile_041','tile_042','tile_043','tile_044','tile_045','tile_046','tile_047','tile_049','tile_051'];
+      const selectedForestTile=forestTiles[Math.floor(rn()*forestTiles.length)];
+      details+=`<image href="image/tileset/forest/${selectedForestTile}.png" x="0" y="-10" width="${W}" height="${H}" opacity=".7" clip-path="url(#tc${seed})"/>`;
     }else if(ttype==='hill'){
       defs+=`<linearGradient id="${gid}" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#5a4828"/><stop offset="40%" stop-color="${tc}"/><stop offset="100%" stop-color="#3a2e18"/></linearGradient>`;
       for(let i=0;i<3;i++){const px=cx+((rn()-.5)*tw*.6),py=cy+((rn()-.5)*th*.4);const rr=1+rn()*1.5;
@@ -126,6 +154,14 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
       for(let i=0;i<4;i++){const px=cx+((rn()-.5)*tw*.7),py=cy+((rn()-.5)*th*.5);details+=`<circle cx="${px}" cy="${py}" r="${.8+rn()*1.2}" fill="#0a0a16" opacity=".5"/>`}
       details+=`<line x1="${cx-tw*.4}" y1="${cy-th*.05}" x2="${cx}" y2="${cy-th*.35}" stroke="#2a2a40" stroke-width=".6" opacity=".35"/>`;
       details+=`<line x1="${cx}" y1="${cy-th*.35}" x2="${cx+tw*.4}" y2="${cy-th*.05}" stroke="#2a2a40" stroke-width=".5" opacity=".25"/>`;
+      // rock 폴더의 랜덤 이미지 오버레이 (회색계열은 2, 갈색/녹색계열은 1)
+      const isGreyscale=/[2-6]a[2-6]a/.test(tc);
+      const rockFolder=isGreyscale?2:1;
+      const rockTiles1=['tile_054','tile_055','tile_056','tile_057','tile_059','tile_060'];
+      const rockTiles2=['tile_064','tile_065','tile_068'];
+      const rockTiles=rockFolder===1?rockTiles1:rockTiles2;
+      const selectedRockTile=rockTiles[Math.floor(rn()*rockTiles.length)];
+      rockImg+=`<image href="image/tileset/rocks/${rockFolder}/${selectedRockTile}.png" x="${-W*0.1}" y="${-H*0.1-20}" width="${W*1.2}" height="${H*1.2}" opacity=".7"/>`;
     }
   }
   let s='',so=0,f='';
@@ -138,6 +174,7 @@ function tSVG(tw,th,tc,lc,rc,z,hl,ttype,seed,vi){
   if(h>0){r+=`<polygon points="${lf}" fill="${lc}"/><polygon points="${rf}" fill="${rc}"/>`}
   if(!useImg)r+=`<polygon points="${top}" fill="url(#${gid})"/>`;
   r+=`<g clip-path="url(#tc${seed})">${details}</g>`;
+  r+=rockImg;
   if(hl){r+=`<polygon points="${top}" fill="${f}" stroke="${s}" stroke-width="1.5" stroke-opacity="${so}"/>`;
     if(hl==='selected')r+=`<polygon points="${top}" fill="none" stroke="${s}" stroke-width="2" stroke-opacity="1"><animate attributeName="stroke-opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/></polygon>`}
   r+=`</svg>`;return r;
