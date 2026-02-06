@@ -228,6 +228,83 @@ Object.assign(G, {
     // random, never: 랜덤 또는 회피
     return inRange[Math.floor(Math.random()*inRange.length)]
   },
+  // ─── 스킬 자동 사용 (조건 만족 시) ────
+  async tryUseSkill(u, profile) {
+    if (!profile.skillUseProbability || Math.random() > profile.skillUseProbability) return false;
+    const al = this.alive('ally');
+    if (!al.length) return false;
+
+    // Warrior 강타: 분노 3+ && 킬각 있음
+    if (u.cls === 'warrior' && u.res >= 3) {
+      const inR = this.atkC(u)
+        .filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally'; })
+        .map(c => this.uAt(c.x, c.y));
+      for (const t of inR) {
+        const dmg = Math.max(1, Math.round(u.atk * 1.5 - t.def));
+        if (t.hp <= dmg) {
+          u.res -= 3;
+          t.hp = 0;
+          this.floatT(u.x, u.y, '강타!', 'heal');
+          this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id);
+          setTimeout(() => { this.units = this.units.filter(v => v.hp > 0); this.rUnits(); }, 500);
+          return true;
+        }
+      }
+    }
+
+    // Brawler 무장해제: 에너지 30+ && 고공격력 적(25+) 인접
+    if (u.cls === 'brawler' && u.res >= 30) {
+      const inR = al.filter(t => mh(u.x, u.y, t.x, t.y) <= 1);
+      const highAtk = inR.filter(t => t.atk >= 25 && !t.disarmed);
+      if (highAtk.length) {
+        const t = highAtk[0];
+        u.res -= 30;
+        t.disarmed = 3;
+        this.floatT(t.x, t.y, '무장해제!', 'damage');
+        this.floatT(u.x, u.y, '무장해제 발동!', 'heal');
+        this.sfxAtk(u.cls);
+        await sl(200);
+        return true;
+      }
+    }
+
+    // Mage 화염폭발: 마나 40+ && 3x3 범위 적 2개+
+    if (u.cls === 'mage' && u.res >= 40) {
+      let targetCell = null, maxCluster = 0;
+      for (let y = u.y - 1; y <= u.y + 1; y++) {
+        for (let x = u.x - 1; x <= u.x + 1; x++) {
+          if (x === u.x && y === u.y) continue;
+          const cnt = al.filter(a => mh(a.x, a.y, x, y) <= 1).length;
+          if (cnt >= 2 && cnt > maxCluster) { maxCluster = cnt; targetCell = { x, y }; }
+        }
+      }
+      if (targetCell) {
+        u.res -= 40;
+        for (let y = targetCell.y - 1; y <= targetCell.y + 1; y++) {
+          for (let x = targetCell.x - 1; x <= targetCell.x + 1; x++) {
+            const t = this.uAt(x, y);
+            if (t && t.team === 'ally') {
+              const dmg = calcDmg(u, t);
+              t.hp = Math.max(0, t.hp - dmg);
+              this.floatT(t.x, t.y, `-${dmg}`, 'damage');
+              this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY,
+                { count: 8, colors: ['#ff6600', '#ffaa00', '#ffff00'], shape: 'spark',
+                  speed: 3, spread: 10, decay: 0.03, size: 4 });
+              if (t.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id); }
+            }
+          }
+        }
+        this.floatT(u.x, u.y, '화염폭발!', 'heal');
+        this.sfxAtk(u.cls);
+        await sl(300);
+        this.units = this.units.filter(v => v.hp > 0);
+        this.rUnits();
+        return true;
+      }
+    }
+
+    return false;
+  },
   async eAI(u){const al=this.alive('ally');if(!al.length&&!this.hasAllyWall())return;
     const profile=AI_PROFILES[u.cls]||AI_PROFILES.novice;
     // 지원 클래스: HP 높으면 전투 회피
@@ -237,6 +314,9 @@ Object.assign(G, {
     // Check attack from current position first
     const inR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
     if(inR.length&&profile.targetPriority!=='never'){
+      // 스킬 사용 시도
+      if(await this.tryUseSkill(u,profile)){return}
+      // 일반 공격
       const target=this.selectTarget(u,inR,profile);
       if(target){await this.eAtkAsync(u,target);return}
     }
@@ -254,6 +334,9 @@ Object.assign(G, {
     await sl(200);
     const postR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'}).map(c=>this.uAt(c.x,c.y));
     if(postR.length&&profile.targetPriority!=='never'){
+      // 스킬 사용 시도
+      if(await this.tryUseSkill(u,profile)){return}
+      // 일반 공격
       const target=this.selectTarget(u,postR,profile);
       if(target){await this.eAtkAsync(u,target);return}
     }
