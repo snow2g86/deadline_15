@@ -32,7 +32,8 @@ const EXP_POTIONS = [
 
 const CLASS_CHANGE_SCROLLS = [
     { id: 'cc_melee', name: '근접 전직서', icon: '📜', desc: '노비스를 근접 직업으로 전직', classes: ['warrior', 'knight', 'assassin', 'brawler', 'lancer', 'sapper'], cost: 150, weight: 30 },
-    { id: 'cc_ranged', name: '원거리 전직서', icon: '📋', desc: '노비스를 원거리 직업으로 전직', classes: ['archer', 'mage', 'summoner', 'shaman'], cost: 150, weight: 30 },
+    { id: 'cc_ranged', name: '원거리 전직서', icon: '📋', desc: '노비스를 원거리 직업으로 전직', classes: ['archer', 'mage', 'shaman'], cost: 150, weight: 30 },
+    { id: 'cc_summoner', name: '소환사 교본', icon: '📖', desc: '노비스를 소환사로 전직', classes: ['summoner'], cost: 150, weight: 30 },
     { id: 'cc_healer', name: '힐러 전직서', icon: '📃', desc: '노비스를 사제로 전직', classes: ['priest'], cost: 120, weight: 20 },
     { id: 'cc_universal', name: '범용 전직서', icon: '🎖️', desc: '노비스를 원하는 직업으로 전직', classes: ['warrior', 'knight', 'assassin', 'archer', 'mage', 'priest', 'summoner', 'shaman', 'brawler', 'lancer', 'sapper'], cost: 200, weight: 10 },
 ];
