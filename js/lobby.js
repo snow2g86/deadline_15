@@ -524,7 +524,10 @@ Object.assign(G,{
     const titleEl=document.getElementById('shop-info-title');
     const remain=Math.max(0,6*3600*1000-(Date.now()-this._shopData.ts));
     const h=Math.floor(remain/3600000);const m=Math.floor((remain%3600000)/60000);
-    timeEl.textContent=`갱신까지 ${h}시간 ${m}분`;
+    // 용병/아이템 탭에서만 타이머 표시
+    const showTimer=this._currentShopTab==='mercenary'||this._currentShopTab==='item';
+    timeEl.style.display=showTimer?'block':'none';
+    if(showTimer)timeEl.textContent=`갱신까지 ${h}시간 ${m}분`;
 
     // 탭별 안내 문구
     const tabTitles={'mercenary':'용병을 모집하세요','item':'아이템을 구매하세요','job':'직업을 선택하세요','gold':'골드를 구매하세요'};
