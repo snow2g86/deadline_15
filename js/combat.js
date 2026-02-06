@@ -329,7 +329,7 @@ Object.assign(G, {
         x:tx,y:ty,hp,mhp:hp,atk,def,
         move,range,role,
         res:0,maxRes:0,resType:'none',resRec:0,
-        summonTurns:5,
+        summonTurns:999,
         hm:false,ha:false,waited:false,mo:false,
         furyBuff:0,stunned:0
       };
