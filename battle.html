@@ -68,9 +68,9 @@
   </div>
 </div>
 <div id="turn-confirm"><div id="tc-box">
-  <div class="tc-msg">모든 아군이 행동을 완료했습니다.<br>턴을 종료하시겠습니까?</div>
-  <div class="tc-btns"><button class="tc-yes" onclick="G.confirmEndTurn(true)">턴 종료</button><button class="tc-no" onclick="G.confirmEndTurn(false)">취소</button></div>
-  <label class="tc-skip"><input type="checkbox" id="tc-skip-chk" onchange="G.setAutoEnd(this.checked)">다음에 묻지 않기</label>
+  <div class="tc-msg" data-i18n="messages.all_units_acted"></div>
+  <div class="tc-btns"><button class="tc-yes" onclick="G.confirmEndTurn(true)" data-i18n="messages.end_turn"></button><button class="tc-no" onclick="G.confirmEndTurn(false)" data-i18n="messages.cancel"></button></div>
+  <label class="tc-skip"><input type="checkbox" id="tc-skip-chk" onchange="G.setAutoEnd(this.checked)"><span data-i18n="messages.dont_ask_again"></span></label>
 </div></div>
 <div id="enemy-banner">⚔ ENEMY TURN ⚔</div><div id="wave-banner"></div>
 <div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sub"></div><div id="modal-buttons"></div></div></div>
