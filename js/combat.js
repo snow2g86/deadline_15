@@ -14,13 +14,13 @@ Object.assign(G, {
       else{const a=this.atkC(u);
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
-      this.rUnits();this.rTer();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect();return}
+      this.rTer();this.rUnits();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect();return}
     // Normal selection
     this.sel=u;this.awPM=true;
     if(u.team==='ally'&&!u.ha){this.mvT=[];const a=this.atkC(u);
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
-    else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
+    else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.rUnits();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
   clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this.skillMenuOpen=false;this._curSkill=null;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
   cellCk(x,y){if(this.phase!=='player'||this.over||this.anim)return;const cl=this.uAt(x,y),s=this.sel;
     if(this.awPM&&s){
@@ -85,7 +85,7 @@ Object.assign(G, {
   doHeal(h,t){const amt=Math.round(h.atk*1.5);const he=this._grantExp(h,'heal');t.hp=Math.min(t.mhp,t.hp+amt);this.vfxHeal(t);this.vfxBuff(t);this.sfxHeal();this.floatT(t.x,t.y,`+${amt}`,'heal');
     if(he>0)this.floatT(h.x,h.y,`+${he} EXP`,'exp');
     h.ha=true;h.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.chkAutoEnd()},
-  actWait(){if(!this.sel)return;this.sel.ha=true;this.sel.waited=true;this.awPM=false;this.hideAM();this.sfxWait();this.rUnits();this.clrSel();this.chkAutoEnd()},
+  actWait(){if(!this.sel)return;this.sel.ha=true;this.sel.waited=true;if(this.sel.team==='ally')this.allyPos[this.sel.id]={x:this.sel.x,y:this.sel.y};this.awPM=false;this.hideAM();this.sfxWait();this.rUnits();this.clrSel();this.chkAutoEnd()},
   actCancel(){if(!this.sel)return;
     // 스킬 서브 메뉴에서 돌아가기
     if(this.skillMenuOpen){this.hideSkillMenu();return}
@@ -183,9 +183,9 @@ Object.assign(G, {
     // 습격: 맵 전체 적 대상 → 인접 이동 → ATK×2 공격
     if(skObj.id==='assassin_ambush'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
-      if(!t){u.res+=skObj.cost;return}
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const adj=this._findAdj(t.x,t.y,u);
-      if(!adj){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.no_empty_tile'),'damage');return}
+      if(!adj){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.no_empty_tile'),'damage');u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       u.x=adj.x;u.y=adj.y;u.mo=true;
       this.animU(u.id,adj.x,adj.y);
       setTimeout(()=>{
@@ -208,7 +208,7 @@ Object.assign(G, {
     // 암살: 겹친 적에 ATK×5 → 이탈
     if(skObj.id==='assassin_assassinate'){
       const t=this.units.find(v=>v.x===u.x&&v.y===u.y&&v.team==='enemy'&&v.hp>0);
-      if(!t){u.res+=skObj.cost;return}
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const dmg=Math.max(1,u.atk*5-t.def);
       t.hp=Math.max(0,t.hp-dmg);
       this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:20,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
@@ -226,7 +226,7 @@ Object.assign(G, {
     if(skObj.id==='priest_massheal'){
       const hr=skObj.healRange||6;
       const targets=this.units.filter(v=>v.team==='ally'&&v.hp>0&&v.hp<v.mhp&&mh(u.x,u.y,v.x,v.y)<=hr);
-      if(!targets.length){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.select_heal_target'),'damage');return}
+      if(!targets.length){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.select_heal_target'),'damage');u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const amt=u.atk;
       targets.forEach(t=>{
         t.hp=Math.min(t.mhp,t.hp+amt);
@@ -241,7 +241,7 @@ Object.assign(G, {
     }
     // 함정 설치: 지정 타일에 아군 함정 배치
     if(skObj.id==='sapper_trap'){
-      if(this.uAt(tx,ty)||this.traps.find(t=>t.x===tx&&t.y===ty)){u.res+=skObj.cost;return}
+      if(this.uAt(tx,ty)||this.traps.find(t=>t.x===tx&&t.y===ty)){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       this.traps.push({x:tx,y:ty,dmg:u.atk*2,id:this.traps.length,team:'ally'});
       this.floatT(tx,ty,t('messages.trap_installed'),'heal');
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:10,colors:['#f80','#ff4','#fa0'],shape:'spark',speed:2,spread:10,decay:0.025,size:3});
@@ -272,7 +272,7 @@ Object.assign(G, {
     // 돌던지기: throwRange 내 적에게 ATK×0.5 데미지
     if(skObj.id==='novice_throw'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
-      if(!t){u.res+=skObj.cost;return}
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const dmg=Math.max(1,Math.round(u.atk*0.5)-t.def);
       t.hp=Math.max(0,t.hp-dmg);
       this.sfxAtk(u.cls);this.shakeU(t.id);
@@ -311,7 +311,7 @@ Object.assign(G, {
       // 1. 위치 검증
       const target=this.units.find(v=>v.x===tx&&v.y===ty);
       if(target||!TI[this.ter[ty][tx]].pass){
-        u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.summoner_no_spawn'),'damage');return
+        u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.summoner_no_spawn'),'damage');u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return
       }
       // 2. 소환수 타입별 스탯 계산
       const isSpirit=skObj.id==='summoner_summon_spirit';
@@ -355,7 +355,7 @@ Object.assign(G, {
     // 무장해제: 적 ATK 50% 감소 3턴
     if(skObj.id==='brawler_disarm'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
-      if(!t){u.res+=skObj.cost;return}
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       t.disarmed=3;
       this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,t('messages.atk_reduced'),'damage');
@@ -368,7 +368,7 @@ Object.assign(G, {
     // 스위치: 아군과 위치 교환
     if(skObj.id==='knight_switch'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='ally'&&v.hp>0&&v.id!==u.id);
-      if(!t)return;
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       [u.x,u.y,t.x,t.y]=[t.x,t.y,u.x,u.y];
       this.animU(u.id,u.x,u.y);this.animU(t.id,t.x,t.y);
       this.floatT(u.x,u.y,t('messages.knight_switch'),'heal');
@@ -379,7 +379,7 @@ Object.assign(G, {
     }
     // 도약: 지정 위치로 빠르게 이동
     if(skObj.id==='archer_dash'){
-      if(this.uAt(tx,ty))return;
+      if(this.uAt(tx,ty)){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       u.x=tx;u.y=ty;u.mo=true;
       this.animU(u.id,tx,ty);
       this.floatT(u.x,u.y,t('messages.archer_leap'),'heal');
@@ -390,7 +390,7 @@ Object.assign(G, {
     // 강타: ATK × 1.5 데미지 공격
     if(skObj.id==='warrior_powersmash'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.hp>0&&v.team!==u.team);
-      if(!t)return;
+      if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const dmg=Math.max(1,Math.round(u.atk*1.5-t.def));
       t.hp=Math.max(0,t.hp-dmg);
       this.vfxAtk(u,t);this.sfxAtk(u.cls);this.shakeU(t.id);

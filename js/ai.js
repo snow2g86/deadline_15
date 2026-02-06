@@ -120,7 +120,7 @@ Object.assign(G, {
   autoEndSkip:false,
   setAutoEnd(v){this.autoEndSkip=v},
   async doET(){const s=this.cStage;
-    if(s&&this.turn%s.si===0&&this.eSpwn<s.tot){this.showWv(`웨이브 — 남은 적 ${s.tot-this.eSpwn}체`);this.sfxWave();this.spawnW();this.rUnits();await sl(600);this.hideWv()}
+    if(s&&this.turn%s.si===0&&this.eSpwn<s.tot){this.showWv(t('messages.wave_info',{count:s.tot-this.eSpwn}));this.sfxWave();this.spawnW();this.rUnits();await sl(600);this.hideWv()}
     // Enemy resource recovery
     this.alive('enemy').forEach(u=>{
       if(u.stunned>0)u.stunned--;
@@ -134,7 +134,7 @@ Object.assign(G, {
         if(u.cls==='sapper'&&u.res>=20&&!this.traps.find(t=>t.x===u.x&&t.y===u.y)){
           u.res-=20;
           this.traps.push({x:u.x,y:u.y,dmg:u.atk*2,id:this.traps.length,team:'enemy'});
-          this.floatT(u.x,u.y,'⚠ 함정','heal');
+          this.floatT(u.x,u.y,t('messages.trap_placed'),'heal');
         }
       }
     });this.rUnits();
@@ -150,7 +150,7 @@ Object.assign(G, {
           const dmg=Math.max(1,Math.round(t.mhp*pct));
           t.hp=Math.max(0,t.hp-dmg);
           this.floatT(t.x,t.y,`-${dmg}`,'damage');
-          this.floatT(t.x,t.y,'저주!','damage');
+          this.floatT(t.x,t.y,t('messages.curse'),'damage');
           this.vfxSpawn(this.uSX(t.x,t.y)+UCX,this.uSY(t.x,t.y)+UCY,{count:6,colors:['#9333ea','#581c87','#a855f7'],shape:'spark',speed:2,spread:8,decay:0.03,size:3});
           if(t.hp<=0){this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);
             setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd()},500)}
@@ -161,7 +161,7 @@ Object.assign(G, {
         if(u.isSummon&&u.summonTurns!==undefined){
           u.summonTurns--;
           if(u.summonTurns<=0){
-            this.floatT(u.x,u.y,'소환 해제','damage');
+            this.floatT(u.x,u.y,t('messages.unsummoned'),'damage');
             this.vfxDeath(u);
             setTimeout(()=>{
               this.units=this.units.filter(v=>v.id!==u.id);
@@ -186,7 +186,7 @@ Object.assign(G, {
           u.res=Math.min(u.maxRes,u.res+rec)}
         // fury: no auto recovery
       });
-      this.uUI();this.rUnits();this.rTer();this.rMM()}},
+      this.uUI();this.clrSel();this.rMM()}},
   // ─── 타겟 선택 (클래스별 우선순위) ────
   selectTarget(u,inRange,profile){
     if(!inRange.length)return null;
@@ -244,8 +244,9 @@ Object.assign(G, {
         if (t.hp <= dmg) {
           u.res -= 3;
           t.hp = 0;
-          this.floatT(u.x, u.y, '강타!', 'heal');
+          this.floatT(u.x, u.y, t('messages.warrior_strike'), 'heal');
           this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id);
+          u.ha = true; // 행동 완료
           setTimeout(() => { this.units = this.units.filter(v => v.hp > 0); this.rUnits(); }, 500);
           return true;
         }
@@ -260,9 +261,10 @@ Object.assign(G, {
         const t = highAtk[0];
         u.res -= 30;
         t.disarmed = 3;
-        this.floatT(t.x, t.y, '무장해제!', 'damage');
-        this.floatT(u.x, u.y, '무장해제 발동!', 'heal');
+        this.floatT(t.x, t.y, t('messages.brawler_disarm'), 'damage');
+        this.floatT(u.x, u.y, t('messages.brawler_disarm'), 'heal');
         this.sfxAtk(u.cls);
+        u.ha = true; // 행동 완료
         await sl(200);
         return true;
       }
@@ -295,8 +297,9 @@ Object.assign(G, {
             }
           }
         }
-        this.floatT(u.x, u.y, '화염폭발!', 'heal');
+        this.floatT(u.x, u.y, t('messages.mage_fireball'), 'heal');
         this.sfxAtk(u.cls);
+        u.ha = true; // 행동 완료
         await sl(300);
         this.units = this.units.filter(v => v.hp > 0);
         this.rUnits();
@@ -353,12 +356,12 @@ Object.assign(G, {
       const k=nx+','+ny;if(!this.gateHP[k]||this.gateHP[k]<=0)continue;
       // Attack gate
       this.gateHP[k]--;
-      this.floatT(nx,ny,`성문 피격!`,'damage');this.sfxAtk(u.cls);
+      this.floatT(nx,ny,t('messages.gate_hit'),'damage');this.sfxAtk(u.cls);
       this.vfxSpawn(this.uSX(nx,ny)+UCX,this.uSY(nx,ny)+UCY,{count:12,colors:['#aa8844','#ffcc66','#fff'],shape:'spark',speed:2,spread:12,decay:0.025,size:3});
       if(this.gateHP[k]<=0){
         // Gate destroyed - becomes passable plain
         this.ter[ny][nx]='plain';this.ter[ny][nx]='plain';
-        this.floatT(nx,ny,'성문 파괴!','damage');this.screenShake();this.sfxKill();
+        this.floatT(nx,ny,t('messages.gate_destroyed'),'damage');this.screenShake();this.sfxKill();
         this.rTer()}
       else this.rTer();
       return true}return false},
@@ -371,7 +374,7 @@ Object.assign(G, {
       if(Math.random()>0.3)continue;
       // Climb over wall — move to wall tile
       u.x=nx;u.y=ny;this.animU(u.id,nx,ny);
-      this.floatT(nx,ny,'🪜 사다리!','heal');this.sfxMove();
+      this.floatT(nx,ny,t('messages.ladder'),'heal');this.sfxMove();
       await sl(340);
       this.onBreach(u);
       return true}return false},
@@ -380,8 +383,8 @@ Object.assign(G, {
     this.breached++;
     const s=this.cStage;if(!s)return;
     const limit=Math.ceil(s.tot/4);
-    this.floatT(u.x,u.y,`돌파 ${this.breached}/${limit}`,'damage');
-    if(this.breached>=limit){this.over=true;this.showRes(false,`적 ${this.breached}체가 성벽을 돌파했습니다!`)}},
+    this.floatT(u.x,u.y,t('messages.breach')+` ${this.breached}/${limit}`,'damage');
+    if(this.breached>=limit){this.over=true;this.showRes(false,t('messages.enemy_breached',{count:this.breached}))}},
   async eAtkAsync(a,t){
     if(t.team==='ally')this.scrollToUnit(t);
     await sl(250);
@@ -390,7 +393,7 @@ Object.assign(G, {
   eAtk(a,t){
     const dmg=calcDmg(a,t);
     t.hp=Math.max(0,t.hp-dmg);this.vfxAtk(a,t);this.sfxAtk(a.cls);this.shakeU(t.id);this.floatT(t.x,t.y,`-${dmg}`,'damage');
-    if(a.furyBuff>0)this.floatT(a.x,a.y,'광폭!','heal');
+    if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
     procFury(a,t,this);
     if(t.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(t);this.deathA(t.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
     else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);setTimeout(()=>{this.units=this.units.filter(u=>u.hp>0);this.rUnits()},500)}
@@ -408,17 +411,40 @@ Object.assign(G, {
       for(const m of mc){const d=mh(m.x,m.y,origPos.x,origPos.y);if(d<bestDist){bestDist=d;bestMove=m}}
       if(bestMove&&mh(bestMove.x,bestMove.y,origPos.x,origPos.y)<mh(u.x,u.y,origPos.x,origPos.y)){
         u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);
-        this.floatT(u.x,u.y,'후퇴!','damage');await sl(340);
+        this.floatT(u.x,u.y,t('messages.retreat'),'damage');await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500)}
         return
       }
     }
-    // 클래스별 전진 제한
-    let advLimit=5;
-    if(profile.style==='defensive')advLimit=3;
-    if(profile.style==='support')advLimit=2;
+    // 클래스별 전진 제한 (Defense 맵: 무리 진격 범위 확대)
+    let advLimit = this.cStage?.style === 'defense' ? 15 : 5;
+    if(profile.style==='defensive') advLimit = this.cStage?.style === 'defense' ? 12 : 3;
+    if(profile.style==='support') advLimit = this.cStage?.style === 'defense' ? 10 : 2;
     const advDist=mh(u.x,u.y,origPos.x,origPos.y);
-    // If already at advance limit, don't move further
+
+    // Defense 맵: 무리 진격 체크 (고립 방지)
+    if(this.cStage?.style === 'defense' && !u.isBoss) {
+      const allies = this.alive('enemy').filter(e => e.id !== u.id && !e.isBoss);
+
+      // 아군이 있으면 무리 진격 체크
+      if(allies.length > 0) {
+        // 가장 가까운 아군과의 거리
+        const nearestAllyDist = Math.min(...allies.map(a => mh(u.x, u.y, a.x, a.y)));
+
+        // 너무 앞서가면 대기 (아군보다 3칸 이상 앞서지 않기)
+        const avgAllyY = allies.reduce((sum, a) => sum + a.y, 0) / allies.length;
+        if(u.y > avgAllyY + 3) {
+          return; // 너무 앞서감, 아군 대기
+        }
+
+        // 너무 고립되면 진격 제한 (가장 가까운 아군이 5칸 이상 멀면)
+        if(nearestAllyDist > 5) {
+          advLimit = Math.min(advLimit, advDist + 2); // 2칸만 더 진격 허용
+        }
+      }
+    }
+
+    // 전진 제한 체크
     if(advDist>=advLimit&&!u.isBoss){return}
 
     const mc=this.eMvC(u);if(!mc.length)return;
@@ -509,14 +535,14 @@ Object.assign(G, {
     this.units.filter(u=>u.cls==='summoner'&&u.hp<=0).forEach(deadSummoner=>{
       const summons=this.units.filter(s=>s.isSummon&&s.summonerId===deadSummoner.id);
       summons.forEach(s=>{
-        this.floatT(s.x,s.y,'소환 해제','damage');
+        this.floatT(s.x,s.y,t('messages.unsummoned'),'damage');
         this.vfxDeath(s);
       });
       this.units=this.units.filter(v=>!(v.isSummon&&v.summonerId===deadSummoner.id));
     });
-    if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,'아군이 전멸했습니다.');return}
+    if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,t('messages.all_defeated'));return}
     // Breach check
     const s=this.cStage;if(s){const limit=Math.ceil(s.tot/4);
-      if(this.breached>=limit){this.over=true;this.showRes(false,`적 ${this.breached}체가 성벽을 돌파했습니다!`);return}}
-    if(s&&this.eSpwn>=s.tot&&!en.length){this.over=true;this.cleared.add(s.id);this.showRes(true,`STAGE ${s.id} 클리어! (${this.turn}턴)`)}},
+      if(this.breached>=limit){this.over=true;this.showRes(false,t('messages.enemy_breached',{count:this.breached}));return}}
+    if(s&&this.eSpwn>=s.tot&&!en.length){this.over=true;this.cleared.add(s.id);this.showRes(true,t('messages.stage_clear',{stage_id:s.id,turn:this.turn}))}},
 });
