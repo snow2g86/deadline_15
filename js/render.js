@@ -77,26 +77,28 @@ Object.assign(G, {
   showMainMenu(u){const m=document.getElementById('action-menu');
     // 동적 스킬 버튼 제거
     m.querySelectorAll('.am-skill').forEach(e=>e.remove());
-    // 1. 이동 버튼 (이동 가능한 경우만)
+    // 1. 이동 버튼: 아직 유닛이 이동하지 않았을 경우
     document.getElementById('btn-move').style.display=
-      (!this.awPM&&this.mvT.length>0)?'':'none';
-    // 2. 공격 버튼 (적군이 사거리에 있을 경우)
+      (!u.hm&&!u.mo)?'':'none';
+    // 2. 공격 버튼: 유닛이 행동 완료 상태가 아닐 경우
     const btnAttack=document.getElementById('btn-attack');
     if(u.role==='healer'){
       btnAttack.textContent='💚 치유';
-      btnAttack.style.display=this.healT.length>0?'':'none'}
+      btnAttack.style.display=(!u.ha&&this.healT.length>0)?'':'none'}
     else{
       btnAttack.textContent='⚔️ 공격';
-      btnAttack.style.display=this.atkT.length>0?'':'none'}
-    // 3. 스킬 버튼 (이동했고 && 사용 가능한 스킬이 있을 경우)
+      btnAttack.style.display=(!u.ha&&this.atkT.length>0)?'':'none'}
+    // 3. 스킬 버튼: 자원(마나, 기력, 분노)이 충분한 경우
     const skills=getSkills(u.cls);
-    const hasUsableSkill=this.awPM&&skills.some(sk=>this.canUseSkill(u,sk));
+    const hasUsableSkill=!u.ha&&skills.some(sk=>this.canUseSkill(u,sk));
     document.getElementById('btn-skill').style.display=hasUsableSkill?'':'none';
-    // 4. 아이템 버튼 (추후 개발, 숨김)
+    // 4. 아이템 버튼: 추후 개발 (비활성화)
     document.getElementById('btn-item').style.display='none';
-    // 5. 대시 버튼 (상시 표시)
-    document.getElementById('btn-dash').style.display='';
-    // 6. 취소 버튼 (이동했을 경우)
+    // 5. 대기 버튼: 상시 활성화
+    const btnDash=document.getElementById('btn-dash');
+    btnDash.textContent='⏸ 대기';
+    btnDash.style.display='';
+    // 6. 취소 버튼: 유닛 이동 후
     const btnCancel=document.getElementById('btn-cancel');
     btnCancel.textContent='↩ 취소';
     btnCancel.style.display=this.preMv?'':'none';
@@ -109,19 +111,20 @@ Object.assign(G, {
     m.querySelectorAll('.am-skill').forEach(e=>e.remove());
     const skills=getSkills(u.cls);
     const btnDash=document.getElementById('btn-dash');
+    // 보유 스킬: 자원이 충분한 경우 활성화, 부족한 경우 디저블 처리
     skills.forEach((sk,idx)=>{
       const btn=document.createElement('button');btn.className='am-skill';
       btn.textContent=sk.icon+' '+sk.name;
-      // 활성화 조건 체크
+      // 자원 충분 여부 확인
       let enabled=this.canUseSkill(u,sk);
       btn.disabled=!enabled;
       btn.onclick=()=>G.actSkill(idx);
       m.insertBefore(btn,btnDash)});
     // 대시 버튼 숨김
     btnDash.style.display='none';
-    // 취소 버튼을 "돌아가기"로 변경
+    // 취소 버튼: 상시 활성화 - 클릭시 행동 UI로 전환
     const btnCancel=document.getElementById('btn-cancel');
-    btnCancel.textContent='↩ 돌아가기';
+    btnCancel.textContent='↩ 취소';
     btnCancel.style.display='';
     btnCancel.onclick=()=>G.hideSkillMenu();
     m.classList.add('show')},

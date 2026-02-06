@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>📖 직업 도감</title>
 <script src="js/classes.js"></script>
+<script defer src="js/i18n.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -146,6 +147,12 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 
 <script src="js/compendium.js"></script>
 <script>
+// i18n 초기화
+window.addEventListener('DOMContentLoaded', async () => {
+  // i18n은 G 객체가 필요하므로, 간단히 번역 키 사용을 위해만 로드
+  // 도감 페이지는 주로 정적 콘텐츠이므로, 필요 시에만 초기화
+});
+
 // 탭 전환
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => {

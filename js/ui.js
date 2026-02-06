@@ -183,7 +183,7 @@ Object.assign(G, {
     ov.classList.add('show')},
 
   // === Settings ===
-  _sett:{bgmVol:0.6,sfxVol:0.8,bgmOn:true,sfxOn:true,speed:1},
+  _sett:{bgmVol:0.6,sfxVol:0.8,bgmOn:true,sfxOn:true,speed:1,language:null},
   _sfxGainNode:null,
   loadSett(){try{const d=JSON.parse(localStorage.getItem('game_setting'));
     if(d){if(typeof d.bgmVol==='number')this._sett.bgmVol=d.bgmVol;
@@ -191,6 +191,7 @@ Object.assign(G, {
       if(typeof d.bgmOn==='boolean')this._sett.bgmOn=d.bgmOn;
       if(typeof d.sfxOn==='boolean')this._sett.sfxOn=d.sfxOn;
       if(typeof d.speed==='number')this._sett.speed=d.speed;
+      if(typeof d.language==='string')this._sett.language=d.language;
     }}catch(e){}},
   saveSett(){try{localStorage.setItem('game_setting',JSON.stringify(this._sett))}catch(e){}},
   toggleSettings(){const p=document.getElementById('settings-panel');if(!p)return;

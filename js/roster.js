@@ -37,15 +37,27 @@ const ROSTER = {
 
   // ── 첫 실행 기본 지급 ──────────────────
   grantStarter() {
-    // 테스트용: 모든 12개 클래스 1명씩 지급
-    const starters = ['novice','warrior','knight','assassin','archer','mage','priest','sapper','summoner','shaman','brawler','lancer'];
+    const TEST_MODE = false; // true: 모든 클래스 1명씩, false: 노비스 5명
     const used = new Set();
-    starters.forEach(cls => {
-      let name;
-      do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
-      used.add(name);
-      this.addChar(cls, name);
-    });
+
+    if (TEST_MODE) {
+      // 테스트 모드: 모든 12개 클래스 1명씩 지급
+      const starters = ['novice','warrior','knight','assassin','archer','mage','priest','sapper','summoner','shaman','brawler','lancer'];
+      starters.forEach(cls => {
+        let name;
+        do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
+        used.add(name);
+        this.addChar(cls, name);
+      });
+    } else {
+      // 실제 모드: 노비스 5명 지급
+      for(let i = 0; i < 5; i++) {
+        let name;
+        do { name = NAMES[Math.floor(Math.random()*NAMES.length)]; } while(used.has(name));
+        used.add(name);
+        this.addChar('novice', name);
+      }
+    }
   },
 
   // ── 캐릭터 추가 (뽑기/보상) ─────────────

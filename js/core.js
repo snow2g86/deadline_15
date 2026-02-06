@@ -73,7 +73,10 @@ const G={
     document.querySelector('#cam-dir .cd-label').textContent=CLAB[0];
     const w=document.getElementById('iso-world');
     w.querySelectorAll('.iso-tile,.unit-sprite,.float-text').forEach(e=>e.remove());
-    for(let i=0;i<this.party.length;i++){const p=DEPLOY[i];this.addU('ally',this.party[i],p.x,p.y)}
+    const meleeCols=[3,4,5,6,7],rangedCols=[3,4,5,6,7];let meleeIdx=0,rangedIdx=0;
+    for(let i=0;i<this.party.length;i++){const uid=this.party[i],ch=ROSTER.getChar(uid);if(!ch)continue;
+      const role=CD[ch.cls]?.role,isRanged=role==='ranged'||role==='healer',cols=isRanged?rangedCols:meleeCols,idx=isRanged?rangedIdx++:meleeIdx++;
+      if(idx<cols.length){const x=cols[idx],y=isRanged?12:11;this.addU('ally',uid,x,y)}}
     this.spawnW();this.layW();this.vfxInit();this.rTer();this.rUnits();this.uUI();this.defI();this.rMM();
     this.bgmStart();
     // Scroll camera to ally position
@@ -110,15 +113,15 @@ const G={
       if(cls==='sapper')sappers.push(cls)
     });
     // Formation rows from top (row 0-1: spawn) - enemies defend from row 2-4
-    // Front line: row 4 (knights first, then melee)
+    // Front line: row 11 (knights first, then melee)
     const frontLine=[];
-    for(let c=2;c<=7;c++){if(!this.uAt(c,4)&&frontLine.length<(knights.length+melee.length))frontLine.push({x:c,y:4})}
+    for(let c=2;c<=7;c++){if(!this.uAt(c,11)&&frontLine.length<(knights.length+melee.length))frontLine.push({x:c,y:11})}
     let idx=0;
     knights.forEach(k=>{if(idx<frontLine.length)form.push({cls:k,pos:frontLine[idx++]})});
     melee.forEach(m=>{if(idx<frontLine.length)form.push({cls:m,pos:frontLine[idx++]})});
-    // Mid line: row 3 (remaining units)
+    // Mid line: row 12 (remaining units)
     const midLine=[];
-    for(let c=2;c<=7;c++){if(!this.uAt(c,3)&&midLine.length<ranged.length+heal.length+sappers.length)midLine.push({x:c,y:3})}
+    for(let c=2;c<=7;c++){if(!this.uAt(c,12)&&midLine.length<ranged.length+heal.length+sappers.length)midLine.push({x:c,y:12})}
     idx=0;
     ranged.forEach(r=>{if(idx<midLine.length)form.push({cls:r,pos:midLine[idx++]})});
     heal.forEach(h=>{if(idx<midLine.length)form.push({cls:h,pos:midLine[idx++]})});
@@ -149,7 +152,7 @@ const G={
         this.ter[r]=[];for(let c=0;c<COLS;c++)this.ter[r][c]='plain'}
       else{this.ter[r]=[];for(let c=0;c<COLS;c++){
         const rn=Math.random();
-        this.ter[r][c]=rn<.06?'rock':rn<.16?'hill':rn<.28?'forest':'plain'}}}},
+        this.ter[r][c]=rn<.15?'rock':rn<.25?'hill':rn<.37?'forest':'plain'}}}},
   // addU: ally는 uid(보유 캐릭터), enemy는 cls+스테이지 배율
   addU(team,src,x,y){
     let cls,hp,mhp,atk,def,mv,rng,role,resType,maxRes,resRec,initRes,uid=0,lv=1;

@@ -98,7 +98,7 @@ const TI = {
   plain:  { cost:1,       z:0, label:'',  pass:true,  tc:'#2a3a4e', lc:'#1e2d3d', rc:'#162232', buff:null },
   forest: { cost:1.5,     z:0, label:'🌲', pass:true,  tc:'#1f3d2a', lc:'#162e1f', rc:'#102216', buff:{name:'은신',icon:'🌿',type:'buff',desc:'DEF+3'} },
   hill:   { cost:2,       z:1, label:'⛰',  pass:true,  tc:'#4a3a20', lc:'#3a2c16', rc:'#2e2210', buff:{name:'고지',icon:'⬆',type:'buff',desc:'ATK+5'} },
-  rock:   { cost:Infinity,z:3, label:'',  pass:false, tc:'#1a1a28', lc:'#121220', rc:'#0e0e18', buff:null },
+  rock:   { cost:Infinity,z:0, label:'',  pass:false, tc:'#3a3a48', lc:'#2a2a38', rc:'#1e1e28', buff:null },
   water:  { cost:Infinity,z:0, label:'',  pass:false, tc:'#1a3050', lc:'#142640', rc:'#102035', buff:null },
   wall:   { cost:Infinity,z:2, label:'',  pass:false, tc:'#4a4458', lc:'#383248', rc:'#2e283c', buff:null },
   gate:   { cost:1,       z:0, label:'',  pass:true,  tc:'#3a3048', lc:'#2e2840', rc:'#262035', buff:null }
@@ -107,23 +107,23 @@ const TI = {
 // ── 스테이지 데이터 ──────────────────────
 // 테마별 스타일: defense(성벽있음) | offense(성벽없음,적장)
 const STAGES = [
-  // ═══ 마을 방어 (DEFENSE) ═══
-  { id:1, name:'초원의 경비',  theme:'마을지킴', style:'defense', story:'산적의 약탈을 저지하라', tot:6,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','novice','novice'], sm:{hp:.65,atk:.65} },
-  { id:2, name:'마을 제2경비', theme:'마을지킴', style:'defense', story:'더 강한 산적단 습격 격퇴', tot:8,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','warrior','warrior','novice','novice'], sm:{hp:.75,atk:.75} },
+  // ═══════════════════════════════════════════
+  // Phase 1: 영웅의 시작
+  // ═══════════════════════════════════════════
 
-  // ═══ 산적 소굴 (OFFENSE) ═══
-  { id:3, name:'산적 소굴',    theme:'산적소굴', style:'offense', story:'산적단의 본거지 잠입', tot:10, spw:3, si:2, boss:null, en:['novice','warrior','novice','warrior','novice','warrior','warrior','novice','warrior','assassin'], sm:{hp:.8,atk:.8} },
-  { id:4, name:'산적단 거점',  theme:'산적소굴', style:'offense', story:'산적단 거점 격파', tot:12, spw:3, si:2, boss:{cls:'warrior',name:'산적 우두머리'}, en:['warrior','warrior','assassin','novice','warrior','brawler','warrior','assassin','warrior','brawler','warrior'], sm:{hp:.9,atk:.9} },
+  // ─── Stage 1-5: 마을 지킴 ───
+  { id:1, phase:1, phaseTitle:'영웅의 시작', name:'초원의 경비',  theme:'마을지킴', style:'defense', story:'산적의 약탈을 저지하라', tot:6,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','novice','novice'], sm:{hp:.65,atk:.65} },
+  { id:2, phase:1, phaseTitle:'영웅의 시작', name:'마을 제2경비', theme:'마을지킴', style:'defense', story:'더 강한 산적단 습격 격퇴', tot:8,  spw:2, si:2, boss:null, en:['novice','novice','novice','novice','warrior','warrior','novice','novice'], sm:{hp:.75,atk:.75} },
+  { id:3, phase:1, phaseTitle:'영웅의 시작', name:'목초지 방어',   theme:'마을지킴', style:'defense', story:'산적 부대 격퇴', tot:10, spw:2, si:2, boss:null, en:['novice','warrior','novice','warrior','novice','warrior','novice','warrior','novice','warrior'], sm:{hp:.8,atk:.8} },
+  { id:4, phase:1, phaseTitle:'영웅의 시작', name:'마을 주변 정찰', theme:'마을지킴', style:'defense', story:'주변 산적소굴 정찰', tot:10, spw:3, si:2, boss:null, en:['warrior','novice','warrior','warrior','novice','warrior','warrior','novice','warrior','assassin'], sm:{hp:.85,atk:.85} },
+  { id:5, phase:1, phaseTitle:'영웅의 시작', name:'최후의 방어',   theme:'마을지킴', style:'defense', story:'대규모 산적단 습격 저지', tot:12, spw:3, si:2, boss:null, en:['warrior','warrior','warrior','warrior','warrior','assassin','novice','warrior','brawler','warrior','novice','warrior'], sm:{hp:.9,atk:.9} },
 
-  // ═══ 성채 방어 (DEFENSE) ═══
-  { id:5, name:'성채 제1경비', theme:'성채방어', style:'defense', story:'성채 침입 적군 격퇴', tot:10, spw:3, si:2, boss:null, en:['warrior','assassin','warrior','knight','warrior','archer','warrior','novice','brawler','warrior'], sm:{hp:.85,atk:.85} },
-  { id:6, name:'성채 제2경비', theme:'성채방어', style:'defense', story:'적군의 대규모 침략 저지', tot:12, spw:3, si:2, boss:null, en:['warrior','knight','assassin','archer','brawler','warrior','knight','assassin','archer','warrior','brawler','warrior'], sm:{hp:.95,atk:.95} },
+  // ─── Stage 6-9: 산적소굴 소탕 ───
+  { id:6, phase:1, phaseTitle:'영웅의 시작', name:'산적 소굴 입구', theme:'산적소굴', style:'offense', story:'산적단의 본거지 입구 진입', tot:10, spw:3, si:2, boss:null, en:['warrior','assassin','warrior','lancer','warrior','archer','warrior','novice','brawler','warrior'], sm:{hp:.9,atk:.9} },
+  { id:7, phase:1, phaseTitle:'영웅의 시작', name:'소굴 심부',     theme:'산적소굴', style:'offense', story:'산적단 거점 탐색', tot:12, spw:3, si:2, boss:null, en:['warrior','lancer','assassin','archer','brawler','warrior','brawler','assassin','archer','warrior','brawler','warrior'], sm:{hp:.95,atk:.95} },
+  { id:8, phase:1, phaseTitle:'영웅의 시작', name:'산적 거점 전투1', theme:'산적소굴', style:'offense', story:'산적 거점 병력 격파', tot:12, spw:3, si:2, boss:null, en:['warrior','assassin','warrior','lancer','warrior','archer','warrior','novice','brawler','warrior','warrior','assassin'], sm:{hp:1,atk:1} },
+  { id:9, phase:1, phaseTitle:'영웅의 시작', name:'산적 거점 전투2', theme:'산적소굴', style:'offense', story:'산적 대장 격파 임박', tot:14, spw:3, si:2, boss:null, en:['warrior','lancer','assassin','brawler','summoner','warrior','archer','warrior','warrior','lancer','brawler','archer','warrior','warrior'], sm:{hp:1.05,atk:1.05} },
 
-  // ═══ 강도단 본거지 (OFFENSE) ═══
-  { id:7, name:'강도단 본거지', theme:'강도단', style:'offense', story:'강도단 최후의 거점 진격', tot:14, spw:3, si:2, boss:{cls:'lancer',name:'강도단 사령관'}, en:['knight','warrior','assassin','archer','brawler','knight','assassin','shaman','sapper','warrior','lancer','warrior','brawler'], sm:{hp:1,atk:1} },
-  { id:8, name:'강도단 보스전', theme:'강도단', style:'offense', story:'강도단 두목 격파', tot:16, spw:4, si:2, boss:{cls:'knight',name:'강도단 두목'}, en:['knight','lancer','assassin','brawler','summoner','shaman','archer','sapper','sapper','warrior','warrior','lancer','brawler','archer','warrior'], sm:{hp:1.05,atk:1.05} },
-
-  // ═══ 마계 침공 (SPECIAL/MIXED) ═══
-  { id:9, name:'마계의 입구',  theme:'마계', style:'mixed', story:'마계 생물 침입 저지', tot:14, spw:3, si:2, boss:{cls:'brawler',name:'마계 선봉대장'}, en:['knight','lancer','assassin','brawler','summoner','shaman','mage','archer','sapper','sapper','warrior','warrior'], sm:{hp:1.1,atk:1.05} },
-  { id:10, name:'최후의 결전', theme:'마계', style:'mixed', story:'마계의 왕 격파', tot:16, spw:4, si:2, boss:{cls:'summoner',name:'마계의 왕'}, en:['knight','lancer','lancer','assassin','brawler','brawler','shaman','mage','archer','sapper','sapper','warrior','warrior','novice','warrior'], sm:{hp:1.15,atk:1.1} }
+  // ─── Stage 10: 산적 보스 ───
+  { id:10, phase:1, phaseTitle:'영웅의 시작', name:'산적 우두머리 격파', theme:'산적소굴', style:'offense', story:'산적 세력 거점 최종 격파', tot:16, spw:4, si:2, boss:{cls:'warrior',name:'산적 우두머리'}, en:['lancer','lancer','assassin','brawler','summoner','shaman','archer','sapper','sapper','warrior','warrior','lancer','brawler','archer','warrior','warrior'], sm:{hp:1.1,atk:1.1} }
 ];

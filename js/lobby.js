@@ -349,7 +349,10 @@ Object.assign(G,{
           `<div class="rl-pot">잠재 HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</div>`+
           `<div class="rl-exp"><div class="rl-exp-fill" style="width:${expPct}%"></div></div>`+
         `</div>`+
-        `<div class="rl-btn ${sel?'chk':'add'}">${sel?'✓':'+'}</div>`;
+        `<div class="rl-actions">`+
+          `<div class="rl-btn ${sel?'chk':'add'}">${sel?'✓':'+'}</div>`+
+          `<button class="rl-release" onclick="event.stopPropagation();G.releaseChar('${ch.uid}')">방출</button>`+
+        `</div>`;
       row.onclick=()=>{
         if(sel)this.party=this.party.filter(u=>u!==ch.uid);
         else if(this.party.length<MAX_P)this.party.push(ch.uid);
@@ -752,6 +755,11 @@ Object.assign(G,{
   },
 
   // ══════════════════════════════════
+  // 언어 변경
+  changeLang(lang){
+    I18N.setLanguage(lang);
+  },
+
   //  설정
   // ══════════════════════════════════
   _renderLobbySettings(){
@@ -763,6 +771,8 @@ Object.assign(G,{
       <div class="sp-row"><span class="sp-label">    볼륨</span><input type="range" id="ls-sfxv" min="0" max="100" value="${Math.round(this._sett.sfxVol*100)}"><span class="sp-val" id="ls-sfxv-v">${Math.round(this._sett.sfxVol*100)}</span></div>
       <div class="sp-divider"></div>
       <div class="sp-row"><span class="sp-label">⏩ 게임 속도</span><input type="range" id="ls-spd" min="50" max="200" value="${Math.round(1/this._sett.speed*100)}" step="25"><span class="sp-val" id="ls-spd-v">${this._sett.speed.toFixed(1)}x</span></div>
+      <div class="sp-divider"></div>
+      <div class="sp-row"><span class="sp-label">🌐 언어</span><select id="ls-lang" onchange="G.changeLang(this.value)"><option value="ko" ${this._sett.language==='ko'?'selected':''}>한국어 (Korean)</option><option value="en" ${this._sett.language==='en'?'selected':''}>English</option><option value="es" ${this._sett.language==='es'?'selected':''}>Español</option></select></div>
       <div class="sp-divider"></div>
       <div style="text-align:center;margin-top:8px">
         <button class="sp-btn danger" id="ls-reset">⚠ 모든 데이터 초기화</button>

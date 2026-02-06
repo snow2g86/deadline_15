@@ -16,11 +16,11 @@ Object.assign(G, {
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
       this.rUnits();this.rTer();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect();return}
     // Normal selection
-    this.sel=u;
-    if(u.team==='ally'&&!u.ha){this.mvT=(u.hm||u.mo)?[]:this.mvC(u);const a=this.atkC(u);
+    this.sel=u;this.awPM=true;
+    if(u.team==='ally'&&!u.ha){this.mvT=[];const a=this.atkC(u);
       if(u.role==='healer'){this.atkT=[];this.healT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&v.hp<v.mhp&&v.id!==u.id})}
       else{this.atkT=a.filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='enemy'});this.healT=[]}}
-    else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
+    else{this.mvT=[];this.atkT=[];this.healT=[]}this.rTer();this.showAM(u);this.showUI(u);this.rNav();this.scrollToUnit(u);this.sfxSelect()},
   clrSel(){this.sel=null;this.mvT=[];this.atkT=[];this.healT=[];this.awPM=false;this.skillMode=false;this.skillMenuOpen=false;this._curSkill=null;this.preMv=null;this.hideAM();this.rTer();this.rUnits();this.defI();this.rNav()},
   cellCk(x,y){if(this.phase!=='player'||this.over||this.anim)return;const cl=this.uAt(x,y),s=this.sel;
     if(this.awPM&&s){
@@ -36,6 +36,8 @@ Object.assign(G, {
       // In awPM: attack/heal targets
       if(cl&&cl.team==='enemy'&&s.team==='ally'&&!s.ha&&this.atkT.some(c=>c.x===x&&c.y===y)){this.doAtk(s,cl);return}
       if(cl&&cl.team==='ally'&&s.role==='healer'&&!s.ha&&cl.id!==s.id&&this.healT.some(c=>c.x===x&&c.y===y)){this.doHeal(s,cl);return}
+      // In awPM: movement (when no unit at target)
+      if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
       // Rule 1/5: 행동 안 하고 다른곳 클릭 → 대기 상태 진입
       s.ha=true;s.waited=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();
       if(cl&&cl.team!=='enemy'){const nu=this.uAt(x,y);if(nu)this.selU(nu)}
@@ -48,7 +50,7 @@ Object.assign(G, {
     if(!cl&&this.mvT.some(c=>c.x===x&&c.y===y)){this.doMv(s,x,y);return}
     if(cl){this.selU(cl);return}this.clrSel()},
   // 이동 버튼 클릭 핸들러
-  actMove(){if(!this.sel)return;this.hideAM();this.floatT(this.sel.x,this.sel.y,'이동할 곳을 선택하세요','heal')},
+  actMove(){if(!this.sel)return;this.hideAM();const u=this.sel;this.mvT=(u.hm||u.mo)?[]:this.mvC(u);this.rTer();this.floatT(u.x,u.y,'이동할 곳을 선택하세요','heal')},
   // 공격/치유 버튼 클릭 핸들러
   actAttack(){if(!this.sel)return;this.hideAM();const msg=this.sel.role==='healer'?'치유할 대상을 선택하세요':'공격할 대상을 선택하세요';this.floatT(this.sel.x,this.sel.y,msg,'heal')},
   // 스킬 메뉴 표시
@@ -323,20 +325,20 @@ Object.assign(G, {
         move=2;range=1;role='melee'
       }
       // 3. 소환수 유닛 생성
+      const summonName=isSpirit?'정령':'골램';
       const summon={
         id:this.nid++,uid:0,team:'ally',cls:summonCls,
         isSummon:true,summonerId:u.id,
         x:tx,y:ty,hp,mhp:hp,atk,def,
         move,range,role,
         res:0,maxRes:0,resType:'none',resRec:0,
-        summonTurns:999,
+        summonTurns:5,
         hm:false,ha:false,waited:false,mo:false,
         furyBuff:0,stunned:0
       };
       // 4. 유닛 배열 추가
       this.units.push(summon);
       // 5. VFX & 피드백
-      const summonName=isSpirit?'정령':'골램';
       this.floatT(tx,ty,`${summonName} 소환!`,'heal');
       const colors=isSpirit?['#8b5cf6','#c084fc','#fff']:['#78716c','#a8a29e','#fff'];
       this.vfxSpawn(this.uSX(tx,ty)+UCX,this.uSY(tx,ty)+UCY,{count:25,colors,shape:'ring',speed:5,spread:20,decay:0.02,size:8});

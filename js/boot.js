@@ -7,10 +7,17 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){G.closeSettings()}
 });
 
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
+  // 1. 기존 초기화 (G._sett 로드 필요)
   ROSTER.load();
   G.loadSett();
   G._loadGold();
+
+  // 2. i18n 초기화 (G._sett.language 사용)
+  await I18N.init();
+
+  // 3. HTML 자동 번역
+  I18N.translatePage();
 
   const page=document.body.dataset.page;
   if(page==='lobby')G._initLobbyPage();

@@ -18,7 +18,11 @@
       "Bash(done)",
       "Bash(do echo \"$f\")",
       "Skill(bkit:pdca)",
-      "Skill(bkit:pdca:*)"
+      "Skill(bkit:pdca:*)",
+      "Bash(grep:*)",
+      "Bash(git revert:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)"
     ]
   }
 }

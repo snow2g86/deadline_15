@@ -505,16 +505,14 @@ Object.assign(G, {
   },
 
   chkEnd(){if(this.over)return;const al=this.alive('ally'),en=this.alive('enemy');
-    // 소환사 사망 시 소환수 제거
-    al.forEach(u=>{
-      if(u.cls==='summoner'){
-        const summons=this.units.filter(s=>s.isSummon&&s.summonerId===u.id);
-        summons.forEach(s=>{
-          this.floatT(s.x,s.y,'소환 해제','damage');
-          this.vfxDeath(s);
-        });
-        this.units=this.units.filter(v=>!(v.isSummon&&v.summonerId===u.id));
-      }
+    // 소환사 사망 시 소환수 제거 (모든 소환사 확인, 죽은 것들만 처리)
+    this.units.filter(u=>u.cls==='summoner'&&u.hp<=0).forEach(deadSummoner=>{
+      const summons=this.units.filter(s=>s.isSummon&&s.summonerId===deadSummoner.id);
+      summons.forEach(s=>{
+        this.floatT(s.x,s.y,'소환 해제','damage');
+        this.vfxDeath(s);
+      });
+      this.units=this.units.filter(v=>!(v.isSummon&&v.summonerId===deadSummoner.id));
     });
     if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,'아군이 전멸했습니다.');return}
     // Breach check
