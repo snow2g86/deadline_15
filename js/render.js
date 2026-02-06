@@ -17,10 +17,10 @@ Object.assign(G, {
       const seed=r*COLS+c;
       const vi=this.tileVar&&this.tileVar[t]!==undefined?this.tileVar[t]:0;
 
-      // 배경 SVG (한 번만 생성, 바위 이미지만 추출 후 제거)
+      // 배경 SVG (한 번만 생성, 이미지 추출 후 제거)
       let bgSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,'',t,seed,vi,true,false);
-      const objImgMatches=bgSvg.match(/href="(image\/tileset\/rocks\/[^"]+)"/g)||[];
-      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/rocks\/[^"]*"[^>]*>/g,'');
+      const objImgMatches=bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g)||[];
+      bgSvg=bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g,'');
       let bgTile=existingBgTiles.get(pos);
       if(!bgTile){bgTile=document.createElement('div');bgTile.className='iso-tile iso-tile-bg';bgTile.dataset.pos=pos;bgTile.innerHTML=bgSvg;w.appendChild(bgTile)}
       else if(bgTile.innerHTML!==bgSvg){bgTile.innerHTML=bgSvg}
@@ -32,11 +32,11 @@ Object.assign(G, {
       if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;w.appendChild(hlTile)}
       if(hlTile.innerHTML!==hlSvg){hlTile.innerHTML=hlSvg}
 
-      // 오브젝트 이미지 레이어
+      // 오브젝트 이미지 레이어 (바위/숲 구분)
       let objTile=existingObjTiles.get(pos);
       if(!objTile){objTile=document.createElement('div');objTile.className='iso-tile iso-tile-obj';objTile.dataset.pos=pos;w.appendChild(objTile)}
       let objHTML='';
-      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];objHTML+=`<img src="${src}" alt="obj" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;">`});
+      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:33%;left:50%;transform:translate(-50%,-50%);width:auto;height:180%;max-width:120%;max-height:180%;pointer-events:none;":"position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
       if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
 
       // 스타일 설정 (bg, hl, obj 모두 동일)
