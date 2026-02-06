@@ -163,7 +163,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     if(deadAllies.length)sub+=`\n💀 전사자: ${deadAllies.length}명 (성소에서 부활 가능)`;
     // 경험치 결과
     if(this._expResults&&this._expResults.length){
-      sub+=`\n\n📈 처치 ${this._deadEnemyCount||0}체 · 총 ${this._totalExp||0} EXP (÷${this._expResults.length}명)`;
+      sub+=`\n\n${t('results.battle_detail', {kills: this._deadEnemyCount||0, exp: this._totalExp||0, survivors: this._expResults.length})}`;
       this._expResults.forEach(r=>{
         const ch=ROSTER.getChar(r.uid);if(!ch)return;
         const d=CD[ch.cls];
@@ -177,10 +177,10 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     if(win)this.sfxVictory();else this.sfxDefeat();
     this.bgmStop();
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
-    const lb=document.createElement('button');lb.className='modal-btn';lb.textContent='로비로 돌아가기';
+    const lb=document.createElement('button');lb.className='modal-btn';lb.textContent=t('results.return_to_lobby');
     lb.onclick=()=>{ov.classList.remove('show');this.returnToLobby()};bt.appendChild(lb);
     if(win){const s=this.cStage,ns=STAGES.find(v=>v.id===s.id+1);
-      if(ns){const b=document.createElement('button');b.className='modal-btn secondary';b.textContent='다음 스테이지 ▶';
+      if(ns){const b=document.createElement('button');b.className='modal-btn secondary';b.textContent=t('results.next_stage');
         b.onclick=()=>{ov.classList.remove('show');this.goNextStage(ns)};bt.appendChild(b)}}
     ov.classList.add('show')},
 

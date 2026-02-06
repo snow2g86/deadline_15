@@ -353,7 +353,7 @@ Object.assign(G,{
           `<div class="rl-top"><span class="rl-name">${charName}</span><span class="rl-lv">Lv.${ch.lv}</span>`+
           `<span class="rl-grade" style="color:${gClr}">${grade}</span></div>`+
           `<div class="rl-stats">HP <b>${ch.hp}</b> ATK <b>${ch.atk}</b> DEF <b>${ch.def}</b> MOV <b>${ch.move}</b> RNG <b>${ch.range}</b></div>`+
-          `<div class="rl-pot">잠재 HP+${ch.pot.hp} ATK+${ch.pot.atk} DEF+${ch.pot.def}</div>`+
+          `<div class="rl-pot">${t('party.potential_stats', {hp: ch.pot.hp, atk: ch.pot.atk, def: ch.pot.def})}</div>`+
           `<div class="rl-exp"><div class="rl-exp-fill" style="width:${expPct}%"></div></div>`+
         `</div>`+
         `<div class="rl-actions">`+
@@ -451,7 +451,7 @@ Object.assign(G,{
     const dead=ROSTER.getAll().filter(c=>c.dead&&!c.cls.startsWith('summon_'));
     list.innerHTML='';
     if(!dead.length){
-      list.innerHTML='<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">사망한 전투원이 없습니다</div>';
+      list.innerHTML=`<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">${t('sanctuary.no_dead_units')}</div>`;
       return;
     }
     dead.forEach(ch=>{
@@ -463,7 +463,7 @@ Object.assign(G,{
       el.innerHTML=`<div class="sanc-icon">${clsIcon(ch.cls,28)}</div>`+
         `<div class="sanc-info"><div class="sanc-name">${charName} <span style="color:#64748b;font-size:10px">Lv.${ch.lv}</span></div>`+
         `<div class="sanc-stats">HP ${ch.hp} · ATK ${ch.atk} · DEF ${ch.def}</div></div>`+
-        `<button class="sanc-btn${canAfford?'':' disabled'}" ${canAfford?'':'disabled'}>${cost}G 부활</button>`;
+        `<button class="sanc-btn${canAfford?'':' disabled'}" ${canAfford?'':'disabled'}>${t('sanctuary.resurrect_button', {cost})}</button>`;
       el.querySelector('.sanc-btn').onclick=()=>{
         if(this.gold<cost)return;
         this.gold-=cost;this._saveGold();this._updGoldUI();
@@ -704,11 +704,11 @@ Object.assign(G,{
   _showClassChangeModal(item,idx){
     const novices=ROSTER.getAll().filter(c=>!c.dead&&c.cls==='novice');
     if(!novices.length){
-      this._showConfirm('전직 가능한 노비스가 없습니다.',null,null);
+      this._showConfirm(t('class_change.no_novice'),null,null);
       return;
     }
     const ov=document.getElementById('modal-overlay');
-    document.getElementById('modal-title').textContent='전직할 노비스 선택';
+    document.getElementById('modal-title').textContent=t('class_change.select_novice');
     document.getElementById('modal-title').className='';
     let h='<div class="potion-target-list">';
     novices.forEach(ch=>{
@@ -718,7 +718,7 @@ Object.assign(G,{
       h+=`<div class="pt-btn" data-uid="${ch.uid}">`+
         `<span class="pt-icon">${clsIcon(ch.cls,20)}</span>`+
         `<span class="pt-info">${charName} Lv.${ch.lv}</span>`+
-        `<span class="pt-exp" style="color:${gClr}">${grade}등급</span>`+
+        `<span class="pt-exp" style="color:${gClr}">${grade}${t('class_change.grade_suffix')}</span>`+
         `</div>`;
     });
     h+='</div>';
@@ -741,7 +741,7 @@ Object.assign(G,{
     const ch=ROSTER.getChar(uid);
     if(!ch)return;
     const ov=document.getElementById('modal-overlay');
-    document.getElementById('modal-title').textContent='전직할 직업 선택';
+    document.getElementById('modal-title').textContent=t('class_change.select_class');
     document.getElementById('modal-title').className='';
     let h='<div class="class-select-grid">';
     item.classes.forEach(cls=>{
@@ -757,7 +757,7 @@ Object.assign(G,{
     const charName = t('character.names')[ch.nameId] || '???';
     document.getElementById('modal-sub').innerHTML=
       `${clsIcon(ch.cls,24)} <b>${charName}</b> (Lv.${ch.lv})<br>`+
-      `<span style="color:var(--dim);font-size:10px">전직 후 되돌릴 수 없습니다</span><br><br>`+h;
+      `<span style="color:var(--dim);font-size:10px">${t('class_change.warning_irreversible')}</span><br><br>`+h;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
     const cb=document.createElement('button');cb.className='modal-btn secondary';cb.textContent=t('common.cancel');
     cb.onclick=()=>ov.classList.remove('show');bt.appendChild(cb);
@@ -780,14 +780,15 @@ Object.assign(G,{
     const grade=ROSTER.potGrade(uid);
     const preview=ROSTER.previewClassChange(uid,newCls);
     const charName = t('character.names')[ch.nameId] || '???';
+    const origClass = ch.cls;
     this._showConfirm(
-      `${oldD.icon} ${charName} (Lv.${ch.lv} ${grade}등급)\n`+
-      `${oldD.name} → ${newD.icon} ${newD.name}\n\n`+
-      `전직 후 예상 스탯:\n`+
+      `${oldD.icon} ${charName} (Lv.${ch.lv} ${grade}${t('class_change.grade_suffix')})\n`+
+      `${t('classes.'+ch.cls)} → ${newD.icon} ${t('classes.'+newCls)}\n\n`+
+      `${t('class_change.stats_preview')}\n`+
       `HP ${preview.hp} / ATK ${preview.atk} / DEF ${preview.def}\n`+
       `MOV ${preview.move} / RNG ${preview.range}\n\n`+
-      `${item.cost}G를 소모하여 전직하시겠습니까?\n`+
-      `(되돌릴 수 없습니다)`,
+      `${t('class_change.confirm_cost', {cost: item.cost})}\n`+
+      `${t('class_change.warning_parenthetical')}`,
       ()=>{
         this.gold-=item.cost;this._saveGold();this._updGoldUI();
         ROSTER.changeClass(uid,newCls);
@@ -799,7 +800,7 @@ Object.assign(G,{
           const updCharName = t('character.names')[updCh.nameId] || '???';
           this._showConfirm(
             `${newD.icon} ${updCharName}\n`+
-            `${oldD.name}에서 ${newD.name}(으)로 전직했습니다!\n\n`+
+            `${t('class_change.success', {oldClass: t('classes.'+origClass), newClass: t('classes.'+newCls)})}\n\n`+
             `HP ${updCh.hp} / ATK ${updCh.atk} / DEF ${updCh.def}\n`+
             `MOV ${updCh.move} / RNG ${updCh.range}`,
             null,null
@@ -905,7 +906,7 @@ Object.assign(G,{
     // 4. 확인 모달
     const dismissCharName = t('character.names')[ch.nameId] || d.name;
     this._showConfirm(
-      `${d.icon} ${dismissCharName} (Lv.${ch.lv} ${grade}등급)\n\n` +
+      `${d.icon} ${dismissCharName} (Lv.${ch.lv} ${grade}${t('class_change.grade_suffix')})\n\n` +
       `정말로 방출하시겠습니까?\n+${price}G을 받습니다.`,
       ()=>{
         // 로스터에서 삭제

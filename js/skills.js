@@ -84,7 +84,7 @@ const FURY_PASSIVES = {
     trigger(defender, attacker, G) {
       defender.furyBuff = 2;
       defender.res = 0;
-      G.floatT(defender.x, defender.y, '광폭 발동!', 'heal');
+      G.floatT(defender.x, defender.y, t('passives.fury_activated'), 'heal');
       G.vfxSpawn(
         G.uSX(defender.x, defender.y) + UCX,
         G.uSY(defender.x, defender.y) + UCY,
@@ -111,7 +111,7 @@ const FURY_PASSIVES = {
           speed: 3, spread: 10, decay: 0.03, size: 3 }
       );
       defender.res = 0;
-      G.floatT(defender.x, defender.y, '몸부림!', 'heal');
+      G.floatT(defender.x, defender.y, t('passives.counter_activated'), 'heal');
     }
   }
 };

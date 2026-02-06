@@ -122,13 +122,19 @@ const I18N_DATA = {
       "stage_clear": "STAGE {stage_id} 클리어! ({turn}턴)",
       "surrender": "항복했습니다"
     },
+    "results": {
+      "battle_detail": "📈 처치 {kills}체 · 총 {exp} EXP (÷{survivors}명)",
+      "return_to_lobby": "로비로 돌아가기",
+      "next_stage": "다음 스테이지 ▶"
+    },
     "party": {
       "title": "파티 편성",
       "subtitle": "5~10명의 클랜원을 편성하세요",
       "member_count": "{current} / 10",
       "start_battle": "▶ 출격",
       "filter_all": "전체",
-      "release": "방출"
+      "release": "방출",
+      "potential_stats": "잠재 HP+{hp} ATK+{atk} DEF+{def}"
     },
     "stage": {
       "title": "스테이지",
@@ -161,7 +167,8 @@ const I18N_DATA = {
       "title": "성소",
       "subtitle": "사망한 전투원을 골드로 부활시킬 수 있습니다",
       "no_dead_units": "사망한 전투원이 없습니다",
-      "resurrect": "{gold}G 부활"
+      "resurrect": "{gold}G 부활",
+      "resurrect_button": "{cost}G 부활"
     },
     "settings": {
       "title": "설정",
@@ -174,6 +181,17 @@ const I18N_DATA = {
       "language_ko": "한국어 (Korean)",
       "language_en": "English",
       "language_es": "Español"
+    },
+    "class_change": {
+      "no_novice": "전직 가능한 노비스가 없습니다.",
+      "select_novice": "전직할 노비스 선택",
+      "select_class": "전직할 직업 선택",
+      "warning_irreversible": "전직 후 되돌릴 수 없습니다",
+      "stats_preview": "전직 후 예상 스탯:",
+      "confirm_cost": "{cost}G를 소모하여 전직하시겠습니까?",
+      "warning_parenthetical": "(되돌릴 수 없습니다)",
+      "success": "{oldClass}에서 {newClass}(으)로 전직했습니다!",
+      "grade_suffix": "등급"
     },
     "compendium": {
       "title_class": "📖 직업 도감",
@@ -273,7 +291,9 @@ const I18N_DATA = {
     },
     "passives": {
       "fury_buff": "광폭",
-      "parry": "몸부림"
+      "parry": "몸부림",
+      "fury_activated": "광폭 발동!",
+      "counter_activated": "몸부림!"
     },
     "passives_desc": {
       "fury_buff": "2턴간 공격 데미지 1.5배",
@@ -451,13 +471,19 @@ const I18N_DATA = {
       "stage_clear": "STAGE {stage_id} Clear! ({turn} turns)",
       "surrender": "Surrendered"
     },
+    "results": {
+      "battle_detail": "📈 Killed {kills} · Total {exp} EXP (÷{survivors})",
+      "return_to_lobby": "Return to Lobby",
+      "next_stage": "Next Stage ▶"
+    },
     "party": {
       "title": "Party Composition",
       "subtitle": "Compose a party of 5-10 clan members",
       "member_count": "{current} / 10",
       "start_battle": "▶ Engage",
       "filter_all": "All",
-      "release": "Release"
+      "release": "Release",
+      "potential_stats": "Potential HP+{hp} ATK+{atk} DEF+{def}"
     },
     "stage": {
       "title": "Stage",
@@ -490,7 +516,19 @@ const I18N_DATA = {
       "title": "Sanctuary",
       "subtitle": "You can resurrect deceased units for gold",
       "no_dead_units": "No deceased units",
-      "resurrect": "Resurrect {gold}G"
+      "resurrect": "Resurrect {gold}G",
+      "resurrect_button": "{cost}G Resurrect"
+    },
+    "class_change": {
+      "no_novice": "No novice available for class change.",
+      "select_novice": "Select Novice to Change Class",
+      "select_class": "Select New Class",
+      "warning_irreversible": "This change cannot be undone",
+      "stats_preview": "Expected stats after class change:",
+      "confirm_cost": "Spend {cost}G to change class?",
+      "warning_parenthetical": "(Cannot be undone)",
+      "success": "Changed from {oldClass} to {newClass}!",
+      "grade_suffix": "Grade"
     },
     "settings": {
       "title": "Settings",
@@ -602,7 +640,9 @@ const I18N_DATA = {
     },
     "passives": {
       "fury_buff": "Fury",
-      "parry": "Parry"
+      "parry": "Parry",
+      "fury_activated": "Fury Activated!",
+      "counter_activated": "Retaliation!"
     },
     "passives_desc": {
       "fury_buff": "Increase attack damage by 1.5x for 2 turns",
@@ -790,13 +830,19 @@ const I18N_DATA = {
       "stage_clear": "¡ETAPA {stage_id} Completada! ({turn} turnos)",
       "surrender": "Se rindió"
     },
+    "results": {
+      "battle_detail": "📈 Asesinados {kills} · Total {exp} EXP (÷{survivors})",
+      "return_to_lobby": "Volver al Vestíbulo",
+      "next_stage": "Siguiente Etapa ▶"
+    },
     "party": {
       "title": "Composición del Equipo",
       "subtitle": "Compón un equipo de 5-10 miembros del clan",
       "member_count": "{current} / 10",
       "start_battle": "▶ Atacar",
       "filter_all": "Todo",
-      "release": "Liberar"
+      "release": "Liberar",
+      "potential_stats": "Potencial HP+{hp} ATK+{atk} DEF+{def}"
     },
     "stage": {
       "title": "Escenario",
@@ -829,7 +875,19 @@ const I18N_DATA = {
       "title": "Santuario",
       "subtitle": "Puedes resucitar unidades fallecidas por oro",
       "no_dead_units": "No hay unidades muertas",
-      "resurrect": "Resucitar {gold}O"
+      "resurrect": "Resucitar {gold}O",
+      "resurrect_button": "{cost}O Resucitar"
+    },
+    "class_change": {
+      "no_novice": "No hay novatos disponibles para cambio de clase.",
+      "select_novice": "Seleccionar Novato para Cambiar Clase",
+      "select_class": "Seleccionar Nueva Clase",
+      "warning_irreversible": "Este cambio no se puede deshacer",
+      "stats_preview": "Estadísticas esperadas después del cambio de clase:",
+      "confirm_cost": "¿Gastar {cost}O para cambiar de clase?",
+      "warning_parenthetical": "(No se puede deshacer)",
+      "success": "¡Cambiado de {oldClass} a {newClass}!",
+      "grade_suffix": "Grado"
     },
     "settings": {
       "title": "Configuración",
@@ -941,7 +999,9 @@ const I18N_DATA = {
     },
     "passives": {
       "fury_buff": "Furia",
-      "parry": "Parada"
+      "parry": "Parada",
+      "fury_activated": "¡Furia Activada!",
+      "counter_activated": "¡Represalia!"
     },
     "passives_desc": {
       "fury_buff": "Aumentar daño ataque 1.5x durante 2 turnos",
