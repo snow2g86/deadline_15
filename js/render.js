@@ -36,7 +36,7 @@ Object.assign(G, {
       let objTile=existingObjTiles.get(pos);
       if(!objTile){objTile=document.createElement('div');objTile.className='iso-tile iso-tile-obj';objTile.dataset.pos=pos;w.appendChild(objTile)}
       let objHTML='';
-      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:23%;left:50%;transform:translate(-50%,-50%);width:auto;height:200%;max-width:120%;max-height:200%;pointer-events:none;":"position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
+      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);width:auto;height:200%;max-width:120%;max-height:200%;pointer-events:none;":"position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
       if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
 
       // 스타일 설정: obj > hl > bg > SVG 순서
