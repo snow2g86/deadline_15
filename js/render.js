@@ -39,11 +39,11 @@ Object.assign(G, {
       objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:23%;left:50%;transform:translate(-50%,-50%);width:auto;height:200%;max-width:120%;max-height:200%;pointer-events:none;":"position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
       if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
 
-      // 스타일 설정: hl > obj > bg > SVG 순서
+      // 스타일 설정: obj > hl > bg > SVG 순서
       const sx=this.tSX(c,r),sy=this.tSY(c,r,ti.z),sw=(TW*2)+'px',sh=(TH*2+ti.z*ZH+2)+'px',zix=this.g2v(c,r);
       bgTile.style.left=sx+'px';bgTile.style.top=sy+'px';bgTile.style.width=sw;bgTile.style.height=sh;bgTile.style.zIndex=zix.vc+zix.vr;
-      hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr+2;
-      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=zix.vc+zix.vr+1;
+      hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr+1;
+      objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=zix.vc+zix.vr+2;
 
       // 하이라이트 클래스 설정
       hlTile.classList.remove('hl-move','hl-attack','hl-heal','hl-selected');
