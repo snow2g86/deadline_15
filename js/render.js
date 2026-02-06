@@ -36,7 +36,7 @@ Object.assign(G, {
       let objTile=existingObjTiles.get(pos);
       if(!objTile){objTile=document.createElement('div');objTile.className='iso-tile iso-tile-obj';objTile.dataset.pos=pos;w.appendChild(objTile)}
       let objHTML='';
-      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];objHTML+=`<img src="${src}" alt="obj" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;">`});
+      objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];objHTML+=`<img src="${src}" alt="obj" style="position:absolute;top:33%;left:50%;transform:translate(-50%,-50%);width:auto;height:180%;max-width:120%;max-height:180%;pointer-events:none;">`});
       if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
 
       // 스타일 설정 (bg, hl, obj 모두 동일)
