@@ -42,7 +42,7 @@ const SKILLS = {
   },
   novice: {
     id: 'novice_throw', name: '돌던지기', icon: '🪨',
-    desc: '4칸 내 적에게 ATK×0.8 데미지', cost: 5, costType: 'energy', throwRange: 4
+    desc: '4칸 내 적에게 ATK×0.5 데미지', cost: 15, costType: 'energy', throwRange: 4
   },
   brawler: {
     id: 'brawler_disarm', name: '무장해제', icon: '🤛',

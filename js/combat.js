@@ -248,11 +248,11 @@ Object.assign(G, {
       u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();
       setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits();this.chkEnd();this.clrSel();this.chkAutoEnd()},500);return
     }
-    // 돌던지기: throwRange 내 적에게 ATK×0.8 데미지
+    // 돌던지기: throwRange 내 적에게 ATK×0.5 데미지
     if(skObj.id==='novice_throw'){
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
       if(!t){u.res+=skObj.cost;return}
-      const dmg=Math.max(1,Math.round(u.atk*0.8)-t.def);
+      const dmg=Math.max(1,Math.round(u.atk*0.5)-t.def);
       t.hp=Math.max(0,t.hp-dmg);
       this.sfxAtk(u.cls);this.shakeU(t.id);
       this.floatT(t.x,t.y,`-${dmg}`,'damage');
