@@ -29,7 +29,7 @@ Object.assign(G, {
       const hlSvg=tSVG(TW,TH,ti.tc,ti.lc,ti.rc,ti.z,hl,t,seed,vi,false,true);
 
       let hlTile=existingHlTiles.get(pos);
-      if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;w.appendChild(hlTile)}
+      if(!hlTile){hlTile=document.createElement('div');hlTile.className='iso-tile iso-tile-hl';hlTile.dataset.pos=pos;hlTile.style.cursor='pointer';hlTile.addEventListener('click',e=>{e.stopPropagation();const rect=w.getBoundingClientRect();const px=e.clientX-rect.left,py=e.clientY-rect.top;const hit=G.isoHit(px,py);if(!hit)return;const{c,r}=hit;if(c<0||c>=COLS||r<0||r>=ROWS)return;if(G.awPM){G.cellCk(c,r);return}const u=G.uAt(c,r);if(u&&!G.sel){G.selU(u);return}if(u&&G.sel&&u.id===G.sel.id){G.clrSel();return}G.cellCk(c,r)});w.appendChild(hlTile)}
       if(hlTile.innerHTML!==hlSvg){hlTile.innerHTML=hlSvg}
 
       // 오브젝트 이미지 레이어 (바위/숲 구분)
@@ -39,10 +39,10 @@ Object.assign(G, {
       objImgMatches.forEach(match=>{const src=match.match(/href="([^"]+)"/)[1];const isRock=src.includes('/rocks/');const style=isRock?"position:absolute;top:23%;left:50%;transform:translate(-50%,-50%);width:auto;height:200%;max-width:120%;max-height:200%;pointer-events:none;":"position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:120%;max-height:120%;pointer-events:none;";objHTML+=`<img src="${src}" alt="obj" style="${style}">`});
       if(objTile.innerHTML!==objHTML){objTile.innerHTML=objHTML}
 
-      // 스타일 설정 (bg, hl, obj 모두 동일)
+      // 스타일 설정: hl > obj > bg > SVG 순서
       const sx=this.tSX(c,r),sy=this.tSY(c,r,ti.z),sw=(TW*2)+'px',sh=(TH*2+ti.z*ZH+2)+'px',zix=this.g2v(c,r);
       bgTile.style.left=sx+'px';bgTile.style.top=sy+'px';bgTile.style.width=sw;bgTile.style.height=sh;bgTile.style.zIndex=zix.vc+zix.vr;
-      hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr;
+      hlTile.style.left=sx+'px';hlTile.style.top=sy+'px';hlTile.style.width=sw;hlTile.style.height=sh;hlTile.style.zIndex=zix.vc+zix.vr+2;
       objTile.style.left=sx+'px';objTile.style.top=sy+'px';objTile.style.width=sw;objTile.style.height=sh;objTile.style.zIndex=zix.vc+zix.vr+1;
 
       // 하이라이트 클래스 설정

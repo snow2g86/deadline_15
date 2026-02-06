@@ -38,6 +38,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
   background:radial-gradient(ellipse at 50% 30%,rgba(20,40,80,.4),transparent 70%),var(--bg)}
 #iso-world{position:absolute;transition:none}
 .iso-tile{position:absolute;pointer-events:none;transition:filter .1s}
+.iso-tile-hl{pointer-events:auto}
 .iso-tile-obj{position:absolute;pointer-events:none}
 .unit-sprite{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
   pointer-events:none;z-index:10;
