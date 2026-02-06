@@ -478,7 +478,7 @@ Object.assign(G,{
     this._genShop();
   },
   _genShop(){
-    const classes=Object.keys(CD);
+    const classes=Object.keys(CD).filter(c=>!c.startsWith('summon'));
     const items=[];
     // 캐릭터 6개
     for(let i=0;i<6;i++){
