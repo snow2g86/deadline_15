@@ -105,6 +105,8 @@ Object.assign(G, {
         if(mh(u.x,u.y,x,y)<=sk.dashRange&&mh(u.x,u.y,x,y)>0&&!this.uAt(x,y)){this.atkT.push({x,y})}}
       this.healT=[]
     }else if(sk.id==='assassin_ambush'){
+      // 습격: 은신 상태에서만 가능
+      if(!isStealthed(u)){this.floatT(u.x,u.y,t('messages.assassin_must_stealth'),'damage');this.skillMode=false;return}
       // 습격: 맵 전체 적 위치
       this.atkT=this.units.filter(v=>v.team==='enemy'&&v.hp>0).map(v=>({x:v.x,y:v.y}));
       this.healT=[]
@@ -180,8 +182,10 @@ Object.assign(G, {
     // 배열인 경우 첫 번째 스킬 사용 (fallback)
     const skObj=Array.isArray(sk)?sk[0]:sk;
     if(u.res<skObj.cost)return;u.res-=skObj.cost;
-    // 습격: 맵 전체 적 대상 → 인접 이동 → ATK×2 공격
+    // 습격: 맵 전체 적 대상 → 인접 이동 → ATK×2 공격 (은신 상태에서만)
     if(skObj.id==='assassin_ambush'){
+      // 은신 상태 확인
+      if(!isStealthed(u)){u.res+=skObj.cost;this.floatT(u.x,u.y,t('messages.assassin_must_stealth'),'damage');u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const t=this.units.find(v=>v.x===tx&&v.y===ty&&v.team==='enemy'&&v.hp>0);
       if(!t){u.res+=skObj.cost;u.ha=true;u.hm=true;this.awPM=false;this.skillMode=false;this._curSkill=null;this.hideAM();this.rUnits();return}
       const adj=this._findAdj(t.x,t.y,u);
