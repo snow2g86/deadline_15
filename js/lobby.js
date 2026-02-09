@@ -837,15 +837,13 @@ Object.assign(G, {
 	// ══════════════════════════════════
 	// 언어 변경 (실시간)
 	changeLang(lang) {
-		I18N.currentLang = lang;
 		this._sett.language = lang;
 		this.saveSett();
-		I18N.loadLanguage(lang).then(loaded => {
-			if (loaded) {
-				I18N.translatePage();
-				this._renderLobbySettings();
-				console.log(`[settings] Language changed to: ${lang}`);
-			}
+		localStorage.removeItem('game_i18n_cache');
+		localStorage.removeItem('game_i18n_lang');
+		i18nInit().then(() => {
+			this._renderLobbySettings();
+			console.log(`[settings] Language changed to: ${lang}`);
 		});
 	},
 

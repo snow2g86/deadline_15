@@ -1,9 +1,11 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-06T21:11:35.423Z",
+  "lastUpdated": "2026-02-09T18:48:32.016Z",
   "activeFeatures": [
     "js",
-    "scripts"
+    "scripts",
+    "data",
+    "language"
   ],
   "primaryFeature": "js",
   "features": {
@@ -16,9 +18,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-05T06:16:20.882Z",
-        "lastUpdated": "2026-02-06T21:11:35.423Z"
+        "lastUpdated": "2026-02-09T18:21:23.867Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/lobby.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/common/i18n.js"
     },
     "scripts": {
       "phase": "do",
@@ -32,6 +34,32 @@
         "lastUpdated": "2026-02-06T18:44:56.778Z"
       },
       "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/scripts/generate-i18n.js"
+    },
+    "data": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-09T17:15:43.753Z",
+        "lastUpdated": "2026-02-09T18:48:32.016Z"
+      },
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/tiles.js"
+    },
+    "language": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-09T17:31:51.728Z",
+        "lastUpdated": "2026-02-09T18:18:07.429Z"
+      },
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es.js"
     }
   },
   "pipeline": {
@@ -42,7 +70,7 @@
   "session": {
     "startedAt": "2026-02-05T06:05:50.525Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-06T21:11:35.423Z"
+    "lastActivity": "2026-02-09T18:48:32.016Z"
   },
   "history": [
     {
@@ -4248,6 +4276,210 @@
     {
       "timestamp": "2026-02-06T21:11:35.423Z",
       "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:36:29.954Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:36:57.487Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:40:13.560Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:42:44.376Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:46:25.235Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T16:54:56.288Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:15:43.753Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:25:19.311Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:25:22.707Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:25:23.361Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:29:36.883Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:31:51.728Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:31:53.504Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:31:55.718Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:33:42.357Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:34:22.366Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:38:17.198Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:40:41.440Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:52:15.855Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T17:59:40.262Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:01:54.343Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:07:18.817Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:07:22.915Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:07:24.538Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:09:03.722Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:09:29.580Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:17:51.992Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:18:03.412Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:18:05.748Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:18:07.429Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:18:49.367Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:21:17.178Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:21:23.867Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-09T18:48:32.016Z",
+      "feature": "data",
       "phase": "do",
       "action": "updated"
     }

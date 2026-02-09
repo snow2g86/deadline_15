@@ -1,49 +1,120 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADLINE 15</title>
-<link rel="stylesheet" href="css/style.css">
-<script defer src="js/data.js"></script>
-<script defer src="js/classes.js"></script>
-<script defer src="js/roster.js"></script>
-<script defer src="js/skills.js"></script>
-<script defer src="js/core.js"></script>
-<script defer src="js/combat.js"></script>
-<script defer src="js/vfx.js"></script>
-<script defer src="js/audio.js"></script>
-<script defer src="js/ai.js"></script>
-<script defer src="js/render.js"></script>
-<script defer src="js/ui.js"></script>
-<script defer src="js/lobby.js"></script>
-<script defer src="js/i18n-data.js"></script>
-<script defer src="js/i18n.js"></script>
-<script defer src="js/boot.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>DEADLINE 15</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script type="text/javascript" src="js/common/i18n.js"></script>
+	<script type="text/javascript" src="js/common/modal.js"></script>
+	<script defer src="js/common/nav.js"></script>
+
+	<script type="text/javascript">
+		var SVG_ICONS = {
+			bgm: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+			sfx: '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+			speed: '<svg viewBox="0 0 24 24"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>',
+			lang: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+			reset: '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>'
+		};
+
+		function loadSettings() {
+			var def = { bgmOn:true, bgmVol:0.5, sfxOn:true, sfxVol:0.7, speed:1, language:'ko' };
+			try {
+				var s = JSON.parse(localStorage.getItem('game_settings'));
+				if (s) return Object.assign(def, s);
+			} catch(_) {}
+			return def;
+		}
+
+		function saveSettings(s) {
+			localStorage.setItem('game_settings', JSON.stringify(s));
+		}
+
+		function renderSettings() {
+			var s = loadSettings();
+			var c = document.getElementById('lset-content');
+			c.innerHTML =
+				'<div class="sp-toggle"><span class="sp-tlabel"><i class="sp-icon">' + SVG_ICONS.bgm + '</i>' + t('settings.bgm') + '</span>'
+				+ '<label class="sp-switch"><input type="checkbox" id="ls-bgm"' + (s.bgmOn ? ' checked' : '') + '><span class="slider"></span></label></div>'
+
+				+ '<div class="sp-row"><span class="sp-label">' + t('settings.volume') + '</span>'
+				+ '<input type="range" id="ls-bgmv" min="0" max="100" value="' + Math.round(s.bgmVol * 100) + '">'
+				+ '<span class="sp-val" id="ls-bgmv-v">' + Math.round(s.bgmVol * 100) + '</span></div>'
+
+				+ '<div class="sp-toggle"><span class="sp-tlabel"><i class="sp-icon">' + SVG_ICONS.sfx + '</i>' + t('settings.sfx') + '</span>'
+				+ '<label class="sp-switch"><input type="checkbox" id="ls-sfx"' + (s.sfxOn ? ' checked' : '') + '><span class="slider"></span></label></div>'
+
+				+ '<div class="sp-row"><span class="sp-label">' + t('settings.volume') + '</span>'
+				+ '<input type="range" id="ls-sfxv" min="0" max="100" value="' + Math.round(s.sfxVol * 100) + '">'
+				+ '<span class="sp-val" id="ls-sfxv-v">' + Math.round(s.sfxVol * 100) + '</span></div>'
+
+				+ '<div class="sp-divider"></div>'
+
+				+ '<div class="sp-row"><span class="sp-label"><i class="sp-icon">' + SVG_ICONS.speed + '</i>' + t('settings.game_speed') + '</span>'
+				+ '<input type="range" id="ls-spd" min="50" max="200" value="' + Math.round(1 / s.speed * 100) + '" step="25">'
+				+ '<span class="sp-val" id="ls-spd-v">' + s.speed.toFixed(1) + 'x</span></div>'
+
+				+ '<div class="sp-divider"></div>'
+
+				+ '<div class="sp-row"><span class="sp-label"><i class="sp-icon">' + SVG_ICONS.lang + '</i>' + t('settings.language') + '</span>'
+				+ '<select id="ls-lang">'
+				+ '<option value="ko"' + (s.language === 'ko' ? ' selected' : '') + '>' + t('settings.language_ko') + '</option>'
+				+ '<option value="en"' + (s.language === 'en' ? ' selected' : '') + '>' + t('settings.language_en') + '</option>'
+				+ '<option value="es"' + (s.language === 'es' ? ' selected' : '') + '>' + t('settings.language_es') + '</option>'
+				+ '</select></div>'
+
+				+ '<div class="sp-divider"></div>'
+				+ '<div style="text-align:center;margin-top:8px">'
+				+ '<button class="sp-btn danger" id="ls-reset"><i class="sp-icon">' + SVG_ICONS.reset + '</i>' + t('settings.reset_all') + '</button></div>';
+
+			// 이벤트 바인딩
+			c.querySelector('#ls-bgm').onchange = function(e) { s.bgmOn = e.target.checked; saveSettings(s); };
+			c.querySelector('#ls-bgmv').oninput = function(e) { s.bgmVol = e.target.value / 100; c.querySelector('#ls-bgmv-v').textContent = e.target.value; saveSettings(s); };
+			c.querySelector('#ls-sfx').onchange = function(e) { s.sfxOn = e.target.checked; saveSettings(s); };
+			c.querySelector('#ls-sfxv').oninput = function(e) { s.sfxVol = e.target.value / 100; c.querySelector('#ls-sfxv-v').textContent = e.target.value; saveSettings(s); };
+			c.querySelector('#ls-spd').oninput = function(e) {
+				var spd = 100 / e.target.value;
+				s.speed = spd; c.querySelector('#ls-spd-v').textContent = spd.toFixed(1) + 'x'; saveSettings(s);
+			};
+			c.querySelector('#ls-lang').onchange = function(e) {
+				s.language = e.target.value; saveSettings(s); location.reload();
+			};
+			c.querySelector('#ls-reset').onclick = function() {
+				showConfirm(t('messages.confirm_reset_all'), function() {
+					localStorage.clear(); location.href = 'index.html';
+				});
+			};
+		}
+
+		var init = async function() {
+			await i18nInit();
+			renderBottomNav();
+			renderSettings();
+		};
+	</script>
 </head>
-<body data-page="settings">
-<header id="top-nav">
-  <button id="nav-back" onclick="location.href='index.html'">←</button>
-  <div id="nav-title" data-i18n="settings.title">${t('settings.title')}</div>
-  <button id="nav-settings" class="hidden">⚙</button>
-</header>
-<main id="content">
-  <div id="lset-content" class="settings-content"></div>
-</main>
-<nav id="bottom-nav">
-  <button class="bnav-tab" data-tab="stage" onclick="G.openStage()">
-    <span class="bnav-icon">⚔</span><span class="bnav-label" data-i18n="nav.stage">스테이지</span>
-  </button>
-  <button class="bnav-tab" data-tab="party" onclick="G.openParty()">
-    <span class="bnav-icon">👥</span><span class="bnav-label" data-i18n="nav.party">파티</span>
-  </button>
-  <button class="bnav-tab" data-tab="sanctuary" onclick="location.href='sanctuary.html'">
-    <span class="bnav-icon">⛪</span><span class="bnav-label" data-i18n="nav.sanctuary">성소</span>
-  </button>
-  <button class="bnav-tab" data-tab="shop" onclick="location.href='shop.html'">
-    <span class="bnav-icon">🏪</span><span class="bnav-label" data-i18n="nav.shop">상점</span>
-  </button>
-</nav>
-<div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sub"></div><div id="modal-buttons"></div></div></div>
+
+<body data-page="settings" onload="init();">
+	<header id="top-nav">
+		<button id="nav-back" onclick="location.href='index.html'"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+		<div id="nav-title" data-i18n="settings.title">DEADLINE 15</div>
+	</header>
+	<main id="content">
+		<div class="lobby-bg"></div>
+		<div class="lobby-content">
+			<div class="settings-content" id="lset-content"></div>
+		</div>
+	</main>
+	<nav id="bottom-nav"></nav>
+	<div id="modal-overlay">
+		<div id="modal-box">
+			<div id="modal-title"></div>
+			<div id="modal-sub"></div>
+			<div id="modal-buttons"></div>
+		</div>
+	</div>
 </body>
+
 </html>

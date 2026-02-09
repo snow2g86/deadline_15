@@ -1,60 +1,45 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADLINE 15</title>
-<link rel="stylesheet" href="css/style.css">
-<script defer src="js/data.js"></script>
-<script defer src="js/classes.js"></script>
-<script defer src="js/roster.js"></script>
-<script defer src="js/skills.js"></script>
-<script defer src="js/core.js"></script>
-<script defer src="js/combat.js"></script>
-<script defer src="js/vfx.js"></script>
-<script defer src="js/audio.js"></script>
-<script defer src="js/ai.js"></script>
-<script defer src="js/render.js"></script>
-<script defer src="js/ui.js"></script>
-<script defer src="js/lobby.js"></script>
-<script defer src="js/i18n-data.js"></script>
-<script defer src="js/i18n.js"></script>
-<script defer src="js/boot.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>DEADLINE 15</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script type="text/javascript" src="js/common/i18n.js"></script>
+	<script type="text/javascript" src="js/common/modal.js"></script>
+	<script type="text/javascript" src="data/jab.js"></script>
+	<script defer src="js/common/nav.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
 </head>
-<body data-page="lobby">
-<div id="splash">
-  <div class="splash-title" data-i18n="common.game_title">${t('common.game_title')}</div>
-  <div class="splash-loading" data-i18n="common.loading">${t('common.loading')}</div>
-</div>
-<header id="top-nav">
-  <button id="nav-back" class="hidden">←</button>
-  <div id="nav-title" data-i18n="common.game_title">${t('common.game_title')}</div>
-  <button id="nav-settings" onclick="location.href='settings.html'">⚙</button>
-</header>
-<main id="content">
-  <div class="lobby-bg"></div>
-  <div class="lobby-content">
-    <div class="lobby-gold"><img src="image/icon/64x64/fc131.png" alt="Gold" style="width:18px;height:auto;vertical-align:middle;margin-right:4px"> <span id="lobby-gold">0</span> G</div>
-    <div class="clan-hideout" id="clan-hideout"></div>
-  </div>
-</main>
-<nav id="bottom-nav">
-  <button class="bnav-tab" data-tab="stage" onclick="G.openStage()">
-    <span class="bnav-icon">⚔</span><span class="bnav-label" data-i18n="nav.stage">스테이지</span>
-  </button>
-  <button class="bnav-tab" data-tab="party" onclick="G.openParty()">
-    <span class="bnav-icon">👥</span><span class="bnav-label" data-i18n="nav.party">파티</span>
-  </button>
-  <button class="bnav-tab" data-tab="compendium" onclick="location.href='compendium-class.html'">
-    <span class="bnav-icon">📖</span><span class="bnav-label" data-i18n="nav.compendium">도감</span>
-  </button>
-  <button class="bnav-tab" data-tab="sanctuary" onclick="location.href='sanctuary.html'">
-    <span class="bnav-icon">⛪</span><span class="bnav-label" data-i18n="nav.sanctuary">성소</span>
-  </button>
-  <button class="bnav-tab" data-tab="shop" onclick="location.href='shop.html'">
-    <span class="bnav-icon">🏪</span><span class="bnav-label" data-i18n="nav.shop">상점</span>
-  </button>
-</nav>
-<div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sub"></div><div id="modal-buttons"></div></div></div>
+
+<body data-page="lobby" onload="init();">
+	<div id="splash">
+		<div class="splash-title" data-i18n="common.game_title">DEADLINE 15</div>
+		<div class="splash-loading" data-i18n="common.loading">loading...</div>
+	</div>
+	<header id="top-nav">
+		<button id="nav-back" class="hidden"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+		<div id="nav-title" data-i18n="common.game_title">DEADLINE 15</div>
+		<button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+	</header>
+	<main id="content">
+		<div class="lobby-bg"></div>
+		<div class="lobby-content">
+			<div class="gold-badge lobby-gold">
+				<img src="image/icon/64x64/fc131.png" alt="Gold">
+				<span id="lobby-gold">0</span> G
+			</div>
+			<div class="clan-hideout" id="clan-hideout"></div>
+		</div>
+	</main>
+	<nav id="bottom-nav"></nav>
+	<div id="modal-overlay">
+		<div id="modal-box">
+			<div id="modal-title"></div>
+			<div id="modal-sub"></div>
+			<div id="modal-buttons"></div>
+		</div>
+	</div>
 </body>
 </html>

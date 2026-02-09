@@ -13,11 +13,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   G.loadSett();
   G._loadGold();
 
-  // 2. i18n 초기화 (G._sett.language 사용)
-  await I18N.init();
-
-  // 3. HTML 자동 번역
-  I18N.translatePage();
+  // 2. i18n 초기화
+  await i18nInit();
 
   const page=document.body.dataset.page;
   if(page==='lobby')G._initLobbyPage();

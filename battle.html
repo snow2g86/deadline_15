@@ -17,8 +17,7 @@
 <script defer src="js/render.js"></script>
 <script defer src="js/ui.js"></script>
 <script defer src="js/lobby.js"></script>
-<script defer src="js/i18n-data.js"></script>
-<script defer src="js/i18n.js"></script>
+<script defer src="js/common/i18n.js"></script>
 <script defer src="js/boot.js"></script>
 </head>
 <body data-page="battle">
@@ -54,17 +53,17 @@
 <button id="settings-btn" onclick="G.toggleSettings()" title="설정">⚙</button>
 <div id="settings-backdrop" onclick="G.closeSettings()"></div>
 <div id="settings-panel">
-  <div class="sp-title">⚙ 설정</div>
-  <div class="sp-toggle"><span class="sp-tlabel">🎵 배경음악</span><label class="sp-switch"><input type="checkbox" id="sp-bgm-on" checked onchange="G.setBGMOn(this.checked)"><span class="slider"></span></label></div>
-  <div class="sp-row"><span class="sp-label">    볼륨</span><input type="range" id="sp-bgm" min="0" max="100" value="60" oninput="G.setBGMVol(this.value)"><span class="sp-val" id="sp-bgm-val">60</span></div>
-  <div class="sp-toggle"><span class="sp-tlabel">🔊 효과음</span><label class="sp-switch"><input type="checkbox" id="sp-sfx-on" checked onchange="G.setSFXOn(this.checked)"><span class="slider"></span></label></div>
-  <div class="sp-row"><span class="sp-label">    볼륨</span><input type="range" id="sp-sfx" min="0" max="100" value="80" oninput="G.setSFXVol(this.value)"><span class="sp-val" id="sp-sfx-val">80</span></div>
+  <div class="sp-title"><i class="sp-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></i> <span data-i18n="settings.title"></span></div>
+  <div class="sp-toggle"><span class="sp-tlabel"><i class="sp-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></i> <span data-i18n="settings.bgm"></span></span><label class="sp-switch"><input type="checkbox" id="sp-bgm-on" checked onchange="G.setBGMOn(this.checked)"><span class="slider"></span></label></div>
+  <div class="sp-row"><span class="sp-label" data-i18n="settings.volume"></span><input type="range" id="sp-bgm" min="0" max="100" value="60" oninput="G.setBGMVol(this.value)"><span class="sp-val" id="sp-bgm-val">60</span></div>
+  <div class="sp-toggle"><span class="sp-tlabel"><i class="sp-icon"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></i> <span data-i18n="settings.sfx"></span></span><label class="sp-switch"><input type="checkbox" id="sp-sfx-on" checked onchange="G.setSFXOn(this.checked)"><span class="slider"></span></label></div>
+  <div class="sp-row"><span class="sp-label" data-i18n="settings.volume"></span><input type="range" id="sp-sfx" min="0" max="100" value="80" oninput="G.setSFXVol(this.value)"><span class="sp-val" id="sp-sfx-val">80</span></div>
   <div class="sp-divider"></div>
-  <div class="sp-row"><span class="sp-label">⏩ 게임 속도</span><input type="range" id="sp-speed" min="50" max="200" value="100" step="25" oninput="G.setSpeed(this.value)"><span class="sp-val" id="sp-speed-val">1.0x</span></div>
+  <div class="sp-row"><span class="sp-label"><i class="sp-icon"><svg viewBox="0 0 24 24"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg></i> <span data-i18n="settings.game_speed"></span></span><input type="range" id="sp-speed" min="50" max="200" value="100" step="25" oninput="G.setSpeed(this.value)"><span class="sp-val" id="sp-speed-val">1.0x</span></div>
   <div class="sp-divider"></div>
   <div class="sp-btn-row">
-    <button class="sp-btn" onclick="G.closeSettings()">닫기</button>
-    <button class="sp-btn danger" onclick="G.surrender()">🏳 항복</button>
+    <button class="sp-btn" onclick="G.closeSettings()" data-i18n="common.close"></button>
+    <button class="sp-btn danger" onclick="G.surrender()"><i class="sp-icon"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></i> <span data-i18n="battle.surrender"></span></button>
   </div>
 </div>
 <div id="turn-confirm"><div id="tc-box">
