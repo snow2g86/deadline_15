@@ -621,12 +621,12 @@ Object.assign(G, {
 			if (cl && cl.team !== 'enemy') { const nu = this.uAt(x, y); if (nu) this.selU(nu) }
 			this.chkAutoEnd(); return
 		}
-		if (!s) { if (cl) this.selU(cl); return }
+		if (!s) { if (cl && cl.team === 'ally') this.selU(cl); return }
 		if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
 		if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
 		if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
 		if (!cl && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
-		if (cl) { this.selU(cl); return } this.clrSel()
+		if (cl && cl.team === 'ally') { this.selU(cl); return } this.clrSel()
 	},
 	actMove() { if (!this.sel) return; this.hideAM(); const u = this.sel; this.mvT = (u.hm || u.mo) ? [] : this.mvC(u); this.rTer(); this.floatT(u.x, u.y, t('messages.select_move_target'), 'heal') },
 	actAttack() { if (!this.sel) return; this.hideAM(); const msg = this.sel.role === 'healer' ? t('messages.select_heal_target') : t('messages.select_attack_target'); this.floatT(this.sel.x, this.sel.y, msg, 'heal') },
@@ -2259,8 +2259,8 @@ Object.assign(G, {
       if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return;
       if (G.awPM) { G.cellCk(c, r); return }
       const u = G.uAt(c, r);
-      if (u && !G.sel) { G.selU(u); return }
-      if (u && G.sel && u.id === G.sel.id) { G.clrSel(); return }
+      if (u && u.team === 'ally' && !G.sel) { G.selU(u); return }
+      if (u && u.team === 'ally' && G.sel && u.id === G.sel.id) { G.clrSel(); return }
       G.cellCk(c, r);
     });
   },
