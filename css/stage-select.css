@@ -1,0 +1,47 @@
+/* ═══ Stage Select ═══ */
+.stage-subtitle{font-size:11px;color:var(--dim);margin-bottom:12px;text-align:center}
+#stage-list{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:380px;padding:0 16px}
+
+/* ═══ Episode Card ═══ */
+.episode-card{width:100%;max-width:340px;padding:16px 18px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(240,192,64,.04));
+  border:2px solid rgba(240,192,64,.15);cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.episode-card::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 30%,rgba(240,192,64,.06),transparent 60%);pointer-events:none}
+.episode-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 20px rgba(240,192,64,.12)}
+.episode-card.locked{opacity:.35;cursor:default;pointer-events:none}
+.ep-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.ep-num{font-family:'Cinzel',serif;font-weight:900;font-size:18px;color:var(--gold);letter-spacing:2px}
+.ep-progress{font-size:12px;font-weight:700;color:var(--dim)}
+.ep-name{font-weight:900;font-size:15px;color:var(--text);margin-bottom:4px}
+.ep-desc{font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:10px}
+.ep-progress-bar{width:100%;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.ep-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#d4a017);border-radius:2px;transition:width .3s}
+
+/* ═══ Stage Button ═══ */
+.stage-btn{width:96px;padding:12px 6px;border-radius:10px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);
+  cursor:pointer;text-align:center;transition:all .2s;color:var(--text)}
+.stage-btn:hover{border-color:var(--gold);transform:translateY(-2px)}
+.stage-btn.locked{opacity:.35;cursor:default;pointer-events:none}
+.stage-btn.cleared{border-color:var(--green);background:rgba(34,197,94,.08)}
+.stage-btn .sb-num{font-family:'Cinzel',serif;font-weight:900;font-size:16px;color:var(--gold)}
+.stage-btn.locked .sb-num{color:var(--dim)}
+.stage-btn .sb-name{font-size:10px;margin-top:3px;color:var(--dim)}
+.stage-btn .sb-stars{font-size:12px;margin-top:3px}.stage-btn .sb-info{font-size:9px;margin-top:2px;color:var(--dim)}
+
+/* ═══ PC (1024px+) ═══ */
+@media(min-width:1024px){
+  .stage-subtitle{font-size:15px}
+  #stage-list{gap:14px;max-width:540px;padding:0 24px}
+  .stage-btn{width:128px;padding:16px 9px;border-radius:12px}
+  .stage-btn .sb-num{font-size:22px}
+  .stage-btn .sb-name{font-size:13px;margin-top:4px}
+  .stage-btn .sb-stars{font-size:16px;margin-top:4px}
+  .stage-btn .sb-info{font-size:11px;margin-top:3px}
+
+  /* Episode Card PC */
+  .episode-card{max-width:460px;padding:22px 26px;border-radius:14px}
+  .ep-num{font-size:22px}.ep-progress{font-size:14px}
+  .ep-name{font-size:18px;margin-bottom:6px}.ep-desc{font-size:13px;margin-bottom:12px}
+  .ep-progress-bar{height:5px}
+}

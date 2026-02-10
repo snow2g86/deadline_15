@@ -35,7 +35,7 @@ function _loadScript(src) {
 const _I18N_CACHE_KEY = 'game_i18n_cache';
 const _I18N_LANG_KEY = 'game_i18n_lang';
 const _I18N_VER_KEY = 'game_i18n_ver';
-const _I18N_VERSION = 2; // bump when language data changes
+const _I18N_VERSION = 4; // bump when language data changes
 
 // 언어 감지 및 데이터 로드
 async function loadI18n() {
@@ -85,7 +85,9 @@ async function loadI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = _resolve(_i18nData, key);
-    if (val !== undefined) el.textContent = val;
+    if (val === undefined) return;
+    if (el.getAttribute('data-i18n-target') === 'innerHTML') el.innerHTML = val;
+    else el.textContent = val;
   });
 }
 

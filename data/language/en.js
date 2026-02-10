@@ -15,13 +15,17 @@ window._LANG_en = {
         "def": "Defense",
         "turn": "Turn",
         "wave": "Wave",
-        "select_unit": "Select a unit"
+        "select_unit": "Select a unit",
+        "move": "Move",
+        "range": "Range"
     },
     "nav": {
         "stage": "Stage",
         "party": "Party",
         "sanctuary": "Sanctuary",
+        "academy": "Academy",
         "shop": "Shop",
+        "equip": "Equip",
         "compendium": "Compendium",
         "settings": "Settings",
         "lobby": "Lobby"
@@ -129,12 +133,14 @@ window._LANG_en = {
     },
     "party": {
         "title": "Party Composition",
-        "subtitle": "Compose a party of 5-10 clan members",
-        "member_count": "{current} / 10",
+        "subtitle": "Compose a party of 5 clan members",
+        "member_count": "{current} / 5",
         "start_battle": "▶ Engage",
         "filter_all": "All",
         "release": "Release",
-        "potential_stats": "Potential HP+{hp} ATK+{atk} DEF+{def}"
+        "potential_stats": "Potential HP+{hp} ATK+{atk} DEF+{def}",
+        "rename": "Rename",
+        "rename_prompt": "Enter new name (max 10 chars)"
     },
     "stage": {
         "title": "Stage",
@@ -154,10 +160,20 @@ window._LANG_en = {
         "subtitle_item": "Buy items",
         "subtitle_job": "Select a job",
         "subtitle_gold": "Buy gold",
+        "subtitle_gacha": "Draw equipment",
         "tab_mercenary": "Mercenary",
         "tab_item": "Item",
+        "tab_gacha": "Gacha",
         "tab_job": "Job",
         "tab_gold": "Gold",
+        "gacha_single": "Single Draw",
+        "gacha_single_desc": "Get 1 random equipment",
+        "gacha_multi": "10+1 Draw",
+        "gacha_multi_desc": "Get 11 items (last one Rare or above guaranteed)",
+        "gacha_pull_1": "{gold}G Single Draw",
+        "gacha_pull_10": "{gold}G 10+1 Draw",
+        "gacha_pity": "Pity {current} / {max} (Legendary guaranteed)",
+        "gacha_results": "Draw Results",
         "recruit": "Recruit {gold}G",
         "buy": "Buy {gold}G",
         "recruit_complete": "Recruitment Complete",
@@ -168,14 +184,54 @@ window._LANG_en = {
         "class_change_desc": "Change to {class}",
         "potion_small": "Small EXP Potion",
         "potion_medium": "Medium EXP Potion",
-        "potion_large": "Large EXP Potion"
+        "potion_large": "Large EXP Potion",
+        "skillbook_only": "Skill Book",
+        "skillbook_buy_confirm": "Buy {skill} Skill Book for {gold}G?"
+    },
+    "academy": {
+        "title": "Academy",
+        "subtitle": "Promote novices to stronger classes",
+        "class_change_btn": "{cost}G Promote",
+        "no_novice": "No novices available for promotion",
+        "cost_label": "Spend {cost}G to change class?",
+        "tab_classchange": "Class Change",
+        "tab_skillbook": "Skill Books",
+        "skillbook_subtitle": "Use skill books to enhance your clan members' skills",
+        "no_skillbooks": "No skill books available",
+        "skillbook_use": "Use",
+        "skillbook_select_target": "Select skill book target",
+        "skillbook_no_target": "No eligible targets available",
+        "skillbook_confirm": "Use {skill} skill book on {name}?",
+        "skillbook_preview": "Skill Level: {from} → {to}",
+        "skillbook_success": "{name}'s {skill} has risen to Lv.{lv}!",
+        "skillbook_max_lv": "Max Level",
+        "skillbook_learn_confirm": "Teach {skill} to {name}?",
+        "skillbook_learn_success": "{name} has learned {skill}!",
+        "skillbook_drop": "Skill Book acquired: {skill}"
     },
     "sanctuary": {
         "title": "Sanctuary",
         "subtitle": "You can resurrect deceased units for gold",
         "no_dead_units": "No deceased units",
         "resurrect": "Resurrect {gold}G",
-        "resurrect_button": "{cost}G Resurrect"
+        "resurrect_button": "{cost}G Resurrect",
+        "tab_resurrect": "Resurrect",
+        "tab_promote": "Promote",
+        "promote_subtitle": "Sacrifice a same-class clan member to raise grade",
+        "promote_btn": "Promote",
+        "promote_no_sacrifice": "No same-class clan members available as sacrifice",
+        "promote_no_sacrifice_hint": "Select a same-class clan member as sacrifice",
+        "promote_max_grade": "Max Grade",
+        "promote_select_sacrifice": "Select Sacrifice",
+        "promote_confirm": "Sacrifice {name} to promote {target} from {from}\u2192{to}?",
+        "promote_warning": "The sacrifice will be permanently lost",
+        "promote_success": "{name}'s grade has risen to {grade}!",
+        "promote_in_party": "(Party)",
+        "no_promotable": "No clan members available for promotion",
+        "promote_confirm_multi": "Sacrifice {count} member(s) to promote {target} from {from}→{to}?",
+        "skill_inherit": "Skill Inheritance",
+        "skill_overflow": "Max level skills will be converted to skill books",
+        "skillbook_gained": "Skill Book gained: {skill}"
     },
     "class_change": {
         "no_novice": "No novice available for class change.",
@@ -323,13 +379,13 @@ window._LANG_en = {
     },
     "passives": {
         "fury_buff": "Fury",
-        "parry": "Parry",
+        "iron_will": "Iron Will",
         "fury_activated": "Fury Activated!",
-        "counter_activated": "Retaliation!"
+        "iron_will_activated": "Iron Will!"
     },
     "passives_desc": {
         "fury_buff": "Increase attack damage by 1.5x for 2 turns",
-        "parry": "Counterattack adjacent attacker with ATK×50%"
+        "iron_will": "Increase defense by 1.5x for 2 turns"
     },
     "items": {
         "potion_small": "Small Experience Potion",
@@ -388,6 +444,74 @@ window._LANG_en = {
         "stage_difficulty_desc": "Difficulty is calculated based on enemy stat scaling (sm.hp, sm.atk) and enemy count.<br>Designed with gradually increasing difficulty, with Stage 10 being the hardest.<br><br><span style=\"color:var(--gold);font-weight:700\">Stage 1-2:</span> Beginner difficulty (0.65x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 3-4:</span> Intermediate difficulty (0.8~0.9x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 5-6:</span> Intermediate-Advanced difficulty (0.95x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 7-8:</span> Advanced difficulty (1.0x)<br><span style=\"color:var(--gold);font-weight:700\">Stage 9-10:</span> Expert difficulty (1.1~1.15x)",
         "resource_system_title": "🔄 Resource System Details",
         "resource_system_desc": "<span style=\"color:var(--fury);font-weight:700\">Fury</span> — MAX: 10~5 | +1 on attack, +2 on hit | Skills: Strike(3), Switch(1), Pierce(5)<br>Passive: warrior Rampage(ATK×1.5), knight Counter(Adjacent enemy ATK×50% counterattack)<br><br><span style=\"color:var(--energy);font-weight:700\">Energy</span> — MAX: 100 | Auto-recover +resRec per turn | Skills: Leap(20), Assault(40), Assassinate(60)<br>Bonus: Assassins recover 2x energy in forests<br><br><span style=\"color:var(--mana);font-weight:700\">Mana</span> — MAX: 100~120 | Starts at MAX in battle | Recover +resRec per turn<br>Uses: Fireball(40), Group Heal(50)"
+    },
+    "equip": {
+        "title": "Equipment",
+        "subtitle": "Equip gear to your characters",
+        "select_char": "Select a character",
+        "slots_title": "Equipment Slots",
+        "inventory": "Inventory",
+        "no_items": "No equipment",
+        "equip_btn": "Equip",
+        "equipped": "Equipped",
+        "sell_btn": "Sell {gold}G",
+        "sell_confirm": "Sell {name}?\n+{gold}G",
+        "filter_armor": "Armor",
+        "filter_accessory": "Accessory",
+        "rarity": {
+            "common": "Common",
+            "uncommon": "Uncommon",
+            "rare": "Rare",
+            "epic": "Epic",
+            "legendary": "Legendary"
+        },
+        "slot": {
+            "weapon": "Weapon",
+            "offhand": "Offhand",
+            "helmet": "Helmet",
+            "armor": "Armor",
+            "boots": "Boots",
+            "necklace": "Necklace",
+            "earring": "Earring",
+            "ring": "Ring"
+        },
+        "item": {
+            "sword_1h": "Sword",
+            "dagger": "Dagger",
+            "mace": "Mace",
+            "wand": "Wand",
+            "fists": "Knuckles",
+            "greatsword": "Greatsword",
+            "bow": "Bow",
+            "staff": "Staff",
+            "spear": "Spear",
+            "shield": "Shield",
+            "tome": "Tome",
+            "buckler": "Buckler",
+            "plate_helm": "Plate Helm",
+            "leather_cap": "Leather Cap",
+            "cloth_hood": "Cloth Hood",
+            "plate_armor": "Plate Armor",
+            "leather_armor": "Leather Armor",
+            "cloth_robe": "Cloth Robe",
+            "plate_boots": "Plate Boots",
+            "leather_boots": "Leather Boots",
+            "cloth_shoes": "Cloth Shoes",
+            "necklace_power": "Power Necklace",
+            "necklace_guard": "Guard Necklace",
+            "necklace_swift": "Swift Necklace",
+            "earring_power": "Power Earring",
+            "earring_guard": "Guard Earring",
+            "earring_swift": "Swift Earring",
+            "ring_power": "Power Ring",
+            "ring_guard": "Guard Ring",
+            "ring_swift": "Swift Ring"
+        },
+        "set": {
+            "power": "Power Set",
+            "guard": "Guard Set",
+            "swift": "Swift Set"
+        }
     },
     "character": {
         "names": [

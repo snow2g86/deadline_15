@@ -195,7 +195,7 @@ const G = {
         const u = {
             id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role,
             res: initRes, maxRes, resType, resRec,
-            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, stunned: 0
+            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
         if (team === 'enemy') { u.origSpawn = { x, y } }
         this.units.push(u); return u

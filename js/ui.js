@@ -160,6 +160,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const deadAllies=this.units.filter(u=>u.team==='ally'&&u.hp<=0);
     let sub=msg;
     if(win&&reward)sub+=`\n🏅 보상: ${reward} Gold`;
+    if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}
     if(deadAllies.length)sub+=`\n💀 전사자: ${deadAllies.length}명 (성소에서 부활 가능)`;
     // 경험치 결과
     if(this._expResults&&this._expResults.length){
@@ -167,7 +168,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
       this._expResults.forEach(r=>{
         const ch=ROSTER.getChar(r.uid);if(!ch)return;
         const d=CD[ch.cls];
-        const charName = t('character.names')[ch.nameId] || d.name;
+        const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
         let line=`\n${d.icon} ${charName}: +${r.exp} EXP`;
         if(r.leveled>0)line+=` ⬆ Lv.${r.prevLv}→${ch.lv}`;
         sub+=line;

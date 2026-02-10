@@ -1,0 +1,71 @@
+/* ═══ Academy Tabs ═══ */
+.acad-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.acad-tabs{display:flex;gap:6px;max-width:330px;width:100%}
+.acad-tab-btn{flex:1;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;transition:all .2s}
+.acad-tab-btn:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+.acad-tab-btn.active{color:#fff;background:rgba(59,130,246,.2);border-color:#3b82f6}
+
+/* ═══ Academy List (Vertical flex) ═══ */
+#academy-list,#skillbook-list{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:360px;margin:0 auto 16px}
+#academy-list.hidden,#skillbook-list.hidden{display:none}
+
+/* ═══ Academy Card ═══ */
+.acad-card{width:100%;max-width:340px;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(147,51,234,.2);border-radius:10px;padding:10px 12px}
+.acad-icon{font-size:28px;flex-shrink:0}
+.acad-info{flex:1}
+.acad-name{font-weight:700;font-size:12px}
+.acad-stats{font-size:10px;color:var(--dim);margin-top:2px}
+.acad-btn{font-weight:700;font-size:11px;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#9333ea,#7c3aed);color:#fff;transition:all .15s;white-space:nowrap}
+.acad-btn:hover{transform:scale(1.05)}.acad-btn.disabled{opacity:.3;cursor:default}
+
+/* ═══ Academy HUD ═══ */
+.acad-hud{display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:4px}
+.acad-hud-gold{}
+.acad-info-row{border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);
+  display:flex;flex-direction:column;align-items:center;width:100%;max-width:330px;padding:12px 0;margin-bottom:8px}
+.acad-info-title{font-size:14px;font-weight:900;color:var(--text)}
+
+/* ═══ Class Selection Grid ═══ */
+.class-select-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:8px}
+.cs-card{background:rgba(255,255,255,.04);border:2px solid rgba(147,51,234,.15);border-radius:8px;
+  padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.cs-card:hover{border-color:#9333ea;transform:translateY(-2px);background:rgba(147,51,234,.1)}
+.cs-icon{font-size:28px;margin-bottom:4px}
+.cs-name{font-weight:900;font-size:11px;color:var(--text);margin-bottom:3px}
+.cs-stats{font-size:8px;color:var(--dim);margin-bottom:2px}
+.cs-role{font-size:7px;color:#64748b}
+
+/* ═══ Skill Book Card ═══ */
+.sb-card{width:100%;max-width:340px;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 12px}
+.sb-card:hover{border-color:rgba(59,130,246,.4)}
+.sb-icon{font-size:22px;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  background:rgba(59,130,246,.1);border-radius:8px}
+.sb-info{flex:1}
+.sb-name{font-weight:700;font-size:12px;color:var(--text)}
+.sb-meta{font-size:9px;color:var(--dim);margin-top:2px}
+.sb-cls-tag{display:inline-block;font-size:8px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,.12);
+  padding:1px 5px;border-radius:3px;margin-left:4px}
+.sb-btn{font-weight:700;font-size:11px;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;transition:all .15s;white-space:nowrap}
+.sb-btn:hover{transform:scale(1.05)}.sb-btn.disabled{opacity:.3;cursor:default}
+
+/* ═══ Skill Book Target Modal ═══ */
+.sb-target-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.sb-target-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .15s}
+.sb-target-btn:hover{border-color:#3b82f6;background:rgba(59,130,246,.08)}
+.sb-target-info{flex:1;font-size:11px;font-weight:700;text-align:left}
+.sb-target-lv{font-size:9px;font-weight:900;color:#3b82f6;background:rgba(59,130,246,.15);
+  padding:2px 6px;border-radius:4px;white-space:nowrap}
+
+/* ═══ PC (1024px+) ═══ */
+@media(min-width:1024px){
+  #academy-list,#skillbook-list{max-width:480px}
+  .acad-card{max-width:460px;padding:14px 16px}
+  .sb-card{max-width:460px;padding:14px 16px}
+  .acad-tabs{max-width:480px}
+}

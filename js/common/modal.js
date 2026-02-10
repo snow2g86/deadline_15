@@ -33,3 +33,31 @@ function showConfirm(msg, onYes, onNo) {
   bt.appendChild(n);
   ov.classList.add('show');
 }
+
+function showPrompt(msg, defaultVal, onOk, onCancel) {
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = '';
+  document.getElementById('modal-title').className = '';
+  document.getElementById('modal-sub').innerHTML = msg.replace(/\n/g, '<br>') +
+    '<br><input id="modal-prompt-input" type="text" maxlength="10" value="' + (defaultVal || '').replace(/"/g, '&quot;') + '" style="width:90%;padding:8px;margin-top:8px;border:1px solid #f0c040;border-radius:6px;background:var(--card);color:#fff;font-size:14px;text-align:center;outline:none">';
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  var y = document.createElement('button');
+  y.className = 'modal-btn';
+  y.textContent = window.t ? t('common.confirm') : 'OK';
+  y.onclick = function() {
+    var val = document.getElementById('modal-prompt-input').value.trim();
+    ov.classList.remove('show');
+    if (onOk) onOk(val);
+  };
+  bt.appendChild(y);
+  var n = document.createElement('button');
+  n.className = 'modal-btn secondary';
+  n.textContent = window.t ? t('common.cancel') : 'Cancel';
+  n.onclick = function() { ov.classList.remove('show'); if (onCancel) onCancel(); };
+  bt.appendChild(n);
+  ov.classList.add('show');
+  setTimeout(function() {
+    var inp = document.getElementById('modal-prompt-input');
+    if (inp) { inp.focus(); inp.select(); }
+  }, 100);
+}

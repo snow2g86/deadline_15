@@ -24,7 +24,10 @@
       "Bash(wc:*)",
       "Bash(find:*)",
       "Bash(node -e:*)",
-      "Bash(node scripts/generate-i18n.js:*)"
+      "Bash(node scripts/generate-i18n.js:*)",
+      "Bash(git checkout:*)",
+      "Bash(xargs cat:*)",
+      "Bash(awk:*)"
     ]
   }
 }

@@ -80,47 +80,6 @@ function getChar(uid) {
   return roster.chars.find(function(c) { return c.uid === uid; });
 }
 
-function potGrade(ch) {
-  var g = JAB[ch.cls].growth;
-  var scores = ['hp', 'atk', 'def'].map(function(k) {
-    var mn = g[k][0], mx = g[k][1], rng = mx - mn;
-    return rng > 0 ? (ch.pot[k] - mn) / rng : 0.5;
-  });
-  var avg = scores.reduce(function(a, b) { return a + b; }, 0) / scores.length;
-  if (avg >= 0.85) return 'S';
-  if (avg >= 0.65) return 'A';
-  if (avg >= 0.35) return 'B';
-  return 'C';
-}
-
-function _rollPotential(cls) {
-  var g = JAB[cls].growth;
-  function roll(mm) { return +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1); }
-  return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) };
-}
-
-function _rollPotentialWithGrade(cls, targetGrade) {
-  var g = JAB[cls].growth;
-  var targetMin = targetGrade === 'S' ? 0.85 : targetGrade === 'A' ? 0.65 : targetGrade === 'B' ? 0.35 : 0;
-  var targetMax = targetGrade === 'S' ? 1.0 : targetGrade === 'A' ? 0.85 : targetGrade === 'B' ? 0.65 : 0.35;
-
-  for (var attempt = 0; attempt < 100; attempt++) {
-    var pot = _rollPotential(cls);
-    var scores = ['hp', 'atk', 'def'].map(function(k) {
-      var mn = g[k][0], mx = g[k][1], rng = mx - mn;
-      return rng > 0 ? (pot[k] - mn) / rng : 0.5;
-    });
-    var avg = scores.reduce(function(a, b) { return a + b; }, 0) / scores.length;
-    if (avg >= targetMin && avg < targetMax) return pot;
-  }
-
-  var mid = (targetMin + targetMax) / 2;
-  return {
-    hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * mid).toFixed(1),
-    atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * mid).toFixed(1),
-    def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1)
-  };
-}
 
 function gainExp(uid, amount) {
   var roster = getRoster();
@@ -144,42 +103,6 @@ function gainExp(uid, amount) {
   return { leveled: leveled, prevLv: prevLv };
 }
 
-function previewClassChange(ch, newCls) {
-  if (!ch || ch.cls !== 'novice') return null;
-  var newD = JAB[newCls];
-  var grade = potGrade(ch);
-  var newPot = _rollPotentialWithGrade(newCls, grade);
-  var gradeMultiplier = grade === 'S' ? 1.1 : grade === 'A' ? 1.0 : grade === 'B' ? 0.9 : 0.8;
-  var baseHP = Math.round(newD.base.hp * gradeMultiplier);
-  var baseATK = Math.round(newD.base.atk * gradeMultiplier);
-  var baseDEF = Math.round(newD.base.def * gradeMultiplier);
-  var lvGain = ch.lv - 1;
-  return {
-    hp: Math.round(baseHP + newPot.hp * lvGain),
-    atk: Math.round(baseATK + newPot.atk * lvGain),
-    def: Math.round(baseDEF + newPot.def * lvGain),
-    move: newD.base.move,
-    range: newD.base.range,
-    pot: newPot
-  };
-}
-
-function changeClass(uid, newCls) {
-  var roster = getRoster();
-  var ch = roster.chars.find(function(c) { return c.uid === uid; });
-  if (!ch || ch.cls !== 'novice') return false;
-  var preview = previewClassChange(ch, newCls);
-  if (!preview) return false;
-  ch.cls = newCls;
-  ch.hp = preview.hp;
-  ch.atk = preview.atk;
-  ch.def = preview.def;
-  ch.move = preview.move;
-  ch.range = preview.range;
-  ch.pot = preview.pot;
-  saveRoster(roster);
-  return true;
-}
 
 // ── 상점 데이터 ──────────────────────────
 var _shopData = null;
@@ -193,7 +116,6 @@ function loadShop() {
       var d = JSON.parse(raw);
       if (Date.now() - d.ts < 6 * 3600 * 1000) {
         _shopData = d;
-        refreshClassChangeScrolls();
         return;
       }
     }
@@ -201,26 +123,6 @@ function loadShop() {
   genShop();
 }
 
-function refreshClassChangeScrolls() {
-  _shopData.items = _shopData.items.filter(function(item) { return item.type !== 'class_change'; });
-  var allClasses = Object.keys(JAB).filter(function(c) { return c !== 'novice' && !c.startsWith('summon_'); });
-  for (var i = 0; i < allClasses.length; i++) {
-    var cls = allClasses[i];
-    var d = JAB[cls];
-    _shopData.items.push({
-      type: 'class_change',
-      scrollId: 'cc_' + cls,
-      name: t('classes.' + cls) + ' ' + t('shop.class_change_suffix'),
-      i18nNameKey: 'classes.' + cls,
-      i18nSuffixKey: 'shop.class_change_suffix',
-      icon: d.icon,
-      desc: t('shop.class_change_desc', { class: t('classes.' + cls) }),
-      classes: [cls],
-      cost: 500,
-      sold: false
-    });
-  }
-}
 
 function genShop() {
   var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon'); });
@@ -262,8 +164,17 @@ function genShop() {
       icon: potObj.icon, exp: potObj.exp, cost: potObj.cost, sold: false
     });
   }
+  // 스킬북 2개
+  if (typeof LEARNABLE_SKILLS !== 'undefined') {
+    var lsKeys = Object.keys(LEARNABLE_SKILLS);
+    for (var sb = 0; sb < 2; sb++) {
+      var sk = LEARNABLE_SKILLS[lsKeys[Math.floor(Math.random() * lsKeys.length)]];
+      items.push({
+        type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: 800, sold: false
+      });
+    }
+  }
   _shopData = { ts: Date.now(), items: items };
-  refreshClassChangeScrolls();
   saveShop();
 }
 
@@ -282,6 +193,7 @@ function switchTab(tab) {
 // ── 렌더링 ───────────────────────────────
 function renderShop() {
   var list = document.getElementById('shop-list'); list.innerHTML = '';
+  list.style.display = ''; list.style.flexDirection = ''; list.style.gap = ''; list.style.gridTemplateColumns = '';
   var timeEl = document.getElementById('shop-timer');
   var titleEl = document.getElementById('shop-info-title');
   var remain = Math.max(0, 6 * 3600 * 1000 - (Date.now() - _shopData.ts));
@@ -297,24 +209,30 @@ function renderShop() {
   var tabTitles = {
     'mercenary': t('shop.subtitle_mercenary'),
     'item': t('shop.subtitle_item'),
-    'job': t('shop.subtitle_job'),
+    'gacha': t('shop.subtitle_gacha'),
     'gold': t('shop.subtitle_gold')
   };
   titleEl.textContent = tabTitles[_currentTab] || t('shop.title');
 
-  var tabTypeMap = { 'mercenary': 'char', 'item': 'potion', 'job': 'class_change', 'gold': null };
-  var filterType = tabTypeMap[_currentTab];
+  if (_currentTab === 'gacha') {
+    renderGacha(list);
+    return;
+  }
+
+  var tabTypeMap = { 'mercenary': 'char', 'item': ['potion', 'skillbook'], 'gold': null };
+  var filterTypes = tabTypeMap[_currentTab];
   var filteredItems = _shopData.items.filter(function(item) {
     var iType = item.type || 'char';
     if (_currentTab === 'gold') return false;
-    return iType === filterType;
+    if (Array.isArray(filterTypes)) return filterTypes.indexOf(iType) >= 0;
+    return iType === filterTypes;
   });
 
   filteredItems.forEach(function(item) {
     var iType = item.type || 'char';
     if (iType === 'char') renderCharCard(item, list);
     else if (iType === 'potion') renderPotionCard(item, list);
-    else if (iType === 'class_change') renderClassChangeCard(item, list);
+    else if (iType === 'skillbook') renderSkillBookCard(item, list);
   });
 
   startShopTimer();
@@ -336,7 +254,7 @@ function renderCharCard(item, list) {
   var recruitBtn = item.sold ? t('shop.recruit_complete') : t('shop.recruit', { gold: item.cost });
   el.innerHTML =
     '<div class="shop-grade" style="color:' + gClr + '">' + grade + '</div>' +
-    '<div class="shop-icon"><span class="cls-icon" style="font-size:28px">' + d.icon + '</span></div>' +
+    '<div class="shop-icon">' + charSprite(item.cls, 28) + '</div>' +
     '<div class="shop-name">' + item.name + '</div>' +
     '<div class="shop-cls">' + t('classes.' + item.cls) + ' \xb7 ' + t('class_desc.' + item.cls) + '</div>' +
     '<div class="shop-stats">' + t('common.hp') + ' ' + d.base.hp + ' ' + t('common.atk') + ' ' + d.base.atk + ' ' + t('common.def') + ' ' + d.base.def + '</div>' +
@@ -380,23 +298,37 @@ function renderPotionCard(item, list) {
   list.appendChild(el);
 }
 
-function renderClassChangeCard(item, list) {
+
+function renderSkillBookCard(item, list) {
   var canAfford = _gold >= item.cost && !item.sold;
+  var sk = typeof LEARNABLE_SKILLS !== 'undefined' ? LEARNABLE_SKILLS[item.skillId] : null;
+  if (!sk) return;
+  var skillName = t('skills.' + item.skillId);
+  var clsName = t('classes.' + item.cls);
   var el = document.createElement('div');
-  el.className = 'shop-card cc-card' + (item.sold ? ' sold' : '');
-  var ccBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
-  var cls = item.classes[0];
-  var ccName = t('classes.' + cls) + ' ' + t('shop.class_change_suffix');
-  var ccDesc = t('shop.class_change_desc', { class: t('classes.' + cls) });
+  el.className = 'shop-card skillbook-card' + (item.sold ? ' sold' : '');
+  var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
   el.innerHTML =
-    '<div class="shop-icon">' + item.icon + '</div>' +
-    '<div class="shop-name">' + ccName + '</div>' +
-    '<div class="shop-cls">' + ccDesc + '</div>' +
-    '<button class="shop-btn cc-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + ccBtn + '</button>';
+    '<div class="shop-icon">' + charSprite(item.cls, 28) + '</div>' +
+    '<div class="shop-name">\ud83d\udcd5 ' + skillName + '</div>' +
+    '<div class="shop-cls">' + clsName + ' ' + t('shop.skillbook_only') + '</div>' +
+    '<div class="shop-stats">' + sk.desc + '</div>' +
+    '<button class="shop-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
   if (!item.sold) {
     el.querySelector('.shop-btn').onclick = function() {
       if (_gold < item.cost) return;
-      showClassChangeModal(item);
+      showConfirm(t('shop.skillbook_buy_confirm', { skill: skillName, gold: item.cost }), function() {
+        _gold -= item.cost;
+        saveGold(_gold);
+        updateGoldUI();
+        var inv = loadInventory();
+        inv.push({ id: item.skillId, cls: item.cls, lv: 1 });
+        saveInventory(inv);
+        item.sold = true;
+        saveShop();
+        renderShop();
+        showAlert(t('academy.skillbook_drop', { skill: skillName }));
+      });
     };
   }
   list.appendChild(el);
@@ -437,12 +369,12 @@ function showPotionModal(item) {
   var names = t('character.names');
   alive.forEach(function(ch) {
     var d = JAB[ch.cls];
-    var charName = names[ch.nameId] || d.icon;
+    var charName = ch.customName || names[ch.nameId] || d.icon;
     var atMax = ch.lv >= MAX_LEVEL;
     var expNeed = atMax ? 0 : expForLevel(ch.lv);
     var expPct = atMax ? 100 : Math.min(100, Math.round((ch.exp || 0) / expNeed * 100));
     h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon"><span class="cls-icon" style="font-size:20px">' + d.icon + '</span></span>' +
+      '<span class="pt-icon">' + charSprite(ch.cls, 20) + '</span>' +
       '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
       '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
       '</div>';
@@ -471,7 +403,7 @@ function showPotionModal(item) {
       if (r.leveled > 0) {
         var ch = getChar(uid);
         var d = JAB[ch.cls];
-        var charName = names[ch.nameId] || d.icon;
+        var charName = ch.customName || names[ch.nameId] || d.icon;
         setTimeout(function() {
           showAlert(
             d.icon + ' ' + charName + '\nLv.' + r.prevLv + ' \u2192 Lv.' + ch.lv +
@@ -483,126 +415,115 @@ function showPotionModal(item) {
   });
 }
 
-// ── 전직서 사용 모달 (노비스 선택) ───────
-function showClassChangeModal(item) {
-  var roster = getRoster();
-  var novices = roster.chars.filter(function(c) { return !c.dead && c.cls === 'novice'; });
-  if (!novices.length) {
-    showAlert(t('class_change.no_novice'));
-    return;
+
+// ── 가챠 렌더링 ─────────────────────────
+function renderGacha(list) {
+  list.style.display = 'grid';
+  list.style.gridTemplateColumns = 'repeat(2,1fr)';
+  list.style.gap = '10px';
+
+  // 천장 카운터 (2칸 차지)
+  var pity = loadPity();
+  var pityPct = Math.round(pity / GACHA_PITY_MAX * 100);
+  var pityEl = document.createElement('div');
+  pityEl.className = 'gacha-pity';
+  pityEl.innerHTML =
+    '<div class="gacha-pity-label">' + t('shop.gacha_pity', { current: pity, max: GACHA_PITY_MAX }) + '</div>' +
+    '<div class="gacha-pity-bar"><div class="gacha-pity-fill" style="width:' + pityPct + '%"></div></div>';
+  list.appendChild(pityEl);
+
+  // 1회 뽑기 카드
+  var c1 = document.createElement('div');
+  c1.className = 'gacha-card';
+  var canAfford1 = _gold >= GACHA_COST_1;
+  c1.innerHTML =
+    '<div class="gacha-icon">&#127922;</div>' +
+    '<div class="gacha-title">' + t('shop.gacha_single') + '</div>' +
+    '<div class="gacha-desc">' + t('shop.gacha_single_desc') + '</div>' +
+    '<button class="gacha-btn' + (canAfford1 ? '' : ' disabled') + '" ' + (canAfford1 ? '' : 'disabled') + '>' + t('shop.gacha_pull_1', { gold: GACHA_COST_1 }) + '</button>';
+  if (canAfford1) c1.querySelector('.gacha-btn').onclick = function() { doGacha(1); };
+  list.appendChild(c1);
+
+  // 10+1 뽑기 카드
+  var c10 = document.createElement('div');
+  c10.className = 'gacha-card gacha-multi';
+  var canAfford10 = _gold >= GACHA_COST_10;
+  c10.innerHTML =
+    '<div class="gacha-icon">&#127921;</div>' +
+    '<div class="gacha-title">' + t('shop.gacha_multi') + '</div>' +
+    '<div class="gacha-desc">' + t('shop.gacha_multi_desc') + '</div>' +
+    '<button class="gacha-btn gacha-btn-multi' + (canAfford10 ? '' : ' disabled') + '" ' + (canAfford10 ? '' : 'disabled') + '>' + t('shop.gacha_pull_10', { gold: GACHA_COST_10 }) + '</button>';
+  if (canAfford10) c10.querySelector('.gacha-btn').onclick = function() { doGacha(10); };
+  list.appendChild(c10);
+
+  // 확률표 (2칸 차지)
+  var rateEl = document.createElement('div');
+  rateEl.className = 'gacha-rates-full';
+  rateEl.innerHTML = gachaRatesHtml();
+  list.appendChild(rateEl);
+}
+
+function gachaRatesHtml() {
+  var html = '<div class="gacha-rate-row">';
+  var names = { common: t('equip.rarity.common'), uncommon: t('equip.rarity.uncommon'), rare: t('equip.rarity.rare'), epic: t('equip.rarity.epic'), legendary: t('equip.rarity.legendary') };
+  for (var r in GACHA_RATE) {
+    var pct = GACHA_RATE[r] * 100;
+    var pctStr = pct >= 1 ? pct.toFixed(0) : pct.toFixed(pct >= 0.1 ? 1 : 2);
+    html += '<span style="color:' + RARITY[r].color + '">' + names[r] + ' ' + pctStr + '%</span> ';
   }
-  var ov = document.getElementById('modal-overlay');
-  document.getElementById('modal-title').textContent = t('class_change.select_novice');
-  document.getElementById('modal-title').className = '';
-  var h = '<div class="potion-target-list">';
-  var names = t('character.names');
-  novices.forEach(function(ch) {
-    var grade = potGrade(ch);
-    var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
-    var charName = names[ch.nameId] || '???';
-    h += '<div class="pt-btn" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon"><span class="cls-icon" style="font-size:20px">' + JAB[ch.cls].icon + '</span></span>' +
-      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
-      '<span class="pt-exp" style="color:' + gClr + '">' + grade + t('class_change.grade_suffix') + '</span>' +
-      '</div>';
-  });
-  h += '</div>';
-  var ccName = item.i18nNameKey ? (t(item.i18nNameKey) + ' ' + t(item.i18nSuffixKey)) : item.name;
-  document.getElementById('modal-sub').innerHTML = item.icon + ' ' + ccName + '<br>' + item.desc + '<br><br>' + h;
-  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
-  var cb = document.createElement('button');
-  cb.className = 'modal-btn secondary';
-  cb.textContent = t('common.cancel');
-  cb.onclick = function() { ov.classList.remove('show'); };
-  bt.appendChild(cb);
-  ov.classList.add('show');
-  document.querySelectorAll('.pt-btn').forEach(function(b) {
-    b.onclick = function() {
-      var uid = +b.dataset.uid;
-      ov.classList.remove('show');
-      showClassSelectModal(uid, item);
-    };
-  });
+  return html + '</div>';
 }
 
-// ── 전직서 사용 모달 (직업 선택) ─────────
-function showClassSelectModal(uid, item) {
-  var ch = getChar(uid);
-  if (!ch) return;
-  var ov = document.getElementById('modal-overlay');
-  document.getElementById('modal-title').textContent = t('class_change.select_class');
-  document.getElementById('modal-title').className = '';
-  var h = '<div class="class-select-grid">';
-  item.classes.forEach(function(cls) {
-    var d = JAB[cls];
-    h += '<div class="cs-card" data-cls="' + cls + '">' +
-      '<div class="cs-icon">' + d.icon + '</div>' +
-      '<div class="cs-name">' + t('classes.' + cls) + '</div>' +
-      '<div class="cs-stats">HP ' + d.base.hp + ' ATK ' + d.base.atk + ' DEF ' + d.base.def + '</div>' +
-      '<div class="cs-role">' + t('class_desc.' + cls) + '</div>' +
-      '</div>';
-  });
-  h += '</div>';
-  var names = t('character.names');
-  var charName = names[ch.nameId] || '???';
-  document.getElementById('modal-sub').innerHTML =
-    '<span class="cls-icon" style="font-size:24px">' + JAB[ch.cls].icon + '</span> <b>' + charName + '</b> (Lv.' + ch.lv + ')<br>' +
-    '<span style="color:var(--dim);font-size:10px">' + t('class_change.warning_irreversible') + '</span><br><br>' + h;
-  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
-  var cb = document.createElement('button');
-  cb.className = 'modal-btn secondary';
-  cb.textContent = t('common.cancel');
-  cb.onclick = function() { ov.classList.remove('show'); };
-  bt.appendChild(cb);
-  ov.classList.add('show');
-  document.querySelectorAll('.cs-card').forEach(function(card) {
-    card.onclick = function() {
-      var newCls = card.dataset.cls;
-      ov.classList.remove('show');
-      confirmClassChange(uid, newCls, item);
-    };
-  });
+function doGacha(count) {
+  var cost = count === 1 ? GACHA_COST_1 : GACHA_COST_10;
+  var pullCount = count === 1 ? 1 : GACHA_MULTI_COUNT;
+  if (_gold < cost) return;
+  _gold -= cost;
+  saveGold(_gold);
+  updateGoldUI();
+
+  var results = [];
+  for (var i = 0; i < pullCount; i++) {
+    var minRarity = null;
+    if (count === 10 && i === pullCount - 1) minRarity = 'rare';
+    results.push(gachaPull(minRarity));
+  }
+  var inv = loadInventory();
+  for (var j = 0; j < results.length; j++) inv.push(results[j]);
+  saveInventory(inv);
+  showGachaResults(results);
 }
 
-// ── 전직서 사용 모달 (최종 확인) ─────────
-function confirmClassChange(uid, newCls, item) {
-  var ch = getChar(uid);
-  if (!ch) return;
-  var oldD = JAB[ch.cls];
-  var newD = JAB[newCls];
-  var grade = potGrade(ch);
-  var preview = previewClassChange(ch, newCls);
-  var names = t('character.names');
-  var charName = names[ch.nameId] || '???';
-  var origClass = ch.cls;
-  showConfirm(
-    oldD.icon + ' ' + charName + ' (Lv.' + ch.lv + ' ' + grade + t('class_change.grade_suffix') + ')\n' +
-    t('classes.' + ch.cls) + ' \u2192 ' + newD.icon + ' ' + t('classes.' + newCls) + '\n\n' +
-    t('class_change.stats_preview') + '\n' +
-    'HP ' + preview.hp + ' / ATK ' + preview.atk + ' / DEF ' + preview.def + '\n' +
-    'MOV ' + preview.move + ' / RNG ' + preview.range + '\n\n' +
-    t('class_change.confirm_cost', { cost: item.cost }) + '\n' +
-    t('class_change.warning_parenthetical'),
-    function() {
-      _gold -= item.cost;
-      saveGold(_gold);
-      updateGoldUI();
-      changeClass(uid, newCls);
-      item.sold = true;
-      saveShop();
-      renderShop();
-      setTimeout(function() {
-        var updCh = getChar(uid);
-        var updCharName = names[updCh.nameId] || '???';
-        showAlert(
-          newD.icon + ' ' + updCharName + '\n' +
-          t('class_change.success', { oldClass: t('classes.' + origClass), newClass: t('classes.' + newCls) }) + '\n\n' +
-          'HP ' + updCh.hp + ' / ATK ' + updCh.atk + ' / DEF ' + updCh.def + '\n' +
-          'MOV ' + updCh.move + ' / RNG ' + updCh.range
-        );
-      }, 100);
+function showGachaResults(results) {
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = t('shop.gacha_results');
+  document.getElementById('modal-title').className = '';
+  var h = '<div class="gacha-results">';
+  for (var i = 0; i < results.length; i++) {
+    var item = results[i];
+    var rc = RARITY[item.rarity].color;
+    var statsArr = [];
+    for (var s in item.stats) {
+      statsArr.push(t('common.' + s) + '+' + item.stats[s]);
     }
-  );
+    h += '<div class="gacha-result-card" style="border-color:' + rc + '">' +
+      '<div class="gr-rarity" style="color:' + rc + '">' + t('equip.rarity.' + item.rarity) + '</div>' +
+      '<div class="gr-name">' + t('equip.item.' + item.templateId) + '</div>' +
+      '<div class="gr-slot">' + t('equip.slot.' + item.slot) + '</div>' +
+      '<div class="gr-stats">' + statsArr.join(' ') + '</div>' +
+      (item.setId ? '<div class="gr-set" style="color:#f0c040">' + t('equip.set.' + item.setId) + '</div>' : '') +
+      '</div>';
+  }
+  h += '</div>';
+  document.getElementById('modal-sub').innerHTML = h;
+  var bt = document.getElementById('modal-buttons');
+  bt.innerHTML = '';
+  var cb = document.createElement('button');
+  cb.className = 'modal-btn';
+  cb.textContent = t('common.confirm');
+  cb.onclick = function() { ov.classList.remove('show'); renderShop(); };
+  bt.appendChild(cb);
+  ov.classList.add('show');
 }
 
 // ── 초기화 ───────────────────────────────

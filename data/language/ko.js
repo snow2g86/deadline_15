@@ -15,12 +15,16 @@ window._LANG_ko = {
         "max": "MAX",
         "turn": "턴",
         "wave": "웨이브",
-        "select_unit": "유닛을 선택하세요"
+        "select_unit": "유닛을 선택하세요",
+        "move": "이동",
+        "range": "사거리"
     },
     "nav": {
         "stage": "스테이지",
         "party": "파티",
         "sanctuary": "성소",
+        "academy": "아카데미",
+        "equip": "장비",
         "shop": "상점",
         "compendium": "도감",
         "settings": "설정",
@@ -129,12 +133,14 @@ window._LANG_ko = {
     },
     "party": {
         "title": "파티 편성",
-        "subtitle": "5~10명의 클랜원을 편성하세요",
-        "member_count": "{current} / 10",
+        "subtitle": "5명의 클랜원을 편성하세요",
+        "member_count": "{current} / 5",
         "start_battle": "▶ 출격",
         "filter_all": "전체",
         "release": "방출",
-        "potential_stats": "잠재 HP+{hp} ATK+{atk} DEF+{def}"
+        "potential_stats": "잠재 HP+{hp} ATK+{atk} DEF+{def}",
+        "rename": "이름 변경",
+        "rename_prompt": "새 이름을 입력하세요 (최대 10자)"
     },
     "stage": {
         "title": "스테이지",
@@ -154,10 +160,20 @@ window._LANG_ko = {
         "subtitle_item": "아이템을 구매하세요",
         "subtitle_job": "직업을 선택하세요",
         "subtitle_gold": "골드를 구매하세요",
+        "subtitle_gacha": "장비를 뽑아보세요",
         "tab_mercenary": "용병",
         "tab_item": "아이템",
+        "tab_gacha": "장비 뽑기",
         "tab_job": "직업",
         "tab_gold": "골드",
+        "gacha_single": "1회 뽑기",
+        "gacha_single_desc": "랜덤 장비 1개를 획득합니다",
+        "gacha_multi": "10+1회 뽑기",
+        "gacha_multi_desc": "11개 장비 획득 (마지막 1개 희귀 이상 보장)",
+        "gacha_pull_1": "{gold}G 1회 뽑기",
+        "gacha_pull_10": "{gold}G 10+1회 뽑기",
+        "gacha_pity": "천장까지 {current} / {max}회 (전설 확정)",
+        "gacha_results": "뽑기 결과",
         "recruit": "{gold}G 모집",
         "buy": "{gold}G 구매",
         "recruit_complete": "모집 완료",
@@ -168,14 +184,54 @@ window._LANG_ko = {
         "class_change_desc": "{class}으로 전직",
         "potion_small": "소형 경험치 물약",
         "potion_medium": "중형 경험치 물약",
-        "potion_large": "대형 경험치 물약"
+        "potion_large": "대형 경험치 물약",
+        "skillbook_only": "스킬북",
+        "skillbook_buy_confirm": "{skill} 스킬북을 {gold}G에 구매하시겠습니까?"
+    },
+    "academy": {
+        "title": "아카데미",
+        "subtitle": "노비스를 전직시켜 더 강한 직업으로 성장하세요",
+        "class_change_btn": "{cost}G 전직",
+        "no_novice": "전직 가능한 노비스가 없습니다",
+        "cost_label": "{cost}G를 소모하여 전직하시겠습니까?",
+        "tab_classchange": "전직",
+        "tab_skillbook": "스킬북",
+        "skillbook_subtitle": "스킬북을 사용하여 클랜원의 스킬을 강화합니다",
+        "no_skillbooks": "보유한 스킬북이 없습니다",
+        "skillbook_use": "사용",
+        "skillbook_select_target": "스킬북 사용 대상 선택",
+        "skillbook_no_target": "사용 가능한 대상이 없습니다",
+        "skillbook_confirm": "{skill} 스킬북을 {name}에게 사용하시겠습니까?",
+        "skillbook_preview": "스킬 레벨: {from} → {to}",
+        "skillbook_success": "{name}의 {skill} 레벨이 {lv}(으)로 상승했습니다!",
+        "skillbook_max_lv": "최대 레벨",
+        "skillbook_learn_confirm": "{name}에게 {skill} 스킬을 습득시키겠습니까?",
+        "skillbook_learn_success": "{name}이(가) {skill}을(를) 습득했습니다!",
+        "skillbook_drop": "스킬북 획득: {skill}"
     },
     "sanctuary": {
         "title": "성소",
         "subtitle": "사망한 전투원을 골드로 부활시킬 수 있습니다",
         "no_dead_units": "사망한 전투원이 없습니다",
         "resurrect": "{gold}G 부활",
-        "resurrect_button": "{cost}G 부활"
+        "resurrect_button": "{cost}G 부활",
+        "tab_resurrect": "부활",
+        "tab_promote": "승급",
+        "promote_subtitle": "같은 직업의 클랜원을 제물로 등급을 올릴 수 있습니다",
+        "promote_btn": "승급",
+        "promote_no_sacrifice": "제물 가능한 같은 직업 클랜원이 없습니다",
+        "promote_no_sacrifice_hint": "같은 직업의 클랜원을 제물로 선택하세요",
+        "promote_max_grade": "최고 등급",
+        "promote_select_sacrifice": "제물 선택",
+        "promote_confirm": "{name}을(를) 제물로 {target}의 등급을 {from}\u2192{to}(으)로 올리시겠습니까?",
+        "promote_warning": "제물은 영구히 사라집니다",
+        "promote_success": "{name}의 등급이 {grade}(으)로 상승했습니다!",
+        "promote_in_party": "(파티)",
+        "no_promotable": "승급 가능한 클랜원이 없습니다",
+        "promote_confirm_multi": "{count}명을 제물로 {target}의 등급을 {from}→{to}(으)로 올리시겠습니까?",
+        "skill_inherit": "스킬 계승",
+        "skill_overflow": "최대 레벨 스킬은 스킬북으로 변환됩니다",
+        "skillbook_gained": "스킬북 획득: {skill}"
     },
     "settings": {
         "title": "설정",
@@ -323,13 +379,13 @@ window._LANG_ko = {
     },
     "passives": {
         "fury_buff": "광폭",
-        "parry": "몸부림",
+        "iron_will": "철의 의지",
         "fury_activated": "광폭 발동!",
-        "counter_activated": "몸부림!"
+        "iron_will_activated": "철의 의지!"
     },
     "passives_desc": {
         "fury_buff": "2턴간 공격 데미지 1.5배",
-        "parry": "인접 공격자에게 ATK×50% 반격"
+        "iron_will": "2턴간 방어력 1.5배"
     },
     "items": {
         "potion_small": "소형 경험치 물약",
@@ -378,6 +434,74 @@ window._LANG_ko = {
         "stage_10_theme": "마계 침공",
         "stage_10_story": "마계의 군주를 무찌르고 평화를 되찾아라",
         "enemy_count": "적 {count}체"
+    },
+    "equip": {
+        "title": "장비",
+        "subtitle": "캐릭터에 장비를 장착하세요",
+        "select_char": "캐릭터를 선택하세요",
+        "slots_title": "장비 슬롯",
+        "inventory": "인벤토리",
+        "no_items": "장비가 없습니다",
+        "equip_btn": "장착",
+        "equipped": "장착 중",
+        "sell_btn": "{gold}G 판매",
+        "sell_confirm": "{name}을(를) 판매하시겠습니까?\n+{gold}G",
+        "filter_armor": "방어구",
+        "filter_accessory": "장신구",
+        "rarity": {
+            "common": "일반",
+            "uncommon": "고급",
+            "rare": "희귀",
+            "epic": "영웅",
+            "legendary": "전설"
+        },
+        "slot": {
+            "weapon": "무기",
+            "offhand": "보조",
+            "helmet": "투구",
+            "armor": "갑옷",
+            "boots": "부츠",
+            "necklace": "목걸이",
+            "earring": "귀걸이",
+            "ring": "반지"
+        },
+        "item": {
+            "sword_1h": "한손검",
+            "dagger": "단검",
+            "mace": "철퇴",
+            "wand": "지팡이",
+            "fists": "너클",
+            "greatsword": "대검",
+            "bow": "활",
+            "staff": "법장",
+            "spear": "창",
+            "shield": "방패",
+            "tome": "마도서",
+            "buckler": "소형방패",
+            "plate_helm": "철투구",
+            "leather_cap": "가죽모자",
+            "cloth_hood": "천두건",
+            "plate_armor": "판금갑옷",
+            "leather_armor": "가죽갑옷",
+            "cloth_robe": "천의",
+            "plate_boots": "철부츠",
+            "leather_boots": "가죽부츠",
+            "cloth_shoes": "천신발",
+            "necklace_power": "힘의 목걸이",
+            "necklace_guard": "수호의 목걸이",
+            "necklace_swift": "신속의 목걸이",
+            "earring_power": "힘의 귀걸이",
+            "earring_guard": "수호의 귀걸이",
+            "earring_swift": "신속의 귀걸이",
+            "ring_power": "힘의 반지",
+            "ring_guard": "수호의 반지",
+            "ring_swift": "신속의 반지"
+        },
+        "set": {
+            "power": "힘 세트",
+            "guard": "수호 세트",
+            "swift": "신속 세트"
+        }
     },
     "character": {
         "names": [

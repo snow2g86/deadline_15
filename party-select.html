@@ -5,10 +5,14 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>DEADLINE 15</title>
-	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/party-select.css">
+	<link rel="stylesheet" href="css/equip.css">
 	<script type="text/javascript" src="js/common/i18n.js"></script>
 	<script type="text/javascript" src="js/common/modal.js"></script>
 	<script type="text/javascript" src="data/jab.js"></script>
+	<script type="text/javascript" src="data/equip.js"></script>
+	<script type="text/javascript" src="js/sprites.js"></script>
 	<script defer src="js/common/nav.js"></script>
 	<script type="text/javascript" src="js/party-select.js"></script>
 </head>
@@ -30,19 +34,46 @@
 			</svg></button>
 	</header>
 	<main id="content">
-		<div class="ps-sub" data-i18n="party.subtitle">DEADLINE 15</div>
-		<div class="ps-layout">
-			<div class="ps-left">
-				<div class="ps-counter" id="ps-counter">0 / 5</div>
-				<div class="ps-party" id="ps-party"></div>
-			</div>
-			<div class="ps-right">
-				<div class="ps-tabs" id="ps-tabs"></div>
-				<div class="ps-roster" id="ps-roster"></div>
+		<!-- Gold HUD -->
+		<div class="ps-hud">
+			<div class="gold-badge ps-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
+					id="ps-gold-val">0</span> G</div>
+		</div>
+		<!-- Tabs (matching shop/sanctuary/academy pattern) -->
+		<div class="ps-page-tabs-wrapper">
+			<div class="ps-page-tabs" id="page-tabs">
+				<button class="ps-page-tab active" data-ptab="party" data-i18n="nav.party">파티</button>
+				<button class="ps-page-tab" data-ptab="equip" data-i18n="nav.equip">장비</button>
 			</div>
 		</div>
-		<button class="ps-start" id="ps-start" disabled onclick="confirmP()" data-i18n="party.start_battle">DEADLINE
-			15</button>
+
+		<!-- Party section -->
+		<div id="section-party">
+			<div class="ps-info-row">
+				<div class="ps-info-title" data-i18n="party.subtitle">DEADLINE 15</div>
+			</div>
+			<div class="ps-layout">
+				<div class="ps-left">
+					<div class="ps-counter" id="ps-counter">0 / 5</div>
+					<div class="ps-party" id="ps-party"></div>
+				</div>
+				<div class="ps-right">
+					<div class="ps-tabs" id="ps-tabs"></div>
+					<div class="ps-roster" id="ps-roster"></div>
+				</div>
+			</div>
+			<button class="ps-start" id="ps-start" disabled onclick="confirmP()" data-i18n="party.start_battle">DEADLINE
+				15</button>
+		</div>
+
+		<!-- Equip section -->
+		<div id="section-equip" style="display:none">
+			<div class="ps-info-row">
+				<div class="ps-info-title" data-i18n="equip.subtitle">DEADLINE 15</div>
+			</div>
+			<div class="eq-chars" id="eq-chars"></div>
+			<div class="eq-body" id="eq-body"></div>
+		</div>
 	</main>
 	<nav id="bottom-nav"></nav>
 	<div id="modal-overlay">

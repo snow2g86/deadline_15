@@ -1,0 +1,85 @@
+/* ═══ Equip Section ═══ */
+#section-equip{display:flex;flex-direction:column;flex:1;overflow:hidden;align-items:center}
+
+/* ═══ Character scroll bar ═══ */
+.eq-chars{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+.eq-chars::-webkit-scrollbar{display:none}
+.eq-char-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:all .15s;min-width:70px}
+.eq-char-btn:hover{border-color:rgba(255,255,255,.2)}
+.eq-char-btn.active{border-color:#60a5fa;background:rgba(96,165,250,.12)}
+.eq-char-name{font-size:9px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
+.eq-char-lv{font-size:8px;color:var(--dim)}
+
+/* ═══ Body ═══ */
+.eq-body{width:100%;max-width:360px;margin:0 auto;padding:0 12px 80px;flex:1;overflow-y:auto}
+.eq-placeholder{text-align:center;color:var(--dim);padding:40px 0;font-size:13px}
+
+/* ═══ Slots grid ═══ */
+.eq-slots-title{font-size:12px;font-weight:900;color:var(--text);margin:10px 0 6px}
+.eq-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.eq-slot{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;min-height:54px}
+.eq-slot:hover{border-color:rgba(255,255,255,.2)}
+.eq-slot.filled{border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.06)}
+.eq-slot.locked{opacity:.4;cursor:default;pointer-events:none}
+.eq-slot-label{font-size:8px;color:var(--dim);margin-bottom:3px;font-weight:700}
+.eq-slot-item{padding:2px;border-radius:4px;border:1px solid}
+.eq-slot-rarity{font-size:8px;font-weight:900}
+.eq-slot-name{font-size:8px;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-slot-empty{font-size:14px;color:rgba(255,255,255,.15)}
+.eq-slot-locked{font-size:14px}
+
+/* ═══ Stats ═══ */
+.eq-stats{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px;padding:8px 10px;
+  background:rgba(255,255,255,.03);border-radius:8px}
+.eq-stat{display:flex;gap:4px;align-items:baseline}
+.eq-stat-label{font-size:9px;color:var(--dim);font-weight:700}
+.eq-stat-val{font-size:11px;font-weight:700;color:var(--text)}
+.eq-stat-bonus{color:#4ade80;font-size:9px;margin-left:1px}
+
+/* ═══ Set info ═══ */
+.eq-set-info{margin-bottom:10px;padding:6px 10px;background:rgba(240,192,64,.04);border-radius:8px;border:1px solid rgba(240,192,64,.15)}
+.eq-set-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:3px}
+.eq-set-name{font-size:10px;font-weight:900;color:#f0c040}
+.eq-set-bonus{font-size:8px;color:var(--dim)}
+.eq-set-bonus.active{color:#4ade80;font-weight:700}
+
+/* ═══ Inventory ═══ */
+.eq-inv-title{font-size:12px;font-weight:900;color:var(--text);margin:10px 0 6px}
+.eq-inv-tabs{display:flex;gap:4px;margin-bottom:8px}
+.eq-inv-tab{padding:5px 10px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);color:var(--dim);cursor:pointer;transition:all .15s}
+.eq-inv-tab:hover{color:var(--text)}
+.eq-inv-tab.active{color:#fff;background:rgba(96,165,250,.2);border-color:#60a5fa}
+.eq-inv-list{display:flex;flex-direction:column;gap:6px}
+.eq-inv-empty{text-align:center;color:var(--dim);padding:20px 0;font-size:11px}
+.eq-inv-row{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px}
+.eq-inv-row.equipped-here{border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.06)}
+.eq-inv-row.equipped-other{opacity:.5}
+.eq-inv-info{flex:1;min-width:0}
+.eq-inv-rarity{font-size:8px;font-weight:900;text-transform:uppercase}
+.eq-inv-name{font-size:10px;font-weight:700;color:var(--text);margin-left:4px}
+.eq-inv-stats{display:block;font-size:8px;color:#4ade80;margin-top:2px}
+.eq-inv-set{font-size:8px;font-weight:700}
+.eq-inv-actions{display:flex;gap:4px;flex-shrink:0}
+.eq-inv-btn{padding:4px 8px;font-size:9px;font-weight:700;border:none;border-radius:4px;cursor:pointer;transition:all .15s}
+.eq-equip-btn{background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff}
+.eq-equip-btn:hover{transform:scale(1.05)}
+.eq-sell-btn{background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.eq-sell-btn:hover{background:rgba(239,68,68,.3)}
+.eq-inv-equipped{font-size:8px;color:#60a5fa;font-weight:700}
+
+/* ═══ PC (1024px+) ═══ */
+@media(min-width:1024px){
+  .eq-body{max-width:480px}
+  .eq-char-btn{padding:10px 16px;min-width:80px}
+  .eq-char-name{font-size:11px;max-width:80px}
+  .eq-char-lv{font-size:10px}
+  .eq-slots{gap:8px}
+  .eq-slot{padding:10px 6px}
+  .eq-inv-row{padding:10px 14px}
+  .eq-inv-name{font-size:12px}
+}

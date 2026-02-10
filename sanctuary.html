@@ -5,10 +5,13 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>DEADLINE 15</title>
-	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/sanctuary.css">
 	<script type="text/javascript" src="js/common/i18n.js"></script>
 	<script type="text/javascript" src="js/common/modal.js"></script>
 	<script type="text/javascript" src="data/jab.js"></script>
+	<script type="text/javascript" src="js/skills.js"></script>
+	<script type="text/javascript" src="js/sprites.js"></script>
 	<script defer src="js/common/nav.js"></script>
 	<script type="text/javascript" src="js/sanctuary.js"></script>
 </head>
@@ -34,8 +37,14 @@
 			<div class="gold-badge sanc-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
 					id="sanc-gold-val">0</span> G</div>
 		</div>
+		<div class="sanc-tabs-wrapper">
+			<div class="sanc-tabs">
+				<button class="sanc-tab-btn active" data-tab="resurrect" onclick="switchTab('resurrect')" data-i18n="sanctuary.tab_resurrect"></button>
+				<button class="sanc-tab-btn" data-tab="promote" onclick="switchTab('promote')" data-i18n="sanctuary.tab_promote"></button>
+			</div>
+		</div>
 		<div class="sanc-info-row">
-			<div class="sanc-info-title" data-i18n="sanctuary.subtitle">DEADLINE 15</div>
+			<div class="sanc-info-title" id="sanc-subtitle" data-i18n="sanctuary.subtitle">DEADLINE 15</div>
 		</div>
 		<div id="sanc-list" class="card-list"></div>
 	</main>

@@ -69,7 +69,7 @@ function renderHideout() {
 		// 이름
 		var nm = document.createElement('div');
 		nm.className = 'hu-name';
-		var charName = names[ch.nameId] || '???';
+		var charName = ch.customName || names[ch.nameId] || '???';
 		nm.textContent = 'Lv.' + ch.lv + ' ' + charName;
 		wrap.appendChild(nm);
 		ct.appendChild(wrap);

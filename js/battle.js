@@ -9,7 +9,7 @@
 // ════════════════════════════════════════════
 
 const COLS = 10, ROWS = 15, TW = 48, TH = 24;
-const ZH = 6, UW = 48, UH = 60, UCX = 24, UCY = 12;
+const ZH = 10, UW = 48, UH = 60, UCX = 24, UCY = 12;
 const MIN_P = 5, MAX_P = 5;
 const DEPLOY = [{ x: 4, y: 12 }, { x: 5, y: 12 }, { x: 3, y: 12 }, { x: 6, y: 12 }, { x: 4, y: 11 }, { x: 5, y: 11 }, { x: 3, y: 11 }, { x: 6, y: 11 }, { x: 7, y: 12 }, { x: 7, y: 11 }];
 const CLAB = ['N', 'E', 'S', 'W'], CARR = ['▲', '▶', '▼', '◀'];
@@ -102,183 +102,23 @@ function toBattleStats(uid) {
   const ch = getChar(uid);
   if(!ch) return null;
   const d = JAB[ch.cls];
+  const names = t('character.names');
+  if(!ch.equip) ch.equip={weapon:null,offhand:null,helmet:null,armor:null,boots:null,necklace:null,earring:null,ring:null};
+  const eq = typeof calcEquipBonus==='function' ? calcEquipBonus(ch) : {hp:0,atk:0,def:0,move:0,range:0};
   return {
     uid: ch.uid, cls: ch.cls, lv: ch.lv,
-    hp: ch.hp, mhp: ch.hp, atk: ch.atk, def: ch.def,
-    move: ch.move, range: ch.range,
+    name: ch.customName || (names && names[ch.nameId]) || d.icon,
+    hp: ch.hp+eq.hp, mhp: ch.hp+eq.hp, atk: ch.atk+eq.atk, def: ch.def+eq.def,
+    move: Math.min(ch.move+eq.move,6), range: Math.min(ch.range+eq.range,5),
     role: ROLE_MAP[ch.cls],
     res: d.res === 'mana' ? d.maxRes : 0,
-    maxRes: d.maxRes, resType: d.res, resRec: d.resRec
+    maxRes: d.maxRes, resType: d.res, resRec: d.resRec,
+    skillLv: ch.skillLv || {}
   };
 }
 function saveBattle(data) { try { localStorage.setItem('game_battle', JSON.stringify(data)) } catch(e) {} }
 function loadBattle() { try { const r = localStorage.getItem('game_battle'); return r ? JSON.parse(r) : null } catch(e) { return null } }
 function clearBattle() { try { localStorage.removeItem('game_battle') } catch(e) {} }
-
-// ════════════════════════════════════════════
-//  Section 3: Skills (from skills.js)
-// ════════════════════════════════════════════
-
-const SKILLS = {
-  warrior: {
-    id: 'warrior_powersmash', name: '강타', icon: '⚡',
-    desc: '공격력 1.5배의 데미지로 공격', cost: 3, costType: 'fury'
-  },
-  knight: {
-    id: 'knight_switch', name: '스위치', icon: '🔄',
-    desc: '이동 범위 내 아군과 위치 교환', cost: 1, costType: 'fury', switchRange: 2
-  },
-  archer: {
-    id: 'archer_dash', name: '도약', icon: '💨',
-    desc: '이동 범위의 1.5배를 즉각 이동', cost: 20, costType: 'energy', dashRange: 4
-  },
-  lancer: {
-    id: 'lancer_pierce', name: '관통', icon: '🔱',
-    desc: '일직선 3칸 관통 데미지', cost: 5, costType: 'fury', pierceLen: 3
-  },
-  assassin: [
-    { id: 'assassin_ambush', name: '습격', icon: '⚡',
-      desc: '2칸 범위 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy', ambushRange: 2 },
-    { id: 'assassin_assassinate', name: '암살', icon: '💀',
-      desc: '은신 겹침 상태에서 ATK×5 즉사급 공격', cost: 60, costType: 'energy' }
-  ],
-  priest: {
-    id: 'priest_massheal', name: '집단 치유', icon: '✨',
-    desc: '6칸 내 모든 아군 체력 회복', cost: 50, costType: 'mana', healRange: 6
-  },
-  sapper: {
-    id: 'sapper_trap', name: '함정 설치', icon: '⚠',
-    desc: 'ATK×2 피해 + 2턴 이동불가 함정 설치', cost: 20, costType: 'energy', trapRange: 1
-  },
-  mage: {
-    id: 'mage_fireburst', name: '화염폭발', icon: '🔥',
-    desc: '대상 중심 3×3 범위 적 전체에 공격', cost: 40, costType: 'mana'
-  },
-  novice: {
-    id: 'novice_throw', name: '돌던지기', icon: '🪨',
-    desc: '4칸 내 적에게 ATK×0.5 데미지', cost: 15, costType: 'energy', throwRange: 4
-  },
-  brawler: {
-    id: 'brawler_disarm', name: '무장해제', icon: '🤛',
-    desc: '1칸 내 적 공격력 3턴간 50% 감소', cost: 30, costType: 'energy', disarmRange: 1
-  },
-  shaman: [
-    { id: 'shaman_curse', name: '쇠약의 저주', icon: '☠️',
-      desc: '매턴 적 1명에게 최대HP 0.5% 피해(보스 0.2%). 해제까지 이동/행동 불가', cost: 100, costType: 'mana' },
-    { id: 'shaman_exalt', name: '고양', icon: '🔺',
-      desc: '전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가', cost: 50, costType: 'mana' }
-  ],
-  summoner: [
-    { id: 'summoner_summon_spirit', name: '정령소환', icon: '✨',
-      desc: '원거리 마법 공격 정령 소환 (5턴, 공격력 50%)', cost: 80, costType: 'mana', summonRange: 3, summonType: 'summon_spirit' },
-    { id: 'summoner_summon_golem', name: '골램소환', icon: '🗿',
-      desc: '근접 공격 골램 소환 (5턴, HP/DEF 120%, 공격력 50%)', cost: 80, costType: 'mana', summonRange: 3, summonType: 'summon_golem' }
-  ]
-};
-
-function getSkills(cls) {
-  const sk = SKILLS[cls];
-  return !sk ? [] : Array.isArray(sk) ? sk : [sk];
-}
-
-function isStealthed(u) {
-  return u.cls === 'assassin' && G.ter[u.y] && G.ter[u.y][u.x] === 'forest';
-}
-
-const FURY_PASSIVES = {
-  warrior: {
-    name: '광폭',
-    icon: '💢',
-    desc: '2턴간 공격 데미지 1.5배',
-    trigger(defender, attacker, G) {
-      defender.furyBuff = 2;
-      defender.res = 0;
-      G.floatT(defender.x, defender.y, t('passives.fury_activated'), 'heal');
-      G.vfxSpawn(
-        G.uSX(defender.x, defender.y) + UCX,
-        G.uSY(defender.x, defender.y) + UCY,
-        { count: 15, colors: ['#ff4400','#ff8800','#ffcc00'], shape: 'spark',
-          speed: 4, spread: 14, decay: 0.025, size: 4 }
-      );
-    }
-  },
-  knight: {
-    name: '몸부림',
-    icon: '🔥',
-    desc: '인접 공격자에게 ATK×50% 반격',
-    trigger(defender, attacker, G) {
-      if (mh(attacker.x, attacker.y, defender.x, defender.y) > 1) return;
-      const cd = Math.max(1, Math.round(defender.atk * 0.5) - attacker.def);
-      attacker.hp = Math.max(0, attacker.hp - cd);
-      G.floatT(attacker.x, attacker.y, `-${cd}`, 'damage');
-      G.shakeU(attacker.id);
-      G.sfxAtk(defender.cls);
-      G.vfxSpawn(
-        G.uSX(attacker.x, attacker.y) + UCX,
-        G.uSY(attacker.x, attacker.y) + UCY,
-        { count: 10, colors: ['#ff8800','#ffcc44','#fff'], shape: 'spark',
-          speed: 3, spread: 10, decay: 0.03, size: 3 }
-      );
-      defender.res = 0;
-      G.floatT(defender.x, defender.y, t('passives.counter_activated'), 'heal');
-    }
-  }
-};
-
-function calcDmg(attacker, target) {
-  let atk = attacker.atk;
-  if (attacker.disarmed > 0) atk = Math.round(atk * 0.5);
-  let dmg = Math.max(1, atk - target.def);
-  if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
-  if (G.units.some(u => u.team === attacker.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
-    dmg = Math.max(1, Math.round(dmg * 1.25));
-  }
-  return dmg;
-}
-
-function procFury(attacker, target, G) {
-  if (attacker.resType === 'fury') {
-    attacker.res = Math.min(attacker.maxRes, attacker.res + 1);
-  }
-  if (target.hp > 0 && target.resType === 'fury') {
-    target.res = Math.min(target.maxRes, target.res + 2);
-    if (target.res >= target.maxRes) {
-      const passive = FURY_PASSIVES[target.cls];
-      if (passive) passive.trigger(target, attacker, G);
-    }
-  }
-}
-
-function tickBuffs(unit) {
-  if (unit.furyBuff > 0) unit.furyBuff--;
-  if (unit.disarmed > 0) unit.disarmed--;
-}
-
-function getSkillBuffs(unit) {
-  const buffs = [];
-  if (unit.resType === 'fury' && unit.res >= unit.maxRes) {
-    buffs.push({ icon: '🔥', type: 'buff', turns: 0 });
-  }
-  if (unit.furyBuff > 0) {
-    buffs.push({ icon: '💢', type: 'buff', turns: unit.furyBuff });
-  }
-  if (unit.disarmed > 0) {
-    buffs.push({ icon: '🤛', type: 'debuff', turns: unit.disarmed });
-  }
-  if (unit.channeling === 'shaman_curse') {
-    buffs.push({ icon: '☠️', type: 'debuff', turns: 0 });
-  }
-  if (unit.channeling === 'shaman_exalt') {
-    buffs.push({ icon: '🔺', type: 'buff', turns: 0 });
-  }
-  if (!unit.channeling && G.units.some(u => u.team === unit.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
-    buffs.push({ icon: '🔺', type: 'buff', turns: 0 });
-  }
-  if (unit.isSummon && unit.summonTurns !== undefined) {
-    buffs.push({ icon: '⏳', type: 'buff', turns: unit.summonTurns });
-  }
-  return buffs;
-}
 
 // ════════════════════════════════════════════
 //  Section 4: AI Profiles (from ai.js)
@@ -369,7 +209,7 @@ const G = {
     },
 
     init() {
-        this.genT(); this.units = []; this.nid = 1; this.turn = 1; this.phase = 'player';
+        this.genT(); this._initTColors(); this.units = []; this.nid = 1; this.turn = 1; this.phase = 'player';
         this.sel = null; this.over = false; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this.anim = false; this.camDir = 0;
         this.breached = 0; this.battleExp = {}; this.allyPos = {}; this.traps = []; this.eFormPos = [];
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[0];
@@ -431,11 +271,6 @@ const G = {
     },
     genT() {
         this.ter = []; this.gateHP = {}; this.wallHP = {}; this.breached = 0;
-        this.tileVar = {};
-        Object.keys(TILE_MAP).forEach(t => {
-            const v = TILE_MAP[t].variants;
-            this.tileVar[t] = Math.floor(Math.random() * v.length);
-        });
         const wallRow = (row) => {
             const r = []; for (let c = 0; c < COLS; c++) {
                 if (c >= 2 && c <= 3 || c >= 6 && c <= 7) { r.push('wall'); this.wallHP[c + ',' + row] = 200 }
@@ -455,31 +290,42 @@ const G = {
                 this.ter[r] = []; for (let c = 0; c < COLS; c++)this.ter[r][c] = 'plain'
             }
             else {
+                const theme = MAP_THEMES[(this.cStage && this.cStage.mapType) || 'plains'];
+                const d = theme.dist;
                 this.ter[r] = []; for (let c = 0; c < COLS; c++) {
-                    const rn = Math.random();
-                    this.ter[r][c] = rn < .15 ? 'rock' : rn < .25 ? 'hill' : rn < .37 ? 'forest' : 'plain'
+                    const rn = Math.random(); let acc = 0;
+                    this.ter[r][c] = (acc+=d.rock,rn<acc)?'rock':(acc+=d.hill,rn<acc)?'hill':(acc+=d.forest,rn<acc)?'forest':(acc+=(d.water||0),rn<acc)?'water':'plain'
                 }
             }
         }
     },
+    _initTColors() {
+        const theme = MAP_THEMES[(this.cStage && this.cStage.mapType) || 'plains'];
+        this._tColors = {};
+        for (const tp in TI) {
+            this._tColors[tp] = theme.colors[tp]
+                ? { tc: theme.colors[tp].tc, lc: theme.colors[tp].lc, rc: theme.colors[tp].rc }
+                : { tc: TI[tp].tc, lc: TI[tp].lc, rc: TI[tp].rc };
+        }
+    },
     addU(team, src, x, y) {
-        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1;
+        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '';
         if (team === 'ally' && typeof src === 'number') {
             const bs = toBattleStats(src);
             if (!bs) return null;
             cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
-            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv;
+            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; name = bs.name;
         } else {
             cls = src; const d = JAB[cls], s = this.cStage;
             hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
             role = ROLE_MAP[cls]; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
-            mhp = hp; initRes = d.res === 'mana' ? maxRes : 0;
+            mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
         }
         const u = {
-            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role,
+            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, name,
             res: initRes, maxRes, resType, resRec,
-            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, stunned: 0
+            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
         if (team === 'enemy') { u.origSpawn = { x, y } }
         this.units.push(u); return u
@@ -634,7 +480,7 @@ Object.assign(G, {
 	hideSkillMenu() { if (!this.sel) return; this.skillMenuOpen = false; this.showAM(this.sel) },
 	actItem() { if (!this.sel) return; this.floatT(this.sel.x, this.sel.y, t('messages.item_system_preparing'), 'damage') },
 
-	_grantExp(u, action) { if (u.team === 'ally' && u.uid) { const e = actExp(this.cStage ? this.cStage.id : 1, action); if (e > 0) this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) + e; return e } return 0 },
+	_grantExp(u, action) { if (u.team === 'ally' && u.uid) { const e = actExp(this.cStage ? this.cStage.id : 1, action); if (e > 0) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) + e; this.floatT(u.x, u.y, `+${e} EXP`, 'exp'); } return e } return 0 },
 	doMv(u, tx, ty) {
 		this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y }; u.x = tx; u.y = ty; u.hm = true; u.mo = true; this.awPM = true; this.animU(u.id, tx, ty); this.sfxMove();
 		this.chkTrap(u);
@@ -643,22 +489,23 @@ Object.assign(G, {
 		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
 	},
 	doAtk(a, tgt) {
-		const dmg = calcDmg(a, tgt); const atkE = this._grantExp(a, 'attack');
+		const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
 		tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
 		this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		if (a.furyBuff > 0) this.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
 		procFury(a, tgt, this);
+		if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0)) {
+			const cdmg = calcDmg(tgt, a); a.hp = Math.max(0, a.hp - cdmg); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
+		}
 		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();
 		if (tgt.hp <= 0) {
-			if (atkE > 0) this.floatT(a.x, a.y, `+${atkE} EXP`, 'exp');
 			this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); setTimeout(() => { this.units = this.units.filter(u => u.hp > 0); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500)
 		}
 		else if (a.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(a); this.deathA(a.id); setTimeout(() => { this.units = this.units.filter(u => u.hp > 0); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500) }
-		else { if (atkE > 0) this.floatT(a.x, a.y, `+${atkE} EXP`, 'exp'); this.rUnits(); this.clrSel(); this.chkAutoEnd() }
+		else { this.rUnits(); this.clrSel(); this.chkAutoEnd() }
 	},
 	doHeal(h, tgt) {
-		const amt = Math.round(h.atk * 1.5); const he = this._grantExp(h, 'heal'); tgt.hp = Math.min(tgt.mhp, tgt.hp + amt); this.vfxHeal(tgt); this.vfxBuff(tgt); this.sfxHeal(); this.floatT(tgt.x, tgt.y, `+${amt}`, 'heal');
-		if (he > 0) this.floatT(h.x, h.y, `+${he} EXP`, 'exp');
+		const amt = Math.round(h.atk * 1.5); this._grantExp(h, 'heal'); tgt.hp = Math.min(tgt.mhp, tgt.hp + amt); this.vfxHeal(tgt); this.vfxBuff(tgt); this.sfxHeal(); this.floatT(tgt.x, tgt.y, `+${amt}`, 'heal');
 		h.ha = true; h.hm = true; this.awPM = false; this.hideAM(); this.rUnits(); this.clrSel(); this.chkAutoEnd()
 	},
 	actWait() { if (!this.sel) return; this.sel.ha = true; this.sel.waited = true; if (this.sel.team === 'ally') this.allyPos[this.sel.id] = { x: this.sel.x, y: this.sel.y }; this.awPM = false; this.hideAM(); this.sfxWait(); this.rUnits(); this.clrSel(); this.chkAutoEnd() },
@@ -670,7 +517,7 @@ Object.assign(G, {
 	},
 	actSkill(idx) {
 		if (!this.sel || !this.awPM) return; const u = this.sel;
-		const skills = getSkills(u.cls); const sk = skills[idx || 0];
+		const skills = getUnitSkills(u); const sk = skills[idx || 0];
 		if (!sk || u.res < sk.cost) return;
 		this.skillMenuOpen = false;
 		this._curSkill = sk; this.skillMode = true;
@@ -864,7 +711,7 @@ Object.assign(G, {
 			u.channeling = 'shaman_curse';
 			this.floatT(u.x, u.y, t('messages.shaman_curse'), 'heal');
 			this.vfxSpawn(this.uSX(u.x, u.y) + UCX, this.uSY(u.x, u.y) + UCY, { count: 15, colors: ['#9333ea', '#581c87', '#a855f7'], shape: 'ring', speed: 3, spread: 14, decay: 0.02, size: 6 });
-			this.sfxAtk(u.cls);
+			this.sfxAtk(u.cls); this._grantExp(u, 'attack');
 			u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			this.rUnits(); this.clrSel(); this.chkAutoEnd(); return
 		}
@@ -876,6 +723,7 @@ Object.assign(G, {
 			this.alive('ally').forEach(a => {
 				if (a.id !== u.id) this.vfxSpawn(this.uSX(a.x, a.y) + UCX, this.uSY(a.x, a.y) + UCY, { count: 6, colors: ['#f59e0b', '#fbbf24'], shape: 'spark', speed: 2, spread: 6, decay: 0.03, size: 3 });
 			});
+			this._grantExp(u, 'heal');
 			u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			this.rUnits(); this.clrSel(); this.chkAutoEnd(); return
 		}
@@ -901,7 +749,7 @@ Object.assign(G, {
 				res: 0, maxRes: 0, resType: 'none', resRec: 0,
 				summonTurns: 5,
 				hm: false, ha: false, waited: false, mo: false,
-				furyBuff: 0, stunned: 0
+				furyBuff: 0, defBuff: 0, stunned: 0
 			};
 			this.units.push(summon);
 			this.floatT(tx, ty, t('messages.sapper_summon', { name: summonName }), 'heal');
@@ -933,6 +781,7 @@ Object.assign(G, {
 			this.floatT(u.x, u.y, t('messages.knight_switch'), 'heal');
 			this.vfxSpawn(this.uSX(u.x, u.y) + UCX, this.uSY(u.x, u.y) + UCY, { count: 10, colors: ['#4f4', '#4ff', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.02, size: 8 });
 			this.vfxSpawn(this.uSX(tgt.x, tgt.y) + UCX, this.uSY(tgt.x, tgt.y) + UCY, { count: 10, colors: ['#4f4', '#4ff', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.02, size: 8 });
+			this._grantExp(u, 'move');
 			this.sfxMove(); u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			setTimeout(() => { this.rUnits(); this.clrSel(); this.chkAutoEnd() }, 340); return
 		}
@@ -945,6 +794,7 @@ Object.assign(G, {
 			this.floatT(u.x, u.y, t('messages.archer_leap'), 'heal');
 			this.vfxSpawn(this.uSX(u.x, u.y) + UCX, this.uSY(u.x, u.y) + UCY, { count: 15, colors: ['#ff8', '#ff0', '#fff'], shape: 'spark', speed: 5, spread: 15, decay: 0.02, size: 3 });
 			this.allyPos[u.id] = { x: u.x, y: u.y };
+			this._grantExp(u, 'move');
 			this.sfxMove(); u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			setTimeout(() => { this.rUnits(); this.clrSel(); this.chkAutoEnd() }, 340); return
 		}
@@ -957,6 +807,7 @@ Object.assign(G, {
 			this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 			procFury(u, tgt, this);
 			this.floatT(u.x, u.y, t('messages.warrior_strike'), 'heal');
+			this._grantExp(u, 'attack');
 			if (tgt.hp <= 0) { this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); this.units = this.units.filter(v => v.hp > 0); }
 			u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			setTimeout(() => { this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500); return
@@ -998,72 +849,68 @@ Object.assign(G, {
 Object.assign(G, {
 	rTer() {
 		const w = document.getElementById('iso-world');
-		const existingBgTiles = new Map(), existingHlTiles = new Map(), existingObjTiles = new Map();
-		w.querySelectorAll('.iso-tile-bg').forEach(el => { const pos = el.dataset.pos; if (pos) existingBgTiles.set(pos, el) });
-		w.querySelectorAll('.iso-tile-hl').forEach(el => { const pos = el.dataset.pos; if (pos) existingHlTiles.set(pos, el) });
-		w.querySelectorAll('.iso-tile-obj').forEach(el => { const pos = el.dataset.pos; if (pos) existingObjTiles.set(pos, el) });
+		const existingBgTiles = new Map(), existingHlTiles = new Map();
+		w.querySelectorAll('.iso-tile-bg').forEach(el => existingBgTiles.set(el.dataset.pos, el));
+		w.querySelectorAll('.iso-tile-hl').forEach(el => existingHlTiles.set(el.dataset.pos, el));
 		const tilesNeeded = new Set();
+		const W = TW * 2;
+		const _tc = this._tColors || {};
 
-		for (let r = 0; r < ROWS; r++)for (let c = 0; c < COLS; c++) {
-			const t = this.ter[r][c], ti = TI[t];
+		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+			const tp = this.ter[r][c], ti = TI[tp], clr = _tc[tp] || ti;
 			const pos = `${c},${r}`; tilesNeeded.add(pos);
-			let hl = ''; if (this.sel) {
+			let hl = '';
+			if (this.sel) {
 				if (this.mvT.some(m => m.x === c && m.y === r)) hl = 'move';
 				else if (this.atkT.some(a => a.x === c && a.y === r)) hl = 'attack';
 				else if (this.healT.some(h => h.x === c && h.y === r)) hl = 'heal';
-				if (this.sel.x === c && this.sel.y === r) hl = 'selected'
+				if (this.sel.x === c && this.sel.y === r) hl = 'selected';
 			}
-			const seed = r * COLS + c;
-			const vi = this.tileVar && this.tileVar[t] !== undefined ? this.tileVar[t] : 0;
+			const h = ti.z * ZH, H = TH * 2 + h + 2;
+			const clip = h > 0
+				? `polygon(${TW}px 1px,${W-1}px ${TH}px,${W-1}px ${TH+h}px,${TW}px ${TH*2-1+h}px,1px ${TH+h}px,1px ${TH}px)`
+				: `polygon(${TW}px 1px,${W-1}px ${TH}px,${TW}px ${TH*2-1}px,1px ${TH}px)`;
 
-			let bgSvg = tSVG(TW, TH, ti.tc, ti.lc, ti.rc, ti.z, '', t, seed, vi, true, false);
-			const objImgMatches = bgSvg.match(/href="(image\/tileset\/(forest|rocks)\/[^"]+)"/g) || [];
-			bgSvg = bgSvg.replace(/<image[^>]*href="image\/tileset\/(forest|rocks)\/[^"]*"[^>]*>/g, '');
 			let bgTile = existingBgTiles.get(pos);
-			if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; bgTile.innerHTML = bgSvg; w.appendChild(bgTile) }
-			else if (bgTile.innerHTML !== bgSvg) { bgTile.innerHTML = bgSvg }
-
-			const hlSvg = tSVG(TW, TH, ti.tc, ti.lc, ti.rc, ti.z, hl, t, seed, vi, false, true);
+			if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; w.appendChild(bgTile) }
+			if (bgTile.innerHTML) bgTile.innerHTML = '';
+			if (h > 0) {
+				const cy = ((TH * 2 - 1) / H * 100).toFixed(1);
+				const ang = Math.round(Math.atan2(TW - 1, TH - 1) * 180 / Math.PI);
+				bgTile.style.background = `conic-gradient(from 0deg at 50% ${cy}%,${clr.tc} 0deg ${ang}deg,${clr.rc} ${ang}deg 180deg,${clr.lc} 180deg ${360-ang}deg,${clr.tc} ${360-ang}deg 360deg)`;
+			} else if (tp === 'forest') {
+				const fb = clr.tc, fl = clr.lc, fd = clr.rc;
+				bgTile.style.background = `radial-gradient(ellipse 14px 10px at 25% 25%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 16px 11px at 70% 20%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 18px 12px at 50% 50%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 13px 9px at 20% 70%,${fl},${fd} 60%,transparent 100%),radial-gradient(ellipse 15px 10px at 78% 65%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 10px 7px at 45% 85%,${fl},${fd} 60%,transparent 100%),${fd}`;
+			} else if (tp === 'rock') {
+				bgTile.style.background = `linear-gradient(135deg,${clr.tc} 25%,${clr.rc} 45%,${clr.tc} 55%,${clr.rc} 75%,${clr.tc})`;
+			} else if (tp === 'water') {
+				const wA = (this.cStage && this.cStage.mapType === 'volcano') ? 'rgba(140,40,20,.12)' : 'rgba(40,90,140,.12)';
+				bgTile.style.background = `repeating-linear-gradient(0deg,transparent,transparent 5px,${wA} 5px,${wA} 6px),${clr.tc}`;
+			} else { bgTile.style.background = clr.tc; }
+			bgTile.style.clipPath = clip;
 
 			let hlTile = existingHlTiles.get(pos);
-			if (!hlTile) { hlTile = document.createElement('div'); hlTile.className = 'iso-tile iso-tile-hl'; hlTile.dataset.pos = pos; hlTile.style.cursor = 'pointer'; hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && !G.sel) { G.selU(u); return } if (u && G.sel && u.id === G.sel.id) { G.clrSel(); return } G.cellCk(c, r) }); w.appendChild(hlTile) }
-			if (hlTile.innerHTML !== hlSvg) { hlTile.innerHTML = hlSvg }
+			if (!hlTile) {
+				hlTile = document.createElement('div'); hlTile.className = 'iso-tile iso-tile-hl'; hlTile.dataset.pos = pos; hlTile.style.cursor = 'pointer';
+				hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && u.team === 'ally' && !G.sel) { G.selU(u); return } if (u && u.team === 'ally' && G.sel && u.id === G.sel.id) { G.clrSel(); return } G.cellCk(c, r) });
+				w.appendChild(hlTile);
+			}
+			if (hlTile.innerHTML) hlTile.innerHTML = '';
+			hlTile.style.clipPath = clip;
 
-			let objTile = existingObjTiles.get(pos);
-			if (!objTile) { objTile = document.createElement('div'); objTile.className = 'iso-tile iso-tile-obj'; objTile.dataset.pos = pos; objTile.dataset.opacity = '1'; w.appendChild(objTile) }
-			let objHTML = '';
-			objImgMatches.forEach((match) => {
-				const src = match.match(/href="([^"]+)"/)[1];
-				const isRock = src.includes('/rocks/');
-				let style = `position:absolute;top:8%;left:50%;transform:translate(-50%,-50%);width:auto;height:80%;pointer-events:none;`
-				objHTML += `<div class=obj_box><img src="${src}" alt="obj" style="${style}">`;
-				style = `position:absolute;top:20%;left:25%;transform:translate(-50%,-50%);width:auto;height:88%;pointer-events:none;` ;
-				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
-				style = `position:absolute;top:25%;left:54%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
-				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
-				style = `position:absolute;top:25%;left:80%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
-				objHTML += `<img src="${src}" alt="obj" style="${style}">`;
-				style = `position:absolute;top:54%;left:50%;transform:translate(-50%,-50%);width:auto;height:78%;pointer-events:none;` ;
-				objHTML += `<img src="${src}" alt="obj" style="${style}"><div>`;
-			});
-			if (objTile.innerHTML !== objHTML) { objTile.innerHTML = objHTML }
-
-			const sx = this.tSX(c, r), sy = this.tSY(c, r, ti.z), sw = (TW * 2) + 'px', sh = (TH * 2 + ti.z * ZH + 2) + 'px', zix = this.g2v(c, r);
-			bgTile.style.left = sx + 'px'; bgTile.style.top = sy + 'px'; bgTile.style.width = sw; bgTile.style.height = sh; bgTile.style.zIndex = zix.vc + zix.vr;
-			hlTile.style.left = sx + 'px'; hlTile.style.top = sy + 'px'; hlTile.style.width = sw; hlTile.style.height = sh; hlTile.style.zIndex = zix.vc + zix.vr + 1;
-			objTile.style.left = sx + 'px'; objTile.style.top = sy + 'px'; objTile.style.width = sw; objTile.style.height = sh; objTile.style.zIndex = 101 + zix.vc + zix.vr;
+			const sx = this.tSX(c, r), sy = this.tSY(c, r, ti.z), zix = this.g2v(c, r);
+			bgTile.style.left = sx + 'px'; bgTile.style.top = sy + 'px'; bgTile.style.width = W + 'px'; bgTile.style.height = H + 'px'; bgTile.style.zIndex = zix.vc + zix.vr;
+			hlTile.style.left = sx + 'px'; hlTile.style.top = sy + 'px'; hlTile.style.width = W + 'px'; hlTile.style.height = H + 'px'; hlTile.style.zIndex = zix.vc + zix.vr + 1;
 
 			hlTile.classList.remove('hl-move', 'hl-attack', 'hl-heal', 'hl-selected');
 			if (hl === 'move') hlTile.classList.add('hl-move');
 			else if (hl === 'attack') hlTile.classList.add('hl-attack');
 			else if (hl === 'heal') hlTile.classList.add('hl-heal');
-			else if (hl === 'selected') hlTile.classList.add('hl-selected')
+			else if (hl === 'selected') hlTile.classList.add('hl-selected');
 		}
 
 		existingBgTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
 		existingHlTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
-		existingObjTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
-		w.querySelectorAll('.tree-obj').forEach(e => e.remove());
 	},
 
 	rUnits() {
@@ -1075,7 +922,7 @@ Object.assign(G, {
 				el = document.createElement('div'); el.id = 'u-' + u.id; el.className = `unit-sprite ${u.team} spawning`;
 				if (u.team === 'ally') this.allyPos[u.id] = {x: u.x, y: u.y};
 				setTimeout(() => el.classList.remove('spawning'), 450);
-				el.innerHTML = `<div class="u-icon">${clsIcon(u.cls, 28)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
+				el.innerHTML = `<div class="u-icon">${charSprite(u.cls, 36)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
 				w.appendChild(el)
 			}
 			el.style.width = UW + 'px'; el.style.height = UH + 'px'; el.style.left = this.uSX(u.x, u.y) + 'px'; el.style.top = this.uSY(u.x, u.y) + 'px';
@@ -1105,23 +952,6 @@ Object.assign(G, {
 		[...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove() });
 		this.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
 			this.allyPos[u.id] = {x: 99, y: 99};
-		});
-		const allyPosCoords = new Set(Object.values(this.allyPos).map(p => `${p.x},${p.y}`));
-		Object.values(this.allyPos).forEach(pos => {
-			if (pos.x !== 99) {
-				const tile = w.querySelector(`.iso-tile-obj[data-pos="${pos.x},${pos.y}"]`);
-				if (tile) {
-					const objBox = tile.querySelector('.obj_box');
-					if (objBox) { objBox.style.opacity = '0'; tile.dataset.opacity = '0'; }
-				}
-			}
-		});
-		w.querySelectorAll('.iso-tile-obj[data-opacity="0"]').forEach(tile => {
-			const pos = tile.dataset.pos;
-			if (!allyPosCoords.has(pos)) {
-				const objBox = tile.querySelector('.obj_box');
-				if (objBox) { objBox.style.opacity = '1'; tile.dataset.opacity = '1'; }
-			}
 		});
 		this.rMM(); this.rNav()
 	},
@@ -1162,7 +992,7 @@ Object.assign(G, {
 			btnAttack.textContent = t('battle.attack');
 			btnAttack.style.display = (!u.ha && this.atkT.length > 0) ? '' : 'none'
 		}
-		const skills = getSkills(u.cls);
+		const skills = getUnitSkills(u);
 		const hasUsableSkill = !u.ha && skills.some(sk => this.canUseSkill(u, sk));
 		document.getElementById('btn-skill').style.display = hasUsableSkill ? '' : 'none';
 		document.getElementById('btn-item').style.display = 'none';
@@ -1179,7 +1009,7 @@ Object.assign(G, {
 		const m = document.getElementById('action-menu');
 		this.hideAllMenuButtons();
 		m.querySelectorAll('.am-skill').forEach(e => e.remove());
-		const skills = getSkills(u.cls);
+		const skills = getUnitSkills(u);
 		const btnDash = document.getElementById('btn-dash');
 		skills.forEach((sk, idx) => {
 			const btn = document.createElement('button'); btn.className = 'am-skill';
@@ -1365,13 +1195,14 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const deadAllies=this.units.filter(u=>u.team==='ally'&&u.hp<=0);
     let sub=msg;
     if(win&&reward)sub+=`\n🏅 보상: ${reward} Gold`;
+    if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}
     if(deadAllies.length)sub+=`\n💀 전사자: ${deadAllies.length}명 (성소에서 부활 가능)`;
     if(this._expResults&&this._expResults.length){
       sub+=`\n\n${t('results.battle_detail', {kills: this._deadEnemyCount||0, exp: this._totalExp||0, survivors: this._expResults.length})}`;
       this._expResults.forEach(r=>{
         const ch=getChar(r.uid);if(!ch)return;
         const d=JAB[ch.cls];
-        const charName = t('character.names')[ch.nameId] || d.icon;
+        const charName = ch.customName || t('character.names')[ch.nameId] || d.icon;
         let line=`\n${d.icon} ${charName}: +${r.exp} EXP`;
         if(r.leveled>0)line+=` ⬆ Lv.${r.prevLv}→${ch.lv}`;
         sub+=line;
@@ -1509,6 +1340,7 @@ Object.assign(G, {
 
     // Class-specific attack VFX
     vfxAtk(attacker, target) {
+        this.atkAnimU(attacker.id);
         const ax = this.uSX(attacker.x, attacker.y) + UCX, ay = this.uSY(attacker.x, attacker.y) + UCY;
         const tx = this.uSX(target.x, target.y) + UCX, ty = this.uSY(target.x, target.y) + UCY;
         const cls = attacker.cls;
@@ -1578,11 +1410,13 @@ Object.assign(G, {
 
     animU(id, x, y) {
         const el = document.getElementById('u-' + id); if (el) {
+            el.classList.add('moving'); setTimeout(() => el.classList.remove('moving'), 340);
             el.style.left = this.uSX(x, y) + 'px'; el.style.top = this.uSY(x, y) + 'px';
             const v = this.g2v(x, y); el.style.zIndex = 100 + v.vc + v.vr
         }
     },
     shakeU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('shaking'); setTimeout(() => el.classList.remove('shaking'), 300) } },
+    atkAnimU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 380) } },
     deathA(id) { const el = document.getElementById('u-' + id); if (el) el.classList.add('dying') },
 });
 
@@ -2057,6 +1891,9 @@ Object.assign(G, {
     tgt.hp=Math.max(0,tgt.hp-dmg);this.vfxAtk(a,tgt);this.sfxAtk(a.cls);this.shakeU(tgt.id);this.floatT(tgt.x,tgt.y,`-${dmg}`,'damage');
     if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
     procFury(a,tgt,this);
+    if(tgt.hp>0&&a.hp>0&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&!(tgt.stunned>0)){
+      const cdmg=calcDmg(tgt,a);a.hp=Math.max(0,a.hp-cdmg);this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');procFury(tgt,a,this);
+    }
     if(tgt.hp<=0){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(tgt);this.deathA(tgt.id);this.units=this.units.filter(u=>u.hp>0);setTimeout(()=>{this.rUnits()},500)}
     else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);this.units=this.units.filter(u=>u.hp>0);setTimeout(()=>{this.rUnits()},500)}
     else this.rUnits()},

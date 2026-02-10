@@ -117,7 +117,7 @@ Object.assign(G, {
 	},
 	actSkill(idx) {
 		if (!this.sel || !this.awPM) return; const u = this.sel;
-		const skills = getSkills(u.cls); const sk = skills[idx || 0];
+		const skills = getUnitSkills(u); const sk = skills[idx || 0];
 		if (!sk || u.res < sk.cost) return;
 		this.skillMenuOpen = false;
 		this._curSkill = sk; this.skillMode = true;
@@ -213,6 +213,7 @@ Object.assign(G, {
 		if (u) { cands.sort((a, b) => mh(a.x, a.y, u.x, u.y) - mh(b.x, b.y, u.x, u.y)) }
 		return cands[0];
 	},
+	skMul(u, skId) { const lv = Math.min((u.skillLv && u.skillLv[skId]) || 1, 10); return 1 + 0.1 * (lv - 1) },
 	doSkill(u, tx, ty) {
 		const sk = this._curSkill || SKILLS[u.cls]; if (!sk) return;
 		// 배열인 경우 첫 번째 스킬 사용 (fallback)
@@ -230,7 +231,7 @@ Object.assign(G, {
 			u.x = adj.x; u.y = adj.y; u.mo = true;
 			this.animU(u.id, adj.x, adj.y);
 			setTimeout(() => {
-				const dmg = Math.max(1, u.atk * 2 - t.def);
+				const dmg = Math.max(1, Math.round(u.atk * 2 * this.skMul(u, 'assassin_ambush')) - t.def);
 				t.hp = Math.max(0, t.hp - dmg);
 				this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY, { count: 12, colors: ['#a855f7', '#fff', '#c4b5fd'], shape: 'spark', speed: 4, spread: 12, decay: 0.025, size: 4 });
 				this.sfxAtk(u.cls); this.shakeU(t.id);
@@ -251,7 +252,7 @@ Object.assign(G, {
 		if (skObj.id === 'assassin_assassinate') {
 			const t = this.units.find(v => v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
 			if (!t) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			const dmg = Math.max(1, u.atk * 5 - t.def);
+			const dmg = Math.max(1, Math.round(u.atk * 5 * this.skMul(u, 'assassin_assassinate')) - t.def);
 			t.hp = Math.max(0, t.hp - dmg);
 			this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY, { count: 20, colors: ['#7c3aed', '#a855f7', '#4c1d95'], shape: 'spark', speed: 5, spread: 16, decay: 0.02, size: 5 });
 			this.screenShake(); this.sfxAtk(u.cls); this.shakeU(t.id);
@@ -269,7 +270,7 @@ Object.assign(G, {
 			const hr = skObj.healRange || 6;
 			const targets = this.units.filter(v => v.team === 'ally' && v.hp > 0 && v.hp < v.mhp && mh(u.x, u.y, v.x, v.y) <= hr);
 			if (!targets.length) { u.res += skObj.cost; this.floatT(u.x, u.y, t('messages.select_heal_target'), 'damage'); u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			const amt = u.atk;
+			const amt = Math.round(u.atk * this.skMul(u, 'priest_massheal'));
 			targets.forEach(t => {
 				t.hp = Math.min(t.mhp, t.hp + amt);
 				this.floatT(t.x, t.y, `+${amt}`, 'heal');
@@ -284,7 +285,7 @@ Object.assign(G, {
 		// 함정 설치: 지정 타일에 아군 함정 배치
 		if (skObj.id === 'sapper_trap') {
 			if (this.uAt(tx, ty) || this.traps.find(t => t.x === tx && t.y === ty)) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			this.traps.push({ x: tx, y: ty, dmg: u.atk * 2, id: this.traps.length, team: 'ally' });
+			this.traps.push({ x: tx, y: ty, dmg: Math.round(u.atk * 2 * this.skMul(u, 'sapper_trap')), id: this.traps.length, team: 'ally' });
 			this.floatT(tx, ty, t('messages.trap_installed'), 'heal');
 			this.vfxSpawn(this.uSX(tx, ty) + UCX, this.uSY(tx, ty) + UCY, { count: 10, colors: ['#f80', '#ff4', '#fa0'], shape: 'spark', speed: 2, spread: 10, decay: 0.025, size: 3 });
 			this.sfxUIClick(); this._grantExp(u, 'attack');
@@ -299,7 +300,7 @@ Object.assign(G, {
 				if (px < 0 || px >= COLS || py < 0 || py >= ROWS) continue;
 				const t = this.units.find(v => v.hp > 0 && v.x === px && v.y === py && v.team === 'enemy');
 				if (t) {
-					const dmg = Math.max(1, u.atk - t.def); t.hp = Math.max(0, t.hp - dmg);
+					const dmg = Math.max(1, Math.round(u.atk * this.skMul(u, 'mage_fireburst')) - t.def); t.hp = Math.max(0, t.hp - dmg);
 					this.floatT(t.x, t.y, `-${dmg}`, 'damage'); this.shakeU(t.id);
 					this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY, { count: 8, colors: ['#f44', '#f80', '#ff4'], shape: 'spark', speed: 3, spread: 8, decay: 0.03, size: 3 });
 					if (t.hp <= 0) { this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id); this.units = this.units.filter(v => v.hp > 0) }
@@ -317,7 +318,7 @@ Object.assign(G, {
 		if (skObj.id === 'novice_throw') {
 			const t = this.units.find(v => v.x === tx && v.y === ty && v.team === 'enemy' && v.hp > 0);
 			if (!t) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			const dmg = Math.max(1, Math.round(u.atk * 0.5) - t.def);
+			const dmg = Math.max(1, Math.round(u.atk * 0.5 * this.skMul(u, 'novice_throw')) - t.def);
 			t.hp = Math.max(0, t.hp - dmg);
 			this.sfxAtk(u.cls); this.shakeU(t.id);
 			this.floatT(t.x, t.y, `-${dmg}`, 'damage');
@@ -382,7 +383,7 @@ Object.assign(G, {
 				res: 0, maxRes: 0, resType: 'none', resRec: 0,
 				summonTurns: 5,
 				hm: false, ha: false, waited: false, mo: false,
-				furyBuff: 0, stunned: 0
+				furyBuff: 0, defBuff: 0, stunned: 0
 			};
 			// 4. 유닛 배열 추가
 			this.units.push(summon);
@@ -440,7 +441,7 @@ Object.assign(G, {
 		if (skObj.id === 'warrior_powersmash') {
 			const t = this.units.find(v => v.x === tx && v.y === ty && v.hp > 0 && v.team !== u.team);
 			if (!t) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			const dmg = Math.max(1, Math.round(u.atk * 1.5 - t.def));
+			const dmg = Math.max(1, Math.round(u.atk * 1.5 * this.skMul(u, 'warrior_powersmash') - t.def));
 			t.hp = Math.max(0, t.hp - dmg);
 			this.vfxAtk(u, t); this.sfxAtk(u.cls); this.shakeU(t.id);
 			this.floatT(t.x, t.y, `-${dmg}`, 'damage');
@@ -457,7 +458,7 @@ Object.assign(G, {
 			if (px < 0 || px >= COLS || py < 0 || py >= ROWS) continue;
 			const t = this.units.find(v => v.hp > 0 && v.x === px && v.y === py && v.team !== u.team);
 			if (t) {
-				const dmg = Math.max(1, u.atk - t.def); t.hp = Math.max(0, t.hp - dmg);
+				const dmg = Math.max(1, Math.round(u.atk * this.skMul(u, 'lancer_pierce')) - t.def); t.hp = Math.max(0, t.hp - dmg);
 				this.floatT(t.x, t.y, `-${dmg}`, 'damage'); this.shakeU(t.id);
 				this.vfxSpawn(this.uSX(t.x, t.y) + UCX, this.uSY(t.x, t.y) + UCY, { count: 8, colors: ['#6af', '#48f', '#fff'], shape: 'spark', speed: 3, spread: 8, decay: 0.03, size: 3 });
 				if (t.hp <= 0) { this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(t); this.deathA(t.id) }

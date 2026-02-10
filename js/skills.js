@@ -22,12 +22,10 @@ const SKILLS = {
     id: 'lancer_pierce', name: '관통', icon: '🔱',
     desc: '일직선 3칸 관통 데미지', cost: 5, costType: 'fury', pierceLen: 3
   },
-  assassin: [
-    { id: 'assassin_ambush', name: '습격', icon: '⚡',
-      desc: '2칸 범위 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy', ambushRange: 2 },
-    { id: 'assassin_assassinate', name: '암살', icon: '💀',
-      desc: '은신 겹침 상태에서 ATK×5 즉사급 공격', cost: 60, costType: 'energy' }
-  ],
+  assassin: {
+    id: 'assassin_assassinate', name: '암살', icon: '💀',
+    desc: '은신 겹침 상태에서 ATK×5 즉사급 공격', cost: 60, costType: 'energy'
+  },
   priest: {
     id: 'priest_massheal', name: '집단 치유', icon: '✨',
     desc: '6칸 내 모든 아군 체력 회복', cost: 50, costType: 'mana', healRange: 6
@@ -63,10 +61,31 @@ const SKILLS = {
   ]
 };
 
+// ── 습득형 스킬 (스킬북으로만 습득 가능) ────
+const LEARNABLE_SKILLS = {
+  assassin_ambush: {
+    id: 'assassin_ambush', name: '습격', icon: '⚡',
+    desc: '2칸 범위 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy', ambushRange: 2,
+    cls: 'assassin'
+  }
+};
+
 // ── 다중 스킬 헬퍼 ────────────────────────
 function getSkills(cls) {
   const sk = SKILLS[cls];
   return !sk ? [] : Array.isArray(sk) ? sk : [sk];
+}
+
+// ── 유닛 전체 스킬 (기본 + 습득형) ─────────
+function getUnitSkills(u) {
+  var skills = getSkills(u.cls).slice();
+  Object.keys(LEARNABLE_SKILLS).forEach(function(skId) {
+    var lsk = LEARNABLE_SKILLS[skId];
+    if (lsk.cls === u.cls && u.skillLv && u.skillLv[skId] >= 1) {
+      skills.push(lsk);
+    }
+  });
+  return skills;
 }
 
 // ── 은신 판정 ──────────────────────────────
@@ -94,24 +113,19 @@ const FURY_PASSIVES = {
     }
   },
   knight: {
-    name: '몸부림',
-    icon: '🔥',
-    desc: '인접 공격자에게 ATK×50% 반격',
+    name: '철의 의지',
+    icon: '🛡️',
+    desc: '2턴간 방어력 1.5배',
     trigger(defender, attacker, G) {
-      if (mh(attacker.x, attacker.y, defender.x, defender.y) > 1) return; // 인접만
-      const cd = Math.max(1, Math.round(defender.atk * 0.5) - attacker.def);
-      attacker.hp = Math.max(0, attacker.hp - cd);
-      G.floatT(attacker.x, attacker.y, `-${cd}`, 'damage');
-      G.shakeU(attacker.id);
-      G.sfxAtk(defender.cls);
-      G.vfxSpawn(
-        G.uSX(attacker.x, attacker.y) + UCX,
-        G.uSY(attacker.x, attacker.y) + UCY,
-        { count: 10, colors: ['#ff8800','#ffcc44','#fff'], shape: 'spark',
-          speed: 3, spread: 10, decay: 0.03, size: 3 }
-      );
+      defender.defBuff = 2;
       defender.res = 0;
-      G.floatT(defender.x, defender.y, t('passives.counter_activated'), 'heal');
+      G.floatT(defender.x, defender.y, t('passives.iron_will_activated'), 'heal');
+      G.vfxSpawn(
+        G.uSX(defender.x, defender.y) + UCX,
+        G.uSY(defender.x, defender.y) + UCY,
+        { count: 15, colors: ['#4488ff','#88bbff','#ffffff'], shape: 'spark',
+          speed: 3, spread: 12, decay: 0.025, size: 4 }
+      );
     }
   }
 };
@@ -122,7 +136,10 @@ function calcDmg(attacker, target) {
   let atk = attacker.atk;
   // 무장해제 디버프: ATK 50% 감소
   if (attacker.disarmed > 0) atk = Math.round(atk * 0.5);
-  let dmg = Math.max(1, atk - target.def);
+  let def = target.def;
+  // 철의 의지 버프: DEF 1.5배
+  if (target.defBuff > 0) def = Math.round(def * 1.5);
+  let dmg = Math.max(1, atk - def);
   // 광폭 버프 적용
   if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
   // 고양 버프: 같은 팀 주술사가 고양 채널링 중이면 +25%
@@ -154,6 +171,7 @@ function procFury(attacker, target, G) {
 // 매 턴 시작 시 호출: 버프 카운트다운
 function tickBuffs(unit) {
   if (unit.furyBuff > 0) unit.furyBuff--;
+  if (unit.defBuff > 0) unit.defBuff--;
   if (unit.disarmed > 0) unit.disarmed--;
 }
 
@@ -168,6 +186,10 @@ function getSkillBuffs(unit) {
   // 광폭 활성 표시
   if (unit.furyBuff > 0) {
     buffs.push({ icon: '💢', type: 'buff', turns: unit.furyBuff });
+  }
+  // 철의 의지 활성 표시
+  if (unit.defBuff > 0) {
+    buffs.push({ icon: '🛡️', type: 'buff', turns: unit.defBuff });
   }
   // 무장해제 디버프 표시
   if (unit.disarmed > 0) {

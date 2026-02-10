@@ -180,7 +180,7 @@ Object.assign(G, {
 			wrap.appendChild(sh);
 			// 이름 (레벨 + 개인 이름)
 			const nm = document.createElement('div'); nm.className = 'hu-name';
-			const charName = t('character.names')[ch.nameId] || '???';
+			const charName = ch.customName || t('character.names')[ch.nameId] || '???';
 			nm.textContent = `Lv.${ch.lv} ${charName}`;
 			wrap.appendChild(nm);
 			ct.appendChild(wrap);
@@ -333,8 +333,8 @@ Object.assign(G, {
 		filtered.sort((a, b) => {
 			const ci = clsOrder.indexOf(a.cls) - clsOrder.indexOf(b.cls); if (ci !== 0) return ci;
 			if (b.lv !== a.lv) return b.lv - a.lv;
-			const aName = names[a.nameId] || '';
-			const bName = names[b.nameId] || '';
+			const aName = a.customName || names[a.nameId] || '';
+			const bName = b.customName || names[b.nameId] || '';
 			return aName.localeCompare(bName);
 		});
 		// ── 로스터 리스트 렌더링 ──
@@ -348,7 +348,7 @@ Object.assign(G, {
 			const expNeed = atMax ? 1 : expForLevel(ch.lv);
 			const expPct = atMax ? 100 : Math.min(100, Math.round(((ch.exp || 0) / expNeed) * 100));
 			const row = document.createElement('div'); row.className = 'rl-row' + (sel ? ' selected' : '');
-			const charName = t('character.names')[ch.nameId] || d.name;
+			const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
 			row.innerHTML =
 				`<div class="rl-icon">${clsIcon(ch.cls, 30)}</div>` +
 				`<div class="rl-info">` +
@@ -425,6 +425,19 @@ Object.assign(G, {
 			this.addGold(reward);
 			if (this.cStage) this.cleared.add(this.cStage.id);
 			this._saveGold();
+			// 습득형 스킬북 드랍 (5% 확률)
+			if (typeof LEARNABLE_SKILLS !== 'undefined' && Math.random() < 0.05) {
+				const lsKeys = Object.keys(LEARNABLE_SKILLS);
+				if (lsKeys.length) {
+					const sk = LEARNABLE_SKILLS[lsKeys[Math.floor(Math.random() * lsKeys.length)]];
+					try {
+						const inv = JSON.parse(localStorage.getItem('game_inventory')) || [];
+						inv.push({ id: sk.id, cls: sk.cls, lv: 1 });
+						localStorage.setItem('game_inventory', JSON.stringify(inv));
+						this._droppedBook = sk.id;
+					} catch(_) {}
+				}
+			}
 		}
 		this.units.filter(u => u.team === 'ally' && u.hp <= 0 && u.uid).forEach(u => {
 			ROSTER.markDead(u.uid);
@@ -466,7 +479,7 @@ Object.assign(G, {
 			const cost = this._reviveCost(ch);
 			const canAfford = this.gold >= cost;
 			const el = document.createElement('div'); el.className = 'sanc-card';
-			const charName = t('character.names')[ch.nameId] || d.name;
+			const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
 			el.innerHTML = `<div class="sanc-icon">${clsIcon(ch.cls, 28)}</div>` +
 				`<div class="sanc-info"><div class="sanc-name">${charName} <span style="color:#64748b;font-size:10px">Lv.${ch.lv}</span></div>` +
 				`<div class="sanc-stats">HP ${ch.hp} · ATK ${ch.atk} · DEF ${ch.def}</div></div>` +
@@ -686,7 +699,7 @@ Object.assign(G, {
 		let h = '<div class="potion-target-list">';
 		alive.forEach(ch => {
 			const d = CD[ch.cls];
-			const charName = t('character.names')[ch.nameId] || d.name;
+			const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
 			const atMax = ch.lv >= MAX_LEVEL;
 			const expNeed = atMax ? 0 : expForLevel(ch.lv);
 			const expPct = atMax ? 100 : Math.min(100, Math.round((ch.exp || 0) / expNeed * 100));
@@ -714,7 +727,7 @@ Object.assign(G, {
 				// 레벨업 알림
 				if (r.leveled > 0) {
 					const ch = ROSTER.getChar(uid); const d = CD[ch.cls];
-					const charName = t('character.names')[ch.nameId] || d.name;
+					const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
 					setTimeout(() => {
 						this._showConfirm(`${d.icon} ${charName}\nLv.${r.prevLv} → Lv.${ch.lv}${r.leveled > 1 ? ' (' + r.leveled + '단계 레벨업!)' : ''}`, null, null);
 					}, 100);
@@ -737,7 +750,7 @@ Object.assign(G, {
 		novices.forEach(ch => {
 			const grade = ROSTER.potGrade(ch.uid);
 			const gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
-			const charName = t('character.names')[ch.nameId];
+			const charName = ch.customName || t('character.names')[ch.nameId] || '???';
 			h += `<div class="pt-btn" data-uid="${ch.uid}">` +
 				`<span class="pt-icon">${clsIcon(ch.cls, 20)}</span>` +
 				`<span class="pt-info">${charName} Lv.${ch.lv}</span>` +
@@ -777,7 +790,7 @@ Object.assign(G, {
 				`</div>`;
 		});
 		h += '</div>';
-		const charName = t('character.names')[ch.nameId] || '???';
+		const charName = ch.customName || t('character.names')[ch.nameId] || '???';
 		document.getElementById('modal-sub').innerHTML =
 			`${clsIcon(ch.cls, 24)} <b>${charName}</b> (Lv.${ch.lv})<br>` +
 			`<span style="color:var(--dim);font-size:10px">${t('class_change.warning_irreversible')}</span><br><br>` + h;
@@ -802,7 +815,7 @@ Object.assign(G, {
 		const newD = CD[newCls];
 		const grade = ROSTER.potGrade(uid);
 		const preview = ROSTER.previewClassChange(uid, newCls);
-		const charName = t('character.names')[ch.nameId] || '???';
+		const charName = ch.customName || t('character.names')[ch.nameId] || '???';
 		const origClass = ch.cls;
 		this._showConfirm(
 			`${oldD.icon} ${charName} (Lv.${ch.lv} ${grade}${t('class_change.grade_suffix')})\n` +
@@ -820,7 +833,7 @@ Object.assign(G, {
 				this._renderShop();
 				setTimeout(() => {
 					const updCh = ROSTER.getChar(uid);
-					const updCharName = t('character.names')[updCh.nameId] || '???';
+					const updCharName = updCh.customName || t('character.names')[updCh.nameId] || '???';
 					this._showConfirm(
 						`${newD.icon} ${updCharName}\n` +
 						`${t('class_change.success', { oldClass: t('classes.' + origClass), newClass: t('classes.' + newCls) })}\n\n` +
@@ -925,7 +938,7 @@ Object.assign(G, {
 		const d = CD[ch.cls];
 
 		// 4. 확인 모달
-		const dismissCharName = t('character.names')[ch.nameId] || d.name;
+		const dismissCharName = ch.customName || t('character.names')[ch.nameId] || d.name;
 		this._showConfirm(
 			`${d.icon} ${dismissCharName} (Lv.${ch.lv} ${grade}${t('class_change.grade_suffix')})\n\n` +
 			`정말로 방출하시겠습니까?\n+${price}G을 받습니다.`,

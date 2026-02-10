@@ -1,0 +1,95 @@
+/* ═══ Shop List (2-column grid) ═══ */
+#shop-list{display:grid !important;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:330px;margin:0 auto 16px;min-height:60px}
+
+/* ═══ Shop HUD ═══ */
+.shop-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:12px}
+.shop-hud-gold{}
+.shop-info-row{display:flex;align-items:baseline;justify-content:space-between;width:100%;max-width:330px;margin-bottom:8px}
+.shop-info-title{margin-top:14px; font-size:14px;font-weight:900;color:var(--text)}
+.shop-info-timer{font-size:11px;font-weight:700;color:#60a5fa}
+
+/* ═══ Shop Card ═══ */
+.shop-card{width:100%;background:rgba(255,255,255,.04);border:2px solid rgba(34,197,94,.15);
+  border-radius:10px;padding:10px 8px;text-align:center;position:relative;transition:all .2s}
+.shop-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.shop-card.sold{opacity:.4;pointer-events:none}
+.shop-grade{position:absolute;top:4px;right:6px;font-weight:900;font-size:12px;text-shadow:0 0 6px rgba(0,0,0,.5)}
+.shop-icon{font-size:28px;margin-bottom:4px}
+.shop-name{font-weight:900;font-size:12px;color:var(--text)}
+.shop-cls{font-size:9px;color:var(--dim);margin-top:2px}
+.shop-stats{font-size:9px;color:var(--dim);margin-top:3px}
+.shop-pot{font-size:8px;color:#64748b;margin-top:3px}
+.shop-btn{font-weight:700;font-size:10px;padding:5px 12px;border-radius:5px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;margin-top:6px;transition:all .15s}
+.shop-btn:hover{transform:scale(1.05)}.shop-btn.disabled{opacity:.3;cursor:default}
+.shop-btn.sold-btn{background:#475569}
+
+
+/* ═══ Potion Card ═══ */
+.potion-card{border-color:rgba(167,139,250,.2)!important}
+.potion-card:hover{border-color:#a78bfa!important}
+.potion-btn{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important}
+
+/* ═══ Shop Tabs ═══ */
+.shop-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.shop-tabs{display:flex;gap:6px;max-width:330px;width:100%}
+.shop-tab-btn{flex:1;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;transition:all .2s}
+.shop-tab-btn:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+.shop-tab-btn.active{color:#fff;background:rgba(96,165,250,.2);border-color:#60a5fa}
+
+/* ═══ Potion Modal ═══ */
+.potion-target-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:4px}
+.pt-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .15s}
+.pt-btn:hover{border-color:var(--gold);background:rgba(240,192,64,.08)}
+.pt-btn.pt-max{opacity:.4;cursor:default;pointer-events:none}
+.pt-icon{font-size:18px}.pt-info{flex:1;font-size:11px;font-weight:700;text-align:left}
+.pt-exp{font-size:9px;color:#a78bfa}
+
+/* ═══ Gacha Pity (spans 2 cols) ═══ */
+.gacha-pity{grid-column:1/-1;background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:10px;padding:10px 14px;text-align:center}
+.gacha-pity-label{font-size:11px;font-weight:700;color:#f0c040;margin-bottom:6px}
+.gacha-pity-bar{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.gacha-pity-fill{height:100%;background:linear-gradient(90deg,#f0c040,#ef4444);border-radius:4px;transition:width .3s}
+
+/* ═══ Gacha Card ═══ */
+.gacha-card{display:flex;flex-direction:column;justify-content:space-between;
+  background:rgba(255,255,255,.04);border:2px solid rgba(96,165,250,.2);
+  border-radius:12px;padding:14px 10px;text-align:center}
+.gacha-card.gacha-multi{border-color:rgba(167,139,250,.3)}
+.gacha-icon{font-size:30px;margin-bottom:4px}
+.gacha-title{font-size:12px;font-weight:900;color:var(--text);margin-bottom:3px}
+.gacha-desc{font-size:9px;color:var(--dim);margin-bottom:8px;flex:1}
+.gacha-btn{font-weight:700;font-size:11px;padding:8px 10px;border-radius:6px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;transition:all .15s;width:100%}
+.gacha-btn:hover{transform:scale(1.05)}
+.gacha-btn.disabled{opacity:.3;cursor:default}
+.gacha-btn-multi{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important}
+
+/* ═══ Gacha Rates (spans 2 cols) ═══ */
+.gacha-rates-full{grid-column:1/-1;text-align:center;padding:6px 0}
+.gacha-rate-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;font-size:9px;font-weight:700}
+
+/* ═══ Gacha Results Modal ═══ */
+.gacha-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:50vh;overflow-y:auto;padding:4px}
+.gacha-result-card{background:rgba(255,255,255,.06);border:2px solid;border-radius:8px;padding:8px 6px;text-align:center}
+.gr-rarity{font-size:8px;font-weight:900;text-transform:uppercase;margin-bottom:2px}
+.gr-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px}
+.gr-slot{font-size:8px;color:var(--dim)}
+.gr-stats{font-size:8px;color:#4ade80;margin-top:3px}
+.gr-set{font-size:8px;font-weight:700;margin-top:2px}
+
+/* ═══ PC (1024px+) ═══ */
+@media(min-width:1024px){
+  .shop-hud{max-width:420px}
+  .shop-info-row{max-width:420px}
+  .shop-info-title{font-size:17px}
+  .shop-info-timer{font-size:13px}
+  #shop-list{max-width:420px}
+  .shop-card{width:100%;padding:14px 10px}
+  .shop-icon{font-size:36px}.shop-name{font-size:14px}
+.pt-btn{padding:10px 14px}
+  .pt-icon{font-size:22px}.pt-info{font-size:13px}
+  .pt-exp{font-size:11px}
+}

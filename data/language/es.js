@@ -15,13 +15,17 @@ window._LANG_es = {
         "max": "MAX",
         "turn": "Turno",
         "wave": "Ola",
-        "select_unit": "Selecciona una unidad"
+        "select_unit": "Selecciona una unidad",
+        "move": "Mov",
+        "range": "Rango"
     },
     "nav": {
         "stage": "Escenario",
         "party": "Equipo",
         "sanctuary": "Santuario",
+        "academy": "Academia",
         "shop": "Tienda",
+        "equip": "Equipar",
         "compendium": "Compendio",
         "settings": "Configuración",
         "lobby": "Lobby"
@@ -129,12 +133,14 @@ window._LANG_es = {
     },
     "party": {
         "title": "Composición del Equipo",
-        "subtitle": "Compón un equipo de 5-10 miembros del clan",
-        "member_count": "{current} / 10",
+        "subtitle": "Compón un equipo de 5 miembros del clan",
+        "member_count": "{current} / 5",
         "start_battle": "▶ Atacar",
         "filter_all": "Todo",
         "release": "Liberar",
-        "potential_stats": "Potencial HP+{hp} ATK+{atk} DEF+{def}"
+        "potential_stats": "Potencial HP+{hp} ATK+{atk} DEF+{def}",
+        "rename": "Renombrar",
+        "rename_prompt": "Ingrese nuevo nombre (máx 10 caracteres)"
     },
     "stage": {
         "title": "Escenario",
@@ -154,10 +160,20 @@ window._LANG_es = {
         "subtitle_item": "Compra objetos",
         "subtitle_job": "Selecciona una clase",
         "subtitle_gold": "Compra oro",
+        "subtitle_gacha": "Consigue equipo",
         "tab_mercenary": "Mercenario",
         "tab_item": "Objeto",
+        "tab_gacha": "Gacha",
         "tab_job": "Clase",
         "tab_gold": "Oro",
+        "gacha_single": "Tirada Simple",
+        "gacha_single_desc": "Obtén 1 equipo aleatorio",
+        "gacha_multi": "Tirada 10+1",
+        "gacha_multi_desc": "Obtén 11 equipos (último Raro o superior garantizado)",
+        "gacha_pull_1": "{gold}O Tirada Simple",
+        "gacha_pull_10": "{gold}O Tirada 10+1",
+        "gacha_pity": "Piedad {current} / {max} (Legendario garantizado)",
+        "gacha_results": "Resultados",
         "recruit": "Reclutar {gold}O",
         "buy": "Comprar {gold}O",
         "recruit_complete": "Reclutamiento Completo",
@@ -168,14 +184,54 @@ window._LANG_es = {
         "class_change_desc": "Cambiar a {class}",
         "potion_small": "Poción de EXP Pequeña",
         "potion_medium": "Poción de EXP Mediana",
-        "potion_large": "Poción de EXP Grande"
+        "potion_large": "Poción de EXP Grande",
+        "skillbook_only": "Libro de Hab.",
+        "skillbook_buy_confirm": "\u00bfComprar libro de {skill} por {gold}O?"
+    },
+    "academy": {
+        "title": "Academia",
+        "subtitle": "Promociona novatos a clases m\u00e1s fuertes",
+        "class_change_btn": "{cost}O Promover",
+        "no_novice": "No hay novatos disponibles para promoci\u00f3n",
+        "cost_label": "\u00bfGastar {cost}O para cambiar de clase?",
+        "tab_classchange": "Cambio de Clase",
+        "tab_skillbook": "Libros de Hab.",
+        "skillbook_subtitle": "Usa libros de habilidades para mejorar las habilidades de tus miembros",
+        "no_skillbooks": "No hay libros de habilidades disponibles",
+        "skillbook_use": "Usar",
+        "skillbook_select_target": "Seleccionar objetivo del libro de habilidades",
+        "skillbook_no_target": "No hay objetivos elegibles disponibles",
+        "skillbook_confirm": "\u00bfUsar libro de {skill} en {name}?",
+        "skillbook_preview": "Nivel de habilidad: {from} \u2192 {to}",
+        "skillbook_success": "\u00a1{skill} de {name} ha subido a Nv.{lv}!",
+        "skillbook_max_lv": "Nivel M\u00e1ximo",
+        "skillbook_learn_confirm": "\u00bfEnse\u00f1ar {skill} a {name}?",
+        "skillbook_learn_success": "\u00a1{name} ha aprendido {skill}!",
+        "skillbook_drop": "Libro de habilidad obtenido: {skill}"
     },
     "sanctuary": {
         "title": "Santuario",
         "subtitle": "Puedes resucitar unidades fallecidas por oro",
         "no_dead_units": "No hay unidades muertas",
         "resurrect": "Resucitar {gold}O",
-        "resurrect_button": "{cost}O Resucitar"
+        "resurrect_button": "{cost}O Resucitar",
+        "tab_resurrect": "Resucitar",
+        "tab_promote": "Promover",
+        "promote_subtitle": "Sacrifica un miembro del clan de la misma clase para subir de grado",
+        "promote_btn": "Promover",
+        "promote_no_sacrifice": "No hay miembros del clan de la misma clase disponibles como sacrificio",
+        "promote_no_sacrifice_hint": "Selecciona un miembro del clan de la misma clase como sacrificio",
+        "promote_max_grade": "Grado M\u00e1ximo",
+        "promote_select_sacrifice": "Seleccionar Sacrificio",
+        "promote_confirm": "\u00bfSacrificar a {name} para promover a {target} de {from}\u2192{to}?",
+        "promote_warning": "El sacrificio se perder\u00e1 permanentemente",
+        "promote_success": "\u00a1El grado de {name} ha subido a {grade}!",
+        "promote_in_party": "(Equipo)",
+        "no_promotable": "No hay miembros del clan disponibles para promoci\u00f3n",
+        "promote_confirm_multi": "\u00bfSacrificar {count} miembro(s) para promover a {target} de {from}\u2192{to}?",
+        "skill_inherit": "Herencia de Habilidades",
+        "skill_overflow": "Las habilidades de nivel m\u00e1ximo se convertir\u00e1n en libros de habilidades",
+        "skillbook_gained": "Libro de habilidades obtenido: {skill}"
     },
     "class_change": {
         "no_novice": "No hay novatos disponibles para cambio de clase.",
@@ -323,13 +379,13 @@ window._LANG_es = {
     },
     "passives": {
         "fury_buff": "Furia",
-        "parry": "Parada",
+        "iron_will": "Voluntad de Hierro",
         "fury_activated": "¡Furia Activada!",
-        "counter_activated": "¡Represalia!"
+        "iron_will_activated": "¡Voluntad de Hierro!"
     },
     "passives_desc": {
         "fury_buff": "Aumentar daño ataque 1.5x durante 2 turnos",
-        "parry": "Contraataque atacante adyacente con ATK×50%"
+        "iron_will": "Aumentar defensa 1.5x durante 2 turnos"
     },
     "items": {
         "potion_small": "Poción de Experiencia Pequeña",
@@ -388,6 +444,74 @@ window._LANG_es = {
         "stage_difficulty_desc": "La dificultad se calcula en función del escalado de estadísticas de enemigos (sm.hp, sm.atk) y cantidad de enemigos.<br>Diseñado con dificultad progresivamente creciente, siendo la Etapa 10 la más difícil.<br><br><span style=\"color:var(--gold);font-weight:700\">Etapa 1-2:</span> Dificultad principiante (0.65x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 3-4:</span> Dificultad intermedia (0.8~0.9x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 5-6:</span> Dificultad intermedia-avanzada (0.95x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 7-8:</span> Dificultad avanzada (1.0x)<br><span style=\"color:var(--gold);font-weight:700\">Etapa 9-10:</span> Dificultad experta (1.1~1.15x)",
         "resource_system_title": "🔄 Detalles del Sistema de Recursos",
         "resource_system_desc": "<span style=\"color:var(--fury);font-weight:700\">Furia</span> — MÁX: 10~5 | +1 en ataque, +2 en golpe | Habilidades: Golpe(3), Cambio(1), Penetración(5)<br>Pasivo: guerrero Frenesí(ATK×1.5), caballero Contraataque(Enemigo adyacente ATK×50% contraataque)<br><br><span style=\"color:var(--energy);font-weight:700\">Energía</span> — MÁX: 100 | Auto-recuperación +resRec por turno | Habilidades: Salto(20), Asalto(40), Asesinato(60)<br>Bonificación: Los asesinos se recuperan 2x de energía en bosques<br><br><span style=\"color:var(--mana);font-weight:700\">Maná</span> — MÁX: 100~120 | Comienza en MÁX en batalla | Recupera +resRec por turno<br>Usos: Bola de Fuego(40), Curación Grupal(50)"
+    },
+    "equip": {
+        "title": "Equipamiento",
+        "subtitle": "Equipa a tus personajes",
+        "select_char": "Selecciona un personaje",
+        "slots_title": "Ranuras de Equipo",
+        "inventory": "Inventario",
+        "no_items": "Sin equipamiento",
+        "equip_btn": "Equipar",
+        "equipped": "Equipado",
+        "sell_btn": "Vender {gold}O",
+        "sell_confirm": "Vender {name}?\n+{gold}O",
+        "filter_armor": "Armadura",
+        "filter_accessory": "Accesorio",
+        "rarity": {
+            "common": "Común",
+            "uncommon": "Poco Común",
+            "rare": "Raro",
+            "epic": "Épico",
+            "legendary": "Legendario"
+        },
+        "slot": {
+            "weapon": "Arma",
+            "offhand": "Secundaria",
+            "helmet": "Casco",
+            "armor": "Armadura",
+            "boots": "Botas",
+            "necklace": "Collar",
+            "earring": "Arete",
+            "ring": "Anillo"
+        },
+        "item": {
+            "sword_1h": "Espada",
+            "dagger": "Daga",
+            "mace": "Maza",
+            "wand": "Varita",
+            "fists": "Puños",
+            "greatsword": "Espadón",
+            "bow": "Arco",
+            "staff": "Bastón",
+            "spear": "Lanza",
+            "shield": "Escudo",
+            "tome": "Tomo",
+            "buckler": "Broquel",
+            "plate_helm": "Yelmo de Placas",
+            "leather_cap": "Gorro de Cuero",
+            "cloth_hood": "Capucha de Tela",
+            "plate_armor": "Armadura de Placas",
+            "leather_armor": "Armadura de Cuero",
+            "cloth_robe": "Túnica de Tela",
+            "plate_boots": "Botas de Placas",
+            "leather_boots": "Botas de Cuero",
+            "cloth_shoes": "Zapatos de Tela",
+            "necklace_power": "Collar de Poder",
+            "necklace_guard": "Collar de Guardia",
+            "necklace_swift": "Collar de Rapidez",
+            "earring_power": "Arete de Poder",
+            "earring_guard": "Arete de Guardia",
+            "earring_swift": "Arete de Rapidez",
+            "ring_power": "Anillo de Poder",
+            "ring_guard": "Anillo de Guardia",
+            "ring_swift": "Anillo de Rapidez"
+        },
+        "set": {
+            "power": "Set de Poder",
+            "guard": "Set de Guardia",
+            "swift": "Set de Rapidez"
+        }
     },
     "character": {
         "names": [
