@@ -1,0 +1,66 @@
+/* ═══ Lobby ═══ */
+.lobby-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(240,192,64,.08),transparent 60%),
+  radial-gradient(ellipse at 30% 80%,rgba(59,130,246,.06),transparent 50%),
+  radial-gradient(ellipse at 70% 70%,rgba(239,68,68,.04),transparent 50%);pointer-events:none}
+.lobby-content{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;z-index:1; width: 100%;}
+.lobby-gold{}
+
+/* ═══ Clan Hideout ═══ */
+.clan-hideout{position:relative;width:100%;max-width:420px;height:100%;border-radius:12px;overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(255,160,40,.15),transparent 60%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0px,rgba(255,255,255,.02) 1px,transparent 1px,transparent 24px),
+    linear-gradient(180deg,#12100e 0%,#1a1410 30%,#221a12 60%,#2a1f15 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 -30px 40px -20px rgba(255,140,40,.06),0 4px 20px rgba(0,0,0,.4)}
+.clan-hideout::before{content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.35) 0%,transparent 15%,transparent 85%,rgba(0,0,0,.35) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 40%);
+  pointer-events:none;z-index:1}
+.hideout-torch{position:absolute;top:14%;width:6px;height:18px;border-radius:50% 50% 30% 30%;z-index:2;
+  background:radial-gradient(ellipse,#ff9922,#ff6600 60%,transparent 100%);
+  box-shadow:0 0 12px 4px rgba(255,140,40,.35),0 0 30px 8px rgba(255,100,20,.15);
+  animation:torchFlicker 1.5s ease-in-out infinite alternate}
+.hideout-torch.t-left{left:8%;top:50%;transform:translateY(-50%)}
+.hideout-torch.t-right{right:8%;top:50%;transform:translateY(-50%)}
+.hideout-torch.t-top-left{left:10%;top:12%}
+.hideout-torch.t-top-right{right:10%;top:12%}
+.hideout-torch.t-bottom-left{left:10%;bottom:10%;top:auto}
+.hideout-torch.t-bottom-right{right:10%;bottom:10%;top:auto}
+@keyframes torchFlicker{0%{opacity:.7;transform:scaleY(.9)}50%{opacity:1;transform:scaleY(1.1)}100%{opacity:.8;transform:scaleY(.95)}}
+.hideout-table{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:140px;height:140px;border-radius:50%;z-index:4;
+  background:radial-gradient(ellipse at 30% 30%,#8b6f47,#5c4a2f);
+  border:3px solid #3d2817;box-shadow:0 8px 16px rgba(0,0,0,.6),inset 0 1px 2px rgba(255,255,255,.1),inset 0 -2px 4px rgba(0,0,0,.5)}
+.hideout-unit{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.7));
+  transition:left 3.5s ease-in-out,top 3.5s ease-in-out}
+.hideout-unit .hu-shadow{width:20px;height:5px;background:rgba(0,0,0,.3);border-radius:50%;margin-top:1px}
+.hideout-unit .hu-name{font-size:12px;color:rgba(255,255,255,.5);margin-top:1px;white-space:nowrap;text-shadow:0 1px 2px #000;font-weight:700}
+@keyframes hideoutFloat{0%{transform:translateY(-8px) scale(1.01)}50%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(-8px) scale(1.01)}}
+@keyframes hideoutIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.hideout-label{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:4;
+  font-size:9px;color:rgba(255,255,255,.35);letter-spacing:2px;font-weight:700;white-space:nowrap}
+
+/* ═══ Lobby Popup Buttons ═══ */
+.lobby-popups{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:12px;z-index:10}
+.popup-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  width:60px;height:70px;padding:8px;border:2px solid rgba(240,192,64,.3);border-radius:10px;
+  background:linear-gradient(135deg,rgba(240,192,64,.1),rgba(240,192,64,.05));color:var(--text);
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);backdrop-filter:blur(4px)}
+.popup-btn:hover{border-color:rgba(240,192,64,.6);background:linear-gradient(135deg,rgba(240,192,64,.2),rgba(240,192,64,.1));
+  transform:translateY(-4px);box-shadow:0 6px 16px rgba(240,192,64,.2)}
+.popup-btn:active{transform:translateY(-2px);box-shadow:0 4px 8px rgba(240,192,64,.15)}
+.popup-icon{font-size:28px;display:block}
+.popup-label{font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.5px}
+.popup-btn:hover .popup-label{color:var(--gold)}
+
+/* ═══ PC (1024px+) ═══ */
+@media(min-width:1024px){
+  .clan-hideout{max-width:560px;height:320px;border-radius:14px}
+  .hideout-unit .hu-name{font-size:13px}
+  .hideout-label{font-size:11px}
+}

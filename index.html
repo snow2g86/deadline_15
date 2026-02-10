@@ -5,7 +5,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>DEADLINE 15</title>
-	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/lobby.css">
 	<script type="text/javascript" src="js/common/i18n.js"></script>
 	<script type="text/javascript" src="js/common/modal.js"></script>
 	<script type="text/javascript" src="data/jab.js"></script>
@@ -31,6 +32,17 @@
 				<span id="lobby-gold">0</span> G
 			</div>
 			<div class="clan-hideout" id="clan-hideout"></div>
+			<!-- 로비 팝업 버튼들 -->
+			<div class="lobby-popups">
+				<button class="popup-btn compendium-btn" onclick="location.href='compendium-class.html'" title="도감 보기">
+					<span class="popup-icon">📖</span>
+					<span class="popup-label">도감</span>
+				</button>
+				<button class="popup-btn balance-btn" onclick="location.href='class-balance-report.html'" title="밸런스 분석">
+					<span class="popup-icon">⚖️</span>
+					<span class="popup-label">밸런스</span>
+				</button>
+			</div>
 		</div>
 	</main>
 	<nav id="bottom-nav"></nav>
