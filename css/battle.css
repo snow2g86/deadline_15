@@ -2,8 +2,8 @@
 #top-bar{height:46px;min-height:46px;background:linear-gradient(180deg,#1a2340,#111827);
   border-bottom:2px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 8px;z-index:100}
 .tb-left,.tb-right{display:flex;align-items:center;gap:6px}
-#turn-indicator{font-family:'Cinzel',serif;font-weight:900;font-size:12px;
-  letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px;transition:all .3s}
+#turn-indicator{font-family:'Cinzel',serif;font-weight:900;font-size:11px;
+  letter-spacing:1.8px;text-transform:uppercase;padding:3px 9px;border-radius:4px;transition:all .3s}
 #turn-indicator.player{background:var(--blue);color:#fff}
 #turn-indicator.enemy{background:var(--red);color:#fff}
 #stage-info{font-size:10px;color:var(--gold);font-weight:700;text-align:center;line-height:1.3}
@@ -122,8 +122,8 @@
 
 /* ═══ Banners ═══ */
 #enemy-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-family:'Cinzel',serif;font-weight:900;font-size:15px;color:var(--red);
-  text-shadow:0 0 20px rgba(239,68,68,.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;letter-spacing:3px}
+  font-family:'Cinzel',serif;font-weight:900;font-size:13px;color:var(--red);
+  text-shadow:0 0 18px rgba(239,68,68,.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;letter-spacing:2.7px}
 #enemy-banner.show{opacity:1}
 #wave-banner{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);
   font-family:'Cinzel',serif;font-weight:900;font-size:12px;color:var(--gold);
@@ -237,6 +237,12 @@
 .unit-sprite.stunned .u-icon{filter:drop-shadow(0 0 4px rgba(255,100,100,.8))}
 .stun-label{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:700;white-space:nowrap;z-index:10;font-weight:bold}
 
+/* ═══ Unit Buff/Debuff Badges ═══ */
+.u-badges{position:absolute;top:-12px;left:50%;transform:translateX(-50%);display:flex;gap:1px;z-index:12;pointer-events:none}
+.u-badge{width:16px;height:16px;border-radius:50%;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.5)}
+.u-badge.buff{background:rgba(34,197,94,.7)}
+.u-badge.debuff{background:rgba(239,68,68,.7)}
+
 /* ═══ EXP Float Text ═══ */
 .float-text.exp{color:#a78bfa}
 
@@ -249,7 +255,7 @@
   /* Top Bar */
   #top-bar{height:58px;min-height:58px;padding:0 12px}
   .tb-left,.tb-right{gap:9px}
-  #turn-indicator{font-size:16px;padding:4px 14px;border-radius:5px;letter-spacing:2px}
+  #turn-indicator{font-size:14px;padding:4px 13px;border-radius:5px;letter-spacing:1.8px}
   #stage-info{font-size:14px}
   #stage-info .si-turn{font-size:12px}
   .cam-btn{width:42px;height:42px;font-size:18px;border-radius:8px}
@@ -300,7 +306,7 @@
   .float-text{font-size:19px}
 
   /* Enemy / Wave Banners */
-  #enemy-banner{font-size:30px;letter-spacing:6px}
+  #enemy-banner{font-size:27px;letter-spacing:5.4px}
   #wave-banner{font-size:22px;letter-spacing:4px}
 
   /* Turn Confirm */

@@ -57,10 +57,10 @@ function renderHideout() {
 		wrap.style.left = cx + '%';
 		wrap.style.top = cy + '%';
 		wrap.style.transform = 'translate(-50%,-50%)';
-		// 아이콘
-		var icon = document.createElement('span');
-		icon.style.fontSize = '28px';
-		icon.textContent = CLS_ICON[ch.cls] || '?';
+		// 캐릭터 이미지
+		var icon = document.createElement('div');
+		var suffix = (ch.gender || 'm') === 'f' ? '02' : '01';
+		icon.innerHTML = '<img src="image/character/' + ch.cls + '_' + suffix + '.png" width="40" style="image-rendering:pixelated">';
 		wrap.appendChild(icon);
 		// 그림자
 		var sh = document.createElement('div');
@@ -96,7 +96,8 @@ function ensureRoster() {
 		chars.push({
 			uid: nextId++, cls: 'novice', nameId: nameId, lv: 1, exp: 0, dead: false,
 			hp: nov.base.hp, atk: nov.base.atk, def: nov.base.def,
-			move: nov.base.move, range: nov.base.range, pot: rollPot(nov.growth)
+			move: nov.base.move, range: nov.base.range, pot: rollPot(nov.growth),
+			gender: Math.random() < 0.5 ? 'm' : 'f'
 		});
 	}
 	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
@@ -114,6 +115,17 @@ function renderGold() {
 var init = async function() {
 	await i18nInit();
 	ensureRoster();
+	// Migrate: add gender to existing characters without one
+	try {
+		var raw = localStorage.getItem('game_roster');
+		if (raw) {
+			var rd = JSON.parse(raw), changed = false;
+			rd.chars.forEach(function(c) {
+				if (!c.gender) { c.gender = Math.random() < 0.5 ? 'm' : 'f'; changed = true; }
+			});
+			if (changed) localStorage.setItem('game_roster', JSON.stringify(rd));
+		}
+	} catch(_) {}
 	renderBottomNav();
 	renderGold();
 	renderHideout();

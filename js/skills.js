@@ -206,6 +206,10 @@ function getSkillBuffs(unit) {
   if (!unit.channeling && G.units.some(u => u.team === unit.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
     buffs.push({ icon: '🔺', type: 'buff', turns: 0 });
   }
+  // 스턴 표시
+  if (unit.stunned > 0) {
+    buffs.push({ icon: '⚡', type: 'debuff', turns: unit.stunned });
+  }
   // 소환수 지속 시간 표시
   if (unit.isSummon && unit.summonTurns !== undefined) {
     buffs.push({ icon: '⏳', type: 'buff', turns: unit.summonTurns });

@@ -207,7 +207,7 @@ function renderResurrect() {
     el.className = 'sanc-card';
     var charName = ch.customName || names[ch.nameId] || d.icon;
     el.innerHTML =
-      '<div class="sanc-icon">' + charSprite(ch.cls, 28) + '</div>' +
+      '<div class="sanc-icon">' + charSprite(ch.cls, 28, ch.gender) + '</div>' +
       '<div class="sanc-info"><div class="sanc-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
       '<div class="sanc-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div></div>' +
       '<button class="sanc-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
@@ -264,7 +264,7 @@ function renderPromote() {
     var el = document.createElement('div');
     el.className = 'promote-card';
     el.innerHTML =
-      '<div class="sanc-icon">' + charSprite(ch.cls, 28) + '</div>' +
+      '<div class="sanc-icon">' + charSprite(ch.cls, 28, ch.gender) + '</div>' +
       '<div class="sanc-info">' +
         '<div class="sanc-name">' + charName +
           ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
@@ -317,7 +317,7 @@ function showSacrificeModal(targetUid) {
 
   // 모달 내용 빌드
   var h = '<div class="sac-target-info">' +
-    charSprite(target.cls, 24) + ' <b>' + targetName + '</b> (Lv.' + target.lv +
+    charSprite(target.cls, 24, target.gender) + ' <b>' + targetName + '</b> (Lv.' + target.lv +
     ' <span style="color:' + GRADE_COLORS[targetGrade] + '">' + targetGrade + '</span>)' +
     '</div>' +
     '<div class="sac-progress" id="sac-progress">' +
@@ -334,7 +334,7 @@ function showSacrificeModal(targetUid) {
     var charName = ch.customName || names[ch.nameId] || d.icon;
     h += '<div class="sac-btn" data-uid="' + ch.uid + '" data-pts="' + pts + '">' +
       '<div class="sac-check" id="sac-chk-' + ch.uid + '"></div>' +
-      charSprite(ch.cls, 22) +
+      charSprite(ch.cls, 22, ch.gender) +
       '<div class="sac-info">' +
         '<div>' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
         ' <span style="color:' + gClr + ';font-weight:900;font-size:10px">' + grade + '</span></div>' +

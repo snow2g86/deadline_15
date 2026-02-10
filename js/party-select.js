@@ -289,7 +289,7 @@ function renderParty() {
     var eqAtk = eqB.atk ? '<span style="color:#4ade80">+' + eqB.atk + '</span>' : '';
     var eqDef = eqB.def ? '<span style="color:#4ade80">+' + eqB.def + '</span>' : '';
     row.innerHTML =
-      '<div class="rl-icon">' + charSprite(ch.cls, 30) + '</div>' +
+      '<div class="rl-icon">' + charSprite(ch.cls, 30, ch.gender) + '</div>' +
       '<div class="rl-info">' +
       '<div class="rl-top"><span class="rl-name">' + charName + '</span><button class="rl-rename" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">&#9998;</button><span class="rl-lv">Lv.' + ch.lv + '</span>' +
       '<span class="rl-grade" style="color:' + gClr + '">' + grade + '</span></div>' +
@@ -326,7 +326,7 @@ function renderParty() {
         var pd = JAB[pch.cls];
         s.classList.add('filled');
         s.innerHTML = '<span class="ps-num">' + (i + 1) + '</span>' +
-          charSprite(pch.cls, 20) +
+          charSprite(pch.cls, 20, pch.gender) +
           '<span class="ps-lv">Lv' + pch.lv + '</span><span class="ps-x">\u2715</span>';
         s.onclick = (function(idx) { return function() { pRemAt(idx); }; })(i);
       }
@@ -370,7 +370,7 @@ function renderChars() {
     var btn = document.createElement('div');
     btn.className = 'eq-char-btn' + (_selUid === ch.uid ? ' active' : '');
     btn.innerHTML =
-      charSprite(ch.cls, 22) +
+      charSprite(ch.cls, 22, ch.gender) +
       '<span class="eq-char-name">' + charName + '</span>' +
       '<span class="eq-char-lv">Lv.' + ch.lv + '</span>';
     btn.onclick = function() { _selUid = ch.uid; eqRenderAll(); };

@@ -57,7 +57,7 @@ function saveRoster(data) {
   try { localStorage.setItem(ROSTER_KEY, JSON.stringify(data)); } catch (_) {}
 }
 
-function addChar(cls, nameId, pot) {
+function addChar(cls, nameId, pot, gender) {
   var d = JAB[cls];
   if (!d) return null;
   var roster = getRoster();
@@ -68,7 +68,8 @@ function addChar(cls, nameId, pot) {
     lv: 1, exp: 0, dead: false,
     hp: d.base.hp, atk: d.base.atk, def: d.base.def,
     move: d.base.move, range: d.base.range,
-    pot: pot
+    pot: pot,
+    gender: gender || (Math.random() < 0.5 ? 'm' : 'f')
   };
   roster.chars.push(ch);
   saveRoster(roster);
@@ -147,7 +148,7 @@ function genShop() {
     var grade = avg >= 0.85 ? 'S' : avg >= 0.65 ? 'A' : avg >= 0.35 ? 'B' : 'C';
     var baseCost = { 'S': 900, 'A': 700, 'B': 550, 'C': 450 };
     var cost = Math.round(baseCost[grade] * (0.9 + avg * 0.2));
-    items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false });
+    items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false, gender: Math.random() < 0.5 ? 'm' : 'f' });
   }
   // 물약 5개
   var potionKeys = { 'exp_s': 'potion_small', 'exp_m': 'potion_medium', 'exp_l': 'potion_large' };
@@ -254,7 +255,7 @@ function renderCharCard(item, list) {
   var recruitBtn = item.sold ? t('shop.recruit_complete') : t('shop.recruit', { gold: item.cost });
   el.innerHTML =
     '<div class="shop-grade" style="color:' + gClr + '">' + grade + '</div>' +
-    '<div class="shop-icon">' + charSprite(item.cls, 28) + '</div>' +
+    '<div class="shop-icon">' + charSprite(item.cls, 28, item.gender) + '</div>' +
     '<div class="shop-name">' + item.name + '</div>' +
     '<div class="shop-cls">' + t('classes.' + item.cls) + ' \xb7 ' + t('class_desc.' + item.cls) + '</div>' +
     '<div class="shop-stats">' + t('common.hp') + ' ' + d.base.hp + ' ' + t('common.atk') + ' ' + d.base.atk + ' ' + t('common.def') + ' ' + d.base.def + '</div>' +
@@ -269,7 +270,7 @@ function renderCharCard(item, list) {
       var names = t('character.names');
       var nameIdx = names.indexOf(item.name);
       if (nameIdx < 0) nameIdx = Math.floor(Math.random() * names.length);
-      addChar(item.cls, nameIdx, item.pot);
+      addChar(item.cls, nameIdx, item.pot, item.gender);
       item.sold = true;
       saveShop();
       renderShop();
@@ -374,7 +375,7 @@ function showPotionModal(item) {
     var expNeed = atMax ? 0 : expForLevel(ch.lv);
     var expPct = atMax ? 100 : Math.min(100, Math.round((ch.exp || 0) / expNeed * 100));
     h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon">' + charSprite(ch.cls, 20) + '</span>' +
+      '<span class="pt-icon">' + charSprite(ch.cls, 20, ch.gender) + '</span>' +
       '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
       '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
       '</div>';

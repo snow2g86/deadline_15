@@ -113,7 +113,8 @@ function toBattleStats(uid) {
     role: ROLE_MAP[ch.cls],
     res: d.res === 'mana' ? d.maxRes : 0,
     maxRes: d.maxRes, resType: d.res, resRec: d.resRec,
-    skillLv: ch.skillLv || {}
+    skillLv: ch.skillLv || {},
+    gender: ch.gender || 'm'
   };
 }
 function saveBattle(data) { try { localStorage.setItem('game_battle', JSON.stringify(data)) } catch(e) {} }
@@ -194,7 +195,9 @@ const G = {
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[this.camDir];
         document.querySelector('#cam-dir .cd-label').textContent = CLAB[this.camDir];
         document.querySelectorAll('.unit-sprite').forEach(el => el.style.transition = 'none');
-        this.layW(); this.rTer(); this.rUnits(); this.rMM();
+        this.layW(); this.rTer(); this.rUnits();
+        this.units.forEach(u => { if (u._gdx || u._gdy) this._applyFace(u.id) });
+        this.rMM();
         requestAnimationFrame(() => requestAnimationFrame(() => {
             document.querySelectorAll('.unit-sprite').forEach(el => el.style.transition = '');
         }));
@@ -309,21 +312,22 @@ const G = {
         }
     },
     addU(team, src, x, y) {
-        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '';
+        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '', gender = 'm';
         if (team === 'ally' && typeof src === 'number') {
             const bs = toBattleStats(src);
             if (!bs) return null;
             cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
-            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; name = bs.name;
+            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; name = bs.name; gender = bs.gender || 'm';
         } else {
             cls = src; const d = JAB[cls], s = this.cStage;
             hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
             role = ROLE_MAP[cls]; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
             mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
+            gender = Math.random() < 0.5 ? 'm' : 'f';
         }
         const u = {
-            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, name,
+            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, name, gender,
             res: initRes, maxRes, resType, resRec,
             hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
@@ -482,7 +486,7 @@ Object.assign(G, {
 
 	_grantExp(u, action) { if (u.team === 'ally' && u.uid) { const e = actExp(this.cStage ? this.cStage.id : 1, action); if (e > 0) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) + e; this.floatT(u.x, u.y, `+${e} EXP`, 'exp'); } return e } return 0 },
 	doMv(u, tx, ty) {
-		this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y }; u.x = tx; u.y = ty; u.hm = true; u.mo = true; this.awPM = true; this.animU(u.id, tx, ty); this.sfxMove();
+		const _mxp = this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y, exp: _mxp }; this._mvU(u, tx, ty); u.hm = true; u.mo = true; this.awPM = true; this.sfxMove();
 		this.chkTrap(u);
 		const a = this.atkC(u); if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
 		else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
@@ -512,8 +516,11 @@ Object.assign(G, {
 	actCancel() {
 		if (!this.sel) return;
 		if (this.skillMenuOpen) { this.hideSkillMenu(); return }
-		if (!this.preMv) return; const u = this.sel; u.x = this.preMv.x; u.y = this.preMv.y; u.hm = false; u.mo = false;
-		this.animU(u.id, u.x, u.y); this.awPM = false; this.preMv = null; this.skillMode = false; this.skillMenuOpen = false; this.hideAM(); this.sfxUIClick(); setTimeout(() => { this.rTer(); this.clrSel() }, 340)
+		if (!this.preMv) return; const u = this.sel; const _gdx = u._gdx, _gdy = u._gdy;
+		if (this.preMv.exp && u.uid) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) - this.preMv.exp }
+		u.x = this.preMv.x; u.y = this.preMv.y; u.hm = false; u.mo = false;
+		this.animU(u.id, u.x, u.y); u._gdx = _gdx; u._gdy = _gdy; this._applyFace(u.id);
+		this.awPM = false; this.preMv = null; this.skillMode = false; this.skillMenuOpen = false; this.hideAM(); this.sfxUIClick(); setTimeout(() => { this.rTer(); this.clrSel() }, 340)
 	},
 	actSkill(idx) {
 		if (!this.sel || !this.awPM) return; const u = this.sel;
@@ -612,8 +619,7 @@ Object.assign(G, {
 			if (!tgt) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
 			const adj = this._findAdj(tgt.x, tgt.y, u);
 			if (!adj) { u.res += skObj.cost; this.floatT(u.x, u.y, t('messages.no_empty_tile'), 'damage'); u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			u.x = adj.x; u.y = adj.y; u.mo = true;
-			this.animU(u.id, adj.x, adj.y);
+			this._mvU(u, adj.x, adj.y); u.mo = true;
 			setTimeout(() => {
 				const dmg = Math.max(1, u.atk * 2 - tgt.def);
 				tgt.hp = Math.max(0, tgt.hp - dmg);
@@ -644,7 +650,7 @@ Object.assign(G, {
 			if (tgt.hp <= 0) { this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); this.units = this.units.filter(v => v.hp > 0) }
 			this._grantExp(u, 'attack');
 			const esc = this._findAdj(u.x, u.y, null);
-			if (esc) { u.x = esc.x; u.y = esc.y; u.mo = true; this.animU(u.id, esc.x, esc.y) }
+			if (esc) { this._mvU(u, esc.x, esc.y); u.mo = true }
 			u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
 			setTimeout(() => { this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500); return
 		}
@@ -776,7 +782,9 @@ Object.assign(G, {
 			const range = skObj.switchRange || 2;
 			const tgt = this.units.find(v => v.x === tx && v.y === ty && v.team === 'ally' && v.hp > 0 && v.id !== u.id && mh(u.x, u.y, v.x, v.y) <= range);
 			if (!tgt) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
-			[u.x, u.y, tgt.x, tgt.y] = [tgt.x, tgt.y, u.x, u.y];
+			const _ux = u.x, _uy = u.y;
+			u._gdx = tgt.x - u.x; u._gdy = tgt.y - u.y; tgt._gdx = u.x - tgt.x; tgt._gdy = u.y - tgt.y;
+			[u.x, u.y, tgt.x, tgt.y] = [tgt.x, tgt.y, _ux, _uy];
 			this.animU(u.id, u.x, u.y); this.animU(tgt.id, tgt.x, tgt.y);
 			this.floatT(u.x, u.y, t('messages.knight_switch'), 'heal');
 			this.vfxSpawn(this.uSX(u.x, u.y) + UCX, this.uSY(u.x, u.y) + UCY, { count: 10, colors: ['#4f4', '#4ff', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.02, size: 8 });
@@ -788,7 +796,7 @@ Object.assign(G, {
 		if (skObj.id === 'archer_dash') {
 			if (this.uAt(tx, ty)) { u.res += skObj.cost; u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM(); this.rUnits(); return }
 			const startX = u.x, startY = u.y;
-			u.x = tx; u.y = ty; u.mo = true;
+			u._gdx = tx - u.x; u._gdy = ty - u.y; u.x = tx; u.y = ty; u.mo = true;
 			this.vfxSpawn(this.uSX(startX, startY) + UCX, this.uSY(startY, startY) + UCY, { count: 12, colors: ['#ccf', '#99f', '#66f'], shape: 'spark', speed: 3, spread: 10, decay: 0.02, size: 2 });
 			this.animU(u.id, tx, ty);
 			this.floatT(u.x, u.y, t('messages.archer_leap'), 'heal');
@@ -922,8 +930,9 @@ Object.assign(G, {
 				el = document.createElement('div'); el.id = 'u-' + u.id; el.className = `unit-sprite ${u.team} spawning`;
 				if (u.team === 'ally') this.allyPos[u.id] = {x: u.x, y: u.y};
 				setTimeout(() => el.classList.remove('spawning'), 450);
-				el.innerHTML = `<div class="u-icon">${charSprite(u.cls, 36)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
-				w.appendChild(el)
+				el.innerHTML = `<div class="u-icon">${charSprite(u.cls, 36, u.gender)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
+				w.appendChild(el);
+				if (u.team === 'enemy') { u._gdx = 0; u._gdy = 1; this._applyFace(u.id) }
 			}
 			el.style.width = UW + 'px'; el.style.height = UH + 'px'; el.style.left = this.uSX(u.x, u.y) + 'px'; el.style.top = this.uSY(u.x, u.y) + 'px';
 			const v = this.g2v(u.x, u.y); el.style.zIndex = 100 + v.vc + v.vr;
@@ -935,6 +944,17 @@ Object.assign(G, {
 			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
 			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0);
 			let stunLabel = el.querySelector('.stun-label'); if (u.stunned > 0) { if (!stunLabel) { stunLabel = document.createElement('div'); stunLabel.className = 'stun-label'; el.appendChild(stunLabel) } stunLabel.textContent = u.stunned } else if (stunLabel) stunLabel.remove();
+			// Buff/debuff badges on unit sprite
+			const fx = [];
+			if (u.furyBuff > 0) fx.push({ icon: '💢', cls: 'buff' });
+			if (u.defBuff > 0) fx.push({ icon: '🛡️', cls: 'buff' });
+			if (u.disarmed > 0) fx.push({ icon: '🤛', cls: 'debuff' });
+			if (u.channeling) fx.push({ icon: u.channeling === 'shaman_curse' ? '☠️' : '🔺', cls: u.channeling === 'shaman_curse' ? 'debuff' : 'buff' });
+			let badges = el.querySelector('.u-badges');
+			if (fx.length) {
+				if (!badges) { badges = document.createElement('div'); badges.className = 'u-badges'; el.appendChild(badges) }
+				badges.innerHTML = fx.map(e => `<span class="u-badge ${e.cls}">${e.icon}</span>`).join('');
+			} else if (badges) badges.remove();
 			if (u.isSummon && u.summonTurns !== undefined) {
 				let turnLabel = el.querySelector('.summon-turns');
 				if (!turnLabel) {
@@ -1340,6 +1360,7 @@ Object.assign(G, {
 
     // Class-specific attack VFX
     vfxAtk(attacker, target) {
+        this.faceDir(attacker.id, target.x - attacker.x, target.y - attacker.y);
         this.atkAnimU(attacker.id);
         const ax = this.uSX(attacker.x, attacker.y) + UCX, ay = this.uSY(attacker.x, attacker.y) + UCY;
         const tx = this.uSX(target.x, target.y) + UCX, ty = this.uSY(target.x, target.y) + UCY;
@@ -1408,9 +1429,31 @@ Object.assign(G, {
         el.classList.add(type + '-flash'); setTimeout(() => el.classList.remove(type + '-flash'), 600);
     },
 
+    // Game-space direction → screen flip conversion
+    // isoX = (vc-vr)*TW, so screen_dx ∝ (dvc-dvr)
+    // camDir 0: dvc=dc,dvr=dr → sdx=dc-dr   camDir 1: dvc=-dr,dvr=dc → sdx=-dr-dc
+    // camDir 2: dvc=-dc,dvr=-dr → sdx=dr-dc  camDir 3: dvc=dr,dvr=-dc → sdx=dr+dc
+    _g2sx(gdx, gdy) { const d=gdx||0,r=gdy||0; switch(this.camDir){case 0:return d-r;case 1:return -r-d;case 2:return r-d;default:return r+d} },
+    faceDir(id, gdx, gdy) {
+        if (!gdx && !gdy) return;
+        const u = this.units.find(v => v.id === id);
+        if (u) { u._gdx = gdx; u._gdy = gdy }
+        this._applyFace(id);
+    },
+    _applyFace(id) {
+        const el = document.getElementById('u-' + id); if (!el) return;
+        const u = this.units.find(v => v.id === id); if (!u) return;
+        const sdx = this._g2sx(u._gdx, u._gdy);
+        if (!sdx) return;
+        const img = el.querySelector('.u-icon img');
+        if (img) img.style.transform = sdx < 0 ? 'scaleX(-1)' : '';
+    },
+    _mvU(u, nx, ny) { u._gdx = nx - u.x; u._gdy = ny - u.y; u.x = nx; u.y = ny; this.animU(u.id, nx, ny) },
     animU(id, x, y) {
         const el = document.getElementById('u-' + id); if (el) {
             el.classList.add('moving'); setTimeout(() => el.classList.remove('moving'), 340);
+            const u = this.units.find(v => v.id === id);
+            if (u && (u._gdx || u._gdy)) this._applyFace(id);
             el.style.left = this.uSX(x, y) + 'px'; el.style.top = this.uSY(x, y) + 'px';
             const v = this.g2v(x, y); el.style.zIndex = 100 + v.vc + v.vr
         }
@@ -1870,7 +1913,7 @@ Object.assign(G, {
       const nx=u.x+dx,ny=u.y+dy;if(ny!==14||nx<0||nx>=COLS)continue;
       const tr=this.ter[ny][nx];if(tr!=='wall')continue;
       if(Math.random()>0.3)continue;
-      u.x=nx;u.y=ny;this.animU(u.id,nx,ny);
+      this._mvU(u,nx,ny);
       this.floatT(nx,ny,t('messages.ladder'),'heal');this.sfxMove();
       await sl(340);
       this.onBreach(u);
@@ -1907,7 +1950,7 @@ Object.assign(G, {
       let bestMove=null,bestDist=Infinity;
       for(const m of mc){const d=mh(m.x,m.y,origPos.x,origPos.y);if(d<bestDist){bestDist=d;bestMove=m}}
       if(bestMove&&mh(bestMove.x,bestMove.y,origPos.x,origPos.y)<mh(u.x,u.y,origPos.x,origPos.y)){
-        u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);
+        this._mvU(u,bestMove.x,bestMove.y);
         this.floatT(u.x,u.y,t('messages.retreat'),'damage');await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);this.units=this.units.filter(v=>v.hp>0);setTimeout(()=>{this.rUnits()},500)}
         return
@@ -1951,7 +1994,7 @@ Object.assign(G, {
         score+=(m.y-u.y)*3;
         if(score>bestScore){bestScore=score;bestMove=m}
       }
-      if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+      if(bestMove){this._mvU(u,bestMove.x,bestMove.y);await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
         if(bestMove.y===14){this.onBreach(u)};return}
     }
@@ -1967,7 +2010,7 @@ Object.assign(G, {
           score-=mh(m.x,m.y,origPos.x,origPos.y)*profile.advanceBonus;
           if(score>bestScore){bestScore=score;bestMove=m}
         }
-        if(bestMove){u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+        if(bestMove){this._mvU(u,bestMove.x,bestMove.y);await sl(340);
           this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
           return
         }
@@ -1983,7 +2026,7 @@ Object.assign(G, {
         if(dist>bestDist&&dist<=u.range){bestDist=dist;bestMove=m}
       }
       if(bestMove&&bestDist>mh(u.x,u.y,cbt.x,cbt.y)){
-        u.x=bestMove.x;u.y=bestMove.y;this.animU(u.id,bestMove.x,bestMove.y);await sl(340);
+        this._mvU(u,bestMove.x,bestMove.y);await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
         return
       }
@@ -1995,7 +2038,7 @@ Object.assign(G, {
         let s=-(mh(c.x,c.y,gateTarget.x,gateTarget.y))*10+(c.y-u.y)*(5+profile.advanceBonus);
         if(s>bs2){bs2=s;bc2=c}
       }
-      if(bc2){u.x=bc2.x;u.y=bc2.y;this.animU(u.id,bc2.x,bc2.y);await sl(340);
+      if(bc2){this._mvU(u,bc2.x,bc2.y);await sl(340);
         this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
         return}
     }
@@ -2006,7 +2049,7 @@ Object.assign(G, {
       s+=(c.y-u.y)*(3+profile.advanceBonus*0.3);if(s>bs){bs=s;bc=c}
     }
 
-    if(bc){u.x=bc.x;u.y=bc.y;this.animU(u.id,bc.x,bc.y);await sl(340);
+    if(bc){this._mvU(u,bc.x,bc.y);await sl(340);
       this.chkTrap(u);if(u.hp<=0){this.vfxDeath(u);this.deathA(u.id);setTimeout(()=>{this.units=this.units.filter(v=>v.hp>0);this.rUnits()},500);return}
       if(bc.y===14){this.onBreach(u)}
     }

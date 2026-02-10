@@ -177,23 +177,22 @@ const G = {
     },
     // addU: ally는 uid(보유 캐릭터), enemy는 cls+스테이지 배율
     addU(team, src, x, y) {
-        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1;
+        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, gender = 'm';
         if (team === 'ally' && typeof src === 'number') {
-            // src = roster uid
             const bs = ROSTER.toBattleStats(src);
             if (!bs) return null;
             cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
-            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv;
+            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; gender = bs.gender || 'm';
         } else {
-            // src = cls string (enemy or legacy)
             cls = src; const d = CD[cls], s = this.cStage;
             hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
             role = d.role; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
             mhp = hp; initRes = d.res === 'mana' ? maxRes : 0;
+            gender = Math.random() < 0.5 ? 'm' : 'f';
         }
         const u = {
-            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role,
+            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, gender,
             res: initRes, maxRes, resType, resRec,
             hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
