@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>📖 직업 도감</title>
-<script src="js/classes.js"></script>
+<script src="data/jab.js"></script>
+<script src="js/skills.js"></script>
 <script defer src="js/common/i18n.js"></script>
+<script defer src="js/common/nav.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -93,7 +95,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 }
 </style>
 </head>
-<body>
+<body data-page="compendium-class">
 
 <div class="header">
   <h1 data-i18n="compendium.title_class">${t('compendium.title_class')}</h1>
@@ -118,10 +120,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <div class="sec-head">RESOURCE SYSTEM</div>
     <div id="res-blocks"></div>
 
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.resource_system_title">${t('guide.resource_system_title')}</div>
-      <div style="font-size:13px;color:#cbd5e1;line-height:1.7" data-i18n="guide.resource_system_desc">${t('guide.resource_system_desc')}</div>
-    </div>
   </div>
 
 </div><!-- end content -->
@@ -137,19 +135,163 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 </nav>
 
 <script>
-// i18n 초기화
-window.addEventListener('DOMContentLoaded', async () => {
-  // i18n은 G 객체가 필요하므로, 간단히 번역 키 사용을 위해만 로드
-  // 도감 페이지는 주로 정적 콘텐츠이므로, 필요 시에만 초기화
-});
+const PLAYER_CLASSES = ['warrior','knight','assassin','mage','archer','priest','novice','summoner','shaman','brawler','lancer','sapper'];
 
-// 안내문 렌더링
-function renderGuides(){
-  const resSection=document.querySelector('[data-i18n="guide.resource_system_title"]')?.parentElement;
-  if(resSection){
-    resSection.querySelector('div:first-child').textContent=t('guide.resource_system_title');
-    resSection.querySelector('div:last-child').innerHTML=t('guide.resource_system_desc');
-  }
+function getRole(cls) {
+  if (cls === 'priest') return 'healer';
+  return (JAB[cls]?.base.range || 1) > 1 ? 'ranged' : 'melee';
+}
+
+function roleStyle(role) {
+  const m = { melee:'background:rgba(248,113,113,.15);color:#f87171', ranged:'background:rgba(96,165,250,.15);color:#60a5fa', healer:'background:rgba(74,222,128,.15);color:#4ade80' };
+  return m[role] || '';
+}
+
+function resColor(res) {
+  return res === 'fury' ? 'var(--fury)' : res === 'energy' ? 'var(--energy)' : res === 'mana' ? 'var(--mana)' : 'var(--dim)';
+}
+
+// 클래스 카드 렌더링
+function renderClassCards() {
+  const container = document.getElementById('class-cards');
+  container.innerHTML = '';
+
+  PLAYER_CLASSES.forEach(cls => {
+    const d = JAB[cls]; if (!d) return;
+    const b = d.base;
+    const role = getRole(cls);
+    const skills = typeof getSkills === 'function' ? getSkills(cls) : [];
+    const passive = typeof FURY_PASSIVES !== 'undefined' ? FURY_PASSIVES[cls] : null;
+
+    // 스킬 HTML
+    let skillHtml = '';
+    if (skills.length) {
+      skillHtml = skills.map(sk =>
+        `<div style="display:flex;gap:6px;align-items:center;font-size:11px;padding:4px 0">
+          <span>${sk.icon}</span>
+          <span style="color:var(--gold);font-weight:700">${t('skills.'+sk.id) || sk.name}</span>
+          <span style="color:var(--dim);flex:1">${t('skills_desc.'+sk.id) || sk.desc}</span>
+          <span style="color:${resColor(sk.costType)};font-weight:700;font-size:10px">${sk.cost} ${t('resources.'+sk.costType) || sk.costType}</span>
+        </div>`
+      ).join('');
+    }
+
+    // 패시브 HTML
+    let passiveHtml = '';
+    if (passive) {
+      const pKey = cls === 'warrior' ? 'fury_buff' : 'iron_will';
+      passiveHtml = `
+        <div style="display:flex;gap:6px;align-items:center;font-size:11px;padding:4px 0;border-top:1px solid var(--border)">
+          <span>${passive.icon}</span>
+          <span style="color:var(--purple);font-weight:700">${t('passives.'+pKey) || passive.name}</span>
+          <span style="color:var(--dim);font-size:10px">패시브</span>
+          <span style="color:var(--dim);flex:1">${t('passives_desc.'+pKey) || passive.desc}</span>
+        </div>`;
+    }
+    // 암살자 은신 패시브
+    if (cls === 'assassin') {
+      passiveHtml = `
+        <div style="display:flex;gap:6px;align-items:center;font-size:11px;padding:4px 0;border-top:1px solid var(--border)">
+          <span>🌿</span>
+          <span style="color:var(--purple);font-weight:700">은신</span>
+          <span style="color:var(--dim);font-size:10px">패시브</span>
+          <span style="color:var(--dim);flex:1">숲 지형에서 적에게 보이지 않음</span>
+        </div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'class-card';
+    card.innerHTML = `
+      <div class="class-card-header">
+        <div class="class-icon">${d.icon}</div>
+        <div class="class-meta">
+          <div class="class-name">${t('classes.'+cls) || cls}</div>
+          <div class="class-desc">${t('class_desc.'+cls) || ''}</div>
+          <span class="role-tag" style="${roleStyle(role)}">${t('roles.'+role) || role}</span>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-item"><div class="stat-label">HP</div><div class="stat-value">${b.hp}</div></div>
+        <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-value">${b.atk}</div></div>
+        <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-value">${b.def}</div></div>
+        <div class="stat-item"><div class="stat-label">MOV</div><div class="stat-value">${b.move}</div></div>
+        <div class="stat-item"><div class="stat-label">RNG</div><div class="stat-value">${b.range}</div></div>
+      </div>
+
+      <div class="res-info">
+        <span style="color:${resColor(d.res)};font-weight:700">${t('resources.'+d.res) || d.res} ${d.maxRes}</span>
+        <span style="color:var(--dim)">${d.resRec > 0 ? '턴당 +'+d.resRec : d.res === 'fury' ? '전투 시 충전' : ''}</span>
+      </div>
+
+      ${(skillHtml || passiveHtml) ? `<div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:6px;padding:8px">${skillHtml}${passiveHtml}</div>` : ''}
+
+      <div class="growth-info">
+        <div class="growth-row">
+          <span style="color:var(--dim);width:32px">HP</span>
+          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
+            <div style="width:${(d.growth.hp[1]/18*100).toFixed(0)}%;height:100%;background:var(--green);border-radius:3px"></div>
+          </div>
+          <span style="color:var(--dim);width:48px;text-align:right">+${d.growth.hp[0]}~${d.growth.hp[1]}</span>
+        </div>
+        <div class="growth-row">
+          <span style="color:var(--dim);width:32px">ATK</span>
+          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
+            <div style="width:${(d.growth.atk[1]/5*100).toFixed(0)}%;height:100%;background:var(--red);border-radius:3px"></div>
+          </div>
+          <span style="color:var(--dim);width:48px;text-align:right">+${d.growth.atk[0]}~${d.growth.atk[1]}</span>
+        </div>
+        <div class="growth-row">
+          <span style="color:var(--dim);width:32px">DEF</span>
+          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
+            <div style="width:${(d.growth.def[1]/4*100).toFixed(0)}%;height:100%;background:var(--blue);border-radius:3px"></div>
+          </div>
+          <span style="color:var(--dim);width:48px;text-align:right">+${d.growth.def[0]}~${d.growth.def[1]}</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// 자원 시스템 렌더링
+function renderResBlocks() {
+  const container = document.getElementById('res-blocks');
+  container.innerHTML = '';
+
+  const groups = [
+    { res:'fury', color:'var(--fury)', label:'분노 (Fury)', desc:'공격 시 +1, 피격 시 +2 충전. MAX 도달 시 패시브 자동 발동 후 0으로 리셋.',
+      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'fury') },
+    { res:'energy', color:'var(--energy)', label:'에너지 (Energy)', desc:'매 턴 자동 회복. 액티브 스킬 사용 시 소모.',
+      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'energy') },
+    { res:'mana', color:'var(--mana)', label:'마나 (Mana)', desc:'매 턴 자동 회복. 마법/힐 스킬 사용 시 소모. 전투 시작 시 MAX.',
+      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'mana') }
+  ];
+
+  groups.forEach(g => {
+    const block = document.createElement('div');
+    block.className = 'res-block';
+    block.style.borderColor = g.color;
+
+    let metersHtml = g.classes.map(cls => {
+      const d = JAB[cls];
+      const pct = 100;
+      return `<div class="res-meter">
+        <div class="res-meter-label">${d.icon} ${t('classes.'+cls) || cls}</div>
+        <div class="res-meter-track">
+          <div class="res-meter-fill" style="width:${pct}%;background:${g.color};color:var(--bg)">${d.maxRes}</div>
+        </div>
+        <div class="res-meter-info">${d.resRec > 0 ? '턴당 +'+d.resRec : 'MAX '+d.maxRes}</div>
+      </div>`;
+    }).join('');
+
+    block.innerHTML = `
+      <div style="font-weight:900;font-size:15px;margin-bottom:4px;color:${g.color}">${g.label}</div>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:8px">${g.desc}</div>
+      ${metersHtml}
+    `;
+    container.appendChild(block);
+  });
 }
 
 // 탭 전환
@@ -163,10 +305,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // 초기화
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    renderGuides();
-  }, 300);
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof loadI18n === 'function') await loadI18n();
+  renderClassCards();
+  renderResBlocks();
 });
 </script>
 </body>

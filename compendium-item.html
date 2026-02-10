@@ -4,8 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🧪 아이템 도감</title>
-<script src="js/data.js"></script>
+<script src="data/jab.js"></script>
+<script>
+var EXP_POTIONS = [
+  { id: 'exp_s', name: '소형 경험치 물약', icon: '🧪', exp: 50, cost: 400, weight: 50 },
+  { id: 'exp_m', name: '중형 경험치 물약', icon: '⚗️', exp: 150, cost: 1000, weight: 35 },
+  { id: 'exp_l', name: '대형 경험치 물약', icon: '🏺', exp: 400, cost: 2400, weight: 15 }
+];
+</script>
 <script defer src="js/common/i18n.js"></script>
+<script defer src="js/common/nav.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -50,7 +58,6 @@ thead th{color:var(--dim);font-size:10px;font-weight:700;padding:8px 4px;text-al
   border-bottom:2px solid var(--border);background:var(--bg);letter-spacing:.5px}
 tbody td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
 tbody tr:hover{background:rgba(240,192,64,.04)}
-
 th:first-child,td:first-child{text-align:center;width:50px}
 th:nth-child(2),td:nth-child(2){text-align:left}
 
@@ -69,6 +76,11 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 .info-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
 .info-value{font-weight:900;color:var(--gold);font-size:16px;margin-top:4px}
 
+/* Scroll Card */
+.scroll-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:10px;transition:all .2s}
+.scroll-card:hover{border-color:rgba(167,139,250,.3);box-shadow:0 0 20px rgba(167,139,250,.08)}
+
 /* Responsive */
 @media(max-width:768px){
   .header h1{font-size:22px}
@@ -80,55 +92,51 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 }
 </style>
 </head>
-<body>
+<body data-page="compendium-item">
 
 <div class="header">
-  <h1 data-i18n="compendium.title_item">${t('compendium.title_item')}</h1>
-  <div class="sub" data-i18n="compendium.subtitle_item">${t('compendium.subtitle_item')}</div>
+  <h1 data-i18n="compendium.title_item"></h1>
+  <div class="sub" data-i18n="compendium.subtitle_item"></div>
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="list" data-i18n="compendium.tab_card_view" style="display:flex;align-items:center;gap:4px"><span>📋</span><span>${t('compendium.tab_card_view')}</span></button>
-  <button class="tab-btn" data-tab="analysis" data-i18n="compendium.tab_efficiency" style="display:flex;align-items:center;gap:4px"><span>💎</span><span>${t('compendium.tab_efficiency')}</span></button>
+  <button class="tab-btn active" data-tab="list">🧪 경험치 물약</button>
+  <button class="tab-btn" data-tab="scrolls">📜 전직서</button>
+  <button class="tab-btn" data-tab="analysis">💎 효율 분석</button>
 </div>
 
 <div class="content">
 
-  <!-- 아이템 목록 패널 -->
+  <!-- 경험치 물약 패널 -->
   <div class="panel active" id="p-list">
-    <div class="sec-head">POTION LIST</div>
-
+    <div class="sec-head">EXPERIENCE POTIONS</div>
     <div style="overflow-x:auto">
     <table>
       <thead>
         <tr>
-          <th>아이콘</th>
-          <th>아이템명</th>
-          <th>경험치</th>
+          <th></th>
+          <th style="text-align:left">이름</th>
+          <th>EXP</th>
           <th>가격</th>
-          <th>효율 (EXP/G)</th>
+          <th>효율</th>
           <th>확률</th>
         </tr>
       </thead>
       <tbody id="item-table-body"></tbody>
     </table>
     </div>
+  </div>
 
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.item_info_title">${t('guide.item_info_title')}</div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.item_info_desc">${t('guide.item_info_desc')}</div>
-    </div>
+  <!-- 전직서 패널 -->
+  <div class="panel" id="p-scrolls">
+    <div class="sec-head">CLASS CHANGE SCROLLS</div>
+    <div id="scroll-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px"></div>
   </div>
 
   <!-- 효율 분석 패널 -->
   <div class="panel" id="p-analysis">
     <div class="sec-head">EFFICIENCY RANKING</div>
     <div id="efficiency-cards"></div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.efficiency_title">${t('guide.efficiency_title')}</div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.efficiency_desc">${t('guide.efficiency_desc')}</div>
-    </div>
   </div>
 
 </div><!-- end content -->
@@ -136,35 +144,79 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 <nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
   display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
   <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby">${t('compendium.nav_lobby')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby"></button>
   <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class">${t('compendium.nav_class')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class"></button>
   <button onclick="location.href='compendium-stage.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_stage">${t('compendium.nav_stage')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_stage"></button>
 </nav>
 
 <script>
-// 아이템 테이블 렌더링
+// 경험치 물약 테이블
 function renderItemTable() {
   const potions = window.EXP_POTIONS || [];
   const totalWeight = potions.reduce((sum, p) => sum + p.weight, 0);
   const tbody = document.getElementById('item-table-body');
-
   tbody.innerHTML = '';
+
   potions.forEach(p => {
     const efficiency = (p.exp / p.cost).toFixed(2);
     const probability = ((p.weight / totalWeight) * 100).toFixed(0);
-
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="font-size:24px">${p.icon}</td>
-      <td style="text-align:left;font-weight:700;color:var(--gold)">${p.name}</td>
-      <td style="color:var(--green);font-weight:700">${p.exp}</td>
-      <td style="color:var(--blue);font-weight:700">${p.cost} G</td>
+      <td style="text-align:left;font-weight:700;color:var(--gold)">${t('items.potion_'+{s:'small',m:'medium',l:'large'}[p.id.split('_')[1]]) || p.name}</td>
+      <td style="color:var(--green);font-weight:700">+${p.exp}</td>
+      <td style="color:var(--blue);font-weight:700">${p.cost}G</td>
       <td style="font-weight:700;color:var(--gold)">${efficiency}</td>
       <td style="color:var(--dim)">${probability}%</td>
     `;
     tbody.appendChild(tr);
+  });
+}
+
+// 전직서 카드 렌더링
+function renderScrollCards() {
+  const cd = window.JAB || {};
+  const container = document.getElementById('scroll-cards');
+  container.innerHTML = '';
+
+  const scrolls = [
+    { id:'class_change_melee', icon:'⚔️', cost:500, classes:['warrior','knight','assassin','brawler','lancer','sapper'] },
+    { id:'class_change_ranged', icon:'🏹', cost:500, classes:['archer','mage','summoner','shaman'] },
+    { id:'class_change_healer', icon:'✝️', cost:500, classes:['priest'] },
+    { id:'class_change_universal', icon:'📜', cost:500, classes:['warrior','knight','assassin','mage','archer','priest','summoner','shaman','brawler','lancer','sapper'] }
+  ];
+
+  scrolls.forEach(sc => {
+    const name = t('items.'+sc.id) || sc.id;
+    const desc = t('items_desc.'+sc.id) || '';
+    const classIcons = sc.classes.map(cls =>
+      `<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:4px;font-size:10px">
+        ${cd[cls]?.icon || ''} ${t('classes.'+cls) || cls}
+      </span>`
+    ).join(' ');
+
+    const card = document.createElement('div');
+    card.className = 'scroll-card';
+    card.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:40px;line-height:1">${sc.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:900;color:var(--purple)">${name}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">${desc}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+            <span style="color:var(--gold);font-weight:700;font-size:13px">${sc.cost}G</span>
+            <span style="color:var(--dim);font-size:10px">| 노비스 전용</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:6px">
+        <div style="color:var(--dim);font-size:10px;margin-bottom:6px">전직 가능 직업 (${sc.classes.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${classIcons}</div>
+      </div>
+    `;
+    container.appendChild(card);
   });
 }
 
@@ -185,6 +237,7 @@ function renderEfficiencyAnalysis() {
   container.innerHTML = '';
   sorted.forEach((item, idx) => {
     const grades = ['S', 'A', 'B'];
+    const gradeColors = ['#f87171', '#f0c040', '#60a5fa'];
     const card = document.createElement('div');
     card.className = 'item-card';
     card.innerHTML = `
@@ -192,8 +245,8 @@ function renderEfficiencyAnalysis() {
         <div class="item-icon">${item.icon}</div>
         <div class="item-meta">
           <div class="item-name">
-            ${item.name}
-            <span style="margin-left:8px;background:var(--gold);color:var(--bg);padding:2px 8px;border-radius:4px;
+            ${t('items.potion_'+{s:'small',m:'medium',l:'large'}[item.id.split('_')[1]]) || item.name}
+            <span style="margin-left:8px;background:${gradeColors[idx] || 'var(--dim)'};color:var(--bg);padding:2px 8px;border-radius:4px;
               font-size:11px;font-weight:700">${grades[idx] || 'C'}</span>
           </div>
           <div style="font-size:11px;color:var(--dim);margin-top:4px">#${idx + 1} 효율 순위</div>
@@ -202,22 +255,27 @@ function renderEfficiencyAnalysis() {
 
       <div class="item-info">
         <div class="info-box">
-          <div class="info-label">획득 경험치</div>
-          <div class="info-value" style="color:var(--green)">${item.exp}</div>
+          <div class="info-label">EXP</div>
+          <div class="info-value" style="color:var(--green)">+${item.exp}</div>
         </div>
         <div class="info-box">
-          <div class="info-label">가격</div>
+          <div class="info-label">COST</div>
           <div class="info-value" style="color:var(--blue)">${item.cost}G</div>
         </div>
         <div class="info-box">
-          <div class="info-label">효율</div>
+          <div class="info-label">EXP/G</div>
           <div class="info-value" style="color:var(--gold)">${item.efficiency.toFixed(2)}</div>
         </div>
       </div>
 
       <div style="margin-top:12px;padding:8px;background:rgba(0,0,0,.2);border-radius:6px;font-size:11px">
-        <div style="color:var(--dim);margin-bottom:2px">🎲 상점 등장 확률</div>
-        <div style="color:var(--text);font-weight:700">${item.probability}%</div>
+        <div style="color:var(--dim);margin-bottom:2px">상점 등장 확률</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
+            <div style="width:${item.probability}%;height:100%;background:var(--gold);border-radius:4px"></div>
+          </div>
+          <span style="color:var(--text);font-weight:700">${item.probability}%</span>
+        </div>
       </div>
     `;
     container.appendChild(card);
@@ -234,27 +292,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
-// 안내문 렌더링
-function renderGuides(){
-  const itemInfoSection=document.querySelector('[data-i18n="guide.item_info_title"]')?.parentElement;
-  if(itemInfoSection){
-    itemInfoSection.querySelector('div:first-child').textContent=t('guide.item_info_title');
-    itemInfoSection.querySelector('div:last-child').innerHTML=t('guide.item_info_desc');
-  }
-  const efficiencySection=document.querySelector('[data-i18n="guide.efficiency_title"]')?.parentElement;
-  if(efficiencySection){
-    efficiencySection.querySelector('div:first-child').textContent=t('guide.efficiency_title');
-    efficiencySection.querySelector('div:last-child').innerHTML=t('guide.efficiency_desc');
-  }
-}
-
 // 초기화
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    renderItemTable();
-    renderEfficiencyAnalysis();
-    renderGuides();
-  }, 300);
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof loadI18n === 'function') await loadI18n();
+  renderItemTable();
+  renderScrollCards();
+  renderEfficiencyAnalysis();
 });
 </script>
 </body>

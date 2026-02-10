@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🗺 스테이지 도감</title>
-<script src="js/classes.js"></script>
+<script src="data/jab.js"></script>
 <script defer src="js/common/i18n.js"></script>
+<script defer src="js/common/nav.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -55,11 +56,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .stage-name{font-size:16px;font-weight:900;color:var(--gold)}
 .stage-info{display:flex;flex-direction:column;gap:6px}
 
-/* Difficulty Bar */
-.difficulty-bar{display:flex;align-items:center;gap:8px;font-size:11px}
-.difficulty-fill{width:80px;height:12px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;position:relative}
-.difficulty-fill-inner{height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:4px}
-
 /* Responsive */
 @media(max-width:768px){
   .header h1{font-size:22px}
@@ -68,16 +64,16 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 }
 </style>
 </head>
-<body>
+<body data-page="compendium-stage">
 
 <div class="header">
-  <h1 data-i18n="compendium.title_stage">${t('compendium.title_stage')}</h1>
-  <div class="sub" data-i18n="compendium.subtitle_stage">${t('compendium.subtitle_stage')}</div>
+  <h1 data-i18n="compendium.title_stage"></h1>
+  <div class="sub" data-i18n="compendium.subtitle_stage"></div>
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-tab="stages" data-i18n="compendium.tab_card_view" style="display:flex;align-items:center;gap:4px"><span>📋</span><span>${t('compendium.tab_card_view')}</span></button>
-  <button class="tab-btn" data-tab="difficulty" data-i18n="compendium.tab_analysis" style="display:flex;align-items:center;gap:4px"><span>📈</span><span>${t('compendium.tab_analysis')}</span></button>
+  <button class="tab-btn active" data-tab="stages">📋 카드 뷰</button>
+  <button class="tab-btn" data-tab="difficulty">📈 난이도 분석</button>
 </div>
 
 <div class="content">
@@ -94,11 +90,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
       <div id="difficulty-chart"></div>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-weight:900;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px" data-i18n="guide.stage_difficulty_title">${t('guide.stage_difficulty_title')}</div>
-      <div style="font-size:12px;color:#cbd5e1;line-height:1.7" data-i18n="guide.stage_difficulty_desc">${t('guide.stage_difficulty_desc')}</div>
-    </div>
   </div>
 
 </div><!-- end content -->
@@ -106,67 +97,85 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
   display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
   <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby">${t('compendium.nav_lobby')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_lobby"></button>
   <button onclick="location.href='compendium-class.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class">${t('compendium.nav_class')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_class"></button>
   <button onclick="location.href='compendium-item.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_item">${t('compendium.nav_item')}</button>
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px" data-i18n="compendium.nav_item"></button>
 </nav>
 
 <script>
-// 스테이지 데이터 로드 및 렌더링
+function styleLabel(style) {
+  if (style === 'defense') return {icon:'🛡', color:'#60a5fa', bg:'rgba(96,165,250,0.15)'};
+  if (style === 'offense') return {icon:'⚔', color:'#f87171', bg:'rgba(248,113,113,0.15)'};
+  return {icon:'🔀', color:'#a78bfa', bg:'rgba(167,139,250,0.15)'};
+}
+
 function initStage() {
-  const STAGES = window.STAGES || [];
-  const CD = window.CD || {};
+  const stages = window.STAGES || [];
+  const cd = window.JAB || {};
 
   // 스테이지 카드 렌더링
   const container = document.getElementById('stage-cards');
   container.innerHTML = '';
 
-  STAGES.forEach(stage => {
-    const difficultyScore = ((stage.sm.hp + stage.sm.atk) / 2 * 100).toFixed(0);
+  stages.forEach(stage => {
+    const diff = ((stage.sm.hp + stage.sm.atk) / 2 * 100).toFixed(0);
     const enemyCount = {};
-    stage.en.forEach(cls => {
-      enemyCount[cls] = (enemyCount[cls] || 0) + 1;
-    });
+    stage.en.forEach(cls => { enemyCount[cls] = (enemyCount[cls] || 0) + 1 });
 
     const enemyDisplay = Object.entries(enemyCount)
       .sort((a, b) => b[1] - a[1])
-      .map(([cls, cnt]) => `${CD[cls]?.icon || '?'}×${cnt}`)
-      .join(' ');
+      .map(([cls, cnt]) => `${cd[cls]?.icon || '?'} ${t('classes.'+cls) || cls} ×${cnt}`)
+      .join(', ');
+
+    const sl = styleLabel(stage.style);
+    const stageName = t('stages.stage_'+stage.id+'_name') || stage.name;
+    const stageTheme = t('stages.stage_'+stage.id+'_theme') || stage.theme;
+    const stageStory = t('stages.stage_'+stage.id+'_story') || stage.story;
 
     const card = document.createElement('div');
     card.className = 'stage-card';
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
-          <div class="stage-name">${stage.name}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">${stage.theme}</div>
+          <div class="stage-name">${stageName}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">${stageTheme}</div>
         </div>
         <div style="background:var(--gold);color:var(--bg);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">Stage ${stage.id}</div>
       </div>
 
       <div class="stage-info">
-        <div style="display:flex;gap:6px;font-size:10px;flex-wrap:wrap">
-          <span style="background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 6px;border-radius:3px">
-            ${stage.style === 'defense' ? '🛡 방어전' : stage.style === 'offense' ? '⚔ 공격전' : '🔀 혼합'}
+        <div style="display:flex;gap:6px;font-size:10px;flex-wrap:wrap;align-items:center">
+          <span style="background:${sl.bg};color:${sl.color};padding:2px 6px;border-radius:3px">
+            ${sl.icon} ${stage.style === 'defense' ? t('battle.defense') || '방어전' : stage.style === 'offense' ? t('battle.offense') || '공격전' : t('battle.mixed') || '혼합'}
           </span>
-          <span style="color:var(--dim)">난이도 ${difficultyScore}%</span>
+          <span style="color:var(--dim)">${t('stages.enemy_count', {count: stage.en.length}) || stage.en.length+'체'}</span>
+          <span style="color:var(--dim)">|</span>
+          <span style="color:var(--dim)">${stage.spw} wave · ${stage.si} spawn</span>
         </div>
 
-        <div style="font-size:11px;color:#cbd5e1;margin:4px 0">${stage.story}</div>
+        <div style="font-size:11px;color:#cbd5e1;margin:4px 0">${stageStory}</div>
 
         <div style="background:rgba(0,0,0,.3);padding:6px;border-radius:4px;font-size:10px">
-          <div style="color:var(--dim);margin-bottom:2px">👹 적 구성 (${stage.en.length})</div>
-          <div>${enemyDisplay}</div>
+          <div style="color:var(--dim);margin-bottom:4px">👹 ${t('stage_select.enemies', {count: stage.en.length}) || '적 구성'}</div>
+          <div style="line-height:1.6">${enemyDisplay}</div>
         </div>
 
         ${stage.boss ? `
         <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);padding:6px;border-radius:4px;font-size:10px">
-          <div style="color:var(--purple);font-weight:700">💀 보스: ${stage.boss.name}</div>
-          <div style="color:var(--dim);margin-top:2px">${CD[stage.boss.cls]?.icon} ${t('classes.' + stage.boss.cls)}</div>
+          <div style="color:var(--purple);font-weight:700">💀 BOSS: ${stage.boss.name}</div>
+          <div style="color:var(--dim);margin-top:2px">${cd[stage.boss.cls]?.icon} ${t('classes.' + stage.boss.cls)}</div>
         </div>
         ` : ''}
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+          <span style="color:var(--dim)">난이도</span>
+          <div style="flex:1;height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
+            <div style="width:${Math.min(100,diff)}%;height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:4px"></div>
+          </div>
+          <span style="color:var(--gold);font-weight:700">${diff}%</span>
+        </div>
       </div>
     `;
     container.appendChild(card);
@@ -176,15 +185,16 @@ function initStage() {
   const diffChart = document.getElementById('difficulty-chart');
   diffChart.innerHTML = '';
 
-  STAGES.forEach(s => {
+  stages.forEach(s => {
     const score = ((s.sm.hp + s.sm.atk) / 2 * 100).toFixed(0);
     const percent = Math.min(100, score);
+    const stageName = t('stages.stage_'+s.id+'_name') || s.name;
 
     const row = document.createElement('div');
     row.style.marginBottom = '12px';
     row.innerHTML = `
       <div style="display:flex;justify-content:space-between;margin-bottom:2px;font-size:12px">
-        <span style="color:var(--gold);font-weight:700">Stage ${s.id}</span>
+        <span style="color:var(--gold);font-weight:700">Stage ${s.id} — ${stageName}</span>
         <span style="color:var(--dim)">${score}%</span>
       </div>
       <div style="width:100%;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
@@ -205,21 +215,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
-// 안내문 렌더링
-function renderGuides(){
-  const diffSection=document.querySelector('[data-i18n="guide.stage_difficulty_title"]')?.parentElement;
-  if(diffSection){
-    diffSection.querySelector('div:first-child').textContent=t('guide.stage_difficulty_title');
-    diffSection.querySelector('div:last-child').innerHTML=t('guide.stage_difficulty_desc');
-  }
-}
-
 // 초기화
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    initStage();
-    renderGuides();
-  }, 300);
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof loadI18n === 'function') await loadI18n();
+  initStage();
 });
 </script>
 </body>
