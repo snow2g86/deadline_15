@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DEADLINE 15 - 클래스 밸런스 & 파티 분석 리포트</title>
+    <link rel="stylesheet" href="css/common.css">
     <style>
         * {
             margin: 0;
@@ -16,38 +17,59 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
             line-height: 1.6;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
         }
 
         .container {
             max-width: 1400px;
-            margin: 0 auto;
+            margin: 60px auto 0;
             background: white;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            height: calc(100dvh - 60px);
+            display: flex;
+            flex-direction: column;
         }
 
-        header {
+        /* Override #top-nav for class-balance-report theme */
+        body[data-page="class-balance-report"] #top-nav {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: none;
+            padding: 10px 16px;
+            gap: 20px;
+        }
+
+        body[data-page="class-balance-report"] #nav-title {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 18px;
             color: white;
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 4px solid #4c51bf;
+            letter-spacing: 0;
+            font-weight: 700;
         }
 
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        body[data-page="class-balance-report"] #nav-back {
+            color: white;
+            font-size: 20px;
         }
 
-        header p {
-            font-size: 1.1em;
-            opacity: 0.95;
+        body[data-page="class-balance-report"] #nav-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-page="class-balance-report"] #nav-settings {
+            color: white;
+        }
+
+        body[data-page="class-balance-report"] #nav-settings:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         main {
             padding: 40px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         section {
@@ -432,17 +454,13 @@
     </style>
 </head>
 <body data-page="class-balance-report">
-    <div class="container">
-        <header style="display: flex; align-items: center; justify-content: space-between; padding: 20px;">
-            <button onclick="location.href='index.html'" style="background: none; border: none; cursor: pointer; font-size: 24px; padding: 10px;">⬅️</button>
-            <div style="flex: 1; text-align: center;">
-                <h1 style="margin: 0;">🎮 DEADLINE 15</h1>
-                <p style="margin: 5px 0 0;">클래스 밸런스 & 최적 파티 분석 리포트</p>
-                <p style="font-size: 0.9em; margin-top: 5px; color: #999;">12개 클래스 상세 분석 및 전략 가이드</p>
-            </div>
-            <div style="width: 44px;"></div>
-        </header>
+    <header id="top-nav">
+        <button id="nav-back" onclick="location.href='index.html'"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div id="nav-title">클래스 밸런스 & 파티 분석</div>
+        <button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </header>
 
+    <div class="container">
         <main>
             <!-- 섹션 1: 클래스별 상세 분석 -->
             <section>

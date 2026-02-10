@@ -27,7 +27,8 @@
       "Bash(node scripts/generate-i18n.js:*)",
       "Bash(git checkout:*)",
       "Bash(xargs cat:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
