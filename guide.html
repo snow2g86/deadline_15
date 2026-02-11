@@ -27,7 +27,7 @@
   box-shadow:0 0 20px rgba(240,192,64,.3)}
 
 /* Content */
-.guide-content{max-width:900px;margin:0 auto;padding:20px 16px 100px}
+.guide-content{max-width:900px;margin:0 auto;padding:20px 16px 20px}
 .guide-panel{display:none;animation:fadeIn .3s}
 .guide-panel.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -45,7 +45,6 @@
 .role-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
 
 .role-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:8px;display:flex;gap:8px;align-items:center}
-.role-title span:first-child{font-size:24px}
 
 .role-meta{font-size:11px;color:var(--dim);margin-bottom:8px;padding:6px;background:rgba(0,0,0,.2);border-radius:4px}
 
@@ -78,7 +77,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 /* Responsive */
 @media(max-width:768px){
   .guide-header h1{font-size:22px}
-  .guide-content{padding:20px 12px 100px}
+  .guide-content{padding:20px 12px 20px}
   .role-grid{grid-template-columns:1fr}
   .guide-sec-head{font-size:14px}
 }
@@ -88,7 +87,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 <header id="top-nav">
   <button id="nav-back" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-  <div id="nav-title">📚 게임 가이드</div>
+  <div id="nav-title"></div>
   <button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 </header>
 
@@ -167,7 +166,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="guide-sec-head">⚔️ 근접 딜러 (Melee)</div>
         <div class="role-grid">
           <div class="role-card">
-            <div class="role-title"><span>⚔️</span> Warrior</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/warrior.png" style="width:24px;height:24px"> Warrior</div>
             <div class="role-meta">높은 공격력, 광폭 패시브</div>
             <div class="role-classes">
               <span class="role-class">💪 높은 ATK</span>
@@ -178,7 +177,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🛡️</span> Knight</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/knight.png" style="width:24px;height:24px"> Knight</div>
             <div class="role-meta">높은 방어력, 스위치 스킬</div>
             <div class="role-classes">
               <span class="role-class">🛡️ 높은 DEF</span>
@@ -189,7 +188,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>👊</span> Brawler</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/brawler.png" style="width:24px;height:24px"> Brawler</div>
             <div class="role-meta">빠른 기술, 무장해제 스킬</div>
             <div class="role-classes">
               <span class="role-class">⚡ 높은 ATK</span>
@@ -200,7 +199,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🔱</span> Lancer</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/lancer.png" style="width:24px;height:24px"> Lancer</div>
             <div class="role-meta">관통 공격, 방진 스킬</div>
             <div class="role-classes">
               <span class="role-class">⚡ 높은 ATK</span>
@@ -216,7 +215,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="guide-sec-head">🏹 원거리 딜러 (Ranged)</div>
         <div class="role-grid">
           <div class="role-card">
-            <div class="role-title"><span>🏹</span> Archer</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/archer.png" style="width:24px;height:24px"> Archer</div>
             <div class="role-meta">원거리 공격, 도약 스킬</div>
             <div class="role-classes">
               <span class="role-class">🏹 범위 4</span>
@@ -227,7 +226,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🔮</span> Mage</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/mage.png" style="width:24px;height:24px"> Mage</div>
             <div class="role-meta">마법 공격, 화염폭발</div>
             <div class="role-classes">
               <span class="role-class">🔥 AoE 공격</span>
@@ -238,7 +237,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🗡️</span> Assassin</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/assassin.png" style="width:24px;height:24px"> Assassin</div>
             <div class="role-meta">높은 공격력, 은신 패시브</div>
             <div class="role-classes">
               <span class="role-class">💀 암살</span>
@@ -249,7 +248,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>📖</span> Summoner</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/summoner.png" style="width:24px;height:24px"> Summoner</div>
             <div class="role-meta">소환 마법, 소환수 조종</div>
             <div class="role-classes">
               <span class="role-class">✨ 소환수</span>
@@ -265,7 +264,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="guide-sec-head">✝️ 지원 & 특수 (Support)</div>
         <div class="role-grid">
           <div class="role-card">
-            <div class="role-title"><span>✝️</span> Priest</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/priest.png" style="width:24px;height:24px"> Priest</div>
             <div class="role-meta">회복 마법, 집단 치유</div>
             <div class="role-classes">
               <span class="role-class">💚 회복</span>
@@ -276,7 +275,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>💣</span> Sapper</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/sapper.png" style="width:24px;height:24px"> Sapper</div>
             <div class="role-meta">함정 설치, 제어 스킬</div>
             <div class="role-classes">
               <span class="role-class">⚠️ 함정</span>
@@ -287,7 +286,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🎭</span> Shaman</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/shaman.png" style="width:24px;height:24px"> Shaman</div>
             <div class="role-meta">저주와 고양, 마법사</div>
             <div class="role-classes">
               <span class="role-class">☠️ 저주</span>
@@ -298,7 +297,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="role-card">
-            <div class="role-title"><span>🔰</span> Novice</div>
+            <div class="role-title"><img class="cls-icon" src="image/icon/jab/novice.png" style="width:24px;height:24px"> Novice</div>
             <div class="role-meta">초심자 전용, 전직 가능</div>
             <div class="role-classes">
               <span class="role-class">🎯 균형</span>
@@ -458,14 +457,6 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
   </div>
 </main>
-
-<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
-  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
-  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">로비</button>
-  <button onclick="location.href='compendium.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">도감</button>
-</nav>
 
 <script>
 // 탭 전환

@@ -84,7 +84,6 @@ const G = {
             if (idx < cols.length) { const x = cols[idx], y = isRanged ? 12 : 11; this.addU('ally', uid, x, y) }
         }
         this.spawnW(); this.layW(); this.vfxInit(); this.rTer(); this.rUnits(); this.uUI(); this.defI(); this.rMM();
-        this.bgmStart();
         setTimeout(() => this.scrollToAllies(), 50)
     },
     _rmDead() {

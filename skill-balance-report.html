@@ -85,8 +85,13 @@
         }
 
         .skill-icon {
-            font-size: 2.2em;
+            display: inline-block;
+            width: 32px; height: 32px;
+            background: url('image/icon/skill-sprite.png') no-repeat;
+            background-size: 256px 224px;
+            image-rendering: pixelated;
             flex-shrink: 0;
+            border-radius: 3px;
         }
 
         .skill-info h3 {
@@ -318,7 +323,7 @@
                     <!-- Warrior -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">⚡</div>
+                            <div class="skill-icon" style="background-position:-32px -192px"></div>
                             <div class="skill-info">
                                 <h3>강타</h3>
                                 <div class="skill-class">🗡️ Warrior</div>
@@ -334,7 +339,7 @@
                     <!-- Knight -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🔄</div>
+                            <div class="skill-icon" style="background-position:0px -64px"></div>
                             <div class="skill-info">
                                 <h3>스위치</h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -350,7 +355,7 @@
                     <!-- Lancer -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🔱</div>
+                            <div class="skill-icon" style="background-position:-128px -64px"></div>
                             <div class="skill-info">
                                 <h3>관통</h3>
                                 <div class="skill-class">🔱 Lancer</div>
@@ -366,7 +371,7 @@
                     <!-- Brawler -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🤛</div>
+                            <div class="skill-icon" style="background-position:-64px -32px"></div>
                             <div class="skill-info">
                                 <h3>무장해제</h3>
                                 <div class="skill-class">🤛 Brawler</div>
@@ -382,7 +387,7 @@
                     <!-- Sapper -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">⚠️</div>
+                            <div class="skill-icon" style="background-position:-64px -128px"></div>
                             <div class="skill-info">
                                 <h3>함정 설치</h3>
                                 <div class="skill-class">🔧 Sapper</div>
@@ -398,7 +403,7 @@
                     <!-- Novice -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🪨</div>
+                            <div class="skill-icon" style="background-position:-64px -96px"></div>
                             <div class="skill-info">
                                 <h3>돌던지기</h3>
                                 <div class="skill-class">👤 Novice</div>
@@ -417,7 +422,7 @@
                     <!-- Archer -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">💨</div>
+                            <div class="skill-icon" style="background-position:0px 0px"></div>
                             <div class="skill-info">
                                 <h3>도약</h3>
                                 <div class="skill-class">🏹 Archer</div>
@@ -433,7 +438,7 @@
                     <!-- Mage -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🔥</div>
+                            <div class="skill-icon" style="background-position:-192px -64px"></div>
                             <div class="skill-info">
                                 <h3>화염폭발</h3>
                                 <div class="skill-class">🔮 Mage</div>
@@ -449,7 +454,7 @@
                     <!-- Priest -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">✨</div>
+                            <div class="skill-icon" style="background-position:-128px -96px"></div>
                             <div class="skill-info">
                                 <h3>집단 치유</h3>
                                 <div class="skill-class">⛪ Priest</div>
@@ -465,7 +470,7 @@
                     <!-- Assassin -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">💀</div>
+                            <div class="skill-icon" style="background-position:-192px 0px"></div>
                             <div class="skill-info">
                                 <h3>암살</h3>
                                 <div class="skill-class">🗡️ Assassin</div>
@@ -481,7 +486,7 @@
                     <!-- Shaman -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">🔺</div>
+                            <div class="skill-icon" style="background-position:-128px -128px"></div>
                             <div class="skill-info">
                                 <h3>고양</h3>
                                 <div class="skill-class">🌙 Shaman</div>
@@ -497,7 +502,7 @@
                     <!-- Summoner -->
                     <div class="skill-card">
                         <div class="skill-header">
-                            <div class="skill-icon">⭐</div>
+                            <div class="skill-icon" style="background-position:-128px -160px"></div>
                             <div class="skill-info">
                                 <h3>소환 (정령/골램)</h3>
                                 <div class="skill-class">🔮 Summoner</div>
@@ -523,7 +528,7 @@
                 <div class="skill-grid">
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🌀</div>
+                            <div class="skill-icon" style="background-position:-224px -160px"></div>
                             <div class="skill-info">
                                 <h3>휘두르기 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🗡️ Warrior</div>
@@ -538,7 +543,7 @@
 
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🦅</div>
+                            <div class="skill-icon" style="background-position:-160px -160px"></div>
                             <div class="skill-info">
                                 <h3>강습 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🗡️ Warrior</div>
@@ -553,7 +558,7 @@
 
                     <div class="skill-card learnable passive">
                         <div class="skill-header">
-                            <div class="skill-icon">🩸</div>
+                            <div class="skill-icon" style="background-position:-192px -160px"></div>
                             <div class="skill-info">
                                 <h3>피의 갈망 <span class="badge badge-passive">패시브</span></h3>
                                 <div class="skill-class">🗡️ Warrior</div>
@@ -568,7 +573,7 @@
 
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🗡️</div>
+                            <div class="skill-icon" style="background-position:0px -192px"></div>
                             <div class="skill-info">
                                 <h3>치명적인 일격 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🗡️ Warrior</div>
@@ -586,7 +591,7 @@
                 <div class="skill-grid">
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🐎</div>
+                            <div class="skill-icon" style="background-position:-160px -32px"></div>
                             <div class="skill-info">
                                 <h3>차징 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -601,7 +606,7 @@
 
                     <div class="skill-card learnable passive">
                         <div class="skill-header">
-                            <div class="skill-icon">💔</div>
+                            <div class="skill-icon" style="background-position:-192px -32px"></div>
                             <div class="skill-info">
                                 <h3>고통 분담 <span class="badge badge-passive">패시브</span></h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -616,7 +621,7 @@
 
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🛡️</div>
+                            <div class="skill-icon" style="background-position:-224px -32px"></div>
                             <div class="skill-info">
                                 <h3>희생 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -631,7 +636,7 @@
 
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">🪝</div>
+                            <div class="skill-icon" style="background-position:-128px -32px"></div>
                             <div class="skill-info">
                                 <h3>포획 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -646,7 +651,7 @@
 
                     <div class="skill-card learnable passive">
                         <div class="skill-header">
-                            <div class="skill-icon">💪</div>
+                            <div class="skill-icon" style="background-position:-32px -64px"></div>
                             <div class="skill-info">
                                 <h3>강인한 <span class="badge badge-passive">패시브</span></h3>
                                 <div class="skill-class">🛡️ Knight</div>
@@ -664,7 +669,7 @@
                 <div class="skill-grid">
                     <div class="skill-card learnable">
                         <div class="skill-header">
-                            <div class="skill-icon">⚡</div>
+                            <div class="skill-icon" style="background-position:-160px 0px"></div>
                             <div class="skill-info">
                                 <h3>습격 <span class="badge badge-learnable">습득형</span></h3>
                                 <div class="skill-class">🗡️ Assassin</div>
@@ -860,7 +865,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>⚡ 강타</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-16px -96px"></span> 강타</strong></td>
                             <td>Warrior</td>
                             <td>3</td>
                             <td><span class="badge badge-fury">Fury</span></td>
@@ -868,7 +873,7 @@
                             <td>1칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🔄 스위치</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:0px -32px"></span> 스위치</strong></td>
                             <td>Knight</td>
                             <td>1</td>
                             <td><span class="badge badge-fury">Fury</span></td>
@@ -876,7 +881,7 @@
                             <td>2칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🔱 관통</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-64px -32px"></span> 관통</strong></td>
                             <td>Lancer</td>
                             <td>5</td>
                             <td><span class="badge badge-fury">Fury</span></td>
@@ -884,7 +889,7 @@
                             <td>직선 3칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🤛 무장해제</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-32px -16px"></span> 무장해제</strong></td>
                             <td>Brawler</td>
                             <td>30</td>
                             <td><span class="badge badge-energy">EP</span></td>
@@ -892,7 +897,7 @@
                             <td>1칸</td>
                         </tr>
                         <tr>
-                            <td><strong>⚠️ 함정 설치</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-32px -64px"></span> 함정 설치</strong></td>
                             <td>Sapper</td>
                             <td>20</td>
                             <td><span class="badge badge-energy">EP</span></td>
@@ -900,7 +905,7 @@
                             <td>1칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🪨 돌던지기</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-32px -48px"></span> 돌던지기</strong></td>
                             <td>Novice</td>
                             <td>15</td>
                             <td><span class="badge badge-energy">EP</span></td>
@@ -908,7 +913,7 @@
                             <td>4칸</td>
                         </tr>
                         <tr>
-                            <td><strong>💨 도약</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:0px 0px"></span> 도약</strong></td>
                             <td>Archer</td>
                             <td>20</td>
                             <td><span class="badge badge-energy">EP</span></td>
@@ -916,7 +921,7 @@
                             <td>4칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🔥 화염폭발</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-96px -32px"></span> 화염폭발</strong></td>
                             <td>Mage</td>
                             <td>40</td>
                             <td><span class="badge badge-mana">MP</span></td>
@@ -924,7 +929,7 @@
                             <td>3×3</td>
                         </tr>
                         <tr>
-                            <td><strong>✨ 집단 치유</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-64px -48px"></span> 집단 치유</strong></td>
                             <td>Priest</td>
                             <td>50</td>
                             <td><span class="badge badge-mana">MP</span></td>
@@ -932,7 +937,7 @@
                             <td>6칸</td>
                         </tr>
                         <tr>
-                            <td><strong>💀 암살</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-96px 0px"></span> 암살</strong></td>
                             <td>Assassin</td>
                             <td>60</td>
                             <td><span class="badge badge-energy">EP</span></td>
@@ -940,7 +945,7 @@
                             <td>겹침 시</td>
                         </tr>
                         <tr>
-                            <td><strong>🔺 고양</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-64px -64px"></span> 고양</strong></td>
                             <td>Shaman</td>
                             <td>50</td>
                             <td><span class="badge badge-mana">MP</span></td>
@@ -948,7 +953,7 @@
                             <td>전체</td>
                         </tr>
                         <tr>
-                            <td><strong>☠️ 쇠약의 저주</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-48px -64px"></span> 쇠약의 저주</strong></td>
                             <td>Shaman</td>
                             <td>100</td>
                             <td><span class="badge badge-mana">MP</span></td>
@@ -956,7 +961,7 @@
                             <td>전체</td>
                         </tr>
                         <tr>
-                            <td><strong>⭐ 정령소환</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-64px -80px"></span> 정령소환</strong></td>
                             <td>Summoner</td>
                             <td>80</td>
                             <td><span class="badge badge-mana">MP</span></td>
@@ -964,7 +969,7 @@
                             <td>3칸</td>
                         </tr>
                         <tr>
-                            <td><strong>🗿 골램소환</strong></td>
+                            <td><strong><span class="skill-icon" style="width:16px;height:16px;background-size:128px 112px;background-position:-48px -80px"></span> 골램소환</strong></td>
                             <td>Summoner</td>
                             <td>80</td>
                             <td><span class="badge badge-mana">MP</span></td>

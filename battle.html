@@ -40,12 +40,19 @@
 <script src="js/battle/boot.js"></script>
 </head>
 <body data-page="battle">
+<div id="battle-loading">
+  <div class="bl-content">
+    <div class="bl-title" id="bl-stage-name"></div>
+    <div class="bl-bar"><div class="bl-fill" id="bl-fill"></div></div>
+    <div class="bl-tip" id="bl-tip"></div>
+  </div>
+</div>
 <div id="app">
   <div id="top-bar">
     <div class="tb-left">
       <div id="turn-indicator" class="player">PLAYER</div>
-      <button class="cam-btn" onclick="G.rotCam(-1)" title="카메라 좌회전 (Q)">↶</button>
-      <button class="cam-btn" onclick="G.rotCam(1)" title="카메라 우회전 (E)">↷</button>
+      <button class="cam-btn" onclick="G.rotCam(-1)" title="카메라 좌회전 (Q)"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+      <button class="cam-btn" onclick="G.rotCam(1)" title="카메라 우회전 (E)"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
     </div>
     <div id="stage-info">STAGE 1<div class="si-turn">TURN 1</div></div>
     <div class="tb-right"><button id="btn-end-turn" onclick="G.endTurn()" data-i18n="battle.end_turn">턴 종료</button></div>
@@ -69,7 +76,7 @@
 <div id="cam-dir"><div class="cd-arrow">▲</div><div class="cd-label">N</div></div>
 <div id="ally-nav"></div>
 <div id="minimap"><canvas id="mm-cv"></canvas><div class="mm-vp" id="mm-vp"></div></div>
-<button id="settings-btn" onclick="G.toggleSettings()" title="설정">⚙</button>
+<button id="settings-btn" onclick="G.toggleSettings()" title="설정"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 <div id="settings-backdrop" onclick="G.closeSettings()"></div>
 <div id="settings-panel">
   <div class="sp-title"><i class="sp-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></i> <span data-i18n="settings.title"></span></div>

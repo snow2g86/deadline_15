@@ -124,7 +124,7 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 /* Responsive */
 @media(max-width:768px){
   .header h1{font-size:22px}
-  .content{padding:20px 12px 60px}
+  .content{padding:20px 12px 20px}
   .card-grid{grid-template-columns:1fr}
   table{font-size:11px}
   thead th{font-size:9px;padding:6px 2px}
@@ -137,7 +137,7 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 
 <header id="top-nav">
   <button id="nav-back" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-  <div id="nav-title">📖 도감</div>
+  <div id="nav-title"></div>
   <button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 </header>
 
@@ -208,12 +208,6 @@ th:nth-child(2),td:nth-child(2){text-align:left}
   </div><!-- end content -->
 </main>
 
-<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
-  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
-  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">로비</button>
-</nav>
-
 <script>
 const PLAYER_CLASSES = ['warrior','knight','assassin','mage','archer','priest','novice','summoner','shaman','brawler','lancer','sapper'];
 
@@ -252,7 +246,7 @@ function renderClassCards() {
     // 기본 스킬 HTML
     let skillHtml = baseSkills.map(sk =>
       `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-        <span>${sk.icon}</span>
+        ${skillIcon(sk.id, 16)}
         <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
         <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
         <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost} ${sk.costType}</span>
@@ -266,7 +260,7 @@ function renderClassCards() {
         <div style="font-size:9px;color:var(--dim);font-weight:700;margin-bottom:4px;letter-spacing:.5px">📚 습득형 스킬</div>
         ${learnableSkills.map(sk =>
           `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-            <span>${sk.icon}</span>
+            ${skillIcon(sk.id, 16)}
             <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
             <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
             <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost || '—'} ${sk.costType || '—'}</span>
@@ -282,7 +276,7 @@ function renderClassCards() {
         <div style="font-size:9px;color:var(--purple);font-weight:700;margin-bottom:4px;letter-spacing:.5px">⭐ 패시브</div>
         ${passiveSkills.map(sk =>
           `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-            <span>${sk.icon}</span>
+            ${skillIcon(sk.id, 16)}
             <span style="color:var(--purple);font-weight:700;min-width:60px">${sk.name}</span>
             <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
           </div>`
@@ -306,7 +300,7 @@ function renderClassCards() {
     card.className = 'class-card';
     card.innerHTML = `
       <div class="class-card-header">
-        <div class="class-icon">${d.icon}</div>
+        <div class="class-icon"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:100%;height:100%;image-rendering:pixelated;border-radius:4px"></div>
         <div class="class-meta">
           <div class="class-name">${cls}</div>
           <span class="role-tag" style="${roleStyle(role)}">${role}</span>
@@ -386,7 +380,7 @@ function renderResBlocks() {
       const d = JAB[cls];
       const pct = 100;
       return `<div class="res-meter">
-        <div class="res-meter-label">${d.icon} ${t('classes.'+cls) || cls}</div>
+        <div class="res-meter-label"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:16px;height:16px;vertical-align:middle;image-rendering:pixelated;border-radius:2px"> ${t('classes.'+cls) || cls}</div>
         <div class="res-meter-track">
           <div class="res-meter-fill" style="width:${pct}%;background:${g.color};color:var(--bg)">${d.maxRes}</div>
         </div>

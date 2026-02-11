@@ -1,8 +1,9 @@
 // index.js — 로비 페이지 전용 스크립트
 
-var CLS_ICON = Object.fromEntries(
-	Object.entries(JAB).map(function(e) { return [e[0], e[1].icon]; })
-);
+function clsIcon(cls, size) {
+  var d = JAB[cls]; if (!d) return '';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
+}
 
 function renderHideout() {
 	var ct = document.getElementById('clan-hideout');
@@ -46,13 +47,13 @@ function renderHideout() {
 	chars.forEach(function(ch) {
 		var wrap = document.createElement('div');
 		wrap.className = 'hideout-unit';
-		// 4사분면 랜덤 배치 (중앙 원탁 회피)
+		// 4사분면 랜덤 배치 (중앙 원탁 회피 - 안전 거리 확보)
 		var cx, cy, q = Math.floor(Math.random() * 4);
 		switch (q) {
-			case 0: cx = 10 + Math.random() * 35; cy = 15 + Math.random() * 30; break;
-			case 1: cx = 55 + Math.random() * 35; cy = 15 + Math.random() * 30; break;
-			case 2: cx = 10 + Math.random() * 35; cy = 60 + Math.random() * 25; break;
-			default: cx = 55 + Math.random() * 35; cy = 60 + Math.random() * 25;
+			case 0: cx = 5 + Math.random() * 30; cy = 10 + Math.random() * 28; break;      // 좌상
+			case 1: cx = 65 + Math.random() * 30; cy = 10 + Math.random() * 28; break;    // 우상
+			case 2: cx = 5 + Math.random() * 30; cy = 62 + Math.random() * 28; break;     // 좌하
+			default: cx = 65 + Math.random() * 30; cy = 62 + Math.random() * 28;          // 우하
 		}
 		wrap.style.left = cx + '%';
 		wrap.style.top = cy + '%';

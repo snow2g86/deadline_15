@@ -270,17 +270,20 @@ Object.assign(G, {
     this.eAtk(a,tgt);
     await sl(tgt.hp<=0?500:300)},
   eAtk(a,tgt){
-    const dmg=calcDmg(a,tgt);
-    const dtgt=tgt.team==='ally'?applyDmgToAlly(tgt,dmg,this):(tgt.hp=Math.max(0,tgt.hp-dmg),tgt);
-    this.vfxAtk(a,tgt);this.sfxAtk(a.cls);this.shakeU(dtgt.id);this.floatT(dtgt.x,dtgt.y,`-${dmg}`,'damage');
-    if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
-    procFury(a,tgt,this);
-    if(tgt.hp>0&&a.hp>0&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&!(tgt.stunned>0)&&!(tgt.frozen>0)){
-      const cdmg=calcDmg(tgt,a);a.hp=Math.max(0,a.hp-cdmg);this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');procFury(tgt,a,this);
-    }
-    if(tgt.hp>0&&a.hp>0&&tgt.skillLv&&tgt.skillLv['brawler_counter']>=1&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&Math.random()<0.3){
+    const bCounter=tgt.skillLv&&tgt.skillLv['brawler_counter']>=1&&!(tgt.stunned>0)&&!(tgt.frozen>0)&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&Math.random()<0.3;
+    let dtgt=tgt;
+    if(bCounter){
       const cdmg=Math.max(1,Math.round(tgt.atk*0.5)-a.def);a.hp=Math.max(0,a.hp-cdmg);
       this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');this.floatT(tgt.x,tgt.y,t('messages.brawler_counter'),'heal');
+    }else{
+      const dmg=calcDmg(a,tgt);
+      dtgt=tgt.team==='ally'?applyDmgToAlly(tgt,dmg,this):(tgt.hp=Math.max(0,tgt.hp-dmg),tgt);
+      this.vfxAtk(a,tgt);this.sfxAtk(a.cls);this.shakeU(dtgt.id);this.floatT(dtgt.x,dtgt.y,`-${dmg}`,'damage');
+      if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
+      procFury(a,tgt,this);
+      if(tgt.hp>0&&a.hp>0&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&!(tgt.stunned>0)&&!(tgt.frozen>0)){
+        const cdmg=calcDmg(tgt,a);a.hp=Math.max(0,a.hp-cdmg);this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');procFury(tgt,a,this);
+      }
     }
     if(dtgt.hp<=0){if(dtgt===tgt){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(tgt);this.deathA(tgt.id);this._rmDead()}setTimeout(()=>{this.rUnits()},500)}
     else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);this._rmDead();setTimeout(()=>{this.rUnits()},500)}

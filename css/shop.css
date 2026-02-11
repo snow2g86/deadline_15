@@ -1,5 +1,5 @@
 /* ═══ Shop List (2-column grid) ═══ */
-#shop-list{display:grid !important;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:330px;margin:0 auto 16px;min-height:60px}
+#shop-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:330px;margin:0 auto 16px;min-height:60px}
 
 /* ═══ Shop HUD ═══ */
 .shop-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:12px}
@@ -32,8 +32,8 @@
 
 /* ═══ Shop Tabs ═══ */
 .shop-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.shop-tabs{display:flex;gap:6px;max-width:330px;width:100%}
-.shop-tab-btn{flex:1;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
+.shop-tabs{display:flex;flex-wrap:wrap;gap:6px;max-width:330px;width:100%}
+.shop-tab-btn{flex:1 1 auto;min-width:28%;padding:8px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;transition:all .2s}
 .shop-tab-btn:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
 .shop-tab-btn.active{color:#fff;background:rgba(96,165,250,.2);border-color:#60a5fa}
@@ -46,6 +46,29 @@
 .pt-btn.pt-max{opacity:.4;cursor:default;pointer-events:none}
 .pt-icon{font-size:18px}.pt-info{flex:1;font-size:11px;font-weight:700;text-align:left}
 .pt-exp{font-size:9px;color:#a78bfa}
+
+/* ═══ Gold Shop ═══ */
+.gold-section{width:100%;max-width:330px;margin:0 auto}
+.gold-section-title{font-size:13px;font-weight:900;color:var(--text);margin-bottom:8px;padding-left:2px}
+.gold-iap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.gold-iap-card{background:rgba(255,255,255,.04);border:2px solid rgba(240,192,64,.2);border-radius:10px;
+  padding:14px 8px;text-align:center;position:relative;transition:all .2s}
+.gold-iap-card.disabled{opacity:.5;pointer-events:none}
+.gold-iap-icon{font-size:28px;margin-bottom:4px}
+.gold-iap-amount{font-size:13px;font-weight:900;color:#f0c040;margin-bottom:3px}
+.gold-iap-price{font-size:11px;font-weight:700;color:var(--dim)}
+.gold-iap-badge{position:absolute;top:6px;right:6px;font-size:7px;font-weight:900;color:#f87171;
+  background:rgba(248,113,113,.12);padding:2px 5px;border-radius:3px}
+.gold-ad-card{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);
+  border:2px solid rgba(96,165,250,.2);border-radius:10px;padding:12px;margin-top:8px}
+.gold-ad-card:hover{border-color:#60a5fa}
+.gold-ad-icon{font-size:28px;flex-shrink:0}
+.gold-ad-info{flex:1}
+.gold-ad-name{font-size:11px;font-weight:700;color:var(--text)}
+.gold-ad-btn{font-weight:700;font-size:11px;padding:8px 14px;border-radius:6px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#f0c040,#d97706);color:#1a1a2e;transition:all .15s;white-space:nowrap}
+.gold-ad-btn:hover{transform:scale(1.05)}
+.gold-ad-btn.disabled{opacity:.4;cursor:default;background:#475569;color:var(--dim)}
 
 /* ═══ Gacha Pity (spans 2 cols) ═══ */
 .gacha-pity{grid-column:1/-1;background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:10px;padding:10px 14px;text-align:center}
@@ -66,6 +89,9 @@
 .gacha-btn:hover{transform:scale(1.05)}
 .gacha-btn.disabled{opacity:.3;cursor:default}
 .gacha-btn-multi{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important}
+
+/* ═══ Shop Tab Ad Card (spans 2 cols in grid) ═══ */
+.shop-tab-ad{grid-column:1/-1;margin-top:0}
 
 /* ═══ Gacha Rates (spans 2 cols) ═══ */
 .gacha-rates-full{grid-column:1/-1;text-align:center;padding:6px 0}
@@ -92,4 +118,7 @@
 .pt-btn{padding:10px 14px}
   .pt-icon{font-size:22px}.pt-info{font-size:13px}
   .pt-exp{font-size:11px}
+  .gold-section{max-width:420px}
+  .gold-ad-card{padding:14px 16px}
+  .shop-tab-ad{padding:14px 16px}
 }

@@ -36,7 +36,40 @@ Object.assign(G, {
 				bgTile.style.background = `conic-gradient(from 0deg at 50% ${cy}%,${clr.tc} 0deg ${ang}deg,${clr.rc} ${ang}deg 180deg,${clr.lc} 180deg ${360-ang}deg,${clr.tc} ${360-ang}deg 360deg)`;
 			} else if (tp === 'forest') {
 				const fb = clr.tc, fl = clr.lc, fd = clr.rc;
-				bgTile.style.background = `radial-gradient(ellipse 14px 10px at 25% 25%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 16px 11px at 70% 20%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 18px 12px at 50% 50%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 13px 9px at 20% 70%,${fl},${fd} 60%,transparent 100%),radial-gradient(ellipse 15px 10px at 78% 65%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 10px 7px at 45% 85%,${fl},${fd} 60%,transparent 100%),${fd}`;
+				bgTile.style.background = [
+					// 잎사귀 디테일 (작은 점 텍스처)
+					`radial-gradient(circle 2px at 18% 18%,rgba(255,255,255,.10),transparent)`,
+					`radial-gradient(circle 1.5px at 32% 14%,rgba(255,255,255,.08),transparent)`,
+					`radial-gradient(circle 2px at 58% 12%,rgba(255,255,255,.09),transparent)`,
+					`radial-gradient(circle 1.5px at 74% 22%,rgba(255,255,255,.07),transparent)`,
+					`radial-gradient(circle 2px at 40% 36%,rgba(255,255,255,.08),transparent)`,
+					`radial-gradient(circle 1.5px at 56% 30%,rgba(255,255,255,.07),transparent)`,
+					// 수관 상단 햇빛 (따뜻한 톤)
+					`radial-gradient(circle 8px at 28% 20%,rgba(160,210,80,.10),transparent)`,
+					`radial-gradient(circle 7px at 66% 16%,rgba(160,210,80,.08),transparent)`,
+					`radial-gradient(circle 6px at 48% 40%,rgba(160,210,80,.07),transparent)`,
+					// 메인 수관 3그루 (크고 뚜렷한 원형)
+					`radial-gradient(circle 18px at 26% 24%,${fb},${fl} 42%,transparent 72%)`,
+					`radial-gradient(circle 20px at 68% 20%,${fb},${fl} 42%,transparent 72%)`,
+					`radial-gradient(circle 22px at 48% 46%,${fb},${fl} 42%,transparent 72%)`,
+					// 후방 수관 (작고 어두운)
+					`radial-gradient(circle 14px at 12% 64%,${fl},${fd} 45%,transparent 75%)`,
+					`radial-gradient(circle 13px at 82% 58%,${fl},${fd} 45%,transparent 75%)`,
+					`radial-gradient(circle 10px at 38% 70%,${fl},${fd} 45%,transparent 75%)`,
+					// 줄기 (가는 수직 그림자)
+					`radial-gradient(ellipse 2.5px 11px at 26% 54%,${fd},transparent 90%)`,
+					`radial-gradient(ellipse 2.5px 11px at 68% 48%,${fd},transparent 90%)`,
+					`radial-gradient(ellipse 2.5px 13px at 48% 70%,${fd},transparent 90%)`,
+					// 지면 그림자 (수관 아래 어둡게)
+					`radial-gradient(ellipse 30px 6px at 38% 90%,rgba(0,0,0,.12),transparent)`,
+					`radial-gradient(ellipse 26px 5px at 68% 86%,rgba(0,0,0,.10),transparent)`,
+					// 지면 이끼 텍스처
+					`radial-gradient(circle 3px at 22% 92%,${fl},transparent)`,
+					`radial-gradient(circle 2.5px at 52% 94%,${fl},transparent)`,
+					`radial-gradient(circle 3px at 78% 90%,${fl},transparent)`,
+					// 바닥
+					fd
+				].join(',');
 			} else if (tp === 'rock') {
 				bgTile.style.background = `linear-gradient(135deg,${clr.tc} 25%,${clr.rc} 45%,${clr.tc} 55%,${clr.rc} 75%,${clr.tc})`;
 			} else if (tp === 'water') {
@@ -183,7 +216,7 @@ Object.assign(G, {
 		skills.forEach((sk, idx) => {
 			if (sk.passive) return;
 			const btn = document.createElement('button'); btn.className = 'am-skill';
-			btn.textContent = sk.icon + ' ' + t('skills.' + sk.id);
+			btn.innerHTML = skillIcon(sk.id, 18) + ' ' + t('skills.' + sk.id);
 			let enabled = this.canUseSkill(u, sk);
 			btn.disabled = !enabled;
 			btn.onclick = () => G.actSkill(idx);

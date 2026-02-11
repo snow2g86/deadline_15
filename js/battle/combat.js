@@ -72,18 +72,20 @@ Object.assign(G, {
 		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
 	},
 	doAtk(a, tgt) {
-		const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
-		tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
-		this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		if (a._lastCrit) { this.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); this.screenShake(); }
-		if (a.furyBuff > 0) this.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
-		procFury(a, tgt, this);
-		if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
-			const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
-		}
-		if (tgt.hp > 0 && a.hp > 0 && tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3) {
+		const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3;
+		if (bCounter) {
 			const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def); a.hp = Math.max(0, a.hp - cdmg);
 			this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); this.floatT(tgt.x, tgt.y, t('messages.brawler_counter'), 'heal');
+		} else {
+			const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
+			tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
+			this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
+			if (a._lastCrit) { this.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); this.screenShake(); }
+			if (a.furyBuff > 0) this.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
+			procFury(a, tgt, this);
+			if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
+				const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
+			}
 		}
 		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();
 		if (tgt.hp <= 0) {

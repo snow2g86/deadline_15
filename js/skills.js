@@ -175,7 +175,7 @@ const LEARNABLE_SKILLS = {
 	},
 	brawler_counter: {
 		id: 'brawler_counter', name: '역습', icon: '🔁',
-		desc: '피격 시 30% 확률로 ATK×0.5 반격', passive: true,
+		desc: '피격 시 30% 확률로 피해 무효 및 ATK×0.5 반격', passive: true,
 		cls: 'brawler'
 	},
 	// ── Lancer 습득형 ──────────────────────
@@ -272,4 +272,30 @@ function getUnitSkills(u) {
 // ── 은신 판정 ──────────────────────────────
 function isStealthed(u) {
 	return u.cls === 'assassin' && G.ter[u.y] && G.ter[u.y][u.x] === 'forest';
+}
+
+// ── 스킬 스프라이트 매핑 (알파벳순, 8열×7행) ──
+const SKILL_SPRITE = {
+	archer_dash:[0,0],archer_rapidfire:[1,0],archer_snipe:[2,0],archer_steelrain:[3,0],
+	archer_weakspot:[4,0],assassin_ambush:[5,0],assassin_assassinate:[6,0],assassin_trapdetect:[7,0],
+	brawler_counter:[0,1],brawler_crush:[1,1],brawler_disarm:[2,1],brawler_flurry:[3,1],
+	knight_capture:[4,1],knight_charge:[5,1],knight_painshare:[6,1],knight_sacrifice:[7,1],
+	knight_switch:[0,2],knight_tenacity:[1,2],lancer_charge:[2,2],lancer_phalanx:[3,2],
+	lancer_pierce:[4,2],lancer_spearwall:[5,2],mage_fireburst:[6,2],mage_freeze:[7,2],
+	mage_grandwall:[0,3],mage_manasurge:[1,3],novice_throw:[2,3],priest_divinegrace:[3,3],
+	priest_massheal:[4,3],priest_purify:[5,3],priest_sanctuary:[6,3],sapper_detonate:[7,3],
+	sapper_enhancedtrap:[0,4],sapper_excavate:[1,4],sapper_trap:[2,4],shaman_curse:[3,4],
+	shaman_exalt:[4,4],shaman_medium:[5,4],shaman_poisonmist:[6,4],shaman_spiritsurge:[7,4],
+	summoner_empower:[0,5],summoner_soulbond:[1,5],summoner_soulburst:[2,5],summoner_summon_golem:[3,5],
+	summoner_summon_spirit:[4,5],warrior_assault:[5,5],warrior_bloodthirst:[6,5],warrior_cleave:[7,5],
+	warrior_criticalstrike:[0,6],warrior_powersmash:[1,6]
+};
+
+function skillIcon(id, size) {
+	var p = SKILL_SPRITE[id];
+	if (!p) return '';
+	var s = size / 64;
+	return '<span class="skill-icon" style="width:' + size + 'px;height:' + size + 'px;' +
+		'background-size:' + (512*s) + 'px ' + (448*s) + 'px;' +
+		'background-position:-' + (p[0]*64*s) + 'px -' + (p[1]*64*s) + 'px"></span>';
 }

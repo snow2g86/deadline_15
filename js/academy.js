@@ -3,6 +3,10 @@
 
 var SAVE_KEY = 'game_save';
 var ROSTER_KEY = 'game_roster';
+function clsIcon(cls, size) {
+  var d = JAB[cls]; if (!d) return '';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
+}
 var INVENTORY_KEY = 'game_inventory';
 var CLASS_CHANGE_COST = 500;
 var MAX_SKILL_LV = 10;
@@ -212,7 +216,7 @@ function renderAcademy() {
     var el = document.createElement('div');
     el.className = 'acad-card';
     el.innerHTML =
-      '<div class="acad-icon">' + charSprite(ch.cls, 28, ch.gender) + '</div>' +
+      '<div class="acad-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="acad-info">' +
         '<div class="acad-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
         '<div class="acad-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
@@ -240,7 +244,7 @@ function showClassSelectModal(uid) {
   allClasses.forEach(function(cls) {
     var d = JAB[cls];
     h += '<div class="cs-card" data-cls="' + cls + '">' +
-      '<div class="cs-icon">' + charSprite(cls, 28) + '</div>' +
+      '<div class="cs-icon">' + clsIcon(cls, 28) + '</div>' +
       '<div class="cs-name">' + t('classes.' + cls) + '</div>' +
       '<div class="cs-stats">HP ' + d.base.hp + ' ATK ' + d.base.atk + ' DEF ' + d.base.def + '</div>' +
       '<div class="cs-role">' + t('class_desc.' + cls) + '</div>' +
@@ -250,7 +254,7 @@ function showClassSelectModal(uid) {
   var names = t('character.names');
   var charName = ch.customName || names[ch.nameId] || '???';
   document.getElementById('modal-sub').innerHTML =
-    charSprite(ch.cls, 24, ch.gender) + ' <b>' + charName + '</b> (Lv.' + ch.lv + ')<br>' +
+    clsIcon(ch.cls, 24) + ' <b>' + charName + '</b> (Lv.' + ch.lv + ')<br>' +
     '<span style="color:var(--dim);font-size:10px">' + t('class_change.warning_irreversible') + '</span><br><br>' + h;
   var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
   var cb = document.createElement('button');
@@ -333,7 +337,7 @@ function renderSkillBooks() {
     var el = document.createElement('div');
     el.className = 'sb-card';
     el.innerHTML =
-      '<div class="sb-icon">' + charSprite(book.cls, 22) + '</div>' +
+      '<div class="sb-icon">' + clsIcon(book.cls, 22) + '</div>' +
       '<div class="sb-info">' +
         '<div class="sb-name">' + skillName + ' <span class="sb-cls-tag">' + clsName + '</span></div>' +
         '<div class="sb-meta">Lv.1 Skill Book</div>' +
@@ -382,7 +386,7 @@ function showSkillBookTargets(idx) {
   }
 
   var h = '<div style="text-align:center;margin-bottom:8px">' +
-    JAB[book.cls].icon + ' <b>' + skillName + '</b> Lv.1' +
+    skillIcon(book.id, 20) + ' <b>' + skillName + '</b> Lv.1' +
     '</div>' +
     '<div class="sb-target-list">';
 
@@ -395,7 +399,7 @@ function showSkillBookTargets(idx) {
       : skillName + ' Lv.' + curLv + ' \u2192 ' + (curLv + 1);
     var lvBadge = curLv === 0 ? 'NEW' : 'Lv.' + curLv;
     h += '<div class="sb-target-btn" data-uid="' + ch.uid + '">' +
-      charSprite(ch.cls, 22, ch.gender) +
+      clsIcon(ch.cls, 22) +
       '<div class="sb-target-info">' +
         '<div>' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
         '<div style="color:var(--dim);font-size:9px">' + lvText + '</div>' +

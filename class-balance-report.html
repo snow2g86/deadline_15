@@ -180,8 +180,13 @@
 
         .skill-icon {
             display: inline-block;
+            width: 20px; height: 20px;
+            background: url('image/icon/skill-sprite.png') no-repeat;
+            background-size: 160px 140px;
+            image-rendering: pixelated;
+            vertical-align: middle;
             margin-right: 5px;
-            font-size: 1.1em;
+            border-radius: 2px;
         }
 
         .skill-name {
@@ -496,7 +501,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">⚡</span>
+                                <span class="skill-icon" style="background-position:-20px -120px"></span>
                                 <span class="skill-name">강타</span>
                                 <div class="skill-desc">공격력 1.5배 데미지 (Fury 3 소비)</div>
                             </div>
@@ -563,7 +568,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">🔄</span>
+                                <span class="skill-icon" style="background-position:0px -40px"></span>
                                 <span class="skill-name">스위치</span>
                                 <div class="skill-desc">이동 범위 내 아군과 위치 교환 (Fury 1 소비)</div>
                             </div>
@@ -630,12 +635,12 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">⚡</span>
+                                <span class="skill-icon" style="background-position:-100px 0px"></span>
                                 <span class="skill-name">습격</span>
                                 <div class="skill-desc">2칸 범위 적 대상, 인접 후 ATK×2 (EP 40)</div>
                             </div>
                             <div class="skill-item">
-                                <span class="skill-icon">💀</span>
+                                <span class="skill-icon" style="background-position:-120px 0px"></span>
                                 <span class="skill-name">암살</span>
                                 <div class="skill-desc">은신+겹침 시 ATK×5 즉사급 (EP 60)</div>
                             </div>
@@ -706,7 +711,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">💨</span>
+                                <span class="skill-icon" style="background-position:0px 0px"></span>
                                 <span class="skill-name">도약</span>
                                 <div class="skill-desc">이동 범위의 1.5배 즉각 이동 (EP 20)</div>
                             </div>
@@ -773,7 +778,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">✨</span>
+                                <span class="skill-icon" style="background-position:-80px -60px"></span>
                                 <span class="skill-name">집단 치유</span>
                                 <div class="skill-desc">6칸 내 모든 아군 체력 회복 (Mana 50)</div>
                             </div>
@@ -844,7 +849,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">🔥</span>
+                                <span class="skill-icon" style="background-position:-120px -40px"></span>
                                 <span class="skill-name">화염폭발</span>
                                 <div class="skill-desc">대상 중심 3×3 범위 적 전체 공격 (Mana 40)</div>
                             </div>
@@ -907,7 +912,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">🪨</span>
+                                <span class="skill-icon" style="background-position:-40px -60px"></span>
                                 <span class="skill-name">돌던지기</span>
                                 <div class="skill-desc">4칸 내 적에게 ATK×0.5 (EP 15)</div>
                             </div>
@@ -974,7 +979,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">🤛</span>
+                                <span class="skill-icon" style="background-position:-40px -20px"></span>
                                 <span class="skill-name">무장해제</span>
                                 <div class="skill-desc">1칸 내 적 공격력 50% 감소 3턴 (EP 30)</div>
                             </div>
@@ -1037,7 +1042,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">🔱</span>
+                                <span class="skill-icon" style="background-position:-80px -40px"></span>
                                 <span class="skill-name">관통</span>
                                 <div class="skill-desc">일직선 3칸 관통 데미지 (Fury 5 소비)</div>
                             </div>
@@ -1100,7 +1105,7 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">⚠️</span>
+                                <span class="skill-icon" style="background-position:-40px -80px"></span>
                                 <span class="skill-name">함정 설치</span>
                                 <div class="skill-desc">ATK×2 피해 + 2턴 기절 함정 (EP 20)</div>
                             </div>
@@ -1167,12 +1172,12 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">✨</span>
+                                <span class="skill-icon" style="background-position:-80px -100px"></span>
                                 <span class="skill-name">정령소환</span>
                                 <div class="skill-desc">원거리 마법 정령 소환 (5턴, Mana 80)</div>
                             </div>
                             <div class="skill-item">
-                                <span class="skill-icon">🗿</span>
+                                <span class="skill-icon" style="background-position:-60px -100px"></span>
                                 <span class="skill-name">골램소환</span>
                                 <div class="skill-desc">근접 골램 소환 (5턴, Mana 80)</div>
                             </div>
@@ -1239,12 +1244,12 @@
 
                         <div class="skill-section">
                             <div class="skill-item">
-                                <span class="skill-icon">☠️</span>
+                                <span class="skill-icon" style="background-position:-60px -80px"></span>
                                 <span class="skill-name">쇠약의 저주</span>
                                 <div class="skill-desc">적에게 매턴 피해 + 행동불가 (Mana 100)</div>
                             </div>
                             <div class="skill-item">
-                                <span class="skill-icon">🔺</span>
+                                <span class="skill-icon" style="background-position:-80px -80px"></span>
                                 <span class="skill-name">고양</span>
                                 <div class="skill-desc">아군 데미지 25% 증가 (Mana 50)</div>
                             </div>

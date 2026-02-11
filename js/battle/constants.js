@@ -30,7 +30,7 @@ function actExp(stageId, action) {
 
 function clsIcon(cls, size) {
     const d = JAB[cls]; if (!d) return '';
-    return `<span class="cls-icon" style="font-size:${size}px">${d.icon}</span>`;
+    return `<img class="cls-icon" src="image/icon/jab/${cls}.png" alt="${cls}" style="width:${size}px;height:${size}px">`;
 }
 
 const ROLE_MAP = {

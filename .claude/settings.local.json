@@ -29,7 +29,11 @@
       "Bash(xargs cat:*)",
       "Bash(awk:*)",
       "Bash(git rm:*)",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "Bash(file:*)",
+      "WebFetch(domain:game-icons.net)",
+      "WebFetch(domain:itch.io)",
+      "WebFetch(domain:kenney.nl)"
     ]
   }
 }

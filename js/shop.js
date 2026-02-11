@@ -15,9 +15,10 @@ var EXP_POTIONS = [
   { id: 'exp_l', name: '\ub300\ud615 \uacbd\ud5d8\uce58 \ubb3c\uc57d', icon: '\ud83c\udfd0', exp: 400, cost: 2400, weight: 15 }
 ];
 
-var CLS_ICON = Object.fromEntries(
-  Object.entries(JAB).map(function(e) { return [e[0], e[1].icon]; })
-);
+function clsIcon(cls, size) {
+  var d = JAB[cls]; if (!d) return '';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
+}
 
 // ── 골드 관리 ─────────────────────────────
 function loadGold() {
@@ -194,14 +195,14 @@ function switchTab(tab) {
 // ── 렌더링 ───────────────────────────────
 function renderShop() {
   var list = document.getElementById('shop-list'); list.innerHTML = '';
-  list.style.display = ''; list.style.flexDirection = ''; list.style.gap = ''; list.style.gridTemplateColumns = '';
+  list.style.display = ''; list.style.flexDirection = ''; list.style.alignItems = ''; list.style.gap = ''; list.style.gridTemplateColumns = '';
   var timeEl = document.getElementById('shop-timer');
   var titleEl = document.getElementById('shop-info-title');
   var remain = Math.max(0, 6 * 3600 * 1000 - (Date.now() - _shopData.ts));
   var h = Math.floor(remain / 3600000);
   var m = Math.floor((remain % 3600000) / 60000);
   var s = Math.floor((remain % 60000) / 1000);
-  var showTimer = _currentTab === 'mercenary' || _currentTab === 'item';
+  var showTimer = _currentTab === 'mercenary' || _currentTab === 'consumable' || _currentTab === 'skill';
   timeEl.style.display = showTimer ? 'block' : 'none';
   if (showTimer) {
     var hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
@@ -209,23 +210,36 @@ function renderShop() {
   }
   var tabTitles = {
     'mercenary': t('shop.subtitle_mercenary'),
-    'item': t('shop.subtitle_item'),
-    'gacha': t('shop.subtitle_gacha'),
+    'consumable': t('shop.subtitle_consumable'),
+    'equip': t('shop.subtitle_equip'),
+    'skill': t('shop.subtitle_skill'),
     'gold': t('shop.subtitle_gold')
   };
   titleEl.textContent = tabTitles[_currentTab] || t('shop.title');
 
-  if (_currentTab === 'gacha') {
+  if (_currentTab === 'equip') {
     renderGacha(list);
     return;
   }
 
-  var tabTypeMap = { 'mercenary': 'char', 'item': ['potion', 'skillbook'], 'gold': null };
+  if (_currentTab === 'gold') {
+    renderGoldShop(list);
+    return;
+  }
+
+  // 광고 보상 카드
+  var tabAdMap = {
+    'mercenary':  { type: 'merc',  descKey: 'shop.ad_merc_desc',  fn: doGachaAdMerc },
+    'consumable': { type: 'item',  descKey: 'shop.ad_item_desc',  fn: doGachaAdItem },
+    'skill':      { type: 'skill', descKey: 'shop.ad_skill_desc', fn: doGachaAdSkill }
+  };
+  var adCfg = tabAdMap[_currentTab];
+  if (adCfg) list.appendChild(buildTabAdCard(adCfg.type, adCfg.descKey, adCfg.fn));
+
+  var tabTypeMap = { 'mercenary': 'char', 'consumable': 'potion', 'skill': 'skillbook' };
   var filterTypes = tabTypeMap[_currentTab];
   var filteredItems = _shopData.items.filter(function(item) {
     var iType = item.type || 'char';
-    if (_currentTab === 'gold') return false;
-    if (Array.isArray(filterTypes)) return filterTypes.indexOf(iType) >= 0;
     return iType === filterTypes;
   });
 
@@ -255,7 +269,7 @@ function renderCharCard(item, list) {
   var recruitBtn = item.sold ? t('shop.recruit_complete') : t('shop.recruit', { gold: item.cost });
   el.innerHTML =
     '<div class="shop-grade" style="color:' + gClr + '">' + grade + '</div>' +
-    '<div class="shop-icon">' + charSprite(item.cls, 28, item.gender) + '</div>' +
+    '<div class="shop-icon">' + clsIcon(item.cls, 36) + '</div>' +
     '<div class="shop-name">' + item.name + '</div>' +
     '<div class="shop-cls">' + t('classes.' + item.cls) + ' \xb7 ' + t('class_desc.' + item.cls) + '</div>' +
     '<div class="shop-stats">' + t('common.hp') + ' ' + d.base.hp + ' ' + t('common.atk') + ' ' + d.base.atk + ' ' + t('common.def') + ' ' + d.base.def + '</div>' +
@@ -310,8 +324,8 @@ function renderSkillBookCard(item, list) {
   el.className = 'shop-card skillbook-card' + (item.sold ? ' sold' : '');
   var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
   el.innerHTML =
-    '<div class="shop-icon">' + charSprite(item.cls, 28) + '</div>' +
-    '<div class="shop-name">\ud83d\udcd5 ' + skillName + '</div>' +
+    '<div class="shop-icon">' + clsIcon(item.cls, 36) + '</div>' +
+    '<div class="shop-name">' + skillIcon(item.skillId, 18) + ' ' + skillName + '</div>' +
     '<div class="shop-cls">' + clsName + ' ' + t('shop.skillbook_only') + '</div>' +
     '<div class="shop-stats">' + sk.desc + '</div>' +
     '<button class="shop-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
@@ -333,6 +347,239 @@ function renderSkillBookCard(item, list) {
     };
   }
   list.appendChild(el);
+}
+
+// ── 골드 상점 ───────────────────────────
+var AD_COOLDOWN_KEY = 'game_ad_cooldown';
+var AD_COOLDOWN_MS = 10 * 60 * 1000; // 10분
+var AD_REWARD = 500;
+
+// ── 가챠 광고 보상 ──────────────────────
+var GACHA_AD_KEYS = {
+  equip: 'game_gacha_ad_equip',
+  item:  'game_gacha_ad_item',
+  merc:  'game_gacha_ad_merc',
+  skill: 'game_gacha_ad_skill'
+};
+var GACHA_AD_COOLDOWN_MS = 30 * 60 * 1000;
+
+function getGachaAdCooldown(type) {
+  try { var v = +localStorage.getItem(GACHA_AD_KEYS[type]); return v || 0; } catch(_) { return 0; }
+}
+
+function setGachaAdCooldown(type) {
+  try { localStorage.setItem(GACHA_AD_KEYS[type], Date.now()); } catch(_) {}
+}
+
+function doGachaAdEquip() {
+  setGachaAdCooldown('equip');
+  var item = gachaPull(null);
+  var inv = loadInventory();
+  inv.push(item);
+  saveInventory(inv);
+  showGachaResults([item]);
+}
+
+function doGachaAdItem() {
+  setGachaAdCooldown('item');
+  var totalW = EXP_POTIONS.reduce(function(s, p) { return s + p.weight; }, 0);
+  var r = Math.random() * totalW, potObj = EXP_POTIONS[0];
+  for (var k = 0; k < EXP_POTIONS.length; k++) {
+    r -= EXP_POTIONS[k].weight;
+    if (r <= 0) { potObj = EXP_POTIONS[k]; break; }
+  }
+  var pKeys = { 'exp_s': 'potion_small', 'exp_m': 'potion_medium', 'exp_l': 'potion_large' };
+  var freeItem = {
+    type: 'potion', potionId: potObj.id, name: potObj.name,
+    i18nNameKey: 'shop.' + pKeys[potObj.id],
+    icon: potObj.icon, exp: potObj.exp, cost: 0, sold: false
+  };
+  showFreePotionModal(freeItem);
+}
+
+function doGachaAdMerc() {
+  setGachaAdCooldown('merc');
+  var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon'); });
+  var cls = classes[Math.floor(Math.random() * classes.length)];
+  var d = JAB[cls];
+  var pot = {
+    hp: +(d.growth.hp[0] + Math.random() * (d.growth.hp[1] - d.growth.hp[0])).toFixed(1),
+    atk: +(d.growth.atk[0] + Math.random() * (d.growth.atk[1] - d.growth.atk[0])).toFixed(1),
+    def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1)
+  };
+  var names = t('character.names');
+  var nameIdx = Math.floor(Math.random() * names.length);
+  addChar(cls, nameIdx, pot);
+  var charName = names[nameIdx] || d.icon;
+  showAlert(t('shop.gacha_ad_merc_success', { name: charName, cls: t('classes.' + cls) }));
+  renderShop();
+}
+
+function doGachaAdSkill() {
+  setGachaAdCooldown('skill');
+  if (typeof LEARNABLE_SKILLS === 'undefined') return;
+  var lsKeys = Object.keys(LEARNABLE_SKILLS);
+  if (!lsKeys.length) return;
+  var sk = LEARNABLE_SKILLS[lsKeys[Math.floor(Math.random() * lsKeys.length)]];
+  var inv = loadInventory();
+  inv.push({ id: sk.id, cls: sk.cls, lv: 1 });
+  saveInventory(inv);
+  showAlert(t('shop.gacha_ad_skill_success', { skill: t('skills.' + sk.id) }));
+  renderShop();
+}
+
+function buildTabAdCard(type, descKey, fn) {
+  var remain = Math.max(0, GACHA_AD_COOLDOWN_MS - (Date.now() - getGachaAdCooldown(type)));
+  var canWatch = remain <= 0;
+  var card = document.createElement('div');
+  card.className = 'gold-ad-card shop-tab-ad';
+  var btnText = canWatch ? t('shop.gacha_ad_btn') : t('shop.gacha_ad_cooldown', { minutes: Math.ceil(remain / 60000) });
+  card.innerHTML =
+    '<div class="gold-ad-icon">&#127916;</div>' +
+    '<div class="gold-ad-info">' +
+      '<div class="gold-ad-name">' + t(descKey) + '</div>' +
+    '</div>' +
+    '<button class="gold-ad-btn' + (canWatch ? '' : ' disabled') + '" ' + (canWatch ? '' : 'disabled') + '>' + btnText + '</button>';
+  if (canWatch) {
+    card.querySelector('.gold-ad-btn').onclick = fn;
+  }
+  return card;
+}
+
+function showFreePotionModal(item) {
+  var roster = getRoster();
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+  if (!alive.length) return;
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = t('shop.select_character');
+  document.getElementById('modal-title').className = '';
+  var h = '<div class="potion-target-list">';
+  var names = t('character.names');
+  alive.forEach(function(ch) {
+    var d = JAB[ch.cls];
+    var charName = ch.customName || names[ch.nameId] || d.icon;
+    var atMax = ch.lv >= MAX_LEVEL;
+    var expNeed = atMax ? 0 : expForLevel(ch.lv);
+    h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
+      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
+      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
+      '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
+      '</div>';
+  });
+  h += '</div>';
+  var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
+  document.getElementById('modal-sub').innerHTML = item.icon + ' ' + potionName + ' (EXP +' + item.exp + ')<br><br>' + h;
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  var cb = document.createElement('button');
+  cb.className = 'modal-btn secondary';
+  cb.textContent = t('common.cancel');
+  cb.onclick = function() { ov.classList.remove('show'); };
+  bt.appendChild(cb);
+  ov.classList.add('show');
+  document.querySelectorAll('.pt-btn:not(.pt-max)').forEach(function(b) {
+    b.onclick = function() {
+      var uid = +b.dataset.uid;
+      var r = gainExp(uid, item.exp);
+      ov.classList.remove('show');
+      renderShop();
+      if (r.leveled > 0) {
+        var ch = getChar(uid);
+        var d = JAB[ch.cls];
+        var charName = ch.customName || names[ch.nameId] || d.icon;
+        setTimeout(function() {
+          showAlert(
+            d.icon + ' ' + charName + '\nLv.' + r.prevLv + ' \u2192 Lv.' + ch.lv +
+            (r.leveled > 1 ? ' (' + r.leveled + t('shop.gacha_ad_levelup') + ')' : '')
+          );
+        }, 100);
+      }
+    };
+  });
+}
+
+function getAdCooldown() {
+  try { var v = +localStorage.getItem(AD_COOLDOWN_KEY); return v || 0; } catch(_) { return 0; }
+}
+
+function setAdCooldown() {
+  try { localStorage.setItem(AD_COOLDOWN_KEY, Date.now()); } catch(_) {}
+}
+
+function renderGoldShop(list) {
+  list.style.display = 'flex';
+  list.style.flexDirection = 'column';
+  list.style.alignItems = 'center';
+  list.style.gap = '10px';
+
+  // 광고 섹션
+  var adSection = document.createElement('div');
+  adSection.className = 'gold-section';
+  var adTitle = document.createElement('div');
+  adTitle.className = 'gold-section-title';
+  adTitle.textContent = t('shop.gold_ad_title');
+  adSection.appendChild(adTitle);
+
+  var adCard = document.createElement('div');
+  adCard.className = 'gold-ad-card';
+  var lastAd = getAdCooldown();
+  var remain = Math.max(0, AD_COOLDOWN_MS - (Date.now() - lastAd));
+  var canWatch = remain <= 0;
+  var adBtnText = canWatch ? t('shop.gold_ad_btn') : t('shop.gold_ad_cooldown', { minutes: Math.ceil(remain / 60000) });
+  adCard.innerHTML =
+    '<div class="gold-ad-icon">&#127916;</div>' +
+    '<div class="gold-ad-info">' +
+      '<div class="gold-ad-name">' + t('shop.gold_ad_desc') + '</div>' +
+    '</div>' +
+    '<button class="gold-ad-btn' + (canWatch ? '' : ' disabled') + '" ' + (canWatch ? '' : 'disabled') + '>' + adBtnText + '</button>';
+  if (canWatch) {
+    adCard.querySelector('.gold-ad-btn').onclick = function() {
+      setAdCooldown();
+      _gold += AD_REWARD;
+      saveGold(_gold);
+      updateGoldUI();
+      showAlert(t('shop.gold_ad_success'));
+      renderShop();
+    };
+  }
+  adSection.appendChild(adCard);
+  list.appendChild(adSection);
+
+  // IAP 패키지 섹션
+  var iapSection = document.createElement('div');
+  iapSection.className = 'gold-section';
+  var iapTitle = document.createElement('div');
+  iapTitle.className = 'gold-section-title';
+  iapTitle.textContent = t('shop.gold_iap_title');
+  iapSection.appendChild(iapTitle);
+
+  var packages = [
+    { gold: 500, price: '$0.99', key: 'gold_iap_500' },
+    { gold: 1200, price: '$1.99', key: 'gold_iap_1200' },
+    { gold: 3000, price: '$4.99', key: 'gold_iap_3000' },
+    { gold: 6500, price: '$9.99', key: 'gold_iap_6500' }
+  ];
+
+  var iapGrid = document.createElement('div');
+  iapGrid.className = 'gold-iap-grid';
+  packages.forEach(function(pkg) {
+    var card = document.createElement('div');
+    card.className = 'gold-iap-card disabled';
+    card.innerHTML =
+      '<div class="gold-iap-icon">' + goldIcon(pkg.gold) + '</div>' +
+      '<div class="gold-iap-amount">' + t('shop.' + pkg.key) + '</div>' +
+      '<div class="gold-iap-price">' + pkg.price + '</div>' +
+      '<div class="gold-iap-badge">' + t('shop.gold_iap_coming') + '</div>';
+    iapGrid.appendChild(card);
+  });
+  iapSection.appendChild(iapGrid);
+  list.appendChild(iapSection);
+}
+
+function goldIcon(amount) {
+  if (amount >= 6500) return '&#x1F4B0;';
+  if (amount >= 3000) return '&#x1F3C6;';
+  if (amount >= 1200) return '&#x1F48E;';
+  return '&#x1FA99;';
 }
 
 // ── 갱신 타이머 ──────────────────────────
@@ -373,9 +620,8 @@ function showPotionModal(item) {
     var charName = ch.customName || names[ch.nameId] || d.icon;
     var atMax = ch.lv >= MAX_LEVEL;
     var expNeed = atMax ? 0 : expForLevel(ch.lv);
-    var expPct = atMax ? 100 : Math.min(100, Math.round((ch.exp || 0) / expNeed * 100));
     h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon">' + charSprite(ch.cls, 20, ch.gender) + '</span>' +
+      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
       '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
       '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
       '</div>';
@@ -456,6 +702,9 @@ function renderGacha(list) {
     '<button class="gacha-btn gacha-btn-multi' + (canAfford10 ? '' : ' disabled') + '" ' + (canAfford10 ? '' : 'disabled') + '>' + t('shop.gacha_pull_10', { gold: GACHA_COST_10 }) + '</button>';
   if (canAfford10) c10.querySelector('.gacha-btn').onclick = function() { doGacha(10); };
   list.appendChild(c10);
+
+  // 광고 보상 카드 (2칸 차지)
+  list.appendChild(buildTabAdCard('equip', 'shop.ad_equip_desc', doGachaAdEquip));
 
   // 확률표 (2칸 차지)
   var rateEl = document.createElement('div');

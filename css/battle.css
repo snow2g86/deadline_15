@@ -1,3 +1,12 @@
+/* ═══ Battle Loading ═══ */
+#battle-loading{position:fixed;inset:0;z-index:9999;background:#0a0e1a;display:flex;align-items:center;justify-content:center;transition:opacity .4s}
+#battle-loading.hide{opacity:0;pointer-events:none}
+.bl-content{text-align:center;width:80%;max-width:300px}
+.bl-title{font-size:16px;font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:16px}
+.bl-bar{width:100%;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.bl-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold));border-radius:3px;transition:width .15s linear}
+.bl-tip{font-size:10px;color:var(--dim);margin-top:12px}
+
 /* ═══ Top Bar ═══ */
 #top-bar{height:46px;min-height:46px;background:linear-gradient(180deg,#1a2340,#111827);
   border-bottom:2px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 8px;z-index:100}
@@ -8,10 +17,12 @@
 #turn-indicator.enemy{background:var(--red);color:#fff}
 #stage-info{font-size:10px;color:var(--gold);font-weight:700;text-align:center;line-height:1.3}
 #stage-info .si-turn{font-size:9px;color:var(--dim)}
-.cam-btn{width:32px;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.06);color:var(--text);font-size:14px;font-weight:900;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all .15s}
-.cam-btn:hover{background:rgba(255,255,255,.15);border-color:var(--gold)}
+.cam-btn{width:32px;height:32px;border-radius:6px;border:1px solid rgba(240,192,64,.25);
+  background:rgba(10,14,26,.7);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0}
+.cam-btn svg{width:18px;height:18px;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cam-btn:hover{background:rgba(240,192,64,.15);border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,.2)}
+.cam-btn:hover svg{stroke:#f5d060}
 .cam-btn:active{transform:scale(.9)}
 #btn-end-turn{font-family:'Cinzel',serif;font-weight:700;font-size:11px;
   background:linear-gradient(135deg,var(--gold),#d4a017);color:#1a1a2e;border:none;
@@ -91,6 +102,7 @@
 #action-menu .am-skill{background:#7c3aed}
 #action-menu .am-skill:disabled{opacity:.35;cursor:default}
 
+
 /* ═══ Info Panel ═══ */
 #info-panel{height:96px;min-height:96px;background:linear-gradient(0deg,#0d1117,var(--panel));
   border-top:2px solid #1e293b;display:flex;align-items:center;padding:0 8px;gap:8px;z-index:100;overflow-x:auto}
@@ -137,16 +149,14 @@
 
 /* ═══ Ally Nav Panel ═══ */
 #ally-nav{position:fixed;top:54px;right:6px;z-index:200;
-  display:flex;flex-direction:column;align-items:flex-end;gap:2px;max-height:calc(100vh - 160px);overflow-y:auto;
-  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
-#ally-nav::-webkit-scrollbar{width:2px}
-#ally-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;max-height:calc(100vh - 160px);overflow-y:auto}
 .an-unit{display:inline-flex;align-items:center;gap:0;padding:2px;
   background:rgba(10,14,26,.88);border:1.5px solid rgba(59,130,246,.2);border-radius:5px;
   cursor:pointer;transition:all .15s;height:28px}
 .an-unit:hover{border-color:var(--blue);background:rgba(59,130,246,.1)}
-.an-unit.selected{background:rgba(240,192,64,.1)}
-.an-unit.dead{pointer-events:none;border-color:rgba(255,255,255,.05)}
+.an-unit.selected{background:rgba(10,14,26,.88);border-color:var(--gold)}
+.an-unit.acted-nav{opacity:.5}
+.an-unit.dead{pointer-events:none;opacity:.35;border-color:rgba(255,255,255,.05)}
 .an-buffs{display:flex;gap:2px;align-items:center;justify-content:flex-end}
 .an-buffs:not(:empty){padding:0 3px}
 .an-buff{position:relative;width:16px;height:16px;border-radius:3px;font-size:10px;
@@ -178,9 +188,11 @@
 /* ═══ Settings (Battle) ═══ */
 #settings-btn{position:fixed;bottom:110px;left:8px;z-index:1001;width:36px;height:36px;
   border-radius:50%;border:1.5px solid rgba(255,255,255,.15);background:rgba(17,24,39,.85);
-  color:var(--dim);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
   box-shadow:0 2px 10px rgba(0,0,0,.4);transition:all .2s;backdrop-filter:blur(4px)}
-#settings-btn:hover{background:rgba(30,41,59,.95);border-color:var(--gold);color:var(--gold)}
+#settings-btn svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#settings-btn:hover{background:rgba(30,41,59,.95);border-color:var(--gold)}
+#settings-btn:hover svg{stroke:var(--gold)}
 #settings-btn:focus{outline:none;border-color:rgba(255,255,255,.15)}
 #settings-panel{position:fixed;bottom:110px;left:52px;z-index:1001;width:260px;
   background:rgba(17,24,39,.96);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;
@@ -248,7 +260,7 @@
 
 /* ═══ Mobile (480px-) ═══ */
 @media(max-width:480px){#top-bar{height:40px;min-height:40px}#info-panel{height:84px;min-height:84px}
-  .cam-btn{width:28px;height:28px;font-size:12px}#turn-indicator{font-size:10px;padding:2px 8px}#btn-end-turn{font-size:10px;padding:4px 8px}}
+  .cam-btn{width:28px;height:28px}.cam-btn svg{width:14px;height:14px}#turn-indicator{font-size:10px;padding:2px 8px}#btn-end-turn{font-size:10px;padding:4px 8px}}
 
 /* ═══ PC (1024px+) ═══ */
 @media(min-width:1024px){
@@ -258,7 +270,8 @@
   #turn-indicator{font-size:14px;padding:4px 13px;border-radius:5px;letter-spacing:1.8px}
   #stage-info{font-size:14px}
   #stage-info .si-turn{font-size:12px}
-  .cam-btn{width:42px;height:42px;font-size:18px;border-radius:8px}
+  .cam-btn{width:42px;height:42px;border-radius:8px}
+  .cam-btn svg{width:22px;height:22px}
   #btn-end-turn{font-size:14px;padding:7px 18px;border-radius:5px;letter-spacing:1px}
 
   /* Info Panel */
@@ -276,7 +289,6 @@
 
   /* Ally Nav */
   #ally-nav{top:66px;right:10px;gap:3px}
-  #ally-nav::-webkit-scrollbar{width:3px}
   .an-unit{padding:3px;border-radius:6px;height:38px}
   .an-buffs{gap:3px}
   .an-buffs:not(:empty){padding:0 4px}
@@ -290,7 +302,8 @@
   #minimap{top:66px;left:12px;border-radius:8px}
 
   /* Settings */
-  #settings-btn{bottom:142px;left:12px;width:44px;height:44px;font-size:22px;border-radius:50%}
+  #settings-btn{bottom:142px;left:12px;width:44px;height:44px;border-radius:50%}
+  #settings-btn svg{width:22px;height:22px}
   #settings-panel{bottom:142px;left:64px;width:300px;padding:16px 20px;gap:14px;border-radius:12px}
   #settings-panel .sp-title{font-size:15px}
   .sp-row .sp-label{font-size:13px}.sp-row .sp-val{font-size:12px}

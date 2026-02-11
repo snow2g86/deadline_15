@@ -22,10 +22,7 @@
 .ps-layout{display:flex;gap:14px;flex:1;overflow:hidden;width:100%;max-width:560px}
 .ps-left{width:80px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
 .ps-counter{font-size:12px;color:var(--blue);font-weight:700;text-align:center;margin-bottom:3px;flex-shrink:0}
-.ps-party{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;
-  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
-.ps-party::-webkit-scrollbar{width:2px}
-.ps-party::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.ps-party{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
 .party-slot{width:100%;min-height:36px;flex-shrink:0;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.12);
   border-radius:7px;display:flex;align-items:center;gap:3px;padding:2px 4px;
   transition:all .2s;cursor:pointer;position:relative}
@@ -44,10 +41,7 @@
   background:rgba(255,255,255,.04);color:var(--dim);cursor:pointer;transition:all .15s;white-space:nowrap}
 .ps-tab:hover{border-color:var(--blue);color:var(--text)}
 .ps-tab.active{border-color:var(--gold);background:rgba(240,192,64,.12);color:var(--gold)}
-.ps-roster{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px;
-  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
-.ps-roster::-webkit-scrollbar{width:3px}
-.ps-roster::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.ps-roster{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
 
 /* ── 로스터 리스트 행 ── */
 .rl-row{display:flex;align-items:center;gap:7px;padding:6px 8px;

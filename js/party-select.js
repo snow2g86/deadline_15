@@ -8,6 +8,10 @@ var ROSTER_KEY = 'game_roster';
 var PARTY_KEY = 'game_party';
 var NAV_KEY = 'game_nav';
 var SAVE_KEY = 'game_save';
+function clsIcon(cls, size) {
+  var d = JAB[cls]; if (!d) return '';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
+}
 
 function expForLevel(lv) { return 80 + 20 * lv + 5 * lv * lv; }
 
@@ -289,7 +293,7 @@ function renderParty() {
     var eqAtk = eqB.atk ? '<span style="color:#4ade80">+' + eqB.atk + '</span>' : '';
     var eqDef = eqB.def ? '<span style="color:#4ade80">+' + eqB.def + '</span>' : '';
     row.innerHTML =
-      '<div class="rl-icon">' + charSprite(ch.cls, 30, ch.gender) + '</div>' +
+      '<div class="rl-icon">' + clsIcon(ch.cls, 30) + '</div>' +
       '<div class="rl-info">' +
       '<div class="rl-top"><span class="rl-name">' + charName + '</span><button class="rl-rename" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">&#9998;</button><span class="rl-lv">Lv.' + ch.lv + '</span>' +
       '<span class="rl-grade" style="color:' + gClr + '">' + grade + '</span></div>' +
@@ -326,7 +330,7 @@ function renderParty() {
         var pd = JAB[pch.cls];
         s.classList.add('filled');
         s.innerHTML = '<span class="ps-num">' + (i + 1) + '</span>' +
-          charSprite(pch.cls, 20, pch.gender) +
+          clsIcon(pch.cls, 20) +
           '<span class="ps-lv">Lv' + pch.lv + '</span><span class="ps-x">\u2715</span>';
         s.onclick = (function(idx) { return function() { pRemAt(idx); }; })(i);
       }
@@ -356,31 +360,151 @@ function renderParty() {
 // ══════════════════════════════════════════════
 
 
-// ── Character scroll bar ──
+// ── Character card grid ──
 function renderChars() {
   var el = document.getElementById('eq-chars');
   if (!el) return;
   el.innerHTML = '';
+
   var roster = getRoster();
   var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
   var names = t('character.names');
+  var party = loadParty();
+  var partySet = {};
+  party.forEach(function(uid) { partySet[uid] = true; });
+
+  // 정렬: 파티원(레벨 높은 순) → 클랜원(레벨 높은 순)
+  alive.sort(function(a, b) {
+    var aInParty = partySet[a.uid] ? 1 : 0;
+    var bInParty = partySet[b.uid] ? 1 : 0;
+    if (bInParty !== aInParty) return bInParty - aInParty;
+    return b.lv - a.lv;
+  });
+
+  var inv = loadInventory();
+  var invEquips = inv.filter(function(it) { return it.type === 'equip' && !it.equipped; });
+
   alive.forEach(function(ch) {
     var d = JAB[ch.cls];
     var charName = ch.customName || names[ch.nameId] || d.icon;
-    var btn = document.createElement('div');
-    btn.className = 'eq-char-btn' + (_selUid === ch.uid ? ' active' : '');
-    btn.innerHTML =
-      charSprite(ch.cls, 22, ch.gender) +
-      '<span class="eq-char-name">' + charName + '</span>' +
-      '<span class="eq-char-lv">Lv.' + ch.lv + '</span>';
-    btn.onclick = function() { _selUid = ch.uid; eqRenderAll(); };
-    el.appendChild(btn);
+    var isInParty = !!partySet[ch.uid];
+
+    var card = document.createElement('div');
+    card.className = 'eq-char-card' + (_selUid === ch.uid ? ' active' : '');
+
+    var html = '';
+
+    // 파티원 배지
+    if (isInParty) {
+      html += '<div class="eq-char-badge">Party</div>';
+    }
+
+    // 장비 슬롯 그리드
+    html += '<div class="eq-char-equips">';
+    ensureEquipSlots(ch);
+    var invMap = {};
+    for (var i = 0; i < inv.length; i++) {
+      if (inv[i].type === 'equip') invMap[inv[i].eid] = inv[i];
+    }
+    for (var j = 0; j < EQUIP_SLOTS.length; j++) {
+      var slot = EQUIP_SLOTS[j];
+      var eid = ch.equip[slot];
+      var equipped = eid ? invMap[eid] : null;
+      var hasUpgrade = false;
+
+      if (equipped) {
+        // 더 좋은 장비가 인벤토리에 있는지 확인
+        var betterExists = invEquips.some(function(it) {
+          if (it.slot !== slot) return false;
+          if (!canEquip(ch, it)) return false;
+          return RARITY[it.rarity].tier > RARITY[equipped.rarity].tier;
+        });
+        hasUpgrade = betterExists;
+      }
+
+      var slotClass = 'eq-char-slot';
+      if (equipped) {
+        slotClass += ' filled';
+        if (hasUpgrade) slotClass += ' upgrade';
+      }
+
+      html += '<div class="' + slotClass + '"' +
+              (equipped ? ' data-rarity="' + equipped.rarity + '"' : '') + '>' +
+              (equipped ? '' : '-') +
+              '</div>';
+    }
+    html += '</div>';
+
+    // 캐릭터 정보
+    html += '<div class="eq-char-info">';
+    html += '<div class="eq-char-name">' + charName + '</div>';
+    html += '<div class="eq-char-meta">';
+    html += '<span class="eq-char-level">Lv.' + ch.lv + '</span>';
+    html += '</div>';
+    html += '</div>';
+
+    card.innerHTML = html;
+    card.onclick = (function(uid) {
+      return function() {
+        _selUid = uid;
+        showEquipModal();
+      };
+    })(ch.uid);
+    el.appendChild(card);
   });
 }
 
-// ── Main body ──
-function renderBody() {
-  var body = document.getElementById('eq-body');
+// ── 장비 모달 표시/숨김 ──
+function showEquipModal() {
+  var overlay = document.getElementById('eq-modal-overlay');
+  if (!overlay) {
+    // 모달 생성
+    overlay = document.createElement('div');
+    overlay.id = 'eq-modal-overlay';
+    overlay.className = 'eq-modal-overlay';
+
+    var content = document.createElement('div');
+    content.className = 'eq-modal-content';
+    content.onclick = function(e) { e.stopPropagation(); };
+
+    var header = document.createElement('div');
+    header.className = 'eq-modal-header';
+    header.innerHTML =
+      '<div class="eq-modal-title">⚔️ ' + t('equip.detail_title') + '</div>' +
+      '<button class="eq-modal-close" onclick="hideEquipModal()">&times;</button>';
+
+    var body = document.createElement('div');
+    body.className = 'eq-modal-body';
+    body.innerHTML = '<div class="eq-body" id="eq-modal-body"></div>';
+
+    content.appendChild(header);
+    content.appendChild(body);
+    overlay.appendChild(content);
+
+    overlay.onclick = function() { hideEquipModal(); };
+
+    document.body.appendChild(overlay);
+  }
+
+  // 모달 내용 렌더링
+  renderModalBody();
+
+  // 모달 표시
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideEquipModal() {
+  var overlay = document.getElementById('eq-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+  }
+  document.body.style.overflow = '';
+}
+
+// ── 모달 바디 렌더링 ──
+function renderModalBody() {
+  var body = document.getElementById('eq-modal-body');
   if (!body) return;
   if (!_selUid) {
     body.innerHTML = '<div class="eq-placeholder">' + t('equip.select_char') + '</div>';
@@ -395,8 +519,16 @@ function renderBody() {
   for (var i = 0; i < inv.length; i++) { if (inv[i].type === 'equip') invMap[inv[i].eid] = inv[i]; }
 
   var html = '';
-  // ── Slots grid ──
-  html += '<div class="eq-slots-title">' + t('equip.slots_title') + '</div>';
+
+  // 2컬럼 레이아웃 래퍼
+  html += '<div class="eq-body-layout">';
+
+  // ──── 좌측 패널: 슬롯 + 스탯 + 세트 ────
+  html += '<div class="eq-left">';
+
+  // 슬롯 섹션
+  html += '<div class="eq-section">';
+  html += '<div class="eq-section-title">' + t('equip.slots_title') + '</div>';
   html += '<div class="eq-slots">';
   for (var s = 0; s < EQUIP_SLOTS.length; s++) {
     var slot = EQUIP_SLOTS[s];
@@ -423,8 +555,11 @@ function renderBody() {
     html += '</div>';
   }
   html += '</div>';
+  html += '</div>'; // .eq-section
 
-  // ── Stats summary ──
+  // 스탯 섹션
+  html += '<div class="eq-section">';
+  html += '<div class="eq-section-title">' + t('equip.stats_title') + '</div>';
   var bonus = calcEquipBonus(ch);
   html += '<div class="eq-stats">';
   var statKeys = ['hp', 'atk', 'def', 'move', 'range'];
@@ -438,8 +573,9 @@ function renderBody() {
     html += '</div>';
   }
   html += '</div>';
+  html += '</div>'; // .eq-section
 
-  // ── Set bonuses ──
+  // 세트 보너스 섹션 (조건부)
   var setCounts = {};
   for (var ss = 0; ss < EQUIP_SLOTS.length; ss++) {
     var sEid = ch.equip[EQUIP_SLOTS[ss]];
@@ -450,6 +586,7 @@ function renderBody() {
   var hasSet = false;
   for (var sid in setCounts) { hasSet = true; break; }
   if (hasSet) {
+    html += '<div class="eq-section">';
     html += '<div class="eq-set-info">';
     for (var setId in setCounts) {
       var cnt = setCounts[setId];
@@ -465,10 +602,15 @@ function renderBody() {
       html += '</div>';
     }
     html += '</div>';
+    html += '</div>'; // .eq-section
   }
 
-  // ── Inventory filter + list ──
-  html += '<div class="eq-inv-title">' + t('equip.inventory') + '</div>';
+  html += '</div>'; // .eq-left
+
+  // ──── 우측 패널: 인벤토리 ────
+  html += '<div class="eq-right">';
+  html += '<div class="eq-section eq-section-fill">';
+  html += '<div class="eq-section-title">' + t('equip.inventory') + '</div>';
   html += '<div class="eq-inv-tabs">';
   var filters = [
     { key: 'all', label: t('party.filter_all') },
@@ -481,6 +623,10 @@ function renderBody() {
   }
   html += '</div>';
   html += '<div class="eq-inv-list" id="eq-inv-list"></div>';
+  html += '</div>'; // .eq-section
+  html += '</div>'; // .eq-right
+
+  html += '</div>'; // .eq-body-layout
 
   body.innerHTML = html;
 
@@ -496,12 +642,94 @@ function renderBody() {
   body.querySelectorAll('.eq-inv-tab').forEach(function(btn) {
     btn.onclick = function() {
       _invFilter = btn.dataset.filter;
-      eqRenderAll();
+      renderModalBody();
     };
   });
 
   // ── Render inventory list ──
-  renderInventory(ch, invMap);
+  renderInventoryInModal(ch);
+}
+
+// ── 모달 내 인벤토리 렌더링 ──
+function renderInventoryInModal(ch) {
+  var list = document.getElementById('eq-inv-list');
+  if (!list) return;
+  list.innerHTML = '';
+  var inv = loadInventory();
+  var equips = inv.filter(function(it) { return it.type === 'equip'; });
+
+  // Filter
+  if (_invFilter === 'weapon') {
+    equips = equips.filter(function(it) { return it.slot === 'weapon' || it.slot === 'offhand'; });
+  } else if (_invFilter === 'armor') {
+    equips = equips.filter(function(it) { return it.slot === 'helmet' || it.slot === 'armor' || it.slot === 'boots'; });
+  } else if (_invFilter === 'accessory') {
+    equips = equips.filter(function(it) { return it.slot === 'necklace' || it.slot === 'earring' || it.slot === 'ring'; });
+  }
+
+  // Sort: rarity desc, then slot
+  equips.sort(function(a, b) {
+    var ra = RARITY[a.rarity].tier, rb = RARITY[b.rarity].tier;
+    if (rb !== ra) return rb - ra;
+    return EQUIP_SLOTS.indexOf(a.slot) - EQUIP_SLOTS.indexOf(b.slot);
+  });
+
+  if (!equips.length) {
+    list.innerHTML = '<div class="eq-inv-empty">' + t('equip.no_items') + '</div>';
+    return;
+  }
+
+  equips.forEach(function(item) {
+    var rc = RARITY[item.rarity].color;
+    var canEquipThis = canEquip(ch, item);
+    var isEquipped = !!item.equipped;
+    var isEquippedHere = false;
+    for (var s = 0; s < EQUIP_SLOTS.length; s++) {
+      if (ch.equip[EQUIP_SLOTS[s]] === item.eid) { isEquippedHere = true; break; }
+    }
+    var isEquippedOther = isEquipped && !isEquippedHere;
+    var statsArr = [];
+    for (var st in item.stats) statsArr.push(t('common.' + st) + '+' + item.stats[st]);
+
+    var row = document.createElement('div');
+    row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
+    row.innerHTML =
+      '<div class="eq-inv-info">' +
+      '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' + t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() + '</span>' +
+      '<span class="eq-inv-name">' + t('equip.item.' + item.templateId) + '</span>' +
+      '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' +
+      (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
+      '</div>' +
+      '<div class="eq-inv-actions">' +
+      (isEquippedHere ? '<span class="eq-inv-equipped">' + t('equip.equipped') + '</span>' :
+        (canEquipThis ? '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' : '') +
+        (!isEquipped ? '<button class="eq-inv-btn eq-sell-btn">' + t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>' : '')
+      ) +
+      '</div>';
+
+    var equipBtn = row.querySelector('.eq-equip-btn');
+    if (equipBtn) {
+      equipBtn.onclick = function() { equipItemInModal(_selUid, item.eid); };
+    }
+    var sellBtn = row.querySelector('.eq-sell-btn');
+    if (sellBtn) {
+      sellBtn.onclick = function() { sellEquipInModal(item.eid); };
+    }
+    list.appendChild(row);
+  });
+}
+
+// ── 모달 내 장비 장착/판매 (갱신 포함) ──
+function equipItemInModal(uid, eid) {
+  equipItem(uid, eid);
+  renderChars(); // 카드 리스트 갱신
+  renderModalBody(); // 모달 내용 갱신
+}
+
+function sellEquipInModal(eid) {
+  sellEquip(eid);
+  renderChars(); // 카드 리스트 갱신
+  renderModalBody(); // 모달 내용 갱신
 }
 
 function renderInventory(ch, invMap) {
@@ -548,10 +776,10 @@ function renderInventory(ch, invMap) {
     row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
     row.innerHTML =
       '<div class="eq-inv-info">' +
-      '<span class="eq-inv-rarity" style="color:' + rc + '">' + t('equip.rarity.' + item.rarity) + '</span>' +
+      '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' + t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() + '</span>' +
       '<span class="eq-inv-name">' + t('equip.item.' + item.templateId) + '</span>' +
       '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' +
-      (item.setId ? '<span class="eq-inv-set" style="color:#f0c040">' + t('equip.set.' + item.setId) + '</span>' : '') +
+      (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
       '</div>' +
       '<div class="eq-inv-actions">' +
       (isEquippedHere ? '<span class="eq-inv-equipped">' + t('equip.equipped') + '</span>' :
@@ -669,7 +897,6 @@ function sellEquip(eid) {
 
 function eqRenderAll() {
   renderChars();
-  renderBody();
 }
 
 // ── 초기화 ───────────────────────────────

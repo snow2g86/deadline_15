@@ -3,6 +3,10 @@
 
 var SAVE_KEY = 'game_save';
 var ROSTER_KEY = 'game_roster';
+function clsIcon(cls, size) {
+  var d = JAB[cls]; if (!d) return '';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
+}
 var PARTY_KEY = 'game_party';
 var INVENTORY_KEY = 'game_inventory';
 var MAX_SKILL_LV = 10;
@@ -185,6 +189,18 @@ function switchTab(tab) {
 // ── 부활 비용 ────────────────────────────
 function reviveCost(ch) { return 20 + ch.lv * 10; }
 
+// ── 광고 부활 ────────────────────────────
+var SANC_AD_KEY = 'game_sanc_ad_cooldown';
+var SANC_AD_COOLDOWN_MS = 30 * 60 * 1000;
+
+function getSancAdCooldown() {
+  try { var v = +localStorage.getItem(SANC_AD_KEY); return v || 0; } catch(_) { return 0; }
+}
+
+function setSancAdCooldown() {
+  try { localStorage.setItem(SANC_AD_KEY, Date.now()); } catch(_) {}
+}
+
 // ── 부활 렌더링 ─────────────────────────
 function renderResurrect() {
   var list = document.getElementById('sanc-list');
@@ -198,6 +214,24 @@ function renderResurrect() {
     return;
   }
 
+  // 광고 무료 부활 카드
+  var adRemain = Math.max(0, SANC_AD_COOLDOWN_MS - (Date.now() - getSancAdCooldown()));
+  var adReady = adRemain <= 0;
+  var adCard = document.createElement('div');
+  adCard.className = 'sanc-ad-card';
+  var adBtnText = adReady ? t('sanctuary.ad_btn') : t('sanctuary.ad_cooldown', { minutes: Math.ceil(adRemain / 60000) });
+  adCard.innerHTML =
+    '<div class="sanc-ad-icon">&#127916;</div>' +
+    '<div class="sanc-ad-info">' +
+      '<div class="sanc-ad-title">' + t('sanctuary.ad_title') + '</div>' +
+      '<div class="sanc-ad-desc">' + t('sanctuary.ad_desc') + '</div>' +
+    '</div>' +
+    '<button class="sanc-ad-btn' + (adReady ? '' : ' disabled') + '" ' + (adReady ? '' : 'disabled') + '>' + adBtnText + '</button>';
+  if (adReady) {
+    adCard.querySelector('.sanc-ad-btn').onclick = function() { showAdReviveModal(dead); };
+  }
+  list.appendChild(adCard);
+
   var names = t('character.names');
 
   dead.forEach(function(ch) {
@@ -208,7 +242,7 @@ function renderResurrect() {
     el.className = 'sanc-card';
     var charName = ch.customName || names[ch.nameId] || d.icon;
     el.innerHTML =
-      '<div class="sanc-icon">' + charSprite(ch.cls, 28, ch.gender) + '</div>' +
+      '<div class="sanc-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="sanc-info"><div class="sanc-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
       '<div class="sanc-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div></div>' +
       '<button class="sanc-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
@@ -225,6 +259,49 @@ function renderResurrect() {
       };
     })(ch.uid, cost);
     list.appendChild(el);
+  });
+}
+
+// ── 광고 부활 모달 ──────────────────────
+function showAdReviveModal(dead) {
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = t('sanctuary.ad_select');
+  document.getElementById('modal-title').className = '';
+  var names = t('character.names');
+  var h = '<div class="potion-target-list">';
+  dead.forEach(function(ch) {
+    var d = JAB[ch.cls];
+    var charName = ch.customName || names[ch.nameId] || d.icon;
+    h += '<div class="pt-btn" data-uid="' + ch.uid + '">' +
+      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
+      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
+      '<span class="pt-exp">HP ' + ch.hp + '</span>' +
+      '</div>';
+  });
+  h += '</div>';
+  document.getElementById('modal-sub').innerHTML = h;
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  var cb = document.createElement('button');
+  cb.className = 'modal-btn secondary';
+  cb.textContent = t('common.cancel');
+  cb.onclick = function() { ov.classList.remove('show'); };
+  bt.appendChild(cb);
+  ov.classList.add('show');
+  document.querySelectorAll('.pt-btn').forEach(function(b) {
+    b.onclick = function() {
+      var uid = +b.dataset.uid;
+      setSancAdCooldown();
+      var roster = getRoster();
+      var ch = roster.chars.find(function(c) { return c.uid === uid; });
+      if (ch) { ch.dead = false; delete ch.diedAt; saveRoster(roster); }
+      ov.classList.remove('show');
+      renderResurrect();
+      var d = JAB[ch.cls];
+      var charName = ch.customName || names[ch.nameId] || d.icon;
+      setTimeout(function() {
+        showAlert(t('sanctuary.ad_success', { name: charName }));
+      }, 100);
+    };
   });
 }
 
@@ -265,7 +342,7 @@ function renderPromote() {
     var el = document.createElement('div');
     el.className = 'promote-card';
     el.innerHTML =
-      '<div class="sanc-icon">' + charSprite(ch.cls, 28, ch.gender) + '</div>' +
+      '<div class="sanc-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="sanc-info">' +
         '<div class="sanc-name">' + charName +
           ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
@@ -318,7 +395,7 @@ function showSacrificeModal(targetUid) {
 
   // 모달 내용 빌드
   var h = '<div class="sac-target-info">' +
-    charSprite(target.cls, 24, target.gender) + ' <b>' + targetName + '</b> (Lv.' + target.lv +
+    clsIcon(target.cls, 24) + ' <b>' + targetName + '</b> (Lv.' + target.lv +
     ' <span style="color:' + GRADE_COLORS[targetGrade] + '">' + targetGrade + '</span>)' +
     '</div>' +
     '<div class="sac-progress" id="sac-progress">' +
@@ -335,7 +412,7 @@ function showSacrificeModal(targetUid) {
     var charName = ch.customName || names[ch.nameId] || d.icon;
     h += '<div class="sac-btn" data-uid="' + ch.uid + '" data-pts="' + pts + '">' +
       '<div class="sac-check" id="sac-chk-' + ch.uid + '"></div>' +
-      charSprite(ch.cls, 22, ch.gender) +
+      clsIcon(ch.cls, 22) +
       '<div class="sac-info">' +
         '<div>' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
         ' <span style="color:' + gClr + ';font-weight:900;font-size:10px">' + grade + '</span></div>' +

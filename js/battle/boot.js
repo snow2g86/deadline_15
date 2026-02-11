@@ -26,6 +26,33 @@ Object.assign(G, {
     });
   },
 
+  // 1) 로딩 바 표시 (2초)
+  _showLoading(stageName) {
+    const el = document.getElementById('battle-loading');
+    if (!el) return Promise.resolve();
+    const nameEl = document.getElementById('bl-stage-name');
+    const fillEl = document.getElementById('bl-fill');
+    const tipEl = document.getElementById('bl-tip');
+    if (nameEl) nameEl.textContent = stageName || t('battle.loading_title');
+    const tips = t('battle.loading_tips');
+    if (tipEl && Array.isArray(tips) && tips.length) tipEl.textContent = tips[Math.floor(Math.random() * tips.length)];
+    el.classList.remove('hide');
+    return new Promise(resolve => {
+      let pct = 0;
+      const iv = setInterval(() => {
+        pct += 5;
+        if (fillEl) fillEl.style.width = Math.min(pct, 100) + '%';
+        if (pct >= 100) { clearInterval(iv); setTimeout(() => { el.classList.add('hide'); setTimeout(resolve, 400) }, 200) }
+      }, 90);
+    });
+  },
+
+  _hideLoading() {
+    const el = document.getElementById('battle-loading');
+    if (el) { el.classList.add('hide') }
+  },
+
+
   _initBattlePage() {
     const nav = loadNav();
     clearNav();
@@ -47,6 +74,7 @@ Object.assign(G, {
         w.querySelectorAll('.iso-tile,.unit-sprite,.float-text').forEach(e => e.remove());
         this.layW(); this.vfxInit(); this.rTer(); this.rUnits(); this.uUI(); this.defI(); this.rMM();
         this.bgmStart();
+        this._hideLoading();
         setTimeout(() => this.scrollToAllies(), 50);
       } else { location.href = 'index.html' }
     } else if (nav?.cStage) {
@@ -56,6 +84,7 @@ Object.assign(G, {
       this._initBattleListeners();
       this.eSpwn = 0; this.eQ = [...this.cStage.en];
       this.init();
+      this._showLoading(this.cStage.name).then(() => this.bgmStart());
     } else { location.href = 'index.html' }
   },
 });
