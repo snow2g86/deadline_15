@@ -441,7 +441,7 @@ function renderChars() {
     html += '<div class="eq-char-info">';
     html += '<div class="eq-char-name">' + charName + '</div>';
     html += '<div class="eq-char-meta">';
-    html += '<span class="eq-char-level">Lv.' + ch.lv + '</span>';
+    html += '<span class="eq-char-level">Lv.' + ch.lv + ' ' + t('classes.' + ch.cls) + '</span>';
     html += '</div>';
     html += '</div>';
 
@@ -900,6 +900,157 @@ function sellEquip(eid) {
 
 function eqRenderAll() {
   renderChars();
+}
+
+// ══════════════════════════════════════════════
+// ── 아이템 탭 (물약 인벤토리) ─────────────────
+// ══════════════════════════════════════════════
+
+var POTION_INFO = {
+  'exp_s': { nameKey: 'shop.potion_small', icon: '\ud83e\uddea' },
+  'exp_m': { nameKey: 'shop.potion_medium', icon: '\u2697\ufe0f' },
+  'exp_l': { nameKey: 'shop.potion_large', icon: '\ud83c\udfd0' }
+};
+
+function renderItemTab() {
+  var list = document.getElementById('item-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  var inv = loadInventory();
+  var potions = inv.filter(function(it) { return it.type === 'potion'; });
+
+  if (!potions.length) {
+    list.innerHTML = '<div class="item-empty">' + t('party.no_potions') + '</div>';
+    return;
+  }
+
+  // 물약 종류별 그룹핑
+  var groups = {};
+  potions.forEach(function(p) {
+    var id = p.potionId;
+    if (!groups[id]) groups[id] = { potionId: id, exp: p.exp, icon: p.icon, count: 0 };
+    groups[id].count++;
+  });
+
+  var order = ['exp_s', 'exp_m', 'exp_l'];
+  order.forEach(function(pid) {
+    var g = groups[pid];
+    if (!g) return;
+    var info = POTION_INFO[pid];
+    var potionName = info ? t(info.nameKey) : pid;
+
+    var card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML =
+      '<div class="item-icon">' + g.icon + '</div>' +
+      '<div class="item-info">' +
+        '<div class="item-name">' + potionName + '</div>' +
+        '<div class="item-exp">EXP +' + g.exp + '</div>' +
+      '</div>' +
+      '<div class="item-count">' + t('party.potion_count', { count: g.count }) + '</div>' +
+      '<button class="item-use-btn">' + t('party.potion_use') + '</button>';
+    card.querySelector('.item-use-btn').onclick = function() {
+      showPotionUseModal(pid);
+    };
+    list.appendChild(card);
+  });
+}
+
+function showPotionUseModal(potionId) {
+  var inv = loadInventory();
+  var potion = inv.find(function(it) { return it.type === 'potion' && it.potionId === potionId; });
+  if (!potion) return;
+
+  var roster = getRoster();
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.lv < MAX_LEVEL; });
+
+  if (!alive.length) {
+    showAlert(t('party.no_available_chars'));
+    return;
+  }
+
+  var info = POTION_INFO[potionId];
+  var potionName = info ? t(info.nameKey) : potionId;
+
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = t('party.potion_use') + ' - ' + potionName;
+  document.getElementById('modal-title').className = '';
+  var h = '<div class="potion-target-list">';
+  var names = t('character.names');
+  alive.forEach(function(ch) {
+    var d = JAB[ch.cls];
+    var charName = ch.customName || names[ch.nameId] || d.icon;
+    var expNeed = expForLevel(ch.lv);
+    h += '<div class="pt-btn" data-uid="' + ch.uid + '">' +
+      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
+      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
+      '<span class="pt-exp">' + (ch.exp || 0) + '/' + expNeed + '</span>' +
+      '</div>';
+  });
+  h += '</div>';
+  document.getElementById('modal-sub').innerHTML = potion.icon + ' ' + potionName + ' (EXP +' + potion.exp + ')<br><br>' + h;
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  var cb = document.createElement('button');
+  cb.className = 'modal-btn secondary';
+  cb.textContent = t('common.cancel');
+  cb.onclick = function() { ov.classList.remove('show'); };
+  bt.appendChild(cb);
+  ov.classList.add('show');
+  document.querySelectorAll('.pt-btn').forEach(function(b) {
+    b.onclick = function() {
+      var uid = +b.dataset.uid;
+      // 인벤토리에서 물약 1개 제거
+      var inv2 = loadInventory();
+      var idx = -1;
+      for (var i = 0; i < inv2.length; i++) {
+        if (inv2[i].type === 'potion' && inv2[i].potionId === potionId) { idx = i; break; }
+      }
+      if (idx === -1) { ov.classList.remove('show'); return; }
+      var usedPotion = inv2[idx];
+      inv2.splice(idx, 1);
+      saveInventory(inv2);
+
+      // EXP 적용
+      var r = gainExp(uid, usedPotion.exp);
+      ov.classList.remove('show');
+      renderItemTab();
+
+      var ch = getChar(uid);
+      var d = JAB[ch.cls];
+      var charName = ch.customName || names[ch.nameId] || d.icon;
+      if (r.leveled > 0) {
+        setTimeout(function() {
+          showAlert(charName + '\nLv.' + r.prevLv + ' \u2192 Lv.' + ch.lv +
+            (r.leveled > 1 ? ' (' + r.leveled + t('party.potion_levelup_multi') + ')' : ''));
+        }, 100);
+      } else {
+        showAlert(charName + ' ' + t('party.potion_use_success', { exp: usedPotion.exp }));
+      }
+    };
+  });
+}
+
+function gainExp(uid, amount) {
+  var roster = getRoster();
+  var ch = roster.chars.find(function(c) { return c.uid === uid; });
+  if (!ch || ch.lv >= MAX_LEVEL) return { leveled: 0, prevLv: ch ? ch.lv : 0 };
+  var prevLv = ch.lv;
+  ch.exp = (ch.exp || 0) + amount;
+  var leveled = 0;
+  while (ch.lv < MAX_LEVEL) {
+    var need = expForLevel(ch.lv);
+    if (ch.exp < need) break;
+    ch.exp -= need;
+    ch.lv++;
+    ch.hp = Math.round(ch.hp + ch.pot.hp);
+    ch.atk = Math.round(ch.atk + ch.pot.atk);
+    ch.def = Math.round(ch.def + ch.pot.def);
+    leveled++;
+  }
+  if (ch.lv >= MAX_LEVEL) ch.exp = 0;
+  saveRoster(roster);
+  return { leveled: leveled, prevLv: prevLv };
 }
 
 // ── 초기화 ───────────────────────────────
