@@ -57,6 +57,7 @@
 
 /* PC 확대 */
 @media(min-width:1024px){
+  #section-equip{max-width:480px}
   .eq-char-card{padding:16px 14px;gap:12px}
   .eq-char-icon{width:72px;height:72px;flex-shrink:0}
   .eq-char-icon img,.eq-char-icon svg{width:72px;height:72px}
