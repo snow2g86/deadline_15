@@ -1,3 +1,7 @@
+/* ═══ Sanctuary Scroll ═══ */
+body[data-page="sanctuary"] #content{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px}
+body[data-page="sanctuary"] #content>*{flex-shrink:0}
+
 /* ═══ Sanctuary Tabs ═══ */
 .sanc-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .sanc-tabs{display:flex;gap:6px;max-width:330px;width:100%}

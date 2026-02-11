@@ -69,7 +69,7 @@ function markDead(uid) {
     const d = JSON.parse(localStorage.getItem('game_roster'));
     if(!d) return;
     const ch = d.chars.find(c => c.uid === uid);
-    if(ch) { ch.dead = true; localStorage.setItem('game_roster', JSON.stringify(d)) }
+    if(ch) { ch.dead = true; ch.diedAt = Date.now(); localStorage.setItem('game_roster', JSON.stringify(d)) }
   } catch(e) {}
 }
 function gainExp(uid, amount) {

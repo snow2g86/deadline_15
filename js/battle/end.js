@@ -18,9 +18,37 @@ Object.assign(G, {
     this._deadEnemyCount = this._killCount;
     if (win) {
       const reward = 50 + (this.cStage ? this.cStage.id * 30 : 0);
-      this.gold += reward;
+      const isFirstClear = this.cStage && !this.cleared.has(this.cStage.id);
+      if (isFirstClear) this._firstClearBonus = 1000;
+      this.gold += reward + (this._firstClearBonus || 0);
       if (this.cStage) this.cleared.add(this.cStage.id);
       saveGold(this.gold, [...this.cleared]);
+      if (isFirstClear) {
+        const NON_NOVICE = Object.keys(JAB).filter(k => k !== 'novice' && !k.startsWith('summon_'));
+        const rCls = NON_NOVICE[Math.floor(Math.random() * NON_NOVICE.length)];
+        const d = JAB[rCls];
+        if (d) {
+          try {
+            const rd = JSON.parse(localStorage.getItem('game_roster'));
+            if (rd) {
+              const g = d.growth;
+              const roll = mm => +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1);
+              const names = Object.keys(rd.chars.reduce((m,c) => { m[c.nameId]=1; return m }, {}));
+              let nameId; do { nameId = Math.floor(Math.random() * 300); } while (names.indexOf(String(nameId)) !== -1);
+              const ch = {
+                uid: rd.nextId++, cls: rCls, nameId, lv: 1, exp: 0, dead: false,
+                hp: d.base.hp, atk: d.base.atk, def: d.base.def,
+                move: d.base.move, range: d.base.range,
+                pot: { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) },
+                gender: Math.random() < 0.5 ? 'm' : 'f'
+              };
+              rd.chars.push(ch);
+              localStorage.setItem('game_roster', JSON.stringify(rd));
+              this._firstClearUnit = ch;
+            }
+          } catch(_) {}
+        }
+      }
       if (typeof LEARNABLE_SKILLS !== 'undefined' && Math.random() < 0.05) {
         const lsKeys = Object.keys(LEARNABLE_SKILLS);
         if (lsKeys.length) {

@@ -1,3 +1,7 @@
+/* ═══ Academy Scroll ═══ */
+body[data-page="academy"] #content{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px}
+body[data-page="academy"] #content>*{flex-shrink:0}
+
 /* ═══ Academy Tabs ═══ */
 .acad-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .acad-tabs{display:flex;gap:6px;max-width:330px;width:100%}

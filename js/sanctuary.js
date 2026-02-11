@@ -190,6 +190,7 @@ function renderResurrect() {
   var list = document.getElementById('sanc-list');
   var roster = getRoster();
   var dead = roster.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_'); });
+  dead.sort(function(a, b) { return (b.diedAt || 0) - (a.diedAt || 0); });
   list.innerHTML = '';
 
   if (!dead.length) {
@@ -219,7 +220,7 @@ function renderResurrect() {
         updateGoldUI();
         var roster = getRoster();
         var ch = roster.chars.find(function(c) { return c.uid === uid; });
-        if (ch) { ch.dead = false; saveRoster(roster); }
+        if (ch) { ch.dead = false; delete ch.diedAt; saveRoster(roster); }
         renderResurrect();
       };
     })(ch.uid, cost);

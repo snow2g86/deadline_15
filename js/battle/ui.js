@@ -144,7 +144,9 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     document.getElementById('modal-title').className=win?'win':'lose';
     const deadAllyCount=this._deadAllyUids.length;
     let sub=msg;
-    if(win&&reward)sub+=`\n🏅 보상: ${reward} Gold`;
+    if(win&&reward)sub+=`\n🏅 ${t('messages.reward')}: ${reward} Gold`;
+    if(win&&this._firstClearBonus){sub+=`\n🎉 ${t('messages.first_clear_bonus')}: +${this._firstClearBonus} Gold`;this._firstClearBonus=0}
+    if(win&&this._firstClearUnit){const fc=this._firstClearUnit,fd=JAB[fc.cls];sub+=`\n🎁 ${t('messages.first_clear_unit',{cls: t('classes.'+fc.cls)})}`;this._firstClearUnit=null}
     if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}
     if(deadAllyCount)sub+=`\n💀 전사자: ${deadAllyCount}명 (성소에서 부활 가능)`;
     if(this._expResults&&this._expResults.length){
@@ -164,7 +166,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
     const lb=document.createElement('button');lb.className='modal-btn';lb.textContent=t('results.return_to_lobby');
     lb.onclick=()=>{ov.classList.remove('show');this.returnToLobby()};bt.appendChild(lb);
-    if(win){const s=this.cStage,ns=STAGES.find(v=>v.id===s.id+1);
+    if(win&&!deadAllyCount){const s=this.cStage,ns=STAGES.find(v=>v.id===s.id+1);
       if(ns){const b=document.createElement('button');b.className='modal-btn secondary';b.textContent=t('results.next_stage');
         b.onclick=()=>{ov.classList.remove('show');this.goNextStage(ns)};bt.appendChild(b)}}
     ov.classList.add('show')},

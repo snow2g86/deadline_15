@@ -102,7 +102,7 @@ function ensureRoster() {
 	}
 	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
 	localStorage.setItem('game_party', JSON.stringify(chars.map(function(c) { return c.uid; })));
-	localStorage.setItem('game_save', JSON.stringify({ gold: 300 }));
+	localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
 }
 
 function renderGold() {
@@ -124,6 +124,29 @@ var init = async function() {
 				if (!c.gender) { c.gender = Math.random() < 0.5 ? 'm' : 'f'; changed = true; }
 			});
 			if (changed) localStorage.setItem('game_roster', JSON.stringify(rd));
+		}
+	} catch(_) {}
+	// Auto-revive: 생존 클랜원이 4명 이하면 가장 마지막 사망자 자동 부활
+	try {
+		var rr = JSON.parse(localStorage.getItem('game_roster'));
+		if (rr && rr.chars) {
+			var alive = rr.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+			if (alive.length <= 4) {
+				var dead = rr.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_'); });
+				if (dead.length) {
+					dead.sort(function(a, b) { return (b.diedAt || 0) - (a.diedAt || 0); });
+					var revived = dead[0];
+					revived.dead = false;
+					delete revived.diedAt;
+					revived.hp = JAB[revived.cls] ? JAB[revived.cls].base.hp : 1;
+					localStorage.setItem('game_roster', JSON.stringify(rr));
+					var names = _resolve(_i18nData, 'character.names') || [];
+					var rName = revived.customName || names[revived.nameId] || '???';
+					setTimeout(function() {
+						showAlert(t('messages.auto_revive', {name: rName}));
+					}, 1200);
+				}
+			}
 		}
 	} catch(_) {}
 	renderBottomNav();

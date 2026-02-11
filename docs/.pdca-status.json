@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-11T09:01:25.619Z",
+  "lastUpdated": "2026-02-11T10:07:09.488Z",
   "activeFeatures": [
     "skill-implementation",
     "js",
@@ -46,9 +46,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-05T06:16:20.882Z",
-        "lastUpdated": "2026-02-11T08:36:17.447Z"
+        "lastUpdated": "2026-02-11T10:07:09.488Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/skills.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/party-select.js"
     },
     "scripts": {
       "phase": "do",
@@ -85,7 +85,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-09T17:31:51.728Z",
-        "lastUpdated": "2026-02-11T09:00:34.654Z"
+        "lastUpdated": "2026-02-11T09:56:09.910Z"
       },
       "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es.js"
     },
@@ -98,9 +98,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T05:18:10.899Z",
-        "lastUpdated": "2026-02-11T09:01:25.619Z"
+        "lastUpdated": "2026-02-11T09:55:57.996Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/ai.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/ui.js"
     },
     "skills": {
       "phase": "do",
@@ -124,7 +124,7 @@
   "session": {
     "startedAt": "2026-02-05T06:05:50.525Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-11T09:01:25.619Z"
+    "lastActivity": "2026-02-11T10:07:09.488Z"
   },
   "history": [
     {
@@ -7810,6 +7810,126 @@
     {
       "timestamp": "2026-02-11T09:01:25.619Z",
       "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:39:22.859Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:43:34.556Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:43:57.233Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:44:21.658Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:44:22.669Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:44:23.803Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:47:55.891Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:48:01.772Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:48:07.164Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:48:11.588Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:48:19.489Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:53:39.952Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:55:48.408Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:55:57.996Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:56:06.321Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:56:07.973Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T09:56:09.910Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T10:06:52.254Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T10:07:01.730Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T10:07:09.488Z",
+      "feature": "js",
       "phase": "do",
       "action": "updated"
     }

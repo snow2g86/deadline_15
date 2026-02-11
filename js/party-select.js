@@ -535,16 +535,17 @@ function renderInventory(ch, invMap) {
   equips.forEach(function(item) {
     var rc = RARITY[item.rarity].color;
     var canEquipThis = canEquip(ch, item);
-    var isEquipped = item.equipped !== null;
+    var isEquipped = !!item.equipped;
     var isEquippedHere = false;
     for (var s = 0; s < EQUIP_SLOTS.length; s++) {
       if (ch.equip[EQUIP_SLOTS[s]] === item.eid) { isEquippedHere = true; break; }
     }
+    var isEquippedOther = isEquipped && !isEquippedHere;
     var statsArr = [];
     for (var st in item.stats) statsArr.push(t('common.' + st) + '+' + item.stats[st]);
 
     var row = document.createElement('div');
-    row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquipped ? ' equipped-other' : '');
+    row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
     row.innerHTML =
       '<div class="eq-inv-info">' +
       '<span class="eq-inv-rarity" style="color:' + rc + '">' + t('equip.rarity.' + item.rarity) + '</span>' +
@@ -554,7 +555,7 @@ function renderInventory(ch, invMap) {
       '</div>' +
       '<div class="eq-inv-actions">' +
       (isEquippedHere ? '<span class="eq-inv-equipped">' + t('equip.equipped') + '</span>' :
-        (canEquipThis && !isEquipped ? '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' : '') +
+        (canEquipThis ? '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' : '') +
         (!isEquipped ? '<button class="eq-inv-btn eq-sell-btn">' + t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>' : '')
       ) +
       '</div>';
@@ -650,7 +651,7 @@ function unequipItem(uid, slot) {
 function sellEquip(eid) {
   var inv = loadInventory();
   var item = inv.find(function(x) { return x.eid === eid; });
-  if (!item || item.equipped !== null) return;
+  if (!item || !!item.equipped) return;
   var price = SELL_PRICE[item.rarity] || 30;
   showConfirm(
     t('equip.sell_confirm', { name: t('equip.item.' + item.templateId), gold: price }),
@@ -683,6 +684,17 @@ var init = async function() {
     var ch = roster.chars.find(function(c) { return c.uid === uid; });
     return ch && !ch.dead;
   });
+
+  // Migrate: 인벤토리 장비 아이템의 equipped 필드 정규화
+  try {
+    var inv = loadInventory(), invChanged = false;
+    for (var mi = 0; mi < inv.length; mi++) {
+      if (inv[mi].type === 'equip' && inv[mi].equipped === undefined) {
+        inv[mi].equipped = null; invChanged = true;
+      }
+    }
+    if (invChanged) saveInventory(inv);
+  } catch(_) {}
 
   // 페이지 탭 바인딩
   document.querySelectorAll('.ps-page-tabs .ps-page-tab').forEach(function(btn) {
