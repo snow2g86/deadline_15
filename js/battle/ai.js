@@ -54,7 +54,7 @@ Object.assign(G, {
         this.poisonMists.forEach(pm=>{
           this.alive('enemy').forEach(e=>{
             if(mh(e.x,e.y,pm.cx,pm.cy)<=1){
-              const dmg=Math.max(1,Math.round(pm.atk*0.3)-e.def);
+              const dmg=Math.max(1,Math.round(pm.atk*0.3));
               e.hp=Math.max(0,e.hp-dmg);
               this.floatT(e.x,e.y,`-${dmg}`,'damage');
               this.vfxSpawn(this.uSX(e.x,e.y)+UCX,this.uSY(e.x,e.y)+UCY,{count:4,colors:['#22c55e','#4ade80'],shape:'spark',speed:2,spread:6,decay:0.03,size:3});
@@ -277,6 +277,10 @@ Object.assign(G, {
     procFury(a,tgt,this);
     if(tgt.hp>0&&a.hp>0&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&!(tgt.stunned>0)&&!(tgt.frozen>0)){
       const cdmg=calcDmg(tgt,a);a.hp=Math.max(0,a.hp-cdmg);this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');procFury(tgt,a,this);
+    }
+    if(tgt.hp>0&&a.hp>0&&tgt.skillLv&&tgt.skillLv['brawler_counter']>=1&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&Math.random()<0.3){
+      const cdmg=Math.max(1,Math.round(tgt.atk*0.5)-a.def);a.hp=Math.max(0,a.hp-cdmg);
+      this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');this.floatT(tgt.x,tgt.y,t('messages.brawler_counter'),'heal');
     }
     if(dtgt.hp<=0){if(dtgt===tgt){this.screenShake();this.sfxKill();this.sfxDeath();this.vfxDeath(tgt);this.deathA(tgt.id);this._rmDead()}setTimeout(()=>{this.rUnits()},500)}
     else if(a.hp<=0){this.screenShake();this.sfxDeath();this.vfxDeath(a);this.deathA(a.id);this._rmDead();setTimeout(()=>{this.rUnits()},500)}

@@ -81,9 +81,9 @@ Object.assign(G, {
 		if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
 			const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
 		}
-		if (a.hp > 0 && tgt.hp > 0 && a.skillLv && a.skillLv['brawler_counter'] >= 1 && mh(a.x,a.y,tgt.x,tgt.y) <= a.range && Math.random() < 0.3) {
-			const cdmg = calcDmg(a, tgt); tgt.hp = Math.max(0, tgt.hp - cdmg);
-			this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id); this.floatT(tgt.x, tgt.y, `-${cdmg}`, 'damage'); this.floatT(a.x, a.y, t('messages.brawler_counter'), 'heal');
+		if (tgt.hp > 0 && a.hp > 0 && tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3) {
+			const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def); a.hp = Math.max(0, a.hp - cdmg);
+			this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); this.floatT(tgt.x, tgt.y, t('messages.brawler_counter'), 'heal');
 		}
 		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();
 		if (tgt.hp <= 0) {

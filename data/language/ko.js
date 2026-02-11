@@ -164,7 +164,9 @@ window._LANG_ko = {
         "shaman_poisonmist": "독안개!",
         "shaman_spiritsurge": "영혼 쇄도!",
         "sapper_detonate": "폭파!",
-        "rooted": "속박!"
+        "rooted": "속박!",
+        "trap_triggered": "함정! -{dmg}",
+        "trap_stun": "{turns}턴 이동불가"
     },
     "results": {
         "battle_detail": "📈 처치 {kills}체 · 총 {exp} EXP (÷{survivors}명)",

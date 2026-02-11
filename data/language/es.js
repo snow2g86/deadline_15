@@ -164,7 +164,9 @@ window._LANG_es = {
         "shaman_poisonmist": "¡Niebla Venenosa!",
         "shaman_spiritsurge": "¡Oleada Espiritual!",
         "sapper_detonate": "¡Detonar!",
-        "rooted": "¡Enraizado!"
+        "rooted": "¡Enraizado!",
+        "trap_triggered": "¡Trampa! -{dmg}",
+        "trap_stun": "{turns} turnos inmovilizado"
     },
     "results": {
         "battle_detail": "📈 Asesinados {kills} · Total {exp} EXP (÷{survivors})",

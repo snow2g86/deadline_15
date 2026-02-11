@@ -222,9 +222,10 @@ const G = {
         const enemy = u.team === 'ally' ? 'enemy' : 'ally';
         const trap = this.traps.find(t => t.x === u.x && t.y === u.y && t.team === enemy);
         if (trap) {
-            u.hp = Math.max(0, u.hp - trap.dmg); u.stunned = Math.max(u.stunned, 2);
+            const trapStun = trap.stun || 2;
+            u.hp = Math.max(0, u.hp - trap.dmg); u.stunned = Math.max(u.stunned, trapStun);
             this.traps = this.traps.filter(t => t !== trap);
-            this.floatT(u.x, u.y, `함정! -${trap.dmg}`, 'damage'); this.floatT(u.x, u.y, '2턴 이동불가', 'damage');
+            this.floatT(u.x, u.y, t('messages.trap_triggered', {dmg: trap.dmg}), 'damage'); this.floatT(u.x, u.y, t('messages.trap_stun', {turns: trapStun}), 'damage');
             this.vfxSpawn(this.uSX(u.x, u.y) + UCX, this.uSY(u.x, u.y) + UCY, { count: 8, colors: ['#f84', '#f80', '#ff4'], shape: 'spark', speed: 3, spread: 8, decay: 0.03, size: 2 });
             return true
         }
@@ -235,7 +236,7 @@ const G = {
         const lancers = this.units.filter(u => u.team === 'ally' && u.hp > 0 && u.skillLv && u.skillLv['lancer_spearwall'] >= 1 && !u._spearwallUsed && !(u.stunned > 0) && !(u.frozen > 0) && mh(u.x, u.y, enemy.x, enemy.y) <= u.range);
         if (lancers.length) {
             const l = lancers[0]; l._spearwallUsed = true;
-            const dmg = Math.max(1, l.atk - enemy.def); enemy.hp = Math.max(0, enemy.hp - dmg);
+            const dmg = Math.max(1, Math.round(l.atk * 0.5) - enemy.def); enemy.hp = Math.max(0, enemy.hp - dmg);
             this.vfxAtk(l, enemy); this.sfxAtk(l.cls); this.shakeU(enemy.id);
             this.floatT(enemy.x, enemy.y, `-${dmg}`, 'damage'); this.floatT(l.x, l.y, t('messages.lancer_spearwall'), 'heal');
             if (enemy.hp <= 0) { this.sfxDeath(); this.vfxDeath(enemy); this.deathA(enemy.id) }

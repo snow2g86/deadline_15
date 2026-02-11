@@ -164,7 +164,9 @@ window._LANG_en = {
         "shaman_poisonmist": "Poison Mist!",
         "shaman_spiritsurge": "Spirit Surge!",
         "sapper_detonate": "Detonate!",
-        "rooted": "Rooted!"
+        "rooted": "Rooted!",
+        "trap_triggered": "Trap! -{dmg}",
+        "trap_stun": "{turns} turns immobilized"
     },
     "results": {
         "battle_detail": "📈 Killed {kills} · Total {exp} EXP (÷{survivors})",
