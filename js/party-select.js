@@ -399,6 +399,9 @@ function renderChars() {
       html += '<div class="eq-char-badge">Party</div>';
     }
 
+    // 캐릭터 아이콘
+    html += '<div class="eq-char-icon">' + clsIcon(ch.cls, 48) + '</div>';
+
     // 장비 슬롯 그리드
     html += '<div class="eq-char-equips">';
     ensureEquipSlots(ch);

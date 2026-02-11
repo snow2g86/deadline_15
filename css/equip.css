@@ -10,15 +10,19 @@
 }
 
 /* ═══ Character Card ═══ */
-.eq-char-card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;position:relative}
+.eq-char-card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;position:relative;align-items:center}
 .eq-char-card:hover{border-color:rgba(96,165,250,.4);background:rgba(96,165,250,.06);transform:translateY(-2px);box-shadow:0 4px 12px rgba(96,165,250,.2)}
 .eq-char-card.active{border-color:#60a5fa;background:rgba(96,165,250,.12)}
+
+/* 캐릭터 아이콘 */
+.eq-char-icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center}
+.eq-char-icon img{width:100%;height:100%;object-fit:contain}
 
 /* 파티원 배지 */
 .eq-char-badge{position:absolute;top:6px;right:6px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:8px;font-weight:900;padding:2px 6px;border-radius:4px;text-transform:uppercase}
 
 /* 장비 슬롯 그리드 */
-.eq-char-equips{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:4px}
+.eq-char-equips{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:4px;width:100%}
 
 .eq-char-slot{width:100%;aspect-ratio:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:3px;position:relative;display:flex;align-items:center;justify-content:center;font-size:8px;color:rgba(255,255,255,.3)}
 .eq-char-slot.filled{border-width:2px}
@@ -35,14 +39,23 @@
 .eq-char-slot.upgrade::after{content:'↑';position:absolute;top:-2px;right:-2px;background:#22c55e;color:#fff;font-size:8px;font-weight:900;width:12px;height:12px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 
 /* 캐릭터 정보 */
-.eq-char-info{text-align:center}
+.eq-char-info{text-align:center;width:100%}
 .eq-char-name{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .eq-char-meta{font-size:9px;color:var(--dim)}
 .eq-char-level{font-weight:700;color:var(--blue)}
 
+/* 모바일 크기 조정 */
+@media(max-width:768px){
+  .eq-char-card{padding:14px 12px;gap:10px}
+  .eq-char-icon{width:56px;height:56px}
+  .eq-char-equips{gap:2px}
+  .eq-char-name{font-size:12px}
+}
+
 /* PC 확대 */
 @media(min-width:1024px){
-  .eq-char-card{padding:14px 12px;gap:10px}
+  .eq-char-card{padding:16px 14px;gap:12px}
+  .eq-char-icon{width:60px;height:60px}
   .eq-char-equips{gap:3px}
   .eq-char-name{font-size:12px}
   .eq-char-meta{font-size:10px}
