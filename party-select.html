@@ -44,6 +44,7 @@
 			<div class="ps-page-tabs" id="page-tabs">
 				<button class="ps-page-tab active" data-ptab="party" data-i18n="nav.party">파티</button>
 				<button class="ps-page-tab" data-ptab="equip" data-i18n="nav.equip">장비</button>
+				<button class="ps-page-tab" data-ptab="item" data-i18n="party.tab_item">아이템</button>
 			</div>
 		</div>
 
@@ -64,6 +65,14 @@
 			</div>
 			<button class="ps-start" id="ps-start" disabled onclick="confirmP()" data-i18n="party.start_battle">DEADLINE
 				15</button>
+		</div>
+
+		<!-- Item section -->
+		<div id="section-item" style="display:none">
+			<div class="ps-info-row">
+				<div class="ps-info-title" data-i18n="party.tab_item">아이템</div>
+			</div>
+			<div class="item-list" id="item-list"></div>
 		</div>
 
 		<!-- Equip section -->

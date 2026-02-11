@@ -161,7 +161,9 @@ body {
 #modal-sub {
   color: var(--dim);
   font-size: 12px;
-  margin-bottom: 16px
+  margin-bottom: 16px;
+  max-height: 60dvh;
+  overflow-y: auto
 }
 
 .modal-btn {

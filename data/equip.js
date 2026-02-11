@@ -150,18 +150,20 @@ function savePity(count) {
   try { localStorage.setItem(PITY_KEY, String(count)); } catch (_) {}
 }
 
-function gachaPull(minRarity) {
+function gachaPull(minRarity, skipPity) {
   var pity = loadPity();
   var rarity;
-  if (pity + 1 >= GACHA_PITY_MAX) {
+  if (!skipPity && pity + 1 >= GACHA_PITY_MAX) {
     rarity = 'legendary';
   } else {
     rarity = rollRarity(minRarity || null);
   }
-  if (rarity === 'legendary') {
-    savePity(0);
-  } else {
-    savePity(pity + 1);
+  if (!skipPity) {
+    if (rarity === 'legendary') {
+      savePity(0);
+    } else {
+      savePity(pity + 1);
+    }
   }
   var tpl = EQUIP_DB[Math.floor(Math.random() * EQUIP_DB.length)];
   return generateEquip(tpl, rarity);

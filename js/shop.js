@@ -15,6 +15,9 @@ var EXP_POTIONS = [
   { id: 'exp_l', name: '\ub300\ud615 \uacbd\ud5d8\uce58 \ubb3c\uc57d', icon: '\ud83c\udfd0', exp: 400, cost: 2400, weight: 15 }
 ];
 
+var SCROLL_CLASSES = ['warrior','knight','assassin','brawler','lancer','sapper','archer','mage','summoner','shaman','priest'];
+var SCROLL_COST = 400;
+
 function clsIcon(cls, size) {
   var d = JAB[cls]; if (!d) return '';
   return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
@@ -166,15 +169,23 @@ function genShop() {
       icon: potObj.icon, exp: potObj.exp, cost: potObj.cost, sold: false
     });
   }
-  // 스킬북 2개
+  // 스킬북 6개 (중복 없음)
   if (typeof LEARNABLE_SKILLS !== 'undefined') {
-    var lsKeys = Object.keys(LEARNABLE_SKILLS);
-    for (var sb = 0; sb < 2; sb++) {
-      var sk = LEARNABLE_SKILLS[lsKeys[Math.floor(Math.random() * lsKeys.length)]];
+    var lsKeys = Object.keys(LEARNABLE_SKILLS).sort(function() { return Math.random() - 0.5; });
+    var sbCount = Math.min(6, lsKeys.length);
+    for (var sb = 0; sb < sbCount; sb++) {
+      var sk = LEARNABLE_SKILLS[lsKeys[sb]];
       items.push({
         type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: 800, sold: false
       });
     }
+  }
+  // 전직서 6개 (랜덤 직업)
+  var shuffled = SCROLL_CLASSES.slice().sort(function() { return Math.random() - 0.5; });
+  for (var si = 0; si < 6; si++) {
+    items.push({
+      type: 'scroll', scrollCls: shuffled[si], cost: SCROLL_COST, sold: false
+    });
   }
   _shopData = { ts: Date.now(), items: items };
   saveShop();
@@ -202,7 +213,7 @@ function renderShop() {
   var h = Math.floor(remain / 3600000);
   var m = Math.floor((remain % 3600000) / 60000);
   var s = Math.floor((remain % 60000) / 1000);
-  var showTimer = _currentTab === 'mercenary' || _currentTab === 'consumable' || _currentTab === 'skill';
+  var showTimer = _currentTab === 'mercenary' || _currentTab === 'consumable' || _currentTab === 'skill' || _currentTab === 'scroll';
   timeEl.style.display = showTimer ? 'block' : 'none';
   if (showTimer) {
     var hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
@@ -213,12 +224,18 @@ function renderShop() {
     'consumable': t('shop.subtitle_consumable'),
     'equip': t('shop.subtitle_equip'),
     'skill': t('shop.subtitle_skill'),
+    'scroll': t('shop.subtitle_scroll'),
     'gold': t('shop.subtitle_gold')
   };
   titleEl.textContent = tabTitles[_currentTab] || t('shop.title');
 
   if (_currentTab === 'equip') {
     renderGacha(list);
+    return;
+  }
+
+  if (_currentTab === 'scroll') {
+    renderScrollShop(list);
     return;
   }
 
@@ -307,7 +324,19 @@ function renderPotionCard(item, list) {
   if (!item.sold) {
     el.querySelector('.shop-btn').onclick = function() {
       if (_gold < item.cost) return;
-      showPotionModal(item);
+      var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
+      showConfirm(t('shop.potion_buy_confirm', { potion: potionName, gold: item.cost }), function() {
+        _gold -= item.cost;
+        saveGold(_gold);
+        updateGoldUI();
+        var inv = loadInventory();
+        inv.push({ type: 'potion', potionId: item.potionId, exp: item.exp, icon: item.icon });
+        saveInventory(inv);
+        item.sold = true;
+        saveShop();
+        renderShop();
+        showAlert(potionName + ' ' + t('shop.potion_stored'));
+      });
     };
   }
   list.appendChild(el);
@@ -324,9 +353,8 @@ function renderSkillBookCard(item, list) {
   el.className = 'shop-card skillbook-card' + (item.sold ? ' sold' : '');
   var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
   el.innerHTML =
-    '<div class="shop-icon">' + clsIcon(item.cls, 36) + '</div>' +
-    '<div class="shop-name">' + skillIcon(item.skillId, 18) + ' ' + skillName + '</div>' +
-    '<div class="shop-cls">' + clsName + ' ' + t('shop.skillbook_only') + '</div>' +
+    '<div class="shop-icon">' + skillIcon(item.skillId, 36) + '</div>' +
+    '<div class="shop-name">' + skillName + ' <span class="sb-cls-label">' + clsName + '</span></div>' +
     '<div class="shop-stats">' + sk.desc + '</div>' +
     '<button class="shop-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
   if (!item.sold) {
@@ -356,10 +384,11 @@ var AD_REWARD = 500;
 
 // ── 가챠 광고 보상 ──────────────────────
 var GACHA_AD_KEYS = {
-  equip: 'game_gacha_ad_equip',
-  item:  'game_gacha_ad_item',
-  merc:  'game_gacha_ad_merc',
-  skill: 'game_gacha_ad_skill'
+  equip:  'game_gacha_ad_equip',
+  item:   'game_gacha_ad_item',
+  merc:   'game_gacha_ad_merc',
+  skill:  'game_gacha_ad_skill',
+  scroll: 'game_gacha_ad_scroll'
 };
 var GACHA_AD_COOLDOWN_MS = 30 * 60 * 1000;
 
@@ -373,7 +402,7 @@ function setGachaAdCooldown(type) {
 
 function doGachaAdEquip() {
   setGachaAdCooldown('equip');
-  var item = gachaPull(null);
+  var item = gachaPull(null, true);
   var inv = loadInventory();
   inv.push(item);
   saveInventory(inv);
@@ -388,13 +417,13 @@ function doGachaAdItem() {
     r -= EXP_POTIONS[k].weight;
     if (r <= 0) { potObj = EXP_POTIONS[k]; break; }
   }
+  var inv = loadInventory();
+  inv.push({ type: 'potion', potionId: potObj.id, exp: potObj.exp, icon: potObj.icon });
+  saveInventory(inv);
   var pKeys = { 'exp_s': 'potion_small', 'exp_m': 'potion_medium', 'exp_l': 'potion_large' };
-  var freeItem = {
-    type: 'potion', potionId: potObj.id, name: potObj.name,
-    i18nNameKey: 'shop.' + pKeys[potObj.id],
-    icon: potObj.icon, exp: potObj.exp, cost: 0, sold: false
-  };
-  showFreePotionModal(freeItem);
+  var potionName = t('shop.' + pKeys[potObj.id]);
+  showAlert(potionName + ' ' + t('shop.potion_stored'));
+  renderShop();
 }
 
 function doGachaAdMerc() {
@@ -428,74 +457,29 @@ function doGachaAdSkill() {
   renderShop();
 }
 
+function doGachaAdScroll() {
+  setGachaAdCooldown('scroll');
+  var cls = SCROLL_CLASSES[Math.floor(Math.random() * SCROLL_CLASSES.length)];
+  var inv = loadInventory();
+  inv.push({ type: 'scroll', scrollCls: cls });
+  saveInventory(inv);
+  var scrollName = t('shop.scroll_prefix') + ' ' + t('classes.' + cls);
+  showAlert(scrollName + ' ' + t('shop.scroll_stored'));
+  renderShop();
+}
+
 function buildTabAdCard(type, descKey, fn) {
-  var remain = Math.max(0, GACHA_AD_COOLDOWN_MS - (Date.now() - getGachaAdCooldown(type)));
-  var canWatch = remain <= 0;
   var card = document.createElement('div');
   card.className = 'gold-ad-card shop-tab-ad';
-  var btnText = canWatch ? t('shop.gacha_ad_btn') : t('shop.gacha_ad_cooldown', { minutes: Math.ceil(remain / 60000) });
   card.innerHTML =
     '<div class="gold-ad-icon">&#127916;</div>' +
     '<div class="gold-ad-info">' +
       '<div class="gold-ad-name">' + t(descKey) + '</div>' +
     '</div>' +
-    '<button class="gold-ad-btn' + (canWatch ? '' : ' disabled') + '" ' + (canWatch ? '' : 'disabled') + '>' + btnText + '</button>';
-  if (canWatch) {
-    card.querySelector('.gold-ad-btn').onclick = fn;
-  }
+    '<button class="gold-ad-btn disabled" disabled>📋 추후 개발</button>';
   return card;
 }
 
-function showFreePotionModal(item) {
-  var roster = getRoster();
-  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
-  if (!alive.length) return;
-  var ov = document.getElementById('modal-overlay');
-  document.getElementById('modal-title').textContent = t('shop.select_character');
-  document.getElementById('modal-title').className = '';
-  var h = '<div class="potion-target-list">';
-  var names = t('character.names');
-  alive.forEach(function(ch) {
-    var d = JAB[ch.cls];
-    var charName = ch.customName || names[ch.nameId] || d.icon;
-    var atMax = ch.lv >= MAX_LEVEL;
-    var expNeed = atMax ? 0 : expForLevel(ch.lv);
-    h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
-      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
-      '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
-      '</div>';
-  });
-  h += '</div>';
-  var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
-  document.getElementById('modal-sub').innerHTML = item.icon + ' ' + potionName + ' (EXP +' + item.exp + ')<br><br>' + h;
-  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
-  var cb = document.createElement('button');
-  cb.className = 'modal-btn secondary';
-  cb.textContent = t('common.cancel');
-  cb.onclick = function() { ov.classList.remove('show'); };
-  bt.appendChild(cb);
-  ov.classList.add('show');
-  document.querySelectorAll('.pt-btn:not(.pt-max)').forEach(function(b) {
-    b.onclick = function() {
-      var uid = +b.dataset.uid;
-      var r = gainExp(uid, item.exp);
-      ov.classList.remove('show');
-      renderShop();
-      if (r.leveled > 0) {
-        var ch = getChar(uid);
-        var d = JAB[ch.cls];
-        var charName = ch.customName || names[ch.nameId] || d.icon;
-        setTimeout(function() {
-          showAlert(
-            d.icon + ' ' + charName + '\nLv.' + r.prevLv + ' \u2192 Lv.' + ch.lv +
-            (r.leveled > 1 ? ' (' + r.leveled + t('shop.gacha_ad_levelup') + ')' : '')
-          );
-        }, 100);
-      }
-    };
-  });
-}
 
 function getAdCooldown() {
   try { var v = +localStorage.getItem(AD_COOLDOWN_KEY); return v || 0; } catch(_) { return 0; }
@@ -506,51 +490,28 @@ function setAdCooldown() {
 }
 
 function renderGoldShop(list) {
-  list.style.display = 'flex';
-  list.style.flexDirection = 'column';
-  list.style.alignItems = 'center';
-  list.style.gap = '10px';
+  list.style.display = 'block';
+  list.style.gridTemplateColumns = '';
+  list.style.flexDirection = '';
+  list.style.alignItems = '';
+  list.style.gap = '';
 
   // 광고 섹션
   var adSection = document.createElement('div');
   adSection.className = 'gold-section';
-  var adTitle = document.createElement('div');
-  adTitle.className = 'gold-section-title';
-  adTitle.textContent = t('shop.gold_ad_title');
-  adSection.appendChild(adTitle);
 
   var adCard = document.createElement('div');
   adCard.className = 'gold-ad-card';
-  var lastAd = getAdCooldown();
-  var remain = Math.max(0, AD_COOLDOWN_MS - (Date.now() - lastAd));
-  var canWatch = remain <= 0;
-  var adBtnText = canWatch ? t('shop.gold_ad_btn') : t('shop.gold_ad_cooldown', { minutes: Math.ceil(remain / 60000) });
   adCard.innerHTML =
     '<div class="gold-ad-icon">&#127916;</div>' +
-    '<div class="gold-ad-info">' +
-      '<div class="gold-ad-name">' + t('shop.gold_ad_desc') + '</div>' +
-    '</div>' +
-    '<button class="gold-ad-btn' + (canWatch ? '' : ' disabled') + '" ' + (canWatch ? '' : 'disabled') + '>' + adBtnText + '</button>';
-  if (canWatch) {
-    adCard.querySelector('.gold-ad-btn').onclick = function() {
-      setAdCooldown();
-      _gold += AD_REWARD;
-      saveGold(_gold);
-      updateGoldUI();
-      showAlert(t('shop.gold_ad_success'));
-      renderShop();
-    };
-  }
+    '<div class="gold-ad-info"><div class="gold-ad-name">' + t('shop.gold_ad_title') + ' ' + t('shop.gold_ad_desc') + '</div></div>' +
+    '<button class="gold-ad-btn disabled" disabled>📋 추후 개발</button>';
   adSection.appendChild(adCard);
   list.appendChild(adSection);
 
   // IAP 패키지 섹션
   var iapSection = document.createElement('div');
   iapSection.className = 'gold-section';
-  var iapTitle = document.createElement('div');
-  iapTitle.className = 'gold-section-title';
-  iapTitle.textContent = t('shop.gold_iap_title');
-  iapSection.appendChild(iapTitle);
 
   var packages = [
     { gold: 500, price: '$0.99', key: 'gold_iap_500' },
@@ -573,6 +534,54 @@ function renderGoldShop(list) {
   });
   iapSection.appendChild(iapGrid);
   list.appendChild(iapSection);
+}
+
+// ── 전직서 렌더링 ─────────────────────────
+function renderScrollShop(list) {
+  list.style.display = 'grid';
+  list.style.gridTemplateColumns = 'repeat(2,1fr)';
+  list.style.gap = '10px';
+
+  // 광고 보상 카드
+  list.appendChild(buildTabAdCard('scroll', 'shop.ad_scroll_desc', doGachaAdScroll));
+
+  var scrollItems = _shopData.items.filter(function(item) { return item.type === 'scroll'; });
+
+  scrollItems.forEach(function(item) {
+    var cls = item.scrollCls;
+    var d = JAB[cls];
+    if (!d) return;
+    var canAfford = _gold >= item.cost && !item.sold;
+    var scrollName = t('shop.scroll_prefix') + ' ' + t('classes.' + cls);
+    var el = document.createElement('div');
+    el.className = 'shop-card scroll-card' + (item.sold ? ' sold' : '');
+    var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
+    el.innerHTML =
+      '<div class="shop-icon">' + clsIcon(cls, 36) + '</div>' +
+      '<div class="shop-name">' + scrollName + '</div>' +
+      '<div class="shop-cls">' + t('class_desc.' + cls) + '</div>' +
+      '<button class="shop-btn scroll-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
+    if (!item.sold) {
+      el.querySelector('.shop-btn').onclick = (function(itm, sName) {
+        return function() {
+          if (_gold < itm.cost) return;
+          showConfirm(t('shop.scroll_buy_confirm', { scroll: sName, gold: itm.cost }), function() {
+            _gold -= itm.cost;
+            saveGold(_gold);
+            updateGoldUI();
+            var inv = loadInventory();
+            inv.push({ type: 'scroll', scrollCls: itm.scrollCls });
+            saveInventory(inv);
+            itm.sold = true;
+            saveShop();
+            renderShop();
+            showAlert(sName + ' ' + t('shop.scroll_stored'));
+          });
+        };
+      })(item, scrollName);
+    }
+    list.appendChild(el);
+  });
 }
 
 function goldIcon(amount) {
@@ -605,62 +614,6 @@ function startShopTimer() {
   }, 1000);
 }
 
-// ── 물약 사용 모달 ───────────────────────
-function showPotionModal(item) {
-  var roster = getRoster();
-  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
-  if (!alive.length) return;
-  var ov = document.getElementById('modal-overlay');
-  document.getElementById('modal-title').textContent = t('shop.select_character');
-  document.getElementById('modal-title').className = '';
-  var h = '<div class="potion-target-list">';
-  var names = t('character.names');
-  alive.forEach(function(ch) {
-    var d = JAB[ch.cls];
-    var charName = ch.customName || names[ch.nameId] || d.icon;
-    var atMax = ch.lv >= MAX_LEVEL;
-    var expNeed = atMax ? 0 : expForLevel(ch.lv);
-    h += '<div class="pt-btn' + (atMax ? ' pt-max' : '') + '" data-uid="' + ch.uid + '">' +
-      '<span class="pt-icon">' + clsIcon(ch.cls, 20) + '</span>' +
-      '<span class="pt-info">' + charName + ' Lv.' + ch.lv + '</span>' +
-      '<span class="pt-exp">' + (atMax ? t('common.max') : ((ch.exp || 0) + '/' + expNeed)) + '</span>' +
-      '</div>';
-  });
-  h += '</div>';
-  var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
-  document.getElementById('modal-sub').innerHTML = item.icon + ' ' + potionName + ' (EXP +' + item.exp + ')<br><br>' + h;
-  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
-  var cb = document.createElement('button');
-  cb.className = 'modal-btn secondary';
-  cb.textContent = t('common.cancel');
-  cb.onclick = function() { ov.classList.remove('show'); };
-  bt.appendChild(cb);
-  ov.classList.add('show');
-  document.querySelectorAll('.pt-btn:not(.pt-max)').forEach(function(b) {
-    b.onclick = function() {
-      var uid = +b.dataset.uid;
-      _gold -= item.cost;
-      saveGold(_gold);
-      updateGoldUI();
-      var r = gainExp(uid, item.exp);
-      item.sold = true;
-      saveShop();
-      ov.classList.remove('show');
-      renderShop();
-      if (r.leveled > 0) {
-        var ch = getChar(uid);
-        var d = JAB[ch.cls];
-        var charName = ch.customName || names[ch.nameId] || d.icon;
-        setTimeout(function() {
-          showAlert(
-            d.icon + ' ' + charName + '\nLv.' + r.prevLv + ' \u2192 Lv.' + ch.lv +
-            (r.leveled > 1 ? ' (' + r.leveled + '\ub2e8\uacc4 \ub808\ubca8\uc5c5!)' : '')
-          );
-        }, 100);
-      }
-    };
-  });
-}
 
 
 // ── 가챠 렌더링 ─────────────────────────
@@ -668,6 +621,9 @@ function renderGacha(list) {
   list.style.display = 'grid';
   list.style.gridTemplateColumns = 'repeat(2,1fr)';
   list.style.gap = '10px';
+
+  // 광고 보상 카드 (최상단, 2칸 차지)
+  list.appendChild(buildTabAdCard('equip', 'shop.ad_equip_desc', doGachaAdEquip));
 
   // 천장 카운터 (2칸 차지)
   var pity = loadPity();
@@ -702,9 +658,6 @@ function renderGacha(list) {
     '<button class="gacha-btn gacha-btn-multi' + (canAfford10 ? '' : ' disabled') + '" ' + (canAfford10 ? '' : 'disabled') + '>' + t('shop.gacha_pull_10', { gold: GACHA_COST_10 }) + '</button>';
   if (canAfford10) c10.querySelector('.gacha-btn').onclick = function() { doGacha(10); };
   list.appendChild(c10);
-
-  // 광고 보상 카드 (2칸 차지)
-  list.appendChild(buildTabAdCard('equip', 'shop.ad_equip_desc', doGachaAdEquip));
 
   // 확률표 (2칸 차지)
   var rateEl = document.createElement('div');

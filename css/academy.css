@@ -315,6 +315,16 @@ body[data-page="academy"] #content>* {
   white-space: nowrap
 }
 
+/* ═══ Scroll Select Modal ═══ */
+.scroll-select-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.scroll-select-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(192,132,252,.15);cursor:pointer;transition:all .15s}
+.scroll-select-btn:hover{border-color:#c084fc;background:rgba(192,132,252,.08)}
+.scroll-select-icon{font-size:24px;flex-shrink:0}
+.scroll-select-info{flex:1;text-align:left}
+.scroll-select-name{font-weight:700;font-size:12px;color:var(--text)}
+.scroll-select-desc{font-size:9px;color:var(--dim);margin-top:2px}
+
 /* ═══ PC (1024px+) ═══ */
 @media(min-width:1024px) {
 

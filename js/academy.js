@@ -8,7 +8,6 @@ function clsIcon(cls, size) {
   return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
 }
 var INVENTORY_KEY = 'game_inventory';
-var CLASS_CHANGE_COST = 500;
 var MAX_SKILL_LV = 10;
 var _currentTab = 'classchange';
 
@@ -194,6 +193,15 @@ function switchTab(tab) {
 }
 
 // ── 전직 탭: 아카데미 렌더링 ─────────────
+function getScrollsFromInventory() {
+  var inv = loadInventory();
+  var scrolls = [];
+  for (var i = 0; i < inv.length; i++) {
+    if (inv[i].type === 'scroll') scrolls.push({ idx: i, item: inv[i] });
+  }
+  return scrolls;
+}
+
 function renderAcademy() {
   var list = document.getElementById('academy-list');
   var roster = getRoster();
@@ -205,57 +213,77 @@ function renderAcademy() {
     return;
   }
 
+  var scrolls = getScrollsFromInventory();
+  var hasScroll = scrolls.length > 0;
   var names = t('character.names');
 
   novices.forEach(function(ch) {
     var d = JAB[ch.cls];
     var grade = potGrade(ch);
     var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
-    var canAfford = _gold >= CLASS_CHANGE_COST;
     var charName = ch.customName || names[ch.nameId] || d.icon;
     var el = document.createElement('div');
     el.className = 'acad-card';
+    var btnText = hasScroll ? t('academy.class_change_btn') : t('academy.class_change_btn_noscroll');
     el.innerHTML =
       '<div class="acad-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="acad-info">' +
         '<div class="acad-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
         '<div class="acad-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
       '</div>' +
-      '<button class="acad-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('academy.class_change_btn', { cost: CLASS_CHANGE_COST }) + '</button>';
+      '<button class="acad-btn' + (hasScroll ? '' : ' disabled') + '" ' + (hasScroll ? '' : 'disabled') + '>' + btnText + '</button>';
     el.querySelector('.acad-btn').onclick = (function(uid) {
       return function() {
-        if (_gold < CLASS_CHANGE_COST) return;
-        showClassSelectModal(uid);
+        showScrollSelectModal(uid);
       };
     })(ch.uid);
     list.appendChild(el);
   });
 }
 
-// ── 전직 모달: 직업 선택 ─────────────────
-function showClassSelectModal(uid) {
+// ── 전직 모달: 전직서 선택 (전직서 = 직업) ───
+function showScrollSelectModal(uid) {
   var ch = getChar(uid);
   if (!ch) return;
-  var allClasses = Object.keys(JAB).filter(function(c) { return c !== 'novice' && !c.startsWith('summon_'); });
+  var scrolls = getScrollsFromInventory();
+
   var ov = document.getElementById('modal-overlay');
-  document.getElementById('modal-title').textContent = t('class_change.select_class');
+  document.getElementById('modal-title').textContent = t('academy.select_scroll');
   document.getElementById('modal-title').className = '';
-  var h = '<div class="class-select-grid">';
-  allClasses.forEach(function(cls) {
-    var d = JAB[cls];
-    h += '<div class="cs-card" data-cls="' + cls + '">' +
-      '<div class="cs-icon">' + clsIcon(cls, 28) + '</div>' +
-      '<div class="cs-name">' + t('classes.' + cls) + '</div>' +
-      '<div class="cs-stats">HP ' + d.base.hp + ' ATK ' + d.base.atk + ' DEF ' + d.base.def + '</div>' +
-      '<div class="cs-role">' + t('class_desc.' + cls) + '</div>' +
-      '</div>';
-  });
-  h += '</div>';
+
+  if (!scrolls.length) {
+    document.getElementById('modal-sub').innerHTML =
+      '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_scroll') + '</div>';
+    var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+    var cb = document.createElement('button');
+    cb.className = 'modal-btn secondary';
+    cb.textContent = t('common.close');
+    cb.onclick = function() { ov.classList.remove('show'); };
+    bt.appendChild(cb);
+    ov.classList.add('show');
+    return;
+  }
+
   var names = t('character.names');
   var charName = ch.customName || names[ch.nameId] || '???';
-  document.getElementById('modal-sub').innerHTML =
-    clsIcon(ch.cls, 24) + ' <b>' + charName + '</b> (Lv.' + ch.lv + ')<br>' +
-    '<span style="color:var(--dim);font-size:10px">' + t('class_change.warning_irreversible') + '</span><br><br>' + h;
+  var h = clsIcon(ch.cls, 24) + ' <b>' + charName + '</b> (Lv.' + ch.lv + ')<br>' +
+    '<span style="color:var(--dim);font-size:10px">' + t('class_change.warning_irreversible') + '</span><br><br>';
+  h += '<div class="scroll-select-list">';
+  scrolls.forEach(function(s) {
+    var cls = s.item.scrollCls;
+    var d = JAB[cls];
+    if (!d) return;
+    h += '<div class="scroll-select-btn" data-idx="' + s.idx + '" data-cls="' + cls + '">' +
+      '<span class="scroll-select-icon">' + clsIcon(cls, 28) + '</span>' +
+      '<div class="scroll-select-info">' +
+        '<div class="scroll-select-name">' + t('shop.scroll_prefix') + ' ' + t('classes.' + cls) + '</div>' +
+        '<div class="scroll-select-desc">' + t('class_desc.' + cls) + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  h += '</div>';
+
+  document.getElementById('modal-sub').innerHTML = h;
   var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
   var cb = document.createElement('button');
   cb.className = 'modal-btn secondary';
@@ -263,17 +291,19 @@ function showClassSelectModal(uid) {
   cb.onclick = function() { ov.classList.remove('show'); };
   bt.appendChild(cb);
   ov.classList.add('show');
-  document.querySelectorAll('.cs-card').forEach(function(card) {
-    card.onclick = function() {
-      var newCls = card.dataset.cls;
+
+  document.querySelectorAll('.scroll-select-btn').forEach(function(btn) {
+    btn.onclick = function() {
+      var idx = parseInt(btn.dataset.idx);
+      var cls = btn.dataset.cls;
       ov.classList.remove('show');
-      confirmClassChange(uid, newCls);
+      confirmClassChange(uid, cls, idx);
     };
   });
 }
 
 // ── 전직 모달: 최종 확인 ─────────────────
-function confirmClassChange(uid, newCls) {
+function confirmClassChange(uid, newCls, scrollIdx) {
   var ch = getChar(uid);
   if (!ch) return;
   var oldD = JAB[ch.cls];
@@ -283,18 +313,23 @@ function confirmClassChange(uid, newCls) {
   var names = t('character.names');
   var charName = ch.customName || names[ch.nameId] || '???';
   var origClass = ch.cls;
+
+  var scrollName = t('shop.scroll_prefix') + ' ' + t('classes.' + newCls);
+
   showConfirm(
     oldD.icon + ' ' + charName + ' (Lv.' + ch.lv + ' ' + grade + t('class_change.grade_suffix') + ')\n' +
     t('classes.' + ch.cls) + ' \u2192 ' + newD.icon + ' ' + t('classes.' + newCls) + '\n\n' +
     t('class_change.stats_preview') + '\n' +
     'HP ' + preview.hp + ' / ATK ' + preview.atk + ' / DEF ' + preview.def + '\n' +
     'MOV ' + preview.move + ' / RNG ' + preview.range + '\n\n' +
-    t('academy.cost_label', { cost: CLASS_CHANGE_COST }) + '\n' +
+    scrollName + '\n' +
     t('class_change.warning_parenthetical'),
     function() {
-      _gold -= CLASS_CHANGE_COST;
-      saveGold(_gold);
-      updateGoldUI();
+      // 전직서 소비
+      var inv2 = loadInventory();
+      inv2.splice(scrollIdx, 1);
+      saveInventory(inv2);
+
       changeClass(uid, newCls);
       renderAcademy();
       setTimeout(function() {

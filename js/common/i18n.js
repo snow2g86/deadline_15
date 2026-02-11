@@ -35,7 +35,7 @@ function _loadScript(src) {
 const _I18N_CACHE_KEY = 'game_i18n_cache';
 const _I18N_LANG_KEY = 'game_i18n_lang';
 const _I18N_VER_KEY = 'game_i18n_ver';
-const _I18N_VERSION = 7; // bump when language data changes
+const _I18N_VERSION = 8; // bump when language data changes
 
 // 언어 감지 및 데이터 로드
 async function loadI18n() {

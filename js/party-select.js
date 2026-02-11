@@ -297,10 +297,11 @@ function renderParty() {
     var eqAtk = eqB.atk ? '<span style="color:#4ade80">+' + eqB.atk + '</span>' : '';
     var eqDef = eqB.def ? '<span style="color:#4ade80">+' + eqB.def + '</span>' : '';
     row.innerHTML =
-      '<div class="rl-icon">' + clsIcon(ch.cls, 30) + '</div>' +
+      '<div class="rl-icon">' + charSprite(ch.cls, 60, ch.gender) +
+        '<span class="rl-grade" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>' +
       '<div class="rl-info">' +
-      '<div class="rl-top"><span class="rl-name">' + charName + '</span><button class="rl-rename" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">&#9998;</button><span class="rl-lv">Lv.' + ch.lv + '</span>' +
-      '<span class="rl-grade" style="color:' + gClr + '">' + grade + '</span></div>' +
+      '<div class="rl-top"><span class="rl-lv">Lv.' + ch.lv + '</span><span class="rl-cls">' + t('classes.' + ch.cls) + '</span></div>' +
+      '<div class="rl-top"><span class="rl-name">' + charName + '</span><button class="rl-rename" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">&#9998;</button></div>' +
       '<div class="rl-stats">HP <b>' + ch.hp + '</b>' + eqHp + ' ATK <b>' + ch.atk + '</b>' + eqAtk + ' DEF <b>' + ch.def + '</b>' + eqDef + ' MOV <b>' + ch.move + '</b> RNG <b>' + ch.range + '</b></div>' +
       '<div class="rl-pot">' + t('party.potential_stats', { hp: ch.pot.hp, atk: ch.pot.atk, def: ch.pot.def }) + '</div>' +
       '<div class="rl-exp"><div class="rl-exp-fill" style="width:' + expPct + '%"></div></div>' +
@@ -396,7 +397,15 @@ function renderChars() {
     var card = document.createElement('div');
     card.className = 'eq-char-card' + (_selUid === ch.uid ? ' active' : '');
 
+    var grade = potGrade(ch);
+    var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
+
     var html = '';
+
+    // 파티원 배지
+    if (isInParty) {
+      html += '<div class="eq-char-badge">' + t('equip.party_member') + '</div>';
+    }
 
     // 장비 슬롯 그리드 (윗쪽)
     html += '<div class="eq-char-equips">';
@@ -434,15 +443,14 @@ function renderChars() {
     }
     html += '</div>';
 
-    // 캐릭터 이미지
-    html += '<div class="eq-char-icon">' + charSprite(ch.cls, 60, ch.gender) + '</div>';
+    // 캐릭터 이미지 + 등급 배지
+    html += '<div class="eq-char-icon">' + charSprite(ch.cls, 60, ch.gender) +
+      '<span class="eq-grade-badge" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>';
 
     // 캐릭터 정보
     html += '<div class="eq-char-info">';
+    html += '<div class="eq-char-meta"><span class="eq-char-level">Lv.' + ch.lv + '</span> <span class="eq-char-cls">' + t('classes.' + ch.cls) + '</span></div>';
     html += '<div class="eq-char-name">' + charName + '</div>';
-    html += '<div class="eq-char-meta">';
-    html += '<span class="eq-char-level">Lv.' + ch.lv + ' ' + t('classes.' + ch.cls) + '</span>';
-    html += '</div>';
     html += '</div>';
 
     card.innerHTML = html;
