@@ -48,6 +48,7 @@
 
 /* 모바일 크기 조정 */
 @media(max-width:768px){
+  #section-equip{max-width:330px}
   .eq-char-card{padding:14px 12px;gap:10px}
   .eq-char-icon{width:64px;height:64px;flex-shrink:0}
   .eq-char-icon img,.eq-char-icon svg{width:64px;height:64px}
