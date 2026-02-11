@@ -118,9 +118,13 @@ function switchPageTab(tab) {
   });
   document.getElementById('section-party').style.display = tab === 'party' ? '' : 'none';
   document.getElementById('section-equip').style.display = tab === 'equip' ? '' : 'none';
+  document.getElementById('section-item').style.display = tab === 'item' ? '' : 'none';
   if (tab === 'equip') {
     _gold = loadGold();
     eqRenderAll();
+  }
+  if (tab === 'item') {
+    renderItemTab();
   }
   updatePageGold();
 }
@@ -394,15 +398,7 @@ function renderChars() {
 
     var html = '';
 
-    // 파티원 배지
-    if (isInParty) {
-      html += '<div class="eq-char-badge">Party</div>';
-    }
-
-    // 캐릭터 아이콘
-    html += '<div class="eq-char-icon">' + clsIcon(ch.cls, 48) + '</div>';
-
-    // 장비 슬롯 그리드
+    // 장비 슬롯 그리드 (윗쪽)
     html += '<div class="eq-char-equips">';
     ensureEquipSlots(ch);
     var invMap = {};
@@ -438,6 +434,9 @@ function renderChars() {
     }
     html += '</div>';
 
+    // 캐릭터 이미지
+    html += '<div class="eq-char-icon">' + charSprite(ch.cls, 60, ch.gender) + '</div>';
+
     // 캐릭터 정보
     html += '<div class="eq-char-info">';
     html += '<div class="eq-char-name">' + charName + '</div>';
@@ -447,6 +446,7 @@ function renderChars() {
     html += '</div>';
 
     card.innerHTML = html;
+    card.className += (isInParty ? ' party-member' : '');
     card.onclick = (function(uid) {
       return function() {
         _selUid = uid;
