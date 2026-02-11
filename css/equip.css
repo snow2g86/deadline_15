@@ -1,5 +1,5 @@
 /* ═══ Equip Section ═══ */
-#section-equip{display:flex;flex-direction:column;flex:1;overflow:hidden;align-items:center}
+#section-equip{display:flex;flex-direction:column;flex:1;overflow-y:auto;align-items:center}
 
 /* ═══ Character Grid ═══ */
 .eq-chars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px;width:100%;max-width:760px;margin:0 auto}
