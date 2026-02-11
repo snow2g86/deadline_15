@@ -1,0 +1,184 @@
+// ═══════════════════════════════════════════
+//  battle/combat.js — Combat system (selU, cellCk, doAtk, doSkill, etc.)
+// ═══════════════════════════════════════════
+
+Object.assign(G, {
+	selU(u) {
+		if (this.phase !== 'player' || this.over || this.anim || this.awPM) return;
+		if (u.team === 'ally' && u.ha && !u.waited) return;
+		if (u.team === 'ally' && u.waited) {
+			u.ha = false; u.waited = false;
+			this.sel = u; this.awPM = true; this.mvT = [];
+			if (u.channeling) { this.atkT = []; this.healT = [] }
+			else {
+				const a = this.atkC(u);
+				if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
+				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+			}
+			this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rNav(); this.scrollToUnit(u); this.sfxSelect(); return
+		}
+		this.sel = u; this.awPM = true;
+		if (u.team === 'ally' && !u.ha) {
+			this.mvT = []; const a = this.atkC(u);
+			if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
+			else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+		}
+		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rNav(); this.scrollToUnit(u); this.sfxSelect()
+	},
+	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rNav() },
+	cellCk(x, y) {
+		if (this.phase !== 'player' || this.over || this.anim) return; const cl = this.uAt(x, y), s = this.sel;
+		if (this.awPM && s) {
+			if (this.skillMode) {
+				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSkill(s, x, y); return }
+				this.skillMode = false; const a = this.atkC(s);
+				if (s.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== s.id }) }
+				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+				this.rTer(); this.showAM(s); return
+			}
+			if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
+			if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
+			if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
+			if (!cl && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
+			if (!cl && (this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0) && !this.mvT.some(c => c.x === x && c.y === y) && !this.atkT.some(c => c.x === x && c.y === y) && !this.healT.some(c => c.x === x && c.y === y)) {
+				this.mvT = []; this.atkT = []; this.healT = []; this.rTer(); this.showAM(s); return;
+			}
+			const hasRange = this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0;
+			if (!hasRange && !cl) { this.clrSel(); return }
+			s.ha = true; s.waited = true; this.awPM = false; this.hideAM(); this.clrSel();
+			if (cl && cl.team !== 'enemy') { const nu = this.uAt(x, y); if (nu) this.selU(nu) }
+			this.chkAutoEnd(); return
+		}
+		if (!s) { if (cl && cl.team === 'ally') this.selU(cl); return }
+		if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
+		if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
+		if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
+		if (!cl && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
+		if (cl && cl.team === 'ally') { this.selU(cl); return } this.clrSel()
+	},
+	actMove() { if (!this.sel) return; this.hideAM(); const u = this.sel; this.mvT = (u.hm || u.mo) ? [] : this.mvC(u); this.rTer(); this.floatT(u.x, u.y, t('messages.select_move_target'), 'heal') },
+	actAttack() { if (!this.sel) return; this.hideAM(); const msg = this.sel.role === 'healer' ? t('messages.select_heal_target') : t('messages.select_attack_target'); this.floatT(this.sel.x, this.sel.y, msg, 'heal') },
+	showSkillMenu() { if (!this.sel || !this.awPM) return; this.skillMenuOpen = true; this.showAM(this.sel) },
+	hideSkillMenu() { if (!this.sel) return; this.skillMenuOpen = false; this.showAM(this.sel) },
+	actItem() { if (!this.sel) return; this.floatT(this.sel.x, this.sel.y, t('messages.item_system_preparing'), 'damage') },
+
+	_grantExp(u, action) { if (u.team === 'ally' && u.uid) { const e = actExp(this.cStage ? this.cStage.id : 1, action); if (e > 0) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) + e; this.floatT(u.x, u.y, `+${e} EXP`, 'exp'); } return e } return 0 },
+	skMul(u, skId) { const lv = Math.min((u.skillLv && u.skillLv[skId]) || 1, 10); return 1 + 0.1 * (lv - 1) },
+	doMv(u, tx, ty) {
+		const _mxp = this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y, exp: _mxp }; this._mvU(u, tx, ty); u.hm = true; u.mo = true; this.awPM = true; this.sfxMove();
+		this.chkTrap(u); chkTrapDetect(u);
+		const a = this.atkC(u); if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
+		else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
+	},
+	doAtk(a, tgt) {
+		const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
+		tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
+		this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
+		if (a._lastCrit) { this.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); this.screenShake(); }
+		if (a.furyBuff > 0) this.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
+		procFury(a, tgt, this);
+		if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
+			const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
+		}
+		if (a.hp > 0 && tgt.hp > 0 && a.skillLv && a.skillLv['brawler_counter'] >= 1 && mh(a.x,a.y,tgt.x,tgt.y) <= a.range && Math.random() < 0.3) {
+			const cdmg = calcDmg(a, tgt); tgt.hp = Math.max(0, tgt.hp - cdmg);
+			this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id); this.floatT(tgt.x, tgt.y, `-${cdmg}`, 'damage'); this.floatT(a.x, a.y, t('messages.brawler_counter'), 'heal');
+		}
+		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();
+		if (tgt.hp <= 0) {
+			this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500)
+		}
+		else if (a.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(a); this.deathA(a.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500) }
+		else { this.rUnits(); this.clrSel(); this.chkAutoEnd() }
+	},
+	doHeal(h, tgt) {
+		let amt = Math.round(h.atk * 1.5);
+		if (h.skillLv && h.skillLv['priest_divinegrace'] >= 1) amt = Math.round(amt * 1.2);
+		this._grantExp(h, 'heal'); tgt.hp = Math.min(tgt.mhp, tgt.hp + amt); this.vfxHeal(tgt); this.vfxBuff(tgt); this.sfxHeal(); this.floatT(tgt.x, tgt.y, `+${amt}`, 'heal');
+		h.ha = true; h.hm = true; this.awPM = false; this.hideAM(); this.rUnits(); this.clrSel(); this.chkAutoEnd()
+	},
+	actWait() { if (!this.sel) return; this.sel.ha = true; this.sel.waited = true; if (this.sel.team === 'ally') this.allyPos[this.sel.id] = { x: this.sel.x, y: this.sel.y }; this.awPM = false; this.hideAM(); this.sfxWait(); this.rUnits(); this.clrSel(); this.chkAutoEnd() },
+	actCancel() {
+		if (!this.sel) return;
+		if (this.skillMenuOpen) { this.hideSkillMenu(); return }
+		if (!this.preMv) return; const u = this.sel; const _gdx = u._gdx, _gdy = u._gdy;
+		if (this.preMv.exp && u.uid) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) - this.preMv.exp }
+		u.x = this.preMv.x; u.y = this.preMv.y; u.hm = false; u.mo = false;
+		this.animU(u.id, u.x, u.y); u._gdx = _gdx; u._gdy = _gdy; this._applyFace(u.id);
+		this.awPM = false; this.preMv = null; this.skillMode = false; this.skillMenuOpen = false; this.hideAM(); this.sfxUIClick(); setTimeout(() => { this.rTer(); this.clrSel() }, 340)
+	},
+
+	// ── 스킬 타겟팅 (디스패처) ────────────
+	actSkill(idx) {
+		if (!this.sel || !this.awPM) return;
+		const u = this.sel;
+		const skills = getUnitSkills(u);
+		const sk = skills[idx || 0];
+		if (!sk || u.res < sk.cost) return;
+		this.skillMenuOpen = false;
+		this._curSkill = sk; this.skillMode = true;
+
+		const handler = SKILL_HANDLERS[sk.id];
+		if (handler) {
+			const result = handler.target(u, sk, this);
+			if (result === null) {
+				this.skillMode = false; this._curSkill = null;
+				return;
+			}
+			if (result === 'instant') {
+				this.skillMode = false;
+				this.doSkill(u, u.x, u.y);
+				return;
+			}
+			this.atkT = result;
+			this.healT = [];
+		} else {
+			const dirs = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+			this.atkT = dirs.map(d => ({x:u.x+d.x,y:u.y+d.y})).filter(p => p.x>=0 && p.x<COLS && p.y>=0 && p.y<ROWS);
+			this.healT = [];
+		}
+		this.hideAM(); this.rTer();
+	},
+
+	_findAdj(x, y, u) {
+		const dirs = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+		const cands = [];
+		for (const d of dirs) {
+			const nx = x+d.x, ny = y+d.y;
+			if (nx<0 || nx>=COLS || ny<0 || ny>=ROWS) continue;
+			const ti = TI[this.ter[ny][nx]]; if (!ti.pass) continue;
+			if (!this.uAt(nx, ny)) cands.push({x:nx, y:ny});
+		}
+		if (!cands.length) return null;
+		if (u) { cands.sort((a,b) => mh(a.x,a.y,u.x,u.y) - mh(b.x,b.y,u.x,u.y)) }
+		return cands[0];
+	},
+
+	// ── 스킬 실행 (디스패처) ──────────────
+	doSkill(u, tx, ty) {
+		const sk = this._curSkill || SKILLS[u.cls];
+		if (!sk) return;
+		const skObj = Array.isArray(sk) ? sk[0] : sk;
+		if (u.res < skObj.cost) return;
+		u.res -= skObj.cost;
+
+		const handler = SKILL_HANDLERS[skObj.id];
+		if (handler) {
+			handler.exec(u, tx, ty, skObj, this);
+			return;
+		}
+		// fallback: 핸들러 미등록 시 비용 환불
+		u.res += skObj.cost;
+	},
+
+	cancelChannel() {
+		if (!this.sel || !this.sel.channeling) return;
+		const u = this.sel;
+		this.floatT(u.x, u.y, t('messages.channel_cancel'), 'damage');
+		u.channeling = null;
+		u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
+		this.sfxUIClick(); this.rUnits(); this.clrSel(); this.chkAutoEnd()
+	},
+
+});

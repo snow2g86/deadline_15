@@ -1,17 +1,14 @@
+// ═══════════════════════════════════════════
+//  battle/ui.js — UI (settings, info panel, result modal, nav)
+// ═══════════════════════════════════════════
+
 Object.assign(G, {
-  // ═══ Ally Nav ═══
   getBuffs(u){
     const buffs=[];
-    // Terrain buff
     const t=this.ter[u.y]?this.ter[u.y][u.x]:null;
     if(t&&TI[t].buff){const b=TI[t].buff;buffs.push({icon:b.icon,type:b.type,turns:0})}
-    // Fury max
-    // 광폭 active
-    // → skills.js에서 관리
     getSkillBuffs(u).forEach(b=>buffs.push(b));
-    // Stealth bonus (assassin in forest)
     if(u.cls==='assassin'&&t==='forest')buffs.push({icon:'🌙',type:'buff',turns:0});
-    // Status
     if(u.ha)buffs.push({icon:'✓',type:'debuff',turns:0});
     else if(u.waited)buffs.push({icon:'⏸',type:'neutral',turns:0});
     if(u.mo&&!u.ha)buffs.push({icon:'👣',type:'neutral',turns:0});
@@ -24,14 +21,14 @@ Object.assign(G, {
     allAllies.forEach(u=>{
       const dead=u.hp<=0;
       const isSel=this.sel&&this.sel.id===u.id;
-      const d=CD[u.cls];
+      const d=JAB[u.cls];
       const pct=dead?0:Math.round(u.hp/u.mhp*100);
       const hpColor=pct>60?'#22c55e':pct>30?'#eab308':'#ef4444';
       const buffs=dead?[]:this.getBuffs(u);
 
       const el=document.createElement('div');
       el.className='an-unit'+(dead?' dead':'')+(isSel?' selected':'')+(u.ha&&!dead?' acted-nav':'');
-      
+
       let bh='';
       buffs.forEach(b=>{
         const tl=b.turns>0?`<span class="bf-turn">${b.turns}</span>`:'';
@@ -43,25 +40,16 @@ Object.assign(G, {
 
       const buffsDiv=bh?`<div class="an-buffs">${bh}</div>`:'';
       el.innerHTML=`${buffsDiv}<div class="an-vres"><div class="an-vres-fill" style="height:${resPct}%;background:${resColor}"></div></div><div class="an-vhp"><div class="an-vhp-fill" style="height:${pct}%;background:${hpColor}"></div></div><div class="an-icon">${clsIcon(u.cls,18)}</div>`;
-      
+
       if(!dead)el.onclick=()=>{if(this.awPM)return;this.selU(u)};
       nav.appendChild(el);
     });
   },
 
-  // ═══ Minimap ═══
   rMM(){
     const d=this.vDim();
-    // Match iso-world coordinate system scaled down
-    // Main world: isoX = (vc-vr)*TW + d.r*TW, isoY = (vc+vr)*TH
-    // World bounds: x from 0..d.c-1, y from 0..d.r-1
-    // min isoX when vc=0,vr=d.r-1 => -(d.r-1)*TW + d.r*TW = TW
-    // max isoX when vc=d.c-1,vr=0 => (d.c-1)*TW + d.r*TW = (d.c+d.r-1)*TW
-    // min isoY when vc=0,vr=0 => 0
-    // max isoY when vc=d.c-1,vr=d.r-1 => (d.c+d.r-2)*TH
     const wW=(d.c+d.r)*TW+4;
     const wH=(d.c+d.r)*TH+80;
-    // minimap scale: fit to ~80px wide
     const mmMaxW=80;
     const sc=mmMaxW/wW;
     const mW=Math.ceil(wW*sc);
@@ -74,7 +62,6 @@ Object.assign(G, {
     const ctx=cv.getContext('2d');
     ctx.clearRect(0,0,mW,mH);
 
-    // draw tiles - use same isoX/isoY scaled
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
       const v=this.g2v(c,r);
       const ix=this.isoX(v.vc,v.vr);
@@ -90,10 +77,9 @@ Object.assign(G, {
       ctx.closePath();ctx.fill();
       ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=0.3;ctx.stroke();
     }
-    // draw units
     this.units.filter(u=>u.hp>0).forEach(u=>{
       const v=this.g2v(u.x,u.y);
-      const ix=this.isoX(v.vc,v.vr)+TW; // center of tile
+      const ix=this.isoX(v.vc,v.vr)+TW;
       const iy=this.isoY(v.vc,v.vr,0)+TH;
       const sx=ix*sc, sy=iy*sc;
       ctx.fillStyle=u.team==='ally'?'#3b82f6':'#ef4444';
@@ -110,7 +96,6 @@ Object.assign(G, {
     const sc=this._mmSc;
     const vp=document.getElementById('mm-vp');
     const oL=parseFloat(w.style.left||0),oT=parseFloat(w.style.top||0);
-    // visible area in world coords
     const vx=ct.scrollLeft-oL, vy=ct.scrollTop-oT;
     vp.style.left=Math.max(0,vx*sc)+'px';
     vp.style.top=Math.max(0,vy*sc)+'px';
@@ -157,18 +142,17 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const reward=win?(50+(this.cStage?this.cStage.id*30:0)):0;
     document.getElementById('modal-title').textContent=win?t('messages.victory'):t('messages.defeat');
     document.getElementById('modal-title').className=win?'win':'lose';
-    const deadAllies=this.units.filter(u=>u.team==='ally'&&u.hp<=0);
+    const deadAllyCount=this._deadAllyUids.length;
     let sub=msg;
     if(win&&reward)sub+=`\n🏅 보상: ${reward} Gold`;
     if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}
-    if(deadAllies.length)sub+=`\n💀 전사자: ${deadAllies.length}명 (성소에서 부활 가능)`;
-    // 경험치 결과
+    if(deadAllyCount)sub+=`\n💀 전사자: ${deadAllyCount}명 (성소에서 부활 가능)`;
     if(this._expResults&&this._expResults.length){
       sub+=`\n\n${t('results.battle_detail', {kills: this._deadEnemyCount||0, exp: this._totalExp||0, survivors: this._expResults.length})}`;
       this._expResults.forEach(r=>{
-        const ch=ROSTER.getChar(r.uid);if(!ch)return;
-        const d=CD[ch.cls];
-        const charName = ch.customName || t('character.names')[ch.nameId] || d.name;
+        const ch=getChar(r.uid);if(!ch)return;
+        const d=JAB[ch.cls];
+        const charName = ch.customName || t('character.names')[ch.nameId] || d.icon;
         let line=`\n${d.icon} ${charName}: +${r.exp} EXP`;
         if(r.leveled>0)line+=` ⬆ Lv.${r.prevLv}→${ch.lv}`;
         sub+=line;
@@ -185,7 +169,6 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
         b.onclick=()=>{ov.classList.remove('show');this.goNextStage(ns)};bt.appendChild(b)}}
     ov.classList.add('show')},
 
-  // === Settings ===
   _sett:{bgmVol:0.6,sfxVol:0.8,bgmOn:true,sfxOn:true,speed:1,language:null},
   _sfxGainNode:null,
   loadSett(){try{const d=JSON.parse(localStorage.getItem('game_setting'));

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📚 게임 가이드</title>
+<link rel="stylesheet" href="css/common.css">
+<script src="data/jab.js"></script>
+<script defer src="js/common/i18n.js"></script>
+<script defer src="js/common/nav.js"></script>
+<style>
+
+/* Header */
+.guide-header{text-align:center;padding:32px 16px 0;position:relative}
+.guide-header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
+  text-shadow:0 0 40px rgba(240,192,64,.25)}
+.guide-header .sub{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* Tabs */
+.guide-tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;
+  background:linear-gradient(var(--bg) 60%,transparent)}
+.guide-tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s}
+.guide-tab-btn:hover{border-color:var(--gold);color:var(--text)}
+.guide-tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
+  box-shadow:0 0 20px rgba(240,192,64,.3)}
+
+/* Content */
+.guide-content{max-width:900px;margin:0 auto;padding:20px 16px 100px}
+.guide-panel{display:none;animation:fadeIn .3s}
+.guide-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section */
+.guide-section{margin-bottom:24px}
+.guide-sec-head{font-size:16px;color:var(--gold);font-weight:900;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.guide-text{color:var(--text);font-size:13px;line-height:1.8;margin-bottom:12px}
+
+/* Role Grid */
+.role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:20px}
+
+/* Role Card */
+.role-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .2s}
+.role-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
+
+.role-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.role-title span:first-child{font-size:24px}
+
+.role-meta{font-size:11px;color:var(--dim);margin-bottom:8px;padding:6px;background:rgba(0,0,0,.2);border-radius:4px}
+
+.role-classes{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.role-class{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:4px 8px;
+  background:rgba(240,192,64,.1);color:var(--gold);border-radius:4px}
+
+.role-pros{color:var(--green);font-size:11px;margin-bottom:6px}
+.role-pros strong{display:block;color:var(--dim);font-weight:700;font-size:10px;margin-bottom:2px}
+
+.role-cons{color:var(--red);font-size:11px}
+.role-cons strong{display:block;color:var(--dim);font-weight:700;font-size:10px;margin-bottom:2px}
+
+/* Tactics */
+.tactics-list{display:flex;flex-direction:column;gap:12px}
+.tactic-item{background:rgba(0,0,0,.2);border-left:3px solid var(--gold);padding:12px;border-radius:4px}
+.tactic-title{font-weight:900;color:var(--gold);font-size:13px;margin-bottom:4px}
+.tactic-desc{font-size:11px;color:var(--dim);line-height:1.6}
+
+/* TIP Box */
+.tip-box{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:12px;
+  margin-bottom:16px}
+.tip-title{font-weight:900;color:var(--purple);font-size:12px;margin-bottom:4px}
+.tip-text{font-size:11px;color:var(--dim);line-height:1.6}
+
+/* Layout Fix */
+body[data-page="guide"]{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* Responsive */
+@media(max-width:768px){
+  .guide-header h1{font-size:22px}
+  .guide-content{padding:20px 12px 100px}
+  .role-grid{grid-template-columns:1fr}
+  .guide-sec-head{font-size:14px}
+}
+</style>
+</head>
+<body data-page="guide">
+
+<header id="top-nav">
+  <button id="nav-back" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <div id="nav-title">📚 게임 가이드</div>
+  <button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</header>
+
+<main>
+  <div class="guide-header">
+    <h1>📚 게임 가이드</h1>
+    <div class="sub">초보자를 위한 직업별 전술</div>
+  </div>
+
+  <div class="guide-tabs" id="guide-tabs">
+    <button class="guide-tab-btn active" data-tab="beginner">🎯 게임 시작</button>
+    <button class="guide-tab-btn" data-tab="roles">💼 직업 가이드</button>
+    <button class="guide-tab-btn" data-tab="tactics">⚔️ 전투 전술</button>
+  </div>
+
+  <div class="guide-content">
+
+    <!-- 게임 시작 탭 -->
+    <div class="guide-panel active" id="p-beginner">
+      <div class="guide-section">
+        <div class="guide-sec-head">🎮 게임 기본</div>
+        <p class="guide-text">
+          <strong>Deadline 15</strong>는 턴 기반 전략 RPG입니다. 클랜원들을 모집하고 훈련시켜 여러 스테이지의 도전을 이겨내세요.
+        </p>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">📍 핵심 시스템</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">🛡️ 파티 구성</div>
+            <div class="tactic-desc">로비에서 "파티"로 이동하여 최대 4명의 클랜원을 선택합니다. 정균형 조합이 필수입니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">💪 레벨업 & 성장</div>
+            <div class="tactic-desc">전투에서 경험치를 얻어 클랜원을 강화하세요. 경험치 물약으로 빠른 성장도 가능합니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🎯 직업 전환</div>
+            <div class="tactic-desc">노비스만 다른 직업으로 전직 가능합니다. 상점에서 전직서를 구매하세요.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">📊 자원 시스템</div>
+            <div class="tactic-desc">직업별 자원(분노/에너지/마나)으로 스킬을 사용합니다. 턴마다 자동 회복됩니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">💡 초보자 팁</div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 적절한 난이도 선택</div>
+          <div class="tip-text">
+            처음에는 낮은 스테이지부터 시작하세요. 클랜원들이 충분히 강해지면 더 어려운 스테이지도 정복할 수 있습니다.
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 균형잡힌 조합</div>
+          <div class="tip-text">
+            근접 딜러, 원거리 딜러, 방어/지원 캐릭터를 적절히 섞어서 팀을 구성하세요.
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 스킬 활용</div>
+          <div class="tip-text">
+            단순히 일반 공격만 하지 말고, 상황에 맞는 스킬을 활용하세요. 스킬마다 효과가 다릅니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 직업 가이드 탭 -->
+    <div class="guide-panel" id="p-roles">
+
+      <div class="guide-section">
+        <div class="guide-sec-head">⚔️ 근접 딜러 (Melee)</div>
+        <div class="role-grid">
+          <div class="role-card">
+            <div class="role-title"><span>⚔️</span> Warrior</div>
+            <div class="role-meta">높은 공격력, 광폭 패시브</div>
+            <div class="role-classes">
+              <span class="role-class">💪 높은 ATK</span>
+              <span class="role-class">⚡ 강타</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 순간 딜량이 높음. 강타로 150% 공격력.</div>
+            <div class="role-cons"><strong>약점:</strong> 방어력이 낮음. 주의가 필요합니다.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🛡️</span> Knight</div>
+            <div class="role-meta">높은 방어력, 스위치 스킬</div>
+            <div class="role-classes">
+              <span class="role-class">🛡️ 높은 DEF</span>
+              <span class="role-class">🔄 스위치</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 매우 튼튼함. 스위치로 위치 교환 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 서포터 역할에 적합합니다.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>👊</span> Brawler</div>
+            <div class="role-meta">빠른 기술, 무장해제 스킬</div>
+            <div class="role-classes">
+              <span class="role-class">⚡ 높은 ATK</span>
+              <span class="role-class">🤛 무장해제</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 높은 공격력. 적의 공격력을 줄일 수 있습니다.</div>
+            <div class="role-cons"><strong>약점:</strong> 방어력이 낮음.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🔱</span> Lancer</div>
+            <div class="role-meta">관통 공격, 방진 스킬</div>
+            <div class="role-classes">
+              <span class="role-class">⚡ 높은 ATK</span>
+              <span class="role-class">🔱 관통</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 관통으로 일직선 3칸 공격. 범위 딜이 가능합니다.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 이동력.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🏹 원거리 딜러 (Ranged)</div>
+        <div class="role-grid">
+          <div class="role-card">
+            <div class="role-title"><span>🏹</span> Archer</div>
+            <div class="role-meta">원거리 공격, 도약 스킬</div>
+            <div class="role-classes">
+              <span class="role-class">🏹 범위 4</span>
+              <span class="role-class">💨 도약</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 먼 거리 공격. 도약으로 신속한 이동.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 위치 선정이 중요합니다.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🔮</span> Mage</div>
+            <div class="role-meta">마법 공격, 화염폭발</div>
+            <div class="role-classes">
+              <span class="role-class">🔥 AoE 공격</span>
+              <span class="role-class">🔮 범위 3</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 화염폭발로 3×3 범위 공격. 많은 적 처리 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 거리 유지 필수.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🗡️</span> Assassin</div>
+            <div class="role-meta">높은 공격력, 은신 패시브</div>
+            <div class="role-classes">
+              <span class="role-class">💀 암살</span>
+              <span class="role-class">🌿 은신</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 숲에서 은신. 암살로 강력한 공격 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 은신 상태 유지 중요.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>📖</span> Summoner</div>
+            <div class="role-meta">소환 마법, 소환수 조종</div>
+            <div class="role-classes">
+              <span class="role-class">✨ 소환수</span>
+              <span class="role-class">🔮 범위 3</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 소환수로 추가 딜. 전술 다양성.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 개인 공격력. 소환수 관리 필요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">✝️ 지원 & 특수 (Support)</div>
+        <div class="role-grid">
+          <div class="role-card">
+            <div class="role-title"><span>✝️</span> Priest</div>
+            <div class="role-meta">회복 마법, 집단 치유</div>
+            <div class="role-classes">
+              <span class="role-class">💚 회복</span>
+              <span class="role-class">✨ 범위 6</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 집단 치유로 범위 회복. 파티 생존율 증가.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 방어 필수.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>💣</span> Sapper</div>
+            <div class="role-meta">함정 설치, 제어 스킬</div>
+            <div class="role-classes">
+              <span class="role-class">⚠️ 함정</span>
+              <span class="role-class">🎯 제어</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 함정으로 적 제어. 전술 활용도 높음.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 기본 능력. 함정 설치 위치 선정 중요.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🎭</span> Shaman</div>
+            <div class="role-meta">저주와 고양, 마법사</div>
+            <div class="role-classes">
+              <span class="role-class">☠️ 저주</span>
+              <span class="role-class">🔺 고양</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 저주로 적 약화. 고양으로 아군 강화.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 개인 능력 약함.</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-title"><span>🔰</span> Novice</div>
+            <div class="role-meta">초심자 전용, 전직 가능</div>
+            <div class="role-classes">
+              <span class="role-class">🎯 균형</span>
+              <span class="role-class">📈 성장</span>
+            </div>
+            <div class="role-pros"><strong>강점:</strong> 높은 성장률. 다른 직업으로 전직 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 기본 능력은 평균 이하. 강화 필수.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 전술 탭 -->
+    <div class="guide-panel" id="p-tactics">
+
+      <div class="guide-section">
+        <div class="guide-sec-head">⚔️ 기본 전술</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">📍 포지셔닝</div>
+            <div class="tactic-desc">
+              • 근접 캐릭터는 앞줄에 배치<br>
+              • 원거리 딜러는 뒷줄에 배치<br>
+              • 지원 캐릭터는 중앙에 배치<br>
+              • 맵 구조를 활용하여 유리한 위치 확보
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">🎯 타겟 우선순위</div>
+            <div class="tactic-desc">
+              • 1순위: 적 원거리 딜러 (위험도 높음)<br>
+              • 2순위: 적 회복사 (지속력 높음)<br>
+              • 3순위: 일반 적 (우선순위 낮음)<br>
+              • 마지막: 적 탱커 (위협도 낮음)
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">💪 스킬 활용</div>
+            <div class="tactic-desc">
+              • 초반: 자원 모으기 (자동 회복)<br>
+              • 중반: 중요 스킬 사용 (주요 적 처리)<br>
+              • 종반: 마지막 스킬로 정리<br>
+              • 회복이 필요하면 즉시 사용
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">🛡️ 방어 전술</div>
+            <div class="tactic-desc">
+              • 아군 회복사 보호 (최우선)<br>
+              • 얇은 캐릭터 뒤에 탱커 배치<br>
+              • 적 광역 공격 범위 회피<br>
+              • 필요시 유닛 교환으로 위치 변경
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🔥 상황별 전술</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">🏹 원거리 적이 많을 때</div>
+            <div class="tactic-desc">
+              맨 앞에 높은 방어력 탱커를 배치하여 적 공격을 흡수합니다. 원거리 딜러가 집중 포화를 당하면 위험하므로 반드시 보호하세요.
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">🔥 광역 공격이 많을 때</div>
+            <div class="tactic-desc">
+              유닛들을 분산시켜 배치하여 광역 피해를 최소화합니다. 꼭 필요한 경우가 아니면 뭉치지 마세요.
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">💀 보스 전투</div>
+            <div class="tactic-desc">
+              보스는 일반 적보다 훨씬 강합니다. 높은 방어력의 탱커로 버티고, 딜러와 지원을 조화시켜 점진적으로 체력을 깎세요. 성급한 도전은 금지입니다.
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">🌳 지형 활용</div>
+            <div class="tactic-desc">
+              • 숲: 암살자 은신 지점<br>
+              • 언덕: 높은 곳에서 이점<br>
+              • 바위: 엄폐물로 사용<br>
+              • 물: 부대 이동 제한 (피하기)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">📊 리소스 관리</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">⚡ Fury (분노)</div>
+            <div class="tactic-desc">
+              • Warrior, Knight, Lancer 보유<br>
+              • 공격 시 +1, 피격 시 +2 충전<br>
+              • MAX 도달 시 강력한 패시브 발동<br>
+              • 적극적인 공격으로 빠르게 충전
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">⚡ Energy (에너지)</div>
+            <div class="tactic-desc">
+              • Archer, Assassin, Brawler, Sapper, Novice 보유<br>
+              • 매턴 자동 회복<br>
+              • 스킬 사용으로 소모<br>
+              • 높은 회복력으로 자주 스킬 사용 가능
+            </div>
+          </div>
+
+          <div class="tactic-item">
+            <div class="tactic-title">💜 Mana (마나)</div>
+            <div class="tactic-desc">
+              • Mage, Priest, Summoner, Shaman 보유<br>
+              • 매턴 자동 회복<br>
+              • 마법/회복 스킬에 사용<br>
+              • 전투 시작 시 MAX로 시작
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">💡 고급 팁</div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 팀 구성 예시</div>
+          <div class="tip-text">
+            <strong>균형 파티:</strong> Knight(탱커) + Archer(딜러) + Mage(딜러) + Priest(회복)<br>
+            <strong>공격 파티:</strong> Warrior + Brawler + Archer + Mage<br>
+            <strong>방어 파티:</strong> Knight + Lancer + Priest + Shaman<br>
+            상황에 따라 조합을 변경하세요.
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 골드 관리</div>
+          <div class="tip-text">
+            초반에는 체험치 물약 구매보다 강한 캐릭터 모집을 우선하세요. 스테이지를 깨면서 경험치를 얻는 것이 더 효율적입니다.
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 전직 전략</div>
+          <div class="tip-text">
+            노비스를 초반에 강한 직업으로 전직시키지 마세요. 레벨을 먼저 올린 후 전직하면 최종 스탯이 더 높아집니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<nav id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);
+  display:flex;gap:8px;padding:8px;justify-content:space-around;z-index:100">
+  <button onclick="location.href='index.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">로비</button>
+  <button onclick="location.href='compendium.html'" style="flex:1;padding:12px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-weight:700;cursor:pointer;font-size:11px">도감</button>
+</nav>
+
+<script>
+// 탭 전환
+document.querySelectorAll('.guide-tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.guide-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.guide-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-' + btn.dataset.tab).classList.add('active');
+  };
+});
+</script>
+</body>
+</html>

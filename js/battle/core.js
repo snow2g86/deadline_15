@@ -1,11 +1,15 @@
+// ═══════════════════════════════════════════
+//  battle/core.js — G Object (core definition)
+// ═══════════════════════════════════════════
+
 const G = {
     ter: [], units: [], nid: 1, turn: 1, phase: 'player',
     sel: null, mvT: [], atkT: [], healT: [],
     awPM: false, skillMode: false, preMv: null, over: false, anim: false,
     cStage: null, eSpwn: 0, eQ: [], cleared: new Set(),
-    party: [], camDir: 0, battleExp: {}, traps: [], eFormPos: [],
+    party: [], camDir: 0, battleExp: {}, traps: [], poisonMists: [], eFormPos: [],
+    _killCount: 0, _killExpPool: 0, _deadAllyUids: [],
 
-    // Camera: remap grid(c,r) to view-space(vc,vr) based on rotation
     g2v(c, r) {
         switch (this.camDir) {
             case 0: return { vc: c, vr: r }; case 1: return { vc: ROWS - 1 - r, vr: c };
@@ -21,21 +25,15 @@ const G = {
     vDim() { return this.camDir % 2 === 0 ? { c: COLS, r: ROWS } : { c: ROWS, r: COLS } },
     isoX(vc, vr) { return (vc - vr) * TW + this.vDim().r * TW },
     isoY(vc, vr, z) { return (vc + vr) * TH - (z || 0) * ZH },
-    // Pixel (relative to iso-world) -> grid(c,r), diamond hit test
     isoHit(px, py) {
         const d = this.vDim(), oX = d.r * TW;
-        // Reverse iso: px = (vc-vr)*TW + oX + TW (center), py = (vc+vr)*TH + TH (center)
-        // vc+vr = (py)/TH,  vc-vr = (px-oX)/TW
         const fvc = ((px - oX) / TW + (py) / TH) / 2;
         const fvr = ((py) / TH - (px - oX) / TW) / 2;
-        // Check nearest integer candidates (the click could be between tiles)
         let best = null, bestD = Infinity;
         for (let dvc = -1; dvc <= 1; dvc++)for (let dvr = -1; dvr <= 1; dvr++) {
             const vc = Math.floor(fvc) + dvc, vr = Math.floor(fvr) + dvr;
             if (vc < 0 || vr < 0 || vc >= d.c || vr >= d.r) continue;
-            // Diamond center
             const cx = this.isoX(vc, vr) + TW, cy = this.isoY(vc, vr, 0) + TH;
-            // Diamond test: |dx/TW| + |dy/TH| <= 1
             const dx = Math.abs(px - cx) / TW, dy = Math.abs(py - cy) / TH;
             if (dx + dy <= 1) {
                 const dist = dx + dy;
@@ -54,7 +52,9 @@ const G = {
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[this.camDir];
         document.querySelector('#cam-dir .cd-label').textContent = CLAB[this.camDir];
         document.querySelectorAll('.unit-sprite').forEach(el => el.style.transition = 'none');
-        this.layW(); this.rTer(); this.rUnits(); this.rMM();
+        this.layW(); this.rTer(); this.rUnits();
+        this.units.forEach(u => { if (u._gdx || u._gdy) this._applyFace(u.id) });
+        this.rMM();
         requestAnimationFrame(() => requestAnimationFrame(() => {
             document.querySelectorAll('.unit-sprite').forEach(el => el.style.transition = '');
         }));
@@ -68,27 +68,44 @@ const G = {
         const cv = document.getElementById('vfx-canvas'); if (cv) { cv.width = wW; cv.height = wH }
     },
 
-    // Stage/Party: managed by lobby.js (openStage, _showStageSelect, selSt, etc.)
-
-    // Init
     init() {
-        this.genT(); this.units = []; this.nid = 1; this.turn = 1; this.phase = 'player';
+        this.genT(); this._initTColors(); this.units = []; this.nid = 1; this.turn = 1; this.phase = 'player';
         this.sel = null; this.over = false; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this.anim = false; this.camDir = 0;
         this.breached = 0; this.battleExp = {}; this.allyPos = {}; this.traps = []; this.eFormPos = [];
+        this._killCount = 0; this._killExpPool = 0; this._deadAllyUids = [];
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[0];
         document.querySelector('#cam-dir .cd-label').textContent = CLAB[0];
         const w = document.getElementById('iso-world');
         w.querySelectorAll('.iso-tile,.unit-sprite,.float-text').forEach(e => e.remove());
         const meleeCols = [3, 4, 5, 6, 7], rangedCols = [3, 4, 5, 6, 7]; let meleeIdx = 0, rangedIdx = 0;
         for (let i = 0; i < this.party.length; i++) {
-            const uid = this.party[i], ch = ROSTER.getChar(uid); if (!ch) continue;
-            const role = CD[ch.cls]?.role, isRanged = role === 'ranged' || role === 'healer', cols = isRanged ? rangedCols : meleeCols, idx = isRanged ? rangedIdx++ : meleeIdx++;
+            const uid = this.party[i], ch = getChar(uid); if (!ch) continue;
+            const role = ROLE_MAP[ch.cls], isRanged = role === 'ranged' || role === 'healer', cols = isRanged ? rangedCols : meleeCols, idx = isRanged ? rangedIdx++ : meleeIdx++;
             if (idx < cols.length) { const x = cols[idx], y = isRanged ? 12 : 11; this.addU('ally', uid, x, y) }
         }
         this.spawnW(); this.layW(); this.vfxInit(); this.rTer(); this.rUnits(); this.uUI(); this.defI(); this.rMM();
         this.bgmStart();
-        // Scroll camera to ally position
         setTimeout(() => this.scrollToAllies(), 50)
+    },
+    _rmDead() {
+        this.units.forEach(u => {
+            if (u.hp <= 0) {
+                if (u.isSummon && u.summonerId) {
+                    const summoner = this.units.find(s => s.id === u.summonerId && s.hp > 0 && s.skillLv && s.skillLv['summoner_soulbond'] >= 1);
+                    if (summoner) { summoner.res = Math.min(summoner.maxRes, summoner.res + 40); this.floatT(summoner.x, summoner.y, '+40 MP', 'heal') }
+                }
+                if (u.team === 'enemy' && !u._counted) {
+                    u._counted = true;
+                    this._killCount++;
+                    this._killExpPool += killExp(this.cStage ? this.cStage.id : 1, u.cls);
+                }
+                if (u.team === 'ally' && u.uid && !u._counted) {
+                    u._counted = true;
+                    this._deadAllyUids.push(u.uid);
+                }
+            }
+        });
+        this.units = this.units.filter(u => u.hp > 0);
     },
     scrollToAllies() {
         const al = this.alive('ally'); if (!al.length) return;
@@ -108,46 +125,33 @@ const G = {
         const tX = oL + ux - ct.clientWidth / 2, tY = oT + uy - ct.clientHeight / 2;
         ct.scrollTo({ left: tX, top: tY, behavior: 'smooth' });
     },
-    // Enemy formation: defensive positioning based on class
     eFormation(enemies, boss) {
         const form = [];
         let knights = [], melee = [], ranged = [], heal = [], sappers = [];
-        // Categorize enemies
         enemies.forEach(cls => {
-            const d = CD[cls];
+            const role = ROLE_MAP[cls];
             if (cls === 'knight') knights.push(cls);
-            else if (d.role === 'melee') melee.push(cls);
-            else if (d.role === 'ranged') ranged.push(cls);
-            else if (d.role === 'healer') heal.push(cls);
+            else if (role === 'melee') melee.push(cls);
+            else if (role === 'ranged') ranged.push(cls);
+            else if (role === 'healer') heal.push(cls);
             if (cls === 'sapper') sappers.push(cls)
         });
-        // Formation rows from top (row 0-1: spawn) - enemies defend from row 2-4
-        // Front line: row 11 (knights first, then melee)
         const frontLine = [];
         for (let c = 2; c <= 7; c++) { if (!this.uAt(c, 11) && frontLine.length < (knights.length + melee.length)) frontLine.push({ x: c, y: 11 }) }
         let idx = 0;
         knights.forEach(k => { if (idx < frontLine.length) form.push({ cls: k, pos: frontLine[idx++] }) });
         melee.forEach(m => { if (idx < frontLine.length) form.push({ cls: m, pos: frontLine[idx++] }) });
-        // Mid line: row 12 (remaining units)
         const midLine = [];
         for (let c = 2; c <= 7; c++) { if (!this.uAt(c, 12) && midLine.length < ranged.length + heal.length + sappers.length) midLine.push({ x: c, y: 12 }) }
         idx = 0;
         ranged.forEach(r => { if (idx < midLine.length) form.push({ cls: r, pos: midLine[idx++] }) });
         heal.forEach(h => { if (idx < midLine.length) form.push({ cls: h, pos: midLine[idx++] }) });
         sappers.forEach(s => { if (idx < midLine.length) form.push({ cls: s, pos: midLine[idx++] }) });
-        // Boss at center-back: row 2-3, col 4-5
         if (boss) { form.push({ cls: boss.cls, pos: { x: 5, y: 2 }, isBoss: true }) }
         return form
     },
     genT() {
         this.ter = []; this.gateHP = {}; this.wallHP = {}; this.breached = 0;
-        // 스테이지별 타일 종류당 1개 variant 선택
-        this.tileVar = {};
-        Object.keys(TILE_MAP).forEach(t => {
-            const v = TILE_MAP[t].variants;
-            this.tileVar[t] = Math.floor(Math.random() * v.length);
-        });
-        // Ally wall row (row 14): cols 2-3,6-7 = wall, cols 4-5 = gate, rest = water
         const wallRow = (row) => {
             const r = []; for (let c = 0; c < COLS; c++) {
                 if (c >= 2 && c <= 3 || c >= 6 && c <= 7) { r.push('wall'); this.wallHP[c + ',' + row] = 200 }
@@ -155,44 +159,53 @@ const G = {
                 else r.push('water')
             } return r
         };
-        // Moat row: water except cols 4-5 = plain (path to gate)
         const moatRow = () => {
             const r = []; for (let c = 0; c < COLS; c++) {
                 if (c >= 4 && c <= 5) r.push('plain'); else r.push('water')
             } return r
         };
         for (let r = 0; r < ROWS; r++) {
-            if (r === 14) { this.ter[r] = wallRow(r) }                // Ally wall only
-            else if (r === 13) { this.ter[r] = moatRow() }             // Ally moat
-            else if (r <= 1 || r >= 11) {                              // Rows 0-1 (enemy spawn), 11-12 (ally front) = plain
+            if (r === 14) { this.ter[r] = wallRow(r) }
+            else if (r === 13) { this.ter[r] = moatRow() }
+            else if (r <= 1 || r >= 11) {
                 this.ter[r] = []; for (let c = 0; c < COLS; c++)this.ter[r][c] = 'plain'
             }
             else {
+                const theme = MAP_THEMES[(this.cStage && this.cStage.mapType) || 'plains'];
+                const d = theme.dist;
                 this.ter[r] = []; for (let c = 0; c < COLS; c++) {
-                    const rn = Math.random();
-                    this.ter[r][c] = rn < .15 ? 'rock' : rn < .25 ? 'hill' : rn < .37 ? 'forest' : 'plain'
+                    const rn = Math.random(); let acc = 0;
+                    this.ter[r][c] = (acc+=d.rock,rn<acc)?'rock':(acc+=d.hill,rn<acc)?'hill':(acc+=d.forest,rn<acc)?'forest':(acc+=(d.water||0),rn<acc)?'water':'plain'
                 }
             }
         }
     },
-    // addU: ally는 uid(보유 캐릭터), enemy는 cls+스테이지 배율
+    _initTColors() {
+        const theme = MAP_THEMES[(this.cStage && this.cStage.mapType) || 'plains'];
+        this._tColors = {};
+        for (const tp in TI) {
+            this._tColors[tp] = theme.colors[tp]
+                ? { tc: theme.colors[tp].tc, lc: theme.colors[tp].lc, rc: theme.colors[tp].rc }
+                : { tc: TI[tp].tc, lc: TI[tp].lc, rc: TI[tp].rc };
+        }
+    },
     addU(team, src, x, y) {
-        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, gender = 'm';
+        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '', gender = 'm';
         if (team === 'ally' && typeof src === 'number') {
-            const bs = ROSTER.toBattleStats(src);
+            const bs = toBattleStats(src);
             if (!bs) return null;
             cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
-            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; gender = bs.gender || 'm';
+            role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; name = bs.name; gender = bs.gender || 'm';
         } else {
-            cls = src; const d = CD[cls], s = this.cStage;
+            cls = src; const d = JAB[cls], s = this.cStage;
             hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
-            role = d.role; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
+            role = ROLE_MAP[cls]; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
-            mhp = hp; initRes = d.res === 'mana' ? maxRes : 0;
+            mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
             gender = Math.random() < 0.5 ? 'm' : 'f';
         }
         const u = {
-            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, gender,
+            id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, name, gender,
             res: initRes, maxRes, resType, resRec,
             hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
@@ -202,11 +215,9 @@ const G = {
     uAt(x, y) {
         const all = this.units.filter(u => u.x === x && u.y === y && u.hp > 0);
         if (all.length <= 1) return all[0] || null;
-        // 겹침: 은신 암살자보다 적을 우선 반환
         return all.find(u => u.team === 'enemy') || all[0]
     },
     alive(t) { return this.units.filter(u => u.team === t && u.hp > 0) },
-    // Trap system — team field: 'enemy' traps hit allies, 'ally' traps hit enemies
     chkTrap(u) {
         const enemy = u.team === 'ally' ? 'enemy' : 'ally';
         const trap = this.traps.find(t => t.x === u.x && t.y === u.y && t.team === enemy);
@@ -219,16 +230,24 @@ const G = {
         }
         return false
     },
+    _chkSpearwall(enemy) {
+        if (enemy.team !== 'enemy' || enemy.hp <= 0) return;
+        const lancers = this.units.filter(u => u.team === 'ally' && u.hp > 0 && u.skillLv && u.skillLv['lancer_spearwall'] >= 1 && !u._spearwallUsed && !(u.stunned > 0) && !(u.frozen > 0) && mh(u.x, u.y, enemy.x, enemy.y) <= u.range);
+        if (lancers.length) {
+            const l = lancers[0]; l._spearwallUsed = true;
+            const dmg = Math.max(1, l.atk - enemy.def); enemy.hp = Math.max(0, enemy.hp - dmg);
+            this.vfxAtk(l, enemy); this.sfxAtk(l.cls); this.shakeU(enemy.id);
+            this.floatT(enemy.x, enemy.y, `-${dmg}`, 'damage'); this.floatT(l.x, l.y, t('messages.lancer_spearwall'), 'heal');
+            if (enemy.hp <= 0) { this.sfxDeath(); this.vfxDeath(enemy); this.deathA(enemy.id) }
+        }
+    },
 
     spawnW() {
         if (!this.cStage) return; const s = this.cStage, rem = s.tot - this.eSpwn; if (rem <= 0) return;
         const cnt = Math.min(s.spw, rem, this.eQ.length);
-        // First wave: Boss + formation positioning (rows 2-4)
         if (this.eSpwn === 0 && s.boss) {
-            // Spawn boss at center-back (row 2, col 4-5)
             const bu = this.addU('enemy', s.boss.cls, 5, 2);
             if (bu) { bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: 5, y: 2 }; } this.eSpwn++;
-            // Spawn regular enemies in formation rows (2-4)
             const posL = [[2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]];
             let pidx = 0;
             while (this.eSpwn < cnt && pidx < posL.length && this.eQ.length) {
@@ -237,7 +256,6 @@ const G = {
                 if (!this.uAt(p[0], p[1])) { this.addU('enemy', c, p[0], p[1]); this.eSpwn++ }
             }
         } else {
-            // Subsequent waves: random spawn at rows 0-1
             const op = [];
             for (let c = 0; c < COLS; c++)if (!this.uAt(c, 0)) op.push({ x: c, y: 0 });
             if (op.length < cnt) for (let c = 0; c < COLS; c++)if (!this.uAt(c, 1)) op.push({ x: c, y: 1 });
@@ -249,23 +267,20 @@ const G = {
         }
     },
 
-    // Pathfinding
     mvC(u) {
-        if (u.stunned > 0) return []; const res = [], vis = new Map(), q = [{ x: u.x, y: u.y, c: 0 }], K = (a, b) => a + ',' + b;
+        if (u.stunned > 0 || u.frozen > 0) return []; const res = [], vis = new Map(), q = [{ x: u.x, y: u.y, c: 0 }], K = (a, b) => a + ',' + b;
         const isStealth = u.cls === 'assassin' && u.team === 'ally' && this.ter[u.y] && this.ter[u.y][u.x] === 'forest';
         vis.set(K(u.x, u.y), 0);
         while (q.length) {
             const { x, y, c } = q.shift();
             const occ = this.uAt(x, y);
             if (c > 0 && !occ) res.push({ x, y });
-            // 은신 암살자: 적이 있는 숲 타일도 이동 가능 (겹침)
             if (c > 0 && occ && occ.team !== u.team && isStealth && this.ter[y] && this.ter[y][x] === 'forest') res.push({ x, y });
             for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
                 const nx = x + dx, ny = y + dy;
                 if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue; const ti = TI[this.ter[ny][nx]]; if (!ti.pass) continue;
                 const o = this.uAt(nx, ny);
                 if (o && o.team !== u.team) {
-                    // 은신 암살자: 적이 있는 숲으로의 진입은 허용 (경로 확장은 차단)
                     if (isStealth && this.ter[ny][nx] === 'forest') {
                         const nc = c + ti.cost; if (nc <= u.move) { const k = K(nx, ny); if (!vis.has(k) || vis.get(k) > nc) { vis.set(k, nc) } }
                     }

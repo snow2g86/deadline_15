@@ -1,5 +1,7 @@
+// ═══════════════════════════════════════════
+//  battle/vfx.js — VFX, particles, animations
+// ═══════════════════════════════════════════
 Object.assign(G, {
-    // ═══ VFX System ═══
     vfxParts: [], vfxRaf: null,
     vfxInit() {
         const cv = document.getElementById('vfx-canvas');
@@ -71,40 +73,40 @@ Object.assign(G, {
         } ctx.closePath(); ctx.fill()
     },
 
-    // Class-specific attack VFX
     vfxAtk(attacker, target) {
+        this.faceDir(attacker.id, target.x - attacker.x, target.y - attacker.y);
+        this.atkAnimU(attacker.id);
         const ax = this.uSX(attacker.x, attacker.y) + UCX, ay = this.uSY(attacker.x, attacker.y) + UCY;
         const tx = this.uSX(target.x, target.y) + UCX, ty = this.uSY(target.x, target.y) + UCY;
         const cls = attacker.cls;
-        if (cls === 'warrior') {// Slash
+        if (cls === 'warrior') {
             this.vfxSpawn(tx, ty, { count: 12, colors: ['#fff', '#aaddff', '#88bbff'], shape: 'slash', speed: 3, spread: 12, decay: 0.04, size: 4 });
             this.vfxSpawn(tx, ty, { count: 6, colors: ['#ffffffcc', '#aaddffcc'], shape: 'spark', speed: 4, spread: 8, decay: 0.03, size: 2 });
-        } else if (cls === 'knight') {// Heavy impact
+        } else if (cls === 'knight') {
             this.vfxSpawn(tx, ty, { count: 15, colors: ['#ffcc44', '#ff8800', '#ffffff'], shape: 'circle', speed: 2, spread: 6, decay: 0.02, size: 4, gravity: 0.1 });
             this.vfxSpawn(tx, ty, { count: 3, colors: ['#ffffff88'], shape: 'ring', speed: 0, spread: 2, decay: 0.02, size: 12 });
-        } else if (cls === 'assassin') {// Quick multi-slash + afterimage
+        } else if (cls === 'assassin') {
             for (let i = 0; i < 3; i++)setTimeout(() => {
                 this.vfxSpawn(tx + (Math.random() - 0.5) * 10, ty + (Math.random() - 0.5) * 10, { count: 6, colors: ['#cc44ff', '#ff44cc', '#ffffff'], shape: 'slash', speed: 4, spread: 8, decay: 0.05, size: 3 })
             }, i * 60);
             this.vfxSpawn(ax, ay, { count: 8, colors: ['#cc44ff44', '#8844ff44'], shape: 'diamond', speed: 1.5, spread: 15, decay: 0.03, size: 5 });
-        } else if (cls === 'mage') {// Magic circle + burst
+        } else if (cls === 'mage') {
             this.vfxSpawn(tx, ty, { count: 4, colors: ['#4488ff55'], shape: 'ring', speed: 0, spread: 4, decay: 0.012, size: 16 });
             this.vfxSpawn(tx, ty, { count: 20, colors: ['#4488ff', '#88aaff', '#aaccff', '#ffffff'], shape: 'star', speed: 3, spread: 8, decay: 0.025, size: 3 });
             this.vfxSpawn(tx, ty, { count: 8, colors: ['#4488ff', '#ffffff'], shape: 'spark', speed: 5, spread: 4, decay: 0.02, size: 2 });
-        } else if (cls === 'archer') {// Arrow trail
+        } else if (cls === 'archer') {
             const dx = tx - ax, dy = ty - ay, dist = Math.sqrt(dx * dx + dy * dy);
             const steps = Math.max(5, Math.floor(dist / 12));
             for (let i = 0; i < steps; i++) {
-                const t = i / steps;
-                setTimeout(() => this.vfxSpawn(ax + dx * t, ay + dy * t, { count: 2, colors: ['#ffdd88', '#ffffff88'], shape: 'spark', speed: 1, spread: 3, decay: 0.06, size: 1.5 }), i * 20)
+                const tt = i / steps;
+                setTimeout(() => this.vfxSpawn(ax + dx * tt, ay + dy * tt, { count: 2, colors: ['#ffdd88', '#ffffff88'], shape: 'spark', speed: 1, spread: 3, decay: 0.06, size: 1.5 }), i * 20)
             }
             setTimeout(() => this.vfxSpawn(tx, ty, { count: 8, colors: ['#ffdd44', '#ff8844', '#ffffff'], shape: 'spark', speed: 3, spread: 6, decay: 0.03, size: 2 }), steps * 20);
-        } else if (cls === 'priest') {// Attack (rare but possible)
+        } else if (cls === 'priest') {
             this.vfxSpawn(tx, ty, { count: 10, colors: ['#ffffff', '#ffffaa'], shape: 'star', speed: 2, spread: 10, decay: 0.025, size: 3 });
         }
     },
 
-    // Heal VFX
     vfxHeal(target) {
         const tx = this.uSX(target.x, target.y) + UCX, ty = this.uSY(target.x, target.y) + UCY;
         this.vfxSpawn(tx, ty, {
@@ -115,7 +117,6 @@ Object.assign(G, {
         this.vfxSpawn(tx, ty, { count: 8, colors: ['#aaffcc', '#ffffff'], shape: 'star', speed: 1, spread: 10, decay: 0.02, size: 2.5, vy: -2, gravity: -0.01 });
     },
 
-    // Death dissolve particles
     vfxDeath(unit) {
         const tx = this.uSX(unit.x, unit.y) + UCX, ty = this.uSY(unit.x, unit.y) + UCY;
         const baseColor = unit.team === 'ally' ? ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] : ['#ef4444', '#f87171', '#fca5a5', '#fecaca'];
@@ -123,7 +124,6 @@ Object.assign(G, {
         this.vfxSpawn(tx, ty, { count: 10, colors: ['#ffffff44'], shape: 'circle', speed: .8, spread: 12, decay: 0.01, size: 2, vy: -1, gravity: -0.01 });
     },
 
-    // Buff apply glow
     vfxBuff(unit) {
         const el = document.getElementById('u-' + unit.id);
         if (el) { el.classList.add('buff-glow'); setTimeout(() => el.classList.remove('buff-glow'), 500) }
@@ -131,28 +131,44 @@ Object.assign(G, {
         this.vfxSpawn(tx, ty, { count: 8, colors: ['#22c55e', '#4ade80', '#ffffff'], shape: 'star', speed: 1.5, spread: 12, decay: 0.025, size: 2.5, vy: -1 });
     },
 
-    // Screen shake
     screenShake() {
         const w = document.getElementById('iso-world');
         w.classList.remove('screen-shake'); void w.offsetWidth; w.classList.add('screen-shake');
         setTimeout(() => w.classList.remove('screen-shake'), 300);
     },
 
-    // Turn transition flash
     turnFlash(type) {
         const el = document.getElementById('turn-flash');
         el.classList.remove('player-flash', 'enemy-flash'); void el.offsetWidth;
         el.classList.add(type + '-flash'); setTimeout(() => el.classList.remove(type + '-flash'), 600);
     },
 
-    // Anim helpers
+    _g2sx(gdx, gdy) { const d=gdx||0,r=gdy||0; switch(this.camDir){case 0:return d-r;case 1:return -r-d;case 2:return r-d;default:return r+d} },
+    faceDir(id, gdx, gdy) {
+        if (!gdx && !gdy) return;
+        const u = this.units.find(v => v.id === id);
+        if (u) { u._gdx = gdx; u._gdy = gdy }
+        this._applyFace(id);
+    },
+    _applyFace(id) {
+        const el = document.getElementById('u-' + id); if (!el) return;
+        const u = this.units.find(v => v.id === id); if (!u) return;
+        const sdx = this._g2sx(u._gdx, u._gdy);
+        if (!sdx) return;
+        const img = el.querySelector('.u-icon img');
+        if (img) img.style.transform = sdx < 0 ? 'scaleX(-1)' : '';
+    },
+    _mvU(u, nx, ny) { u._gdx = nx - u.x; u._gdy = ny - u.y; u.x = nx; u.y = ny; this.animU(u.id, nx, ny) },
     animU(id, x, y) {
         const el = document.getElementById('u-' + id); if (el) {
+            el.classList.add('moving'); setTimeout(() => el.classList.remove('moving'), 340);
+            const u = this.units.find(v => v.id === id);
+            if (u && (u._gdx || u._gdy)) this._applyFace(id);
             el.style.left = this.uSX(x, y) + 'px'; el.style.top = this.uSY(x, y) + 'px';
             const v = this.g2v(x, y); el.style.zIndex = 100 + v.vc + v.vr
         }
     },
     shakeU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('shaking'); setTimeout(() => el.classList.remove('shaking'), 300) } },
+    atkAnimU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 380) } },
     deathA(id) { const el = document.getElementById('u-' + id); if (el) el.classList.add('dying') },
-
 });

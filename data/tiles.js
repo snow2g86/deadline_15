@@ -4,8 +4,8 @@
 
 const TI = {
   plain:  { cost:1,       z:0, label:'',  pass:true,  tc:'#2a3a4e', lc:'#1e2d3d', rc:'#162232', buff:null },
-  forest: { cost:1.5,     z:0, label:'', pass:true,  tc:'#1a4430', lc:'#143620', rc:'#0e2a16', buff:{type:'buff',icon:''} },
-  hill:   { cost:2,       z:1, label:'',  pass:true,  tc:'#5a4828', lc:'#2a2010', rc:'#1e1808', buff:{type:'buff',icon:''} },
+  forest: { cost:1.5,     z:0, label:'', pass:true,  tc:'#1a4430', lc:'#143620', rc:'#0e2a16', buff:{type:'buff',icon:'🌲'} },
+  hill:   { cost:2,       z:1, label:'',  pass:true,  tc:'#5a4828', lc:'#2a2010', rc:'#1e1808', buff:{type:'buff',icon:'⛰️'} },
   rock:   { cost:Infinity,z:2, label:'',  pass:false, tc:'#2e2e3e', lc:'#161622', rc:'#0e0e18', buff:null },
   water:  { cost:Infinity,z:0, label:'',  pass:false, tc:'#162e55', lc:'#102240', rc:'#0c1a35', buff:null },
   wall:   { cost:Infinity,z:2, label:'',  pass:false, tc:'#504868', lc:'#261e38', rc:'#1a1428', buff:null },

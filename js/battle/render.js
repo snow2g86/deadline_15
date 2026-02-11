@@ -1,0 +1,230 @@
+// ═══════════════════════════════════════════
+//  battle/render.js — Terrain, Units, Minimap rendering
+// ═══════════════════════════════════════════
+
+Object.assign(G, {
+	rTer() {
+		const w = document.getElementById('iso-world');
+		const existingBgTiles = new Map(), existingHlTiles = new Map();
+		w.querySelectorAll('.iso-tile-bg').forEach(el => existingBgTiles.set(el.dataset.pos, el));
+		w.querySelectorAll('.iso-tile-hl').forEach(el => existingHlTiles.set(el.dataset.pos, el));
+		const tilesNeeded = new Set();
+		const W = TW * 2;
+		const _tc = this._tColors || {};
+
+		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+			const tp = this.ter[r][c], ti = TI[tp], clr = _tc[tp] || ti;
+			const pos = `${c},${r}`; tilesNeeded.add(pos);
+			let hl = '';
+			if (this.sel) {
+				if (this.mvT.some(m => m.x === c && m.y === r)) hl = 'move';
+				else if (this.atkT.some(a => a.x === c && a.y === r)) hl = 'attack';
+				else if (this.healT.some(h => h.x === c && h.y === r)) hl = 'heal';
+				if (this.sel.x === c && this.sel.y === r) hl = 'selected';
+			}
+			const h = ti.z * ZH, H = TH * 2 + h + 2;
+			const clip = h > 0
+				? `polygon(${TW}px 1px,${W-1}px ${TH}px,${W-1}px ${TH+h}px,${TW}px ${TH*2-1+h}px,1px ${TH+h}px,1px ${TH}px)`
+				: `polygon(${TW}px 1px,${W-1}px ${TH}px,${TW}px ${TH*2-1}px,1px ${TH}px)`;
+
+			let bgTile = existingBgTiles.get(pos);
+			if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; w.appendChild(bgTile) }
+			if (bgTile.innerHTML) bgTile.innerHTML = '';
+			if (h > 0) {
+				const cy = ((TH * 2 - 1) / H * 100).toFixed(1);
+				const ang = Math.round(Math.atan2(TW - 1, TH - 1) * 180 / Math.PI);
+				bgTile.style.background = `conic-gradient(from 0deg at 50% ${cy}%,${clr.tc} 0deg ${ang}deg,${clr.rc} ${ang}deg 180deg,${clr.lc} 180deg ${360-ang}deg,${clr.tc} ${360-ang}deg 360deg)`;
+			} else if (tp === 'forest') {
+				const fb = clr.tc, fl = clr.lc, fd = clr.rc;
+				bgTile.style.background = `radial-gradient(ellipse 14px 10px at 25% 25%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 16px 11px at 70% 20%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 18px 12px at 50% 50%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 13px 9px at 20% 70%,${fl},${fd} 60%,transparent 100%),radial-gradient(ellipse 15px 10px at 78% 65%,${fb},${fl} 60%,transparent 100%),radial-gradient(ellipse 10px 7px at 45% 85%,${fl},${fd} 60%,transparent 100%),${fd}`;
+			} else if (tp === 'rock') {
+				bgTile.style.background = `linear-gradient(135deg,${clr.tc} 25%,${clr.rc} 45%,${clr.tc} 55%,${clr.rc} 75%,${clr.tc})`;
+			} else if (tp === 'water') {
+				const wA = (this.cStage && this.cStage.mapType === 'volcano') ? 'rgba(140,40,20,.12)' : 'rgba(40,90,140,.12)';
+				bgTile.style.background = `repeating-linear-gradient(0deg,transparent,transparent 5px,${wA} 5px,${wA} 6px),${clr.tc}`;
+			} else { bgTile.style.background = clr.tc; }
+			bgTile.style.clipPath = clip;
+
+			let hlTile = existingHlTiles.get(pos);
+			if (!hlTile) {
+				hlTile = document.createElement('div'); hlTile.className = 'iso-tile iso-tile-hl'; hlTile.dataset.pos = pos; hlTile.style.cursor = 'pointer';
+				hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && u.team === 'ally' && !G.sel) { G.selU(u); return } if (u && u.team === 'ally' && G.sel && u.id === G.sel.id) { G.clrSel(); return } G.cellCk(c, r) });
+				w.appendChild(hlTile);
+			}
+			if (hlTile.innerHTML) hlTile.innerHTML = '';
+			hlTile.style.clipPath = clip;
+
+			const sx = this.tSX(c, r), sy = this.tSY(c, r, ti.z), zix = this.g2v(c, r);
+			bgTile.style.left = sx + 'px'; bgTile.style.top = sy + 'px'; bgTile.style.width = W + 'px'; bgTile.style.height = H + 'px'; bgTile.style.zIndex = zix.vc + zix.vr;
+			hlTile.style.left = sx + 'px'; hlTile.style.top = sy + 'px'; hlTile.style.width = W + 'px'; hlTile.style.height = H + 'px'; hlTile.style.zIndex = zix.vc + zix.vr + 1;
+
+			hlTile.classList.remove('hl-move', 'hl-attack', 'hl-heal', 'hl-selected');
+			if (hl === 'move') hlTile.classList.add('hl-move');
+			else if (hl === 'attack') hlTile.classList.add('hl-attack');
+			else if (hl === 'heal') hlTile.classList.add('hl-heal');
+			else if (hl === 'selected') hlTile.classList.add('hl-selected');
+		}
+
+		existingBgTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
+		existingHlTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove() });
+	},
+
+	rUnits() {
+		const w = document.getElementById('iso-world'), al = this.units.filter(u => u.hp > 0), ids = new Set();
+		const resClr = u => u.resType === 'mana' ? '#4488ff' : u.resType === 'energy' ? '#f0c040' : '#ff6644';
+		al.forEach(u => {
+			ids.add('u-' + u.id); let el = document.getElementById('u-' + u.id);
+			if (!el) {
+				el = document.createElement('div'); el.id = 'u-' + u.id; el.className = `unit-sprite ${u.team} spawning`;
+				if (u.team === 'ally') this.allyPos[u.id] = {x: u.x, y: u.y};
+				setTimeout(() => el.classList.remove('spawning'), 450);
+				el.innerHTML = `<div class="u-icon">${charSprite(u.cls, 36, u.gender)}</div><div class="u-shadow"></div><div class="hp-bg"><div class="hp-fill"></div></div><div class="mp-bg"><div class="mp-fill"></div></div>`;
+				w.appendChild(el);
+				if (u.team === 'enemy') { u._gdx = 0; u._gdy = 1; this._applyFace(u.id) }
+			}
+			el.style.width = UW + 'px'; el.style.height = UH + 'px'; el.style.left = this.uSX(u.x, u.y) + 'px'; el.style.top = this.uSY(u.x, u.y) + 'px';
+			const v = this.g2v(u.x, u.y); el.style.zIndex = 100 + v.vc + v.vr;
+			el.querySelector('.hp-fill').style.width = `${(u.hp / u.mhp) * 100}%`;
+			const mpFill = el.querySelector('.mp-fill');
+			mpFill.style.width = `${u.maxRes ? (u.res / u.maxRes) * 100 : 0}%`;
+			mpFill.style.background = resClr(u);
+			const isSel = this.sel && this.sel.id === u.id;
+			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
+			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0 || u.frozen > 0);
+			let stunLabel = el.querySelector('.stun-label'); if (u.stunned > 0 || u.frozen > 0) { if (!stunLabel) { stunLabel = document.createElement('div'); stunLabel.className = 'stun-label'; el.appendChild(stunLabel) } stunLabel.textContent = u.frozen > 0 ? '❄️' + u.frozen : u.stunned } else if (stunLabel) stunLabel.remove();
+			const fx = [];
+			const tile = this.ter[u.y] ? this.ter[u.y][u.x] : null;
+			if (tile && TI[tile] && TI[tile].buff) fx.push({ icon: TI[tile].buff.icon, cls: TI[tile].buff.type });
+			if (u.furyBuff > 0) fx.push({ icon: '💢', cls: 'buff' });
+			if (u.defBuff > 0) fx.push({ icon: '🛡️', cls: 'buff' });
+			if (u.disarmed > 0) fx.push({ icon: '🤛', cls: 'debuff' });
+			if (u.channeling) fx.push({ icon: u.channeling === 'shaman_curse' ? '☠️' : '🔺', cls: u.channeling === 'shaman_curse' ? 'debuff' : 'buff' });
+			let badges = el.querySelector('.u-badges');
+			if (fx.length) {
+				if (!badges) { badges = document.createElement('div'); badges.className = 'u-badges'; el.appendChild(badges) }
+				badges.innerHTML = fx.map(e => `<span class="u-badge ${e.cls}">${e.icon}</span>`).join('');
+			} else if (badges) badges.remove();
+			if (u.isSummon && u.summonTurns !== undefined) {
+				let turnLabel = el.querySelector('.summon-turns');
+				if (!turnLabel) {
+					turnLabel = document.createElement('div');
+					turnLabel.className = 'summon-turns';
+					turnLabel.style.cssText = 'position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid #fff;z-index:10;';
+					el.appendChild(turnLabel)
+				}
+				turnLabel.textContent = u.summonTurns
+			} else {
+				const turnLabel = el.querySelector('.summon-turns');
+				if (turnLabel) turnLabel.remove()
+			}
+		});
+		[...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove() });
+		this.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
+			this.allyPos[u.id] = {x: 99, y: 99};
+		});
+		this.rMM(); this.rNav()
+	},
+
+	floatT(x, y, t, tp) {
+		const w = document.getElementById('iso-world'), el = document.createElement('div');
+		el.className = `float-text ${tp}`; el.textContent = t; el.style.left = (this.uSX(x, y) + UCX / 2) + 'px'; el.style.top = (this.uSY(x, y) - 8) + 'px'; el.style.zIndex = 500;
+		w.appendChild(el); setTimeout(() => el.remove(), 950)
+	},
+	showAM(u) {
+		const m = document.getElementById('action-menu');
+		m.style.left = (this.uSX(u.x, u.y) + UW + 2) + 'px';
+		m.style.top = this.uSY(u.x, u.y) + 'px'; m.style.zIndex = 600;
+		if (u.channeling) {
+			this.hideAllMenuButtons();
+			document.getElementById('btn-cancel').style.display = 'none';
+			const btn = document.createElement('button'); btn.className = 'am-skill';
+			btn.textContent = t('messages.unlock');
+			btn.onclick = () => G.cancelChannel();
+			const btnDash = document.getElementById('btn-dash');
+			m.insertBefore(btn, btnDash);
+			btnDash.style.display = 'none';
+			m.classList.add('show'); return
+		}
+		if (this.skillMenuOpen) { this.showSkillSubMenu(u); return }
+		this.showMainMenu(u)
+	},
+	showMainMenu(u) {
+		const m = document.getElementById('action-menu');
+		m.querySelectorAll('.am-skill').forEach(e => e.remove());
+		document.getElementById('btn-move').style.display = (!u.hm && !u.mo) ? '' : 'none';
+		const btnAttack = document.getElementById('btn-attack');
+		if (u.role === 'healer') {
+			btnAttack.textContent = t('battle.heal');
+			btnAttack.style.display = (!u.ha && this.healT.length > 0) ? '' : 'none'
+		}
+		else {
+			btnAttack.textContent = t('battle.attack');
+			btnAttack.style.display = (!u.ha && this.atkT.length > 0) ? '' : 'none'
+		}
+		const skills = getUnitSkills(u);
+		const hasUsableSkill = !u.ha && skills.some(sk => this.canUseSkill(u, sk));
+		document.getElementById('btn-skill').style.display = hasUsableSkill ? '' : 'none';
+		document.getElementById('btn-item').style.display = 'none';
+		const btnDash = document.getElementById('btn-dash');
+		btnDash.textContent = t('battle.wait');
+		btnDash.style.display = '';
+		const btnCancel = document.getElementById('btn-cancel');
+		btnCancel.textContent = t('battle.cancel');
+		btnCancel.style.display = this.preMv ? '' : 'none';
+		btnCancel.onclick = () => G.actCancel();
+		m.classList.add('show')
+	},
+	showSkillSubMenu(u) {
+		const m = document.getElementById('action-menu');
+		this.hideAllMenuButtons();
+		m.querySelectorAll('.am-skill').forEach(e => e.remove());
+		const skills = getUnitSkills(u);
+		const btnDash = document.getElementById('btn-dash');
+		skills.forEach((sk, idx) => {
+			if (sk.passive) return;
+			const btn = document.createElement('button'); btn.className = 'am-skill';
+			btn.textContent = sk.icon + ' ' + t('skills.' + sk.id);
+			let enabled = this.canUseSkill(u, sk);
+			btn.disabled = !enabled;
+			btn.onclick = () => G.actSkill(idx);
+			m.insertBefore(btn, btnDash)
+		});
+		btnDash.style.display = 'none';
+		const btnCancel = document.getElementById('btn-cancel');
+		btnCancel.textContent = '↩ ' + t('battle.cancel');
+		btnCancel.style.display = '';
+		btnCancel.onclick = () => G.hideSkillMenu();
+		m.classList.add('show')
+	},
+	hideAllMenuButtons() {
+		['btn-move', 'btn-attack', 'btn-skill', 'btn-item', 'btn-dash', 'btn-cancel'].forEach(id => {
+			document.getElementById(id).style.display = 'none'
+		})
+	},
+	canUseSkill(u, sk) {
+		if (sk.passive) return false;
+		let enabled = u.res >= sk.cost && !u.ha;
+		if (sk.id === 'assassin_assassinate') {
+			const overlapping = isStealthed(u) && this.units.some(v =>
+				v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
+			enabled = enabled && overlapping
+		}
+		if (sk.id.startsWith('summoner_summon_')) {
+			const maxSummons = 1;
+			const currentSummons = this.units.filter(s => s.isSummon && s.summonerId === u.id);
+			if (currentSummons.length >= maxSummons) { enabled = false }
+		}
+		if (sk.id === 'archer_snipe') {
+			const sMin = sk.snipeMin || 5, sMax = sk.snipeMax || 10;
+			const hasTarget = this.units.some(v => v.team === 'enemy' && v.hp > 0 && mh(u.x, u.y, v.x, v.y) >= sMin && mh(u.x, u.y, v.x, v.y) <= sMax);
+			if (!hasTarget) enabled = false;
+		}
+		if (sk.id === 'sapper_excavate') {
+			const er = sk.excavateRange || 1;
+			const hasRock = G.ter.some((row, y) => row.some((tile, x) => tile === 'rock' && mh(u.x, u.y, x, y) <= er && mh(u.x, u.y, x, y) > 0));
+			if (!hasRock) enabled = false;
+		}
+		return enabled
+	},
+	hideAM() { document.getElementById('action-menu').classList.remove('show') },
+});

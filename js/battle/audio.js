@@ -1,5 +1,7 @@
+// ═══════════════════════════════════════════
+//  battle/audio.js — SFX & BGM (procedural)
+// ═══════════════════════════════════════════
 Object.assign(G, {
-  // ═══ SFX System ═══
   _actx:null,
   sfxCtx(){if(!this._actx)this._actx=new(window.AudioContext||window.webkitAudioContext)();
     if(this._actx.state==='suspended')this._actx.resume();
@@ -25,7 +27,6 @@ Object.assign(G, {
     g.connect(this.sfxDest());g.gain.exponentialRampToValueAtTime(0.001,start+dur);
     src.start(start);src.stop(start+dur)},
 
-  // UI sounds
   sfxSelect(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'sine',880,t,0.06,0.12);this.sfxOsc(c,'sine',1320,t+0.04,0.08,0.08)},
   sfxMove(){const c=this.sfxCtx(),t=c.currentTime;
@@ -35,7 +36,6 @@ Object.assign(G, {
   sfxWait(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'sine',440,t,0.1,0.08);this.sfxOsc(c,'sine',330,t+0.06,0.12,0.06)},
 
-  // Attack sounds by class
   sfxAtkWarrior(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxNoise(c,t,0.12,0.25,{type:'bandpass',freq:2000,Q:2});
     this.sfxOsc(c,'sawtooth',200,t,0.08,0.12);
@@ -71,12 +71,10 @@ Object.assign(G, {
       mage:'sfxAtkMage',archer:'sfxAtkArcher',priest:'sfxAtkPriest'};
     if(m[cls])this[m[cls]]()},
 
-  // Heal
   sfxHeal(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'sine',523,t,0.15,0.1);this.sfxOsc(c,'sine',659,t+0.08,0.15,0.08);
     this.sfxOsc(c,'sine',784,t+0.16,0.2,0.07);this.sfxOsc(c,'triangle',1047,t+0.24,0.25,0.05)},
 
-  // Death dissolve
   sfxDeath(){const c=this.sfxCtx(),t=c.currentTime;
     const o=c.createOscillator(),g=this.sfxGain(c,0.12,t);
     o.type='sine';o.frequency.setValueAtTime(500,t);o.frequency.exponentialRampToValueAtTime(80,t+0.5);
@@ -84,19 +82,16 @@ Object.assign(G, {
     g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
     this.sfxNoise(c,t+0.1,0.35,0.06,{type:'lowpass',freq:800})},
 
-  // Turn transition
   sfxTurnPlayer(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'sine',523,t,0.1,0.1);this.sfxOsc(c,'sine',659,t+0.08,0.1,0.09);
     this.sfxOsc(c,'sine',784,t+0.16,0.15,0.08)},
   sfxTurnEnemy(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'sawtooth',220,t,0.15,0.08);this.sfxOsc(c,'sawtooth',165,t+0.1,0.2,0.07)},
 
-  // Wave warning
   sfxWave(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxOsc(c,'square',440,t,0.1,0.07);this.sfxOsc(c,'square',440,t+0.15,0.1,0.07);
     this.sfxOsc(c,'square',660,t+0.3,0.15,0.09)},
 
-  // Victory / Defeat
   sfxVictory(){const c=this.sfxCtx(),t=c.currentTime;
     const notes=[523,659,784,1047];
     notes.forEach((f,i)=>{this.sfxOsc(c,'sine',f,t+i*0.12,0.25,0.1);this.sfxOsc(c,'triangle',f,t+i*0.12,0.25,0.04)})},
@@ -104,8 +99,6 @@ Object.assign(G, {
     const notes=[392,349,330,262];
     notes.forEach((f,i)=>{this.sfxOsc(c,'sine',f,t+i*0.2,0.35,0.1);this.sfxOsc(c,'sawtooth',f/2,t+i*0.2,0.35,0.03)})},
 
-
-  // === BGM - Tense Battle (One-shot Sequencer) ===
   _bgm:null,
   bgmStart(){
     this.bgmStop();
@@ -119,7 +112,6 @@ Object.assign(G, {
     comp.connect(master);
 
     const BPM=128, eighth=60/BPM/2;
-    // Dm->Bb->Gm->A
     const chords=[[147,175,220],[117,147,175],[98,117,147],[110,139,165]];
     const bassN=[73.5,58.5,49,55];
     const riffs=[
@@ -160,23 +152,19 @@ Object.assign(G, {
         const ci=Math.floor((beatIdx/8)%4);
         const b=beatIdx%8;
 
-        // PAD: one-shot chord tones on bar start (sustain full bar)
         if(b===0){
           const ch=chords[ci];
           note('sawtooth',ch[0],t,eighth*7.8,0.06,-3);
           note('triangle',ch[1],t,eighth*7.8,0.05,0);
           note('triangle',ch[2],t,eighth*7.8,0.05,3);
         }
-        // BASS: one-shot per 8th, octave alternation
         const bF=b%2===0?bassN[ci]:bassN[ci]*2;
         note('sawtooth',bF,t,eighth*0.8,b%2===0?0.18:0.12,0);
 
-        // MELODY: one-shot riff per 8th
         const mF=riffs[ci][b];
         note('square',mF,t,eighth*0.7,b%2===0?0.08:0.04,0);
         note('triangle',mF*1.002,t,eighth*0.7,b%2===0?0.04:0.02,0);
 
-        // KICK: beats 0, 4
         if(b===0||b===4){
           const ko=ctx.createOscillator(),kg=ctx.createGain();
           ko.type='sine';ko.frequency.setValueAtTime(100,t);
@@ -184,12 +172,10 @@ Object.assign(G, {
           kg.gain.setValueAtTime(0.25,t);kg.gain.exponentialRampToValueAtTime(0.001,t+0.12);
           ko.connect(kg);kg.connect(comp);ko.start(t);ko.stop(t+0.13);
         }
-        // SNARE: beats 2, 6
         if(b===2||b===6){
           noise(t,0.08,0.15,2000);
           note('triangle',180,t,0.06,0.06,0);
         }
-        // HI-HAT: every 8th
         noise(t,0.03,b%2===0?0.05:0.025,9000);
 
         beatIdx++;
@@ -208,9 +194,7 @@ Object.assign(G, {
     this._bgm=null;
   },
 
-  // Kill confirm (screen shake moment)
   sfxKill(){const c=this.sfxCtx(),t=c.currentTime;
     this.sfxNoise(c,t,0.2,0.3,{type:'lowpass',freq:500,Q:2});
     this.sfxOsc(c,'sine',100,t,0.2,0.15);this.sfxOsc(c,'sine',60,t+0.05,0.18,0.1)},
-
 });
