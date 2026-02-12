@@ -1,54 +1,8 @@
 // party-select.js — 파티 편성 + 장비 관리 통합 페이지
-// G/ROSTER/CD 의존 없이 JAB + localStorage 직접 조작
+// 공통 모듈에서 공유 함수 로드
 
-// ── 상수 ──────────────────────────────────
-var MIN_P = 5, MAX_P = 5;
-var MAX_LEVEL = 15;
-var ROSTER_KEY = 'game_roster';
-var PARTY_KEY = 'game_party';
-var NAV_KEY = 'game_nav';
-var SAVE_KEY = 'game_save';
-function clsIcon(cls, size) {
-  var d = JAB[cls]; if (!d) return '';
-  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
-}
-
-function expForLevel(lv) { return 80 + 20 * lv + 5 * lv * lv; }
-
-// 역할 매핑 (JAB에 role 필드가 없으므로 직접 정의)
-var ROLE_MAP = {
-  warrior: 'melee', knight: 'melee', assassin: 'melee',
-  novice: 'melee', brawler: 'melee', lancer: 'melee', sapper: 'melee',
-  mage: 'ranged', archer: 'ranged', summoner: 'ranged', shaman: 'ranged',
-  priest: 'healer'
-};
-
+// 역할 i18n 매핑
 var ROLE_I18N = { melee: 'roles.melee', ranged: 'roles.ranged', healer: 'roles.healer' };
-
-// ── localStorage 조작 ────────────────────
-function getRoster() {
-  try {
-    var raw = localStorage.getItem(ROSTER_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return { chars: [], nextId: 1 };
-}
-
-function saveRoster(data) {
-  try { localStorage.setItem(ROSTER_KEY, JSON.stringify(data)); } catch (_) {}
-}
-
-function loadParty() {
-  try {
-    var r = localStorage.getItem(PARTY_KEY);
-    if (r) return JSON.parse(r);
-  } catch (_) {}
-  return [];
-}
-
-function saveParty(party) {
-  try { localStorage.setItem(PARTY_KEY, JSON.stringify(party)); } catch (_) {}
-}
 
 // ── 전역 포션/공성 아이템 로드/저장 ──────────────
 function loadGlobalBattleItems() {
@@ -64,48 +18,6 @@ function saveGlobalBattleItems() {
     var data = { potions: _globalBattlePotions, sieges: _globalSiegeItems };
     localStorage.setItem('game_battle_items', JSON.stringify(data));
   } catch (_) {}
-}
-
-function loadNav() {
-  try { return JSON.parse(localStorage.getItem(NAV_KEY)); } catch (_) { return null; }
-}
-
-function saveNav(data) {
-  try { localStorage.setItem(NAV_KEY, JSON.stringify(data)); } catch (_) {}
-}
-
-function loadGold() {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (d) return d.gold || 0;
-  } catch (_) {}
-  return 0;
-}
-
-function saveGold(gold) {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
-    d.gold = gold;
-    localStorage.setItem(SAVE_KEY, JSON.stringify(d));
-  } catch (_) {}
-}
-
-function getChar(uid) {
-  var roster = getRoster();
-  return roster.chars.find(function(c) { return c.uid === uid; });
-}
-
-function potGrade(ch) {
-  var g = JAB[ch.cls].growth;
-  var scores = ['hp', 'atk', 'def'].map(function(k) {
-    var mn = g[k][0], mx = g[k][1], rng = mx - mn;
-    return rng > 0 ? (ch.pot[k] - mn) / rng : 0.5;
-  });
-  var avg = scores.reduce(function(a, b) { return a + b; }, 0) / scores.length;
-  if (avg >= 0.85) return 'S';
-  if (avg >= 0.65) return 'A';
-  if (avg >= 0.35) return 'B';
-  return 'C';
 }
 
 // ── 페이지 상태 ──────────────────────────

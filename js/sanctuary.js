@@ -1,52 +1,15 @@
 // sanctuary.js — 성소 페이지 전용 스크립트
-// G/ROSTER/CD 의존 없이 JAB + localStorage 직접 조작
+// 공통 모듈에서 공유 함수 로드
 
-var SAVE_KEY = 'game_save';
-var ROSTER_KEY = 'game_roster';
-function clsIcon(cls, size) {
-  var d = JAB[cls]; if (!d) return '';
-  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
-}
-var PARTY_KEY = 'game_party';
-var INVENTORY_KEY = 'game_inventory';
 var MAX_SKILL_LV = 10;
 var _currentTab = 'resurrect';
 
 // ── 골드 관리 ─────────────────────────────
 var _gold = 0;
 
-function loadGold() {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (d) return d.gold || 0;
-  } catch (_) {}
-  return 0;
-}
-
-function saveGold(gold) {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
-    d.gold = gold;
-    localStorage.setItem(SAVE_KEY, JSON.stringify(d));
-  } catch (_) {}
-}
-
 function updateGoldUI() {
   var el = document.getElementById('sanc-gold-val');
   if (el) el.textContent = _gold.toLocaleString();
-}
-
-// ── 로스터 조작 ──────────────────────────
-function getRoster() {
-  try {
-    var raw = localStorage.getItem(ROSTER_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return { chars: [], nextId: 1 };
-}
-
-function saveRoster(data) {
-  try { localStorage.setItem(ROSTER_KEY, JSON.stringify(data)); } catch (_) {}
 }
 
 // ── 파티 체크 ────────────────────────────
@@ -63,65 +26,8 @@ function isInParty(uid) {
   return party.indexOf(uid) !== -1;
 }
 
-// ── 인벤토리 관리 ─────────────────────────
-function loadInventory() {
-  try {
-    var raw = localStorage.getItem(INVENTORY_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return [];
-}
-
-function saveInventory(inv) {
-  try { localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv)); } catch (_) {}
-}
-
 // ── 등급 유틸 ────────────────────────────
-var GRADE_ORDER = ['C', 'B', 'A', 'S'];
-var GRADE_COLORS = { S: '#f0c040', A: '#60a5fa', B: '#4ade80', C: '#9ca3af' };
 var REQUIRED_POINTS = 4;
-
-function potGrade(ch) {
-  var g = JAB[ch.cls].growth;
-  var scores = ['hp', 'atk', 'def'].map(function(k) {
-    var mn = g[k][0], mx = g[k][1], rng = mx - mn;
-    return rng > 0 ? (ch.pot[k] - mn) / rng : 0.5;
-  });
-  var avg = scores.reduce(function(a, b) { return a + b; }, 0) / scores.length;
-  if (avg >= 0.85) return 'S';
-  if (avg >= 0.65) return 'A';
-  if (avg >= 0.35) return 'B';
-  return 'C';
-}
-
-function _rollPotential(cls) {
-  var g = JAB[cls].growth;
-  function roll(mm) { return +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1); }
-  return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) };
-}
-
-function _rollPotentialWithGrade(cls, targetGrade) {
-  var g = JAB[cls].growth;
-  var targetMin = targetGrade === 'S' ? 0.85 : targetGrade === 'A' ? 0.65 : targetGrade === 'B' ? 0.35 : 0;
-  var targetMax = targetGrade === 'S' ? 1.0 : targetGrade === 'A' ? 0.85 : targetGrade === 'B' ? 0.65 : 0.35;
-
-  for (var attempt = 0; attempt < 100; attempt++) {
-    var pot = _rollPotential(cls);
-    var scores = ['hp', 'atk', 'def'].map(function(k) {
-      var mn = g[k][0], mx = g[k][1], rng = mx - mn;
-      return rng > 0 ? (pot[k] - mn) / rng : 0.5;
-    });
-    var avg = scores.reduce(function(a, b) { return a + b; }, 0) / scores.length;
-    if (avg >= targetMin && avg < targetMax) return pot;
-  }
-
-  var mid = (targetMin + targetMax) / 2;
-  return {
-    hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * mid).toFixed(1),
-    atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * mid).toFixed(1),
-    def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1)
-  };
-}
 
 function nextGrade(grade) {
   var i = GRADE_ORDER.indexOf(grade);
@@ -142,11 +48,6 @@ function sacrificePoints(sacGrade, targetGrade) {
   return 0; // 2단계+ 아래 — 불가
 }
 
-// 스킬 레벨 헬퍼
-function getCharSkillLv(ch, skillId) {
-  if (ch.skillLv && ch.skillLv[skillId]) return ch.skillLv[skillId];
-  return 1;
-}
 
 function getCharSkills(cls) {
   var sk = SKILLS[cls];

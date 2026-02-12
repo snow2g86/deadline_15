@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-12T09:03:14.951Z",
+  "lastUpdated": "2026-02-12T10:30:41.911Z",
   "activeFeatures": [
     "skill-implementation",
     "js",
@@ -9,7 +9,11 @@
     "language",
     "battle",
     "skills",
-    "deadline_15"
+    "deadline_15",
+    "en",
+    "ko",
+    "es",
+    "tmp"
   ],
   "primaryFeature": "skill-implementation",
   "features": {
@@ -47,9 +51,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-05T06:16:20.882Z",
-        "lastUpdated": "2026-02-12T09:01:44.385Z"
+        "lastUpdated": "2026-02-12T10:30:41.911Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/party-select.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/academy.js"
     },
     "scripts": {
       "phase": "do",
@@ -86,7 +90,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-09T17:31:51.728Z",
-        "lastUpdated": "2026-02-12T09:01:10.973Z"
+        "lastUpdated": "2026-02-12T09:28:35.471Z"
       },
       "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es.js"
     },
@@ -125,9 +129,61 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T15:53:50.120Z",
-        "lastUpdated": "2026-02-11T17:55:45.377Z"
+        "lastUpdated": "2026-02-12T10:01:51.727Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/generate_status_icons_v2.py"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/_verify_split.js"
+    },
+    "en": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-12T09:42:23.623Z",
+        "lastUpdated": "2026-02-12T10:04:44.953Z"
+      },
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/en/stages.js"
+    },
+    "ko": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-12T09:42:50.218Z",
+        "lastUpdated": "2026-02-12T10:03:36.956Z"
+      },
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/ko/stages.js"
+    },
+    "es": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-12T09:43:02.076Z",
+        "lastUpdated": "2026-02-12T10:03:49.751Z"
+      },
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es/stages.js"
+    },
+    "tmp": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-12T10:01:26.818Z",
+        "lastUpdated": "2026-02-12T10:01:26.818Z"
+      },
+      "lastFile": "/tmp/verify_split.js"
     }
   },
   "pipeline": {
@@ -138,7 +194,7 @@
   "session": {
     "startedAt": "2026-02-05T06:05:50.525Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-12T09:03:14.951Z"
+    "lastActivity": "2026-02-12T10:30:41.911Z"
   },
   "history": [
     {
@@ -11256,6 +11312,396 @@
     {
       "timestamp": "2026-02-12T09:03:14.951Z",
       "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:10:50.088Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:11:25.070Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:17.695Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:19.195Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:20.525Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:21.570Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:22.858Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:24.343Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:18:25.495Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:24:22.839Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:24:23.900Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:28:03.703Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:28:20.671Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:28:35.471Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:42:23.623Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:42:50.218Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:43:02.076Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:43:13.104Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:43:46.002Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:43:58.737Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:44:31.629Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:44:43.023Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:23.748Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:32.397Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:33.404Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:36.144Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:40.216Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:45.656Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:45:49.137Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:46:05.035Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:46:34.923Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:46:42.842Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:46:46.454Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:47:19.008Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:47:24.346Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:47:41.294Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:47:41.366Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:48:13.981Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:48:28.751Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:48:58.061Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T09:49:12.081Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:00:32.140Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:01:26.818Z",
+      "feature": "tmp",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:01:45.116Z",
+      "feature": "deadline_15",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:01:51.727Z",
+      "feature": "deadline_15",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:03:36.956Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:03:49.751Z",
+      "feature": "es",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:04:01.805Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:04:40.638Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:04:44.953Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:27:28.672Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:27:36.251Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:27:51.372Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:27:58.763Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:28:23.048Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:28:53.768Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:29:04.527Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:29:14.484Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:29:16.490Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:29:30.584Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:30:00.463Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:30:14.355Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:30:19.768Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:30:20.810Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T10:30:41.911Z",
+      "feature": "js",
       "phase": "do",
       "action": "updated"
     }

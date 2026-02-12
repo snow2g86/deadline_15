@@ -1,0 +1,65 @@
+window._LANG_en = window._LANG_en || {};
+Object.assign(window._LANG_en, {
+    "common": {
+        "game_title": "DEADLINE 15",
+        "loading": "Loading...",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "close": "Close",
+        "gold": "G",
+        "level": "Level",
+        "exp": "Experience",
+        "hp": "HP",
+        "atk": "Attack",
+        "potential": "Potential",
+        "max": "MAX",
+        "def": "Defense",
+        "turn": "Turn",
+        "wave": "Wave",
+        "select_unit": "Select a unit",
+        "move": "Move",
+        "range": "Range",
+        "type": "Type"
+    },
+    "nav": {
+        "stage": "Stage",
+        "party": "Party",
+        "sanctuary": "Sanctuary",
+        "academy": "Academy",
+        "equip": "Equip",
+        "enhance": "Enhance",
+        "shop": "Shop",
+        "compendium": "Compendium",
+        "settings": "Settings",
+        "lobby": "Lobby"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language",
+        "bgm": "Background Music",
+        "sfx": "Sound Effects",
+        "volume": "Volume",
+        "game_speed": "Game Speed",
+        "reset_all": "Reset All Data",
+        "licenses": "Open Source Licenses",
+        "language_ko": "\ud55c\uad6d\uc5b4 (Korean)",
+        "language_en": "English",
+        "language_es": "Espa\u00f1ol"
+    },
+    "compendium": {
+        "title_class": "\ud83d\udcd6 Class Compendium",
+        "title_stage": "\ud83d\udcd6 Stage Compendium",
+        "title_item": "\ud83d\udcd6 Item Compendium",
+        "subtitle_class": "Detailed information on 12 classes \u00b7 Defense RPG",
+        "subtitle_stage": "Difficulty analysis of 10 stages \u00b7 Defense RPG",
+        "subtitle_item": "Efficiency analysis of experience potions \u00b7 Defense RPG",
+        "tab_card_view": "\ud83c\udfb4 Card View",
+        "tab_resource_system": "\u26a1 Resource System",
+        "tab_analysis": "\ud83d\udcca Difficulty Analysis",
+        "tab_efficiency": "\ud83d\udc8e Efficiency Analysis",
+        "nav_lobby": "\u2190 Lobby",
+        "nav_stage": "\ud83d\uddfa Stage",
+        "nav_item": "\ud83e\uddea Item",
+        "nav_class": "\ud83c\udfb4 Class"
+    }
+});

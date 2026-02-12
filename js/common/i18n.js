@@ -35,7 +35,14 @@ function _loadScript(src) {
 const _I18N_CACHE_KEY = 'game_i18n_cache';
 const _I18N_LANG_KEY = 'game_i18n_lang';
 const _I18N_VER_KEY = 'game_i18n_ver';
-const _I18N_VERSION = 8; // bump when language data changes
+const _I18N_VERSION = 9; // bump when language data changes
+const _LANG_PARTS = ['common','battle','stages','classes','skills','items','ui','character'];
+
+// 다중 파일 병렬 로드
+async function _loadLang(lang) {
+  await Promise.all(_LANG_PARTS.map(p => _loadScript(`./data/language/${lang}/${p}.js`)));
+  return window['_LANG_' + lang];
+}
 
 // 언어 감지 및 데이터 로드
 async function loadI18n() {
@@ -61,19 +68,17 @@ async function loadI18n() {
     } catch (_) {}
   }
 
-  // 3. 캐시 미스 → script 태그로 로드 후 캐싱
+  // 3. 캐시 미스 → 8개 파일 병렬 로드 후 캐싱
   if (!_i18nData) {
     try {
-      await _loadScript(`./data/language/${lang}.js`);
-      _i18nData = window['_LANG_' + lang];
+      _i18nData = await _loadLang(lang);
       localStorage.setItem(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
       localStorage.setItem(_I18N_LANG_KEY, lang);
       localStorage.setItem(_I18N_VER_KEY, _I18N_VERSION);
     } catch (e) {
       console.warn('[i18n] load failed, fallback ko', e);
       try {
-        await _loadScript('./data/language/ko.js');
-        _i18nData = window._LANG_ko;
+        _i18nData = await _loadLang('ko');
         localStorage.setItem(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
         localStorage.setItem(_I18N_LANG_KEY, 'ko');
         localStorage.setItem(_I18N_VER_KEY, _I18N_VERSION);

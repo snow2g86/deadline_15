@@ -212,7 +212,7 @@ body:not([data-page="battle"]) {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  position: relative;
   background: linear-gradient(180deg, #151d30, var(--panel));
   border-bottom: 1px solid rgba(255, 255, 255, .08);
   box-shadow: 0 1px 8px rgba(0, 0, 0, .3);
@@ -220,6 +220,8 @@ body:not([data-page="battle"]) {
 }
 
 #nav-back {
+  position: absolute;
+  left: 12px;
   width: 36px;
   height: 36px;
   background: none;
@@ -248,16 +250,21 @@ body:not([data-page="battle"]) {
 }
 
 #nav-title {
-  flex: 1;
+  width: 100%;
   text-align: center;
   font-family: 'Cinzel', serif;
   font-weight: 900;
   font-size: 16px;
   color: var(--gold);
-  letter-spacing: 2px
+  letter-spacing: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
 }
 
 #nav-settings {
+  position: absolute;
+  right: 12px;
   width: 36px;
   height: 36px;
   background: none;
@@ -598,10 +605,11 @@ body[data-page="skill-balance-report"] #top-nav {
   left: 0;
   right: 0;
   height: 60px;
-  padding: 0 16px;
   z-index: 1000;
   background: var(--panel);
   border-bottom: 1px solid rgba(255, 255, 255, .08);
+  display: flex;
+  align-items: center;
 }
 
 body[data-page^="compendium"] main,
@@ -621,8 +629,19 @@ body[data-page="skill-balance-report"] main {
   }
 
   #top-nav {
-    height: 56px;
-    padding: 0 16px
+    height: 56px
+  }
+
+  #nav-back {
+    left: 16px;
+    width: 40px;
+    height: 40px
+  }
+
+  #nav-settings {
+    right: 16px;
+    width: 40px;
+    height: 40px
   }
 
   #nav-title {
@@ -714,7 +733,7 @@ body[data-page="skill-balance-report"] main {
   body[data-page^="compendium"] #top-nav,
   body[data-page="class-balance-report"] #top-nav,
   body[data-page="skill-balance-report"] #top-nav {
-    height: 64px;
+    height: 64px
   }
 
   body[data-page^="compendium"] main,

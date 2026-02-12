@@ -1,0 +1,65 @@
+window._LANG_es = window._LANG_es || {};
+Object.assign(window._LANG_es, {
+    "common": {
+        "game_title": "DEADLINE 15",
+        "loading": "Cargando...",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "close": "Cerrar",
+        "gold": "O",
+        "level": "Nivel",
+        "exp": "Experiencia",
+        "hp": "Vida",
+        "atk": "Ataque",
+        "def": "Defensa",
+        "potential": "Potencial",
+        "max": "MAX",
+        "turn": "Turno",
+        "wave": "Ola",
+        "select_unit": "Selecciona una unidad",
+        "move": "Mov",
+        "range": "Rango",
+        "type": "Tipo"
+    },
+    "nav": {
+        "stage": "Escenario",
+        "party": "Equipo",
+        "sanctuary": "Santuario",
+        "academy": "Academia",
+        "equip": "Equipar",
+        "enhance": "Mejorar",
+        "shop": "Tienda",
+        "compendium": "Compendio",
+        "settings": "Configuración",
+        "lobby": "Lobby"
+    },
+    "settings": {
+        "title": "Configuración",
+        "language": "Idioma",
+        "bgm": "Música de Fondo",
+        "sfx": "Efectos de Sonido",
+        "volume": "Volumen",
+        "game_speed": "Velocidad del Juego",
+        "reset_all": "Reiniciar Todos los Datos",
+        "licenses": "Licencias de C\u00f3digo Abierto",
+        "language_ko": "한국어 (Korean)",
+        "language_en": "English",
+        "language_es": "Español"
+    },
+    "compendium": {
+        "title_class": "📖 Compendio de Clases",
+        "title_stage": "📖 Compendio de Escenarios",
+        "title_item": "📖 Compendio de Objetos",
+        "subtitle_class": "Información detallada de 12 clases · Defense RPG",
+        "subtitle_stage": "Análisis de dificultad de 10 escenarios · Defense RPG",
+        "subtitle_item": "Análisis de eficiencia de pociones de experiencia · Defense RPG",
+        "tab_card_view": "🎴 Vista de Tarjeta",
+        "tab_resource_system": "⚡ Sistema de Recursos",
+        "tab_analysis": "📊 Análisis de Dificultad",
+        "tab_efficiency": "💎 Análisis de Eficiencia",
+        "nav_lobby": "← Lobby",
+        "nav_stage": "🗺 Escenario",
+        "nav_item": "🧪 Objeto",
+        "nav_class": "🎴 Clase"
+    }
+});

@@ -61,3 +61,24 @@ function showPrompt(msg, defaultVal, onOk, onCancel) {
     if (inp) { inp.focus(); inp.select(); }
   }, 100);
 }
+
+function showModal(title, content, buttons) {
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-title').className = '';
+  document.getElementById('modal-sub').innerHTML = content;
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  (buttons || []).forEach(function(btn) {
+    var el = document.createElement('button');
+    el.className = 'modal-btn' + (btn.className ? ' ' + btn.className : '');
+    el.textContent = btn.text;
+    el.onclick = function() { if (btn.onClick) btn.onClick(); };
+    bt.appendChild(el);
+  });
+  ov.classList.add('show');
+}
+
+function closeModal() {
+  var ov = document.getElementById('modal-overlay');
+  ov.classList.remove('show');
+}

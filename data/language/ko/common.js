@@ -1,0 +1,66 @@
+window._LANG_ko = window._LANG_ko || {};
+Object.assign(window._LANG_ko, {
+    "common": {
+        "game_title": "DEADLINE 15",
+        "loading": "불러오는 중...",
+        "confirm": "확인",
+        "cancel": "취소",
+        "close": "닫기",
+        "gold": "G",
+        "level": "레벨",
+        "exp": "경험치",
+        "hp": "체력",
+        "atk": "공격력",
+        "def": "방어력",
+        "potential": "잠재",
+        "max": "MAX",
+        "turn": "턴",
+        "wave": "웨이브",
+        "select_unit": "유닛을 선택하세요",
+        "move": "이동",
+        "range": "사거리",
+        "type": "종류"
+    },
+    "nav": {
+        "stage": "스테이지",
+        "party": "파티",
+        "sanctuary": "성소",
+        "academy": "아카데미",
+        "equip": "장비",
+        "inventory": "인벤토리",
+        "enhance": "강화",
+        "shop": "상점",
+        "compendium": "도감",
+        "settings": "설정",
+        "lobby": "로비"
+    },
+    "settings": {
+        "title": "설정",
+        "language": "언어",
+        "bgm": "배경음악",
+        "sfx": "효과음",
+        "volume": "볼륨",
+        "game_speed": "게임 속도",
+        "reset_all": "모든 데이터 초기화",
+        "licenses": "오픈소스 라이선스",
+        "language_ko": "한국어 (Korean)",
+        "language_en": "English",
+        "language_es": "Español"
+    },
+    "compendium": {
+        "title_class": "📖 직업 도감",
+        "title_stage": "📖 스테이지 도감",
+        "title_item": "📖 아이템 도감",
+        "subtitle_class": "12개 직업의 상세 정보 · Defense RPG",
+        "subtitle_stage": "10개 스테이지의 난이도 분석 · Defense RPG",
+        "subtitle_item": "경험치 물약의 효율 분석 · Defense RPG",
+        "tab_card_view": "🎴 카드 뷰",
+        "tab_resource_system": "⚡ 자원 시스템",
+        "tab_analysis": "📊 난이도 분석",
+        "tab_efficiency": "💎 효율 분석",
+        "nav_lobby": "← 로비",
+        "nav_stage": "🗺 스테이지",
+        "nav_item": "🧪 아이템",
+        "nav_class": "🎴 직업"
+    }
+});
