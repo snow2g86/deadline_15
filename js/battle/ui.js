@@ -180,7 +180,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     const bt=document.getElementById('modal-buttons');bt.innerHTML='';
     const lb=document.createElement('button');lb.className='modal-btn';lb.textContent=t('results.return_to_lobby');
     lb.onclick=()=>{ov.classList.remove('show');this.returnToLobby()};bt.appendChild(lb);
-    if(win&&!deadAllyCount){const s=this.cStage,ns=STAGES.find(v=>v.id===s.id+1);
+    if(win){const s=this.cStage,ns=s&&STAGES.find(v=>v.id===s.id+1);
       if(ns){const b=document.createElement('button');b.className='modal-btn secondary';b.textContent=t('results.next_stage');
         b.onclick=()=>{ov.classList.remove('show');this.goNextStage(ns)};bt.appendChild(b)}}
     ov.classList.add('show')},

@@ -119,10 +119,13 @@ Object.assign(G, {
 			}
 			el.style.width = UW + 'px'; el.style.height = UH + 'px'; el.style.left = this.uSX(u.x, u.y) + 'px'; el.style.top = this.uSY(u.x, u.y) + 'px';
 			const v = this.g2v(u.x, u.y); el.style.zIndex = 100 + v.vc + v.vr;
-			el.querySelector('.hp-fill').style.width = `${(u.hp / u.mhp) * 100}%`;
+			const hpFill = el.querySelector('.hp-fill');
+			if (hpFill) hpFill.style.width = `${(u.hp / u.mhp) * 100}%`;
 			const mpFill = el.querySelector('.mp-fill');
-			mpFill.style.width = `${u.maxRes ? (u.res / u.maxRes) * 100 : 0}%`;
-			mpFill.style.background = resClr(u);
+			if (mpFill) {
+				mpFill.style.width = `${u.maxRes ? (u.res / u.maxRes) * 100 : 0}%`;
+				mpFill.style.background = resClr(u);
+			}
 			const isSel = this.sel && this.sel.id === u.id;
 			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
 			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0 || u.frozen > 0);

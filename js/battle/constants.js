@@ -8,7 +8,6 @@
 
 const COLS = 10, ROWS = 15, TW = 48, TH = 24;
 const ZH = 10, UW = 48, UH = 60, UCX = 24, UCY = 12;
-const MIN_P = 5, MAX_P = 5;
 const DEPLOY = [{ x: 4, y: 12 }, { x: 5, y: 12 }, { x: 3, y: 12 }, { x: 6, y: 12 }, { x: 4, y: 11 }, { x: 5, y: 11 }, { x: 3, y: 11 }, { x: 6, y: 11 }, { x: 7, y: 12 }, { x: 7, y: 11 }];
 const CLAB = ['N', 'E', 'S', 'W'], CARR = ['▲', '▶', '▼', '◀'];
 

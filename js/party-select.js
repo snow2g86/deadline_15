@@ -4,6 +4,18 @@
 // 역할 i18n 매핑
 var ROLE_I18N = { melee: 'roles.melee', ranged: 'roles.ranged', healer: 'roles.healer' };
 
+// ── 스킬 정보 포맷팅 ──────────────────────
+function formatPartyCharSkills(ch) {
+  var skills = getCharSkills(ch.cls);
+  if (!skills.length) return '';
+  var parts = [];
+  skills.forEach(function(sk) {
+    var lv = getCharSkillLv(ch, sk.id);
+    if (lv > 0) parts.push('Lv' + lv + '. ' + t('skills.' + sk.id));
+  });
+  return parts.length ? parts.join(' | ') : '';
+}
+
 // ── 전역 포션/공성 아이템 로드/저장 ──────────────
 function loadGlobalBattleItems() {
   try {
@@ -235,8 +247,10 @@ function renderParty() {
     var eqHp = eqB.hp ? '<span style="color:#4ade80">+' + eqB.hp + '</span>' : '';
     var eqAtk = eqB.atk ? '<span style="color:#4ade80">+' + eqB.atk + '</span>' : '';
     var eqDef = eqB.def ? '<span style="color:#4ade80">+' + eqB.def + '</span>' : '';
+    var skillInfo = formatPartyCharSkills(ch);
+    const iconSize = (ch.cls === 'brawler' || ch.cls === 'assassin') ? 51 : 60;
     row.innerHTML =
-      '<div class="rl-icon">' + charSprite(ch.cls, 60, ch.gender) +
+      '<div class="rl-icon">' + charSprite(ch.cls, iconSize, ch.gender) +
         '<span class="rl-grade" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>' +
       '<div class="rl-info">' +
       '<div class="rl-top"><span class="rl-lv">Lv.' + ch.lv + '</span><span class="rl-cls">' + t('classes.' + ch.cls) + '</span></div>' +
@@ -244,6 +258,7 @@ function renderParty() {
       '<div class="rl-stats">HP <b>' + ch.hp + '</b>' + eqHp + ' ATK <b>' + ch.atk + '</b>' + eqAtk + ' DEF <b>' + ch.def + '</b>' + eqDef + ' MOV <b>' + ch.move + '</b> RNG <b>' + ch.range + '</b></div>' +
       '<div class="rl-pot">' + t('party.potential_stats', { hp: ch.pot.hp, atk: ch.pot.atk, def: ch.pot.def }) + '</div>' +
       '<div class="rl-exp"><div class="rl-exp-fill" style="width:' + expPct + '%"></div></div>' +
+      (skillInfo ? '<div class="rl-skills">' + skillInfo + '</div>' : '') +
       '</div>' +
       '<div class="rl-actions">' +
       '<div class="rl-btn ' + (sel ? 'chk' : 'add') + '">' + (sel ? '\u2713' : '+') + '</div>' +
@@ -385,7 +400,8 @@ function renderChars() {
     html += '</div>';
 
     // 캐릭터 이미지 + 등급 배지
-    html += '<div class="eq-char-icon">' + charSprite(ch.cls, 60, ch.gender) +
+    const eqIconSize = (ch.cls === 'brawler' || ch.cls === 'assassin') ? 51 : 60;
+    html += '<div class="eq-char-icon">' + charSprite(ch.cls, eqIconSize, ch.gender) +
       '<span class="eq-grade-badge" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>';
 
     // 캐릭터 정보

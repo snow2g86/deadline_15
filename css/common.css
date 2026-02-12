@@ -140,7 +140,9 @@ body {
   text-align: center;
   box-shadow: 0 0 40px rgba(240, 192, 64, .12), 0 8px 32px rgba(0, 0, 0, .5);
   max-width: 340px;
-  width: 90%
+  width: 90%;
+  max-height: 85dvh;
+  overflow-y: auto
 }
 
 #modal-title {
