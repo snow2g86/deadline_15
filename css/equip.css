@@ -280,6 +280,15 @@
     margin-bottom: 12px;
   }
 
+  .eq-section-fill {
+    display: block;
+    overflow: visible;
+  }
+
+  .eq-section-fill .eq-inv-list {
+    overflow-y: visible;
+  }
+
   .eq-section-title {
     font-size: 12px;
     margin: 10px 0 6px;
