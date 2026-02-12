@@ -6,6 +6,7 @@ var SAVE_KEY = 'game_save';
 var ROSTER_KEY = 'game_roster';
 var PARTY_KEY = 'game_party';
 var NAV_KEY = 'game_nav';
+var CD = (typeof JAB !== 'undefined') ? JAB : {};
 
 // ── 뷰 상태 ────────────────────────────────
 var _viewMode = 'episodes'; // 'episodes' | 'stages'
@@ -146,15 +147,12 @@ function renderStages() {
         '<div class="sb-diff-label">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
       '</div>' +
       '<button class="sb-info-btn" onclick="event.stopPropagation(); showStageInfo(' + st.id + ')">' +
-        '\u2139\ufe0f ' + t('stage.info') +
-      '</button>' +
-      '<button class="sb-practice-btn" onclick="event.stopPropagation(); startPracticeMode(' + st.id + ')">' +
-        '\ud83c\udf93 ' + t('stage.practice') +
+        'ℹ️ ' + t('stage.info') +
       '</button>';
 
     b.onclick = (function(stage) {
       return function() {
-        showModeSelectionModal(stage);
+        startStage(stage.id, false);
       };
     })(st);
 
@@ -190,9 +188,9 @@ function showStageInfo(stageId) {
     .map(function(entry) {
       var cls = entry[0], count = entry[1];
       return '<div class="si-enemy-row">' +
-        '<span class="si-enemy-icon">' + (CD[cls] ? CD[cls].icon : '\u2753') + '</span>' +
+        '<span class="si-enemy-icon">' + (CD[cls] ? CD[cls].icon : '❓') + '</span>' +
         '<span class="si-enemy-name">' + t('classes.' + cls) + '</span>' +
-        '<span class="si-enemy-count">\u00d7' + count + '</span>' +
+        '<span class="si-enemy-count">×' + count + '</span>' +
       '</div>';
     }).join('');
 
@@ -200,7 +198,7 @@ function showStageInfo(stageId) {
   var recHTML = (st.recommendedClasses || [])
     .map(function(cls) {
       return '<div class="si-rec-class">' +
-        '<span class="si-rec-icon">' + (CD[cls] ? CD[cls].icon : '\u2753') + '</span>' +
+        '<span class="si-rec-icon">' + (CD[cls] ? CD[cls].icon : '❓') + '</span>' +
         '<span class="si-rec-name">' + t('classes.' + cls) + '</span>' +
       '</div>';
     }).join('');
@@ -213,10 +211,10 @@ function showStageInfo(stageId) {
   // 보스 HTML
   var bossHTML = st.boss ?
     '<div class="si-boss">' +
-      '<div class="si-boss-label">\ud83d\udc80 ' + t('stage.boss') + '</div>' +
+      '<div class="si-boss-label">💀 ' + t('stage.boss') + '</div>' +
       '<div class="si-boss-name">' + st.boss.name + '</div>' +
       '<div class="si-boss-class">' +
-        (CD[st.boss.cls] ? CD[st.boss.cls].icon : '\u2753') + ' ' +
+        (CD[st.boss.cls] ? CD[st.boss.cls].icon : '❓') + ' ' +
         t('classes.' + st.boss.cls) +
       '</div>' +
     '</div>' : '';
@@ -243,7 +241,7 @@ function showStageInfo(stageId) {
         '<div class="si-section-title">' + t('stage.enemy_composition') + '</div>' +
         '<div class="si-enemy-list">' + compHTML + '</div>' +
         '<div class="si-meta">' +
-          t('stage.total_enemies', {count: st.tot}) + ' \u00b7 ' +
+          t('stage.total_enemies', {count: st.tot}) + ' · ' +
           t('stage.wave_count', {count: st.spw}) +
         '</div>' +
       '</div>' +
@@ -259,40 +257,6 @@ function showStageInfo(stageId) {
   ]);
 }
 
-// ── 모드 선택 모달 ──────────────────────────
-function showModeSelectionModal(stage) {
-  var modalContent =
-    '<div class="mode-select-modal">' +
-      '<div class="ms-title">' + t('stage.select_mode') + '</div>' +
-      '<div class="ms-options">' +
-        '<div class="ms-option ms-normal" onclick="startStage(' + stage.id + ', false)">' +
-          '<div class="ms-opt-icon">\u2694\ufe0f</div>' +
-          '<div class="ms-opt-title">' + t('stage.normal_mode') + '</div>' +
-          '<div class="ms-opt-desc">' + t('stage.normal_mode_desc') + '</div>' +
-          '<ul class="ms-opt-features">' +
-            '<li>\u2713 ' + t('stage.full_rewards') + '</li>' +
-            '<li>\u2713 ' + t('stage.clear_record') + '</li>' +
-            '<li>\u2717 ' + t('stage.no_auto_revival') + '</li>' +
-          '</ul>' +
-        '</div>' +
-        '<div class="ms-option ms-practice" onclick="startStage(' + stage.id + ', true)">' +
-          '<div class="ms-opt-icon">\ud83c\udf93</div>' +
-          '<div class="ms-opt-title">' + t('stage.practice_mode') + '</div>' +
-          '<div class="ms-opt-desc">' + t('stage.practice_mode_desc') + '</div>' +
-          '<ul class="ms-opt-features">' +
-            '<li>\u26a0 ' + t('stage.reduced_rewards') + ' (70%)</li>' +
-            '<li>\u2713 ' + t('stage.full_exp') + ' (100%)</li>' +
-            '<li>\u2713 ' + t('stage.auto_revival') + '</li>' +
-            '<li>\u26a0 ' + t('stage.no_clear_record') + '</li>' +
-          '</ul>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-
-  showModal('', modalContent, [
-    {text: t('common.cancel'), onClick: closeModal}
-  ]);
-}
 
 // ── 스테이지 진입 (모드 선택) ──────────────
 function startStage(stageId, practiceMode) {
@@ -318,7 +282,3 @@ function startStage(stageId, practiceMode) {
   closeModal();
 }
 
-// ── 연습 모드 직접 진입 ──────────────────────
-function startPracticeMode(stageId) {
-  startStage(stageId, true);
-}
