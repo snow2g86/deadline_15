@@ -1020,7 +1020,7 @@ function toggleBattlePotion(potionPid, isSelected) {
   renderModalBody();
 }
 
-// ── 공성 아이템 리스트 렌더링 (전체 아군 공유) ──
+// ── 공성 아이템 리스트 렌더링 (아이콘 + 수량만 표시) ──
 function renderSiegeItemsList() {
   var list = document.getElementById('eq-sieges-list');
   if (!list) return;
@@ -1034,46 +1034,20 @@ function renderSiegeItemsList() {
     return;
   }
 
-  // 공성 아이템 버튼들 (인벤토리에 있는 것만) - 무제한 선택
+  // 공성 아이템 (아이콘 + 수량만 표시)
   availableSieges.forEach(function(item) {
     var siege = SIEGE_ITEMS.find(function(s) { return s.id === item.siegeId; });
     if (!siege) return;
 
-    var isSelected = _globalSiegeItems.indexOf(item.sid) !== -1;
-
-    var btn = document.createElement('button');
-    btn.className = 'eq-siege-btn' + (isSelected ? ' selected' : '');
-    btn.style.cssText = 'flex:0 0 auto;padding:6px 10px;border:1px solid #ddd;border-radius:4px;' +
-      'background:' + (isSelected ? '#60a5fa' : '#f3f4f6') + ';' +
-      'cursor:pointer;';
+    var div = document.createElement('div');
+    div.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:6px 10px;' +
+      'background:#f3f4f6;border-radius:4px;margin-right:8px;margin-bottom:6px;font-size:12px;';
     var qty = item.quantity || 1;
-    btn.innerHTML = siege.icon + ' ' + t('shop.' + item.siegeId) + ' ×' + qty;
-    btn.title = t('shop.' + item.siegeId) + ' | ×' + qty;
+    div.innerHTML = siege.icon + ' <span style="font-weight:600;">×' + qty + '</span>';
+    div.title = t('shop.' + item.siegeId) + ' | ×' + qty;
 
-    btn.onclick = (function(siegeSid, selected) {
-      return function() {
-        toggleSiegeItem(siegeSid, selected);
-      };
-    })(item.sid, isSelected);
-
-    list.appendChild(btn);
+    list.appendChild(div);
   });
-}
-
-// ── 공성 아이템 토글 (전체 아군 공유, 무제한) ──
-function toggleSiegeItem(siegeSid, isSelected) {
-  if (isSelected) {
-    // 제거
-    var idx = _globalSiegeItems.indexOf(siegeSid);
-    if (idx !== -1) _globalSiegeItems.splice(idx, 1);
-  } else {
-    // 무제한 추가
-    _globalSiegeItems.push(siegeSid);
-  }
-
-  saveGlobalBattleItems();
-  renderChars();
-  renderModalBody();
 }
 
 // ── 초기화 ───────────────────────────────
