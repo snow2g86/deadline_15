@@ -56,6 +56,8 @@
 :root {
   --bg: #0a0e1a;
   --panel: #111827;
+  --card: #141824;
+  --border: rgba(255,255,255,.1);
   --gold: #f0c040;
   --gold-d: #a08020;
   --blue: #3b82f6;
@@ -184,6 +186,14 @@ body {
 
 .modal-btn:hover {
   transform: scale(1.05)
+}
+
+.modal-btn:disabled,
+.modal-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none
 }
 
 .modal-btn.secondary {
@@ -404,15 +414,19 @@ body:not([data-page="battle"]) {
   width: 100%;
 }
 
-/* ═══ Unified Tabs ═══ */
-.game-tab-wrap{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.game-tabs{display:flex;flex-wrap:wrap;gap:6px;max-width:330px;width:100%}
-.game-tab{flex:1 1 auto;min-width:28%;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;
-  cursor:pointer;transition:all .2s;text-align:center}
-.game-tab:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
-.game-tab.active{color:#fff;background:rgba(240,192,64,.12);border-color:var(--gold);
-  box-shadow:0 0 12px rgba(240,192,64,.1)}
+/* ═══ Unified Tabs (file-folder style) ═══ */
+.game-tab-wrap{width:100%;display:flex;justify-content:center;padding:8px 0 0;
+  border-bottom:2px solid var(--gold)}
+.game-tabs{display:flex;flex-wrap:wrap;gap:0;max-width:360px;width:100%;align-items:flex-end}
+.game-tab{flex:1 1 auto;min-width:28%;padding:8px 6px 10px;font-size:11px;font-weight:700;color:var(--dim);
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+  border-bottom:none;border-radius:10px 10px 0 0;
+  cursor:pointer;transition:all .2s;text-align:center;
+  margin-bottom:-2px;position:relative}
+.game-tab:hover{color:var(--text);background:rgba(255,255,255,.07)}
+.game-tab.active{color:#fff;background:var(--bg);
+  border-color:var(--gold);border-bottom:2px solid var(--bg);
+  z-index:1;padding-top:10px}
 
 /* ═══ Unified HUD ═══ */
 .page-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:4px}
@@ -651,8 +665,9 @@ body[data-page="skill-balance-report"] main {
     font-size: 14px
   }
 
-  .game-tabs{max-width:480px}
-  .game-tab{font-size:13px;padding:12px 8px}
+  .game-tabs{max-width:500px}
+  .game-tab{font-size:13px;padding:10px 8px 12px}
+  .game-tab.active{padding-top:12px}
   .page-info-row{max-width:480px}
   .page-info-title{font-size:17px}
   .game-card{max-width:460px;padding:14px 16px}

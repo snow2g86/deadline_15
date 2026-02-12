@@ -21,12 +21,12 @@
         section { margin-bottom:50px; }
         .section-title { font-size:1.8em; color:#667eea; margin-bottom:24px; padding-bottom:10px; border-bottom:3px solid #667eea; }
 
-        /* Tabs */
-        .tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
-        .tab { padding:8px 16px; border-radius:20px; border:2px solid #667eea; background:transparent; color:#667eea; font-weight:600; cursor:pointer; font-size:.9em; transition:all .2s; }
-        .tab.active { background:#667eea; color:#fff; }
-        .tab:hover:not(.active) { background:rgba(102,126,234,.1); }
-        .tab-content { display:none; }
+        /* Tabs (file-folder style) */
+        .tabs { display:flex; gap:0; margin-bottom:0; flex-wrap:wrap; border-bottom:2px solid #667eea; }
+        .tab { padding:8px 16px 10px; border-radius:10px 10px 0 0; border:1px solid rgba(102,126,234,.3); border-bottom:none; background:transparent; color:#667eea; font-weight:600; cursor:pointer; font-size:.9em; transition:all .2s; margin-bottom:-2px; position:relative; }
+        .tab.active { background:#fff; color:#667eea; font-weight:800; border-color:#667eea; border-bottom:2px solid #fff; z-index:1; padding-top:10px; }
+        .tab:hover:not(.active) { background:rgba(102,126,234,.08); }
+        .tab-content { display:none; padding-top:20px; }
         .tab-content.active { display:block; }
 
         /* Class cards */

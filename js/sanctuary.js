@@ -431,23 +431,39 @@ function showSacrificeModal(targetUid) {
   confirmBtn.id = 'sac-confirm-btn';
   confirmBtn.textContent = t('sanctuary.promote_btn');
   confirmBtn.disabled = true;
-  confirmBtn.onclick = function() {
-    if (_sacSelected.length === 0) return;
+  confirmBtn.type = 'button';
+  confirmBtn.onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (_sacSelected.length === 0) {
+      console.warn('[Sanctuary] _sacSelected is empty, confirm button should be disabled');
+      return;
+    }
     ov.classList.remove('show');
     confirmPromote(_sacTargetUid, _sacSelected);
   };
   var cb = document.createElement('button');
   cb.className = 'modal-btn secondary';
+  cb.type = 'button';
   cb.textContent = t('common.cancel');
-  cb.onclick = function() { ov.classList.remove('show'); };
+  cb.onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    ov.classList.remove('show');
+  };
   bt.appendChild(cb);
   bt.appendChild(confirmBtn);
   ov.classList.add('show');
 
   // 클릭 이벤트 바인딩
   document.querySelectorAll('#sac-list-inner .sac-btn').forEach(function(btn) {
-    btn.onclick = function() {
-      var uid = parseInt(btn.dataset.uid);
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      var uidStr = btn.getAttribute('data-uid');
+      if (!uidStr) return;
+      var uid = parseInt(uidStr, 10);
+      if (isNaN(uid)) return;
+
       var idx = _sacSelected.indexOf(uid);
       if (idx !== -1) {
         _sacSelected.splice(idx, 1);
