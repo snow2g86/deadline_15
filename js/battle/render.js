@@ -311,6 +311,9 @@ Object.assign(G, {
 				v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
 			enabled = enabled && overlapping
 		}
+		if (sk.id === 'assassin_ambush') {
+			if (!isStealthed(u)) enabled = false;
+		}
 		if (sk.id.startsWith('summoner_summon_')) {
 			const maxSummons = 1;
 			const currentSummons = this.units.filter(s => s.isSummon && s.summonerId === u.id);
