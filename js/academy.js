@@ -1,7 +1,6 @@
 // academy.js — 아카데미 페이지 전용 스크립트
-// 공통 모듈에서 공유 함수 로드
+// 공통 모듈에서 공유 함수 로드 (MAX_SKILL_LV는 constants.js에서 로드)
 
-var MAX_SKILL_LV = 10;
 var _currentTab = 'classchange';
 
 // ── 골드 관리 ─────────────────────────────

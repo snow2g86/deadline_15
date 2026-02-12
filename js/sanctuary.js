@@ -1,7 +1,6 @@
 // sanctuary.js — 성소 페이지 전용 스크립트
-// 공통 모듈에서 공유 함수 로드
+// 공통 모듈에서 공유 함수 로드 (MAX_SKILL_LV, GRADE_ORDER, GRADE_COLORS는 constants.js에서 로드)
 
-var MAX_SKILL_LV = 10;
 var _currentTab = 'resurrect';
 
 // ── 골드 관리 ─────────────────────────────
