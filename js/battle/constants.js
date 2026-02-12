@@ -16,8 +16,11 @@ function mh(a, b, c, d) { return Math.abs(a - c) + Math.abs(b - d) }
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } }
 function sl(ms) { return new Promise(r => setTimeout(r, ms * G._sett.speed)) }
 
-const MAX_LEVEL = 15;
-function expForLevel(lv) { return 80 + 20 * lv + 5 * lv * lv }
+// ════════════════════════════════════════════
+//  Section 2: Storage & Battle-specific functions
+//  (Common utilities loaded from js/common/*.js)
+// ════════════════════════════════════════════
+
 function killExp(stageId, enemyCls) {
     const base = 10 + stageId * 5;
     const bonus = { knight: 1.3, mage: 1.2, summoner: 1.2, shaman: 1.2, assassin: 1.1, priest: 1.1, brawler: 1.1, lancer: 1.1, sapper: 1.1, novice: 1, warrior: 1, archer: 1 };
@@ -28,73 +31,12 @@ function actExp(stageId, action) {
     return Math.floor((base[action] || 0) * (1 + stageId * 0.2));
 }
 
-function clsIcon(cls, size) {
-    const d = JAB[cls]; if (!d) return '';
-    return `<img class="cls-icon" src="image/icon/jab/${cls}.png" alt="${cls}" style="width:${size}px;height:${size}px">`;
-}
-
-const ROLE_MAP = {
-  warrior:'melee', knight:'melee', assassin:'melee', brawler:'melee', lancer:'melee', sapper:'melee', novice:'melee',
-  archer:'ranged', mage:'ranged', summoner:'ranged', shaman:'ranged',
-  priest:'healer',
-  summon_spirit:'ranged', summon_golem:'melee'
-};
-
-// ════════════════════════════════════════════
-//  Section 2: localStorage access functions
-// ════════════════════════════════════════════
-
-function loadNav() { try { return JSON.parse(localStorage.getItem('game_nav')) } catch(e) { return null } }
-function clearNav() { try { localStorage.removeItem('game_nav') } catch(e) {} }
-function loadParty() { try { const r = localStorage.getItem('game_party'); return r ? JSON.parse(r) : [] } catch(e) { return [] } }
 function loadGoldData() {
   try {
-    const d = JSON.parse(localStorage.getItem('game_save'));
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY));
     if(d) return { gold: d.gold||0, cleared: new Set(d.cleared||[]) };
     return { gold: 2000, cleared: new Set() };
   } catch(e) { return { gold: 2000, cleared: new Set() } }
-}
-function saveGold(gold, clearedArr) {
-  try { localStorage.setItem('game_save', JSON.stringify({ gold, cleared: clearedArr })) } catch(e) {}
-}
-function getRoster() {
-  try { const d = JSON.parse(localStorage.getItem('game_roster')); return d ? d.chars : [] } catch(e) { return [] }
-}
-function saveRoster(chars, nextId) {
-  try { localStorage.setItem('game_roster', JSON.stringify({ chars, nextId })) } catch(e) {}
-}
-function getChar(uid) { return getRoster().find(c => c.uid === uid) }
-function markDead(uid) {
-  try {
-    const d = JSON.parse(localStorage.getItem('game_roster'));
-    if(!d) return;
-    const ch = d.chars.find(c => c.uid === uid);
-    if(ch) { ch.dead = true; ch.diedAt = Date.now(); localStorage.setItem('game_roster', JSON.stringify(d)) }
-  } catch(e) {}
-}
-function gainExp(uid, amount) {
-  try {
-    const d = JSON.parse(localStorage.getItem('game_roster'));
-    if(!d) return { leveled:0, prevLv:1 };
-    const ch = d.chars.find(c => c.uid === uid);
-    if(!ch || ch.lv >= MAX_LEVEL) return { leveled:0, prevLv: ch ? ch.lv : 1 };
-    const prevLv = ch.lv;
-    ch.exp = (ch.exp||0) + amount;
-    let leveled = 0;
-    while(ch.lv < MAX_LEVEL) {
-      const need = expForLevel(ch.lv);
-      if(ch.exp < need) break;
-      ch.exp -= need;
-      ch.lv++;
-      ch.hp = Math.round(ch.hp + ch.pot.hp);
-      ch.atk = Math.round(ch.atk + ch.pot.atk);
-      ch.def = Math.round(ch.def + ch.pot.def);
-      leveled++;
-    }
-    if(ch.lv >= MAX_LEVEL) ch.exp = 0;
-    localStorage.setItem('game_roster', JSON.stringify(d));
-    return { leveled, prevLv };
-  } catch(e) { return { leveled:0, prevLv:1 } }
 }
 function toBattleStats(uid) {
   const ch = getChar(uid);
@@ -114,6 +56,19 @@ function toBattleStats(uid) {
     skillLv: ch.skillLv || {},
     gender: ch.gender || 'm'
   };
+}
+
+// Battle-specific: Mark character as dead
+function markDead(uid) {
+  try {
+    const roster = getRoster();
+    const ch = roster.find(c => c.uid === uid);
+    if(ch) {
+      ch.dead = true;
+      ch.diedAt = Date.now();
+      saveRoster({ chars: roster, nextId: Math.max(...roster.map(c=>c.uid||0))+1 });
+    }
+  } catch(e) {}
 }
 function saveBattle(data) { try { localStorage.setItem('game_battle', JSON.stringify(data)) } catch(e) {} }
 function loadBattle() { try { const r = localStorage.getItem('game_battle'); return r ? JSON.parse(r) : null } catch(e) { return null } }
