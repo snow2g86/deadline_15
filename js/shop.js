@@ -290,6 +290,11 @@ function renderShop() {
     else if (iType === 'siege') renderSiegeCard(item, list);
     else if (iType === 'skillbook') renderSkillBookCard(item, list);
   });
+
+  // 마지막에 spacer 추가
+  var spacer = document.createElement('div');
+  spacer.className = 'shop-list-spacer';
+  list.appendChild(spacer);
 }
 
 function renderCharCard(item, list) {
@@ -674,6 +679,11 @@ function renderScrollShop(list) {
     }
     list.appendChild(el);
   });
+
+  // 마지막에 spacer 추가
+  var spacer = document.createElement('div');
+  spacer.className = 'shop-list-spacer';
+  list.appendChild(spacer);
 }
 
 function goldIcon(amount) {
@@ -703,6 +713,12 @@ function renderGacha(list) {
     '<div class="gacha-pity-bar"><div class="gacha-pity-fill" style="width:' + pityPct + '%"></div></div>';
   list.appendChild(pityEl);
 
+  // 확률표 (2칸 차지)
+  var rateEl = document.createElement('div');
+  rateEl.className = 'gacha-rates-full';
+  rateEl.innerHTML = gachaRatesHtml();
+  list.appendChild(rateEl);
+
   // 1회 뽑기 카드
   var c1 = document.createElement('div');
   c1.className = 'gacha-card';
@@ -727,11 +743,10 @@ function renderGacha(list) {
   if (canAfford10) c10.querySelector('.gacha-btn').onclick = function() { doGacha(10); };
   list.appendChild(c10);
 
-  // 확률표 (2칸 차지)
-  var rateEl = document.createElement('div');
-  rateEl.className = 'gacha-rates-full';
-  rateEl.innerHTML = gachaRatesHtml();
-  list.appendChild(rateEl);
+  // 마지막에 spacer 추가
+  var spacer = document.createElement('div');
+  spacer.className = 'shop-list-spacer';
+  list.appendChild(spacer);
 }
 
 function gachaRatesHtml() {

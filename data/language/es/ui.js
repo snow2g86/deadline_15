@@ -10,12 +10,12 @@ Object.assign(window._LANG_es, {
         "potential_stats": "Potencial HP+{hp} ATK+{atk} DEF+{def}",
         "rename": "Renombrar",
         "rename_prompt": "Ingrese nuevo nombre (máx 10 caracteres)",
-        "tab_item": "Objetos",
+        "tab_item": "Consumibles",
         "potion_count": "\u00d7{count}",
         "potion_use": "Usar",
         "potion_use_success": "+{exp} EXP obtenido!",
         "potion_levelup_multi": " niveles arriba!",
-        "no_potions": "No hay pociones en el inventario",
+        "no_items": "No hay objetos en el inventario",
         "no_available_chars": "No hay personajes disponibles"
     },
     "academy": {

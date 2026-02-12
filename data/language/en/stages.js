@@ -342,7 +342,7 @@ Object.assign(window._LANG_en, {
     "episode": {
         "1": {
             "name": "The Hero's Beginning",
-            "desc": "Defend the village from bandits and defeat the demon lord"
+            "desc": "Defend the village from bandits and defeat the bandit leader"
         },
         "2": {
             "name": "The Frozen Conspiracy",

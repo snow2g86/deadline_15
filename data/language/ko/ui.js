@@ -10,12 +10,12 @@ Object.assign(window._LANG_ko, {
         "potential_stats": "잠재 HP+{hp} ATK+{atk} DEF+{def}",
         "rename": "이름 변경",
         "rename_prompt": "새 이름을 입력하세요 (최대 10자)",
-        "tab_item": "아이템",
+        "tab_item": "소모품",
         "potion_count": "{count}개",
         "potion_use": "사용",
         "potion_use_success": "+{exp} EXP 획득!",
         "potion_levelup_multi": "단계 레벨업!",
-        "no_potions": "보유한 물약이 없습니다",
+        "no_items": "보유한 아이템이 없습니다",
         "no_available_chars": "사용 가능한 캐릭터가 없습니다"
     },
     "academy": {

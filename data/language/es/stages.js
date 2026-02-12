@@ -338,7 +338,7 @@ Object.assign(window._LANG_es, {
     "episode": {
         "1": {
             "name": "El Comienzo del Héroe",
-            "desc": "Defiende la aldea de los bandidos y derrota al señor demonio"
+            "desc": "Defiende la aldea de los bandidos y derrota al líder de los bandidos"
         },
         "2": {
             "name": "La Conspiración Helada",

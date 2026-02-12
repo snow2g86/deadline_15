@@ -2,11 +2,11 @@
 #section-equip{display:flex;flex-direction:column;flex:1;overflow-y:auto;align-items:center;width:100%}
 
 /* ═══ Character Grid ═══ */
-.eq-chars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px;width:100%;max-width:760px;margin:0 auto}
+.eq-chars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:760px;margin:0 auto; padding-bottom: 10px;}
 
 /* 모바일: 2컬럼 */
 @media(max-width:768px){
-  .eq-chars{grid-template-columns:repeat(2,1fr);gap:10px;padding:10px}
+  .eq-chars{grid-template-columns:repeat(2,1fr);gap:10px;}
 }
 
 /* ═══ Character Card ═══ */

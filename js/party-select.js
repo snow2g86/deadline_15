@@ -826,42 +826,85 @@ function renderItemTab() {
 
   var inv = loadInventory();
   var potions = inv.filter(function(it) { return it.type === 'potion'; });
+  var sieges = inv.filter(function(it) { return it.type === 'siege'; });
 
-  if (!potions.length) {
-    list.innerHTML = '<div class="item-empty">' + t('party.no_potions') + '</div>';
+  if (!potions.length && !sieges.length) {
+    list.innerHTML = '<div class="item-empty">' + t('party.no_items') + '</div>';
     return;
   }
 
-  // 물약 종류별 그룹핑
-  var groups = {};
-  potions.forEach(function(p) {
-    var id = p.potionId;
-    if (!groups[id]) groups[id] = { potionId: id, exp: p.exp, icon: p.icon, count: 0 };
-    groups[id].count++;
-  });
+  // 물약 섹션
+  if (potions.length > 0) {
+    var potionSection = document.createElement('div');
+    potionSection.className = 'item-section';
+    potionSection.innerHTML = '<div class="item-section-title">💊 경험치 물약</div>';
 
-  var order = ['exp_s', 'exp_m', 'exp_l'];
-  order.forEach(function(pid) {
-    var g = groups[pid];
-    if (!g) return;
-    var info = POTION_INFO[pid];
-    var potionName = info ? t(info.nameKey) : pid;
+    // 물약 종류별 그룹핑
+    var groups = {};
+    potions.forEach(function(p) {
+      var id = p.potionId;
+      if (!groups[id]) groups[id] = { potionId: id, exp: p.exp, icon: p.icon, count: 0 };
+      groups[id].count++;
+    });
 
-    var card = document.createElement('div');
-    card.className = 'item-card';
-    card.innerHTML =
-      '<div class="item-icon">' + g.icon + '</div>' +
-      '<div class="item-info">' +
-        '<div class="item-name">' + potionName + '</div>' +
-        '<div class="item-exp">EXP +' + g.exp + '</div>' +
-      '</div>' +
-      '<div class="item-count">' + t('party.potion_count', { count: g.count }) + '</div>' +
-      '<button class="item-use-btn">' + t('party.potion_use') + '</button>';
-    card.querySelector('.item-use-btn').onclick = function() {
-      showPotionUseModal(pid);
-    };
-    list.appendChild(card);
-  });
+    var order = ['exp_s', 'exp_m', 'exp_l'];
+    order.forEach(function(pid) {
+      var g = groups[pid];
+      if (!g) return;
+      var info = POTION_INFO[pid];
+      var potionName = info ? t(info.nameKey) : pid;
+
+      var card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML =
+        '<div class="item-icon">' + g.icon + '</div>' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + potionName + '</div>' +
+          '<div class="item-exp">EXP +' + g.exp + '</div>' +
+        '</div>' +
+        '<div class="item-count">' + t('party.potion_count', { count: g.count }) + '</div>' +
+        '<button class="item-use-btn">' + t('party.potion_use') + '</button>';
+      card.querySelector('.item-use-btn').onclick = function() {
+        showPotionUseModal(pid);
+      };
+      potionSection.appendChild(card);
+    });
+
+    list.appendChild(potionSection);
+  }
+
+  // 공성 아이템 섹션
+  if (sieges.length > 0) {
+    var siegeSection = document.createElement('div');
+    siegeSection.className = 'item-section';
+    siegeSection.innerHTML = '<div class="item-section-title">⚙️ 공성 아이템</div>';
+
+    // 공성 아이템 종류별 그룹핑
+    var siegeGroups = {};
+    sieges.forEach(function(s) {
+      var id = s.siegeId;
+      if (!siegeGroups[id]) {
+        var siegeInfo = SIEGE_ITEMS.find(function(x) { return x.id === id; });
+        siegeGroups[id] = { siegeId: id, icon: siegeInfo ? siegeInfo.icon : '⚙️', count: 0 };
+      }
+      siegeGroups[id].count++;
+    });
+
+    Object.keys(siegeGroups).forEach(function(sid) {
+      var sg = siegeGroups[sid];
+      var card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML =
+        '<div class="item-icon">' + sg.icon + '</div>' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + t('shop.' + sg.siegeId) + '</div>' +
+        '</div>' +
+        '<div class="item-count">' + t('party.potion_count', { count: sg.count }) + '</div>';
+      siegeSection.appendChild(card);
+    });
+
+    list.appendChild(siegeSection);
+  }
 }
 
 function showPotionUseModal(potionId) {

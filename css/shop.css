@@ -90,6 +90,9 @@
 /* ═══ Shop Tab Ad Card (spans 2 cols in grid) ═══ */
 .shop-tab-ad{grid-column:1/-1;margin-top:0}
 
+/* ═══ Shop List Spacer ═══ */
+.shop-list-spacer{grid-column:1/-1;height:1px}
+
 /* ═══ Gacha Rates (spans 2 cols) ═══ */
 .gacha-rates-full{grid-column:1/-1;text-align:center;padding:6px 0}
 .gacha-rate-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;font-size:9px;font-weight:700}

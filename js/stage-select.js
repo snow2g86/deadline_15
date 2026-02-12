@@ -87,29 +87,20 @@ function renderStages() {
   var epStages = STAGES.filter(function(st) { return ep.stages.indexOf(st.id) !== -1; });
 
   // unlock된 스테이지만 (에피소드 내 첫 번째 + 클리어된 다음)
-  var available = epStages.filter(function(st, i) { return i === 0 || cleared.has(epStages[i - 1].id); });
+  var available = epStages.filter(function(_, i) { return i === 0 || cleared.has(epStages[i - 1].id); });
 
-  available.forEach(function(st) {
+  available.forEach(function(st, index) {
+    var stageIndex = index + 1;
     var cl = cleared.has(st.id);
     var b = document.createElement('div');
     b.className = 'stage-btn' + (cl ? ' cleared' : '');
 
-    var diffColor = st.difficulty < 30 ? 'var(--green)' :
-                    st.difficulty < 60 ? 'var(--gold)' :
-                    '#ef4444';
-
     b.innerHTML =
       '<div class="sb-header">' +
-        '<div class="sb-num">' + st.id + '</div>' +
-        '<div class="sb-stars">' + (cl ? '\u2b50' : '\u2606') + '</div>' +
+        '<div class="sb-num">EP.' + ep.id + '-' + stageIndex + '</div>' +
+        '<div class="sb-rec-level">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
       '</div>' +
       '<div class="sb-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
-      '<div class="sb-difficulty">' +
-        '<div class="sb-diff-bar">' +
-          '<div class="sb-diff-fill" style="width:' + st.difficulty + '%;background:' + diffColor + '"></div>' +
-        '</div>' +
-        '<div class="sb-diff-label">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
-      '</div>' +
       '<button class="sb-info-btn" onclick="event.stopPropagation(); showStageInfo(' + st.id + ')">' +
         'ℹ️ ' + t('stage.info') +
       '</button>';
@@ -141,10 +132,20 @@ var init = async function() {
   setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
 };
 
+// ── 클래스 아이콘 반환 ──────────────────────
+function getClassIcon(cls) {
+  if (!JAB[cls]) return '❓';
+  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:20px;height:20px">';
+}
+
 // ── 스테이지 정보 모달 ────────────────────────
 function showStageInfo(stageId) {
   var st = STAGES.find(function(s) { return s.id === stageId; });
   if (!st) return;
+
+  // EP.x-y 형식으로 표시
+  var ep = Math.floor((st.id - 1) / 10) + 1;
+  var stageIndex = ((st.id - 1) % 10) + 1;
 
   // 적 구성 HTML
   var compHTML = Object.entries(st.enemyComposition || {})
@@ -152,18 +153,9 @@ function showStageInfo(stageId) {
     .map(function(entry) {
       var cls = entry[0], count = entry[1];
       return '<div class="si-enemy-row">' +
-        '<span class="si-enemy-icon">' + (CD[cls] ? CD[cls].icon : '❓') + '</span>' +
+        '<span class="si-enemy-icon">' + getClassIcon(cls) + '</span>' +
         '<span class="si-enemy-name">' + t('classes.' + cls) + '</span>' +
         '<span class="si-enemy-count">×' + count + '</span>' +
-      '</div>';
-    }).join('');
-
-  // 권장 클래스 HTML
-  var recHTML = (st.recommendedClasses || [])
-    .map(function(cls) {
-      return '<div class="si-rec-class">' +
-        '<span class="si-rec-icon">' + (CD[cls] ? CD[cls].icon : '❓') + '</span>' +
-        '<span class="si-rec-name">' + t('classes.' + cls) + '</span>' +
       '</div>';
     }).join('');
 
@@ -178,45 +170,38 @@ function showStageInfo(stageId) {
       '<div class="si-boss-label">💀 ' + t('stage.boss') + '</div>' +
       '<div class="si-boss-name">' + st.boss.name + '</div>' +
       '<div class="si-boss-class">' +
-        (CD[st.boss.cls] ? CD[st.boss.cls].icon : '❓') + ' ' +
+        getClassIcon(st.boss.cls) + ' ' +
         t('classes.' + st.boss.cls) +
       '</div>' +
     '</div>' : '';
 
-  var diffColor = st.difficulty < 30 ? 'var(--green)' :
-                  st.difficulty < 60 ? 'var(--gold)' :
-                  '#ef4444';
-
   var modalContent =
     '<div class="stage-info-modal">' +
       '<div class="si-header">' +
-        '<div class="si-stage-num">' + t('stage.stage') + ' ' + st.id + '</div>' +
-        '<div class="si-stage-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
-      '</div>' +
-      '<div class="si-section">' +
-        '<div class="si-section-title">' + t('stage.difficulty_rating') + '</div>' +
-        '<div class="si-diff-bar">' +
-          '<div class="si-diff-fill" style="width:' + st.difficulty + '%;background:' + diffColor + '"></div>' +
+        '<div class="si-header-top">' +
+          '<div class="si-stage-num">EP.' + ep + '-' + stageIndex + '</div>' +
+          '<div class="si-rec-level">' + t('stage.recommended_level_full', {level: st.recommendedLevel}) + '</div>' +
         '</div>' +
-        '<div class="si-rec-level">' + t('stage.recommended_level_full', {level: st.recommendedLevel}) + '</div>' +
+        '<div class="si-stage-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
       '</div>' +
       bossHTML +
       '<div class="si-section">' +
-        '<div class="si-section-title">' + t('stage.enemy_composition') + '</div>' +
-        '<div class="si-enemy-list">' + compHTML + '</div>' +
-        '<div class="si-meta">' +
-          t('stage.total_enemies', {count: st.tot}) + ' · ' +
-          t('stage.wave_count', {count: st.spw}) +
+        '<div class="si-section-header">' +
+          '<div class="si-section-title">' + t('stage.enemy_composition') + '</div>' +
+          '<div class="si-meta">' +
+            '[' + t('stage.total_enemies', {count: st.tot}) + ' / ' +
+            t('stage.wave_count', {count: st.spw}) + ']' +
+          '</div>' +
         '</div>' +
+        '<div class="si-enemy-list">' + compHTML + '</div>' +
       '</div>' +
       '<div class="si-section">' +
         '<div class="si-section-title">' + t('stage.recommended_strategy') + '</div>' +
-        '<div class="si-rec-classes">' + recHTML + '</div>' +
         '<ul class="si-tips">' + tipsHTML + '</ul>' +
       '</div>' +
     '</div>';
 
-  showModal(t('stage.stage_info'), modalContent, [
+  showModal('', modalContent, [
     {text: t('common.close'), onClick: closeModal}
   ]);
 }
