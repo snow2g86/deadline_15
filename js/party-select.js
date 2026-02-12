@@ -395,43 +395,6 @@ function renderChars() {
     html += '</div>';
 
     // 포션 & 공성 아이템 (아래쪽)
-    html += '<div class="eq-char-items">';
-
-    // 포션 표시
-    html += '<div class="eq-char-item-row" style="margin-bottom:6px;">';
-    html += '<span class="eq-item-label">💊</span>';
-    if (ch.battle_potions && ch.battle_potions.length > 0) {
-      for (var pi = 0; pi < ch.battle_potions.length; pi++) {
-        var bpPid = ch.battle_potions[pi];
-        var bpInv = null;
-        for (var k = 0; k < inv.length; k++) { if (inv[k].pid === bpPid) { bpInv = inv[k]; break; } }
-        var pot = bpInv ? BATTLE_POTIONS[bpInv.potionId] : null;
-        var potLabel = bpInv ? t('battle_potions.' + bpInv.potionId) : '?';
-        html += '<span class="eq-item-icon" title="' + potLabel + '">' + (pot ? pot.icon : '?') + '</span>';
-      }
-    } else {
-      html += '<span class="eq-item-empty">-</span>';
-    }
-    html += '</div>';
-
-    // 공성 아이템 표시
-    html += '<div class="eq-char-item-row">';
-    html += '<span class="eq-item-label">⚙️</span>';
-    if (ch.siege_items && ch.siege_items.length > 0) {
-      for (var si = 0; si < ch.siege_items.length; si++) {
-        var siSid = ch.siege_items[si];
-        var siInv = null;
-        for (var k2 = 0; k2 < inv.length; k2++) { if (inv[k2].sid === siSid) { siInv = inv[k2]; break; } }
-        var siege = siInv ? SIEGE_ITEMS.find(function(s) { return s.id === siInv.siegeId; }) : null;
-        var siegeLabel = siInv ? t('shop.' + siInv.siegeId) : '?';
-        html += '<span class="eq-item-icon" title="' + siegeLabel + '">' + (siege ? siege.icon : '?') + '</span>';
-      }
-    } else {
-      html += '<span class="eq-item-empty">-</span>';
-    }
-    html += '</div>';
-
-    html += '</div>';
 
     card.innerHTML = html;
     card.className += (isInParty ? ' party-member' : '');
