@@ -27,7 +27,7 @@
   background:rgba(0,0,0,.7);border:1px solid}
 
 /* 장비 슬롯 그리드 */
-.eq-char-equips{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:4px;width:100%}
+.eq-char-equips{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:4px;width:100%}
 
 .eq-char-slot{width:100%;aspect-ratio:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:3px;position:relative;display:flex;align-items:center;justify-content:center;font-size:8px;color:rgba(255,255,255,.3)}
 .eq-char-slot.filled{border-width:2px}
@@ -131,6 +131,10 @@
 .eq-sell-btn{background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
 .eq-sell-btn:hover{background:rgba(239,68,68,.3)}
 .eq-inv-equipped{font-size:8px;color:#60a5fa;font-weight:700}
+.eq-inv-restrict{display:block;font-size:8px;color:#ef4444;margin-top:2px;font-weight:700;padding:2px 4px;background:rgba(239,68,68,.1);border-radius:3px;border:1px solid rgba(239,68,68,.3)}
+
+/* ═══ Character Card Items (Hidden) ═══ */
+.eq-char-items{display:none}
 
 /* ═══ 2-COLUMN LAYOUT SYSTEM ═══ */
 @media(min-width:1024px){
@@ -458,9 +462,12 @@
   padding: 0;
 }
 
-/* 모달 내부는 기존 eq-body 스타일 재사용 */
+/* 모달 내부는 기존 eq-body 스타일 재사용 — 중첩 스크롤 방지 */
 .eq-modal-body .eq-body {
   padding: 16px 20px;
+  overflow-y: visible;
+  flex: none;
+  max-width: none;
 }
 
 /* 모바일 최적화 */
@@ -481,5 +488,8 @@
 
   .eq-modal-body .eq-body {
     padding: 12px 16px;
+    overflow-y: visible;
+    flex: none;
+    max-width: none;
   }
 }
