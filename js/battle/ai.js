@@ -477,5 +477,5 @@ Object.assign(G, {
     if(!al.length&&!this.hasAllyWall()){this.over=true;this.showRes(false,t('messages.all_defeated'));return}
     const s=this.cStage;if(s){const limit=Math.ceil(s.tot/4);
       if(this.breached>=limit){this.over=true;this.showRes(false,t('messages.enemy_breached',{count:this.breached}));return}}
-    if(s&&this.eSpwn>=s.tot&&!en.length){this.over=true;this.cleared.add(s.id);this.showRes(true,t('messages.stage_clear',{stage_id:s.id,turn:this.turn}))}},
+    if(s&&this.eSpwn>=s.tot&&!en.length){this.over=true;this.showRes(true,t('messages.stage_clear',{stage_id:s.id,turn:this.turn}))}},
 });

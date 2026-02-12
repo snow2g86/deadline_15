@@ -144,7 +144,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
     document.getElementById('modal-title').className=win?'win':'lose';
     const deadAllyCount=this._deadAllyUids.length;
     let sub=msg;
-    if(win&&reward)sub+=`\n🏅 ${t('messages.reward')}: ${reward} Gold`;
+    if(win&&reward)sub+=`\n<img src="image/icon/64x64/fc67.png" alt="Gold" style="width:16px;height:16px;vertical-align:middle;"> ${t('messages.reward')}: ${reward} Gold`;
     if(win&&this._firstClearBonus){sub+=`\n🎉 ${t('messages.first_clear_bonus')}: +${this._firstClearBonus} Gold`;this._firstClearBonus=0}
     if(win&&this._firstClearUnit){const fc=this._firstClearUnit,fd=JAB[fc.cls];sub+=`\n🎁 ${t('messages.first_clear_unit',{cls: t('classes.'+fc.cls)})}`;this._firstClearUnit=null}
     if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}
@@ -155,8 +155,8 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
         const ch=getChar(r.uid);if(!ch)return;
         const d=JAB[ch.cls];
         const charName = ch.customName || t('character.names')[ch.nameId] || d.icon;
-        let line=`\n${d.icon} ${charName}: +${r.exp} EXP`;
-        if(r.leveled>0)line+=` ⬆ Lv.${r.prevLv}→${ch.lv}`;
+        let line=`\n${clsIcon(ch.cls,16)} ${charName}: +${r.exp} EXP`;
+        if(r.leveled>0)line+=` <img src="image/icon/64x64/fc675.png" alt="LvUp" style="width:14px;height:14px;vertical-align:middle;margin:0 2px;"> Lv.${r.prevLv}→${ch.lv}`;
         sub+=line;
       });
     }
