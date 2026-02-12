@@ -25,6 +25,7 @@ window._LANG_ko = {
         "sanctuary": "성소",
         "academy": "아카데미",
         "equip": "장비",
+        "enhance": "강화",
         "shop": "상점",
         "compendium": "도감",
         "settings": "설정",
@@ -344,6 +345,7 @@ window._LANG_ko = {
         "volume": "볼륨",
         "game_speed": "게임 속도",
         "reset_all": "모든 데이터 초기화",
+        "licenses": "오픈소스 라이선스",
         "language_ko": "한국어 (Korean)",
         "language_en": "English",
         "language_es": "Español"
@@ -1286,5 +1288,27 @@ window._LANG_ko = {
             "장기용",
             "장동건"
         ]
+    },
+    "enhance": {
+        "subtitle": "장비 강화",
+        "button_enhance": "강화",
+        "select_material": "재료 선택",
+        "material_hint": "같은 슬롯의 장비를 선택하세요",
+        "no_items": "강화 가능한 장비가 없습니다",
+        "no_materials": "사용 가능한 재료 장비가 없습니다",
+        "confirm_title": "강화 확인",
+        "target_item": "대상 장비",
+        "material_item": "재료 장비 (소멸)",
+        "material_consumed": "강화 시도 시 소모됩니다",
+        "success_title": "✅ 강화 성공!",
+        "fail_title": "❌ 강화 실패",
+        "fail_msg": "재료가 소모되었습니다.",
+        "fail_pity": "실패 {count}회 누적",
+        "pity_ready": "다음 강화는 100% 성공합니다!",
+        "pity_counter": "실패: {current}/{total}",
+        "error_invalid": "유효하지 않은 장비입니다",
+        "error_equipped": "장착 중인 장비는 강화할 수 없습니다",
+        "error_material_equipped": "장착 중인 장비는 재료로 사용할 수 없습니다",
+        "error_slot_mismatch": "같은 슬롯의 장비만 재료로 사용할 수 있습니다"
     }
 };

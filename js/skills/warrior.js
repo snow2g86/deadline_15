@@ -13,8 +13,9 @@ registerSkill('warrior_powersmash', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		const dmg = Math.max(1, Math.round(u.atk*1.5 - tgt.def));
 		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:10,colors:['#fff','#ff8800','#ffcc00'],shape:'cross',speed:3,spread:10,decay:0.03,size:5});
 		procFury(u, tgt, G);
 		G.floatT(u.x, u.y, t('messages.warrior_strike'), 'heal');
 		G._grantExp(u, 'attack');
@@ -36,13 +37,16 @@ registerSkill('warrior_cleave', {
 				const dmg = Math.max(1, Math.round(u.atk*1.2*G.skMul(u,'warrior_cleave')) - tgt.def);
 				tgt.hp = Math.max(0, tgt.hp - dmg);
 				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#f44','#f80','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:10,colors:['#f44','#f80','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
+				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#ff4400','#ffcc00'],shape:'cross',speed:2,spread:6,decay:0.03,size:3});
 				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 			}
 		});
-		G.sfxAtk(u.cls); G._grantExp(u, 'attack');
+		G.sfxAtk(u.cls); G.screenShake(true); G.vfxFlash('rgba(255,100,0,.2)'); G._grantExp(u, 'attack');
 		G.floatT(u.x, u.y, t('messages.warrior_cleave'), 'heal');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:15,colors:['#ff4400','#ff8800','#ffcc00'],shape:'ring',speed:4,spread:16,decay:0.02,size:6});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:28,colors:['#ff4400','#ff8800','#ffcc00'],shape:'ring',speed:5,spread:20,decay:0.015,size:8});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:12,colors:['#fff','#ffcc00'],shape:'slash',speed:5,spread:16,decay:0.03,size:5});
+		setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:10,colors:['#ff4400','#ff8800'],shape:'star',speed:3,spread:14,decay:0.025,size:4}),80);
 		procFury(u, u, G);
 		_skillDone(u, G, {delay:500, chkEnd:true});
 	}
@@ -72,13 +76,16 @@ registerSkill('warrior_assault', {
 					const dmg=Math.max(1,Math.round(u.atk*0.8*G.skMul(u,'warrior_assault'))-e.def);
 					e.hp=Math.max(0,e.hp-dmg);
 					G.floatT(e.x,e.y,`-${dmg}`,'damage');G.shakeU(e.id);
-					G.vfxSpawn(G.uSX(e.x,e.y)+UCX,G.uSY(e.x,e.y)+UCY,{count:6,colors:['#f44','#f80','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+					G.vfxSpawn(G.uSX(e.x,e.y)+UCX,G.uSY(e.x,e.y)+UCY,{count:10,colors:['#f44','#f80','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
+					G.vfxSpawn(G.uSX(e.x,e.y)+UCX,G.uSY(e.x,e.y)+UCY,{count:3,colors:['#ff4400','#ffcc00'],shape:'cross',speed:2,spread:5,decay:0.03,size:3});
 					if(e.hp<=0){G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(e);G.deathA(e.id);G._rmDead()}
 				}
 			});
-			G.sfxAtk(u.cls); G._grantExp(u,'attack');
+			G.sfxAtk(u.cls); G.sfxExplosion(); G.screenShake(true); G.vfxFlash('rgba(255,80,0,.25)'); G._grantExp(u,'attack');
 			G.floatT(u.x,u.y,t('messages.warrior_assault'),'heal');
-			G.vfxSpawn(G.uSX(u.x,u.y)+UCX,G.uSY(u.x,u.y)+UCY,{count:20,colors:['#ff4400','#ff8800','#ffcc00'],shape:'spark',speed:5,spread:18,decay:0.02,size:5});
+			G.vfxSpawn(G.uSX(u.x,u.y)+UCX,G.uSY(u.x,u.y)+UCY,{count:30,colors:['#ff4400','#ff8800','#ffcc00'],shape:'spark',speed:7,spread:22,decay:0.015,size:7});
+			G.vfxSpawn(G.uSX(u.x,u.y)+UCX,G.uSY(u.x,u.y)+UCY,{count:6,colors:['#ff440044'],shape:'ring',speed:0,spread:5,decay:0.01,size:18});
+			setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX,G.uSY(u.x,u.y)+UCY,{count:12,colors:['#ff4400','#ff8800'],shape:'star',speed:4,spread:16,decay:0.02,size:5}),100);
 			procFury(u,u,G);
 			_skillDone(u, G, {delay:500, chkEnd:true});
 		},360);
@@ -96,11 +103,14 @@ registerSkill('warrior_criticalstrike', {
 		const dmg = Math.max(1, Math.round(u.atk*G.skMul(u,'warrior_criticalstrike')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
 		tgt._bleedTurns = 3; tgt._bleedDmg = Math.max(1, Math.round(u.atk*0.2));
-		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		G.floatT(tgt.x, tgt.y, t('messages.warrior_bleed'), 'debuff');
 		G.floatT(u.x, u.y, t('messages.warrior_criticalstrike'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#dc2626','#ef4444','#fff'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
+		G.vfxFlash('rgba(220,38,38,.2)');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:18,colors:['#dc2626','#ef4444','#fff'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#dc262644'],shape:'ring',speed:0,spread:4,decay:0.015,size:14});
+		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#dc2626','#ef4444'],shape:'cross',speed:2,spread:8,decay:0.03,size:4}),60);
 		procFury(u, tgt, G);
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');

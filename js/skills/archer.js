@@ -37,10 +37,12 @@ registerSkill('archer_snipe', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		const dmg = Math.max(1, Math.round(u.atk*1.5*G.skMul(u,'archer_snipe')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		G.floatT(u.x, u.y, t('messages.archer_snipe'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#f44','#ff8','#fff'],shape:'spark',speed:5,spread:14,decay:0.02,size:4});
+		G.vfxFlash('rgba(255,68,68,.15)');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:18,colors:['#f44','#ff8','#fff'],shape:'spark',speed:6,spread:16,decay:0.018,size:5});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#f4444444'],shape:'ring',speed:0,spread:3,decay:0.015,size:12});
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, chkEnd:true});
@@ -64,11 +66,12 @@ registerSkill('archer_rapidfire', {
 			const dmg = Math.max(1, Math.round(u.atk*0.8*G.skMul(u,'archer_rapidfire')) - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
 			totalDmg += dmg;
-			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#ff8','#f80','#fff'],shape:'spark',speed:3,spread:6,decay:0.03,size:2});
+			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#ff8','#f80','#fff'],shape:'spark',speed:4,spread:8,decay:0.025,size:3});
 		}
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 		G.floatT(tgt.x, tgt.y, `-${totalDmg}`, 'damage');
 		G.floatT(u.x, u.y, t('messages.archer_rapidfire', {hits}), 'heal');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#ff880044'],shape:'ring',speed:0,spread:3,decay:0.015,size:10});
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, chkEnd:true});
@@ -93,13 +96,15 @@ registerSkill('archer_steelrain', {
 				const dmg = Math.max(1, Math.round(u.atk*1.0*G.skMul(u,'archer_steelrain')) - tgt.def);
 				tgt.hp = Math.max(0, tgt.hp - dmg);
 				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#888','#aaa','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:10,colors:['#888','#aaa','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
 				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 			}
 		}
-		G.sfxAtk(u.cls); G._grantExp(u, 'attack');
+		G.sfxAtk(u.cls); G.screenShake(true); G.vfxFlash('rgba(136,136,136,.2)'); G._grantExp(u, 'attack');
 		G.floatT(u.x, u.y, t('messages.archer_steelrain'), 'heal');
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:20,colors:['#888','#aaa','#ccc','#fff'],shape:'spark',speed:5,spread:18,decay:0.02,size:4});
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:30,colors:['#888','#aaa','#ccc','#fff'],shape:'spark',speed:7,spread:22,decay:0.015,size:6});
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:8,colors:['#88888844'],shape:'arrow',speed:0,spread:12,decay:0.02,size:5,vy:3,gravity:0.1});
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:4,colors:['#88888844'],shape:'ring',speed:0,spread:4,decay:0.012,size:16});
 		_skillDone(u, G, {delay:500, chkEnd:true});
 	}
 });

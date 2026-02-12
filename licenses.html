@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>DEADLINE 15</title>
+	<link rel="stylesheet" href="css/common.css">
+	<script type="text/javascript" src="js/common/i18n.js"></script>
+	<style>
+		body[data-page="licenses"] {
+			display: flex;
+			flex-direction: column;
+			height: 100dvh;
+			overflow: hidden
+		}
+
+		body[data-page="licenses"] #top-nav {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 60px;
+			padding: 0 16px;
+			z-index: 1000;
+			background: var(--panel);
+			border-bottom: 1px solid rgba(255, 255, 255, .08)
+		}
+
+		body[data-page="licenses"] main {
+			margin-top: 60px;
+			flex: 1;
+			overflow-y: auto;
+			padding: 20px 16px 40px;
+			display: flex;
+			flex-direction: column;
+			align-items: center
+		}
+
+		.lic-container {
+			width: 100%;
+			max-width: 400px;
+			display: flex;
+			flex-direction: column;
+			gap: 16px
+		}
+
+		.lic-section {
+			background: rgba(255, 255, 255, .04);
+			border: 1px solid rgba(255, 255, 255, .08);
+			border-radius: 10px;
+			padding: 14px 16px
+		}
+
+		.lic-name {
+			font-size: 13px;
+			font-weight: 900;
+			color: var(--text);
+			margin-bottom: 4px
+		}
+
+		.lic-author {
+			font-size: 10px;
+			color: var(--dim);
+			margin-bottom: 6px
+		}
+
+		.lic-type {
+			display: inline-block;
+			font-size: 9px;
+			font-weight: 700;
+			color: #4ade80;
+			background: rgba(74, 222, 128, .1);
+			padding: 2px 8px;
+			border-radius: 4px;
+			margin-bottom: 8px
+		}
+
+		.lic-desc {
+			font-size: 10px;
+			color: var(--dim);
+			line-height: 1.5
+		}
+
+		.lic-url {
+			font-size: 9px;
+			color: #60a5fa;
+			text-decoration: none;
+			word-break: break-all
+		}
+
+		.lic-url:hover {
+			text-decoration: underline
+		}
+
+		.lic-footer {
+			text-align: center;
+			font-size: 9px;
+			color: rgba(255, 255, 255, .2);
+			margin-top: 8px
+		}
+
+		@media(min-width:1024px) {
+			body[data-page="licenses"] #top-nav {
+				height: 64px
+			}
+
+			body[data-page="licenses"] main {
+				margin-top: 64px
+			}
+
+			.lic-container {
+				max-width: 500px
+			}
+
+			.lic-name {
+				font-size: 15px
+			}
+
+			.lic-desc {
+				font-size: 11px
+			}
+		}
+	</style>
+	<script>
+		var init = async function () {
+			await i18nInit();
+		};
+	</script>
+</head>
+
+<body data-page="licenses" onload="init();">
+	<header id="top-nav">
+		<button id="nav-back" onclick="location.href='settings.html'">
+			<svg viewBox="0 0 24 24">
+				<polyline points="15 18 9 12 15 6" />
+			</svg>
+		</button>
+		<div id="nav-title" data-i18n="settings.licenses">Open Source Licenses</div>
+	</header>
+	<main>
+		<div class="lic-container">
+
+			<div class="lic-section">
+				<div class="lic-name">Noto Sans KR</div>
+				<div class="lic-author">Google</div>
+				<div class="lic-type">SIL Open Font License 1.1</div>
+				<div class="lic-desc">
+					This Font Software is licensed under the SIL Open Font License, Version 1.1.
+					This license is available with a FAQ at:
+					<a class="lic-url" href="https://scripts.sil.org/OFL" target="_blank" rel="noopener">https://scripts.sil.org/OFL</a>
+				</div>
+			</div>
+
+			<div class="lic-section">
+				<div class="lic-name">Cinzel</div>
+				<div class="lic-author">Natanael Gama</div>
+				<div class="lic-type">SIL Open Font License 1.1</div>
+				<div class="lic-desc">
+					This Font Software is licensed under the SIL Open Font License, Version 1.1.
+					This license is available with a FAQ at:
+					<a class="lic-url" href="https://scripts.sil.org/OFL" target="_blank" rel="noopener">https://scripts.sil.org/OFL</a>
+				</div>
+			</div>
+
+			<div class="lic-footer">DEADLINE 15 &copy; 2026 show4you &middot; MIT License</div>
+		</div>
+	</main>
+</body>
+
+</html>

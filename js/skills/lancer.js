@@ -17,13 +17,15 @@ registerSkill('lancer_pierce', {
 			if (tgt) {
 				const dmg = Math.max(1, u.atk - tgt.def); tgt.hp = Math.max(0, tgt.hp - dmg);
 				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#6af','#48f','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#6af','#48f','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
+				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:3,colors:['#6af','#48f'],shape:'slash',speed:3,spread:6,decay:0.03,size:3});
 				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
 			}
 		}
-		G.sfxAtk(u.cls); G._grantExp(u, 'attack');
+		G.sfxAtk(u.cls); G.screenShake(); G._grantExp(u, 'attack');
 		G.floatT(u.x, u.y, t('messages.lancer_pierce'), 'heal');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:12,colors:['#6af','#48f','#aaf'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:16,colors:['#6af','#48f','#aaf'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:4,colors:['#6af44'],shape:'ring',speed:0,spread:3,decay:0.015,size:12});
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
 });
@@ -56,10 +58,12 @@ registerSkill('lancer_charge', {
 		setTimeout(() => {
 			const dmg = Math.max(1, Math.round(u.atk * 1.2 * G.skMul(u, 'lancer_charge')) - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
-			G.sfxAtk(u.cls); G.shakeU(tgt.id);
+			G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 			G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 			G.floatT(u.x, u.y, t('messages.lancer_charge'), 'heal');
-			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#6af','#48f','#fff'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
+			G.vfxFlash('rgba(106,170,255,.2)');
+			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:18,colors:['#6af','#48f','#fff'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
+			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#6af44'],shape:'ring',speed:0,spread:4,decay:0.015,size:14});
 			procFury(u, tgt, G);
 			if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
 			G._grantExp(u, 'attack');
@@ -81,7 +85,9 @@ registerSkill('lancer_phalanx', {
 		});
 		G.sfxHeal();
 		G.floatT(u.x, u.y, t('messages.lancer_phalanx'), 'heal');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:15,colors:['#60a5fa','#3b82f6','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
+		G.vfxFlash('rgba(96,165,250,.12)');
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:22,colors:['#60a5fa','#3b82f6','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:6,colors:['#60a5fa','#93c5fd'],shape:'diamond',speed:1.5,spread:10,decay:0.025,size:3,vy:-1.5}),80);
 		procFury(u, u, G); G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}

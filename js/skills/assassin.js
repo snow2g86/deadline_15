@@ -10,8 +10,10 @@ registerSkill('assassin_assassinate', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		const dmg = Math.max(1, u.atk*5 - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:20,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
-		G.screenShake(); G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:25,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:6,spread:18,decay:0.018,size:6});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#7c3aed44'],shape:'ring',speed:0,spread:4,decay:0.012,size:16});
+		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#a855f7','#c4b5fd'],shape:'star',speed:3,spread:12,decay:0.025,size:4}),70);
+		G.screenShake(true); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.vfxFlash('rgba(124,58,237,.25)');
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		G.floatT(u.x, u.y, t('messages.assassin_assassinate'), 'heal');
 		if (tgt.hp<=0) {G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
@@ -40,8 +42,9 @@ registerSkill('assassin_ambush', {
 		setTimeout(() => {
 			const dmg = Math.max(1, u.atk*2 - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
-			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#a855f7','#fff','#c4b5fd'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
-			G.sfxAtk(u.cls); G.shakeU(tgt.id);
+			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:16,colors:['#a855f7','#fff','#c4b5fd'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
+			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#a855f7','#7c3aed'],shape:'slash',speed:3,spread:8,decay:0.03,size:4});
+			G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 			G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 			G.floatT(u.x, u.y, t('messages.assassin_raid'), 'heal');
 			if (tgt.hp<=0) {

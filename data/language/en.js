@@ -24,8 +24,9 @@ window._LANG_en = {
         "party": "Party",
         "sanctuary": "Sanctuary",
         "academy": "Academy",
-        "shop": "Shop",
         "equip": "Equip",
+        "enhance": "Enhance",
+        "shop": "Shop",
         "compendium": "Compendium",
         "settings": "Settings",
         "lobby": "Lobby"
@@ -355,6 +356,7 @@ window._LANG_en = {
         "volume": "Volume",
         "game_speed": "Game Speed",
         "reset_all": "Reset All Data",
+        "licenses": "Open Source Licenses",
         "language_ko": "한국어 (Korean)",
         "language_en": "English",
         "language_es": "Español"
@@ -1296,5 +1298,27 @@ window._LANG_en = {
             "Jang Giyong",
             "Jang Donggun"
         ]
+    },
+    "enhance": {
+        "subtitle": "Equipment Enhancement",
+        "button_enhance": "Enhance",
+        "select_material": "Select Material",
+        "material_hint": "Select equipment from the same slot",
+        "no_items": "No equipment available for enhancement",
+        "no_materials": "No material equipment available",
+        "confirm_title": "Confirm Enhancement",
+        "target_item": "Target Equipment",
+        "material_item": "Material Equipment (Consumed)",
+        "material_consumed": "Will be consumed on enhancement attempt",
+        "success_title": "✅ Enhancement Success!",
+        "fail_title": "❌ Enhancement Failed",
+        "fail_msg": "The material has been consumed.",
+        "fail_pity": "Failed attempts: {count}",
+        "pity_ready": "Next enhancement is guaranteed 100% success!",
+        "pity_counter": "Failures: {current}/{total}",
+        "error_invalid": "Invalid equipment",
+        "error_equipped": "Cannot enhance equipped items",
+        "error_material_equipped": "Cannot use equipped items as material",
+        "error_slot_mismatch": "Material must be from the same slot"
     }
 };

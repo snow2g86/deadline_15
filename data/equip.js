@@ -137,7 +137,9 @@ function generateEquip(template, rarity) {
     clsRestrict: cls,
     setId: template.setId || null,
     stats: rolled,
-    equipped: null
+    equipped: null,
+    enhanceLv: 0,
+    enhanceAttempts: 0
   };
 }
 
@@ -183,8 +185,9 @@ function calcEquipBonus(ch) {
     if (!eid) continue;
     var item = invMap[eid];
     if (!item) continue;
-    for (var stat in item.stats) {
-      if (bonus[stat] !== undefined) bonus[stat] += item.stats[stat];
+    var enhancedStats = getEnhancedStats(item);
+    for (var stat in enhancedStats) {
+      if (bonus[stat] !== undefined) bonus[stat] += enhancedStats[stat];
     }
     if (item.setId) {
       setCounts[item.setId] = (setCounts[item.setId] || 0) + 1;
@@ -213,4 +216,67 @@ function ensureEquipSlots(ch) {
     ch.equip = { weapon: null, offhand: null, helmet: null, armor: null, boots: null, necklace: null, earring: null, ring: null };
   }
   return ch;
+}
+
+// ═══════════════════════════════════════════
+// 장비 강화 시스템 (Enhancement System)
+// ═══════════════════════════════════════════
+
+var ENHANCE_MAX_LV = 10;
+var ENHANCE_PITY_THRESHOLD = 3;
+
+var ENHANCE_RATES = {
+  0: 1.00,  // +0→+1: 100%
+  1: 1.00,  // +1→+2: 100%
+  2: 0.80,  // +2→+3: 80%
+  3: 0.80,  // +3→+4: 80%
+  4: 0.60,  // +4→+5: 60%
+  5: 0.60,  // +5→+6: 60%
+  6: 0.40,  // +6→+7: 40%
+  7: 0.40,  // +7→+8: 40%
+  8: 0.20,  // +8→+9: 20%
+  9: 0.20   // +9→+10: 20%
+};
+
+var ENHANCE_BASE_COST = 50;
+var ENHANCE_RARITY_COST = {
+  common: 1.0,
+  uncommon: 1.5,
+  rare: 2.0,
+  epic: 3.0,
+  legendary: 5.0
+};
+
+var ENHANCE_STAT_MULT = 0.10;
+
+// 강화 비용 계산
+function calcEnhanceCost(item) {
+  var base = ENHANCE_BASE_COST;
+  var rarityMult = ENHANCE_RARITY_COST[item.rarity] || 1.0;
+  return Math.round(base * (item.enhanceLv + 1) * rarityMult);
+}
+
+// 강화된 스탯 반환 (강화 레벨 적용)
+function getEnhancedStats(item) {
+  if (!item || !item.enhanceLv) return item.stats;
+  var mult = 1 + (item.enhanceLv * ENHANCE_STAT_MULT);
+  var enhanced = {};
+  for (var stat in item.stats) {
+    enhanced[stat] = Math.round(item.stats[stat] * mult);
+  }
+  return enhanced;
+}
+
+// 강화 가능 여부 확인
+function canEnhance(item) {
+  return (item.enhanceLv || 0) < ENHANCE_MAX_LV;
+}
+
+// 성공률 계산 (pity 시스템 포함)
+function calcEnhanceRate(item) {
+  var baseRate = ENHANCE_RATES[item.enhanceLv || 0] || 0;
+  if ((item.enhanceAttempts || 0) >= ENHANCE_PITY_THRESHOLD) {
+    return 1.00; // Pity 발동: 100% 성공
+  }
+  return baseRate;
 }

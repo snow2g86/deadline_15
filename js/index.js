@@ -127,24 +127,27 @@ var init = async function() {
 			if (changed) localStorage.setItem('game_roster', JSON.stringify(rd));
 		}
 	} catch(_) {}
-	// Auto-revive: 생존 클랜원이 4명 이하면 가장 마지막 사망자 자동 부활
+	// Auto-revive: 생존 클랜원이 5명 미만이면 5명이 될 때까지 자동 부활
 	try {
 		var rr = JSON.parse(localStorage.getItem('game_roster'));
 		if (rr && rr.chars) {
 			var alive = rr.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
-			if (alive.length <= 4) {
+			if (alive.length < 5) {
 				var dead = rr.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_'); });
 				if (dead.length) {
 					dead.sort(function(a, b) { return (b.diedAt || 0) - (a.diedAt || 0); });
-					var revived = dead[0];
-					revived.dead = false;
-					delete revived.diedAt;
-					revived.hp = JAB[revived.cls] ? JAB[revived.cls].base.hp : 1;
-					localStorage.setItem('game_roster', JSON.stringify(rr));
+					var need = Math.min(5 - alive.length, dead.length);
+					var revivedNames = [];
 					var names = _resolve(_i18nData, 'character.names') || [];
-					var rName = revived.customName || names[revived.nameId] || '???';
+					for (var ri = 0; ri < need; ri++) {
+						dead[ri].dead = false;
+						delete dead[ri].diedAt;
+						dead[ri].hp = JAB[dead[ri].cls] ? JAB[dead[ri].cls].base.hp : 1;
+						revivedNames.push(dead[ri].customName || names[dead[ri].nameId] || '???');
+					}
+					localStorage.setItem('game_roster', JSON.stringify(rr));
 					setTimeout(function() {
-						showAlert(t('messages.auto_revive', {name: rName}));
+						showAlert(t('messages.auto_revive', {name: revivedNames.join(', ')}));
 					}, 1200);
 				}
 			}

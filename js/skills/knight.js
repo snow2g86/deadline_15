@@ -37,12 +37,14 @@ registerSkill('knight_charge', {
 		const dmg = Math.max(1, Math.round(u.atk*0.8*G.skMul(u,'knight_charge')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
 		tgt.stunned = Math.max(tgt.stunned || 0, 1);
-		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id);
+		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		G.floatT(tgt.x, tgt.y, t('messages.stunned'), 'debuff');
 		procFury(u, tgt, G);
 		G.floatT(u.x, u.y, t('messages.knight_charge'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:15,colors:['#60a5fa','#3b82f6','#fff'],shape:'spark',speed:4,spread:14,decay:0.025,size:4});
+		G.vfxFlash('rgba(96,165,250,.2)');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:20,colors:['#60a5fa','#3b82f6','#fff'],shape:'spark',speed:5,spread:16,decay:0.02,size:5});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#60a5fa44'],shape:'ring',speed:0,spread:4,decay:0.015,size:14});
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, chkEnd:true});
@@ -86,8 +88,10 @@ registerSkill('knight_capture', {
 		G.animU(enemy.id, adj.x, adj.y);
 		G.floatT(u.x, u.y, t('messages.knight_capture'), 'heal');
 		G.floatT(enemy.x, enemy.y, t('messages.knight_captured'), 'damage');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:12,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:12,decay:0.025,size:4});
-		G.vfxSpawn(G.uSX(enemy.x,enemy.y)+UCX, G.uSY(enemy.x,enemy.y)+UCY, {count:10,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:3,spread:10,decay:0.025,size:4});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:16,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:4,colors:['#f9731644'],shape:'ring',speed:0,spread:3,decay:0.015,size:12});
+		G.vfxSpawn(G.uSX(enemy.x,enemy.y)+UCX, G.uSY(enemy.x,enemy.y)+UCY, {count:14,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:4,spread:12,decay:0.02,size:5});
+		G.screenShake();
 		G.sfxAtk(u.cls); procFury(u, u, G); G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:340});
 	}

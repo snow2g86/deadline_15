@@ -76,9 +76,13 @@ registerSkill('sapper_detonate', {
 			}
 		});
 		G.traps = G.traps.filter(tr => tr !== trap);
-		G.sfxAtk(u.cls);
+		G.sfxAtk(u.cls); G.sfxExplosion(); G.screenShake(true);
 		G.floatT(tx, ty, t('messages.sapper_detonate'), 'heal');
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:20,colors:['#f80','#ff4','#fa0','#fff'],shape:'spark',speed:5,spread:18,decay:0.02,size:6});
+		G.vfxFlash('rgba(255,136,0,.25)');
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:35,colors:['#f80','#ff4','#fa0','#fff'],shape:'spark',speed:7,spread:24,decay:0.015,size:7});
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:6,colors:['#ff880044'],shape:'ring',speed:0,spread:5,decay:0.01,size:20});
+		setTimeout(()=>G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:12,colors:['#f80','#ff4'],shape:'star',speed:3,spread:16,decay:0.02,size:5}),80);
+		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:8,colors:['#ff8800','#ffcc00'],shape:'circle',speed:2,spread:18,decay:0.012,size:4,gravity:0.06});
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}

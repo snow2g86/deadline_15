@@ -24,8 +24,9 @@ window._LANG_es = {
         "party": "Equipo",
         "sanctuary": "Santuario",
         "academy": "Academia",
-        "shop": "Tienda",
         "equip": "Equipar",
+        "enhance": "Mejorar",
+        "shop": "Tienda",
         "compendium": "Compendio",
         "settings": "Configuración",
         "lobby": "Lobby"
@@ -355,6 +356,7 @@ window._LANG_es = {
         "volume": "Volumen",
         "game_speed": "Velocidad del Juego",
         "reset_all": "Reiniciar Todos los Datos",
+        "licenses": "Licencias de C\u00f3digo Abierto",
         "language_ko": "한국어 (Korean)",
         "language_en": "English",
         "language_es": "Español"
@@ -1296,5 +1298,27 @@ window._LANG_es = {
             "Jang Giyong",
             "Jang Donggun"
         ]
+    },
+    "enhance": {
+        "subtitle": "Mejora de Equipo",
+        "button_enhance": "Mejorar",
+        "select_material": "Seleccionar Material",
+        "material_hint": "Selecciona equipo del mismo tipo",
+        "no_items": "No hay equipo disponible para mejorar",
+        "no_materials": "No hay equipo de material disponible",
+        "confirm_title": "Confirmar Mejora",
+        "target_item": "Equipo Objetivo",
+        "material_item": "Equipo de Material (Consumido)",
+        "material_consumed": "Se consumirá en el intento de mejora",
+        "success_title": "✅ ¡Mejora Exitosa!",
+        "fail_title": "❌ Mejora Fallida",
+        "fail_msg": "El material ha sido consumido.",
+        "fail_pity": "Intentos fallidos: {count}",
+        "pity_ready": "¡La próxima mejora es 100% garantizada!",
+        "pity_counter": "Fallos: {current}/{total}",
+        "error_invalid": "Equipo inválido",
+        "error_equipped": "No puedes mejorar equipo equipado",
+        "error_material_equipped": "No puedes usar equipo equipado como material",
+        "error_slot_mismatch": "El material debe ser del mismo tipo"
     }
 };

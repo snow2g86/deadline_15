@@ -74,8 +74,12 @@ Object.assign(G, {
 	doAtk(a, tgt) {
 		const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3;
 		if (bCounter) {
-			const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def); a.hp = Math.max(0, a.hp - cdmg);
-			this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); this.floatT(tgt.x, tgt.y, t('messages.brawler_counter'), 'heal');
+			// 공격 애니메이션 후 약간의 텀 후에 반격(격투가 카운터) 시작 (약 420ms 지연)
+			setTimeout(() => {
+				const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def); a.hp = Math.max(0, a.hp - cdmg);
+				this._grantExp(tgt, 'attack'); // 반격 경험치 획득
+				this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); this.floatT(tgt.x, tgt.y, t('messages.brawler_counter'), 'heal');
+			}, 420);
 		} else {
 			const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
 			tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
@@ -84,7 +88,11 @@ Object.assign(G, {
 			if (a.furyBuff > 0) this.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
 			procFury(a, tgt, this);
 			if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
-				const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
+				// 공격 애니메이션 후 약간의 텀 후에 반격 시작 (약 420ms 지연)
+				setTimeout(() => {
+					this._grantExp(tgt, 'attack'); // 반격 경험치 획득
+					const cdmg = calcDmg(tgt, a); const da = applyDmgToAlly(a, cdmg, this); this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(da.id); this.floatT(da.x, da.y, `-${cdmg}`, 'damage'); procFury(tgt, a, this);
+				}, 420);
 			}
 		}
 		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();

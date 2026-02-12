@@ -3,6 +3,8 @@
 // ═══════════════════════════════════════════
 
 Object.assign(G, {
+	_activeTexts: new Map(), // 위치별 활성 메시지 추적
+
 	rTer() {
 		const w = document.getElementById('iso-world');
 		const existingBgTiles = new Map(), existingHlTiles = new Map();
@@ -160,8 +162,23 @@ Object.assign(G, {
 
 	floatT(x, y, t, tp) {
 		const w = document.getElementById('iso-world'), el = document.createElement('div');
-		el.className = `float-text ${tp}`; el.textContent = t; el.style.left = (this.uSX(x, y) + UCX / 2) + 'px'; el.style.top = (this.uSY(x, y) - 8) + 'px'; el.style.zIndex = 500;
-		w.appendChild(el); setTimeout(() => el.remove(), 950)
+		const posKey = `${x},${y}`;
+		const count = (this._activeTexts.get(posKey) || 0) + 1;
+		this._activeTexts.set(posKey, count);
+
+		const yOffset = -8 - (count - 1) * 18; // 각 메시지마다 18px 위 오프셋
+		el.className = `float-text ${tp}`;
+		el.textContent = t;
+		el.style.left = (this.uSX(x, y) + UCX / 2) + 'px';
+		el.style.top = (this.uSY(x, y) + yOffset) + 'px';
+		el.style.zIndex = 500;
+		w.appendChild(el);
+		setTimeout(() => {
+			el.remove();
+			const newCount = (this._activeTexts.get(posKey) || 1) - 1;
+			if (newCount <= 0) this._activeTexts.delete(posKey);
+			else this._activeTexts.set(posKey, newCount);
+		}, 950)
 	},
 	showAM(u) {
 		const m = document.getElementById('action-menu');

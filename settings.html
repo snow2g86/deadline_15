@@ -9,7 +9,6 @@
 	<link rel="stylesheet" href="css/lobby.css">
 	<script type="text/javascript" src="js/common/i18n.js"></script>
 	<script type="text/javascript" src="js/common/modal.js"></script>
-	<script defer src="js/common/nav.js"></script>
 
 	<script type="text/javascript">
 		var SVG_ICONS = {
@@ -68,7 +67,11 @@
 
 				+ '<div class="sp-divider"></div>'
 				+ '<div style="text-align:center;margin-top:8px">'
-				+ '<button class="sp-btn danger" id="ls-reset"><i class="sp-icon">' + SVG_ICONS.reset + '</i>' + t('settings.reset_all') + '</button></div>';
+				+ '<button class="sp-btn danger" id="ls-reset"><i class="sp-icon">' + SVG_ICONS.reset + '</i>' + t('settings.reset_all') + '</button></div>'
+
+				+ '<div class="sp-divider"></div>'
+				+ '<div style="text-align:center;margin-top:4px">'
+				+ '<a href="licenses.html" class="sp-link">' + t('settings.licenses') + '</a></div>';
 
 			// 이벤트 바인딩
 			c.querySelector('#ls-bgm').onchange = function(e) { s.bgmOn = e.target.checked; saveSettings(s); };
@@ -91,7 +94,6 @@
 
 		var init = async function() {
 			await i18nInit();
-			renderBottomNav();
 			renderSettings();
 		};
 	</script>
@@ -108,7 +110,6 @@
 			<div class="settings-content" id="lset-content"></div>
 		</div>
 	</main>
-	<nav id="bottom-nav"></nav>
 	<div id="modal-overlay">
 		<div id="modal-box">
 			<div id="modal-title"></div>

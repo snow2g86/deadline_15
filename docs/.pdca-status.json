@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-11T19:51:31.765Z",
+  "lastUpdated": "2026-02-12T00:18:59.248Z",
   "activeFeatures": [
     "skill-implementation",
     "js",
@@ -47,9 +47,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-05T06:16:20.882Z",
-        "lastUpdated": "2026-02-11T19:51:31.765Z"
+        "lastUpdated": "2026-02-12T00:18:02.634Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/shop.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/party-select.js"
     },
     "scripts": {
       "phase": "do",
@@ -73,7 +73,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-09T17:15:43.753Z",
-        "lastUpdated": "2026-02-11T19:04:02.258Z"
+        "lastUpdated": "2026-02-12T00:16:42.120Z"
       },
       "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/equip.js"
     },
@@ -86,7 +86,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-09T17:31:51.728Z",
-        "lastUpdated": "2026-02-11T19:49:36.299Z"
+        "lastUpdated": "2026-02-12T00:18:59.248Z"
       },
       "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es.js"
     },
@@ -99,9 +99,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T05:18:10.899Z",
-        "lastUpdated": "2026-02-11T17:55:23.982Z"
+        "lastUpdated": "2026-02-12T00:02:17.747Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/render.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/vfx.js"
     },
     "skills": {
       "phase": "do",
@@ -112,9 +112,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T07:51:03.649Z",
-        "lastUpdated": "2026-02-11T08:39:12.247Z"
+        "lastUpdated": "2026-02-12T00:09:13.517Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/skills/priest.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/skills/mage.js"
     },
     "deadline_15": {
       "phase": "do",
@@ -138,7 +138,7 @@
   "session": {
     "startedAt": "2026-02-05T06:05:50.525Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-11T19:51:31.765Z"
+    "lastActivity": "2026-02-12T00:18:59.248Z"
   },
   "history": [
     {
@@ -9222,6 +9222,450 @@
     {
       "timestamp": "2026-02-11T19:51:31.765Z",
       "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:41:34.770Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:41:35.820Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:41:37.229Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:48:43.954Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:48:52.819Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:49:57.460Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:50:42.731Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:50:49.829Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:51:42.949Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:51:49.194Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:55:39.506Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:56:19.577Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:56:29.808Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:56:46.679Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:56:51.907Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:06.244Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:18.579Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:29.325Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:35.778Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:42.821Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:50.497Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:57:57.037Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:58:03.293Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:58:11.566Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:58:19.377Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:59:32.351Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-11T23:59:37.779Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:01:11.351Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:01:18.004Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:02:17.747Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:02:24.225Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:02:32.649Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:02:36.793Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:02:44.653Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:05:34.781Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:06:29.546Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:06:43.766Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:06:55.016Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:06:58.524Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:04.194Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:08.939Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:17.539Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:21.126Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:25.033Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:34.237Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:39.061Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:48.663Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:55.637Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:07:59.921Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:04.574Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:13.142Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:18.044Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:24.425Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:31.568Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:35.536Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:38.697Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:42.480Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:46.105Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:51.361Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:08:57.119Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:09:01.731Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:09:13.517Z",
+      "feature": "skills",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:16:26.830Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:16:36.682Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:16:42.120Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:17:01.371Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:17:53.295Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:02.634Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:13.718Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:22.571Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:29.853Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:38.538Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:49.918Z",
+      "feature": "language",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T00:18:59.248Z",
+      "feature": "language",
       "phase": "do",
       "action": "updated"
     }

@@ -68,12 +68,16 @@
 .unit-sprite.dying{animation:deathDissolve .6s ease-out forwards}
 @keyframes screenShake{0%,100%{transform:translate(0)}10%{transform:translate(-4px,-3px)}30%{transform:translate(4px,2px)}50%{transform:translate(-3px,3px)}70%{transform:translate(3px,-2px)}90%{transform:translate(-2px,1px)}}
 #iso-world.screen-shake{animation:screenShake .3s ease}
+@keyframes screenShakeHeavy{0%,100%{transform:translate(0)}8%{transform:translate(-8px,-6px)}20%{transform:translate(7px,5px)}32%{transform:translate(-6px,4px)}44%{transform:translate(5px,-5px)}56%{transform:translate(-4px,3px)}68%{transform:translate(6px,-3px)}80%{transform:translate(-3px,4px)}92%{transform:translate(2px,-2px)}}
+#iso-world.screen-shake-heavy{animation:screenShakeHeavy .45s ease}
 
 /* ═══ Turn Flash ═══ */
 @keyframes turnFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
 #turn-flash{position:fixed;inset:0;z-index:250;pointer-events:none;opacity:0}
 #turn-flash.player-flash{background:radial-gradient(ellipse,rgba(59,130,246,.15),transparent 70%);animation:turnFlash .6s ease-out}
 #turn-flash.enemy-flash{background:radial-gradient(ellipse,rgba(239,68,68,.15),transparent 70%);animation:turnFlash .6s ease-out}
+@keyframes skillFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+#turn-flash.skill-flash{animation:skillFlash .4s ease-out}
 
 /* ═══ Tile Highlights ═══ */
 .iso-tile.hl-move{background:rgba(59,130,246,.2);box-shadow:inset 0 0 0 2px rgba(59,130,246,.7)}

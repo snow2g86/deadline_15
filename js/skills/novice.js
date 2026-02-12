@@ -15,7 +15,8 @@ registerSkill('novice_throw', {
 		G.sfxAtk(u.cls); G.shakeU(tgt.id);
 		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 		G.floatT(u.x, u.y, t('messages.stone_throw'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#a88','#ccc','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#a88','#ccc','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:3,colors:['#a8888844'],shape:'ring',speed:0,spread:3,decay:0.02,size:8});
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});

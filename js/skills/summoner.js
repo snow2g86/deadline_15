@@ -78,7 +78,8 @@ registerSkill('summoner_empower', {
 		summon._empowerTurns = 3; summon._empowerMul = 1.5;
 		G.sfxHeal();
 		G.floatT(summon.x, summon.y, t('messages.summoner_empower'), 'heal');
-		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:15,colors:['#fbbf24','#f59e0b','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});
+		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:20,colors:['#fbbf24','#f59e0b','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:6,colors:['#fbbf24','#f59e0b'],shape:'star',speed:2,spread:10,decay:0.025,size:3,vy:-1});
 		G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}
@@ -109,8 +110,12 @@ registerSkill('summoner_soulburst', {
 		}
 		G.floatT(summon.x, summon.y, t('messages.summoner_soulburst'), 'damage');
 		G.vfxDeath(summon);
+		G.vfxFlash('rgba(139,92,246,.25)');
+		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:28,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:7,spread:22,decay:0.015,size:6});
+		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:6,colors:['#8b5cf644'],shape:'ring',speed:0,spread:5,decay:0.01,size:18});
+		setTimeout(()=>G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:10,colors:['#8b5cf6','#c084fc'],shape:'star',speed:3,spread:14,decay:0.025,size:4}),80);
 		G.units = G.units.filter(v => v.id !== summon.id);
-		G.sfxAtk(u.cls); G._grantExp(u, 'attack');
+		G.sfxAtk(u.cls); G.sfxExplosion(); G.screenShake(true); G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
 });

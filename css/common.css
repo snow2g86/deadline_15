@@ -474,15 +474,39 @@ body:not([data-page="battle"]) {
   flex-shrink: 0
 }
 
-/* ═══ Lobby Settings ═══ */
-.settings-content {
-  width: 100%;
-  max-width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px
-}
+/* ═══ Settings UI ═══ */
+.settings-content{width:100%;max-width:300px;display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.sp-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sp-row .sp-label{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;min-width:60px}
+.sp-row .sp-val{font-size:10px;color:var(--dim);min-width:28px;text-align:right}
+.sp-row input[type="range"]{flex:1;height:4px;accent-color:var(--gold);cursor:pointer;
+  -webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;outline:none}
+.sp-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid #1a1a2e}
+.sp-row select{flex:1;font-size:11px;font-weight:700;padding:6px 8px;border-radius:6px;
+  background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.12);outline:none;cursor:pointer}
+.sp-row select:focus{border-color:var(--gold)}
+.sp-toggle{display:flex;align-items:center;gap:8px}
+.sp-tlabel{font-size:11px;font-weight:700;color:var(--text);flex:1;cursor:default}
+.sp-switch{position:relative;width:38px;height:20px;flex-shrink:0}
+.sp-switch input{opacity:0;width:0;height:0}
+.sp-switch .slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:10px;transition:.2s;cursor:pointer}
+.sp-switch .slider:before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;
+  left:2px;bottom:2px;background:#64748b;transition:.2s}
+.sp-switch input:checked+.slider{background:rgba(240,192,64,.3)}
+.sp-switch input:checked+.slider:before{transform:translateX(18px);background:var(--gold)}
+.sp-icon{display:inline-flex;align-items:center;vertical-align:middle;margin-right:5px;font-style:normal}
+.sp-icon svg{width:14px;height:14px;stroke:var(--gold);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sp-divider{height:1px;background:rgba(255,255,255,.06)}
+.sp-btn{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:10px;
+  padding:5px 14px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.12);
+  color:var(--text);background:rgba(255,255,255,.06);transition:all .15s}
+.sp-btn:hover{background:rgba(255,255,255,.12);border-color:var(--gold)}
+.sp-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3)}
+.sp-btn.danger:hover{background:rgba(239,68,68,.1)}
+.sp-btn.danger .sp-icon svg{stroke:var(--red)}
+.sp-link{font-size:10px;color:var(--dim);text-decoration:none;transition:color .15s}
+.sp-link:hover{color:var(--gold);text-decoration:underline}
 
 /* ═══ Compendium & Report Pages (Fixed Header) ═══ */
 body[data-page^="compendium"],
@@ -566,6 +590,23 @@ body[data-page="skill-balance-report"] main {
 
   .settings-content {
     max-width: 380px
+  }
+
+  .sp-row .sp-label {
+    font-size: 13px
+  }
+
+  .sp-row .sp-val {
+    font-size: 12px
+  }
+
+  .sp-tlabel {
+    font-size: 13px
+  }
+
+  .sp-btn {
+    font-size: 12px;
+    padding: 6px 16px
   }
 
   /* Modal PC */

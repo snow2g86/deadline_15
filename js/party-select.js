@@ -119,12 +119,17 @@ function switchPageTab(tab) {
   document.getElementById('section-party').style.display = tab === 'party' ? '' : 'none';
   document.getElementById('section-equip').style.display = tab === 'equip' ? '' : 'none';
   document.getElementById('section-item').style.display = tab === 'item' ? '' : 'none';
+  document.getElementById('section-enhance').style.display = tab === 'enhance' ? '' : 'none';
   if (tab === 'equip') {
     _gold = loadGold();
     eqRenderAll();
   }
   if (tab === 'item') {
     renderItemTab();
+  }
+  if (tab === 'enhance') {
+    _gold = loadGold();
+    renderEnhanceList();
   }
   updatePageGold();
 }
@@ -1095,3 +1100,260 @@ var init = async function() {
   renderBottomNav();
   setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
 };
+
+// ═══════════════════════════════════════════
+// 강화 시스템 (Enhancement System)
+// ═══════════════════════════════════════════
+
+// 강화 목록 렌더링
+function renderEnhanceList() {
+  var inv = loadInventory();
+  var enhanceable = inv.filter(function(x) {
+    return x.type === 'equip' && !x.equipped && canEnhance(x);
+  });
+
+  var html = '';
+  for (var i = 0; i < enhanceable.length; i++) {
+    var item = enhanceable[i];
+    var enhancedStats = getEnhancedStats(item);
+    var currentStats = item.stats;
+    var rate = calcEnhanceRate(item);
+    var ratePercent = Math.round(rate * 100);
+    var costGold = calcEnhanceCost(item);
+
+    var rateClass = rate >= 0.80 ? 'rate-high' : rate >= 0.40 ? 'rate-mid' : 'rate-low';
+    var statsText = 'HP';
+    if (currentStats.atk) statsText += ' ATK+' + (enhancedStats.atk - currentStats.atk);
+    if (currentStats.def) statsText += ' DEF+' + (enhancedStats.def - currentStats.def);
+
+    html += '<div class="enhance-card" onclick="showEnhanceModal(\'' + item.eid + '\')">' +
+      '<div class="enhance-icon">⚔️</div>' +
+      '<div class="enhance-info">' +
+        '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
+        '<div class="enhance-level">' + t('equip.rarity.' + item.rarity) + ' ' +
+          (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') +
+        '</div>' +
+        '<div class="enhance-badge enhance-badge-lvl ' + rateClass + '">' + ratePercent + '% • ' + costGold + 'G</div>' +
+        '<div class="enhance-stats">' + statsText + '</div>' +
+      '</div>' +
+      '<button class="enhance-btn" onclick="event.stopPropagation(); showEnhanceModal(\'' + item.eid + '\');">' + t('enhance.button_enhance') + '</button>' +
+    '</div>';
+  }
+
+  if (enhanceable.length === 0) {
+    html = '<div style="text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;">' +
+           t('enhance.no_items') + '</div>';
+  }
+
+  document.getElementById('enhance-list').innerHTML = html;
+}
+
+// 강화 모달 표시 (단계 2: 재료 선택)
+function showEnhanceModal(targetEid) {
+  var inv = loadInventory();
+  var target = inv.find(function(x) { return x.eid === targetEid; });
+  if (!target) return;
+
+  var materials = inv.filter(function(x) {
+    return x.type === 'equip' && x.slot === target.slot && x.eid !== targetEid && !x.equipped;
+  });
+
+  if (materials.length === 0) {
+    showAlert(t('enhance.no_materials'));
+    return;
+  }
+
+  var overlay = document.getElementById('enhance-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'enhance-modal-overlay';
+    overlay.className = 'enhance-modal-overlay';
+    overlay.onclick = function(e) { if (e.target === overlay) hideEnhanceModal(); };
+    document.body.appendChild(overlay);
+  }
+
+  var html = '<div class="enhance-modal" onclick="event.stopPropagation();">' +
+    '<div class="enhance-modal-header">' +
+      '<div class="enhance-modal-title" data-i18n="enhance.select_material">' + t('enhance.select_material') + '</div>' +
+      '<div class="enhance-modal-close" onclick="hideEnhanceModal();">✕</div>' +
+    '</div>' +
+    '<div class="enhance-modal-body">' +
+      '<div style="font-size:11px;color:var(--dim);">' + t('enhance.material_hint') + '</div>' +
+      '<div class="enhance-material-list">';
+
+  for (var i = 0; i < materials.length; i++) {
+    var mat = materials[i];
+    html += '<div class="enhance-material-item" onclick="showEnhanceConfirmModal(\'' + targetEid + '\', \'' + mat.eid + '\')">' +
+      '<div class="enhance-material-icon">⚙️</div>' +
+      '<div class="enhance-material-info">' +
+        '<div class="enhance-material-name">' + t('equip.item.' + mat.templateId) + '</div>' +
+        '<div class="enhance-material-rarity">' + t('equip.rarity.' + mat.rarity) + (mat.enhanceLv > 0 ? ' +' + mat.enhanceLv : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  html += '</div></div></div>';
+  overlay.innerHTML = html;
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// 강화 최종 확인 모달 (단계 3)
+function showEnhanceConfirmModal(targetEid, materialEid) {
+  var inv = loadInventory();
+  var target = inv.find(function(x) { return x.eid === targetEid; });
+  var material = inv.find(function(x) { return x.eid === materialEid; });
+  if (!target || !material) return;
+
+  var cost = calcEnhanceCost(target);
+  var rate = calcEnhanceRate(target);
+  var ratePercent = Math.round(rate * 100);
+  var enhancedStats = getEnhancedStats(target);
+  var newStats = {};
+  for (var stat in enhancedStats) {
+    newStats[stat] = Math.round(enhancedStats[stat] * (1 + ENHANCE_STAT_MULT));
+  }
+
+  var overlay = document.getElementById('enhance-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'enhance-modal-overlay';
+    overlay.className = 'enhance-modal-overlay';
+    overlay.onclick = function(e) { if (e.target === overlay) hideEnhanceModal(); };
+    document.body.appendChild(overlay);
+  }
+
+  var pityHtml = '';
+  if (target.enhanceAttempts > 0) {
+    pityHtml = '<div class="enhance-pity-counter">⚠️ ' +
+      t('enhance.pity_counter', { current: target.enhanceAttempts, total: ENHANCE_PITY_THRESHOLD }) +
+      '</div>';
+  }
+
+  var ratePercent = Math.round(rate * 100);
+  var rateColor = rate >= 0.80 ? '#4ade80' : rate >= 0.40 ? '#fbbf24' : '#ef4444';
+
+  var html = '<div class="enhance-modal enhance-confirm-modal" onclick="event.stopPropagation();">' +
+    '<div class="enhance-modal-header">' +
+      '<div class="enhance-modal-title" data-i18n="enhance.confirm_title">' + t('enhance.confirm_title') + '</div>' +
+      '<div class="enhance-modal-close" onclick="hideEnhanceModal();">✕</div>' +
+    '</div>' +
+    '<div class="enhance-modal-body enhance-confirm-content">' +
+      '<div class="enhance-confirm-section">' +
+        '<div class="enhance-confirm-label">' + t('enhance.target_item') + '</div>' +
+        '<div class="enhance-confirm-value">' + t('equip.item.' + target.templateId) + (target.enhanceLv > 0 ? ' +' + target.enhanceLv : '') + '</div>' +
+        '<div class="enhance-success-rate">' +
+          '<span style="font-size:10px;color:var(--dim);">' + ratePercent + '%</span>' +
+          '<div class="enhance-success-bar" style="width:60px;"><div class="enhance-success-fill" style="width:' + ratePercent + '%;background-color:' + rateColor + ';"></div></div>' +
+        '</div>' +
+        pityHtml +
+      '</div>' +
+      '<div class="enhance-confirm-section">' +
+        '<div class="enhance-confirm-label">' + t('enhance.material_item') + '</div>' +
+        '<div class="enhance-confirm-value">' + t('equip.item.' + material.templateId) + (material.enhanceLv > 0 ? ' +' + material.enhanceLv : '') + '</div>' +
+        '<div style="font-size:9px;color:#ef4444;margin-top:4px;">⚠️ ' + t('enhance.material_consumed') + '</div>' +
+      '</div>' +
+      '<div class="enhance-confirm-section">' +
+        '<div class="enhance-confirm-label">' + t('common.gold') + '</div>' +
+        '<div class="enhance-confirm-value">' + cost + ' G</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="enhance-modal-buttons">' +
+      '<button class="enhance-modal-btn" onclick="hideEnhanceModal();">' + t('common.cancel') + '</button>' +
+      '<button class="enhance-modal-btn primary" onclick="executeEnhance(\'' + targetEid + '\', \'' + materialEid + '\');">' +
+        t('enhance.button_enhance') + '</button>' +
+    '</div>' +
+  '</div>';
+
+  overlay.innerHTML = html;
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// 모달 닫기
+function hideEnhanceModal() {
+  var overlay = document.getElementById('enhance-modal-overlay');
+  if (overlay) overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// 강화 실행
+function executeEnhance(targetEid, materialEid) {
+  var inv = loadInventory();
+  var target = inv.find(function(x) { return x.eid === targetEid; });
+  var material = inv.find(function(x) { return x.eid === materialEid; });
+
+  // 유효성 검사
+  if (!target || !material) {
+    showAlert(t('enhance.error_invalid'));
+    return;
+  }
+  if (target.equipped) {
+    showAlert(t('enhance.error_equipped'));
+    return;
+  }
+  if (material.equipped) {
+    showAlert(t('enhance.error_material_equipped'));
+    return;
+  }
+  if (target.slot !== material.slot) {
+    showAlert(t('enhance.error_slot_mismatch'));
+    return;
+  }
+
+  var cost = calcEnhanceCost(target);
+  var gold = loadGold();
+  if (gold < cost) {
+    showAlert(t('messages.not_enough_gold'));
+    return;
+  }
+
+  // 재료 소비
+  inv = inv.filter(function(x) { return x.eid !== materialEid; });
+
+  // 강화 시도
+  var rate = calcEnhanceRate(target);
+  var roll = Math.random();
+  var succeeded = roll < rate;
+
+  if (succeeded) {
+    // 성공
+    target.enhanceLv = (target.enhanceLv || 0) + 1;
+    target.enhanceAttempts = 0; // Pity 초기화
+    saveGold(gold - cost);
+    saveInventory(inv);
+
+    var newStats = getEnhancedStats(target);
+    var statStr = '';
+    if (newStats.hp) statStr += ' HP+' + newStats.hp;
+    if (newStats.atk) statStr += ' ATK+' + newStats.atk;
+    if (newStats.def) statStr += ' DEF+' + newStats.def;
+
+    hideEnhanceModal();
+    showAlert(
+      t('enhance.success_title') + '\n\n' +
+      '✨ ' + t('equip.item.' + target.templateId) + ' → +' + target.enhanceLv + '\n' +
+      statStr
+    );
+  } else {
+    // 실패
+    target.enhanceAttempts = (target.enhanceAttempts || 0) + 1;
+    saveGold(gold - cost);
+    saveInventory(inv);
+
+    var attempts = target.enhanceAttempts;
+    var pityMsg = '';
+    if (attempts >= ENHANCE_PITY_THRESHOLD) {
+      pityMsg = '\n\n✅ ' + t('enhance.pity_ready');
+    } else {
+      pityMsg = '\n📊 ' + t('enhance.fail_pity', { count: attempts });
+    }
+
+    hideEnhanceModal();
+    showAlert(t('enhance.fail_title') + '\n' + t('enhance.fail_msg') + pityMsg);
+  }
+
+  _gold = loadGold();
+  renderEnhanceList();
+  updatePageGold();
+}
