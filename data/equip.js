@@ -294,8 +294,8 @@ function calcEnhanceRate(item) {
 // ═══════════════════════════════════════════
 
 var SIEGE_ITEMS = [
-  { id: 'siege_ladder', icon: '\u{1FA9C}', cost: 100, targetType: 'wall', range: 1, effect: 'climb', weight: 40 },
-  { id: 'siege_bomb',   icon: '\u{1F4A3}', cost: 200, targetType: 'wall', range: 3, effect: 'destroy', weight: 35 },
+  { id: 'siege_ladder', icon: '\u{1FA9C}', cost: 100, targetType: 'wall_rock', range: 1, effect: 'climb', weight: 40 },
+  { id: 'siege_bomb',   icon: '\u{1F4A3}', cost: 200, targetType: 'wall_rock', range: 3, effect: 'destroy', weight: 35 },
   { id: 'siege_bridge', icon: '\u{1F309}', cost: 150, targetType: 'water', range: 3, effect: 'bridge', weight: 25 }
 ];
 

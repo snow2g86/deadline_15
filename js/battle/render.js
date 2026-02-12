@@ -202,7 +202,7 @@ Object.assign(G, {
 	},
 	showMainMenu(u) {
 		const m = document.getElementById('action-menu');
-		m.querySelectorAll('.am-skill').forEach(e => e.remove());
+		m.querySelectorAll('.am-skill, .am-item').forEach(e => e.remove());
 		document.getElementById('btn-move').style.display = (!u.hm && !u.mo) ? '' : 'none';
 		const btnAttack = document.getElementById('btn-attack');
 		if (u.role === 'healer') {

@@ -163,6 +163,7 @@ Object.assign(G, {
 			if (mh(u.x, u.y, c, r) > def.range) continue;
 			const tile = this.ter[r][c];
 			if (def.targetType === 'wall' && (tile === 'wall' || tile === 'gate')) targets.push({ x: c, y: r });
+			else if (def.targetType === 'wall_rock' && (tile === 'wall' || tile === 'gate' || tile === 'rock')) targets.push({ x: c, y: r });
 			else if (def.targetType === 'water' && tile === 'water') targets.push({ x: c, y: r });
 		}
 		if (targets.length === 0) {
