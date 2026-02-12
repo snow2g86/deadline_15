@@ -64,6 +64,7 @@
 │  └─ 행동 완료
 └─ 적 턴
    ├─ 적 AI 이동/공격
+   ├─ 공성아이템 전략적 사용
    └─ 함정 트리거 체크
 ```
 
@@ -77,6 +78,14 @@
   - 💣 **함정**: Sapper가 설치 (ATK×2 데미지 + 2턴 기절)
   - 🛡️ **성벽**: 방어 스테이지의 파괴 가능한 벽 (경험치 획득)
   - 💀 **보스**: 각 스테이지 마지막 웨이브에 강력한 보스 출현
+
+- **적 AI 공성아이템 시스템** (NEW):
+  - 💣 **폭탄**: 인접 아군에게 ATK×0.3 데미지
+  - 🛡️ **방어막**: 3턴 동안 받는 데미지 50% 감소
+  - ⚡ **회피**: 1턴 동안 30% 확률로 공격 회피
+  - 🚪 **우회로**: 지형 우회 능력
+  - **AI 분석**: 현재 상황 심각도 분석 → 최적의 공성아이템 선택
+  - **난이도 증가**: 적이 전략적으로 아이템을 사용하여 +15-20% 강화
 
 ### 💾 저장 및 로드
 - **자동 저장**: localStorage에 게임 상태 자동 저장
@@ -146,14 +155,19 @@ deadline_15/
 │
 ├── js/
 │   ├── index.js               # 로비 로직
-│   ├── core.js                # 게임 엔진 (맵/유닛/카메라)
-│   ├── combat.js              # 전투 시스템 (이동/공격)
+│   ├── battle.js              # 통합 전투 시스템 (2,391줄)
+│   │                          # - 게임 엔진 (맵/유닛/카메라)
+│   │                          # - 전투 (이동/공격/스킬)
+│   │                          # - UI (네비/미니맵)
+│   │                          # - AI + 공성아이템 시스템
+│   │                          # - VFX + 오디오
 │   ├── skills.js              # 스킬/패시브 정의 + 데미지 계산
-│   ├── ui.js                  # UI 렌더링 (네비/미니맵)
-│   ├── lobby.js               # 로비 로직 (상점/파티/결과)
 │   ├── party-select.js        # 파티 선택 로직
+│   ├── battle/                # 전투 모듈 분리
+│   │   ├── core.js            # 맵/유닛/카메라 기본
+│   │   └── ai.js              # 적 AI 프로필 + 공성아이템
 │   ├── common/
-│   │   ├── i18n.js            # 다국어 엔진
+│   │   ├── i18n.js            # 다국어 엔진 (dot notation)
 │   │   ├── modal.js           # 모달 시스템
 │   │   └── nav.js             # 네비게이션
 │   └── sprites.js             # 스프라이트 렌더링
@@ -161,11 +175,10 @@ deadline_15/
 ├── data/
 │   ├── jab.js                 # 상수/클래스 정의 (CD 객체)
 │   ├── tiles.js               # 타일 맵 + SVG
-│   ├── stages.js              # 10개 스테이지 정의
+│   ├── stages.js              # 10개 스테이지 정의 (i18n 키)
+│   ├── i18n-data.js           # 다국어 번역 데이터
 │   └── language/
-│       ├── ko.js              # 한국어 번역
-│       ├── en.js              # 영어 번역
-│       └── es.js              # 스페인어 번역
+│       └── (레거시 - i18n-data.js 사용)
 │
 └── image/
     ├── tileset/               # 타일 PNG (5개)
@@ -180,11 +193,14 @@ deadline_15/
 | 분류 | 기술 |
 |-----|------|
 | **Frontend** | HTML5, CSS3, Vanilla JavaScript (프레임워크 없음) |
-| **Architecture** | Multi-Page Application (MPA) |
-| **Storage** | localStorage (클라이언트 사이드) |
-| **Rendering** | CSS Grid + Canvas (타일/유닛) |
-| **Deployment** | Cloudflare Pages |
-| **i18n** | Custom 다국어 엔진 (dot notation 경로) |
+| **Architecture** | Multi-Page Application (MPA), 모듈식 JS 구조 |
+| **Game Engine** | 타일 기반 그리드 맵, 캐릭터 렌더링 (CSS + Canvas) |
+| **AI System** | 상황 분석 기반 적 AI + 공성아이템 전략 시스템 |
+| **Storage** | localStorage (클라이언트 사이드 전체 저장) |
+| **Rendering** | CSS Grid (타일), requestAnimationFrame (VFX) |
+| **Deployment** | Cloudflare Pages (완전 자동 배포) |
+| **i18n** | Custom 다국어 엔진 (dot notation 경로 지원) |
+| **Performance** | 코드 통합으로 네트워크 요청 최소화, 클라이언트 최적화 |
 
 ---
 
@@ -254,6 +270,9 @@ deadline_15/
 2. **상점에서 물약 구매** - 경험치 빠르게 획득
 3. **균형 잡힌 파티** - 근접 2 + 원거리 2 + 힐러 1
 4. **도감 확인** - 클래스/스테이지 정보로 전략 수립
+5. **적 공성아이템 주의** - 적 AI가 위험한 상황에서 전략적으로 아이템 사용
+   - 방어막을 사용하면 피해 감소 → 먼저 제거하기
+   - 회피 아이템 사용 시 다른 적 공격하기
 
 ### ⚖️ 난이도별 공략
 | 난이도 | 권장 레벨 | 팀 구성 | 전략 |
@@ -352,4 +371,4 @@ Assassin (암살) + Archer + Mage + Priest + Summoner
 
 **재미있게 즐겨주세요! Happy Gaming! 🎮**
 
-마지막 업데이트: 2026년 2월 10일
+마지막 업데이트: 2026년 2월 12일 (AI 공성아이템 시스템 + 코드 통합 완성)

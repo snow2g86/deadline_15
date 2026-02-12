@@ -326,13 +326,14 @@ Object.assign(G, {
   async eAtkAsync(a,tgt){
     if(tgt.team==='ally')this.scrollToUnit(tgt);
     await sl(250);
-    this.eAtk(a,tgt);
+    await this.eAtk(a,tgt);
     await sl(tgt.hp<=0?500:300)},
-  eAtk(a,tgt){
+  async eAtk(a,tgt){
     if(a._siegeEvasion>0&&Math.random()<0.3){a._siegeEvasion--;this.floatT(a.x,a.y,t('messages.evasion'),'heal');return}
     const bCounter=tgt.skillLv&&tgt.skillLv['brawler_counter']>=1&&!(tgt.stunned>0)&&!(tgt.frozen>0)&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&Math.random()<0.3;
     let dtgt=tgt;
     if(bCounter){
+      await sl(420);
       const cdmg=Math.max(1,Math.round(tgt.atk*0.5)-a.def);a.hp=Math.max(0,a.hp-cdmg);
       this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');this.floatT(tgt.x,tgt.y,t('messages.brawler_counter'),'heal');
     }else{
@@ -343,6 +344,7 @@ Object.assign(G, {
       if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
       procFury(a,tgt,this);
       if(tgt.hp>0&&a.hp>0&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&!(tgt.stunned>0)&&!(tgt.frozen>0)){
+        await sl(420);
         const cdmg=calcDmg(tgt,a);a.hp=Math.max(0,a.hp-cdmg);this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');procFury(tgt,a,this);
       }
     }
