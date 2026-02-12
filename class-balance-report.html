@@ -3,1830 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEADLINE 15 - 클래스 밸런스 & 파티 분석 리포트</title>
+    <title>DEADLINE 15 - 클래스 밸런스 리포트</title>
     <link rel="stylesheet" href="css/common.css">
+    <script src="data/jab.js"></script>
+    <script src="js/skills.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 60px auto 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            height: calc(100dvh - 60px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Override #top-nav for class-balance-report theme */
-        body[data-page="class-balance-report"] #top-nav {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-bottom: none;
-            padding: 10px 16px;
-            gap: 20px;
-        }
-
-        body[data-page="class-balance-report"] #nav-title {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 18px;
-            color: white;
-            letter-spacing: 0;
-            font-weight: 700;
-        }
-
-        body[data-page="class-balance-report"] #nav-back {
-            color: white;
-            font-size: 20px;
-        }
-
-        body[data-page="class-balance-report"] #nav-back:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        body[data-page="class-balance-report"] #nav-settings {
-            color: white;
-        }
-
-        body[data-page="class-balance-report"] #nav-settings:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        main {
-            padding: 40px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        section {
-            margin-bottom: 50px;
-        }
-
-        .section-title {
-            font-size: 2em;
-            color: #667eea;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        /* 클래스 카드 그리드 */
-        .class-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .class-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            background: #f9f9f9;
-            transition: all 0.3s ease;
-        }
-
-        .class-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .class-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .class-icon {
-            font-size: 2.5em;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        .class-name {
-            flex: 1;
-        }
-
-        .class-name h3 {
-            font-size: 1.4em;
-            color: #333;
-            margin-bottom: 3px;
-        }
-
-        .class-type {
-            font-size: 0.85em;
-            color: #777;
-            font-weight: 500;
-        }
-
-        .stat-bar {
-            margin: 8px 0;
-            font-size: 0.9em;
-        }
-
-        .stat-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 3px;
-            color: #555;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .skill-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-        }
-
-        .skill-item {
-            margin: 8px 0;
-            font-size: 0.9em;
-        }
-
-        .skill-icon {
-            display: inline-block;
-            width: 20px; height: 20px;
-            background: url('image/icon/skill-sprite.png') no-repeat;
-            background-size: 160px 140px;
-            image-rendering: pixelated;
-            vertical-align: middle;
-            margin-right: 5px;
-            border-radius: 2px;
-        }
-
-        .skill-name {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .skill-desc {
-            font-size: 0.85em;
-            color: #666;
-            margin-left: 25px;
-        }
-
-        .passive-item {
-            margin: 8px 0;
-            padding: 8px;
-            background: #fff3cd;
-            border-left: 3px solid #ffc107;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
-        .resource-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: bold;
-            margin-right: 5px;
-            margin-top: 8px;
-        }
-
-        .fury-badge { background: #ffe0e0; color: #d32f2f; }
-        .energy-badge { background: #fff3e0; color: #f57c00; }
-        .mana-badge { background: #e3f2fd; color: #1976d2; }
-
-        /* 파티 추천 */
-        .party-recommendation {
-            background: #f5f5f5;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .party-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .party-members {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .member-card {
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .member-icon {
-            font-size: 2em;
-            margin-bottom: 5px;
-        }
-
-        .member-role {
-            font-size: 0.8em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .member-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 3px;
-        }
-
-        .member-desc {
-            font-size: 0.75em;
-            color: #777;
-        }
-
-        .party-analysis {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .analysis-box {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 0.9em;
-        }
-
-        .analysis-label {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .analysis-value {
-            color: #333;
-        }
-
-        /* 비교 테이블 */
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .comparison-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .comparison-table th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .comparison-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .comparison-table tbody tr:hover {
-            background: #f5f5f5;
-        }
-
-        .comparison-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .role-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: bold;
-            background: #e8eaf6;
-            color: #667eea;
-        }
-
-        /* 스테이지별 권장 */
-        .stage-recommendation {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .stage-box {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .stage-box h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .stage-difficulty {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .difficulty-easy { background: #c8e6c9; color: #2e7d32; }
-        .difficulty-normal { background: #fff9c4; color: #f57f17; }
-        .difficulty-hard { background: #ffccbc; color: #d84315; }
-        .difficulty-veryhard { background: #f8bbd0; color: #c2185b; }
-
-        .recommendation-item {
-            font-size: 0.9em;
-            margin: 5px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .recommendation-item:last-child {
-            border-bottom: none;
-        }
-
-        /* 강점/약점 */
-        .strengths-weaknesses {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 15px 0;
-        }
-
-        .strength, .weakness {
-            padding: 12px;
-            border-radius: 8px;
-        }
-
-        .strength {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-        }
-
-        .weakness {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-        }
-
-        .strength-title, .weakness-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
-
-        .strength-title { color: #2e7d32; }
-        .weakness-title { color: #c62828; }
-
-        ul {
-            list-style-position: inside;
-            font-size: 0.85em;
-            color: #555;
-        }
-
-        ul li {
-            margin: 4px 0;
-        }
-
-        footer {
-            background: #f5f5f5;
-            padding: 20px;
-            text-align: center;
-            color: #777;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .divider {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #667eea, transparent);
-            margin: 30px 0;
-        }
-
-        @media (max-width: 768px) {
-            header h1 { font-size: 1.8em; }
-            main { padding: 20px; }
-            .class-grid { grid-template-columns: 1fr; }
-            .party-analysis { grid-template-columns: 1fr; }
-            .strengths-weaknesses { grid-template-columns: 1fr; }
-            .comparison-table { font-size: 0.85em; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#333; line-height:1.6; }
+        .container { max-width:1400px; margin:60px auto 0; background:#fff; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.3); overflow:hidden; height:calc(100dvh - 60px); display:flex; flex-direction:column; }
+        body[data-page="class-balance-report"] #top-nav { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); border-bottom:none; padding:10px 16px; gap:20px; }
+        body[data-page="class-balance-report"] #nav-title { font-size:18px; color:#fff; letter-spacing:0; font-weight:700; }
+        body[data-page="class-balance-report"] #nav-back,
+        body[data-page="class-balance-report"] #nav-settings { color:#fff; }
+        body[data-page="class-balance-report"] #nav-back:hover,
+        body[data-page="class-balance-report"] #nav-settings:hover { background:rgba(255,255,255,.1); }
+        main { padding:40px; flex:1; overflow-y:auto; }
+        section { margin-bottom:50px; }
+        .section-title { font-size:1.8em; color:#667eea; margin-bottom:24px; padding-bottom:10px; border-bottom:3px solid #667eea; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+        .tab { padding:8px 16px; border-radius:20px; border:2px solid #667eea; background:transparent; color:#667eea; font-weight:600; cursor:pointer; font-size:.9em; transition:all .2s; }
+        .tab.active { background:#667eea; color:#fff; }
+        .tab:hover:not(.active) { background:rgba(102,126,234,.1); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        /* Class cards */
+        .class-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+        .class-card { border:2px solid #e0e0e0; border-radius:10px; padding:20px; background:#f9f9f9; transition:all .3s; }
+        .class-card:hover { border-color:#667eea; box-shadow:0 5px 20px rgba(102,126,234,.2); transform:translateY(-4px); }
+        .class-header { display:flex; align-items:center; gap:15px; margin-bottom:15px; }
+        .class-icon { font-size:2.5em; min-width:50px; text-align:center; }
+        .class-name h3 { font-size:1.4em; color:#333; margin-bottom:2px; }
+        .class-type { font-size:.85em; color:#777; font-weight:500; }
+        .stat-bar { margin:6px 0; font-size:.9em; }
+        .stat-label { display:flex; justify-content:space-between; margin-bottom:2px; color:#555; }
+        .stat-value { font-weight:bold; color:#667eea; }
+        .progress-bar { width:100%; height:8px; background:#e0e0e0; border-radius:4px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#667eea,#764ba2); border-radius:4px; }
+        .skill-section { margin-top:14px; padding-top:14px; border-top:1px solid #ddd; }
+        .skill-item { margin:6px 0; font-size:.9em; display:flex; align-items:flex-start; gap:6px; }
+        .sk-icon { font-size:1.1em; min-width:22px; text-align:center; }
+        .skill-name { font-weight:bold; color:#333; }
+        .skill-desc { font-size:.82em; color:#666; margin-left:28px; }
+        .passive-item { margin:6px 0; padding:8px; background:#fff3cd; border-left:3px solid #ffc107; border-radius:4px; font-size:.88em; }
+        .resource-badge { display:inline-block; padding:3px 8px; border-radius:12px; font-size:.75em; font-weight:bold; margin-top:8px; }
+        .fury-badge { background:#ffe0e0; color:#d32f2f; }
+        .energy-badge { background:#fff3e0; color:#f57c00; }
+        .mana-badge { background:#e3f2fd; color:#1976d2; }
+        .growth-row { display:flex; gap:12px; margin-top:10px; font-size:.82em; color:#666; flex-wrap:wrap; }
+        .growth-tag { background:#f0f0f0; padding:2px 8px; border-radius:8px; }
+
+        /* Comparison table */
+        .comparison-table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+        .comparison-table thead { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+        .comparison-table th { padding:12px; text-align:left; font-weight:600; font-size:.9em; }
+        .comparison-table td { padding:10px 12px; border-bottom:1px solid #e0e0e0; font-size:.9em; }
+        .comparison-table tbody tr:hover { background:#f5f5f5; }
+        .comparison-table tbody tr:last-child td { border-bottom:none; }
+        .role-badge { display:inline-block; padding:3px 8px; border-radius:4px; font-size:.8em; font-weight:bold; background:#e8eaf6; color:#667eea; }
+        .rank-1 { background:#ffd700; color:#333; font-weight:bold; }
+        .rank-2 { background:#c0c0c0; color:#333; }
+        .rank-3 { background:#cd7f32; color:#fff; }
+
+        /* Skill master table */
+        .skill-table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.1); margin-bottom:20px; }
+        .skill-table thead { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+        .skill-table th { padding:10px 12px; text-align:left; font-weight:600; font-size:.85em; }
+        .skill-table td { padding:8px 12px; border-bottom:1px solid #e0e0e0; font-size:.85em; }
+        .skill-table tbody tr:hover { background:#f5f5f5; }
+        .skill-table .passive-row { background:#fffde7; }
+
+        /* Party */
+        .party-recommendation { background:#f5f5f5; border:2px solid #e0e0e0; border-radius:10px; padding:20px; margin-bottom:20px; }
+        .party-title { font-size:1.2em; font-weight:bold; color:#333; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid #667eea; }
+        .party-members { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:14px; }
+        .member-card { background:#fff; border:2px solid #667eea; border-radius:8px; padding:10px; text-align:center; }
+        .member-icon { font-size:1.8em; margin-bottom:4px; }
+        .member-name { font-weight:bold; color:#333; font-size:.95em; }
+        .member-desc { font-size:.75em; color:#777; }
+        .party-analysis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        .analysis-box { background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:.88em; }
+        .analysis-label { font-weight:bold; color:#667eea; margin-bottom:4px; }
+
+        .divider { height:2px; background:linear-gradient(90deg,transparent,#667eea,transparent); margin:30px 0; }
+        footer { background:#f5f5f5; padding:16px; text-align:center; color:#777; border-top:1px solid #e0e0e0; font-size:.9em; }
+
+        @media (max-width:768px) {
+            main { padding:16px; }
+            .class-grid { grid-template-columns:1fr; }
+            .party-analysis { grid-template-columns:1fr; }
+            .comparison-table { font-size:.8em; }
+            .section-title { font-size:1.4em; }
         }
     </style>
 </head>
 <body data-page="class-balance-report">
     <header id="top-nav">
         <button id="nav-back" onclick="location.href='index.html'"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div id="nav-title">클래스 밸런스 & 파티 분석</div>
+        <div id="nav-title">클래스 밸런스 리포트</div>
         <button id="nav-settings" onclick="location.href='settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </header>
 
     <div class="container">
         <main>
-            <!-- 섹션 1: 클래스별 상세 분석 -->
-            <section>
-                <h2 class="section-title">📊 클래스별 상세 분석</h2>
-
-                <div class="class-grid">
-                    <!-- Warrior -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">⚔️</div>
-                            <div class="class-name">
-                                <h3>Warrior</h3>
-                                <div class="class-type">근접 공격수</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">100</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 66%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">25</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 89%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">10</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-20px -120px"></span>
-                                <span class="skill-name">강타</span>
-                                <div class="skill-desc">공격력 1.5배 데미지 (Fury 3 소비)</div>
-                            </div>
-                            <div class="passive-item">
-                                <strong>패시브: 광폭</strong><br>
-                                Fury MAX 도달 시 2턴간 공격 데미지 1.5배
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge fury-badge">Fury</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>높은 공격력</li>
-                                    <li>강화 스킬</li>
-                                    <li>안정적</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 방어력</li>
-                                    <li>근접 범위</li>
-                                    <li>느린 자원 회복</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 초급~중급 스테이지, 근접 딜러
-                        </div>
-                    </div>
-
-                    <!-- Knight -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🛡️</div>
-                            <div class="class-name">
-                                <h3>Knight</h3>
-                                <div class="class-type">방어 탱커</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">150</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">15</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 54%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">20</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">2</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:0px -40px"></span>
-                                <span class="skill-name">스위치</span>
-                                <div class="skill-desc">이동 범위 내 아군과 위치 교환 (Fury 1 소비)</div>
-                            </div>
-                            <div class="passive-item">
-                                <strong>패시브: 철의 의지</strong><br>
-                                Fury MAX 도달 시 2턴간 방어력 1.5배
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge fury-badge">Fury</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>최고 체력</li>
-                                    <li>최고 방어력</li>
-                                    <li>전술 스킬</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 공격력</li>
-                                    <li>느린 이동</li>
-                                    <li>낮은 데미지</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 방어 스테이지, 탱킹 역할
-                        </div>
-                    </div>
-
-                    <!-- Assassin -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🗡️</div>
-                            <div class="class-name">
-                                <h3>Assassin</h3>
-                                <div class="class-type">암살자</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">70</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 46%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">35</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">5</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 25%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">4</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-100px 0px"></span>
-                                <span class="skill-name">습격</span>
-                                <div class="skill-desc">2칸 범위 적 대상, 인접 후 ATK×2 (EP 40)</div>
-                            </div>
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-120px 0px"></span>
-                                <span class="skill-name">암살</span>
-                                <div class="skill-desc">은신+겹침 시 ATK×5 즉사급 (EP 60)</div>
-                            </div>
-                            <div class="passive-item">
-                                <strong>패시브: 은신</strong><br>
-                                숲 타일에서 자동 은신, 적 겹침 이동 가능
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge energy-badge">Energy</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>최고 공격력</li>
-                                    <li>최빠른 이동</li>
-                                    <li>즉사 스킬</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 체력</li>
-                                    <li>낮은 방어력</li>
-                                    <li>타겟 받기 쉬움</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 상급~극상급 스테이지, 보스 처치
-                        </div>
-                    </div>
-
-                    <!-- Archer -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🏹</div>
-                            <div class="class-name">
-                                <h3>Archer</h3>
-                                <div class="class-type">원거리 공격수</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">60</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">28</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 15%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>RANGE</span><span class="stat-value">4</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:0px 0px"></span>
-                                <span class="skill-name">도약</span>
-                                <div class="skill-desc">이동 범위의 1.5배 즉각 이동 (EP 20)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge energy-badge">Energy</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>최장 사거리</li>
-                                    <li>높은 공격력</li>
-                                    <li>도약 스킬</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>최저 체력</li>
-                                    <li>최저 방어력</li>
-                                    <li>매우 취약</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 원거리 딜러, 보조 공격
-                        </div>
-                    </div>
-
-                    <!-- Priest -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">✝️</div>
-                            <div class="class-name">
-                                <h3>Priest</h3>
-                                <div class="class-type">힐러/지원</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">70</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 46%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">20</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 57%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">5</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 25%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>RANGE</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-80px -60px"></span>
-                                <span class="skill-name">집단 치유</span>
-                                <div class="skill-desc">6칸 내 모든 아군 체력 회복 (Mana 50)</div>
-                            </div>
-                            <div class="passive-item">
-                                <strong>패시브: 치유</strong><br>
-                                기본 정보 없음 (힐러 전담 역할)
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge mana-badge">Mana</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>유일한 힐러</li>
-                                    <li>범위 회복</li>
-                                    <li>필수 인원</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 공격력</li>
-                                    <li>낮은 방어력</li>
-                                    <li>느린 회복</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 필수 힐러, 모든 스테이지
-                        </div>
-                    </div>
-
-                    <!-- Mage -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🔮</div>
-                            <div class="class-name">
-                                <h3>Mage</h3>
-                                <div class="class-type">범위 마법사</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">65</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 43%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">30</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">4</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 20%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>RANGE</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-120px -40px"></span>
-                                <span class="skill-name">화염폭발</span>
-                                <div class="skill-desc">대상 중심 3×3 범위 적 전체 공격 (Mana 40)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge mana-badge">Mana</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>범위 공격</li>
-                                    <li>높은 공격력</li>
-                                    <li>다수 타격</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 체력</li>
-                                    <li>낮은 방어력</li>
-                                    <li>취약한 위치</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 범위 공격, 다수 적 처리
-                        </div>
-                    </div>
-
-                    <!-- Novice -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🔰</div>
-                            <div class="class-name">
-                                <h3>Novice</h3>
-                                <div class="class-type">초보자/만능</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">85</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 56%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">22</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 62%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">8</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-40px -60px"></span>
-                                <span class="skill-name">돌던지기</span>
-                                <div class="skill-desc">4칸 내 적에게 ATK×0.5 (EP 15)</div>
-                            </div>
-                            <div class="passive-item">
-                                <strong>전직 가능</strong><br>
-                                모든 직업으로 전직 가능 (레벨 및 잠재력 유지)
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge energy-badge">Energy</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>균형 잡힘</li>
-                                    <li>전직 가능</li>
-                                    <li>초급 추천</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>특화 부족</li>
-                                    <li>약한 스킬</li>
-                                    <li>곧 교체</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 초급 스테이지, 전직 대기 중
-                        </div>
-                    </div>
-
-                    <!-- Brawler -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">👊</div>
-                            <div class="class-name">
-                                <h3>Brawler</h3>
-                                <div class="class-type">격투가</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">90</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">32</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 91%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">7</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 35%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-40px -20px"></span>
-                                <span class="skill-name">무장해제</span>
-                                <div class="skill-desc">1칸 내 적 공격력 50% 감소 3턴 (EP 30)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge energy-badge">Energy</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>높은 공격력</li>
-                                    <li>디버프 스킬</li>
-                                    <li>균형잡힘</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>근접만 가능</li>
-                                    <li>낮은 방어력</li>
-                                    <li>범위 제한</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 근접 딜러, 보스 약화
-                        </div>
-                    </div>
-
-                    <!-- Lancer -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🔱</div>
-                            <div class="class-name">
-                                <h3>Lancer</h3>
-                                <div class="class-type">시원한 창과</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">95</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 63%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">28</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">12</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-80px -40px"></span>
-                                <span class="skill-name">관통</span>
-                                <div class="skill-desc">일직선 3칸 관통 데미지 (Fury 5 소비)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge fury-badge">Fury</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>높은 공격력</li>
-                                    <li>높은 방어력</li>
-                                    <li>관통 스킬</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>근접만 가능</li>
-                                    <li>느린 자원</li>
-                                    <li>범위 제한</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 균형잡힌 근접, 중급~상급
-                        </div>
-                    </div>
-
-                    <!-- Sapper -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">💣</div>
-                            <div class="class-name">
-                                <h3>Sapper</h3>
-                                <div class="class-type">공병/함정</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">75</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">30</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">6</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 30%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-40px -80px"></span>
-                                <span class="skill-name">함정 설치</span>
-                                <div class="skill-desc">ATK×2 피해 + 2턴 기절 함정 (EP 20)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge energy-badge">Energy</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>높은 공격력</li>
-                                    <li>함정 설치</li>
-                                    <li>CC 기술</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 방어력</li>
-                                    <li>함정 의존</li>
-                                    <li>느린 회복</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 방어 스테이지, 적 약화
-                        </div>
-                    </div>
-
-                    <!-- Summoner -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">📖</div>
-                            <div class="class-name">
-                                <h3>Summoner</h3>
-                                <div class="class-type">소환사</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">60</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">26</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 74%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">4</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 20%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>RANGE</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-80px -100px"></span>
-                                <span class="skill-name">정령소환</span>
-                                <div class="skill-desc">원거리 마법 정령 소환 (5턴, Mana 80)</div>
-                            </div>
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-60px -100px"></span>
-                                <span class="skill-name">골램소환</span>
-                                <div class="skill-desc">근접 골램 소환 (5턴, Mana 80)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge mana-badge">Mana</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>소환수 생성</li>
-                                    <li>원거리</li>
-                                    <li>다양성</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗ 약점</div>
-                                <ul>
-                                    <li>낮은 체력</li>
-                                    <li>높은 마나 비용</li>
-                                    <li>취약함</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 추가 병력, 범위 커버
-                        </div>
-                    </div>
-
-                    <!-- Shaman -->
-                    <div class="class-card">
-                        <div class="class-header">
-                            <div class="class-icon">🎭</div>
-                            <div class="class-name">
-                                <h3>Shaman</h3>
-                                <div class="class-type">주술사</div>
-                            </div>
-                        </div>
-
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>HP</span><span class="stat-value">70</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 46%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>ATK</span><span class="stat-value">28</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>DEF</span><span class="stat-value">6</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 30%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>MOV</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-                        <div class="stat-bar">
-                            <div class="stat-label"><span>RANGE</span><span class="stat-value">3</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                        </div>
-
-                        <div class="skill-section">
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-60px -80px"></span>
-                                <span class="skill-name">쇠약의 저주</span>
-                                <div class="skill-desc">적에게 매턴 피해 + 행동불가 (Mana 100)</div>
-                            </div>
-                            <div class="skill-item">
-                                <span class="skill-icon" style="background-position:-80px -80px"></span>
-                                <span class="skill-name">고양</span>
-                                <div class="skill-desc">아군 데미지 25% 증가 (Mana 50)</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="resource-badge mana-badge">Mana</span>
-                        </div>
-
-                        <div class="strengths-weaknesses">
-                            <div class="strength">
-                                <div class="strength-title">✓ 강점</div>
-                                <ul>
-                                    <li>저주 스킬</li>
-                                    <li>고양 버프</li>
-                                    <li>다양성</li>
-                                </ul>
-                            </div>
-                            <div class="weakness">
-                                <div class="weakness-title">✗약점</div>
-                                <ul>
-                                    <li>높은 마나</li>
-                                    <li>낮은 체력</li>
-                                    <li>취약함</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
-                            <strong>권장 용도:</strong> 버프/디버프, 상급 전략
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 섹션 2: 클래스 비교 테이블 -->
-            <section>
-                <h2 class="section-title">📈 종합 비교 테이블</h2>
-
-                <table class="comparison-table">
-                    <thead>
-                        <tr>
-                            <th>클래스</th>
-                            <th>체력</th>
-                            <th>공격</th>
-                            <th>방어</th>
-                            <th>이동</th>
-                            <th>범위</th>
-                            <th>자원</th>
-                            <th>역할</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>⚔️ Warrior</strong></td>
-                            <td>100 (중)</td>
-                            <td>25 (높음)</td>
-                            <td>10 (낮음)</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td>Fury</td>
-                            <td><span class="role-badge">근접 딜러</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🛡️ Knight</strong></td>
-                            <td>150 (최고)</td>
-                            <td>15 (낮음)</td>
-                            <td>20 (최고)</td>
-                            <td>2</td>
-                            <td>1</td>
-                            <td>Fury</td>
-                            <td><span class="role-badge">탱커</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🗡️ Assassin</strong></td>
-                            <td>70 (낮음)</td>
-                            <td>35 (최고)</td>
-                            <td>5 (매우낮음)</td>
-                            <td>4</td>
-                            <td>1</td>
-                            <td>Energy</td>
-                            <td><span class="role-badge">암살자</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🔮 Mage</strong></td>
-                            <td>65 (낮음)</td>
-                            <td>30 (높음)</td>
-                            <td>4 (매우낮음)</td>
-                            <td>3</td>
-                            <td>3</td>
-                            <td>Mana</td>
-                            <td><span class="role-badge">범위딜러</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🏹 Archer</strong></td>
-                            <td>60 (매우낮음)</td>
-                            <td>28 (높음)</td>
-                            <td>3 (매우낮음)</td>
-                            <td>3</td>
-                            <td>4</td>
-                            <td>Energy</td>
-                            <td><span class="role-badge">원거리딜러</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>✝️ Priest</strong></td>
-                            <td>70 (낮음)</td>
-                            <td>20 (낮음)</td>
-                            <td>5 (매우낮음)</td>
-                            <td>3</td>
-                            <td>3</td>
-                            <td>Mana</td>
-                            <td><span class="role-badge">힐러</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🔰 Novice</strong></td>
-                            <td>85 (중)</td>
-                            <td>22 (중)</td>
-                            <td>8 (중)</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td>Energy</td>
-                            <td><span class="role-badge">초보자</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>👊 Brawler</strong></td>
-                            <td>90 (중)</td>
-                            <td>32 (최고)</td>
-                            <td>7 (낮음)</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td>Energy</td>
-                            <td><span class="role-badge">격투가</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🔱 Lancer</strong></td>
-                            <td>95 (중)</td>
-                            <td>28 (높음)</td>
-                            <td>12 (중)</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td>Fury</td>
-                            <td><span class="role-badge">균형형</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>💣 Sapper</strong></td>
-                            <td>75 (낮음)</td>
-                            <td>30 (높음)</td>
-                            <td>6 (낮음)</td>
-                            <td>3</td>
-                            <td>1</td>
-                            <td>Energy</td>
-                            <td><span class="role-badge">함정설치</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>📖 Summoner</strong></td>
-                            <td>60 (매우낮음)</td>
-                            <td>26 (중)</td>
-                            <td>4 (매우낮음)</td>
-                            <td>3</td>
-                            <td>3</td>
-                            <td>Mana</td>
-                            <td><span class="role-badge">소환사</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>🎭 Shaman</strong></td>
-                            <td>70 (낮음)</td>
-                            <td>28 (높음)</td>
-                            <td>6 (낮음)</td>
-                            <td>3</td>
-                            <td>3</td>
-                            <td>Mana</td>
-                            <td><span class="role-badge">버프/디버프</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <div class="divider"></div>
-
-            <!-- 섹션 3: 최적 파티 추천 -->
-            <section>
-                <h2 class="section-title">⭐ 최적 5인 파티 추천</h2>
-
-                <!-- 파티 1: 균형형 (초급~중급) -->
-                <div class="party-recommendation">
-                    <div class="party-title">🎯 1. 균형형 파티 (초급~중급 스테이지)</div>
-                    <div class="party-members">
-                        <div class="member-card">
-                            <div class="member-icon">⚔️</div>
-                            <div class="member-role">근접 딜러</div>
-                            <div class="member-name">Warrior</div>
-                            <div class="member-desc">기본 공격, 강타 스킬</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🛡️</div>
-                            <div class="member-role">탱커</div>
-                            <div class="member-name">Knight</div>
-                            <div class="member-desc">높은 체력, 방어력</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🏹</div>
-                            <div class="member-role">원거리 딜러</div>
-                            <div class="member-name">Archer</div>
-                            <div class="member-desc">장거리 공격</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🔮</div>
-                            <div class="member-role">범위 딜러</div>
-                            <div class="member-name">Mage</div>
-                            <div class="member-desc">화염폭발, 다수 처리</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">✝️</div>
-                            <div class="member-role">지원/힐러</div>
-                            <div class="member-name">Priest</div>
-                            <div class="member-desc">집단 치유, 생존력</div>
-                        </div>
-                    </div>
-                    <div class="party-analysis">
-                        <div class="analysis-box">
-                            <div class="analysis-label">📊 특징</div>
-                            <div class="analysis-value">전형적인 균형형, 모든 상황 대응 가능</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">⚠️ 약점</div>
-                            <div class="analysis-value">특화된 역할 없음, 개별 강점 약함</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">✅ 추천 스테이지</div>
-                            <div class="analysis-value">1-4단계 (초급~중급)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 파티 2: 공격 중심 (중급~상급) -->
-                <div class="party-recommendation">
-                    <div class="party-title">🔥 2. 공격형 파티 (중급~상급 스테이지)</div>
-                    <div class="party-members">
-                        <div class="member-card">
-                            <div class="member-icon">🗡️</div>
-                            <div class="member-role">암살자</div>
-                            <div class="member-name">Assassin</div>
-                            <div class="member-desc">최고 공격력, 암살 스킬</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">👊</div>
-                            <div class="member-role">격투가</div>
-                            <div class="member-name">Brawler</div>
-                            <div class="member-desc">높은 공격력, 무장해제</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🏹</div>
-                            <div class="member-role">원거리 딜러</div>
-                            <div class="member-name">Archer</div>
-                            <div class="member-desc">도약, 장거리 공격</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🔮</div>
-                            <div class="member-role">범위 딜러</div>
-                            <div class="member-name">Mage</div>
-                            <div class="member-desc">화염폭발, 범위 처리</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">✝️</div>
-                            <div class="member-role">지원/힐러</div>
-                            <div class="member-name">Priest</div>
-                            <div class="member-desc">집단 치유, 생존</div>
-                        </div>
-                    </div>
-                    <div class="party-analysis">
-                        <div class="analysis-box">
-                            <div class="analysis-label">📊 특징</div>
-                            <div class="analysis-value">높은 딜량, 빠른 클리어</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">⚠️ 약점</div>
-                            <div class="analysis-value">방어력 약함, 높은 난이도</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">✅ 추천 스테이지</div>
-                            <div class="analysis-value">5-7단계 (중상급~상급)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 파티 3: 방어 중심 (방어 스테이지) -->
-                <div class="party-recommendation">
-                    <div class="party-title">🛡️ 3. 방어형 파티 (방어 스테이지)</div>
-                    <div class="party-members">
-                        <div class="member-card">
-                            <div class="member-icon">🛡️</div>
-                            <div class="member-role">탱커</div>
-                            <div class="member-name">Knight</div>
-                            <div class="member-desc">최고 방어력</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">💣</div>
-                            <div class="member-role">함정설치</div>
-                            <div class="member-name">Sapper</div>
-                            <div class="member-desc">함정 설치, 기절</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🔮</div>
-                            <div class="member-role">범위 딜러</div>
-                            <div class="member-name">Mage</div>
-                            <div class="member-desc">화염폭발, 범위 처리</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🎭</div>
-                            <div class="member-role">버프/디버프</div>
-                            <div class="member-name">Shaman</div>
-                            <div class="member-desc">고양, 저주</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">✝️</div>
-                            <div class="member-role">지원/힐러</div>
-                            <div class="member-name">Priest</div>
-                            <div class="member-desc">집단 치유</div>
-                        </div>
-                    </div>
-                    <div class="party-analysis">
-                        <div class="analysis-box">
-                            <div class="analysis-label">📊 특징</div>
-                            <div class="analysis-value">높은 방어, 함정 활용</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">⚠️ 약점</div>
-                            <div class="analysis-value">공격력 부족, 느린 클리어</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">✅ 추천 스테이지</div>
-                            <div class="analysis-value">1-2, 5-6단계 (방어)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 파티 4: 고급형 (극상급 스테이지) -->
-                <div class="party-recommendation">
-                    <div class="party-title">💎 4. 최고급형 파티 (극상급 스테이지)</div>
-                    <div class="party-members">
-                        <div class="member-card">
-                            <div class="member-icon">🗡️</div>
-                            <div class="member-role">암살자</div>
-                            <div class="member-name">Assassin</div>
-                            <div class="member-desc">암살 스킬, 보스 처치</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🔱</div>
-                            <div class="member-role">균형형</div>
-                            <div class="member-name">Lancer</div>
-                            <div class="member-desc">관통 스킬, 생존력</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🔮</div>
-                            <div class="member-role">범위 딜러</div>
-                            <div class="member-name">Mage</div>
-                            <div class="member-desc">화염폭발, 다수 처리</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🎭</div>
-                            <div class="member-role">버프/디버프</div>
-                            <div class="member-name">Shaman</div>
-                            <div class="member-desc">고양 버프, 약화</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">✝️</div>
-                            <div class="member-role">지원/힐러</div>
-                            <div class="member-name">Priest</div>
-                            <div class="member-desc">집단 치유, 필수</div>
-                        </div>
-                    </div>
-                    <div class="party-analysis">
-                        <div class="analysis-box">
-                            <div class="analysis-label">📊 특징</div>
-                            <div class="analysis-value">높은 난이도, 최적 조합</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">⚠️ 약점</div>
-                            <div class="analysis-value">높은 레벨 필요, 숙련도 필요</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">✅ 추천 스테이지</div>
-                            <div class="analysis-value">9-10단계 (극상급)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 파티 5: 버프형 (특수) -->
-                <div class="party-recommendation">
-                    <div class="party-title">✨ 5. 버프형 파티 (고급 전략)</div>
-                    <div class="party-members">
-                        <div class="member-card">
-                            <div class="member-icon">👊</div>
-                            <div class="member-role">격투가</div>
-                            <div class="member-name">Brawler</div>
-                            <div class="member-desc">높은 공격력</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">📖</div>
-                            <div class="member-role">소환사</div>
-                            <div class="member-name">Summoner</div>
-                            <div class="member-desc">소환수 생성</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">🎭</div>
-                            <div class="member-role">버프/디버프</div>
-                            <div class="member-name">Shaman</div>
-                            <div class="member-desc">고양, 약화</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">⚔️</div>
-                            <div class="member-role">근접 딜러</div>
-                            <div class="member-name">Warrior</div>
-                            <div class="member-desc">강타, 광폭</div>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-icon">✝️</div>
-                            <div class="member-role">지원/힐러</div>
-                            <div class="member-name">Priest</div>
-                            <div class="member-desc">집단 치유</div>
-                        </div>
-                    </div>
-                    <div class="party-analysis">
-                        <div class="analysis-box">
-                            <div class="analysis-label">📊 특징</div>
-                            <div class="analysis-value">Shaman 고양 활용, 버프 극대화</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">⚠️ 약점</div>
-                            <div class="analysis-value">Shaman 집중 필요, 마나 소비 많음</div>
-                        </div>
-                        <div class="analysis-box">
-                            <div class="analysis-label">✅ 추천 스테이지</div>
-                            <div class="analysis-value">보스 전투, 극상급</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div class="divider"></div>
-
-            <!-- 섹션 4: 스테이지별 권장 클래스 -->
-            <section>
-                <h2 class="section-title">🗺️ 스테이지별 권장 클래스</h2>
-
-                <div class="stage-recommendation">
-                    <div class="stage-box">
-                        <h4>Stage 1-2: 마을 방어</h4>
-                        <span class="stage-difficulty difficulty-easy">초급</span>
-                        <div class="recommendation-item">
-                            <strong>추천:</strong> Novice(5명) 또는 Warrior/Knight
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>전술:</strong> 기초 학습, 경험 쌓기
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>주의:</strong> 나약해도 충분히 클리어 가능
-                        </div>
-                    </div>
-
-                    <div class="stage-box">
-                        <h4>Stage 3-4: 산적 소굴</h4>
-                        <span class="stage-difficulty difficulty-normal">중급</span>
-                        <div class="recommendation-item">
-                            <strong>추천:</strong> Warrior, Knight, Priest 필수
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>전술:</strong> 근접 강화, 방어력 중시
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>주의:</strong> Warrior 여러 명 추천
-                        </div>
-                    </div>
-
-                    <div class="stage-box">
-                        <h4>Stage 5-6: 성채 방어</h4>
-                        <span class="stage-difficulty difficulty-normal">중상급</span>
-                        <div class="recommendation-item">
-                            <strong>추천:</strong> 균형형 (근접 2 + 원거리 2 + 힐러 1)
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>전술:</strong> 다양한 클래스 활용
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>주의:</strong> 5단계는 방어, 6단계는 공략
-                        </div>
-                    </div>
-
-                    <div class="stage-box">
-                        <h4>Stage 7-8: 강도단 본거지</h4>
-                        <span class="stage-difficulty difficulty-hard">상급</span>
-                        <div class="recommendation-item">
-                            <strong>추천:</strong> Assassin, Brawler, Mage + Priest
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>전술:</strong> 공격형, 빠른 클리어
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>주의:</strong> 높은 레벨(11~13) 필수
-                        </div>
-                    </div>
-
-                    <div class="stage-box">
-                        <h4>Stage 9-10: 마계 침공</h4>
-                        <span class="stage-difficulty difficulty-veryhard">극상급</span>
-                        <div class="recommendation-item">
-                            <strong>추천:</strong> Assassin, Lancer, Mage, Shaman, Priest
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>전술:</strong> 최고급 조합, 버프/디버프 활용
-                        </div>
-                        <div class="recommendation-item">
-                            <strong>주의:</strong> 최대 레벨(15) + 숙련도 필수
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div class="divider"></div>
-
-            <!-- 섹션 5: 전략 팁 -->
-            <section>
-                <h2 class="section-title">💡 게임 전략 팁</h2>
-
-                <div style="background: #f5f5f5; padding: 25px; border-radius: 10px; font-size: 1em; line-height: 1.8;">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">🎯 1. 클래스 조합 원칙</h3>
-                    <ul style="margin-left: 20px; color: #555;">
-                        <li>필수: <strong>Priest 1명</strong> (유일한 힐러)</li>
-                        <li>근접: <strong>2명</strong> (Warrior, Knight, Assassin, Brawler, Lancer 중 선택)</li>
-                        <li>원거리: <strong>2명</strong> (Archer, Mage, Summoner, Shaman 중 선택)</li>
-                        <li>특수: 상황에 따라 Sapper(함정), Summoner(소환수) 추가</li>
-                    </ul>
-
-                    <h3 style="color: #667eea; margin: 20px 0 15px;">⚔️ 2. 클래스별 운영법</h3>
-                    <ul style="margin-left: 20px; color: #555;">
-                        <li><strong>Warrior:</strong> 강타 스킬 활용, Fury 관리</li>
-                        <li><strong>Knight:</strong> 탱킹 후방 배치, 스위치로 아군 보호</li>
-                        <li><strong>Assassin:</strong> 숲 타일에서 은신 활용, 암살로 보스 처치</li>
-                        <li><strong>Archer:</strong> 최후방 배치, 장거리에서 안전하게 공격</li>
-                        <li><strong>Priest:</strong> 중앙 배치, 집단 치유 타이밍 중요</li>
-                        <li><strong>Mage:</strong> 범위 공격 활용, 적 집중 위치 노림</li>
-                    </ul>
-
-                    <h3 style="color: #667eea; margin: 20px 0 15px;">📊 3. 자원 관리</h3>
-                    <ul style="margin-left: 20px; color: #555;">
-                        <li><strong>Fury (분노):</strong> 공격/피격으로 증가, MAX 시 강화 패시브 발동</li>
-                        <li><strong>Energy (에너지):</strong> 턴마다 자동 회복, 스킬 사용 위주</li>
-                        <li><strong>Mana (마나):</strong> 느리게 회복, 큰 스킬에 주의</li>
-                    </ul>
-
-                    <h3 style="color: #667eea; margin: 20px 0 15px;">🎪 4. 파티 구성 팁</h3>
-                    <ul style="margin-left: 20px; color: #555;">
-                        <li>초급: <strong>균형형</strong> - 안정적이고 배우기 좋음</li>
-                        <li>중급: <strong>공격형</strong> - 딜량을 늘려 클리어 속도 상향</li>
-                        <li>상급: <strong>특화형</strong> - 상황에 맞는 최적 조합 선택</li>
-                        <li>극상급: <strong>버프형</strong> - Shaman 고양 활용 극대화</li>
-                    </ul>
-
-                    <h3 style="color: #667eea; margin: 20px 0 15px;">⭐ 5. 최우선 순위 클래스</h3>
-                    <ul style="margin-left: 20px; color: #555;">
-                        <li>1순위: <strong>Priest</strong> (필수, 유일한 힐러)</li>
-                        <li>2순위: <strong>Assassin</strong> (최고 공격력, 보스 처치)</li>
-                        <li>3순위: <strong>Warrior</strong> (기초 근접 딜러)</li>
-                        <li>4순위: <strong>Archer</strong> (원거리 딜러)</li>
-                        <li>5순위: <strong>Mage</strong> (범위 공격)</li>
-                    </ul>
-                </div>
-            </section>
+            <div class="tabs" id="main-tabs">
+                <button class="tab active" data-tab="tab-cards">클래스 카드</button>
+                <button class="tab" data-tab="tab-compare">종합 비교</button>
+                <button class="tab" data-tab="tab-skills">스킬 목록</button>
+                <button class="tab" data-tab="tab-party">파티 추천</button>
+                <button class="tab" data-tab="tab-tips">전략 팁</button>
+            </div>
+
+            <div id="tab-cards" class="tab-content active"></div>
+            <div id="tab-compare" class="tab-content"></div>
+            <div id="tab-skills" class="tab-content"></div>
+            <div id="tab-party" class="tab-content"></div>
+            <div id="tab-tips" class="tab-content"></div>
         </main>
-
-        <footer>
-            <p>📊 DEADLINE 15 클래스 밸런스 & 파티 분석 리포트</p>
-            <p style="font-size: 0.9em; margin-top: 10px; color: #999;">
-                게임 플레이 가이드 (비공식 분석)<br>
-                라이브 데모: <a href="https://deadline-15.pages.dev/" style="color: #667eea; text-decoration: none;">https://deadline-15.pages.dev/</a>
-            </p>
-        </footer>
+        <footer>DEADLINE 15 클래스 밸런스 리포트 (자동 생성)</footer>
     </div>
+
+<script>
+const CLASSES = ['warrior','knight','assassin','mage','archer','priest','novice','brawler','lancer','sapper','summoner','shaman'];
+const ROLE_MAP = {
+    warrior:'근접 딜러', knight:'방어 탱커', assassin:'암살자', mage:'범위 마법사',
+    archer:'원거리 딜러', priest:'힐러/지원', novice:'초보자/만능', brawler:'격투가',
+    lancer:'창술사', sapper:'공병/함정', summoner:'소환사', shaman:'주술사/버퍼'
+};
+const PASSIVE_MAP = {
+    warrior: {name:'광폭', desc:'Fury MAX 시 2턴간 ATK x1.5'},
+    knight: {name:'몸부림', desc:'Fury MAX 시 2턴간 DEF x1.5'},
+    assassin: {name:'은신', desc:'숲 타일에서 자동 은신, 적 겹침 이동 가능'},
+};
+const MAX_HP=150, MAX_ATK=35, MAX_DEF=20;
+
+// ── Tab switching ──
+document.querySelectorAll('.tab').forEach(b => {
+    b.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById(b.dataset.tab).classList.add('active');
+    };
+});
+
+// ── Helpers ──
+function pct(v, max) { return Math.round(v / max * 100); }
+function resBadge(res) {
+    const m = {fury:'fury-badge', energy:'energy-badge', mana:'mana-badge'};
+    return `<span class="resource-badge ${m[res]||''}">${res.charAt(0).toUpperCase()+res.slice(1)}</span>`;
+}
+function statBar(label, val, max) {
+    return `<div class="stat-bar"><div class="stat-label"><span>${label}</span><span class="stat-value">${val}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct(val,max)}%"></div></div></div>`;
+}
+
+// ── 1. Class Cards ──
+function renderCards() {
+    let html = '<h2 class="section-title">클래스별 상세 분석</h2><div class="class-grid">';
+    CLASSES.forEach(cls => {
+        const d = JAB[cls], b = d.base;
+        const skills = getSkills(cls);
+        const learnables = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
+        const passive = PASSIVE_MAP[cls];
+
+        html += `<div class="class-card"><div class="class-header"><div class="class-icon">${d.icon}</div><div class="class-name"><h3>${cls.charAt(0).toUpperCase()+cls.slice(1)}</h3><div class="class-type">${ROLE_MAP[cls]}</div></div></div>`;
+        html += statBar('HP', b.hp, MAX_HP);
+        html += statBar('ATK', b.atk, MAX_ATK);
+        html += statBar('DEF', b.def, MAX_DEF);
+        html += statBar('MOV', b.move, 4);
+        if (b.range > 1) html += statBar('RANGE', b.range, 4);
+
+        // Skills
+        html += '<div class="skill-section"><div style="font-weight:600;font-size:.85em;color:#667eea;margin-bottom:6px">기본 스킬</div>';
+        skills.forEach(sk => {
+            html += `<div class="skill-item"><span class="sk-icon">${sk.icon}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
+        });
+
+        if (learnables.length) {
+            const actives = learnables.filter(s => !s.passive);
+            const passives = learnables.filter(s => s.passive);
+            if (actives.length) {
+                html += '<div style="font-weight:600;font-size:.85em;color:#f57c00;margin:10px 0 6px">습득형 스킬</div>';
+                actives.forEach(sk => {
+                    html += `<div class="skill-item"><span class="sk-icon">${sk.icon}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
+                });
+            }
+            if (passives.length) {
+                passives.forEach(sk => {
+                    html += `<div class="passive-item"><strong>${sk.icon} ${sk.name}</strong> (패시브)<br>${sk.desc}</div>`;
+                });
+            }
+        }
+
+        if (passive) {
+            html += `<div class="passive-item"><strong>패시브: ${passive.name}</strong><br>${passive.desc}</div>`;
+        }
+        html += '</div>';
+
+        // Resource + Growth
+        html += `<div>${resBadge(d.res)} <span style="font-size:.75em;color:#999">Max ${d.maxRes}${d.resRec ? ' / +' + d.resRec + '/턴' : ''}</span></div>`;
+        const g = d.growth;
+        html += `<div class="growth-row"><span class="growth-tag">HP +${g.hp[0]}~${g.hp[1]}</span><span class="growth-tag">ATK +${g.atk[0]}~${g.atk[1]}</span><span class="growth-tag">DEF +${g.def[0]}~${g.def[1]}</span></div>`;
+        html += '</div>';
+    });
+    html += '</div>';
+    document.getElementById('tab-cards').innerHTML = html;
+}
+
+// ── 2. Comparison Table ──
+function renderCompare() {
+    // Sort helpers
+    const sorted = (key) => CLASSES.slice().sort((a,b) => JAB[b].base[key] - JAB[a].base[key]);
+    const rankMap = {};
+    ['hp','atk','def'].forEach(key => {
+        const s = sorted(key);
+        s.forEach((cls,i) => { if(!rankMap[cls]) rankMap[cls]={}; rankMap[cls][key]=i; });
+    });
+
+    let html = '<h2 class="section-title">종합 비교 테이블</h2>';
+    html += '<table class="comparison-table"><thead><tr><th>클래스</th><th>HP</th><th>ATK</th><th>DEF</th><th>MOV</th><th>RANGE</th><th>자원</th><th>Max</th><th>회복</th><th>역할</th></tr></thead><tbody>';
+    CLASSES.forEach(cls => {
+        const d = JAB[cls], b = d.base;
+        const r = rankMap[cls];
+        const rc = (i) => i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
+        html += `<tr>
+            <td><strong>${d.icon} ${cls.charAt(0).toUpperCase()+cls.slice(1)}</strong></td>
+            <td class="${rc(r.hp)}">${b.hp}</td>
+            <td class="${rc(r.atk)}">${b.atk}</td>
+            <td class="${rc(r.def)}">${b.def}</td>
+            <td>${b.move}</td>
+            <td>${b.range}</td>
+            <td>${d.res}</td>
+            <td>${d.maxRes}</td>
+            <td>${d.resRec||'-'}</td>
+            <td><span class="role-badge">${ROLE_MAP[cls]}</span></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+
+    // Stat rankings
+    html += '<div class="divider"></div><h3 style="color:#667eea;margin-bottom:16px">스탯 순위</h3>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">';
+    [{key:'hp',label:'HP 순위',emoji:'❤️'},{key:'atk',label:'ATK 순위',emoji:'⚔️'},{key:'def',label:'DEF 순위',emoji:'🛡️'}].forEach(({key,label,emoji}) => {
+        const s = sorted(key);
+        html += `<div style="background:#f9f9f9;padding:16px;border-radius:8px"><h4 style="color:#667eea;margin-bottom:8px">${emoji} ${label}</h4>`;
+        s.forEach((cls,i) => {
+            const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
+            html += `<div style="font-size:.88em;padding:3px 0">${medal} ${JAB[cls].icon} ${cls} <strong>${JAB[cls].base[key]}</strong></div>`;
+        });
+        html += '</div>';
+    });
+    html += '</div>';
+
+    document.getElementById('tab-compare').innerHTML = html;
+}
+
+// ── 3. Skill Master List ──
+function renderSkills() {
+    let html = '<h2 class="section-title">전체 스킬 목록</h2>';
+
+    // Base skills
+    html += '<h3 style="color:#667eea;margin-bottom:12px">기본 스킬</h3>';
+    html += '<table class="skill-table"><thead><tr><th>클래스</th><th>스킬명</th><th>설명</th><th>비용</th></tr></thead><tbody>';
+    CLASSES.forEach(cls => {
+        getSkills(cls).forEach(sk => {
+            html += `<tr><td>${JAB[cls].icon} ${cls}</td><td><strong>${sk.icon} ${sk.name}</strong></td><td>${sk.desc}</td><td>${sk.cost} ${sk.costType}</td></tr>`;
+        });
+    });
+    html += '</tbody></table>';
+
+    // Learnable skills by class
+    html += '<div class="divider"></div><h3 style="color:#f57c00;margin-bottom:12px">습득형 스킬 (스킬북)</h3>';
+    html += '<table class="skill-table"><thead><tr><th>클래스</th><th>스킬명</th><th>타입</th><th>설명</th><th>비용</th></tr></thead><tbody>';
+    CLASSES.forEach(cls => {
+        const learnables = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
+        learnables.forEach(sk => {
+            const isPassive = sk.passive;
+            html += `<tr class="${isPassive?'passive-row':''}"><td>${JAB[cls].icon} ${cls}</td><td><strong>${sk.icon} ${sk.name}</strong></td><td>${isPassive?'<span style="color:#f57c00">패시브</span>':'액티브'}</td><td>${sk.desc}</td><td>${isPassive?'-':sk.cost+' '+sk.costType}</td></tr>`;
+        });
+    });
+    html += '</tbody></table>';
+
+    // Skill count summary
+    html += '<div class="divider"></div><h3 style="color:#667eea;margin-bottom:12px">클래스별 스킬 수 요약</h3>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">';
+    CLASSES.forEach(cls => {
+        const base = getSkills(cls).length;
+        const learn = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
+        const actives = learn.filter(s => !s.passive).length;
+        const passives = learn.filter(s => s.passive).length;
+        html += `<div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center">
+            <div style="font-size:1.5em">${JAB[cls].icon}</div>
+            <div style="font-weight:bold">${cls}</div>
+            <div style="font-size:.82em;color:#666">기본 ${base} / 액티브 ${actives} / 패시브 ${passives}</div>
+            <div style="font-size:1.2em;font-weight:bold;color:#667eea;margin-top:4px">${base + actives + passives}개</div>
+        </div>`;
+    });
+    html += '</div>';
+
+    document.getElementById('tab-skills').innerHTML = html;
+}
+
+// ── 4. Party Recommendations ──
+function renderParty() {
+    const parties = [
+        {
+            title: '1. 균형형 파티 (초급~중급)', icon: '🎯',
+            members: ['warrior','knight','archer','mage','priest'],
+            feature: '전형적인 균형형, 모든 상황 대응',
+            weakness: '특화 부족, 개별 강점 약함',
+            stages: '1-4단계 (초급~중급)'
+        },
+        {
+            title: '2. 공격형 파티 (중급~상급)', icon: '🔥',
+            members: ['assassin','brawler','archer','mage','priest'],
+            feature: '높은 딜량, 빠른 클리어',
+            weakness: '방어력 약함, 높은 난이도',
+            stages: '5-7단계 (중상급~상급)'
+        },
+        {
+            title: '3. 방어형 파티 (방어 스테이지)', icon: '🛡️',
+            members: ['knight','lancer','sapper','mage','priest'],
+            feature: '높은 방어 + 함정 활용 + 관통',
+            weakness: '공격력 부족, 느린 클리어',
+            stages: '1-2, 5-6단계 (방어)'
+        },
+        {
+            title: '4. 최고급 파티 (극상급)', icon: '💎',
+            members: ['assassin','lancer','mage','shaman','priest'],
+            feature: '최적 조합: 암살 + 버프 + 범위공격',
+            weakness: '높은 레벨/숙련도 필요',
+            stages: '9-10단계 (극상급)'
+        },
+        {
+            title: '5. 소환/버프형 파티 (특수)', icon: '✨',
+            members: ['summoner','shaman','warrior','brawler','priest'],
+            feature: 'Shaman 고양 + 소환수 + 물리딜러',
+            weakness: 'Shaman 채널링 보호 필요',
+            stages: '보스 전투, 극상급'
+        }
+    ];
+
+    let html = '<h2 class="section-title">최적 5인 파티 추천</h2>';
+    parties.forEach(p => {
+        html += `<div class="party-recommendation"><div class="party-title">${p.icon} ${p.title}</div><div class="party-members">`;
+        p.members.forEach(cls => {
+            const d = JAB[cls];
+            html += `<div class="member-card"><div class="member-icon">${d.icon}</div><div class="member-name">${cls.charAt(0).toUpperCase()+cls.slice(1)}</div><div class="member-desc">${ROLE_MAP[cls]}</div></div>`;
+        });
+        html += `</div><div class="party-analysis">
+            <div class="analysis-box"><div class="analysis-label">특징</div><div>${p.feature}</div></div>
+            <div class="analysis-box"><div class="analysis-label">약점</div><div>${p.weakness}</div></div>
+            <div class="analysis-box"><div class="analysis-label">추천 스테이지</div><div>${p.stages}</div></div>
+        </div></div>`;
+    });
+
+    document.getElementById('tab-party').innerHTML = html;
+}
+
+// ── 5. Strategy Tips ──
+function renderTips() {
+    document.getElementById('tab-tips').innerHTML = `
+    <h2 class="section-title">게임 전략 팁</h2>
+    <div style="background:#f9f9f9;padding:24px;border-radius:10px;line-height:1.8">
+        <h3 style="color:#667eea;margin-bottom:12px">1. 클래스 조합 원칙</h3>
+        <ul style="margin-left:20px;color:#555">
+            <li>필수: <strong>Priest 1명</strong> (유일한 힐러)</li>
+            <li>근접 2명: Warrior, Knight, Assassin, Brawler, Lancer 중 택2</li>
+            <li>원거리 2명: Archer, Mage, Summoner, Shaman 중 택2</li>
+            <li>특수: Sapper(함정), Summoner(소환수), Shaman(버프/디버프)</li>
+        </ul>
+
+        <h3 style="color:#667eea;margin:20px 0 12px">2. 자원 시스템</h3>
+        <ul style="margin-left:20px;color:#555">
+            <li><strong style="color:#d32f2f">Fury (분노):</strong> 공격/피격으로 +1, MAX 시 2턴간 패시브 발동. Warrior/Knight/Lancer</li>
+            <li><strong style="color:#f57c00">Energy (에너지):</strong> 매턴 자동회복 (8~15). Assassin/Archer/Novice/Brawler/Sapper</li>
+            <li><strong style="color:#1976d2">Mana (마나):</strong> 매턴 자동회복 (10~12). Mage/Priest/Summoner/Shaman</li>
+        </ul>
+
+        <h3 style="color:#667eea;margin:20px 0 12px">3. 핵심 운영법</h3>
+        <ul style="margin-left:20px;color:#555">
+            <li><strong>Knight:</strong> 전방 배치, 스위치로 위험한 아군 보호. 포획으로 원거리 적 끌어오기</li>
+            <li><strong>Assassin:</strong> 숲 타일에서 은신 → 암살(ATKx5) 콤보. 습격으로 기동 공격</li>
+            <li><strong>Mage:</strong> 화염폭발로 뭉친 적 다수 처리. 빙결로 보스 동결</li>
+            <li><strong>Archer:</strong> 후방 안전지대에서 저격(5~10칸). 강철비로 범위 공격</li>
+            <li><strong>Shaman:</strong> 고양 버프(전체 딜 +25%) → 채널링 유지. 독안개로 지역 제어</li>
+            <li><strong>Sapper:</strong> 방어 스테이지에서 함정 설치 후 폭파(x1.5 범위 데미지)</li>
+            <li><strong>Lancer:</strong> 관통으로 일직선 다수 타격. 돌격으로 원거리 적 급습. 방진으로 파티 방어력 UP</li>
+            <li><strong>Brawler:</strong> 무장해제로 보스 ATK 감소. 파쇄로 방어 무시 딜</li>
+        </ul>
+
+        <h3 style="color:#667eea;margin:20px 0 12px">4. 스테이지 공략</h3>
+        <ul style="margin-left:20px;color:#555">
+            <li><strong>방어 스테이지 (1,2,5,6):</strong> 성벽 뒤에서 함정+원거리 공격. Knight/Sapper 필수</li>
+            <li><strong>공격 스테이지 (3,4,7,8):</strong> 적장 처치 목표. Assassin으로 빠르게 돌파</li>
+            <li><strong>보스 스테이지 (9,10):</strong> Shaman 고양 + Assassin 암살 + Priest 치유 조합</li>
+        </ul>
+
+        <h3 style="color:#667eea;margin:20px 0 12px">5. 클래스 우선순위</h3>
+        <ul style="margin-left:20px;color:#555">
+            <li>1순위: <strong>Priest</strong> (유일한 힐러, 모든 파티 필수)</li>
+            <li>2순위: <strong>Assassin</strong> (최고 ATK, 보스 처치 핵심)</li>
+            <li>3순위: <strong>Mage</strong> (범위 공격, 다수 처리 효율)</li>
+            <li>4순위: <strong>Knight</strong> (탱킹, 스위치/포획 유틸)</li>
+            <li>5순위: <strong>Archer / Lancer</strong> (상황별 선택)</li>
+        </ul>
+    </div>`;
+}
+
+// ── Init ──
+renderCards();
+renderCompare();
+renderSkills();
+renderParty();
+renderTips();
+</script>
 </body>
 </html>

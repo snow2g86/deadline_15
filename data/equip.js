@@ -256,10 +256,18 @@ function calcEnhanceCost(item) {
   return Math.round(base * (item.enhanceLv + 1) * rarityMult);
 }
 
+// 강화 레벨별 스탯 증가율
+function getEnhanceMultiplier(lvl) {
+  if (lvl <= 3) return 0.10;     // +0~+3: 10%
+  if (lvl <= 6) return 0.15;     // +4~+6: 15%
+  if (lvl <= 9) return 0.22;     // +7~+9: 22%
+  return 0.30;                   // +10: 30%
+}
+
 // 강화된 스탯 반환 (강화 레벨 적용)
 function getEnhancedStats(item) {
   if (!item || !item.enhanceLv) return item.stats;
-  var mult = 1 + (item.enhanceLv * ENHANCE_STAT_MULT);
+  var mult = 1 + getEnhanceMultiplier(item.enhanceLv);
   var enhanced = {};
   for (var stat in item.stats) {
     enhanced[stat] = Math.round(item.stats[stat] * mult);

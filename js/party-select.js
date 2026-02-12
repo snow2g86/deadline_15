@@ -1122,19 +1122,29 @@ function renderEnhanceList() {
     var costGold = calcEnhanceCost(item);
 
     var rateClass = rate >= 0.80 ? 'rate-high' : rate >= 0.40 ? 'rate-mid' : 'rate-low';
-    var statsText = 'HP';
-    if (currentStats.atk) statsText += ' ATK+' + (enhancedStats.atk - currentStats.atk);
-    if (currentStats.def) statsText += ' DEF+' + (enhancedStats.def - currentStats.def);
+
+    // 성공 시 예상 스탯 (다음 레벨)
+    var nextLvl = item.enhanceLv + 1;
+    var nextMult = 1 + getEnhanceMultiplier(nextLvl);
+    var nextStats = {};
+    for (var stat in currentStats) {
+      nextStats[stat] = Math.round(currentStats[stat] * nextMult);
+    }
+
+    var gainText = '';
+    if (currentStats.atk) gainText += ' ATK+' + (nextStats.atk - currentStats.atk);
+    if (currentStats.def) gainText += ' DEF+' + (nextStats.def - currentStats.def);
+    if (currentStats.hp) gainText += ' HP+' + (nextStats.hp - currentStats.hp);
 
     html += '<div class="enhance-card" onclick="showEnhanceModal(\'' + item.eid + '\')">' +
       '<div class="enhance-icon">⚔️</div>' +
       '<div class="enhance-info">' +
         '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
         '<div class="enhance-level">' + t('equip.rarity.' + item.rarity) + ' ' +
-          (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') +
+          (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') + ' → +' + nextLvl +
         '</div>' +
         '<div class="enhance-badge enhance-badge-lvl ' + rateClass + '">' + ratePercent + '% • ' + costGold + 'G</div>' +
-        '<div class="enhance-stats">' + statsText + '</div>' +
+        '<div class="enhance-stats" style="color:#4ade80;font-weight:600;">✨' + gainText + '</div>' +
       '</div>' +
       '<button class="enhance-btn" onclick="event.stopPropagation(); showEnhanceModal(\'' + item.eid + '\');">' + t('enhance.button_enhance') + '</button>' +
     '</div>';
@@ -1208,10 +1218,14 @@ function showEnhanceConfirmModal(targetEid, materialEid) {
   var cost = calcEnhanceCost(target);
   var rate = calcEnhanceRate(target);
   var ratePercent = Math.round(rate * 100);
-  var enhancedStats = getEnhancedStats(target);
-  var newStats = {};
-  for (var stat in enhancedStats) {
-    newStats[stat] = Math.round(enhancedStats[stat] * (1 + ENHANCE_STAT_MULT));
+
+  // 현재 스탯과 성공 시 예상 스탯
+  var currentStats = getEnhancedStats(target);
+  var nextLvl = target.enhanceLv + 1;
+  var nextMult = 1 + getEnhanceMultiplier(nextLvl);
+  var nextStats = {};
+  for (var stat in target.stats) {
+    nextStats[stat] = Math.round(target.stats[stat] * nextMult);
   }
 
   var overlay = document.getElementById('enhance-modal-overlay');
@@ -1230,8 +1244,18 @@ function showEnhanceConfirmModal(targetEid, materialEid) {
       '</div>';
   }
 
-  var ratePercent = Math.round(rate * 100);
   var rateColor = rate >= 0.80 ? '#4ade80' : rate >= 0.40 ? '#fbbf24' : '#ef4444';
+
+  // 성공 시 스탯 증가량
+  var gainHtml = '';
+  for (var stat in nextStats) {
+    if (currentStats[stat]) {
+      var gain = nextStats[stat] - currentStats[stat];
+      if (gain > 0) {
+        gainHtml += (gainHtml ? ' ' : '') + stat.toUpperCase() + '+' + gain;
+      }
+    }
+  }
 
   var html = '<div class="enhance-modal enhance-confirm-modal" onclick="event.stopPropagation();">' +
     '<div class="enhance-modal-header">' +
@@ -1240,21 +1264,22 @@ function showEnhanceConfirmModal(targetEid, materialEid) {
     '</div>' +
     '<div class="enhance-modal-body enhance-confirm-content">' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">' + t('enhance.target_item') + '</div>' +
+        '<div class="enhance-confirm-label">📊 ' + t('enhance.target_item') + '</div>' +
         '<div class="enhance-confirm-value">' + t('equip.item.' + target.templateId) + (target.enhanceLv > 0 ? ' +' + target.enhanceLv : '') + '</div>' +
-        '<div class="enhance-success-rate">' +
-          '<span style="font-size:10px;color:var(--dim);">' + ratePercent + '%</span>' +
-          '<div class="enhance-success-bar" style="width:60px;"><div class="enhance-success-fill" style="width:' + ratePercent + '%;background-color:' + rateColor + ';"></div></div>' +
-        '</div>' +
+      '</div>' +
+      '<div class="enhance-confirm-section" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);">' +
+        '<div class="enhance-confirm-label" style="color:#4ade80;">✨ 성공 시 보상 (+' + nextLvl + ')</div>' +
+        '<div class="enhance-confirm-value" style="color:#4ade80;font-size:14px;font-weight:700;">' + gainHtml + '</div>' +
+        '<div style="font-size:10px;color:#4ade80;margin-top:4px;">확률: <span style="font-size:12px;font-weight:700;">' + ratePercent + '%</span></div>' +
         pityHtml +
       '</div>' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">' + t('enhance.material_item') + '</div>' +
+        '<div class="enhance-confirm-label">⚙️ ' + t('enhance.material_item') + '</div>' +
         '<div class="enhance-confirm-value">' + t('equip.item.' + material.templateId) + (material.enhanceLv > 0 ? ' +' + material.enhanceLv : '') + '</div>' +
         '<div style="font-size:9px;color:#ef4444;margin-top:4px;">⚠️ ' + t('enhance.material_consumed') + '</div>' +
       '</div>' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">' + t('common.gold') + '</div>' +
+        '<div class="enhance-confirm-label">💰 ' + t('common.gold') + '</div>' +
         '<div class="enhance-confirm-value">' + cost + ' G</div>' +
       '</div>' +
     '</div>' +
