@@ -329,6 +329,8 @@ Object.assign(G, {
   async eAtkAsync(a,tgt){
     if(tgt.team==='ally')this.scrollToUnit(tgt);
     await sl(250);
+    // 적 공격 애니메이션
+    await new Promise(resolve => this.playAttackAnimation(a, resolve));
     await this.eAtk(a,tgt);
     await sl(tgt.hp<=0?500:300)},
   async eAtk(a,tgt){
