@@ -66,7 +66,7 @@ Object.assign(window._LANG_en, {
         "mage_fireburst": "Attack all enemies in 3\u00d73 area centered on target",
         "novice_throw": "ATK\u00d70.5 damage to enemies within 4 cells",
         "brawler_disarm": "Reduce target's attack power by 50% for 3 turns within 1 cell",
-        "shaman_curse": "Deal 0.5% max HP damage to 1 random enemy each turn (boss 0.2%). Immobilize until removed",
+        "shaman_curse": "Deal 1.0% max HP damage to 1 random enemy each turn (boss 0.4%). Immobilize until removed",
         "shaman_exalt": "Increase all allies' damage by 25%. Immobilize until removed",
         "summoner_summon_spirit": "Summon ranged magic spirit (5 turns, 50% attack power)",
         "summoner_summon_golem": "Summon melee golem (5 turns, 120% HP/DEF, 50% attack power)",

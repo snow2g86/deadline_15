@@ -48,7 +48,7 @@ const SKILLS = {
 	},
 	shaman: [
 		{ id: 'shaman_curse', name: '쇠약의 저주', icon: '☠️',
-			desc: '매턴 적 1명에게 최대HP 0.5% 피해(보스 0.2%). 해제까지 이동/행동 불가', cost: 100, costType: 'mana' },
+			desc: '매턴 적 1명에게 최대HP 1.0% 피해(보스 0.4%). 해제까지 이동/행동 불가', cost: 100, costType: 'mana' },
 		{ id: 'shaman_exalt', name: '고양', icon: '🔺',
 			desc: '전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가', cost: 50, costType: 'mana' }
 	],

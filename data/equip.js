@@ -290,6 +290,54 @@ function calcEnhanceRate(item) {
 }
 
 // ═══════════════════════════════════════════
+// 장비 이모지 매핑 (Emoji Mapping)
+// ═══════════════════════════════════════════
+// TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
+
+var EQUIP_EMOJI = {
+  // Weapons
+  'sword_1h': '🗡️', // 기사검
+  'dagger': '🔪', // 단검
+  'mace': '🔨', // 메이스
+  'wand': '✨', // 지팡이
+  'fists': '👊', // 권투장갑
+  'greatsword': '⚔️', // 대검
+  'bow': '🏹', // 활
+  'staff': '🪄', // 마법봉
+  'spear': '🗣️', // 창
+  // Offhand
+  'shield': '🛡️', // 방패
+  'tome': '📖', // 마법서
+  'buckler': '🎯', // 작은 방패
+  // Helmets
+  'plate_helm': '⚡', // 판금 투구
+  'leather_cap': '👒', // 가죽 모자
+  'cloth_hood': '🧢', // 천 두건
+  // Armor
+  'plate_armor': '🏰', // 판금 갑옷
+  'leather_armor': '🧵', // 가죽 갑옷
+  'cloth_robe': '👗', // 천 로브
+  // Boots
+  'plate_boots': '👢', // 판금 부츠
+  'leather_boots': '🥾', // 가죽 부츠
+  'cloth_shoes': '👟', // 천 신발
+  // Accessories
+  'necklace_power': '💎', // 목걸이 - 힘
+  'necklace_guard': '🔗', // 목걸이 - 방어
+  'necklace_swift': '🌪️', // 목걸이 - 민첩
+  'earring_power': '💫', // 귀걸이 - 힘
+  'earring_guard': '⭐', // 귀걸이 - 방어
+  'earring_swift': '✨', // 귀걸이 - 민첩
+  'ring_power': '💠', // 반지 - 힘
+  'ring_guard': '🔷', // 반지 - 방어
+  'ring_swift': '🔹' // 반지 - 민첩
+};
+
+function getEquipEmoji(templateId) {
+  return EQUIP_EMOJI[templateId] || '📦'; // 기본값: 박스
+}
+
+// ═══════════════════════════════════════════
 // 공성 도구 (Siege Items)
 // ═══════════════════════════════════════════
 

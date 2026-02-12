@@ -43,7 +43,7 @@ Object.assign(G, {
         const enemies=this.alive('enemy');
         if(enemies.length){
           const tgt=enemies[Math.floor(Math.random()*enemies.length)];
-          const pct=tgt.isBoss?0.002:0.005;
+          const pct=tgt.isBoss?0.004:0.01;
           const dmg=Math.max(1,Math.round(tgt.mhp*pct));
           tgt.hp=Math.max(0,tgt.hp-dmg);
           this.floatT(tgt.x,tgt.y,`-${dmg}`,'damage');

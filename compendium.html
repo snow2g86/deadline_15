@@ -557,40 +557,53 @@ function renderResourceInfo() {
   const container = document.getElementById('resource-info');
   container.innerHTML = '';
 
+  // JAB에서 자원 유형별 클래스 분류
+  const resourceMap = {
+    fury: [],
+    energy: [],
+    mana: []
+  };
+
+  Object.entries(JAB || {}).forEach(([cls, data]) => {
+    if (data.res && resourceMap[data.res]) {
+      resourceMap[data.res].push(cls);
+    }
+  });
+
   const resources = [
     {
       icon: '🔥',
       name: 'Fury (분노)',
-      desc: 'Warrior 전용 자원',
+      desc: resourceMap.fury.length > 0 ? `${resourceMap.fury.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
       details: [
         '• 최대 10',
-        '• 턴마다 자동 증가',
-        '• 강공(Strong Attack) 사용 시 소비',
-        '• 효과: ATK × 1.5배 증가'
+        '• 공격 시 +1, 피격 시 +2 충전',
+        '• MAX 도달 시 패시브 자동 발동 후 0으로 리셋',
+        '• 스킬 사용 시 소비 가능'
       ],
       color: '#f87171'
     },
     {
       icon: '⚡',
       name: 'Energy (에너지)',
-      desc: 'Assassin, Archer, Sapper 자원',
+      desc: resourceMap.energy.length > 0 ? `${resourceMap.energy.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
       details: [
         '• 최대 100',
-        '• 턴마다 12-15 회복',
-        '• 스킬 사용 시 소비',
-        '• Sapper: 함정 설치에 20 소비'
+        '• 턴마다 자동 회복',
+        '• 액티브 스킬 사용 시 소비',
+        '• Sapper: 함정 설치에 에너지 20 소비'
       ],
       color: '#fbbf24'
     },
     {
       icon: '💜',
       name: 'Mana (마나)',
-      desc: 'Mage, Priest, Summoner, Shaman 자원',
+      desc: resourceMap.mana.length > 0 ? `${resourceMap.mana.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
       details: [
         '• 최대 100-120',
-        '• 턴마다 10-12 회복',
+        '• 턴마다 자동 회복',
         '• 마법/힐 스킬 사용 시 소비',
-        '• Priest: 집단치유(+50HP) 사용'
+        '• 전투 시작 시 MAX로 시작'
       ],
       color: '#a78bfa'
     }
@@ -693,6 +706,14 @@ function renderSpecialAbilities() {
       effect: '패시브 능력',
       desc: '공격 시 ATK × 1.5배 증가',
       color: '#f87171'
+    },
+    {
+      icon: '🏰',
+      name: '철벽 (Iron Phalanx)',
+      classes: 'Lancer',
+      effect: '분노 MAX 도달 시',
+      desc: '2턴간 방어력 2배 증가',
+      color: '#60a5fa'
     }
   ];
 

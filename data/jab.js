@@ -50,7 +50,7 @@ const JAB = {
     "growth": { "hp": [7,11], "atk": [3,5], "def": [0,2] }
   },
   "lancer": {
-    "icon":"🔱", "res":"fury", "maxRes": 5, "resRec": 0,
+    "icon":"🔱", "res":"fury", "maxRes": 10, "resRec": 0,
     "base": { "hp": 95, "atk": 28, "def": 12, "move": 3, "range": 1 },
     "growth": { "hp": [8,13], "atk": [2,4], "def": [1,3] }
   },

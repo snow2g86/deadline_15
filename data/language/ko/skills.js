@@ -66,7 +66,7 @@ Object.assign(window._LANG_ko, {
         "mage_fireburst": "대상 중심 3×3 범위 적 전체에 공격",
         "novice_throw": "4칸 내 적에게 ATK×0.5 데미지",
         "brawler_disarm": "1칸 내 적 공격력 3턴간 50% 감소",
-        "shaman_curse": "매턴 적 1명에게 최대HP 0.5% 피해(보스 0.2%). 해제까지 이동/행동 불가",
+        "shaman_curse": "매턴 적 1명에게 최대HP 1.0% 피해(보스 0.4%). 해제까지 이동/행동 불가",
         "shaman_exalt": "전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가",
         "summoner_summon_spirit": "원거리 마법 공격 정령 소환 (5턴, 공격력 50%)",
         "summoner_summon_golem": "근접 공격 골램 소환 (5턴, HP/DEF 120%, 공격력 50%)",

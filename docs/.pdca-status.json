@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-12T18:17:13.610Z",
+  "lastUpdated": "2026-02-12T18:27:19.567Z",
   "activeFeatures": [
     "skill-implementation",
     "js",
@@ -51,9 +51,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-05T06:16:20.882Z",
-        "lastUpdated": "2026-02-12T18:17:13.610Z"
+        "lastUpdated": "2026-02-12T18:27:09.059Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/shop.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/skills.js"
     },
     "scripts": {
       "phase": "do",
@@ -77,9 +77,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-09T17:15:43.753Z",
-        "lastUpdated": "2026-02-12T08:59:21.549Z"
+        "lastUpdated": "2026-02-12T18:22:16.838Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/stages.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/jab.js"
     },
     "language": {
       "phase": "do",
@@ -103,9 +103,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T05:18:10.899Z",
-        "lastUpdated": "2026-02-12T14:21:49.525Z"
+        "lastUpdated": "2026-02-12T18:27:01.903Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/constants.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/js/battle/ai.js"
     },
     "skills": {
       "phase": "do",
@@ -142,9 +142,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T09:42:23.623Z",
-        "lastUpdated": "2026-02-12T17:28:05.986Z"
+        "lastUpdated": "2026-02-12T18:27:18.497Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/en/stages.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/en/skills.js"
     },
     "ko": {
       "phase": "do",
@@ -155,9 +155,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T09:42:50.218Z",
-        "lastUpdated": "2026-02-12T17:27:43.438Z"
+        "lastUpdated": "2026-02-12T18:27:17.435Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/ko/stages.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/ko/skills.js"
     },
     "es": {
       "phase": "do",
@@ -168,9 +168,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T09:43:02.076Z",
-        "lastUpdated": "2026-02-12T17:28:07.050Z"
+        "lastUpdated": "2026-02-12T18:27:19.567Z"
       },
-      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es/stages.js"
+      "lastFile": "/Users/2z/Desktop/workspace/game/deadline_15/data/language/es/skills.js"
     },
     "tmp": {
       "phase": "do",
@@ -194,7 +194,7 @@
   "session": {
     "startedAt": "2026-02-05T06:05:50.525Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-12T18:17:13.610Z"
+    "lastActivity": "2026-02-12T18:27:19.567Z"
   },
   "history": [
     {
@@ -11942,6 +11942,66 @@
     {
       "timestamp": "2026-02-12T18:17:13.610Z",
       "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:19:57.751Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:20:15.465Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:20:25.280Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:20:30.617Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:22:16.838Z",
+      "feature": "data",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:27:01.903Z",
+      "feature": "battle",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:27:09.059Z",
+      "feature": "js",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:27:17.435Z",
+      "feature": "ko",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:27:18.497Z",
+      "feature": "en",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T18:27:19.567Z",
+      "feature": "es",
       "phase": "do",
       "action": "updated"
     }

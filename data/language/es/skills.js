@@ -66,7 +66,7 @@ Object.assign(window._LANG_es, {
         "mage_fireburst": "Atacar todos enemigos en área 3×3 centrada en objetivo",
         "novice_throw": "Daño ATK×0.5 a enemigos dentro de 4 celdas",
         "brawler_disarm": "Reducir poder de ataque objetivo en 50% durante 3 turnos dentro de 1 celda",
-        "shaman_curse": "Infligir 0.5% daño HP máximo a 1 enemigo aleatorio cada turno (jefe 0.2%). Inmovilizar hasta remover",
+        "shaman_curse": "Infligir 1.0% daño HP máximo a 1 enemigo aleatorio cada turno (jefe 0.4%). Inmovilizar hasta remover",
         "shaman_exalt": "Aumentar daño aliados en 25%. Inmovilizar hasta remover",
         "summoner_summon_spirit": "Invocar espíritu magia a distancia (5 turnos, 50% poder ataque)",
         "summoner_summon_golem": "Invocar golem cuerpo a cuerpo (5 turnos, 120% HP/DEF, 50% poder ataque)",

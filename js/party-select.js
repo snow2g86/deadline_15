@@ -668,11 +668,14 @@ function renderInventoryInModal(ch) {
       restrictInfo = '<span class="eq-inv-restrict" title="허용 직업: ' + allowedClasses + '">🔒 ' + allowedClasses + '</span>';
     }
 
+    // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
+    var itemEmoji = getEquipEmoji(item.templateId);
     var row = document.createElement('div');
     row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
     row.innerHTML =
       '<div class="eq-inv-info">' +
       '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' + t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() + '</span>' +
+      '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
       '<span class="eq-inv-name">' + t('equip.item.' + item.templateId) + '</span>' +
       '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' +
       (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
@@ -1165,8 +1168,10 @@ function renderEnhanceList() {
     if (currentStats.def) gainText += ' DEF+' + (nextStats.def - currentStats.def);
     if (currentStats.hp) gainText += ' HP+' + (nextStats.hp - currentStats.hp);
 
+    // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
+    var itemEmoji = getEquipEmoji(item.templateId);
     html += '<div class="enhance-card" onclick="showEnhanceModal(\'' + item.eid + '\')">' +
-      '<div class="enhance-icon">⚔️</div>' +
+      '<div class="enhance-icon">' + itemEmoji + '</div>' +
       '<div class="enhance-info">' +
         '<div class="enhance-header">' +
           '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
@@ -1226,8 +1231,10 @@ function showEnhanceModal(targetEid) {
 
   for (var i = 0; i < materials.length; i++) {
     var mat = materials[i];
+    // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
+    var matEmoji = getEquipEmoji(mat.templateId);
     html += '<div class="enhance-material-item" onclick="showEnhanceConfirmModal(\'' + targetEid + '\', \'' + mat.eid + '\')">' +
-      '<div class="enhance-material-icon">⚙️</div>' +
+      '<div class="enhance-material-icon">' + matEmoji + '</div>' +
       '<div class="enhance-material-info">' +
         '<div class="enhance-material-name">' + t('equip.item.' + mat.templateId) + '</div>' +
         '<div class="enhance-material-rarity">' + t('equip.rarity.' + mat.rarity) + (mat.enhanceLv > 0 ? ' +' + mat.enhanceLv : '') + '</div>' +
