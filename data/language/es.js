@@ -408,7 +408,10 @@ window._LANG_es = {
         "promote_confirm_multi": "\u00bfSacrificar {count} miembro(s) para promover a {target} de {from}\u2192{to}?",
         "skill_inherit": "Herencia de Habilidades",
         "skill_overflow": "Las habilidades de nivel m\u00e1ximo se convertir\u00e1n en libros de habilidades",
-        "skillbook_gained": "Libro de habilidades obtenido: {skill}"
+        "skillbook_gained": "Libro de habilidades obtenido: {skill}",
+        "sacrifice_select_more": "Selecciona un sacrificio",
+        "more_points": "puntos necesarios",
+        "promote_btn_help": "Se requieren 4 puntos"
     },
     "class_change": {
         "no_novice": "No hay novatos disponibles para cambio de clase.",

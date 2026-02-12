@@ -1,4 +1,6 @@
 /* HUD, Tabs, Info Row → common.css (.page-hud, .game-tab-wrap, .page-info-row) */
+#page-tabs{flex-wrap:nowrap}
+#page-tabs .game-tab{min-width:0}
 
 /* ═══ Party Select ═══ */
 #section-party{display:flex;flex-direction:column;flex:1;overflow:hidden;align-items:center;width:100%}

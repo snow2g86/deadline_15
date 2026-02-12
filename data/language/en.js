@@ -408,7 +408,10 @@ window._LANG_en = {
         "promote_confirm_multi": "Sacrifice {count} member(s) to promote {target} from {from}→{to}?",
         "skill_inherit": "Skill Inheritance",
         "skill_overflow": "Max level skills will be converted to skill books",
-        "skillbook_gained": "Skill Book gained: {skill}"
+        "skillbook_gained": "Skill Book gained: {skill}",
+        "sacrifice_select_more": "Select a sacrifice",
+        "more_points": "points needed",
+        "promote_btn_help": "4 points required"
     },
     "class_change": {
         "no_novice": "No novice available for class change.",

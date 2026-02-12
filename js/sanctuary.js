@@ -423,6 +423,10 @@ function showSacrificeModal(targetUid) {
   });
   h += '</div>';
 
+  h += '<div id="sac-status-msg" style="text-align:center;font-size:11px;color:var(--dim);margin-top:8px;margin-bottom:4px;min-height:14px">' +
+    (t('sanctuary.sacrifice_select_more') || 'Select more sacrifices') +
+    '</div>';
+
   document.getElementById('modal-sub').innerHTML = h;
 
   var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
@@ -432,6 +436,7 @@ function showSacrificeModal(targetUid) {
   confirmBtn.textContent = t('sanctuary.promote_btn');
   confirmBtn.disabled = true;
   confirmBtn.type = 'button';
+  confirmBtn.title = t('sanctuary.promote_btn_help') || 'require ' + REQUIRED_POINTS + ' points';
   confirmBtn.onclick = function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -488,6 +493,7 @@ function updateSacProgress(targetGrade, allSacrifices) {
   var fill = document.getElementById('sac-fill');
   var txt = document.getElementById('sac-pts-text');
   var btn = document.getElementById('sac-confirm-btn');
+  var statusMsg = document.getElementById('sac-status-msg');
 
   if (fill) fill.style.width = pct + '%';
   if (txt) txt.textContent = totalPts + ' / ' + REQUIRED_POINTS + ' pt';
@@ -495,9 +501,14 @@ function updateSacProgress(targetGrade, allSacrifices) {
   if (totalPts >= REQUIRED_POINTS) {
     if (fill) fill.style.background = 'linear-gradient(90deg,#a855f7,#c084fc)';
     if (btn) { btn.disabled = false; btn.classList.remove('disabled'); }
+    if (statusMsg) statusMsg.textContent = '';  // 준비 완료 시 메시지 제거
   } else {
     if (fill) fill.style.background = 'linear-gradient(90deg,#6b21a8,#7c3aed)';
     if (btn) { btn.disabled = true; btn.classList.add('disabled'); }
+    var needed = REQUIRED_POINTS - totalPts;
+    if (statusMsg) {
+      statusMsg.textContent = (needed > 0 ? '⚠️ ' : '') + needed + ' ' + (t('sanctuary.more_points') || 'more points needed');
+    }
   }
 
   // 체크 표시 업데이트

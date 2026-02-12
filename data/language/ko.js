@@ -409,7 +409,10 @@ window._LANG_ko = {
         "promote_confirm_multi": "{count}명을 제물로 {target}의 등급을 {from}→{to}(으)로 올리시겠습니까?",
         "skill_inherit": "스킬 계승",
         "skill_overflow": "최대 레벨 스킬은 스킬북으로 변환됩니다",
-        "skillbook_gained": "스킬북 획득: {skill}"
+        "skillbook_gained": "스킬북 획득: {skill}",
+        "sacrifice_select_more": "제물을 선택하세요",
+        "more_points": "포인트 필요",
+        "promote_btn_help": "4점 필요"
     },
     "settings": {
         "title": "설정",
