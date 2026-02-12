@@ -60,7 +60,7 @@ Object.assign(G, {
       const bs = loadBattle();
       if (bs) {
         this._initBattleListeners();
-        this.cStage = bs.stage; this.party = bs.party;
+        this.cStage = bs.stage; this.party = bs.party; this.practiceMode = bs.practiceMode || false;
         this.ter = bs.ter; this.turn = bs.turn; this.eSpwn = bs.eSpwn; this.eQ = bs.eQ;
         this.breached = bs.breached; this.gateHP = bs.gateHP; this.wallHP = bs.wallHP; this.nid = bs.nid;
         this.battleExp = bs.battleExp || {};
@@ -81,7 +81,7 @@ Object.assign(G, {
         setTimeout(() => this.scrollToAllies(), 50);
       } else { location.href = 'index.html' }
     } else if (nav?.cStage) {
-      this.cStage = nav.cStage;
+      this.cStage = nav.cStage; this.practiceMode = nav.practiceMode || false;
       if (nav.party) { this.party = nav.party } else { this.party = loadParty() }
       if (!this.party || this.party.length < MIN_P) { location.href = 'index.html'; return }
       this._initBattleListeners();

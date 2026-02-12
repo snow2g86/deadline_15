@@ -139,12 +139,26 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`;
   hideWv(){document.getElementById('wave-banner').classList.remove('show')},
   showRes(win,msg){const ov=document.getElementById('modal-overlay');
     this.onBattleEnd(win);
-    const reward=win?(50+(this.cStage?this.cStage.id*30:0)):0;
+    const baseReward=this._baseReward||0;
+    const bonusReward=this._bonusReward||0;
+    const actualReward=baseReward+bonusReward;
     document.getElementById('modal-title').textContent=win?t('messages.victory'):t('messages.defeat');
     document.getElementById('modal-title').className=win?'win':'lose';
     const deadAllyCount=this._deadAllyUids.length;
-    let sub=msg;
-    if(win&&reward)sub+=`\n<img src="image/icon/64x64/fc67.png" alt="Gold" style="width:16px;height:16px;vertical-align:middle;"> ${t('messages.reward')}: ${reward} Gold`;
+    const autoRevived=this._autoRevivedCount||0;
+
+    // 연습 모드 공지
+    let sub='';
+    if(this.practiceMode){
+      sub+=`🎓 ${t('stage.practice_mode_active')}\n`;
+      sub+=`<img src="image/icon/64x64/fc67.png" alt="Gold" style="width:14px;height:14px;vertical-align:middle;"> ${t('stage.reduced_gold')} (70%)\n`;
+      sub+=`📊 ${t('stage.full_exp')} (100%)\n`;
+      if(autoRevived>0)sub+=`❤ ${t('stage.auto_revived',{count: autoRevived})}\n`;
+      sub+=`⚠️ ${t('stage.no_clear_recorded')}\n\n`;
+    }
+
+    sub+=msg;
+    if(win&&actualReward)sub+=`\n<img src="image/icon/64x64/fc67.png" alt="Gold" style="width:16px;height:16px;vertical-align:middle;"> ${t('messages.reward')}: ${actualReward} Gold`;
     if(win&&this._firstClearBonus){sub+=`\n🎉 ${t('messages.first_clear_bonus')}: +${this._firstClearBonus} Gold`;this._firstClearBonus=0}
     if(win&&this._firstClearUnit){const fc=this._firstClearUnit,fd=JAB[fc.cls];sub+=`\n🎁 ${t('messages.first_clear_unit',{cls: t('classes.'+fc.cls)})}`;this._firstClearUnit=null}
     if(win&&this._droppedBook){sub+=`\n📕 ${t('academy.skillbook_drop', {skill: t('skills.'+this._droppedBook)})}`;this._droppedBook=null}

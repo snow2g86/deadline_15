@@ -122,3 +122,86 @@ var STAGES = [
   { id:99, phase:10, style:'mixed', mapType:'abyss', tot:116, spw:15, si:2, name:'마계의 근위대', story:'마계 군주의 최상급 근위대 마계의 전사를 격퇴하고 최종 보스와의 대면을 준비한다', boss:{cls:"warrior",name:"마계의 전사"}, en:["knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","priest","priest","priest","priest","priest","priest","sapper","sapper","sapper","sapper","sapper","brawler","brawler","brawler","brawler","brawler","brawler","shaman","shaman","shaman","shaman","shaman"], sm:{hp:8.5,atk:8.5} },
   { id:100, phase:10, style:'offense', mapType:'abyss', tot:120, spw:15, si:2, name:'운명의 종극', story:'모든 악의 원천 마계 군주를 격퇴하고 세계를 구한다. 이것이 진정한 끝이자 새로운 시작이다.', boss:{cls:"warrior",name:"마계 군주"}, en:["knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","priest","priest","priest","priest","priest","priest","sapper","sapper","sapper","sapper","sapper","brawler","brawler","brawler","brawler","brawler","brawler","shaman","shaman","shaman","shaman","shaman","archer","archer","archer"], sm:{hp:9.0,atk:9.0} }
 ];
+
+// ═══ 난이도 계산 및 데이터 확장 로직 ═══
+function calculateDifficulty(stage) {
+  return Math.min(100, Math.round(
+    stage.id * 0.8 +
+    stage.tot * 0.1 +
+    (stage.sm.hp * 5) +
+    (stage.sm.atk * 5) +
+    stage.spw * 2 +
+    (stage.boss ? 15 : 0)
+  ));
+}
+
+function getEnemyComposition(enemies) {
+  return enemies.reduce(function(acc, cls) {
+    acc[cls] = (acc[cls] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function recommendCounters(composition) {
+  var sorted = Object.entries(composition).sort(function(a, b) { return b[1] - a[1]; });
+  var dominant = sorted.slice(0, 2).map(function(e) { return e[0]; });
+
+  var counters = {
+    warrior: ['mage', 'archer'],
+    knight: ['mage', 'brawler'],
+    mage: ['assassin', 'archer'],
+    summoner: ['assassin', 'warrior'],
+    assassin: ['knight', 'brawler'],
+    archer: ['knight', 'warrior'],
+    priest: ['assassin', 'warrior'],
+    brawler: ['mage', 'archer'],
+    lancer: ['mage', 'assassin'],
+    sapper: ['archer', 'mage'],
+    shaman: ['warrior', 'knight'],
+    novice: []
+  };
+
+  var recommended = new Set();
+  dominant.forEach(function(cls) {
+    (counters[cls] || []).forEach(function(c) { recommended.add(c); });
+  });
+
+  return Array.from(recommended).slice(0, 3);
+}
+
+function generateStrategyTips(stage) {
+  var tips = [];
+
+  if (stage.style === 'defense') {
+    tips.push('strategy_tips.defend_gate');
+    tips.push('strategy_tips.use_terrain');
+  } else if (stage.style === 'offense') {
+    tips.push('strategy_tips.offense_quick');
+    tips.push('strategy_tips.use_range');
+  } else {
+    tips.push('strategy_tips.mixed_balance');
+  }
+
+  if (stage.boss) {
+    tips.push('strategy_tips.focus_boss');
+  }
+
+  var comp = getEnemyComposition(stage.en);
+  if (comp.mage && comp.mage > 3) tips.push('strategy_tips.use_assassin');
+  if (comp.warrior && comp.warrior > 5) tips.push('strategy_tips.use_tank');
+  if (comp.knight && comp.knight > 3) tips.push('strategy_tips.use_aoe');
+
+  return tips.slice(0, 2);
+}
+
+// STAGES 배열 데이터 확장
+STAGES = STAGES.map(function(stage) {
+  var composition = getEnemyComposition(stage.en);
+  return Object.assign({}, stage, {
+    difficulty: calculateDifficulty(stage),
+    recommendedLevel: Math.ceil(stage.id * 0.15),
+    enemyComposition: composition,
+    recommendedClasses: recommendCounters(composition),
+    strategyTips: generateStrategyTips(stage)
+  });
+});

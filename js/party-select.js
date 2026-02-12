@@ -111,6 +111,7 @@ function potGrade(ch) {
 // ── 페이지 상태 ──────────────────────────
 var _party = [];
 var _cStage = null;
+var _practiceMode = false;
 var _pFilter = 'all';
 var _activePageTab = 'party';
 
@@ -165,7 +166,7 @@ function partyBack() {
 // ── 출격 확인 ────────────────────────────
 function confirmP() {
   if (_party.length < MIN_P) return;
-  saveNav({ cStage: _cStage, party: _party });
+  saveNav({ cStage: _cStage, party: _party, practiceMode: _practiceMode });
   location.href = 'battle.html';
 }
 
@@ -1205,6 +1206,7 @@ var init = async function() {
   await i18nInit();
   var nav = loadNav();
   _cStage = (nav && nav.cStage) ? nav.cStage : null;
+  _practiceMode = (nav && nav.practiceMode) ? nav.practiceMode : false;
   _party = loadParty();
   loadGlobalBattleItems();
   // 죽은 유닛 제거

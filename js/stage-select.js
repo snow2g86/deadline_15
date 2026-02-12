@@ -128,29 +128,36 @@ function renderStages() {
     var cl = cleared.has(st.id);
     var b = document.createElement('div');
     b.className = 'stage-btn' + (cl ? ' cleared' : '');
+
+    var diffColor = st.difficulty < 30 ? 'var(--green)' :
+                    st.difficulty < 60 ? 'var(--gold)' :
+                    '#ef4444';
+
     b.innerHTML =
-      '<div class="sb-num">' + st.id + '</div>' +
+      '<div class="sb-header">' +
+        '<div class="sb-num">' + st.id + '</div>' +
+        '<div class="sb-stars">' + (cl ? '\u2b50' : '\u2606') + '</div>' +
+      '</div>' +
       '<div class="sb-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
-      '<div class="sb-info">' + t('stage.enemies', { count: st.tot }) + '</div>' +
-      '<div class="sb-stars">' + (cl ? '\u2b50' : '\u2606') + '</div>';
+      '<div class="sb-difficulty">' +
+        '<div class="sb-diff-bar">' +
+          '<div class="sb-diff-fill" style="width:' + st.difficulty + '%;background:' + diffColor + '"></div>' +
+        '</div>' +
+        '<div class="sb-diff-label">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
+      '</div>' +
+      '<button class="sb-info-btn" onclick="event.stopPropagation(); showStageInfo(' + st.id + ')">' +
+        '\u2139\ufe0f ' + t('stage.info') +
+      '</button>' +
+      '<button class="sb-practice-btn" onclick="event.stopPropagation(); startPracticeMode(' + st.id + ')">' +
+        '\ud83c\udf93 ' + t('stage.practice') +
+      '</button>';
+
     b.onclick = (function(stage) {
       return function() {
-        var party = loadParty();
-        var roster = getRoster();
-        // 죽은 유닛 제거
-        party = party.filter(function(uid) {
-          var ch = roster.chars.find(function(c) { return c.uid === uid; });
-          return ch && !ch.dead;
-        });
-        if (party.length >= MIN_P) {
-          saveNav({ cStage: stage, party: party });
-          location.href = 'battle.html';
-        } else {
-          saveNav({ cStage: stage });
-          location.href = 'party-select.html';
-        }
+        showModeSelectionModal(stage);
       };
     })(st);
+
     l.appendChild(b);
   });
 }
@@ -171,3 +178,147 @@ var init = async function() {
   renderBottomNav();
   setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
 };
+
+// ── 스테이지 정보 모달 ────────────────────────
+function showStageInfo(stageId) {
+  var st = STAGES.find(function(s) { return s.id === stageId; });
+  if (!st) return;
+
+  // 적 구성 HTML
+  var compHTML = Object.entries(st.enemyComposition || {})
+    .sort(function(a, b) { return b[1] - a[1]; })
+    .map(function(entry) {
+      var cls = entry[0], count = entry[1];
+      return '<div class="si-enemy-row">' +
+        '<span class="si-enemy-icon">' + (CD[cls] ? CD[cls].icon : '\u2753') + '</span>' +
+        '<span class="si-enemy-name">' + t('classes.' + cls) + '</span>' +
+        '<span class="si-enemy-count">\u00d7' + count + '</span>' +
+      '</div>';
+    }).join('');
+
+  // 권장 클래스 HTML
+  var recHTML = (st.recommendedClasses || [])
+    .map(function(cls) {
+      return '<div class="si-rec-class">' +
+        '<span class="si-rec-icon">' + (CD[cls] ? CD[cls].icon : '\u2753') + '</span>' +
+        '<span class="si-rec-name">' + t('classes.' + cls) + '</span>' +
+      '</div>';
+    }).join('');
+
+  // 전략 팁 HTML
+  var tipsHTML = (st.strategyTips || [])
+    .map(function(key) { return '<li>' + t(key) + '</li>'; })
+    .join('');
+
+  // 보스 HTML
+  var bossHTML = st.boss ?
+    '<div class="si-boss">' +
+      '<div class="si-boss-label">\ud83d\udc80 ' + t('stage.boss') + '</div>' +
+      '<div class="si-boss-name">' + st.boss.name + '</div>' +
+      '<div class="si-boss-class">' +
+        (CD[st.boss.cls] ? CD[st.boss.cls].icon : '\u2753') + ' ' +
+        t('classes.' + st.boss.cls) +
+      '</div>' +
+    '</div>' : '';
+
+  var diffColor = st.difficulty < 30 ? 'var(--green)' :
+                  st.difficulty < 60 ? 'var(--gold)' :
+                  '#ef4444';
+
+  var modalContent =
+    '<div class="stage-info-modal">' +
+      '<div class="si-header">' +
+        '<div class="si-stage-num">' + t('stage.stage') + ' ' + st.id + '</div>' +
+        '<div class="si-stage-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
+      '</div>' +
+      '<div class="si-section">' +
+        '<div class="si-section-title">' + t('stage.difficulty_rating') + '</div>' +
+        '<div class="si-diff-bar">' +
+          '<div class="si-diff-fill" style="width:' + st.difficulty + '%;background:' + diffColor + '"></div>' +
+        '</div>' +
+        '<div class="si-rec-level">' + t('stage.recommended_level_full', {level: st.recommendedLevel}) + '</div>' +
+      '</div>' +
+      bossHTML +
+      '<div class="si-section">' +
+        '<div class="si-section-title">' + t('stage.enemy_composition') + '</div>' +
+        '<div class="si-enemy-list">' + compHTML + '</div>' +
+        '<div class="si-meta">' +
+          t('stage.total_enemies', {count: st.tot}) + ' \u00b7 ' +
+          t('stage.wave_count', {count: st.spw}) +
+        '</div>' +
+      '</div>' +
+      '<div class="si-section">' +
+        '<div class="si-section-title">' + t('stage.recommended_strategy') + '</div>' +
+        '<div class="si-rec-classes">' + recHTML + '</div>' +
+        '<ul class="si-tips">' + tipsHTML + '</ul>' +
+      '</div>' +
+    '</div>';
+
+  showModal(t('stage.stage_info'), modalContent, [
+    {text: t('common.close'), onClick: closeModal}
+  ]);
+}
+
+// ── 모드 선택 모달 ──────────────────────────
+function showModeSelectionModal(stage) {
+  var modalContent =
+    '<div class="mode-select-modal">' +
+      '<div class="ms-title">' + t('stage.select_mode') + '</div>' +
+      '<div class="ms-options">' +
+        '<div class="ms-option ms-normal" onclick="startStage(' + stage.id + ', false)">' +
+          '<div class="ms-opt-icon">\u2694\ufe0f</div>' +
+          '<div class="ms-opt-title">' + t('stage.normal_mode') + '</div>' +
+          '<div class="ms-opt-desc">' + t('stage.normal_mode_desc') + '</div>' +
+          '<ul class="ms-opt-features">' +
+            '<li>\u2713 ' + t('stage.full_rewards') + '</li>' +
+            '<li>\u2713 ' + t('stage.clear_record') + '</li>' +
+            '<li>\u2717 ' + t('stage.no_auto_revival') + '</li>' +
+          '</ul>' +
+        '</div>' +
+        '<div class="ms-option ms-practice" onclick="startStage(' + stage.id + ', true)">' +
+          '<div class="ms-opt-icon">\ud83c\udf93</div>' +
+          '<div class="ms-opt-title">' + t('stage.practice_mode') + '</div>' +
+          '<div class="ms-opt-desc">' + t('stage.practice_mode_desc') + '</div>' +
+          '<ul class="ms-opt-features">' +
+            '<li>\u26a0 ' + t('stage.reduced_rewards') + ' (70%)</li>' +
+            '<li>\u2713 ' + t('stage.full_exp') + ' (100%)</li>' +
+            '<li>\u2713 ' + t('stage.auto_revival') + '</li>' +
+            '<li>\u26a0 ' + t('stage.no_clear_record') + '</li>' +
+          '</ul>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  showModal('', modalContent, [
+    {text: t('common.cancel'), onClick: closeModal}
+  ]);
+}
+
+// ── 스테이지 진입 (모드 선택) ──────────────
+function startStage(stageId, practiceMode) {
+  var stage = STAGES.find(function(s) { return s.id === stageId; });
+  if (!stage) return;
+
+  var party = loadParty();
+  var roster = getRoster();
+
+  party = party.filter(function(uid) {
+    var ch = roster.chars.find(function(c) { return c.uid === uid; });
+    return ch && !ch.dead;
+  });
+
+  if (party.length >= MIN_P) {
+    saveNav({ cStage: stage, party: party, practiceMode: practiceMode });
+    location.href = 'battle.html';
+  } else {
+    saveNav({ cStage: stage, practiceMode: practiceMode });
+    location.href = 'party-select.html';
+  }
+
+  closeModal();
+}
+
+// ── 연습 모드 직접 진입 ──────────────────────
+function startPracticeMode(stageId) {
+  startStage(stageId, true);
+}

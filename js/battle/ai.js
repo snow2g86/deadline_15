@@ -99,7 +99,7 @@ Object.assign(G, {
         if(u.resType==='fury'&&u.cls==='warrior'&&u.skillLv&&u.skillLv['warrior_bloodthirst']>=1){u.res=Math.min(u.maxRes,u.res+1)}
       });
       this.uUI();this.clrSel();this.rMM();this._autoSave()}},
-  _autoSave(){try{saveBattle({stage:this.cStage,party:this.party,ter:this.ter,turn:this.turn,eSpwn:this.eSpwn,eQ:this.eQ,breached:this.breached,gateHP:this.gateHP,wallHP:this.wallHP,nid:this.nid,units:this.units.map(u=>{const o={...u};delete o._el;return o}),battleExp:this.battleExp,allyPos:this.allyPos,_killCount:this._killCount,_killExpPool:this._killExpPool,_deadAllyUids:this._deadAllyUids,_siegeItems:this._siegeItems,_siegeInvIndices:this._siegeInvIndices,_battlePotions:this._battlePotions,_battlePotionIndices:this._battlePotionIndices})}catch(e){}},
+  _autoSave(){try{saveBattle({stage:this.cStage,party:this.party,practiceMode:this.practiceMode,ter:this.ter,turn:this.turn,eSpwn:this.eSpwn,eQ:this.eQ,breached:this.breached,gateHP:this.gateHP,wallHP:this.wallHP,nid:this.nid,units:this.units.map(u=>{const o={...u};delete o._el;return o}),battleExp:this.battleExp,allyPos:this.allyPos,_killCount:this._killCount,_killExpPool:this._killExpPool,_deadAllyUids:this._deadAllyUids,_siegeItems:this._siegeItems,_siegeInvIndices:this._siegeInvIndices,_battlePotions:this._battlePotions,_battlePotionIndices:this._battlePotionIndices})}catch(e){}},
   selectTarget(u,inRange,profile){
     if(!inRange.length)return null;
     if(Math.random()<AI_MISTAKE_CHANCE){

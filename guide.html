@@ -94,13 +94,14 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 <main>
   <div class="guide-header">
     <h1>📚 게임 가이드</h1>
-    <div class="sub">초보자를 위한 직업별 전술</div>
+    <div class="sub">Deadline 15 완벽 공략</div>
   </div>
 
   <div class="guide-tabs" id="guide-tabs">
-    <button class="guide-tab-btn active" data-tab="beginner">🎯 게임 시작</button>
-    <button class="guide-tab-btn" data-tab="roles">💼 직업 가이드</button>
-    <button class="guide-tab-btn" data-tab="tactics">⚔️ 전투 전술</button>
+    <button class="guide-tab-btn active" data-tab="beginner">🎯 시작</button>
+    <button class="guide-tab-btn" data-tab="roles">💼 직업</button>
+    <button class="guide-tab-btn" data-tab="systems">⚙️ 시스템</button>
+    <button class="guide-tab-btn" data-tab="tactics">⚔️ 전술</button>
   </div>
 
   <div class="guide-content">
@@ -110,7 +111,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
       <div class="guide-section">
         <div class="guide-sec-head">🎮 게임 기본</div>
         <p class="guide-text">
-          <strong>Deadline 15</strong>는 턴 기반 전략 RPG입니다. 클랜원들을 모집하고 훈련시켜 여러 스테이지의 도전을 이겨내세요.
+          <strong>Deadline 15</strong>는 턴 기반 전략 RPG입니다. 클랜원들을 모집하고 훈련시켜 10개 스테이지의 도전을 이겨내세요.
         </p>
       </div>
 
@@ -119,19 +120,27 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="tactics-list">
           <div class="tactic-item">
             <div class="tactic-title">🛡️ 파티 구성</div>
-            <div class="tactic-desc">로비에서 "파티"로 이동하여 최대 4명의 클랜원을 선택합니다. 정균형 조합이 필수입니다.</div>
+            <div class="tactic-desc">로비에서 "파티"로 이동하여 최대 5명의 클랜원을 선택합니다. 균형 잡힌 조합이 필수입니다.</div>
           </div>
           <div class="tactic-item">
             <div class="tactic-title">💪 레벨업 & 성장</div>
-            <div class="tactic-desc">전투에서 경험치를 얻어 클랜원을 강화하세요. 경험치 물약으로 빠른 성장도 가능합니다.</div>
+            <div class="tactic-desc">전투에서 경험치를 얻어 클랜원을 강화하세요. 최대 레벨 15까지 성장 가능합니다.</div>
           </div>
           <div class="tactic-item">
-            <div class="tactic-title">🎯 직업 전환</div>
-            <div class="tactic-desc">노비스만 다른 직업으로 전직 가능합니다. 상점에서 전직서를 구매하세요.</div>
+            <div class="tactic-title">🎯 전직 (아카데미)</div>
+            <div class="tactic-desc">노비스만 다른 직업으로 전직 가능합니다. 아카데미에서 전직서를 사용하세요. 레벨, 경험치, 잠재력 등급은 유지됩니다.</div>
           </div>
           <div class="tactic-item">
             <div class="tactic-title">📊 자원 시스템</div>
-            <div class="tactic-desc">직업별 자원(분노/에너지/마나)으로 스킬을 사용합니다. 턴마다 자동 회복됩니다.</div>
+            <div class="tactic-desc">분노(Fury): 공격/피격 시 충전. 에너지(Energy): 매턴 자동 회복. 마나(Mana): 매턴 자동 회복.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">⚔️ 반격 시스템</div>
+            <div class="tactic-desc">적에게 공격당해도 사거리 내라면 자동으로 반격합니다. 스턴/빙결 상태에서는 반격 불가.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🏆 초기 클리어 보상</div>
+            <div class="tactic-desc">스테이지를 처음 클리어하면 +1000G 보너스와 랜덤 클래스 캐릭터 1명을 획득합니다.</div>
           </div>
         </div>
       </div>
@@ -151,9 +160,9 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
         </div>
         <div class="tip-box">
-          <div class="tip-title">🌟 스킬 활용</div>
+          <div class="tip-title">🌟 전투 포션 챙기기</div>
           <div class="tip-text">
-            단순히 일반 공격만 하지 말고, 상황에 맞는 스킬을 활용하세요. 스킬마다 효과가 다릅니다.
+            전투 전 상점에서 회복/자원/버프 포션을 구매하여 전투에 가져가세요. 위기 상황에서 포션이 생존을 결정합니다.
           </div>
         </div>
       </div>
@@ -167,46 +176,50 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="role-grid">
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/warrior.png" style="width:24px;height:24px"> Warrior</div>
-            <div class="role-meta">높은 공격력, 광폭 패시브</div>
+            <div class="role-meta">HP 100 / ATK 25 / DEF 10 / 이동 3 / 분노</div>
             <div class="role-classes">
-              <span class="role-class">💪 높은 ATK</span>
-              <span class="role-class">⚡ 강타</span>
+              <span class="role-class">⚡ 강타 (ATK×1.5)</span>
+              <span class="role-class">🔥 광폭 패시브</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 순간 딜량이 높음. 강타로 150% 공격력.</div>
-            <div class="role-cons"><strong>약점:</strong> 방어력이 낮음. 주의가 필요합니다.</div>
+            <div class="role-pros"><strong>강점:</strong> 순간 딜량이 높음. 분노 MAX 시 광폭 발동(ATK×1.5).</div>
+            <div class="role-cons"><strong>약점:</strong> 방어력이 보통. 집중 공격에 약합니다.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 휘두르기, 강습, 치명적인 일격, 피의 갈망(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/knight.png" style="width:24px;height:24px"> Knight</div>
-            <div class="role-meta">높은 방어력, 스위치 스킬</div>
+            <div class="role-meta">HP 150 / ATK 15 / DEF 14 / 이동 2 / 분노</div>
             <div class="role-classes">
-              <span class="role-class">🛡️ 높은 DEF</span>
               <span class="role-class">🔄 스위치</span>
+              <span class="role-class">🛡️ 최고 탱커</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 매우 튼튼함. 스위치로 위치 교환 가능.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 서포터 역할에 적합합니다.</div>
+            <div class="role-pros"><strong>강점:</strong> 높은 HP와 방어력. 스위치로 위치 교환. 희생/고통분담으로 아군 보호.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 공격력과 이동력. 서포터 역할에 적합합니다.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 차징, 포획, 희생, 고통분담(패시브), 강인한(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/brawler.png" style="width:24px;height:24px"> Brawler</div>
-            <div class="role-meta">빠른 기술, 무장해제 스킬</div>
+            <div class="role-meta">HP 90 / ATK 32 / DEF 7 / 이동 3 / 에너지</div>
             <div class="role-classes">
-              <span class="role-class">⚡ 높은 ATK</span>
               <span class="role-class">🤛 무장해제</span>
+              <span class="role-class">🔁 역습 패시브</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 높은 공격력. 적의 공격력을 줄일 수 있습니다.</div>
-            <div class="role-cons"><strong>약점:</strong> 방어력이 낮음.</div>
+            <div class="role-pros"><strong>강점:</strong> 높은 공격력. 무장해제로 적 ATK 50% 감소. 역습 패시브로 반격.</div>
+            <div class="role-cons"><strong>약점:</strong> 방어력이 낮음. 원거리 공격 불가.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 연타, 파쇄, 역습(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/lancer.png" style="width:24px;height:24px"> Lancer</div>
-            <div class="role-meta">관통 공격, 방진 스킬</div>
+            <div class="role-meta">HP 95 / ATK 28 / DEF 12 / 이동 3 / 분노</div>
             <div class="role-classes">
-              <span class="role-class">⚡ 높은 ATK</span>
-              <span class="role-class">🔱 관통</span>
+              <span class="role-class">🔱 관통 (3칸)</span>
+              <span class="role-class">🛡️ 방진</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 관통으로 일직선 3칸 공격. 범위 딜이 가능합니다.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 이동력.</div>
+            <div class="role-pros"><strong>강점:</strong> 관통으로 일직선 3칸 공격. 방진으로 아군 DEF 버프.</div>
+            <div class="role-cons"><strong>약점:</strong> 분노 MAX가 5로 적음. 공격 타이밍 관리 필요.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 돌격, 방진, 창벽(패시브)</div>
           </div>
         </div>
       </div>
@@ -216,46 +229,50 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="role-grid">
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/archer.png" style="width:24px;height:24px"> Archer</div>
-            <div class="role-meta">원거리 공격, 도약 스킬</div>
+            <div class="role-meta">HP 60 / ATK 28 / DEF 3 / 이동 3 / 사거리 4 / 에너지</div>
             <div class="role-classes">
-              <span class="role-class">🏹 범위 4</span>
               <span class="role-class">💨 도약</span>
+              <span class="role-class">🏹 사거리 4</span>
             </div>
             <div class="role-pros"><strong>강점:</strong> 먼 거리 공격. 도약으로 신속한 이동.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 위치 선정이 중요합니다.</div>
+            <div class="role-cons"><strong>약점:</strong> 매우 낮은 방어력. 위치 선정이 중요합니다.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 저격(5~10칸), 연속사격, 강철비(AoE), 약점포착(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/mage.png" style="width:24px;height:24px"> Mage</div>
-            <div class="role-meta">마법 공격, 화염폭발</div>
+            <div class="role-meta">HP 65 / ATK 30 / DEF 4 / 이동 3 / 사거리 3 / 마나</div>
             <div class="role-classes">
-              <span class="role-class">🔥 AoE 공격</span>
-              <span class="role-class">🔮 범위 3</span>
+              <span class="role-class">🔥 화염폭발 (3×3)</span>
+              <span class="role-class">🔮 AoE</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 화염폭발로 3×3 범위 공격. 많은 적 처리 가능.</div>
+            <div class="role-pros"><strong>강점:</strong> 화염폭발로 3×3 범위 공격. 많은 적 일소 가능.</div>
             <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 거리 유지 필수.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 빙결(2턴 동결), 그랜드 월(벽 설치), 마나 쇄도(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/assassin.png" style="width:24px;height:24px"> Assassin</div>
-            <div class="role-meta">높은 공격력, 은신 패시브</div>
+            <div class="role-meta">HP 70 / ATK 35 / DEF 5 / 이동 4 / 사거리 1 / 에너지</div>
             <div class="role-classes">
-              <span class="role-class">💀 암살</span>
+              <span class="role-class">💀 암살 (ATK×5)</span>
               <span class="role-class">🌿 은신</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 숲에서 은신. 암살로 강력한 공격 가능.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 은신 상태 유지 중요.</div>
+            <div class="role-pros"><strong>강점:</strong> 최고 공격력. 숲에서 자동 은신. 은신+겹침 시 ATK×5 암살.</div>
+            <div class="role-cons"><strong>약점:</strong> 낮은 방어력. 은신 해제 시 위험. 습격도 은신 상태에서만 사용 가능.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 습격(은신 중 ATK×2), 함정감지(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/summoner.png" style="width:24px;height:24px"> Summoner</div>
-            <div class="role-meta">소환 마법, 소환수 조종</div>
+            <div class="role-meta">HP 60 / ATK 26 / DEF 4 / 이동 3 / 사거리 3 / 마나</div>
             <div class="role-classes">
-              <span class="role-class">✨ 소환수</span>
-              <span class="role-class">🔮 범위 3</span>
+              <span class="role-class">✨ 정령소환</span>
+              <span class="role-class">🗿 골램소환</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 소환수로 추가 딜. 전술 다양성.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 개인 공격력. 소환수 관리 필요.</div>
+            <div class="role-pros"><strong>강점:</strong> 소환수로 전장 제어. 영혼 폭발로 AoE 딜.</div>
+            <div class="role-cons"><strong>약점:</strong> 소환수 1체 제한. 소환수 사망 시 전력 하락.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 소환 강화, 영혼 폭발, 영적 유대(패시브)</div>
           </div>
         </div>
       </div>
@@ -265,46 +282,167 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="role-grid">
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/priest.png" style="width:24px;height:24px"> Priest</div>
-            <div class="role-meta">회복 마법, 집단 치유</div>
+            <div class="role-meta">HP 70 / ATK 20 / DEF 5 / 이동 3 / 사거리 3 / 마나</div>
             <div class="role-classes">
+              <span class="role-class">✨ 집단 치유 (6칸)</span>
               <span class="role-class">💚 회복</span>
-              <span class="role-class">✨ 범위 6</span>
             </div>
             <div class="role-pros"><strong>강점:</strong> 집단 치유로 범위 회복. 파티 생존율 증가.</div>
             <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 방어 필수.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 정화(상태이상 해제), 성역선포(지속 회복), 신의 은총(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/sapper.png" style="width:24px;height:24px"> Sapper</div>
-            <div class="role-meta">함정 설치, 제어 스킬</div>
+            <div class="role-meta">HP 75 / ATK 30 / DEF 6 / 이동 3 / 사거리 1 / 에너지</div>
             <div class="role-classes">
-              <span class="role-class">⚠️ 함정</span>
-              <span class="role-class">🎯 제어</span>
+              <span class="role-class">⚠️ 함정 (ATK×2)</span>
+              <span class="role-class">⛏️ 굴착</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 함정으로 적 제어. 전술 활용도 높음.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 기본 능력. 함정 설치 위치 선정 중요.</div>
+            <div class="role-pros"><strong>강점:</strong> 함정으로 적 제어. 굴착으로 바위 파괴. 폭파로 원격 기폭.</div>
+            <div class="role-cons"><strong>약점:</strong> 함정 위치 선정이 핵심. 에너지 관리 필요.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 굴착, 폭파, 강화 함정(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/shaman.png" style="width:24px;height:24px"> Shaman</div>
-            <div class="role-meta">저주와 고양, 마법사</div>
+            <div class="role-meta">HP 70 / ATK 28 / DEF 6 / 이동 3 / 사거리 3 / 마나</div>
             <div class="role-classes">
-              <span class="role-class">☠️ 저주</span>
+              <span class="role-class">☠️ 쇠약의 저주</span>
               <span class="role-class">🔺 고양</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 저주로 적 약화. 고양으로 아군 강화.</div>
-            <div class="role-cons"><strong>약점:</strong> 낮은 공격력. 개인 능력 약함.</div>
+            <div class="role-pros"><strong>강점:</strong> 저주로 적 매턴 피해+이동불가. 고양으로 아군 전체 25% 딜 증가.</div>
+            <div class="role-cons"><strong>약점:</strong> 채널링 중 이동/행동 불가. 보호 필수.</div>
+            <div class="role-meta" style="margin-top:8px">습득형: 독안개(AoE 지속), 영혼 쇄도, 영매(패시브)</div>
           </div>
 
           <div class="role-card">
             <div class="role-title"><img class="cls-icon" src="image/icon/jab/novice.png" style="width:24px;height:24px"> Novice</div>
-            <div class="role-meta">초심자 전용, 전직 가능</div>
+            <div class="role-meta">HP 85 / ATK 22 / DEF 8 / 이동 3 / 사거리 1 / 에너지</div>
             <div class="role-classes">
-              <span class="role-class">🎯 균형</span>
-              <span class="role-class">📈 성장</span>
+              <span class="role-class">🪨 돌던지기</span>
+              <span class="role-class">📈 전직 가능</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 높은 성장률. 다른 직업으로 전직 가능.</div>
-            <div class="role-cons"><strong>약점:</strong> 기본 능력은 평균 이하. 강화 필수.</div>
+            <div class="role-pros"><strong>강점:</strong> 높은 성장률. 아카데미에서 11개 직업으로 전직 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 기본 능력은 평균 이하. 빠른 전직 권장.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 시스템 탭 -->
+    <div class="guide-panel" id="p-systems">
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🏰 공성 아이템</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">🪜 사다리 (100G)</div>
+            <div class="tactic-desc">인접한 벽/바위 너머로 이동합니다. 사용 후 추가 행동 가능. 이동 불가 지형을 우회하는 핵심 아이템.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">💣 폭탄 (200G)</div>
+            <div class="tactic-desc">3칸 내 벽/바위를 파괴하여 평지로 만듭니다. 성벽이나 바위 장애물을 영구적으로 제거.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🌉 다리 (150G)</div>
+            <div class="tactic-desc">3칸 내 물 타일을 평지로 변환합니다. 물로 막힌 경로를 개척할 때 유용.</div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 적 AI도 공성아이템 사용</div>
+          <div class="tip-text">적 유닛도 폭탄, 방어막, 회피, 우회로 등 공성아이템을 보유합니다. 이동 불가 시 무조건 사용하므로 주의하세요.</div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🧪 전투 포션</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">💊 회복 포션</div>
+            <div class="tactic-desc">HP 50% 회복. 자신 또는 인접 아군에게 사용 가능. 행동 1회 소비.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">⚡ 자원 포션</div>
+            <div class="tactic-desc">자원(에너지/마나/분노) 30 회복. 스킬 사용이 급할 때 유용.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🔥 공격력 버프 포션</div>
+            <div class="tactic-desc">ATK +30%, 3턴 지속. 보스전이나 결정적 순간에 사용.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🏫 아카데미</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">📜 전직 시스템</div>
+            <div class="tactic-desc">
+              노비스만 전직 가능합니다. 전직서 종류:<br>
+              • 근접 전직서 (150G): 전사/기사/도적/격투가/창병/공병<br>
+              • 원거리 전직서 (150G): 궁수/마법사/소환사/주술사<br>
+              • 힐러 전직서 (120G): 사제<br>
+              • 범용 전직서 (200G): 모든 11개 직업
+            </div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">📕 스킬북</div>
+            <div class="tactic-desc">스킬북으로 습득형 스킬을 배울 수 있습니다. 전투 클리어 시 5% 확률로 드롭되거나 상점에서 구매 가능.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">⚒️ 장비 & 강화</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">🗡️ 장비 시스템</div>
+            <div class="tactic-desc">파티 메뉴의 "장비" 탭에서 무기/방어구를 장착합니다. 장비는 스탯 보너스를 제공합니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">⬆️ 강화 시스템</div>
+            <div class="tactic-desc">파티 메뉴의 "강화" 탭에서 장비를 강화합니다. 강화 실패 시 레벨이 유지되며, 일정 횟수 실패 시 보장 강화가 됩니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">⛪ 성소</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">💀 부활</div>
+            <div class="tactic-desc">전투에서 사망한 클랜원을 골드로 부활시킵니다. 광고 시청으로 무료 부활도 가능합니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">⬆️ 승격</div>
+            <div class="tactic-desc">클랜원의 잠재력 등급을 올립니다. C → B → A → S 순서로 승격.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-sec-head">🗺️ 지형 효과</div>
+        <div class="tactics-list">
+          <div class="tactic-item">
+            <div class="tactic-title">🌿 숲 (Forest)</div>
+            <div class="tactic-desc">암살자가 자동으로 은신합니다. 적 AI가 은신 유닛을 감지하지 못합니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">⛰️ 언덕 (Hill)</div>
+            <div class="tactic-desc">높은 지형에서 공격 시 이점을 얻습니다.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🪨 바위 (Rock)</div>
+            <div class="tactic-desc">이동 불가. 폭탄이나 사다리로 극복 가능. 공병의 굴착으로 파괴 가능.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🌊 물 (Water)</div>
+            <div class="tactic-desc">이동 불가. 다리 아이템으로 평지로 변환 가능.</div>
+          </div>
+          <div class="tactic-item">
+            <div class="tactic-title">🧱 성벽 (Wall/Gate)</div>
+            <div class="tactic-desc">방어 스테이지에서 적 진입을 막습니다. HP가 있으며 공격으로 파괴 가능.</div>
           </div>
         </div>
       </div>
@@ -331,7 +469,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
             <div class="tactic-desc">
               • 1순위: 적 원거리 딜러 (위험도 높음)<br>
               • 2순위: 적 회복사 (지속력 높음)<br>
-              • 3순위: 일반 적 (우선순위 낮음)<br>
+              • 3순위: 일반 적<br>
               • 마지막: 적 탱커 (위협도 낮음)
             </div>
           </div>
@@ -347,12 +485,11 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           </div>
 
           <div class="tactic-item">
-            <div class="tactic-title">🛡️ 방어 전술</div>
+            <div class="tactic-title">🔄 반격 활용</div>
             <div class="tactic-desc">
-              • 아군 회복사 보호 (최우선)<br>
-              • 얇은 캐릭터 뒤에 탱커 배치<br>
-              • 적 광역 공격 범위 회피<br>
-              • 필요시 유닛 교환으로 위치 변경
+              • 사거리 내 적에게 공격당하면 자동 반격<br>
+              • 격투가의 역습(30% 확률 피해 무효+반격) 패시브 적극 활용<br>
+              • 스턴/빙결 상태에서는 반격 불가하므로 주의
             </div>
           </div>
         </div>
@@ -364,31 +501,28 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           <div class="tactic-item">
             <div class="tactic-title">🏹 원거리 적이 많을 때</div>
             <div class="tactic-desc">
-              맨 앞에 높은 방어력 탱커를 배치하여 적 공격을 흡수합니다. 원거리 딜러가 집중 포화를 당하면 위험하므로 반드시 보호하세요.
+              맨 앞에 기사를 배치하여 적 공격을 흡수합니다. 기사의 포획으로 적 딜러를 끌어오거나, 희생으로 아군을 보호하세요.
             </div>
           </div>
 
           <div class="tactic-item">
             <div class="tactic-title">🔥 광역 공격이 많을 때</div>
             <div class="tactic-desc">
-              유닛들을 분산시켜 배치하여 광역 피해를 최소화합니다. 꼭 필요한 경우가 아니면 뭉치지 마세요.
+              유닛들을 분산시켜 배치하여 광역 피해를 최소화합니다. 마법사의 화염폭발, 주술사의 독안개 범위를 피하세요.
             </div>
           </div>
 
           <div class="tactic-item">
             <div class="tactic-title">💀 보스 전투</div>
             <div class="tactic-desc">
-              보스는 일반 적보다 훨씬 강합니다. 높은 방어력의 탱커로 버티고, 딜러와 지원을 조화시켜 점진적으로 체력을 깎세요. 성급한 도전은 금지입니다.
+              보스는 일반 적보다 훨씬 강합니다. 주술사 저주로 지속 피해를 주고, 기사 탱킹 + 딜러 집중 공격으로 처리하세요. 포션을 아끼지 마세요.
             </div>
           </div>
 
           <div class="tactic-item">
-            <div class="tactic-title">🌳 지형 활용</div>
+            <div class="tactic-title">🧱 방어 스테이지</div>
             <div class="tactic-desc">
-              • 숲: 암살자 은신 지점<br>
-              • 언덕: 높은 곳에서 이점<br>
-              • 바위: 엄폐물로 사용<br>
-              • 물: 부대 이동 제한 (피하기)
+              성벽 뒤에서 원거리 공격으로 적을 처리합니다. 성벽이 파괴되면 폭탄/사다리로 대응하는 적에 주의. 적 돌파 수가 한계를 넘으면 패배합니다.
             </div>
           </div>
         </div>
@@ -398,32 +532,29 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="guide-sec-head">📊 리소스 관리</div>
         <div class="tactics-list">
           <div class="tactic-item">
-            <div class="tactic-title">⚡ Fury (분노)</div>
+            <div class="tactic-title">⚡ Fury (분노) — Warrior, Knight, Lancer</div>
             <div class="tactic-desc">
-              • Warrior, Knight, Lancer 보유<br>
               • 공격 시 +1, 피격 시 +2 충전<br>
-              • MAX 도달 시 강력한 패시브 발동<br>
-              • 적극적인 공격으로 빠르게 충전
+              • MAX 도달 시 강력한 패시브 발동 (전사: 광폭, 기사: 몸부림)<br>
+              • 적극적인 전투로 빠르게 충전
             </div>
           </div>
 
           <div class="tactic-item">
-            <div class="tactic-title">⚡ Energy (에너지)</div>
+            <div class="tactic-title">⚡ Energy (에너지) — Archer, Assassin, Brawler, Sapper, Novice</div>
             <div class="tactic-desc">
-              • Archer, Assassin, Brawler, Sapper, Novice 보유<br>
-              • 매턴 자동 회복<br>
-              • 스킬 사용으로 소모<br>
-              • 높은 회복력으로 자주 스킬 사용 가능
+              • 매턴 자동 회복 (8~15)<br>
+              • 스킬 사용으로 소모 (20~100)<br>
+              • 자원 포션으로 긴급 충전 가능
             </div>
           </div>
 
           <div class="tactic-item">
-            <div class="tactic-title">💜 Mana (마나)</div>
+            <div class="tactic-title">💜 Mana (마나) — Mage, Priest, Summoner, Shaman</div>
             <div class="tactic-desc">
-              • Mage, Priest, Summoner, Shaman 보유<br>
-              • 매턴 자동 회복<br>
-              • 마법/회복 스킬에 사용<br>
-              • 전투 시작 시 MAX로 시작
+              • 매턴 자동 회복 (10~12)<br>
+              • 마법/회복/소환 스킬에 사용<br>
+              • 마법사: 마나 80% 이상 시 데미지 20% 증가 (마나 쇄도 패시브)
             </div>
           </div>
         </div>
@@ -434,22 +565,28 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="tip-box">
           <div class="tip-title">🌟 팀 구성 예시</div>
           <div class="tip-text">
-            <strong>균형 파티:</strong> Knight(탱커) + Archer(딜러) + Mage(딜러) + Priest(회복)<br>
-            <strong>공격 파티:</strong> Warrior + Brawler + Archer + Mage<br>
-            <strong>방어 파티:</strong> Knight + Lancer + Priest + Shaman<br>
+            <strong>균형 파티:</strong> Knight + Archer + Mage + Priest + Warrior<br>
+            <strong>공격 파티:</strong> Warrior + Brawler + Assassin + Archer + Mage<br>
+            <strong>방어 파티:</strong> Knight + Lancer + Priest + Shaman + Sapper<br>
             상황에 따라 조합을 변경하세요.
           </div>
         </div>
         <div class="tip-box">
           <div class="tip-title">🌟 골드 관리</div>
           <div class="tip-text">
-            초반에는 체험치 물약 구매보다 강한 캐릭터 모집을 우선하세요. 스테이지를 깨면서 경험치를 얻는 것이 더 효율적입니다.
+            초반에는 경험치 물약보다 강한 캐릭터 모집을 우선하세요. 초기 클리어 보너스(+1000G)를 활용하여 장비와 전직서에 투자하세요.
           </div>
         </div>
         <div class="tip-box">
           <div class="tip-title">🌟 전직 전략</div>
           <div class="tip-text">
-            노비스를 초반에 강한 직업으로 전직시키지 마세요. 레벨을 먼저 올린 후 전직하면 최종 스탯이 더 높아집니다.
+            노비스를 초반에 전직시키면 빠르게 스킬을 사용할 수 있습니다. 잠재력 등급(S/A/B/C)은 전직 후에도 유지됩니다.
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-title">🌟 암살자 운용</div>
+          <div class="tip-text">
+            숲 타일을 적극 활용하세요. 은신 상태에서만 습격과 암살을 사용할 수 있습니다. 숲→숲 이동으로 은신을 유지하며 적 후방을 기습하세요.
           </div>
         </div>
       </div>
