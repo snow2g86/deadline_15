@@ -243,13 +243,15 @@ Object.assign(G, {
     const hpPct=u.hp/u.mhp;
     const nearbyAllies=al.filter(a=>!isStealthed(a)&&mh(u.x,u.y,a.x,a.y)<=2).length;
     const moveOptions=this.eMvC(u).length;
+    let nearbyTerrain=0;
+    for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]]){const nx=u.x+dx,ny=u.y+dy;if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){const tile=this.ter[ny][nx];if(tile==='wall'||tile==='gate'||tile==='rock')nearbyTerrain++}}
     let situationType='safe';
     if(hpPct<0.3){situationType='weakened'}
     else if(nearbyAllies>=3){situationType='surrounded'}
     else if(moveOptions===0){situationType='blocked'}
     else if(nearbyAllies>0){situationType='distant'}
     const severity=(1-hpPct)*0.4+(nearbyAllies/5)*0.4+(1-moveOptions/4)*0.2;
-    return{type:situationType,severity:Math.max(0,Math.min(1,severity)),blockCount:4-moveOptions,nearbyAllies,hpPercent:hpPct}
+    return{type:situationType,severity:Math.max(0,Math.min(1,severity)),blockCount:4-moveOptions,nearbyAllies,hpPercent:hpPct,nearbyTerrain}
   },
   selectSiegeItem(u,situation){
     if(!u.siegeItems||!u.siegeItems.length)return null;
@@ -272,7 +274,7 @@ Object.assign(G, {
   },
   async useSiegeItem(u,item){
     try{
-      const sitemap={'bomb':await(async()=>{const tc=[[u.x+1,u.y],[u.x-1,u.y],[u.x,u.y+1],[u.x,u.y-1]].filter(p=>p[0]>=0&&p[0]<COLS&&p[1]>=0&&p[1]<ROWS);for(const[x,y]of tc){const v=this.uAt(x,y);if(v&&v.team==='ally'&&!isStealthed(v)){const dmg=Math.max(1,Math.round(u.atk*0.3));v.hp=Math.max(0,v.hp-dmg);this.floatT(v.x,v.y,`-${dmg}`,'damage');this.vfxSpawn(this.uSX(v.x,v.y)+UCX,this.uSY(v.x,v.y)+UCY,{count:10,colors:['#ff4500','#ff6347','#ffa500'],shape:'spark',speed:4,spread:12,decay:0.03,size:4})}}this.floatT(u.x,u.y,'💣','heal');this.sfxAtk(u.cls);this._rmDead();return true})()||false,'shield':async()=>{u._siegeShield=3;this.floatT(u.x,u.y,'🛡️','heal');this.sfxAtk(u.cls);return true},'evasion':async()=>{u._siegeEvasion=1;this.floatT(u.x,u.y,'⚡','heal');this.sfxAtk(u.cls);return true}};
+      const sitemap={'bomb':await(async()=>{const range=3;let best=null,bestD=Infinity;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const d=mh(u.x,u.y,c,r);if(d<1||d>range)continue;const tile=this.ter[r][c];if(tile==='wall'||tile==='gate'||tile==='rock'){if(d<bestD){bestD=d;best={x:c,y:r}}}}if(!best)return false;this.ter[best.y][best.x]='plain';const wk=best.x+','+best.y;if(this.wallHP[wk])this.wallHP[wk]=0;if(this.gateHP[wk])this.gateHP[wk]=0;this.floatT(best.x,best.y,t('messages.wall_destroyed'),'damage');this.vfxSiege('siege_bomb',best.x,best.y);this.sfxAtk(u.cls);this.screenShake();this.rTer();return true})()||false,'shield':async()=>{u._siegeShield=3;this.floatT(u.x,u.y,'🛡️','heal');this.sfxAtk(u.cls);return true},'evasion':async()=>{u._siegeEvasion=1;this.floatT(u.x,u.y,'⚡','heal');this.sfxAtk(u.cls);return true}};
       if(sitemap[item.type]){
         const success=await sitemap[item.type]();
         if(success){
@@ -287,6 +289,7 @@ Object.assign(G, {
     if(!u.siegeItems||!u.siegeItems.length)return false;
     const situation=this.analyzeSituation(u);
     if(situation.type==='blocked'){const item=this.selectSiegeItem(u,situation);if(!item)return false;return await this.useSiegeItem(u,item)}
+    if(situation.nearbyTerrain>0){const bomb=u.siegeItems.find(i=>i.type==='bomb'&&i.cooldown===0);if(bomb)return await this.useSiegeItem(u,bomb)}
     if(situation.severity<0.15)return false;
     const item=this.selectSiegeItem(u,situation);
     if(!item)return false;
