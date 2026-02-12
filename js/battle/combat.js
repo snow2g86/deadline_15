@@ -254,6 +254,7 @@ Object.assign(G, {
 		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
 	},
 	doAtk(a, tgt) {
+		if(tgt._siegeEvasion>0&&Math.random()<0.3){tgt._siegeEvasion--;this.floatT(tgt.x,tgt.y,t('messages.evasion'),'heal');a.ha=true;a.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.chkAutoEnd();return}
 		const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3;
 		if (bCounter) {
 			// 공격 애니메이션 후 약간의 텀 후에 반격(격투가 카운터) 시작 (약 420ms 지연)
@@ -263,7 +264,8 @@ Object.assign(G, {
 				this.vfxAtk(tgt, a); this.sfxAtk(tgt.cls); this.shakeU(a.id); this.floatT(a.x, a.y, `-${cdmg}`, 'damage'); this.floatT(tgt.x, tgt.y, t('messages.brawler_counter'), 'heal');
 			}, 420);
 		} else {
-			const dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
+			let dmg = calcDmg(a, tgt); this._grantExp(a, 'attack');
+			if(tgt._siegeShield>0){dmg=Math.max(1,Math.round(dmg*0.5));this.floatT(tgt.x,tgt.y,'🛡️','heal')}
 			tgt.hp = Math.max(0, tgt.hp - dmg); this.vfxAtk(a, tgt); this.sfxAtk(a.cls); this.shakeU(tgt.id);
 			this.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
 			if (a._lastCrit) { this.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); this.screenShake(); }

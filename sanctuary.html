@@ -16,7 +16,7 @@
 	<script type="text/javascript" src="js/sanctuary.js"></script>
 </head>
 
-<body data-page="sanctuary" onload="init();">
+<body data-page="sanctuary" class="page-scroll" onload="init();">
 	<div id="splash">
 		<div class="splash-title" data-i18n="common.game_title">DEADLINE 15</div>
 		<div class="splash-loading" data-i18n="common.loading">loading...</div>
@@ -33,18 +33,18 @@
 			</svg></button>
 	</header>
 	<main id="content">
-		<div class="sanc-hud">
-			<div class="gold-badge sanc-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
+		<div class="page-hud">
+			<div class="gold-badge"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
 					id="sanc-gold-val">0</span> G</div>
 		</div>
-		<div class="sanc-tabs-wrapper">
-			<div class="sanc-tabs">
-				<button class="sanc-tab-btn active" data-tab="resurrect" onclick="switchTab('resurrect')" data-i18n="sanctuary.tab_resurrect"></button>
-				<button class="sanc-tab-btn" data-tab="promote" onclick="switchTab('promote')" data-i18n="sanctuary.tab_promote"></button>
+		<div class="game-tab-wrap">
+			<div class="game-tabs">
+				<button class="game-tab active" data-tab="resurrect" onclick="switchTab('resurrect')" data-i18n="sanctuary.tab_resurrect"></button>
+				<button class="game-tab" data-tab="promote" onclick="switchTab('promote')" data-i18n="sanctuary.tab_promote"></button>
 			</div>
 		</div>
-		<div class="sanc-info-row">
-			<div class="sanc-info-title" id="sanc-subtitle" data-i18n="sanctuary.subtitle">DEADLINE 15</div>
+		<div class="page-info-row">
+			<div class="page-info-title" id="sanc-subtitle" data-i18n="sanctuary.subtitle">DEADLINE 15</div>
 		</div>
 		<div id="sanc-list" class="card-list"></div>
 	</main>

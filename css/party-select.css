@@ -1,19 +1,4 @@
-/* ═══ Party HUD ═══ */
-.ps-hud{display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:4px}
-.ps-hud-gold{}
-
-/* ═══ Page-level Tabs (matching shop/sanctuary/academy) ═══ */
-.ps-page-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0}
-.ps-page-tabs{display:flex;gap:6px;max-width:330px;width:100%}
-.ps-page-tab{flex:1;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;transition:all .2s}
-.ps-page-tab:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
-.ps-page-tab.active{color:#fff;background:rgba(96,165,250,.2);border-color:#60a5fa}
-
-/* ═══ Info Row (matching sanctuary/academy) ═══ */
-.ps-info-row{border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);
-  display:flex;flex-direction:column;align-items:center;width:100%;max-width:330px;padding:12px 0;margin-bottom:8px}
-.ps-info-title{font-size:14px;font-weight:900;color:var(--text)}
+/* HUD, Tabs, Info Row → common.css (.page-hud, .game-tab-wrap, .page-info-row) */
 
 /* ═══ Party Select ═══ */
 #section-party{display:flex;flex-direction:column;flex:1;overflow:hidden;align-items:center;width:100%}
@@ -113,8 +98,6 @@
 
 /* ═══ PC (1024px+) ═══ */
 @media(min-width:1024px){
-  .ps-info-row{max-width:480px}
-  .ps-page-tabs{max-width:480px}
   .ps-layout{max-width:480px;gap:24px}
   .ps-left{width:110px}
   .ps-counter{font-size:14px}

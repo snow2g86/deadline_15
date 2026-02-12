@@ -1,55 +1,3 @@
-/* ═══ Sanctuary Scroll ═══ */
-body[data-page="sanctuary"] #content {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 24px
-}
-
-body[data-page="sanctuary"] #content>* {
-  flex-shrink: 0
-}
-
-/* ═══ Sanctuary Tabs ═══ */
-.sanc-tabs-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, .05)
-}
-
-.sanc-tabs {
-  display: flex;
-  gap: 6px;
-  max-width: 330px;
-  width: 100%
-}
-
-.sanc-tab-btn {
-  flex: 1;
-  padding: 10px 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--dim);
-  background: rgba(255, 255, 255, .04);
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all .2s
-}
-
-.sanc-tab-btn:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, .08);
-  border-color: rgba(255, 255, 255, .15)
-}
-
-.sanc-tab-btn.active {
-  color: #fff;
-  background: rgba(168, 85, 247, .2);
-  border-color: #a855f7
-}
-
 /* ═══ Sanctuary List (Vertical flex) ═══ */
 #sanc-list {
   display: flex !important;
@@ -60,92 +8,11 @@ body[data-page="sanctuary"] #content>* {
   margin: 0 auto 16px
 }
 
-/* ═══ Sanctuary Card ═══ */
-.sanc-card {
-  width: 100%;
-  max-width: 340px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, .04);
-  border: 1px solid rgba(168, 85, 247, .2);
-  border-radius: 10px;
-  padding: 10px 12px
-}
-
-.sanc-icon {
-  font-size: 28px;
-  flex-shrink: 0
-}
-
-.sanc-info {
-  flex: 1
-}
-
-.sanc-name {
-  font-weight: 700;
-  font-size: 12px
-}
-
-.sanc-stats {
-  font-size: 10px;
-  color: var(--dim);
-  margin-top: 2px
-}
-
+/* ═══ Sanctuary Skill Info ═══ */
 .sanc-skill-info {
   font-size: 9px;
   color: #c084fc;
   margin-top: 2px
-}
-
-.sanc-btn {
-  font-weight: 700;
-  font-size: 11px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, #a855f7, #7c3aed);
-  color: #fff;
-  transition: all .15s;
-  white-space: nowrap
-}
-
-.sanc-btn:hover {
-  transform: scale(1.05)
-}
-
-.sanc-btn.disabled {
-  opacity: .3;
-  cursor: default
-}
-
-/* ═══ Sanctuary HUD ═══ */
-.sanc-hud {
-  display: flex;
-  justify-content: center;
-  padding: 12px 0 8px;
-  margin-bottom: 4px
-}
-
-.sanc-hud-gold {}
-
-.sanc-info-row {
-  border-top: 1px solid rgba(255, 255, 255, .15);
-  border-bottom: 1px solid rgba(255, 255, 255, .15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 12px 0;
-  margin-bottom: 8px
-}
-
-.sanc-info-title {
-  font-size: 14px;
-  font-weight: 900;
-  color: var(--text)
 }
 
 /* ═══ Ad Revive Card ═══ */
@@ -312,11 +179,6 @@ body[data-page="sanctuary"] #content>* {
     max-width: 480px
   }
 
-  .sanc-card {
-    max-width: 460px;
-    padding: 14px 16px
-  }
-
   .promote-card {
     max-width: 460px;
     padding: 14px 16px
@@ -324,7 +186,4 @@ body[data-page="sanctuary"] #content>* {
 
   .sanc-ad-card{max-width:460px;padding:12px 16px}
 
-  .sanc-tabs {
-    max-width: 480px
-  }
 }

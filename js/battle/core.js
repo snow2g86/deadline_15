@@ -47,6 +47,38 @@ const G = {
     uSX(c, r) { return this.tSX(c, r) + TW - UCX },
     uSY(c, r) { const t = this.ter[r] ? this.ter[r][c] : null; return this.tSY(c, r, t ? TI[t].z : 0) - 22 },
 
+    _selectRandomSiegeType() {
+        const types = [
+            { type: 'bomb', weight: 40 },
+            { type: 'shield', weight: 30 },
+            { type: 'evasion', weight: 20 },
+            { type: 'detour', weight: 10 }
+        ];
+        const total = types.reduce((s, t) => s + t.weight, 0);
+        let rand = Math.random() * total;
+        for (const t of types) {
+            if (rand < t.weight) return t.type;
+            rand -= t.weight;
+        }
+        return 'bomb';
+    },
+    _createSiegeItem(type) {
+        const itemDefs = {
+            'bomb': { type: 'bomb', name: '💣 폭탄', description: '폭발로 주변 피해', targetType: 'self' },
+            'shield': { type: 'shield', name: '🛡️ 방어막', description: '일시적 방어 증가', targetType: 'self' },
+            'evasion': { type: 'evasion', name: '⚡ 회피', description: '다음 공격 회피', targetType: 'self' },
+            'detour': { type: 'detour', name: '🛣️ 우회로', description: '이동 경로 개선', targetType: 'self' }
+        };
+        const def = itemDefs[type] || itemDefs['bomb'];
+        return {
+            id: Math.random(),
+            type: def.type,
+            name: def.name,
+            description: def.description,
+            targetType: def.targetType,
+            cooldown: 0
+        };
+    },
     rotCam(d) {
         this.camDir = ((this.camDir + d) % 4 + 4) % 4;
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[this.camDir];
@@ -226,7 +258,10 @@ const G = {
             res: initRes, maxRes, resType, resRec,
             hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
         };
-        if (team === 'enemy') { u.origSpawn = { x, y } }
+        if (team === 'enemy') {
+            u.origSpawn = { x, y };
+            u.siegeItems = [this._createSiegeItem(this._selectRandomSiegeType())];
+        }
         this.units.push(u); return u
     },
     uAt(x, y) {
@@ -262,7 +297,13 @@ const G = {
 
     spawnW() {
         if (!this.cStage) return; const s = this.cStage, rem = s.tot - this.eSpwn; if (rem <= 0) return;
-        const cnt = Math.min(s.spw, rem, this.eQ.length);
+
+        // 동시 적군 수 체크: 20명 이상이면 스폰 미루기
+        const activeEnemies = this.units.filter(u => u.team === 'enemy' && u.hp > 0).length;
+        const maxConcurrent = 20;
+        if (activeEnemies >= maxConcurrent) return;
+
+        const cnt = Math.min(s.spw, rem, this.eQ.length, maxConcurrent - activeEnemies);
         if (this.eSpwn === 0 && s.boss) {
             const bu = this.addU('enemy', s.boss.cls, 5, 2);
             if (bu) { bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: 5, y: 2 }; } this.eSpwn++;

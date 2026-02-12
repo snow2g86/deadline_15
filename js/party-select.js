@@ -113,7 +113,7 @@ function updatePageGold() {
 // ── 탭 전환 ─────────────────────────────
 function switchPageTab(tab) {
   _activePageTab = tab;
-  var tabs = document.querySelectorAll('.ps-page-tabs .ps-page-tab');
+  var tabs = document.querySelectorAll('.game-tabs .game-tab');
   tabs.forEach(function(btn) {
     btn.classList.toggle('active', btn.getAttribute('data-ptab') === tab);
   });
@@ -469,9 +469,12 @@ function renderChars() {
     html += '<span class="eq-item-label">💊</span>';
     if (ch.battle_potions && ch.battle_potions.length > 0) {
       for (var pi = 0; pi < ch.battle_potions.length; pi++) {
-        var potId = ch.battle_potions[pi];
-        var pot = BATTLE_POTIONS[potId];
-        html += '<span class="eq-item-icon" title="' + (pot ? pot.name : potId) + '">' + (pot ? pot.icon : '?') + '</span>';
+        var bpPid = ch.battle_potions[pi];
+        var bpInv = null;
+        for (var k = 0; k < inv.length; k++) { if (inv[k].pid === bpPid) { bpInv = inv[k]; break; } }
+        var pot = bpInv ? BATTLE_POTIONS[bpInv.potionId] : null;
+        var potLabel = bpInv ? t('battle_potions.' + bpInv.potionId) : '?';
+        html += '<span class="eq-item-icon" title="' + potLabel + '">' + (pot ? pot.icon : '?') + '</span>';
       }
     } else {
       html += '<span class="eq-item-empty">-</span>';
@@ -483,9 +486,12 @@ function renderChars() {
     html += '<span class="eq-item-label">⚙️</span>';
     if (ch.siege_items && ch.siege_items.length > 0) {
       for (var si = 0; si < ch.siege_items.length; si++) {
-        var siegeId = ch.siege_items[si];
-        var siege = SIEGE_ITEMS.find(function(s) { return s.id === siegeId; });
-        html += '<span class="eq-item-icon" title="' + (siege ? siege.id : siegeId) + '">' + (siege ? siege.icon : '?') + '</span>';
+        var siSid = ch.siege_items[si];
+        var siInv = null;
+        for (var k2 = 0; k2 < inv.length; k2++) { if (inv[k2].sid === siSid) { siInv = inv[k2]; break; } }
+        var siege = siInv ? SIEGE_ITEMS.find(function(s) { return s.id === siInv.siegeId; }) : null;
+        var siegeLabel = siInv ? t('siege_items.' + siInv.siegeId) : '?';
+        html += '<span class="eq-item-icon" title="' + siegeLabel + '">' + (siege ? siege.icon : '?') + '</span>';
       }
     } else {
       html += '<span class="eq-item-empty">-</span>';
@@ -1132,7 +1138,7 @@ function renderBattlePotionsList(ch) {
   if (!ch.battle_potions) ch.battle_potions = [];
 
   var inv = loadInventory();
-  var availablePotions = inv.filter(function(item) { return item.type === 'potion'; });
+  var availablePotions = inv.filter(function(item) { return item.type === 'battle_potion'; });
 
   if (availablePotions.length === 0) {
     list.innerHTML = '<div style="font-size:12px;color:#9ca3af;">인벤토리에 포션이 없습니다</div>';
@@ -1154,8 +1160,8 @@ function renderBattlePotionsList(ch) {
       'cursor:' + (isSelected || !isFull ? 'pointer' : 'default') + ';' +
       'opacity:' + (isSelected || !isFull ? '1' : '0.5') + ';';
     var qty = item.quantity || 1;
-    btn.innerHTML = pot.icon + ' ' + pot.name + ' ×' + qty;
-    btn.title = '종류: ' + pot.type + ' | 보유: ' + qty + '개';
+    btn.innerHTML = pot.icon + ' ' + t('battle_potions.' + item.potionId) + ' ×' + qty;
+    btn.title = t('battle_potions.' + item.potionId) + ' | ×' + qty;
 
     if (isSelected || !isFull) {
       btn.onclick = (function(uid, potionPid, selected) {
@@ -1222,8 +1228,8 @@ function renderSiegeItemsList(ch) {
       'cursor:' + (isSelected || !isFull ? 'pointer' : 'default') + ';' +
       'opacity:' + (isSelected || !isFull ? '1' : '0.5') + ';';
     var qty = item.quantity || 1;
-    btn.innerHTML = siege.icon + ' ' + siege.id + ' ×' + qty;
-    btn.title = '효과: ' + siege.effect + ' | 비용: ' + siege.cost + 'G | 보유: ' + qty + '개';
+    btn.innerHTML = siege.icon + ' ' + t('siege_items.' + item.siegeId) + ' ×' + qty;
+    btn.title = t('siege_items.' + item.siegeId) + ' | ×' + qty;
 
     if (isSelected || !isFull) {
       btn.onclick = (function(uid, siegeSid, selected) {
@@ -1285,7 +1291,7 @@ var init = async function() {
   } catch(_) {}
 
   // 페이지 탭 바인딩
-  document.querySelectorAll('.ps-page-tabs .ps-page-tab').forEach(function(btn) {
+  document.querySelectorAll('.game-tabs .game-tab').forEach(function(btn) {
     btn.onclick = function() { switchPageTab(btn.getAttribute('data-ptab')); };
   });
 

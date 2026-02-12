@@ -133,12 +133,12 @@ body {
 }
 
 #modal-box {
-  background: var(--panel);
+  background: linear-gradient(180deg, #151d30, #111827);
   border: 2px solid var(--gold-d);
   border-radius: 12px;
   padding: 28px 32px;
   text-align: center;
-  box-shadow: 0 0 60px rgba(240, 192, 64, .15);
+  box-shadow: 0 0 40px rgba(240, 192, 64, .12), 0 8px 32px rgba(0, 0, 0, .5);
   max-width: 340px;
   width: 90%
 }
@@ -159,7 +159,7 @@ body {
 }
 
 #modal-sub {
-  color: var(--dim);
+  color: var(--text);
   font-size: 12px;
   margin-bottom: 16px;
   max-height: 60dvh;
@@ -205,8 +205,9 @@ body:not([data-page="battle"]) {
   display: flex;
   align-items: center;
   padding: 0 12px;
-  background: var(--panel);
+  background: linear-gradient(180deg, #151d30, var(--panel));
   border-bottom: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, .3);
   z-index: 10
 }
 
@@ -284,7 +285,7 @@ body:not([data-page="battle"]) {
   flex-direction: column;
   align-items: center;
   padding: 16px;
-  background: radial-gradient(ellipse at 50% 30%, #1a2340, #0a0e1a);
+  background: radial-gradient(ellipse at 50% 20%, #1e2d4a, #0a0e1a);
   position: relative
 }
 
@@ -293,7 +294,7 @@ body:not([data-page="battle"]) {
   flex-shrink: 0;
   display: flex;
   background: var(--panel);
-  border-top: 1px solid rgba(255, 255, 255, .08);
+  border-top: 1px solid rgba(240, 192, 64, .1);
   z-index: 10
 }
 
@@ -312,8 +313,12 @@ body:not([data-page="battle"]) {
 }
 
 .bnav-tab.active {
-  color: var(--gold)
+  color: var(--gold);
+  position: relative
 }
+
+.bnav-tab.active::after{content:'';position:absolute;bottom:4px;width:16px;height:2px;
+  background:var(--gold);border-radius:1px}
 
 .bnav-icon {
   line-height: 1;
@@ -347,9 +352,10 @@ body:not([data-page="battle"]) {
   color: var(--gold);
   font-weight: 700;
   background: rgba(240, 192, 64, .08);
-  border: 1px solid rgba(240, 192, 64, .2);
+  border: 1px solid rgba(240, 192, 64, .25);
   border-radius: 20px;
-  padding: 4px 16px
+  padding: 4px 16px;
+  box-shadow: 0 0 8px rgba(240, 192, 64, .1)
 }
 
 .gold-badge img {
@@ -397,6 +403,63 @@ body:not([data-page="battle"]) {
   min-height: 60px;
   width: 100%;
 }
+
+/* ═══ Unified Tabs ═══ */
+.game-tab-wrap{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.game-tabs{display:flex;flex-wrap:wrap;gap:6px;max-width:330px;width:100%}
+.game-tab{flex:1 1 auto;min-width:28%;padding:10px 6px;font-size:11px;font-weight:700;color:var(--dim);
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  cursor:pointer;transition:all .2s;text-align:center}
+.game-tab:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+.game-tab.active{color:#fff;background:rgba(240,192,64,.12);border-color:var(--gold);
+  box-shadow:0 0 12px rgba(240,192,64,.1)}
+
+/* ═══ Unified HUD ═══ */
+.page-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:4px}
+
+/* ═══ Unified Info Row ═══ */
+.page-info-row{border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;align-items:center;width:100%;max-width:330px;padding:12px 0;margin-bottom:8px}
+.page-info-title{font-size:14px;font-weight:900;color:var(--text)}
+
+/* ═══ Unified Game Card ═══ */
+.game-card{width:100%;max-width:340px;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  padding:10px 12px;transition:all .2s}
+.game-card:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06);
+  transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.game-card-icon{font-size:28px;flex-shrink:0}
+.game-card-info{flex:1;min-width:0}
+.game-card-name{font-weight:700;font-size:12px}
+.game-card-sub{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* ═══ Unified Action Button ═══ */
+.game-btn{font-weight:700;font-size:11px;padding:6px 14px;border-radius:6px;border:none;
+  cursor:pointer;color:#fff;transition:all .15s;white-space:nowrap;
+  box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.game-btn:hover{transform:scale(1.05);filter:brightness(1.1)}
+.game-btn:active{transform:scale(.97)}
+.game-btn.disabled{opacity:.35;cursor:default;transform:none;filter:none}
+.game-btn--gold{background:linear-gradient(135deg,var(--gold),#d4a017);color:#1a1a2e}
+.game-btn--purple{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+.game-btn--blue{background:linear-gradient(135deg,#60a5fa,#3b82f6)}
+.game-btn--green{background:linear-gradient(135deg,#4ade80,#16a34a)}
+.game-btn--red{background:linear-gradient(135deg,#ef4444,#dc2626)}
+
+/* ═══ Unified Progress Bar ═══ */
+.game-bar{width:100%;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.game-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.game-bar--gold .game-bar-fill{background:linear-gradient(90deg,var(--gold),#d4a017)}
+.game-bar--purple .game-bar-fill{background:linear-gradient(90deg,#a78bfa,#7c3aed)}
+.game-bar--green .game-bar-fill{background:linear-gradient(90deg,#4ade80,#16a34a)}
+.game-bar--red .game-bar-fill{background:linear-gradient(90deg,#ef4444,#dc2626)}
+
+/* ═══ Page Scroll ═══ */
+.page-scroll #content{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px}
+.page-scroll #content>*{flex-shrink:0}
+
+/* ═══ Utility ═══ */
+.hidden{display:none!important}
 
 /* ═══ EXP Bar (Party Card) ═══ */
 .cc-exp {
@@ -587,6 +650,12 @@ body[data-page="skill-balance-report"] main {
   .screen-sub {
     font-size: 14px
   }
+
+  .game-tabs{max-width:480px}
+  .game-tab{font-size:13px;padding:12px 8px}
+  .page-info-row{max-width:480px}
+  .page-info-title{font-size:17px}
+  .game-card{max-width:460px;padding:14px 16px}
 
   .settings-content {
     max-width: 380px

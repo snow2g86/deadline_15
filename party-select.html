@@ -35,24 +35,24 @@
 	</header>
 	<main id="content">
 		<!-- Gold HUD -->
-		<div class="ps-hud">
-			<div class="gold-badge ps-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
+		<div class="page-hud">
+			<div class="gold-badge"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
 					id="ps-gold-val">0</span> G</div>
 		</div>
 		<!-- Tabs (matching shop/sanctuary/academy pattern) -->
-		<div class="ps-page-tabs-wrapper">
-			<div class="ps-page-tabs" id="page-tabs">
-				<button class="ps-page-tab active" data-ptab="party" data-i18n="nav.party">파티</button>
-				<button class="ps-page-tab" data-ptab="equip" data-i18n="nav.equip">장비</button>
-				<button class="ps-page-tab" data-ptab="item" data-i18n="party.tab_item">아이템</button>
-				<button class="ps-page-tab" data-ptab="enhance" data-i18n="nav.enhance">강화</button>
+		<div class="game-tab-wrap">
+			<div class="game-tabs" id="page-tabs">
+				<button class="game-tab active" data-ptab="party" data-i18n="nav.party">파티</button>
+				<button class="game-tab" data-ptab="equip" data-i18n="nav.equip">장비</button>
+				<button class="game-tab" data-ptab="item" data-i18n="party.tab_item">아이템</button>
+				<button class="game-tab" data-ptab="enhance" data-i18n="nav.enhance">강화</button>
 			</div>
 		</div>
 
 		<!-- Party section -->
 		<div id="section-party">
-			<div class="ps-info-row">
-				<div class="ps-info-title" data-i18n="party.subtitle">DEADLINE 15</div>
+			<div class="page-info-row">
+				<div class="page-info-title" data-i18n="party.subtitle">DEADLINE 15</div>
 			</div>
 			<div class="ps-layout">
 				<div class="ps-left">
@@ -70,24 +70,24 @@
 
 		<!-- Item section -->
 		<div id="section-item" style="display:none">
-			<div class="ps-info-row">
-				<div class="ps-info-title" data-i18n="party.tab_item">아이템</div>
+			<div class="page-info-row">
+				<div class="page-info-title" data-i18n="party.tab_item">아이템</div>
 			</div>
 			<div class="item-list" id="item-list"></div>
 		</div>
 
 		<!-- Equip section -->
 		<div id="section-equip" style="display:none">
-			<div class="ps-info-row">
-				<div class="ps-info-title" data-i18n="equip.subtitle">장비 관리</div>
+			<div class="page-info-row">
+				<div class="page-info-title" data-i18n="equip.subtitle">장비 관리</div>
 			</div>
 			<div class="eq-chars" id="eq-chars"></div>
 		</div>
 
 		<!-- Enhance section -->
 		<div id="section-enhance" style="display:none">
-			<div class="ps-info-row">
-				<div class="ps-info-title" data-i18n="enhance.subtitle">장비 강화</div>
+			<div class="page-info-row">
+				<div class="page-info-title" data-i18n="enhance.subtitle">장비 강화</div>
 			</div>
 			<div class="enhance-list" id="enhance-list"></div>
 		</div>

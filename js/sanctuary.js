@@ -175,7 +175,7 @@ function formatSkillLvs(ch) {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  document.querySelectorAll('.sanc-tab-btn').forEach(function(btn) {
+  document.querySelectorAll('.game-tab').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
   var sub = document.getElementById('sanc-subtitle');
@@ -239,14 +239,14 @@ function renderResurrect() {
     var cost = reviveCost(ch);
     var canAfford = _gold >= cost;
     var el = document.createElement('div');
-    el.className = 'sanc-card';
+    el.className = 'game-card';
     var charName = ch.customName || names[ch.nameId] || d.icon;
     el.innerHTML =
-      '<div class="sanc-icon">' + clsIcon(ch.cls, 28) + '</div>' +
-      '<div class="sanc-info"><div class="sanc-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
-      '<div class="sanc-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div></div>' +
-      '<button class="sanc-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
-    el.querySelector('.sanc-btn').onclick = (function(uid, cost) {
+      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
+      '<div class="game-card-sub">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div></div>' +
+      '<button class="game-btn game-btn--purple' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
+    el.querySelector('.game-btn').onclick = (function(uid, cost) {
       return function() {
         if (_gold < cost) return;
         _gold -= cost;
@@ -342,13 +342,13 @@ function renderPromote() {
     var el = document.createElement('div');
     el.className = 'promote-card';
     el.innerHTML =
-      '<div class="sanc-icon">' + clsIcon(ch.cls, 28) + '</div>' +
-      '<div class="sanc-info">' +
-        '<div class="sanc-name">' + charName +
+      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-info">' +
+        '<div class="game-card-name">' + charName +
           ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
           ' <span class="promote-grade" style="color:' + gClr + '">' + grade + '</span>' +
         '</div>' +
-        '<div class="sanc-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
+        '<div class="game-card-sub">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
         (skillInfo ? '<div class="sanc-skill-info">' + skillInfo + '</div>' : '') +
       '</div>' +
       '<button class="promote-btn' + (hasSacrifice ? '' : ' disabled') + '" ' + (hasSacrifice ? '' : 'disabled') + '>' +

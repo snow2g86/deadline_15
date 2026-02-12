@@ -174,7 +174,7 @@ function changeClass(uid, newCls) {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  document.querySelectorAll('.acad-tab-btn').forEach(function(btn) {
+  document.querySelectorAll('.game-tab').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
   var sub = document.getElementById('acad-subtitle');
@@ -223,16 +223,16 @@ function renderAcademy() {
     var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
     var charName = ch.customName || names[ch.nameId] || d.icon;
     var el = document.createElement('div');
-    el.className = 'acad-card';
+    el.className = 'game-card';
     var btnText = hasScroll ? t('academy.class_change_btn') : t('academy.class_change_btn_noscroll');
     el.innerHTML =
-      '<div class="acad-icon">' + clsIcon(ch.cls, 28) + '</div>' +
-      '<div class="acad-info">' +
-        '<div class="acad-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
-        '<div class="acad-stats">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
+      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-info">' +
+        '<div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
+        '<div class="game-card-sub">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
       '</div>' +
-      '<button class="acad-btn' + (hasScroll ? '' : ' disabled') + '" ' + (hasScroll ? '' : 'disabled') + '>' + btnText + '</button>';
-    el.querySelector('.acad-btn').onclick = (function(uid) {
+      '<button class="game-btn game-btn--purple' + (hasScroll ? '' : ' disabled') + '" ' + (hasScroll ? '' : 'disabled') + '>' + btnText + '</button>';
+    el.querySelector('.game-btn').onclick = (function(uid) {
       return function() {
         showScrollSelectModal(uid);
       };
@@ -357,9 +357,13 @@ function renderSkillBooks() {
     return;
   }
 
+  var hasBooks = false;
   inv.forEach(function(book, idx) {
+    // 스킬북만 필터 (type 없고 id+cls+lv 있는 항목)
+    if (book.type || !book.id || !book.cls || book.lv === undefined) return;
     var d = JAB[book.cls];
     if (!d) return;
+    hasBooks = true;
     var skillName = t('skills.' + book.id);
     var clsName = t('classes.' + book.cls);
 
@@ -377,15 +381,18 @@ function renderSkillBooks() {
         '<div class="sb-name">' + skillName + ' <span class="sb-cls-tag">' + clsName + '</span></div>' +
         '<div class="sb-meta">Lv.1 Skill Book</div>' +
       '</div>' +
-      '<button class="sb-btn' + (hasTarget ? '' : ' disabled') + '" ' + (hasTarget ? '' : 'disabled') + '>' + t('academy.skillbook_use') + '</button>';
+      '<button class="game-btn game-btn--blue' + (hasTarget ? '' : ' disabled') + '" ' + (hasTarget ? '' : 'disabled') + '>' + t('academy.skillbook_use') + '</button>';
 
     if (hasTarget) {
-      el.querySelector('.sb-btn').onclick = (function(i) {
+      el.querySelector('.game-btn').onclick = (function(i) {
         return function() { showSkillBookTargets(i); };
       })(idx);
     }
     list.appendChild(el);
   });
+  if (!hasBooks) {
+    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_skillbooks') + '</div>';
+  }
 }
 
 // ── 스킬북: 대상 선택 모달 ──────────────

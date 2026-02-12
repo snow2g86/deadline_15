@@ -16,7 +16,7 @@
 	<script type="text/javascript" src="js/academy.js"></script>
 </head>
 
-<body data-page="academy" onload="init();">
+<body data-page="academy" class="page-scroll" onload="init();">
 	<div id="splash">
 		<div class="splash-title" data-i18n="common.game_title">DEADLINE 15</div>
 		<div class="splash-loading" data-i18n="common.loading">loading...</div>
@@ -33,21 +33,21 @@
 			</svg></button>
 	</header>
 	<main id="content">
-		<div class="acad-hud">
-			<div class="gold-badge acad-hud-gold"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
+		<div class="page-hud">
+			<div class="gold-badge"><img src="image/icon/64x64/fc131.png" alt="Gold"><span
 					id="acad-gold-val">0</span> G</div>
 		</div>
-		<div class="acad-tabs-wrapper">
-			<div class="acad-tabs">
-				<button class="acad-tab-btn active" data-tab="classchange" onclick="switchTab('classchange')" data-i18n="academy.tab_classchange"></button>
-				<button class="acad-tab-btn" data-tab="skillbook" onclick="switchTab('skillbook')" data-i18n="academy.tab_skillbook"></button>
+		<div class="game-tab-wrap">
+			<div class="game-tabs">
+				<button class="game-tab active" data-tab="classchange" onclick="switchTab('classchange')" data-i18n="academy.tab_classchange"></button>
+				<button class="game-tab" data-tab="skillbook" onclick="switchTab('skillbook')" data-i18n="academy.tab_skillbook"></button>
 			</div>
 		</div>
-		<div class="acad-info-row">
-			<div class="acad-info-title" id="acad-subtitle" data-i18n="academy.subtitle">DEADLINE 15</div>
+		<div class="page-info-row">
+			<div class="page-info-title" id="acad-subtitle" data-i18n="academy.subtitle">DEADLINE 15</div>
 		</div>
 		<div id="academy-list" class="card-list"></div>
-		<div id="skillbook-list" class="card-list" style="display:none"></div>
+		<div id="skillbook-list" class="card-list hidden"></div>
 	</main>
 	<nav id="bottom-nav"></nav>
 	<div id="modal-overlay">

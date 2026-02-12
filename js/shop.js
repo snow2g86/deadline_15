@@ -291,7 +291,7 @@ function updateShopTimer() {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  var btns = document.querySelectorAll('.shop-tab-btn');
+  var btns = document.querySelectorAll('.game-tab');
   btns.forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
   renderShop();
 }

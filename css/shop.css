@@ -1,9 +1,7 @@
 /* ═══ Shop List (2-column grid) ═══ */
 #shop-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:330px;margin:0 auto 16px;min-height:60px}
 
-/* ═══ Shop HUD ═══ */
-.shop-hud{width:100%;display:flex;justify-content:center;padding:12px 0 8px;margin-bottom:12px}
-.shop-hud-gold{}
+/* ═══ Shop Info Row ═══ */
 .shop-info-row{display:flex;align-items:baseline;justify-content:space-between;width:100%;max-width:330px;margin-bottom:8px}
 .shop-info-title{margin-top:14px; font-size:14px;font-weight:900;color:var(--text)}
 .shop-info-timer{font-size:11px;font-weight:700;color:#60a5fa}
@@ -37,14 +35,6 @@
 .scroll-card{border-color:rgba(192,132,252,.2)!important}
 .scroll-card:hover{border-color:#c084fc!important}
 .scroll-btn{background:linear-gradient(135deg,#c084fc,#9333ea)!important}
-
-/* ═══ Shop Tabs ═══ */
-.shop-tabs-wrapper{width:100%;display:flex;justify-content:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.shop-tabs{display:flex;flex-wrap:wrap;gap:6px;max-width:330px;width:100%}
-.shop-tab-btn{flex:1 1 auto;min-width:28%;padding:8px 6px;font-size:11px;font-weight:700;color:var(--dim);background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;transition:all .2s}
-.shop-tab-btn:hover{color:var(--text);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
-.shop-tab-btn.active{color:#fff;background:rgba(96,165,250,.2);border-color:#60a5fa}
 
 /* ═══ Potion Modal ═══ */
 .potion-target-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:4px}
@@ -123,8 +113,6 @@
 
 /* ═══ PC (1024px+) ═══ */
 @media(min-width:1024px){
-  .shop-hud{max-width:480px}
-  .shop-tabs{max-width:480px}
   .shop-info-row{max-width:480px}
   .shop-info-title{font-size:17px}
   .shop-info-timer{font-size:13px}

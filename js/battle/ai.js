@@ -20,6 +20,9 @@ Object.assign(G, {
     this.alive('enemy').forEach(u=>{
       if(u.stunned>0)u.stunned--;
       if(u.frozen>0)u.frozen--;
+      if(u._siegeShield>0)u._siegeShield--;
+      if(u._siegeEvasion>0)u._siegeEvasion--;
+      if(u.siegeItems){u.siegeItems.forEach(item=>{if(item.cooldown>0)item.cooldown--})}
       tickBuffs(u);
       if(u.resType==='mana'){u.res=Math.min(u.maxRes,u.res+u.resRec)}
       else if(u.resType==='energy'){
@@ -218,6 +221,7 @@ Object.assign(G, {
       const target=this.selectTarget(u,inR,profile);
       if(target){await this.eAtkAsync(u,target);return}
     }
+    if(await this.trySiegeItemUse(u)){return}
     const gAtk=this.tryGateAtk(u);
     if(gAtk){await sl(250);return}
     const wClimb=await this.tryWallClimb(u);
@@ -234,6 +238,59 @@ Object.assign(G, {
     }
     this.tryGateAtk(u);
     },
+  analyzeSituation(u){
+    const al=this.alive('ally');
+    const hpPct=u.hp/u.mhp;
+    const nearbyAllies=al.filter(a=>!isStealthed(a)&&mh(u.x,u.y,a.x,a.y)<=2).length;
+    const moveOptions=this.eMvC(u).length;
+    let situationType='safe';
+    if(hpPct<0.3){situationType='weakened'}
+    else if(nearbyAllies>=3){situationType='surrounded'}
+    else if(moveOptions===0){situationType='blocked'}
+    else if(nearbyAllies>0){situationType='distant'}
+    const severity=(1-hpPct)*0.4+(nearbyAllies/5)*0.4+(1-moveOptions/4)*0.2;
+    return{type:situationType,severity:Math.max(0,Math.min(1,severity)),blockCount:4-moveOptions,nearbyAllies,hpPercent:hpPct}
+  },
+  selectSiegeItem(u,situation){
+    if(!u.siegeItems||!u.siegeItems.length)return null;
+    const available=u.siegeItems.filter(i=>i.cooldown===0);
+    if(!available.length)return null;
+    const priorityMap={
+      'blocked':{'bomb':90,'ladder':70,'detour':80},
+      'distant':{'detour':80,'bomb':60,'ladder':50},
+      'weakened':{'shield':100,'evasion':80},
+      'surrounded':{'evasion':90,'bomb':70,'detour':60},
+      'safe':{}
+    };
+    const priors=priorityMap[situation.type]||{};
+    let best=null,bestScore=-1;
+    for(const item of available){
+      const score=(priors[item.type]||0)+(Math.random()*10);
+      if(score>bestScore){bestScore=score;best=item}
+    }
+    return best
+  },
+  async useSiegeItem(u,item){
+    try{
+      const sitemap={'bomb':await(async()=>{const tc=[[u.x+1,u.y],[u.x-1,u.y],[u.x,u.y+1],[u.x,u.y-1]].filter(p=>p[0]>=0&&p[0]<COLS&&p[1]>=0&&p[1]<ROWS);for(const[x,y]of tc){const v=this.uAt(x,y);if(v&&v.team==='ally'&&!isStealthed(v)){const dmg=Math.max(1,Math.round(u.atk*0.3));v.hp=Math.max(0,v.hp-dmg);this.floatT(v.x,v.y,`-${dmg}`,'damage');this.vfxSpawn(this.uSX(v.x,v.y)+UCX,this.uSY(v.x,v.y)+UCY,{count:10,colors:['#ff4500','#ff6347','#ffa500'],shape:'spark',speed:4,spread:12,decay:0.03,size:4})}}this.floatT(u.x,u.y,'💣','heal');this.sfxAtk(u.cls);this._rmDead();return true})()||false,'shield':async()=>{u._siegeShield=3;this.floatT(u.x,u.y,'🛡️','heal');this.sfxAtk(u.cls);return true},'evasion':async()=>{u._siegeEvasion=1;this.floatT(u.x,u.y,'⚡','heal');this.sfxAtk(u.cls);return true}};
+      if(sitemap[item.type]){
+        const success=await sitemap[item.type]();
+        if(success){
+          item.cooldown=3;
+          return true
+        }
+      }
+    }catch(e){}
+    return false
+  },
+  async trySiegeItemUse(u){
+    if(!u.siegeItems||!u.siegeItems.length)return false;
+    const situation=this.analyzeSituation(u);
+    if(situation.severity<0.15)return false;
+    const item=this.selectSiegeItem(u,situation);
+    if(!item)return false;
+    return await this.useSiegeItem(u,item)
+  },
   hasAllyWall(){return Object.keys(this.gateHP).some(k=>k.endsWith(',14')&&this.gateHP[k]>0)},
   tryGateAtk(u){
     for(const[dx,dy]of[[0,1],[0,-1],[-1,0],[1,0]]){
@@ -271,13 +328,15 @@ Object.assign(G, {
     this.eAtk(a,tgt);
     await sl(tgt.hp<=0?500:300)},
   eAtk(a,tgt){
+    if(a._siegeEvasion>0&&Math.random()<0.3){a._siegeEvasion--;this.floatT(a.x,a.y,t('messages.evasion'),'heal');return}
     const bCounter=tgt.skillLv&&tgt.skillLv['brawler_counter']>=1&&!(tgt.stunned>0)&&!(tgt.frozen>0)&&mh(tgt.x,tgt.y,a.x,a.y)<=tgt.range&&Math.random()<0.3;
     let dtgt=tgt;
     if(bCounter){
       const cdmg=Math.max(1,Math.round(tgt.atk*0.5)-a.def);a.hp=Math.max(0,a.hp-cdmg);
       this.vfxAtk(tgt,a);this.sfxAtk(tgt.cls);this.shakeU(a.id);this.floatT(a.x,a.y,`-${cdmg}`,'damage');this.floatT(tgt.x,tgt.y,t('messages.brawler_counter'),'heal');
     }else{
-      const dmg=calcDmg(a,tgt);
+      let dmg=calcDmg(a,tgt);
+      if(a._siegeShield>0){dmg=Math.max(1,Math.round(dmg*0.5));this.floatT(a.x,a.y,'🛡️','heal')}
       dtgt=tgt.team==='ally'?applyDmgToAlly(tgt,dmg,this):(tgt.hp=Math.max(0,tgt.hp-dmg),tgt);
       this.vfxAtk(a,tgt);this.sfxAtk(a.cls);this.shakeU(dtgt.id);this.floatT(dtgt.x,dtgt.y,`-${dmg}`,'damage');
       if(a.furyBuff>0)this.floatT(a.x,a.y,t('messages.fury_buff'),'heal');
