@@ -286,6 +286,7 @@ Object.assign(G, {
   async trySiegeItemUse(u){
     if(!u.siegeItems||!u.siegeItems.length)return false;
     const situation=this.analyzeSituation(u);
+    if(situation.type==='blocked'){const item=this.selectSiegeItem(u,situation);if(!item)return false;return await this.useSiegeItem(u,item)}
     if(situation.severity<0.15)return false;
     const item=this.selectSiegeItem(u,situation);
     if(!item)return false;
