@@ -17,7 +17,8 @@ window._LANG_es = {
         "wave": "Ola",
         "select_unit": "Selecciona una unidad",
         "move": "Mov",
-        "range": "Rango"
+        "range": "Rango",
+        "type": "Tipo"
     },
     "nav": {
         "stage": "Escenario",
@@ -126,6 +127,7 @@ window._LANG_es = {
         "trap_placed": "⚠ Trampa",
         "curse": "¡Maldición!",
         "unsummoned": "Invocación Desecha",
+        "soulbond_restore": "+40 MP",
         "gate_hit": "¡Puerta Golpeada!",
         "gate_destroyed": "¡Puerta Destruida!",
         "ladder": "🪜 ¡Escalera!",
@@ -135,6 +137,7 @@ window._LANG_es = {
         "enemy_breached": "¡{count} enemigos atravesaron la muralla!",
         "stage_clear": "¡ETAPA {stage_id} Completada! ({turn} turnos)",
         "surrender": "Se rindió",
+        "resume_battle": "Reanudar Batalla",
         "auto_revive": "¡{name} ha sido revivido automáticamente!",
         "reward": "Recompensa",
         "first_clear_bonus": "Bonificación de primer despeje",
@@ -179,8 +182,18 @@ window._LANG_es = {
         "shaman_spiritsurge": "¡Oleada Espiritual!",
         "sapper_detonate": "¡Detonar!",
         "rooted": "¡Enraizado!",
-        "trap_triggered": "¡Trampa! -{dmg}",
-        "trap_stun": "{turns} turnos inmovilizado"
+        "trap_triggered": "\u00a1Trampa! -{dmg}",
+        "trap_stun": "{turns} turnos inmovilizado",
+        "siege_ladder": "\u{1FA9C} \u00a1Escalera!",
+        "siege_bomb": "\u{1F4A3} \u00a1Muro destruido!",
+        "siege_bridge": "\u{1F309} \u00a1Puente!",
+        "select_siege_target": "Selecciona la casilla objetivo",
+        "siege_no_target": "No hay objetivo v\u00e1lido",
+        "wall_destroyed": "\u00a1Muro destruido!",
+        "bridge_placed": "\u00a1Puente colocado!",
+        "climbed_wall": "\u00a1Escalado el muro!",
+        "select_potion_target": "Selecciona objetivo",
+        "potion_no_target": "Sin objetivo"
     },
     "results": {
         "battle_detail": "📈 Asesinados {kills} · Total {exp} EXP (÷{survivors})",
@@ -216,6 +229,20 @@ window._LANG_es = {
             "name": "El Comienzo del Hroe",
             "desc": "Defiende la aldea de los bandidos y derrota al senor demonio"
         }
+    },
+    "battle_potions": {
+        "potion_heal": "Poción de Curación",
+        "potion_heal_desc": "Restaura 50% HP",
+        "potion_resource": "Poción de Recurso",
+        "potion_resource_desc": "Restaura 30 recurso",
+        "potion_atk_buff": "Elixir de Ataque",
+        "potion_atk_buff_desc": "ATQ +30% por 3 turnos",
+        "potion_def_buff": "Elixir de Defensa",
+        "potion_def_buff_desc": "DEF +30% por 3 turnos",
+        "potion_atk_debuff": "Veneno Debilitante",
+        "potion_atk_debuff_desc": "ATQ enemigo -25% (3 turnos)",
+        "potion_def_debuff": "Veneno Corrosivo",
+        "potion_def_debuff_desc": "DEF enemigo -25% (3 turnos)"
     },
     "shop": {
         "title": "Tienda",
@@ -282,7 +309,17 @@ window._LANG_es = {
         "scroll_prefix": "Pergamino:",
         "scroll_buy_confirm": "\u00bfComprar {scroll} por {gold}O?",
         "scroll_stored": "guardado en inventario",
-        "ad_scroll_desc": "Mira un anuncio para obtener un pergamino gratis"
+        "ad_scroll_desc": "Mira un anuncio para obtener un pergamino gratis",
+        "siege_ladder": "Escalera",
+        "siege_bomb": "Bomba de Asedio",
+        "siege_bridge": "Puente",
+        "siege_ladder_desc": "Escalar un muro adyacente",
+        "siege_bomb_desc": "Destruir un muro, convirti\u00e9ndolo en llanura",
+        "siege_bridge_desc": "Colocar un puente sobre el agua",
+        "siege_buy_confirm": "\u00bfComprar {item} por {gold}O?",
+        "siege_stored": "guardado en inventario",
+        "battle_potion_buy_confirm": "\u00bfComprar {name} por {gold}O?",
+        "battle_potion_stored": "{name} guardado en inventario"
     },
     "academy": {
         "title": "Academia",
@@ -636,6 +673,7 @@ window._LANG_es = {
         "no_items": "Sin equipamiento",
         "equip_btn": "Equipar",
         "equipped": "Equipado",
+        "sell": "Vender",
         "sell_btn": "Vender {gold}O",
         "sell_confirm": "Vender {name}?\n+{gold}O",
         "filter_armor": "Armadura",
@@ -1298,6 +1336,23 @@ window._LANG_es = {
             "Jang Giyong",
             "Jang Donggun"
         ]
+    },
+    "inventory": {
+        "filter_all": "Todo",
+        "filter_equip": "Equipo",
+        "filter_potion": "Poción",
+        "filter_scroll": "Pergamino",
+        "filter_skillbook": "Libro de Habilidades",
+        "filter_all_rarity": "Todas Rareza",
+        "sort_rarity": "Rareza",
+        "sort_name": "Nombre",
+        "sort_level": "Nivel de Mejora",
+        "empty": "Sin artículos",
+        "use": "Usar",
+        "stat_total": "Total",
+        "stat_rare": "Raro+",
+        "stat_value": "Valor Total",
+        "stat_equipped": "Tasa Equipada"
     },
     "enhance": {
         "subtitle": "Mejora de Equipo",

@@ -126,6 +126,7 @@ Object.assign(G, {
 			const isSel = this.sel && this.sel.id === u.id;
 			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
 			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0 || u.frozen > 0);
+			el.classList.toggle('potion-target', this.potionMode && this.potionTargets && this.potionTargets.some(pt => pt.id === u.id));
 			let stunLabel = el.querySelector('.stun-label'); if (u.stunned > 0 || u.frozen > 0) { if (!stunLabel) { stunLabel = document.createElement('div'); stunLabel.className = 'stun-label'; el.appendChild(stunLabel) } stunLabel.textContent = u.frozen > 0 ? '❄️' + u.frozen : u.stunned } else if (stunLabel) stunLabel.remove();
 			const fx = [];
 			const tile = this.ter[u.y] ? this.ter[u.y][u.x] : null;
@@ -196,6 +197,7 @@ Object.assign(G, {
 			m.classList.add('show'); return
 		}
 		if (this.skillMenuOpen) { this.showSkillSubMenu(u); return }
+		if (this.itemMenuOpen) { this.showItemSubMenu(u); return }
 		this.showMainMenu(u)
 	},
 	showMainMenu(u) {
@@ -214,7 +216,9 @@ Object.assign(G, {
 		const skills = getUnitSkills(u);
 		const hasUsableSkill = !u.ha && skills.some(sk => this.canUseSkill(u, sk));
 		document.getElementById('btn-skill').style.display = hasUsableSkill ? '' : 'none';
-		document.getElementById('btn-item').style.display = 'none';
+		const hasPotion = this._battlePotions && this._battlePotions.length > 0;
+		const hasSiege = this._siegeItems && this._siegeItems.length > 0;
+		document.getElementById('btn-item').style.display = (!u.ha && (hasPotion || hasSiege)) ? '' : 'none';
 		const btnDash = document.getElementById('btn-dash');
 		btnDash.textContent = t('battle.wait');
 		btnDash.style.display = '';
@@ -245,6 +249,54 @@ Object.assign(G, {
 		btnCancel.style.display = '';
 		btnCancel.onclick = () => G.hideSkillMenu();
 		m.classList.add('show')
+	},
+	showItemSubMenu(u) {
+		const m = document.getElementById('action-menu');
+		this.hideAllMenuButtons();
+		m.querySelectorAll('.am-skill,.am-item').forEach(e => e.remove());
+		const btnDash = document.getElementById('btn-dash');
+		// 포션 버튼
+		const potionSeen = {};
+		if (this._battlePotions) {
+			this._battlePotions.forEach((pot, idx) => {
+				const def = BATTLE_POTIONS[pot.potionId];
+				if (!def) return;
+				const key = pot.potionId;
+				if (!potionSeen[key]) potionSeen[key] = { def, count: 0, firstIdx: idx };
+				potionSeen[key].count += pot.quantity || 1;
+			});
+			Object.keys(potionSeen).forEach(key => {
+				const { def, count, firstIdx } = potionSeen[key];
+				const btn = document.createElement('button'); btn.className = 'am-item';
+				btn.textContent = def.icon + ' ' + t('battle_potions.' + def.id) + ' x' + count;
+				btn.onclick = () => G.actPotion(firstIdx);
+				m.insertBefore(btn, btnDash);
+			});
+		}
+		// 공성 아이템 버튼
+		const siegeSeen = {};
+		if (this._siegeItems) {
+			this._siegeItems.forEach((si, idx) => {
+				const def = SIEGE_ITEMS.find(d => d.id === si.siegeId);
+				if (!def) return;
+				const key = si.siegeId;
+				if (!siegeSeen[key]) siegeSeen[key] = { def, count: 0, firstIdx: idx };
+				siegeSeen[key].count += si.quantity || 1;
+			});
+			Object.keys(siegeSeen).forEach(key => {
+				const { def, count, firstIdx } = siegeSeen[key];
+				const btn = document.createElement('button'); btn.className = 'am-item';
+				btn.textContent = def.icon + ' ' + t('shop.' + def.id) + (count > 1 ? ' x' + count : '');
+				btn.onclick = () => G.actSiege(firstIdx);
+				m.insertBefore(btn, btnDash);
+			});
+		}
+		btnDash.style.display = 'none';
+		const btnCancel = document.getElementById('btn-cancel');
+		btnCancel.textContent = '\u21a9 ' + t('battle.cancel');
+		btnCancel.style.display = '';
+		btnCancel.onclick = () => G.hideItemMenu();
+		m.classList.add('show');
 	},
 	hideAllMenuButtons() {
 		['btn-move', 'btn-attack', 'btn-skill', 'btn-item', 'btn-dash', 'btn-cancel'].forEach(id => {

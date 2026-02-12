@@ -90,6 +90,28 @@
         .divider { height:2px; background:linear-gradient(90deg,transparent,#667eea,transparent); margin:30px 0; }
         footer { background:#f5f5f5; padding:16px; text-align:center; color:#777; border-top:1px solid #e0e0e0; font-size:.9em; }
 
+        /* Character sprites */
+        .class-sprites { display:flex; gap:4px; min-width:80px; }
+        .char-sprite { width:40px; height:50px; image-rendering:pixelated; }
+        /* VFX Demo */
+        .vfx-class-btns { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+        .vfx-cls-btn { padding:6px 12px; border:2px solid #667eea; border-radius:8px; background:transparent; color:#667eea; font-weight:600; cursor:pointer; font-size:.85em; transition:all .2s; display:flex; align-items:center; gap:6px; }
+        .vfx-cls-btn:hover { background:rgba(102,126,234,.1); }
+        .vfx-cls-btn.active { background:#667eea; color:#fff; }
+        .vfx-cls-btn img { width:24px; height:30px; image-rendering:pixelated; }
+        .vfx-info { display:flex; gap:24px; margin-bottom:20px; flex-wrap:wrap; }
+        .vfx-char { text-align:center; }
+        .vfx-char img { width:120px; height:150px; image-rendering:pixelated; }
+        .vfx-char-name { font-size:1.2em; font-weight:bold; color:#333; margin-top:8px; }
+        .vfx-skills { flex:1; min-width:200px; }
+        .vfx-skill-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; margin-bottom:8px; background:#f9f9f9; }
+        .vfx-skill-item .sk-name { font-weight:bold; flex:1; }
+        .vfx-skill-item .sk-cost { font-size:.8em; color:#999; margin-right:8px; }
+        .vfx-demo-btn { padding:5px 10px; border:none; border-radius:6px; background:#667eea; color:#fff; font-weight:600; cursor:pointer; font-size:.8em; transition:all .2s; white-space:nowrap; }
+        .vfx-demo-btn:hover { background:#764ba2; }
+        .vfx-canvas-wrap { display:flex; justify-content:center; margin-top:16px; }
+        #vfx-demo-canvas { border-radius:12px; border:2px solid #333; background:#1a1a2e; }
+
         @media (max-width:768px) {
             main { padding:16px; }
             .class-grid { grid-template-columns:1fr; }
@@ -114,6 +136,7 @@
                 <button class="tab" data-tab="tab-skills">스킬 목록</button>
                 <button class="tab" data-tab="tab-party">파티 추천</button>
                 <button class="tab" data-tab="tab-tips">전략 팁</button>
+                <button class="tab" data-tab="tab-vfx">스킬 시연</button>
             </div>
 
             <div id="tab-cards" class="tab-content active"></div>
@@ -121,6 +144,7 @@
             <div id="tab-skills" class="tab-content"></div>
             <div id="tab-party" class="tab-content"></div>
             <div id="tab-tips" class="tab-content"></div>
+            <div id="tab-vfx" class="tab-content"></div>
         </main>
         <footer>DEADLINE 15 클래스 밸런스 리포트 (자동 생성)</footer>
     </div>
@@ -168,7 +192,7 @@ function renderCards() {
         const learnables = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
         const passive = PASSIVE_MAP[cls];
 
-        html += `<div class="class-card"><div class="class-header"><div class="class-icon">${d.icon}</div><div class="class-name"><h3>${cls.charAt(0).toUpperCase()+cls.slice(1)}</h3><div class="class-type">${ROLE_MAP[cls]}</div></div></div>`;
+        html += `<div class="class-card"><div class="class-header"><div class="class-sprites"><img class="char-sprite" src="image/character/${cls}_01.png" alt="${cls}"><img class="char-sprite" src="image/character/${cls}_02.png" alt="${cls}"></div><div class="class-name"><h3>${cls.charAt(0).toUpperCase()+cls.slice(1)}</h3><div class="class-type">${ROLE_MAP[cls]}</div></div></div>`;
         html += statBar('HP', b.hp, MAX_HP);
         html += statBar('ATK', b.atk, MAX_ATK);
         html += statBar('DEF', b.def, MAX_DEF);
@@ -413,12 +437,387 @@ function renderTips() {
     </div>`;
 }
 
+// ── 6. VFX Demo ──
+const _vfxParts = [];
+let _vfxRaf = null;
+
+const SKILL_VFX = {
+    warrior_basic:[
+        {delay:0,opts:{count:16,colors:['#fff','#adf','#8bf'],shape:'slash',speed:4,spread:14,decay:.035,size:5}},
+        {delay:0,opts:{count:10,colors:['#fff','#adf'],shape:'spark',speed:5,spread:10,decay:.025,size:3}},
+        {delay:0,opts:{count:2,colors:['#ffffff33'],shape:'ring',speed:0,spread:2,decay:.025,size:10}}
+    ],
+    warrior_powersmash:[
+        {delay:0,opts:{count:10,colors:['#fff','#f80','#fc0'],shape:'cross',speed:3,spread:10,decay:.03,size:5}}
+    ],
+    warrior_cleave:[
+        {delay:0,opts:{count:28,colors:['#f40','#f80','#fc0'],shape:'ring',speed:5,spread:20,decay:.015,size:8}},
+        {delay:0,opts:{count:12,colors:['#fff','#fc0'],shape:'slash',speed:5,spread:16,decay:.03,size:5}},
+        {delay:80,opts:{count:10,colors:['#f40','#f80'],shape:'star',speed:3,spread:14,decay:.025,size:4}}
+    ],
+    warrior_assault:[
+        {delay:0,opts:{count:30,colors:['#f40','#f80','#fc0'],shape:'spark',speed:7,spread:22,decay:.015,size:7}},
+        {delay:0,opts:{count:6,colors:['#ff440044'],shape:'ring',speed:0,spread:5,decay:.01,size:18}},
+        {delay:100,opts:{count:12,colors:['#f40','#f80'],shape:'star',speed:4,spread:16,decay:.02,size:5}}
+    ],
+    warrior_criticalstrike:[
+        {delay:0,opts:{count:18,colors:['#dc2626','#ef4444','#fff'],shape:'spark',speed:5,spread:14,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#dc262644'],shape:'ring',speed:0,spread:4,decay:.015,size:14}},
+        {delay:60,opts:{count:6,colors:['#dc2626','#ef4444'],shape:'cross',speed:2,spread:8,decay:.03,size:4}}
+    ],
+    knight_basic:[
+        {delay:0,opts:{count:20,colors:['#fc4','#f80','#fff'],shape:'circle',speed:3,spread:10,decay:.018,size:5,gravity:.08}},
+        {delay:0,opts:{count:4,colors:['#ffcc4455'],shape:'ring',speed:0,spread:3,decay:.018,size:14}},
+        {delay:0,opts:{count:6,colors:['#fff','#fc4'],shape:'spark',speed:4,spread:6,decay:.03,size:2}}
+    ],
+    knight_switch:[
+        {delay:0,opts:{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:.02,size:8}},
+        {delay:0,x:40,opts:{count:10,colors:['#4f4','#4ff','#fff'],shape:'ring',speed:2,spread:8,decay:.02,size:8}}
+    ],
+    knight_charge:[
+        {delay:0,opts:{count:20,colors:['#60a5fa','#3b82f6','#fff'],shape:'spark',speed:5,spread:16,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#60a5fa44'],shape:'ring',speed:0,spread:4,decay:.015,size:14}}
+    ],
+    knight_sacrifice:[
+        {delay:0,opts:{count:15,colors:['#60a5fa','#3b82f6','#fff'],shape:'ring',speed:3,spread:14,decay:.02,size:6}},
+        {delay:0,x:40,opts:{count:10,colors:['#60a5fa','#93c5fd','#fff'],shape:'ring',speed:2,spread:10,decay:.025,size:5}}
+    ],
+    knight_capture:[
+        {delay:0,opts:{count:16,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:5,spread:14,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#f9731644'],shape:'ring',speed:0,spread:3,decay:.015,size:12}},
+        {delay:0,x:50,opts:{count:14,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:4,spread:12,decay:.02,size:5}}
+    ],
+    assassin_basic:[
+        {delay:0,opts:{count:8,colors:['#c4f','#f4c','#fff'],shape:'slash',speed:5,spread:10,decay:.04,size:4}},
+        {delay:50,opts:{count:8,colors:['#c4f','#f4c','#fff'],shape:'slash',speed:5,spread:10,decay:.04,size:4}},
+        {delay:100,opts:{count:12,colors:['#cc44ff66','#8844ff66'],shape:'diamond',speed:2,spread:18,decay:.025,size:5}},
+        {delay:100,opts:{count:3,colors:['#cc44ff33'],shape:'ring',speed:0,spread:3,decay:.02,size:12}}
+    ],
+    assassin_assassinate:[
+        {delay:0,opts:{count:25,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:6,spread:18,decay:.018,size:6}},
+        {delay:0,opts:{count:4,colors:['#7c3aed44'],shape:'ring',speed:0,spread:4,decay:.012,size:16}},
+        {delay:70,opts:{count:8,colors:['#a855f7','#c4b5fd'],shape:'star',speed:3,spread:12,decay:.025,size:4}}
+    ],
+    assassin_ambush:[
+        {delay:0,opts:{count:16,colors:['#a855f7','#fff','#c4b5fd'],shape:'spark',speed:5,spread:14,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#a855f7','#7c3aed'],shape:'slash',speed:3,spread:8,decay:.03,size:4}}
+    ],
+    mage_basic:[
+        {delay:0,opts:{count:5,colors:['#4488ff44'],shape:'ring',speed:0,spread:5,decay:.01,size:18}},
+        {delay:0,opts:{count:25,colors:['#48f','#8af','#acf','#fff'],shape:'star',speed:4,spread:12,decay:.02,size:4}},
+        {delay:0,opts:{count:12,colors:['#48f','#fff'],shape:'spark',speed:6,spread:6,decay:.018,size:3}},
+        {delay:80,opts:{count:8,colors:['#8af','#fff'],shape:'circle',speed:2,spread:14,decay:.025,size:2,vy:-1.5}}
+    ],
+    mage_fireburst:[
+        {delay:0,opts:{count:35,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:7,spread:26,decay:.015,size:7}},
+        {delay:0,opts:{count:6,colors:['#ff440055'],shape:'ring',speed:0,spread:5,decay:.01,size:22}},
+        {delay:0,opts:{count:10,colors:['#f80','#fc0'],shape:'circle',speed:2,spread:18,decay:.012,size:5,gravity:.06}},
+        {delay:80,opts:{count:15,colors:['#f40','#f80'],shape:'star',speed:3,spread:20,decay:.02,size:4,vy:-2}}
+    ],
+    mage_freeze:[
+        {delay:0,opts:{count:20,colors:['#8cf','#adf','#fff'],shape:'star',speed:4,spread:16,decay:.02,size:5}},
+        {delay:0,opts:{count:5,colors:['#88ccff44'],shape:'ring',speed:0,spread:4,decay:.015,size:16}},
+        {delay:0,opts:{count:8,colors:['#adf','#fff'],shape:'diamond',speed:1.5,spread:12,decay:.018,size:3,vy:-1.5}}
+    ],
+    mage_grandwall:[
+        {delay:0,opts:{count:20,colors:['#88f','#aaf','#66f'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:0,opts:{count:6,colors:['#88f','#66f'],shape:'diamond',speed:1.5,spread:8,decay:.025,size:3,vy:-1.5}}
+    ],
+    archer_basic:[
+        {delay:0,opts:{count:3,colors:['#fd8','#fff'],shape:'spark',speed:1.5,spread:4,decay:.05,size:2}},
+        {delay:100,opts:{count:12,colors:['#fd4','#f84','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:100,opts:{count:2,colors:['#ffdd4444'],shape:'ring',speed:0,spread:2,decay:.025,size:10}}
+    ],
+    archer_dash:[
+        {delay:0,opts:{count:12,colors:['#ccf','#99f','#66f'],shape:'spark',speed:3,spread:10,decay:.02,size:2}},
+        {delay:100,opts:{count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:.02,size:3}}
+    ],
+    archer_snipe:[
+        {delay:0,opts:{count:18,colors:['#f44','#ff8','#fff'],shape:'spark',speed:6,spread:16,decay:.018,size:5}},
+        {delay:0,opts:{count:4,colors:['#f4444444'],shape:'ring',speed:0,spread:3,decay:.015,size:12}}
+    ],
+    archer_rapidfire:[
+        {delay:0,opts:{count:8,colors:['#ff8','#f80','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:100,opts:{count:8,colors:['#ff8','#f80','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:200,opts:{count:8,colors:['#ff8','#f80','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:250,opts:{count:6,colors:['#ff880044'],shape:'ring',speed:0,spread:3,decay:.015,size:10}}
+    ],
+    archer_steelrain:[
+        {delay:0,opts:{count:30,colors:['#888','#aaa','#ccc','#fff'],shape:'spark',speed:7,spread:22,decay:.015,size:6}},
+        {delay:0,opts:{count:8,colors:['#88888844'],shape:'arrow',speed:0,spread:12,decay:.02,size:5,vy:3,gravity:.1}},
+        {delay:0,opts:{count:4,colors:['#88888844'],shape:'ring',speed:0,spread:4,decay:.012,size:16}}
+    ],
+    priest_basic:[
+        {delay:0,opts:{count:14,colors:['#fff','#ffa','#fe0'],shape:'star',speed:2.5,spread:12,decay:.02,size:4}},
+        {delay:0,opts:{count:3,colors:['#ffffaa33'],shape:'ring',speed:0,spread:3,decay:.018,size:12}}
+    ],
+    priest_massheal:[
+        {delay:0,opts:{count:22,colors:['#4f4','#ff8','#fff'],shape:'ring',speed:4,spread:18,decay:.015,size:9}},
+        {delay:0,opts:{count:12,colors:['#4f4','#8f8','#fff'],shape:'ring',speed:3,spread:10,decay:.02,size:7}},
+        {delay:80,opts:{count:8,colors:['#4f4','#8f8'],shape:'star',speed:2,spread:12,decay:.02,size:4,vy:-1}}
+    ],
+    priest_purify:[
+        {delay:0,opts:{count:20,colors:['#88f','#aaf','#fff'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:0,opts:{count:6,colors:['#88f','#fff'],shape:'diamond',speed:2,spread:10,decay:.025,size:3,vy:-2}}
+    ],
+    priest_sanctuary:[
+        {delay:0,opts:{count:28,colors:['#fbbf24','#ff8','#fff'],shape:'ring',speed:5,spread:20,decay:.015,size:10}},
+        {delay:0,opts:{count:8,colors:['#fbbf24','#fff','#4f4'],shape:'ring',speed:2,spread:8,decay:.025,size:5}},
+        {delay:80,opts:{count:10,colors:['#fbbf24','#ff8'],shape:'star',speed:2,spread:14,decay:.02,size:4,vy:-1}}
+    ],
+    novice_basic:[
+        {delay:0,opts:{count:8,colors:['#ccc','#fff','#aaa'],shape:'spark',speed:3,spread:10,decay:.035,size:3}},
+        {delay:0,opts:{count:4,colors:['#ccc'],shape:'circle',speed:1.5,spread:6,decay:.03,size:2,gravity:.1}}
+    ],
+    novice_throw:[
+        {delay:0,opts:{count:12,colors:['#a88','#ccc','#fff'],shape:'spark',speed:4,spread:10,decay:.025,size:4}},
+        {delay:0,opts:{count:3,colors:['#aa888844'],shape:'ring',speed:0,spread:3,decay:.02,size:8}}
+    ],
+    brawler_basic:[
+        {delay:0,opts:{count:7,colors:['#f97316','#fbbf24','#fff'],shape:'slash',speed:5,spread:8,decay:.04,size:4}},
+        {delay:40,opts:{count:7,colors:['#f97316','#fbbf24','#fff'],shape:'slash',speed:5,spread:8,decay:.04,size:4}},
+        {delay:80,opts:{count:5,colors:['#ffffff44'],shape:'ring',speed:0,spread:3,decay:.025,size:12}},
+        {delay:80,opts:{count:6,colors:['#f97316','#f40'],shape:'spark',speed:5,spread:8,decay:.03,size:3}}
+    ],
+    brawler_disarm:[
+        {delay:0,opts:{count:16,colors:['#f97316','#fbbf24','#fff'],shape:'ring',speed:4,spread:14,decay:.02,size:6}},
+        {delay:0,opts:{count:6,colors:['#f97316','#fbbf24'],shape:'spark',speed:3,spread:8,decay:.03,size:3}}
+    ],
+    brawler_flurry:[
+        {delay:0,opts:{count:8,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:80,opts:{count:8,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:160,opts:{count:8,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:8,decay:.025,size:3}},
+        {delay:200,opts:{count:5,colors:['#f9731644'],shape:'ring',speed:0,spread:3,decay:.015,size:10}}
+    ],
+    brawler_crush:[
+        {delay:0,opts:{count:24,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:6,spread:18,decay:.018,size:6}},
+        {delay:0,opts:{count:5,colors:['#ef444444'],shape:'ring',speed:0,spread:4,decay:.012,size:16}},
+        {delay:70,opts:{count:8,colors:['#ef4444','#f97316'],shape:'cross',speed:3,spread:10,decay:.025,size:4}}
+    ],
+    lancer_basic:[
+        {delay:0,opts:{count:4,colors:['#60a5fa','#3b82f6','#fff'],shape:'spark',speed:6,spread:5,decay:.04,size:3}},
+        {delay:50,opts:{count:4,colors:['#60a5fa','#3b82f6','#fff'],shape:'spark',speed:6,spread:5,decay:.04,size:3}},
+        {delay:100,opts:{count:12,colors:['#60a5fa','#93c5fd','#fff'],shape:'spark',speed:5,spread:10,decay:.025,size:4}},
+        {delay:100,opts:{count:3,colors:['#60a5fa44'],shape:'ring',speed:0,spread:3,decay:.02,size:12}}
+    ],
+    lancer_pierce:[
+        {delay:0,opts:{count:16,colors:['#6af','#48f','#aaf'],shape:'spark',speed:5,spread:14,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#66aaff44'],shape:'ring',speed:0,spread:3,decay:.015,size:12}},
+        {delay:0,opts:{count:12,colors:['#6af','#48f','#fff'],shape:'spark',speed:4,spread:10,decay:.025,size:4}},
+        {delay:0,opts:{count:3,colors:['#6af','#48f'],shape:'slash',speed:3,spread:6,decay:.03,size:3}}
+    ],
+    lancer_charge:[
+        {delay:0,opts:{count:18,colors:['#6af','#48f','#fff'],shape:'spark',speed:5,spread:16,decay:.02,size:5}},
+        {delay:0,opts:{count:4,colors:['#66aaff44'],shape:'ring',speed:0,spread:4,decay:.015,size:14}}
+    ],
+    lancer_phalanx:[
+        {delay:0,opts:{count:22,colors:['#60a5fa','#3b82f6','#fff'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:0,opts:{count:8,colors:['#60a5fa','#93c5fd','#fff'],shape:'ring',speed:2,spread:8,decay:.025,size:5}},
+        {delay:80,opts:{count:6,colors:['#60a5fa','#93c5fd'],shape:'diamond',speed:1.5,spread:10,decay:.025,size:3,vy:-1.5}}
+    ],
+    sapper_basic:[
+        {delay:0,opts:{count:14,colors:['#f97316','#f60','#fc0'],shape:'spark',speed:4,spread:12,decay:.03,size:4}},
+        {delay:0,opts:{count:6,colors:['#aaa','#888'],shape:'circle',speed:2,spread:8,decay:.02,size:3,gravity:.08}},
+        {delay:0,opts:{count:2,colors:['#ff660044'],shape:'ring',speed:0,spread:2,decay:.025,size:10}}
+    ],
+    sapper_trap:[
+        {delay:0,opts:{count:10,colors:['#f80','#ff4','#fa0'],shape:'spark',speed:2,spread:10,decay:.025,size:3}}
+    ],
+    sapper_excavate:[
+        {delay:0,opts:{count:15,colors:['#a88','#ccc','#fff'],shape:'spark',speed:4,spread:14,decay:.025,size:4}}
+    ],
+    sapper_detonate:[
+        {delay:0,opts:{count:35,colors:['#f80','#ff4','#fa0','#fff'],shape:'spark',speed:7,spread:24,decay:.015,size:7}},
+        {delay:0,opts:{count:6,colors:['#ff880044'],shape:'ring',speed:0,spread:5,decay:.01,size:20}},
+        {delay:80,opts:{count:12,colors:['#f80','#ff4'],shape:'star',speed:3,spread:16,decay:.02,size:5}},
+        {delay:80,opts:{count:8,colors:['#f80','#fc0'],shape:'circle',speed:2,spread:18,decay:.012,size:4,gravity:.06}}
+    ],
+    summoner_basic:[
+        {delay:0,opts:{count:18,colors:['#8b5cf6','#c084fc','#e9d5ff','#fff'],shape:'star',speed:3,spread:14,decay:.018,size:4}},
+        {delay:0,opts:{count:5,colors:['#8b5cf644'],shape:'ring',speed:0,spread:4,decay:.012,size:16}},
+        {delay:60,opts:{count:8,colors:['#c084fc','#fff'],shape:'diamond',speed:2,spread:10,decay:.025,size:3,vy:-1}}
+    ],
+    summoner_summon_spirit:[
+        {delay:0,opts:{count:25,colors:['#8b5cf6','#c084fc','#fff'],shape:'ring',speed:5,spread:20,decay:.02,size:8}}
+    ],
+    summoner_summon_golem:[
+        {delay:0,opts:{count:25,colors:['#78716c','#a8a29e','#fff'],shape:'ring',speed:5,spread:20,decay:.02,size:8}}
+    ],
+    summoner_empower:[
+        {delay:0,opts:{count:20,colors:['#fbbf24','#f59e0b','#fff'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:0,opts:{count:6,colors:['#fbbf24','#f59e0b'],shape:'star',speed:2,spread:10,decay:.025,size:3,vy:-1}}
+    ],
+    summoner_soulburst:[
+        {delay:0,opts:{count:28,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:7,spread:22,decay:.015,size:6}},
+        {delay:0,opts:{count:6,colors:['#8b5cf644'],shape:'ring',speed:0,spread:5,decay:.01,size:18}},
+        {delay:80,opts:{count:10,colors:['#8b5cf6','#c084fc'],shape:'star',speed:3,spread:14,decay:.025,size:4}}
+    ],
+    shaman_basic:[
+        {delay:0,opts:{count:14,colors:['#22c55e','#4ade80','#9333ea'],shape:'diamond',speed:3,spread:14,decay:.02,size:4}},
+        {delay:0,opts:{count:6,colors:['#9333ea44','#22c55e44'],shape:'ring',speed:0,spread:5,decay:.015,size:14}},
+        {delay:0,opts:{count:8,colors:['#22c55e','#9333ea','#fff'],shape:'spark',speed:4,spread:10,decay:.025,size:3}}
+    ],
+    shaman_curse:[
+        {delay:0,opts:{count:22,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:80,opts:{count:8,colors:['#9333ea','#a855f7'],shape:'star',speed:2,spread:10,decay:.025,size:4,vy:-1}}
+    ],
+    shaman_exalt:[
+        {delay:0,opts:{count:22,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:4,spread:16,decay:.018,size:7}},
+        {delay:80,opts:{count:8,colors:['#f59e0b','#fbbf24'],shape:'diamond',speed:1.5,spread:10,decay:.025,size:3,vy:-1.5}},
+        {delay:0,opts:{count:6,colors:['#f59e0b','#fbbf24'],shape:'spark',speed:2,spread:6,decay:.03,size:3}}
+    ],
+    shaman_poisonmist:[
+        {delay:0,opts:{count:30,colors:['#22c55e','#4ade80','#86efac'],shape:'ring',speed:5,spread:22,decay:.012,size:12}},
+        {delay:0,opts:{count:12,colors:['#22c55e44','#4ade8044'],shape:'circle',speed:1.5,spread:18,decay:.01,size:5,gravity:-.02}},
+        {delay:100,opts:{count:8,colors:['#22c55e','#4ade80'],shape:'star',speed:2,spread:14,decay:.02,size:4,vy:-1}}
+    ],
+    shaman_spiritsurge:[
+        {delay:0,opts:{count:20,colors:['#9333ea','#a855f7','#fff'],shape:'spark',speed:5,spread:16,decay:.02,size:6}},
+        {delay:0,opts:{count:4,colors:['#9333ea44'],shape:'ring',speed:0,spread:4,decay:.015,size:14}},
+        {delay:60,opts:{count:6,colors:['#9333ea','#a855f7'],shape:'cross',speed:2,spread:8,decay:.03,size:4}}
+    ]
+};
+
+function _vfxSpawn(cvs, cx, cy, opts) {
+    const cnt = opts.count || 8;
+    for (let i = 0; i < cnt; i++) {
+        _vfxParts.push({
+            x: cx + (Math.random() - .5) * (opts.spread || 10),
+            y: cy + (Math.random() - .5) * (opts.spread || 10),
+            vx: (Math.random() - .5) * (opts.speed || 2),
+            vy: opts.vy !== undefined ? (opts.vy + (Math.random() - .5)) : (-Math.random() * (opts.speed || 2)),
+            life: 1, decay: opts.decay || (0.015 + Math.random() * 0.02),
+            size: opts.size || (2 + Math.random() * 3),
+            color: opts.colors[Math.floor(Math.random() * opts.colors.length)],
+            shape: opts.shape || 'circle',
+            gravity: opts.gravity || 0,
+            rotation: Math.random() * Math.PI * 2,
+            rotSpd: (Math.random() - .5) * 0.2
+        });
+    }
+    if (!_vfxRaf) _vfxLoop(cvs);
+}
+
+function _drawStar(ctx, x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+        ctx.lineTo(x + r * Math.cos(i * 1.256 - .785), y + r * Math.sin(i * 1.256 - .785));
+        ctx.lineTo(x + r * .4 * Math.cos(i * 1.256 + .628 - .785), y + r * .4 * Math.sin(i * 1.256 + .628 - .785));
+    }
+    ctx.closePath(); ctx.fill();
+}
+
+function _vfxLoop(cvs) {
+    const ctx = cvs.getContext('2d');
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    for (let i = _vfxParts.length - 1; i >= 0; i--) {
+        const p = _vfxParts[i];
+        p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life -= p.decay; p.rotation += p.rotSpd;
+        if (p.life <= 0) { _vfxParts.splice(i, 1); continue; }
+        ctx.save(); ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color; ctx.shadowBlur = p.size * p.life * 2.5;
+        ctx.translate(p.x, p.y); ctx.rotate(p.rotation);
+        if (p.shape === 'circle') { ctx.beginPath(); ctx.arc(0, 0, p.size * p.life, 0, Math.PI * 2); ctx.fill(); }
+        else if (p.shape === 'star') { _drawStar(ctx, 0, 0, p.size * p.life); }
+        else if (p.shape === 'slash') {
+            ctx.strokeStyle = p.color; ctx.lineWidth = p.size * p.life * 0.8; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(-p.size * 2.5, p.size * 2.5); ctx.lineTo(p.size * 2.5, -p.size * 2.5); ctx.stroke();
+        }
+        else if (p.shape === 'spark') {
+            ctx.strokeStyle = p.color; ctx.lineWidth = 1.5; ctx.beginPath();
+            ctx.moveTo(0, 0); ctx.lineTo(-p.vx * 4, -p.vy * 4); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 0, p.size * p.life * 0.6, 0, Math.PI * 2); ctx.fill();
+        }
+        else if (p.shape === 'ring') {
+            ctx.strokeStyle = p.color; ctx.lineWidth = 2 * p.life;
+            ctx.beginPath(); ctx.arc(0, 0, p.size * (1 - p.life) * 3.5 + 2, 0, Math.PI * 2); ctx.stroke();
+        }
+        else if (p.shape === 'arrow') {
+            ctx.strokeStyle = p.color; ctx.lineWidth = 2 * p.life; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(0, p.size * 3); ctx.lineTo(0, -p.size * 3);
+            ctx.moveTo(-p.size, -p.size); ctx.lineTo(0, -p.size * 3); ctx.lineTo(p.size, -p.size); ctx.stroke();
+        }
+        else if (p.shape === 'diamond') {
+            ctx.beginPath(); const s = p.size * p.life;
+            ctx.moveTo(0, -s); ctx.lineTo(s, 0); ctx.lineTo(0, s); ctx.lineTo(-s, 0); ctx.closePath(); ctx.fill();
+        }
+        else if (p.shape === 'cross') {
+            ctx.strokeStyle = p.color; ctx.lineWidth = p.size * p.life * 0.5; ctx.lineCap = 'round';
+            const s = p.size * 2; ctx.beginPath();
+            ctx.moveTo(-s, 0); ctx.lineTo(s, 0); ctx.moveTo(0, -s); ctx.lineTo(0, s); ctx.stroke();
+        }
+        ctx.restore();
+    }
+    if (_vfxParts.length) _vfxRaf = requestAnimationFrame(() => _vfxLoop(cvs));
+    else { _vfxRaf = null; }
+}
+
+function playVfx(skillKey) {
+    const cvs = document.getElementById('vfx-demo-canvas');
+    if (!cvs) return;
+    const data = SKILL_VFX[skillKey];
+    if (!data) return;
+    _vfxParts.length = 0;
+    if (_vfxRaf) { cancelAnimationFrame(_vfxRaf); _vfxRaf = null; }
+    const ctx = cvs.getContext('2d');
+    ctx.fillStyle = data[0]?.opts?.colors?.[0] || '#fff';
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.globalAlpha = 1;
+    const cx = cvs.width / 2, cy = cvs.height / 2;
+    data.forEach(d => {
+        setTimeout(() => _vfxSpawn(cvs, cx + (d.x||0), cy + (d.y||0), d.opts), d.delay || 0);
+    });
+}
+
+function renderVfxDemo() {
+    let html = '<h2 class="section-title">스킬 VFX 시연</h2>';
+    html += '<div class="vfx-class-btns">';
+    CLASSES.forEach(cls => {
+        const d = JAB[cls];
+        html += `<button class="vfx-cls-btn" data-cls="${cls}" onclick="selectDemoCls('${cls}')"><img src="image/character/${cls}_01.png" alt="${cls}">${cls.charAt(0).toUpperCase()+cls.slice(1)}</button>`;
+    });
+    html += '</div>';
+    html += '<div id="vfx-info-area" style="min-height:200px"></div>';
+    html += '<div class="vfx-canvas-wrap"><canvas id="vfx-demo-canvas" width="400" height="300"></canvas></div>';
+    document.getElementById('tab-vfx').innerHTML = html;
+}
+
+function selectDemoCls(cls) {
+    document.querySelectorAll('.vfx-cls-btn').forEach(b => b.classList.toggle('active', b.dataset.cls === cls));
+    const d = JAB[cls];
+    let html = '<div class="vfx-info">';
+    html += `<div class="vfx-char"><img src="image/character/${cls}_01.png" alt="${cls}"><div class="vfx-char-name">${d.icon} ${cls.charAt(0).toUpperCase()+cls.slice(1)}</div><div style="font-size:.85em;color:#777">${ROLE_MAP[cls]}</div></div>`;
+    html += '<div class="vfx-skills">';
+    html += `<div class="vfx-skill-item"><span class="sk-icon">⚔️</span><span class="sk-name">기본공격</span><span class="sk-cost"></span><button class="vfx-demo-btn" onclick="playVfx('${cls}_basic')">시연</button></div>`;
+    const skills = getSkills(cls);
+    skills.forEach(sk => {
+        const hasVfx = SKILL_VFX[sk.id];
+        html += `<div class="vfx-skill-item"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${sk.id}')">시연</button>` : ''}</div>`;
+    });
+    const learnables = Object.entries(LEARNABLE_SKILLS).filter(([k,v]) => v.cls === cls);
+    if (learnables.length) {
+        html += '<div style="font-weight:600;font-size:.85em;color:#f57c00;margin:12px 0 6px">습득형 스킬</div>';
+        learnables.forEach(([key, sk]) => {
+            if (sk.passive) {
+                html += `<div class="vfx-skill-item" style="background:#fffde7"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost" style="color:#f57c00">패시브</span></div>`;
+            } else {
+                const hasVfx = SKILL_VFX[key];
+                html += `<div class="vfx-skill-item"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${key}')">시연</button>` : ''}</div>`;
+            }
+        });
+    }
+    html += '</div></div>';
+    document.getElementById('vfx-info-area').innerHTML = html;
+}
+
 // ── Init ──
 renderCards();
 renderCompare();
 renderSkills();
 renderParty();
 renderTips();
+renderVfxDemo();
 </script>
 </body>
 </html>

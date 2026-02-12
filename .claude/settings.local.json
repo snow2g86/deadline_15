@@ -33,7 +33,16 @@
       "Bash(file:*)",
       "WebFetch(domain:game-icons.net)",
       "WebFetch(domain:itch.io)",
-      "WebFetch(domain:kenney.nl)"
+      "WebFetch(domain:kenney.nl)",
+      "Bash(identify:*)",
+      "Bash(for:*)",
+      "Bash(do)",
+      "Bash([ -f \"$f\" ])",
+      "Bash(/tmp/check_stages.txt << 'EOF'\nStage 1: tot=6, en array length=6 ✓\nStage 2: tot=8, en array length=8 ✓\nStage 3: tot=10, en array length=10 ✓\nStage 4: tot=10, en array length=10 ✓\nStage 5: tot=12, en array length=12 ✓\nStage 6: tot=10, en array length=10 ✓\nStage 7: tot=12, en array length=12 ✓\nStage 8: tot=12, en array length=12 ✓\nStage 9: tot=14, en array length=14 ✓\nStage 10: tot=16, en array length=17 ✗ \\(MISMATCH!\\)\nEOF)",
+      "Bash(if grep -q \"^\\\\s*$func\" /Users/2z/Desktop/workspace/game/deadline_15/js/battle/*.js)",
+      "Bash(then)",
+      "Bash(else)",
+      "Bash(fi)"
     ]
   }
 }

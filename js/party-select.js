@@ -103,6 +103,7 @@ var _selUid = null;
 var _invFilter = 'all';
 var _gold = 0;
 
+
 // ── 골드 UI ─────────────────────────────
 function updatePageGold() {
   var el = document.getElementById('ps-gold-val');
@@ -415,6 +416,8 @@ function renderChars() {
     // 장비 슬롯 그리드 (윗쪽)
     html += '<div class="eq-char-equips">';
     ensureEquipSlots(ch);
+    if (!ch.battle_potions) ch.battle_potions = [];
+    if (!ch.siege_items) ch.siege_items = [];
     var invMap = {};
     for (var i = 0; i < inv.length; i++) {
       if (inv[i].type === 'equip') invMap[inv[i].eid] = inv[i];
@@ -456,6 +459,39 @@ function renderChars() {
     html += '<div class="eq-char-info">';
     html += '<div class="eq-char-meta"><span class="eq-char-level">Lv.' + ch.lv + '</span> <span class="eq-char-cls">' + t('classes.' + ch.cls) + '</span></div>';
     html += '<div class="eq-char-name">' + charName + '</div>';
+    html += '</div>';
+
+    // 포션 & 공성 아이템 (아래쪽)
+    html += '<div class="eq-char-items">';
+
+    // 포션 표시
+    html += '<div class="eq-char-item-row" style="margin-bottom:6px;">';
+    html += '<span class="eq-item-label">💊</span>';
+    if (ch.battle_potions && ch.battle_potions.length > 0) {
+      for (var pi = 0; pi < ch.battle_potions.length; pi++) {
+        var potId = ch.battle_potions[pi];
+        var pot = BATTLE_POTIONS[potId];
+        html += '<span class="eq-item-icon" title="' + (pot ? pot.name : potId) + '">' + (pot ? pot.icon : '?') + '</span>';
+      }
+    } else {
+      html += '<span class="eq-item-empty">-</span>';
+    }
+    html += '</div>';
+
+    // 공성 아이템 표시
+    html += '<div class="eq-char-item-row">';
+    html += '<span class="eq-item-label">⚙️</span>';
+    if (ch.siege_items && ch.siege_items.length > 0) {
+      for (var si = 0; si < ch.siege_items.length; si++) {
+        var siegeId = ch.siege_items[si];
+        var siege = SIEGE_ITEMS.find(function(s) { return s.id === siegeId; });
+        html += '<span class="eq-item-icon" title="' + (siege ? siege.id : siegeId) + '">' + (siege ? siege.icon : '?') + '</span>';
+      }
+    } else {
+      html += '<span class="eq-item-empty">-</span>';
+    }
+    html += '</div>';
+
     html += '</div>';
 
     card.innerHTML = html;
@@ -621,6 +657,18 @@ function renderModalBody() {
     html += '</div>'; // .eq-section
   }
 
+  // 포션 섹션
+  html += '<div class="eq-section">';
+  html += '<div class="eq-section-title">💊 전투 포션 (최대 2개)</div>';
+  html += '<div class="eq-potions" id="eq-potions-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>';
+  html += '</div>';
+
+  // 공성 아이템 섹션
+  html += '<div class="eq-section">';
+  html += '<div class="eq-section-title">⚙️ 공성 아이템 (최대 2개)</div>';
+  html += '<div class="eq-sieges" id="eq-sieges-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>';
+  html += '</div>';
+
   html += '</div>'; // .eq-left
 
   // ──── 우측 패널: 인벤토리 ────
@@ -645,6 +693,12 @@ function renderModalBody() {
   html += '</div>'; // .eq-body-layout
 
   body.innerHTML = html;
+
+  // ── 포션 리스트 렌더링 ──
+  renderBattlePotionsList(ch);
+
+  // ── 공성 아이템 리스트 렌더링 ──
+  renderSiegeItemsList(ch);
 
   // ── Bind slot click (unequip) ──
   body.querySelectorAll('.eq-slot.filled').forEach(function(el) {
@@ -1066,6 +1120,146 @@ function gainExp(uid, amount) {
   return { leveled: leveled, prevLv: prevLv };
 }
 
+// ═══════════════════════════════════════════
+// 전투 포션 & 공성 아이템 관리
+// ═══════════════════════════════════════════
+
+// ── 전투 포션 리스트 렌더링 ──
+function renderBattlePotionsList(ch) {
+  var list = document.getElementById('eq-potions-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!ch.battle_potions) ch.battle_potions = [];
+
+  var inv = loadInventory();
+  var availablePotions = inv.filter(function(item) { return item.type === 'potion'; });
+
+  if (availablePotions.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;">인벤토리에 포션이 없습니다</div>';
+    return;
+  }
+
+  // 포션 버튼들 (인벤토리에 있는 것만)
+  availablePotions.forEach(function(item) {
+    var pot = BATTLE_POTIONS[item.potionId];
+    if (!pot) return;
+
+    var isSelected = ch.battle_potions.indexOf(item.pid) !== -1;
+    var isFull = ch.battle_potions.length >= 2;
+
+    var btn = document.createElement('button');
+    btn.className = 'eq-potion-btn' + (isSelected ? ' selected' : '');
+    btn.style.cssText = 'flex:0 0 auto;padding:6px 10px;border:1px solid #ddd;border-radius:4px;' +
+      'background:' + (isSelected ? '#4ade80' : '#f3f4f6') + ';' +
+      'cursor:' + (isSelected || !isFull ? 'pointer' : 'default') + ';' +
+      'opacity:' + (isSelected || !isFull ? '1' : '0.5') + ';';
+    var qty = item.quantity || 1;
+    btn.innerHTML = pot.icon + ' ' + pot.name + ' ×' + qty;
+    btn.title = '종류: ' + pot.type + ' | 보유: ' + qty + '개';
+
+    if (isSelected || !isFull) {
+      btn.onclick = (function(uid, potionPid, selected) {
+        return function() {
+          toggleBattlePotion(uid, potionPid, selected);
+        };
+      })(ch.uid, item.pid, isSelected);
+    }
+
+    list.appendChild(btn);
+  });
+}
+
+// ── 포션 토글 ──
+function toggleBattlePotion(uid, potionPid, isSelected) {
+  var roster = getRoster();
+  var ch = roster.chars.find(function(c) { return c.uid === uid; });
+  if (!ch) return;
+  if (!ch.battle_potions) ch.battle_potions = [];
+
+  if (isSelected) {
+    // 제거
+    var idx = ch.battle_potions.indexOf(potionPid);
+    if (idx !== -1) ch.battle_potions.splice(idx, 1);
+  } else {
+    // 최대 2개까지만 추가
+    if (ch.battle_potions.length < 2) {
+      ch.battle_potions.push(potionPid);
+    }
+  }
+
+  saveRoster(roster);
+  renderChars();
+  renderModalBody();
+}
+
+// ── 공성 아이템 리스트 렌더링 ──
+function renderSiegeItemsList(ch) {
+  var list = document.getElementById('eq-sieges-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!ch.siege_items) ch.siege_items = [];
+
+  var inv = loadInventory();
+  var availableSieges = inv.filter(function(item) { return item.type === 'siege'; });
+
+  if (availableSieges.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;">인벤토리에 공성 아이템이 없습니다</div>';
+    return;
+  }
+
+  // 공성 아이템 버튼들 (인벤토리에 있는 것만)
+  availableSieges.forEach(function(item) {
+    var siege = SIEGE_ITEMS.find(function(s) { return s.id === item.siegeId; });
+    if (!siege) return;
+
+    var isSelected = ch.siege_items.indexOf(item.sid) !== -1;
+    var isFull = ch.siege_items.length >= 2;
+
+    var btn = document.createElement('button');
+    btn.className = 'eq-siege-btn' + (isSelected ? ' selected' : '');
+    btn.style.cssText = 'flex:0 0 auto;padding:6px 10px;border:1px solid #ddd;border-radius:4px;' +
+      'background:' + (isSelected ? '#60a5fa' : '#f3f4f6') + ';' +
+      'cursor:' + (isSelected || !isFull ? 'pointer' : 'default') + ';' +
+      'opacity:' + (isSelected || !isFull ? '1' : '0.5') + ';';
+    var qty = item.quantity || 1;
+    btn.innerHTML = siege.icon + ' ' + siege.id + ' ×' + qty;
+    btn.title = '효과: ' + siege.effect + ' | 비용: ' + siege.cost + 'G | 보유: ' + qty + '개';
+
+    if (isSelected || !isFull) {
+      btn.onclick = (function(uid, siegeSid, selected) {
+        return function() {
+          toggleSiegeItem(uid, siegeSid, selected);
+        };
+      })(ch.uid, item.sid, isSelected);
+    }
+
+    list.appendChild(btn);
+  });
+}
+
+// ── 공성 아이템 토글 ──
+function toggleSiegeItem(uid, siegeSid, isSelected) {
+  var roster = getRoster();
+  var ch = roster.chars.find(function(c) { return c.uid === uid; });
+  if (!ch) return;
+  if (!ch.siege_items) ch.siege_items = [];
+
+  if (isSelected) {
+    // 제거
+    var idx = ch.siege_items.indexOf(siegeSid);
+    if (idx !== -1) ch.siege_items.splice(idx, 1);
+  } else {
+    // 최대 2개까지만 추가
+    if (ch.siege_items.length < 2) {
+      ch.siege_items.push(siegeSid);
+    }
+  }
+
+  saveRoster(roster);
+  renderChars();
+  renderModalBody();
+}
+
 // ── 초기화 ───────────────────────────────
 var init = async function() {
   await i18nInit();
@@ -1139,12 +1333,16 @@ function renderEnhanceList() {
     html += '<div class="enhance-card" onclick="showEnhanceModal(\'' + item.eid + '\')">' +
       '<div class="enhance-icon">⚔️</div>' +
       '<div class="enhance-info">' +
-        '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
-        '<div class="enhance-level">' + t('equip.rarity.' + item.rarity) + ' ' +
-          (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') + ' → +' + nextLvl +
+        '<div class="enhance-header">' +
+          '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
+          '<div class="enhance-level">' +
+            (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') + ' → +' + nextLvl +
+          '</div>' +
         '</div>' +
-        '<div class="enhance-badge enhance-badge-lvl ' + rateClass + '">' + ratePercent + '% • ' + costGold + 'G</div>' +
-        '<div class="enhance-stats" style="color:#4ade80;font-weight:600;">✨' + gainText + '</div>' +
+        '<div class="enhance-details">' +
+          '<div class="enhance-stats-current">' + gainText + '</div>' +
+          '<div class="enhance-rate-cost">' + ratePercent + '% • ' + costGold + 'G</div>' +
+        '</div>' +
       '</div>' +
       '<button class="enhance-btn" onclick="event.stopPropagation(); showEnhanceModal(\'' + item.eid + '\');">' + t('enhance.button_enhance') + '</button>' +
     '</div>';
@@ -1381,4 +1579,40 @@ function executeEnhance(targetEid, materialEid) {
   _gold = loadGold();
   renderEnhanceList();
   updatePageGold();
+}
+
+// ── 유틸 함수 ──────────────────────
+function getItemMeta(item) {
+  var rarity = item.rarity || 'common';
+  return {
+    type: item.type,
+    name: t('equip.item.' + item.templateId),
+    rarity: rarity,
+    rarityColor: RARITY[rarity].color
+  };
+}
+
+// ── 액션 함수들 ──────────────────────
+function invSellItem(eid) {
+  var inv = loadInventory();
+  var item = inv.find(function(x) { return x.eid === eid; });
+  if (!item || item.equipped) return;
+
+  var meta = getItemMeta(item);
+  var sellPrice = SELL_PRICE[item.rarity] || 0;
+
+  showModal(t('equip.sell'), meta.name + ' - ' + sellPrice + 'G', [
+    { label: t('common.cancel'), fn: function() { hideModal(); } },
+    { label: t('equip.sell'), fn: function() {
+      var idx = inv.indexOf(item);
+      inv.splice(idx, 1);
+      saveInventory(inv);
+      _gold += sellPrice;
+      saveGold(_gold);
+      updatePageGold();
+      renderChars();
+      renderModalBody();
+      hideModal();
+    }}
+  ]);
 }

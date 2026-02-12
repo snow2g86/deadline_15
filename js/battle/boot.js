@@ -68,6 +68,9 @@ Object.assign(G, {
         this._killCount = bs._killCount || 0; this._killExpPool = bs._killExpPool || 0; this._deadAllyUids = bs._deadAllyUids || [];
         this.units = bs.units; this.phase = 'player'; this.sel = null; this.over = false;
         this.awPM = false; this.anim = false; this.camDir = 0;
+        this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false;
+        this._siegeItems = bs._siegeItems || []; this._siegeInvIndices = bs._siegeInvIndices || [];
+        this._battlePotions = bs._battlePotions || []; this._battlePotionIndices = bs._battlePotionIndices || [];
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[0];
         document.querySelector('#cam-dir .cd-label').textContent = CLAB[0];
         const w = document.getElementById('iso-world');

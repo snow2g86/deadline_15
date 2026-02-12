@@ -73,6 +73,21 @@ const G = {
         this.sel = null; this.over = false; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this.anim = false; this.camDir = 0;
         this.breached = 0; this.battleExp = {}; this.allyPos = {}; this.traps = []; this.eFormPos = [];
         this._killCount = 0; this._killExpPool = 0; this._deadAllyUids = [];
+        this.siegeMode = false; this._curSiege = null; this.itemMenuOpen = false;
+        this._battlePotions = []; this._battlePotionIndices = [];
+        this._siegeItems = []; this._siegeInvIndices = [];
+        if (typeof loadInventory === 'function') {
+            const inv = loadInventory();
+            for (let i = 0; i < inv.length; i++) {
+                if (inv[i].type === 'battle_potion') {
+                    this._battlePotions.push(inv[i]);
+                    this._battlePotionIndices.push(i);
+                } else if (inv[i].type === 'siege') {
+                    this._siegeItems.push(inv[i]);
+                    this._siegeInvIndices.push(i);
+                }
+            }
+        }
         document.querySelector('#cam-dir .cd-arrow').textContent = CARR[0];
         document.querySelector('#cam-dir .cd-label').textContent = CLAB[0];
         const w = document.getElementById('iso-world');
@@ -91,7 +106,7 @@ const G = {
             if (u.hp <= 0) {
                 if (u.isSummon && u.summonerId) {
                     const summoner = this.units.find(s => s.id === u.summonerId && s.hp > 0 && s.skillLv && s.skillLv['summoner_soulbond'] >= 1);
-                    if (summoner) { summoner.res = Math.min(summoner.maxRes, summoner.res + 40); this.floatT(summoner.x, summoner.y, '+40 MP', 'heal') }
+                    if (summoner) { summoner.res = Math.min(summoner.maxRes, summoner.res + 40); this.floatT(summoner.x, summoner.y, t('messages.soulbond_restore'), 'heal') }
                 }
                 if (u.team === 'enemy' && !u._counted) {
                     u._counted = true;
@@ -163,9 +178,12 @@ const G = {
                 if (c >= 4 && c <= 5) r.push('plain'); else r.push('water')
             } return r
         };
+        const isOffense = this.cStage && this.cStage.style === 'offense';
         for (let r = 0; r < ROWS; r++) {
-            if (r === 14) { this.ter[r] = wallRow(r) }
-            else if (r === 13) { this.ter[r] = moatRow() }
+            if (!isOffense && r === 14) { this.ter[r] = wallRow(r) }
+            else if (!isOffense && r === 13) { this.ter[r] = moatRow() }
+            else if (isOffense && r === 0) { this.ter[r] = wallRow(r) }
+            else if (isOffense && r === 1) { this.ter[r] = moatRow() }
             else if (r <= 1 || r >= 11) {
                 this.ter[r] = []; for (let c = 0; c < COLS; c++)this.ter[r][c] = 'plain'
             }
@@ -257,8 +275,10 @@ const G = {
             }
         } else {
             const op = [];
-            for (let c = 0; c < COLS; c++)if (!this.uAt(c, 0)) op.push({ x: c, y: 0 });
-            if (op.length < cnt) for (let c = 0; c < COLS; c++)if (!this.uAt(c, 1)) op.push({ x: c, y: 1 });
+            const isOff = this.cStage && this.cStage.style === 'offense';
+            const spawnRows = isOff ? [2, 3] : [0, 1];
+            for (let c = 0; c < COLS; c++)if (!this.uAt(c, spawnRows[0])) op.push({ x: c, y: spawnRows[0] });
+            if (op.length < cnt) for (let c = 0; c < COLS; c++)if (!this.uAt(c, spawnRows[1])) op.push({ x: c, y: spawnRows[1] });
             shuffle(op);
             for (let i = 0; i < Math.min(cnt, op.length); i++) {
                 const c = this.eQ.shift(); if (!c) break;

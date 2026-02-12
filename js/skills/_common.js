@@ -101,9 +101,13 @@ function calcDmg(attacker, target) {
 	}
 	if (attacker.disarmed > 0) atk = Math.round(atk * 0.5);
 	if (attacker.isSummon && attacker._empowerTurns > 0 && attacker._empowerMul > 0) atk = Math.round(atk * attacker._empowerMul);
+	if (attacker.buffs) attacker.buffs.forEach(b => { if (b.type === 'atk_up') atk = Math.round(atk * (1 + b.value / 100)) });
+	if (attacker.buffs) attacker.buffs.forEach(b => { if (b.type === 'atk_down') atk = Math.round(atk * (1 - b.value / 100)) });
 	let def = target.def;
 	if (target._tenacityDef) def += 10000;
 	if (target.defBuff > 0) def = Math.round(def * 1.5);
+	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_up') def = Math.round(def * (1 + b.value / 100)) });
+	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_down') def = Math.round(def * (1 - b.value / 100)) });
 	if (target._phalanxDef > 0) def += target._phalanxDef;
 	let dmg = Math.max(1, atk - def);
 	if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
@@ -163,6 +167,12 @@ function tickBuffs(unit) {
 		unit._sanctuaryTurns--;
 		if (unit._sanctuaryTurns <= 0) { unit._sanctuaryHeal = 0; }
 	}
+	if (unit.buffs) {
+		for (let i = unit.buffs.length - 1; i >= 0; i--) {
+			unit.buffs[i].duration--;
+			if (unit.buffs[i].duration <= 0) unit.buffs.splice(i, 1);
+		}
+	}
 }
 
 // ── 버프 아이콘 목록 ─────────────────────
@@ -197,5 +207,9 @@ function getSkillBuffs(unit) {
 	if (unit.cls === 'sapper' && unit.skillLv && unit.skillLv['sapper_enhancedtrap'] >= 1) buffs.push({ icon: '⚙️', type: 'buff', turns: 0 });
 	if (unit.cls === 'mage' && unit.skillLv && unit.skillLv['mage_manasurge'] >= 1 && unit.res >= unit.maxRes * 0.8) buffs.push({ icon: '🌊', type: 'buff', turns: 0 });
 	if (unit.cls === 'priest' && unit.skillLv && unit.skillLv['priest_divinegrace'] >= 1) buffs.push({ icon: '🕊️', type: 'buff', turns: 0 });
+	if (unit.buffs) unit.buffs.forEach(b => {
+		const icon = b.type === 'atk_up' ? '🔥' : b.type === 'def_up' ? '🛡️' : b.type === 'atk_down' ? '💢' : '❄️';
+		buffs.push({ icon, type: b.type.includes('down') ? 'debuff' : 'buff', turns: b.duration });
+	});
 	return buffs;
 }

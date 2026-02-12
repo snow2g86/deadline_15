@@ -288,3 +288,88 @@ function calcEnhanceRate(item) {
   }
   return baseRate;
 }
+
+// ═══════════════════════════════════════════
+// 공성 도구 (Siege Items)
+// ═══════════════════════════════════════════
+
+var SIEGE_ITEMS = [
+  { id: 'siege_ladder', icon: '\u{1FA9C}', cost: 100, targetType: 'wall', range: 1, effect: 'climb', weight: 40 },
+  { id: 'siege_bomb',   icon: '\u{1F4A3}', cost: 200, targetType: 'wall', range: 3, effect: 'destroy', weight: 35 },
+  { id: 'siege_bridge', icon: '\u{1F309}', cost: 150, targetType: 'water', range: 3, effect: 'bridge', weight: 25 }
+];
+
+// ═══════════════════════════════════════════
+// 전투 포션 시스템 (Combat Potions)
+// ═══════════════════════════════════════════
+
+var BATTLE_POTIONS = {
+  // 회복 포션
+  potion_heal: {
+    id: 'potion_heal',
+    icon: '💊',
+    name: 'potion_heal',
+    type: 'heal',
+    value: 50,  // HP 50% 회복
+    range: 1,   // 인근 아군/적군에게 사용 가능
+    actionCost: 1  // 행동 1회 소비
+  },
+  // 스킬 재원 회복
+  potion_resource: {
+    id: 'potion_resource',
+    icon: '⚡',
+    name: 'potion_resource',
+    type: 'resource',
+    value: 30,  // 자원 30 회복
+    range: 1,
+    actionCost: 1
+  },
+  // 공격력 버프
+  potion_atk_buff: {
+    id: 'potion_atk_buff',
+    icon: '🔥',
+    name: 'potion_atk_buff',
+    type: 'buff',
+    stat: 'atk',
+    value: 30,  // ATK +30%
+    duration: 3,  // 3턴 지속
+    range: 1,
+    actionCost: 1
+  },
+  // 방어력 버프
+  potion_def_buff: {
+    id: 'potion_def_buff',
+    icon: '🛡️',
+    name: 'potion_def_buff',
+    type: 'buff',
+    stat: 'def',
+    value: 30,  // DEF +30%
+    duration: 3,
+    range: 1,
+    actionCost: 1
+  },
+  // 공격력 디버프
+  potion_atk_debuff: {
+    id: 'potion_atk_debuff',
+    icon: '💢',
+    name: 'potion_atk_debuff',
+    type: 'debuff',
+    stat: 'atk',
+    value: -25,  // 대상 ATK -25%
+    duration: 3,
+    range: 2,
+    actionCost: 1
+  },
+  // 방어력 디버프
+  potion_def_debuff: {
+    id: 'potion_def_debuff',
+    icon: '❄️',
+    name: 'potion_def_debuff',
+    type: 'debuff',
+    stat: 'def',
+    value: -25,  // 대상 DEF -25%
+    duration: 3,
+    range: 2,
+    actionCost: 1
+  }
+};

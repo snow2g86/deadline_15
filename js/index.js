@@ -156,6 +156,25 @@ var init = async function() {
 	renderBottomNav();
 	renderGold();
 	renderHideout();
+	// 저장된 전투가 있으면 재개 버튼 표시
+	try {
+		var bs = localStorage.getItem('game_battle');
+		if (bs) {
+			var bd = JSON.parse(bs);
+			if (bd && bd.stage) {
+				var resumeBtn = document.createElement('button');
+				resumeBtn.className = 'popup-btn resume-btn';
+				resumeBtn.title = t('messages.resume_battle') || '전투 재개';
+				resumeBtn.innerHTML = '<span class="popup-icon">⚔️</span><span class="popup-label">' + (t('messages.resume_battle') || '전투 재개') + '</span>';
+				resumeBtn.onclick = function() {
+					localStorage.setItem('game_nav', JSON.stringify({ resume: true }));
+					location.href = 'battle.html';
+				};
+				var popups = document.querySelector('.lobby-popups');
+				if (popups) popups.insertBefore(resumeBtn, popups.firstChild);
+			}
+		}
+	} catch(_) {}
 
 	setTimeout(function() {
 		document.getElementById('splash').style.display = 'none';

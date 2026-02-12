@@ -175,6 +175,19 @@ Object.assign(G, {
         this.vfxSpawn(tx, ty, { count: 8, colors: ['#22c55e', '#4ade80', '#ffffff'], shape: 'star', speed: 1.5, spread: 12, decay: 0.025, size: 2.5, vy: -1 });
     },
 
+    vfxSiege(itemId, tx, ty) {
+        const sx = this.tSX(tx, ty) + TW, sy = this.tSY(tx, ty, 0) + TH;
+        if (itemId === 'siege_ladder') {
+            this.vfxSpawn(sx, sy, { count: 10, colors: ['#d4a574', '#b08050', '#fff8'], shape: 'spark', speed: 2, spread: 10, decay: 0.025, size: 2.5, vy: -2 });
+        } else if (itemId === 'siege_bomb') {
+            this.vfxSpawn(sx, sy, { count: 30, colors: ['#f84', '#f60', '#ff4', '#fff'], shape: 'spark', speed: 4, spread: 16, decay: 0.02, size: 3.5 });
+            this.vfxSpawn(sx, sy, { count: 8, colors: ['#f8440088'], shape: 'ring', speed: 0, spread: 4, decay: 0.012, size: 18 });
+            this.vfxSpawn(sx, sy, { count: 12, colors: ['#888', '#666', '#aaa'], shape: 'circle', speed: 2, spread: 14, decay: 0.015, size: 3, vy: -1.5, gravity: 0.06 });
+        } else if (itemId === 'siege_bridge') {
+            this.vfxSpawn(sx, sy, { count: 12, colors: ['#8B4513', '#A0522D', '#D2B48C'], shape: 'circle', speed: 1.5, spread: 12, decay: 0.02, size: 2.5, vy: -1 });
+        }
+    },
+
     vfxFlash(color) {
         const el = document.getElementById('turn-flash');
         el.style.background = `radial-gradient(ellipse, ${color}, transparent 70%)`;

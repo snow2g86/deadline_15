@@ -17,7 +17,8 @@ window._LANG_en = {
         "wave": "Wave",
         "select_unit": "Select a unit",
         "move": "Move",
-        "range": "Range"
+        "range": "Range",
+        "type": "Type"
     },
     "nav": {
         "stage": "Stage",
@@ -126,6 +127,7 @@ window._LANG_en = {
         "trap_placed": "⚠ Trap",
         "curse": "Curse!",
         "unsummoned": "Unsummoned",
+        "soulbond_restore": "+40 MP",
         "gate_hit": "Gate Hit!",
         "gate_destroyed": "Gate Destroyed!",
         "ladder": "🪜 Ladder!",
@@ -135,6 +137,7 @@ window._LANG_en = {
         "enemy_breached": "{count} enemies breached the wall!",
         "stage_clear": "STAGE {stage_id} Clear! ({turn} turns)",
         "surrender": "Surrendered",
+        "resume_battle": "Resume Battle",
         "auto_revive": "{name} has been automatically revived!",
         "reward": "Reward",
         "first_clear_bonus": "First Clear Bonus",
@@ -180,7 +183,17 @@ window._LANG_en = {
         "sapper_detonate": "Detonate!",
         "rooted": "Rooted!",
         "trap_triggered": "Trap! -{dmg}",
-        "trap_stun": "{turns} turns immobilized"
+        "trap_stun": "{turns} turns immobilized",
+        "siege_ladder": "\u{1FA9C} Ladder!",
+        "siege_bomb": "\u{1F4A3} Wall Destroyed!",
+        "siege_bridge": "\u{1F309} Bridge!",
+        "select_siege_target": "Select target tile",
+        "siege_no_target": "No valid target",
+        "wall_destroyed": "Wall destroyed!",
+        "bridge_placed": "Bridge placed!",
+        "climbed_wall": "Climbed over wall!",
+        "select_potion_target": "Select target",
+        "potion_no_target": "No valid target"
     },
     "results": {
         "battle_detail": "📈 Killed {kills} · Total {exp} EXP (÷{survivors})",
@@ -216,6 +229,20 @@ window._LANG_en = {
             "name": "The Hero's Beginning",
             "desc": "Defend the village from bandits and defeat the demon lord"
         }
+    },
+    "battle_potions": {
+        "potion_heal": "Healing Potion",
+        "potion_heal_desc": "Restore 50% HP",
+        "potion_resource": "Resource Potion",
+        "potion_resource_desc": "Restore 30 resource",
+        "potion_atk_buff": "Attack Elixir",
+        "potion_atk_buff_desc": "ATK +30% for 3 turns",
+        "potion_def_buff": "Defense Elixir",
+        "potion_def_buff_desc": "DEF +30% for 3 turns",
+        "potion_atk_debuff": "Weakening Poison",
+        "potion_atk_debuff_desc": "Enemy ATK -25% (3 turns)",
+        "potion_def_debuff": "Corrosive Poison",
+        "potion_def_debuff_desc": "Enemy DEF -25% (3 turns)"
     },
     "shop": {
         "title": "Shop",
@@ -282,7 +309,17 @@ window._LANG_en = {
         "scroll_prefix": "Scroll:",
         "scroll_buy_confirm": "Buy {scroll} for {gold}G?",
         "scroll_stored": "saved to inventory",
-        "ad_scroll_desc": "Watch an ad to get a free class change scroll"
+        "ad_scroll_desc": "Watch an ad to get a free class change scroll",
+        "siege_ladder": "Ladder",
+        "siege_bomb": "Siege Bomb",
+        "siege_bridge": "Bridge",
+        "siege_ladder_desc": "Climb over an adjacent wall tile",
+        "siege_bomb_desc": "Destroy a wall tile, turning it into plain",
+        "siege_bridge_desc": "Place a bridge on water, turning it into plain",
+        "siege_buy_confirm": "Buy {item} for {gold}G?",
+        "siege_stored": "saved to inventory",
+        "battle_potion_buy_confirm": "Buy {name} for {gold}G?",
+        "battle_potion_stored": "{name} saved to inventory"
     },
     "academy": {
         "title": "Academy",
@@ -636,6 +673,7 @@ window._LANG_en = {
         "no_items": "No equipment",
         "equip_btn": "Equip",
         "equipped": "Equipped",
+        "sell": "Sell",
         "sell_btn": "Sell {gold}G",
         "sell_confirm": "Sell {name}?\n+{gold}G",
         "filter_armor": "Armor",
@@ -1298,6 +1336,23 @@ window._LANG_en = {
             "Jang Giyong",
             "Jang Donggun"
         ]
+    },
+    "inventory": {
+        "filter_all": "All",
+        "filter_equip": "Equipment",
+        "filter_potion": "Potion",
+        "filter_scroll": "Scroll",
+        "filter_skillbook": "Skillbook",
+        "filter_all_rarity": "All Rarity",
+        "sort_rarity": "Rarity",
+        "sort_name": "Name",
+        "sort_level": "Enhancement Level",
+        "empty": "No items",
+        "use": "Use",
+        "stat_total": "Total",
+        "stat_rare": "Rare+",
+        "stat_value": "Total Value",
+        "stat_equipped": "Equipped Rate"
     },
     "enhance": {
         "subtitle": "Equipment Enhancement",

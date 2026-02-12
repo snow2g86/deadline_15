@@ -25,10 +25,21 @@ Object.assign(G, {
 		}
 		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rNav(); this.scrollToUnit(u); this.sfxSelect()
 	},
-	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rNav() },
+	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rNav() },
 	cellCk(x, y) {
 		if (this.phase !== 'player' || this.over || this.anim) return; const cl = this.uAt(x, y), s = this.sel;
 		if (this.awPM && s) {
+			if (this.potionMode) {
+				const potTarget = this.potionTargets.find(t => t.x === x && t.y === y);
+				if (potTarget) { this.doPotion(potTarget); return }
+				this.potionMode = false; this._curPotion = null;
+				this.potionTargets = []; this.rTer(); this.showAM(s); return;
+			}
+			if (this.siegeMode) {
+				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSiege(s, x, y); return }
+				this.siegeMode = false; this._curSiege = null;
+				this.atkT = []; this.rTer(); this.showAM(s); return;
+			}
 			if (this.skillMode) {
 				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSkill(s, x, y); return }
 				this.skillMode = false; const a = this.atkC(s);
@@ -60,7 +71,178 @@ Object.assign(G, {
 	actAttack() { if (!this.sel) return; this.hideAM(); const msg = this.sel.role === 'healer' ? t('messages.select_heal_target') : t('messages.select_attack_target'); this.floatT(this.sel.x, this.sel.y, msg, 'heal') },
 	showSkillMenu() { if (!this.sel || !this.awPM) return; this.skillMenuOpen = true; this.showAM(this.sel) },
 	hideSkillMenu() { if (!this.sel) return; this.skillMenuOpen = false; this.showAM(this.sel) },
-	actItem() { if (!this.sel) return; this.floatT(this.sel.x, this.sel.y, t('messages.item_system_preparing'), 'damage') },
+	actItem() {
+		if (!this.sel || !this.awPM) return;
+		const hasPotion = this._battlePotions && this._battlePotions.length > 0;
+		const hasSiege = this._siegeItems && this._siegeItems.length > 0;
+		if (!hasPotion && !hasSiege) return;
+		this.itemMenuOpen = true; this.showAM(this.sel);
+	},
+	hideItemMenu() { if (!this.sel) return; this.itemMenuOpen = false; this.showAM(this.sel) },
+	actPotion(idx) {
+		if (!this.sel || !this.awPM) return;
+		const pot = this._battlePotions[idx]; if (!pot) return;
+		const def = BATTLE_POTIONS[pot.potionId]; if (!def) return;
+		this.itemMenuOpen = false; this._curPotion = { idx, def, pot };
+		this.potionMode = true;
+		const u = this.sel;
+		const targets = [];
+		const isDebuff = def.type === 'debuff';
+		for (let i = 0; i < this.units.length; i++) {
+			const tu = this.units[i];
+			if (tu.hp <= 0) continue;
+			if (mh(u.x, u.y, tu.x, tu.y) > def.range) continue;
+			if (isDebuff) { if (tu.team === 'enemy') targets.push(tu) }
+			else { if (tu.team === 'ally') targets.push(tu) }
+		}
+		if (targets.length === 0) {
+			this.potionMode = false; this._curPotion = null;
+			this.floatT(u.x, u.y, t('messages.potion_no_target'), 'damage');
+			this.showAM(u); return;
+		}
+		this.potionTargets = targets;
+		this.hideAM();
+		this.floatT(u.x, u.y, t('messages.select_potion_target'), 'heal');
+		this.rUnits();
+	},
+	doPotion(targetU) {
+		const potion = this._curPotion; if (!potion) return;
+		const def = potion.def;
+		const u = this.sel;
+		if (def.type === 'heal') {
+			const heal = Math.round(targetU.mhp * def.value / 100);
+			targetU.hp = Math.min(targetU.mhp, targetU.hp + heal);
+			this.floatT(targetU.x, targetU.y, '+' + heal + ' HP', 'heal');
+			this.vfxHeal(targetU); this.sfxHeal();
+		} else if (def.type === 'resource') {
+			const restore = def.value;
+			targetU.res = Math.min(targetU.maxRes, targetU.res + restore);
+			this.floatT(targetU.x, targetU.y, '+' + restore, 'heal');
+			this.vfxBuff(targetU); this.sfxHeal();
+		} else if (def.type === 'buff') {
+			if (!targetU.buffs) targetU.buffs = [];
+			targetU.buffs.push({ type: def.stat + '_up', duration: def.duration, value: def.value, source: 'potion' });
+			this.floatT(targetU.x, targetU.y, t('battle_potions.' + def.id), 'heal');
+			this.vfxBuff(targetU); this.sfxHeal();
+		} else if (def.type === 'debuff') {
+			if (!targetU.buffs) targetU.buffs = [];
+			targetU.buffs.push({ type: def.stat + '_down', duration: def.duration, value: Math.abs(def.value), source: 'potion' });
+			this.floatT(targetU.x, targetU.y, t('battle_potions.' + def.id), 'damage');
+			this.sfxAtk(u.cls);
+		}
+		// 인벤토리에서 수량 차감
+		if (typeof loadInventory === 'function' && typeof saveInventory === 'function') {
+			const inv = loadInventory();
+			const invIdx = this._battlePotionIndices[potion.idx];
+			if (invIdx >= 0 && inv[invIdx]) {
+				inv[invIdx].quantity = (inv[invIdx].quantity || 1) - 1;
+				if (inv[invIdx].quantity <= 0) {
+					inv.splice(invIdx, 1);
+					this._battlePotions.splice(potion.idx, 1);
+					this._battlePotionIndices.splice(potion.idx, 1);
+					for (let i = 0; i < this._battlePotionIndices.length; i++) {
+						if (this._battlePotionIndices[i] > invIdx) this._battlePotionIndices[i]--;
+					}
+				}
+				saveInventory(inv);
+			}
+		}
+		this.potionMode = false; this._curPotion = null; this.potionTargets = [];
+		u.ha = true; this.awPM = false; this.hideAM();
+		this.rUnits(); this.clrSel(); this.chkAutoEnd();
+	},
+	actSiege(idx) {
+		if (!this.sel || !this.awPM) return;
+		const si = this._siegeItems[idx]; if (!si) return;
+		const def = SIEGE_ITEMS.find(d => d.id === si.siegeId); if (!def) return;
+		this.itemMenuOpen = false; this._curSiege = { idx, def, si };
+		this.siegeMode = true;
+		const u = this.sel;
+		const targets = [];
+		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+			if (mh(u.x, u.y, c, r) > def.range) continue;
+			const tile = this.ter[r][c];
+			if (def.targetType === 'wall' && (tile === 'wall' || tile === 'gate')) targets.push({ x: c, y: r });
+			else if (def.targetType === 'water' && tile === 'water') targets.push({ x: c, y: r });
+		}
+		if (targets.length === 0) {
+			this.siegeMode = false; this._curSiege = null;
+			this.floatT(u.x, u.y, t('messages.siege_no_target'), 'damage');
+			this.showAM(u); return;
+		}
+		this.atkT = targets; this.healT = []; this.mvT = [];
+		this.hideAM(); this.rTer();
+		this.floatT(u.x, u.y, t('messages.select_siege_target'), 'heal');
+	},
+	doSiege(u, tx, ty) {
+		const siege = this._curSiege; if (!siege) return;
+		const def = siege.def;
+		if (def.effect === 'climb') {
+			// 사다리: 벽 너머 반대편으로 이동
+			const dx = tx - u.x, dy = ty - u.y;
+			let landX = tx + (dx !== 0 ? dx : 0), landY = ty + (dy !== 0 ? dy : 0);
+			// 범위 체크 및 빈 칸 확인, 못 찾으면 연장
+			let found = false;
+			for (let step = 1; step <= 3; step++) {
+				const lx = tx + dx * step, ly = ty + dy * step;
+				if (lx < 0 || lx >= COLS || ly < 0 || ly >= ROWS) break;
+				const lt = this.ter[ly][lx];
+				if (TI[lt] && TI[lt].pass && !this.uAt(lx, ly)) { landX = lx; landY = ly; found = true; break; }
+			}
+			if (!found) {
+				this.floatT(u.x, u.y, t('messages.siege_no_target'), 'damage');
+				this.siegeMode = false; this._curSiege = null;
+				this.showAM(u); return;
+			}
+			this._mvU(u, landX, landY);
+			u.hm = true; u.mo = true;
+			this.floatT(landX, landY, t('messages.climbed_wall'), 'heal');
+			this.vfxSiege('siege_ladder', tx, ty);
+			this.sfxUIClick();
+		} else if (def.effect === 'destroy') {
+			// 폭탄: 벽 파괴 → 평지
+			this.ter[ty][tx] = 'plain';
+			const wk = tx + ',' + ty;
+			if (this.wallHP[wk]) this.wallHP[wk] = 0;
+			if (this.gateHP[wk]) this.gateHP[wk] = 0;
+			this.floatT(tx, ty, t('messages.wall_destroyed'), 'damage');
+			this.vfxSiege('siege_bomb', tx, ty);
+			this.sfxAtk('warrior');
+			this.screenShake();
+		} else if (def.effect === 'bridge') {
+			// 다리: 물 → 평지
+			this.ter[ty][tx] = 'plain';
+			this.floatT(tx, ty, t('messages.bridge_placed'), 'heal');
+			this.vfxSiege('siege_bridge', tx, ty);
+			this.sfxUIClick();
+		}
+		// 인벤토리에서 아이템 제거
+		const invIdx = this._siegeInvIndices[siege.idx];
+		if (typeof loadInventory === 'function' && typeof saveInventory === 'function') {
+			const inv = loadInventory();
+			if (invIdx >= 0 && invIdx < inv.length) {
+				inv.splice(invIdx, 1);
+				saveInventory(inv);
+			}
+		}
+		this._siegeItems.splice(siege.idx, 1);
+		this._siegeInvIndices.splice(siege.idx, 1);
+		// 인덱스 재조정 (삭제된 위치 이후의 인덱스 -1)
+		for (let i = 0; i < this._siegeInvIndices.length; i++) {
+			if (this._siegeInvIndices[i] > invIdx) this._siegeInvIndices[i]--;
+		}
+		// 사다리가 아닌 경우 행동 완료
+		if (def.effect !== 'climb') {
+			u.ha = true;
+		}
+		this.siegeMode = false; this._curSiege = null; this.awPM = def.effect === 'climb';
+		this.rTer(); this.rUnits();
+		if (def.effect === 'climb') {
+			setTimeout(() => { this.scrollToUnit(u); this.showAM(u); this.showUI(u) }, 340);
+		} else {
+			this.clrSel(); this.chkAutoEnd();
+		}
+	},
 
 	_grantExp(u, action) { if (u.team === 'ally' && u.uid) { const e = actExp(this.cStage ? this.cStage.id : 1, action); if (e > 0) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) + e; this.floatT(u.x, u.y, `+${e} EXP`, 'exp'); } return e } return 0 },
 	skMul(u, skId) { const lv = Math.min((u.skillLv && u.skillLv[skId]) || 1, 10); return 1 + 0.1 * (lv - 1) },
@@ -112,6 +294,9 @@ Object.assign(G, {
 	actCancel() {
 		if (!this.sel) return;
 		if (this.skillMenuOpen) { this.hideSkillMenu(); return }
+		if (this.itemMenuOpen) { this.hideItemMenu(); return }
+		if (this.potionMode) { this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.rUnits(); this.showAM(this.sel); return }
+		if (this.siegeMode) { this.siegeMode = false; this._curSiege = null; this.atkT = []; this.rTer(); this.showAM(this.sel); return }
 		if (!this.preMv) return; const u = this.sel; const _gdx = u._gdx, _gdy = u._gdy;
 		if (this.preMv.exp && u.uid) { this.battleExp[u.uid] = (this.battleExp[u.uid] || 0) - this.preMv.exp }
 		u.x = this.preMv.x; u.y = this.preMv.y; u.hm = false; u.mo = false;

@@ -15,6 +15,24 @@ var EXP_POTIONS = [
   { id: 'exp_l', name: '\ub300\ud615 \uacbd\ud5d8\uce58 \ubb3c\uc57d', icon: '\ud83c\udfd0', exp: 400, cost: 2400, weight: 15 }
 ];
 
+// 전투 포션 (BATTLE_POTIONS는 data/equip.js에서 정의)
+var BATTLE_POTION_LIST = [
+  { potionId: 'potion_heal', weight: 40 },
+  { potionId: 'potion_resource', weight: 30 },
+  { potionId: 'potion_atk_buff', weight: 20 },
+  { potionId: 'potion_def_buff', weight: 20 },
+  { potionId: 'potion_atk_debuff', weight: 15 },
+  { potionId: 'potion_def_debuff', weight: 15 }
+];
+
+function genPotionId() {
+  return 'pot_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+
+function genSiegeId() {
+  return 'siege_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+
 var SCROLL_CLASSES = ['warrior','knight','assassin','brawler','lancer','sapper','archer','mage','summoner','shaman','priest'];
 var SCROLL_COST = 400;
 
@@ -112,24 +130,25 @@ function gainExp(uid, amount) {
 // ── 상점 데이터 ──────────────────────────
 var _shopData = null;
 var _currentTab = 'mercenary';
-var _shopTimerInterval = null;
 
 function loadShop() {
   try {
     var raw = localStorage.getItem(SHOP_KEY);
     if (raw) {
-      var d = JSON.parse(raw);
-      if (Date.now() - d.ts < 6 * 3600 * 1000) {
-        _shopData = d;
-        return;
+      var data = JSON.parse(raw);
+      // 1시간 이상 지났으면 갱신 아이템만 새로 생성
+      if (Date.now() - data.ts >= SHOP_REFRESH_INTERVAL) {
+        refreshRotatingItems(data);
       }
+      _shopData = data;
+      return;
     }
   } catch (_) {}
   genShop();
 }
 
 
-function genShop() {
+function genRotatingItems() {
   var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon'); });
   var items = [];
   var charNames = t('character.names');
@@ -154,21 +173,6 @@ function genShop() {
     var cost = Math.round(baseCost[grade] * (0.9 + avg * 0.2));
     items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false, gender: Math.random() < 0.5 ? 'm' : 'f' });
   }
-  // 물약 5개
-  var potionKeys = { 'exp_s': 'potion_small', 'exp_m': 'potion_medium', 'exp_l': 'potion_large' };
-  for (var j = 0; j < 5; j++) {
-    var totalW = EXP_POTIONS.reduce(function(s, p) { return s + p.weight; }, 0);
-    var r = Math.random() * totalW, potObj = EXP_POTIONS[0];
-    for (var k = 0; k < EXP_POTIONS.length; k++) {
-      r -= EXP_POTIONS[k].weight;
-      if (r <= 0) { potObj = EXP_POTIONS[k]; break; }
-    }
-    items.push({
-      type: 'potion', potionId: potObj.id, name: potObj.name,
-      i18nNameKey: 'shop.' + potionKeys[potObj.id],
-      icon: potObj.icon, exp: potObj.exp, cost: potObj.cost, sold: false
-    });
-  }
   // 스킬북 6개 (중복 없음)
   if (typeof LEARNABLE_SKILLS !== 'undefined') {
     var lsKeys = Object.keys(LEARNABLE_SKILLS).sort(function() { return Math.random() - 0.5; });
@@ -187,12 +191,101 @@ function genShop() {
       type: 'scroll', scrollCls: shuffled[si], cost: SCROLL_COST, sold: false
     });
   }
+  return items;
+}
+
+function genFixedItems() {
+  var items = [];
+  var potionKeys = { 'exp_s': 'potion_small', 'exp_m': 'potion_medium', 'exp_l': 'potion_large' };
+  for (var j = 0; j < EXP_POTIONS.length; j++) {
+    var potObj = EXP_POTIONS[j];
+    items.push({
+      type: 'potion', potionId: potObj.id, name: potObj.name,
+      i18nNameKey: 'shop.' + potionKeys[potObj.id],
+      icon: potObj.icon, exp: potObj.exp, cost: potObj.cost, sold: false, quantity: 1
+    });
+  }
+  // 전투 포션 6가지 (각 1개씩, 중복 없음)
+  if (typeof BATTLE_POTIONS !== 'undefined' && BATTLE_POTION_LIST) {
+    for (var bp = 0; bp < BATTLE_POTION_LIST.length; bp++) {
+      var bpDef = BATTLE_POTIONS[BATTLE_POTION_LIST[bp].potionId];
+      if (bpDef) {
+        items.push({
+          type: 'battle_potion', potionId: BATTLE_POTION_LIST[bp].potionId,
+          name: bpDef.name, icon: bpDef.icon,
+          cost: 150, sold: false, quantity: 1
+        });
+      }
+    }
+  }
+  // 공성 아이템 전체 (각 1개씩, 중복 없음)
+  if (typeof SIEGE_ITEMS !== 'undefined') {
+    for (var si2 = 0; si2 < SIEGE_ITEMS.length; si2++) {
+      items.push({
+        type: 'siege', siegeId: SIEGE_ITEMS[si2].id, icon: SIEGE_ITEMS[si2].icon,
+        cost: SIEGE_ITEMS[si2].cost, sold: false, quantity: 1
+      });
+    }
+  }
+  return items;
+}
+
+function refreshRotatingItems(data) {
+  var rotatingItems = genRotatingItems();
+  var newItems = [];
+  // 고정 아이템 유지
+  for (var i = 0; i < data.items.length; i++) {
+    var item = data.items[i];
+    if (['potion', 'battle_potion', 'siege'].indexOf(item.type) >= 0) {
+      newItems.push(item);
+    }
+  }
+  // 갱신 아이템 추가
+  newItems = newItems.concat(rotatingItems);
+  data.items = newItems;
+  data.ts = Date.now();
+  saveShop();
+}
+
+function genShop() {
+  var items = [];
+  items = items.concat(genFixedItems());
+  items = items.concat(genRotatingItems());
   _shopData = { ts: Date.now(), items: items };
   saveShop();
 }
 
 function saveShop() {
   try { localStorage.setItem(SHOP_KEY, JSON.stringify(_shopData)); } catch (_) {}
+}
+
+// ── 상점 갱신 시간 ───────────────────────
+var SHOP_REFRESH_INTERVAL = 60 * 60 * 1000; // 1시간
+
+function getShopRefreshTime() {
+  if (!_shopData || !_shopData.ts) return null;
+  var elapsed = Date.now() - _shopData.ts;
+  var remaining = SHOP_REFRESH_INTERVAL - (elapsed % SHOP_REFRESH_INTERVAL);
+  var totalSeconds = Math.floor(remaining / 1000);
+  var hours = Math.floor(totalSeconds / 3600);
+  var minutes = Math.floor((totalSeconds % 3600) / 60);
+  var seconds = totalSeconds % 60;
+  return { hours: hours, minutes: minutes, seconds: seconds };
+}
+
+function updateShopTimer() {
+  var timerEl = document.getElementById('shop-timer');
+  if (!timerEl) return;
+  // 소모품, 골드 탭은 타이머 숨김
+  var timerHiddenTabs = ['consumable', 'gold'];
+  if (timerHiddenTabs.indexOf(_currentTab) >= 0) {
+    timerEl.style.display = 'none';
+    return;
+  }
+  timerEl.style.display = '';
+  var time = getShopRefreshTime();
+  if (!time) { timerEl.style.display = 'none'; return; }
+  timerEl.innerHTML = t('shop.refresh_timer', { hours: time.hours, minutes: ('0' + time.minutes).slice(-2), seconds: ('0' + time.seconds).slice(-2) });
 }
 
 // ── 탭 전환 ──────────────────────────────
@@ -207,18 +300,7 @@ function switchTab(tab) {
 function renderShop() {
   var list = document.getElementById('shop-list'); list.innerHTML = '';
   list.style.display = ''; list.style.flexDirection = ''; list.style.alignItems = ''; list.style.gap = ''; list.style.gridTemplateColumns = '';
-  var timeEl = document.getElementById('shop-timer');
   var titleEl = document.getElementById('shop-info-title');
-  var remain = Math.max(0, 6 * 3600 * 1000 - (Date.now() - _shopData.ts));
-  var h = Math.floor(remain / 3600000);
-  var m = Math.floor((remain % 3600000) / 60000);
-  var s = Math.floor((remain % 60000) / 1000);
-  var showTimer = _currentTab === 'mercenary' || _currentTab === 'consumable' || _currentTab === 'skill' || _currentTab === 'scroll';
-  timeEl.style.display = showTimer ? 'block' : 'none';
-  if (showTimer) {
-    var hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
-    timeEl.querySelector('span').textContent = t('shop.refresh_timer', { hours: hh, minutes: mm, seconds: ss });
-  }
   var tabTitles = {
     'mercenary': t('shop.subtitle_mercenary'),
     'consumable': t('shop.subtitle_consumable'),
@@ -228,6 +310,7 @@ function renderShop() {
     'gold': t('shop.subtitle_gold')
   };
   titleEl.textContent = tabTitles[_currentTab] || t('shop.title');
+  updateShopTimer();
 
   if (_currentTab === 'equip') {
     renderGacha(list);
@@ -253,21 +336,21 @@ function renderShop() {
   var adCfg = tabAdMap[_currentTab];
   if (adCfg) list.appendChild(buildTabAdCard(adCfg.type, adCfg.descKey, adCfg.fn));
 
-  var tabTypeMap = { 'mercenary': 'char', 'consumable': 'potion', 'skill': 'skillbook' };
-  var filterTypes = tabTypeMap[_currentTab];
+  var tabTypeMap = { 'mercenary': ['char'], 'consumable': ['potion', 'battle_potion', 'siege'], 'skill': ['skillbook'] };
+  var filterTypes = tabTypeMap[_currentTab] || [];
   var filteredItems = _shopData.items.filter(function(item) {
     var iType = item.type || 'char';
-    return iType === filterTypes;
+    return filterTypes.indexOf(iType) >= 0;
   });
 
   filteredItems.forEach(function(item) {
     var iType = item.type || 'char';
     if (iType === 'char') renderCharCard(item, list);
     else if (iType === 'potion') renderPotionCard(item, list);
+    else if (iType === 'battle_potion') renderBattlePotionCard(item, list);
+    else if (iType === 'siege') renderSiegeCard(item, list);
     else if (iType === 'skillbook') renderSkillBookCard(item, list);
   });
-
-  startShopTimer();
 }
 
 function renderCharCard(item, list) {
@@ -311,34 +394,37 @@ function renderCharCard(item, list) {
 }
 
 function renderPotionCard(item, list) {
-  var canAfford = _gold >= item.cost && !item.sold;
+  var canAfford = _gold >= item.cost;
   var el = document.createElement('div');
-  el.className = 'shop-card potion-card' + (item.sold ? ' sold' : '');
-  var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
+  el.className = 'shop-card potion-card';
+  var buyBtn = t('shop.buy', { gold: item.cost });
   var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
   el.innerHTML =
     '<div class="shop-icon">' + item.icon + '</div>' +
     '<div class="shop-name">' + potionName + '</div>' +
-    '<div class="shop-cls">' + t('common.exp') + ' +' + item.exp + '</div>' +
-    '<button class="shop-btn potion-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
-  if (!item.sold) {
-    el.querySelector('.shop-btn').onclick = function() {
-      if (_gold < item.cost) return;
-      var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
-      showConfirm(t('shop.potion_buy_confirm', { potion: potionName, gold: item.cost }), function() {
-        _gold -= item.cost;
-        saveGold(_gold);
-        updateGoldUI();
-        var inv = loadInventory();
-        inv.push({ type: 'potion', potionId: item.potionId, exp: item.exp, icon: item.icon });
-        saveInventory(inv);
-        item.sold = true;
-        saveShop();
-        renderShop();
-        showAlert(potionName + ' ' + t('shop.potion_stored'));
-      });
-    };
-  }
+    (item.exp ? '<div class="shop-cls">' + t('common.exp') + ' +' + item.exp + '</div>' : '') +
+    '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
+  el.querySelector('.shop-btn').onclick = function() {
+    if (_gold < item.cost) return;
+    var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
+    showConfirm(t('shop.potion_buy_confirm', { potion: potionName, gold: item.cost }), function() {
+      _gold -= item.cost;
+      saveGold(_gold);
+      updateGoldUI();
+      var inv = loadInventory();
+      var potItem = {
+        type: 'potion',
+        pid: genPotionId(),
+        potionId: item.potionId,
+        exp: item.exp,
+        icon: item.icon,
+        quantity: item.quantity || 1
+      };
+      inv.push(potItem);
+      saveInventory(inv);
+      showAlert(potionName + ' ' + t('shop.potion_stored'));
+    });
+  };
   list.appendChild(el);
 }
 
@@ -374,6 +460,73 @@ function renderSkillBookCard(item, list) {
       });
     };
   }
+  list.appendChild(el);
+}
+
+function renderBattlePotionCard(item, list) {
+  var canAfford = _gold >= item.cost && !item.sold;
+  var potDef = BATTLE_POTIONS[item.potionId];
+  if (!potDef) return;
+  var el = document.createElement('div');
+  el.className = 'shop-card potion-card';
+  var buyBtn = t('shop.buy', { gold: item.cost });
+  el.innerHTML =
+    '<div class="shop-icon">' + potDef.icon + '</div>' +
+    '<div class="shop-name">' + t('battle_potions.' + item.potionId) + '</div>' +
+    '<div class="shop-cls">' + t('battle_potions.' + item.potionId + '_desc') + '</div>' +
+    '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
+  el.querySelector('.shop-btn').onclick = function() {
+    if (_gold < item.cost) return;
+    var potName = t('battle_potions.' + item.potionId);
+    showConfirm(t('shop.battle_potion_buy_confirm', { name: potName, gold: item.cost }), function() {
+      _gold -= item.cost;
+      saveGold(_gold);
+      updateGoldUI();
+      var inv = loadInventory();
+      inv.push({
+        type: 'battle_potion',
+        pid: genPotionId(),
+        potionId: item.potionId,
+        icon: potDef.icon,
+        quantity: item.quantity || 1
+      });
+      saveInventory(inv);
+      showAlert(t('shop.battle_potion_stored', { name: potName }));
+    });
+  };
+  list.appendChild(el);
+}
+
+function renderSiegeCard(item, list) {
+  var canAfford = _gold >= item.cost;
+  var siegeName = t('shop.' + item.siegeId);
+  var siegeDesc = t('shop.' + item.siegeId + '_desc');
+  var el = document.createElement('div');
+  el.className = 'shop-card potion-card';
+  var buyBtn = t('shop.buy', { gold: item.cost });
+  el.innerHTML =
+    '<div class="shop-icon">' + item.icon + '</div>' +
+    '<div class="shop-name">' + siegeName + '</div>' +
+    '<div class="shop-cls">' + siegeDesc + '</div>' +
+    '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
+  el.querySelector('.shop-btn').onclick = function() {
+    if (_gold < item.cost) return;
+    showConfirm(t('shop.siege_buy_confirm', { item: siegeName, gold: item.cost }), function() {
+      _gold -= item.cost;
+      saveGold(_gold);
+      updateGoldUI();
+      var inv = loadInventory();
+      inv.push({
+        type: 'siege',
+        sid: genSiegeId(),
+        siegeId: item.siegeId,
+        icon: item.icon,
+        quantity: item.quantity || 1
+      });
+      saveInventory(inv);
+      showAlert(siegeName + ' ' + t('shop.siege_stored'));
+    });
+  };
   list.appendChild(el);
 }
 
@@ -591,30 +744,6 @@ function goldIcon(amount) {
   return '&#x1FA99;';
 }
 
-// ── 갱신 타이머 ──────────────────────────
-function startShopTimer() {
-  if (_shopTimerInterval) clearInterval(_shopTimerInterval);
-  _shopTimerInterval = setInterval(function() {
-    var timeEl = document.getElementById('shop-timer');
-    if (!timeEl) return;
-    var remain = Math.max(0, 6 * 3600 * 1000 - (Date.now() - _shopData.ts));
-    var h = Math.floor(remain / 3600000);
-    var m = Math.floor((remain % 3600000) / 60000);
-    var s = Math.floor((remain % 60000) / 1000);
-    var showTimer = _currentTab === 'mercenary' || _currentTab === 'item';
-    timeEl.style.display = showTimer ? 'block' : 'none';
-    if (showTimer) {
-      var hh = String(h).padStart(2, '0'), mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
-      timeEl.querySelector('span').textContent = t('shop.refresh_timer', { hours: hh, minutes: mm, seconds: ss });
-    }
-    if (remain <= 0) {
-      genShop();
-      renderShop();
-    }
-  }, 1000);
-}
-
-
 
 // ── 가챠 렌더링 ─────────────────────────
 function renderGacha(list) {
@@ -737,5 +866,7 @@ var init = async function() {
   loadShop();
   renderShop();
   renderBottomNav();
+  // 타이머를 1초마다 업데이트
+  setInterval(updateShopTimer, 1000);
   setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
 };

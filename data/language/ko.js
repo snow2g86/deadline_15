@@ -17,7 +17,8 @@ window._LANG_ko = {
         "wave": "웨이브",
         "select_unit": "유닛을 선택하세요",
         "move": "이동",
-        "range": "사거리"
+        "range": "사거리",
+        "type": "종류"
     },
     "nav": {
         "stage": "스테이지",
@@ -25,6 +26,7 @@ window._LANG_ko = {
         "sanctuary": "성소",
         "academy": "아카데미",
         "equip": "장비",
+        "inventory": "인벤토리",
         "enhance": "강화",
         "shop": "상점",
         "compendium": "도감",
@@ -126,6 +128,7 @@ window._LANG_ko = {
         "trap_placed": "⚠ 함정",
         "curse": "저주!",
         "unsummoned": "소환 해제",
+        "soulbond_restore": "+40 MP",
         "gate_hit": "성문 피격!",
         "gate_destroyed": "성문 파괴!",
         "ladder": "🪜 사다리!",
@@ -135,6 +138,7 @@ window._LANG_ko = {
         "enemy_breached": "적 {count}체가 성벽을 돌파했습니다!",
         "stage_clear": "STAGE {stage_id} 클리어! ({turn}턴)",
         "surrender": "항복했습니다",
+        "resume_battle": "전투 재개",
         "auto_revive": "{name}이(가) 자동으로 부활했습니다!",
         "reward": "보상",
         "first_clear_bonus": "첫 클리어 보너스",
@@ -180,7 +184,17 @@ window._LANG_ko = {
         "sapper_detonate": "폭파!",
         "rooted": "속박!",
         "trap_triggered": "함정! -{dmg}",
-        "trap_stun": "{turns}턴 이동불가"
+        "trap_stun": "{turns}턴 이동불가",
+        "siege_ladder": "🪜 사다리!",
+        "siege_bomb": "💣 벽 파괴!",
+        "siege_bridge": "🌉 다리 설치!",
+        "select_siege_target": "대상 타일을 선택하세요",
+        "siege_no_target": "사용 가능한 대상이 없습니다",
+        "wall_destroyed": "성벽이 파괴되었습니다!",
+        "bridge_placed": "다리가 설치되었습니다!",
+        "climbed_wall": "벽을 넘었습니다!",
+        "select_potion_target": "대상을 선택하세요",
+        "potion_no_target": "대상이 없습니다"
     },
     "results": {
         "battle_detail": "📈 처치 {kills}체 · 총 {exp} EXP (÷{survivors}명)",
@@ -216,6 +230,20 @@ window._LANG_ko = {
             "name": "영웅의 시작",
             "desc": "산적의 위협으로부터 마을을 지키고 마계의 군주를 무찌르라"
         }
+    },
+    "battle_potions": {
+        "potion_heal": "치유 물약",
+        "potion_heal_desc": "HP 50% 회복",
+        "potion_resource": "자원 물약",
+        "potion_resource_desc": "자원 30 회복",
+        "potion_atk_buff": "공격 강화약",
+        "potion_atk_buff_desc": "3턴간 ATK +30%",
+        "potion_def_buff": "방어 강화약",
+        "potion_def_buff_desc": "3턴간 DEF +30%",
+        "potion_atk_debuff": "약화 독약",
+        "potion_atk_debuff_desc": "적 ATK -25% (3턴)",
+        "potion_def_debuff": "부식 독약",
+        "potion_def_debuff_desc": "적 DEF -25% (3턴)"
     },
     "shop": {
         "title": "상점",
@@ -282,7 +310,17 @@ window._LANG_ko = {
         "scroll_prefix": "전직서:",
         "scroll_buy_confirm": "{scroll}을(를) {gold}G에 구매하시겠습니까?",
         "scroll_stored": "인벤토리에 저장되었습니다",
-        "ad_scroll_desc": "광고를 시청하고 무료 전직서를 획득하세요"
+        "ad_scroll_desc": "광고를 시청하고 무료 전직서를 획득하세요",
+        "siege_ladder": "사다리",
+        "siege_bomb": "파괴 폭탄",
+        "siege_bridge": "가교",
+        "siege_ladder_desc": "인접한 벽 타일을 넘어 반대편으로 이동",
+        "siege_bomb_desc": "벽 타일을 파괴하여 평지로 변환",
+        "siege_bridge_desc": "물/해자 타일에 다리를 설치하여 평지로 변환",
+        "siege_buy_confirm": "{item}을(를) {gold}G에 구매하시겠습니까?",
+        "siege_stored": "인벤토리에 저장되었습니다",
+        "battle_potion_buy_confirm": "{name}을(를) {gold}G에 구매하시겠습니까?",
+        "battle_potion_stored": "{name} 인벤토리에 저장되었습니다"
     },
     "academy": {
         "title": "아카데미",
@@ -626,6 +664,7 @@ window._LANG_ko = {
         "no_items": "장비가 없습니다",
         "equip_btn": "장착",
         "equipped": "장착 중",
+        "sell": "판매",
         "sell_btn": "{gold}G 판매",
         "sell_confirm": "{name}을(를) 판매하시겠습니까?\n+{gold}G",
         "filter_armor": "방어구",
@@ -1310,5 +1349,22 @@ window._LANG_ko = {
         "error_equipped": "장착 중인 장비는 강화할 수 없습니다",
         "error_material_equipped": "장착 중인 장비는 재료로 사용할 수 없습니다",
         "error_slot_mismatch": "같은 슬롯의 장비만 재료로 사용할 수 있습니다"
+    },
+    "inventory": {
+        "filter_all": "전체",
+        "filter_equip": "장비",
+        "filter_potion": "물약",
+        "filter_scroll": "전직서",
+        "filter_skillbook": "스킬북",
+        "filter_all_rarity": "모든 등급",
+        "sort_rarity": "레어도",
+        "sort_name": "이름",
+        "sort_level": "강화 레벨",
+        "empty": "아이템이 없습니다",
+        "use": "사용",
+        "stat_total": "아이템",
+        "stat_rare": "희귀이상",
+        "stat_value": "판매가",
+        "stat_equipped": "장착률"
     }
 };
