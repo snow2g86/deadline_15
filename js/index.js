@@ -1,10 +1,5 @@
 // index.js — 로비 페이지 전용 스크립트
 
-function clsIcon(cls, size) {
-  var d = JAB[cls]; if (!d) return '';
-  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
-}
-
 function renderHideout() {
 	var ct = document.getElementById('clan-hideout');
 	if (!ct) return;

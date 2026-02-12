@@ -2,13 +2,6 @@
 // G/ROSTER/CD 의존 없이 JAB + localStorage 직접 조작
 
 // ── 상수 ──────────────────────────────────
-var MAX_LEVEL = 15;
-var SHOP_KEY = 'game_shop';
-var SAVE_KEY = 'game_save';
-var ROSTER_KEY = 'game_roster';
-
-function expForLevel(lv) { return 80 + 20 * lv + 5 * lv * lv; }
-
 var EXP_POTIONS = [
   { id: 'exp_s', name: '\uc18c\ud615 \uacbd\ud5d8\uce58 \ubb3c\uc57d', icon: '\ud83e\uddea', exp: 50, cost: 400, weight: 50 },
   { id: 'exp_m', name: '\uc911\ud615 \uacbd\ud5d8\uce58 \ubb3c\uc57d', icon: '\u2697\ufe0f', exp: 150, cost: 1000, weight: 35 },
@@ -36,27 +29,7 @@ function genSiegeId() {
 var SCROLL_CLASSES = ['warrior','knight','assassin','brawler','lancer','sapper','archer','mage','summoner','shaman','priest'];
 var SCROLL_COST = 400;
 
-function clsIcon(cls, size) {
-  var d = JAB[cls]; if (!d) return '';
-  return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
-}
-
 // ── 골드 관리 ─────────────────────────────
-function loadGold() {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (d) return d.gold || 0;
-  } catch (_) {}
-  return 0;
-}
-
-function saveGold(gold) {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
-    d.gold = gold;
-    localStorage.setItem(SAVE_KEY, JSON.stringify(d));
-  } catch (_) {}
-}
 
 function updateGoldUI() {
   var el = document.getElementById('shop-gold-val');
@@ -67,44 +40,10 @@ function updateGoldUI() {
 var _gold = 0;
 
 // ── 로스터 직접 조작 ─────────────────────
-function getRoster() {
-  try {
-    var raw = localStorage.getItem(ROSTER_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return { chars: [], nextId: 1 };
-}
 
-function saveRoster(data) {
-  try { localStorage.setItem(ROSTER_KEY, JSON.stringify(data)); } catch (_) {}
-}
+// Character functions moved to js/common/character.js
 
-function addChar(cls, nameId, pot, gender) {
-  var d = JAB[cls];
-  if (!d) return null;
-  var roster = getRoster();
-  var ch = {
-    uid: roster.nextId++,
-    cls: cls,
-    nameId: nameId,
-    lv: 1, exp: 0, dead: false,
-    hp: d.base.hp, atk: d.base.atk, def: d.base.def,
-    move: d.base.move, range: d.base.range,
-    pot: pot,
-    gender: gender || (Math.random() < 0.5 ? 'm' : 'f')
-  };
-  roster.chars.push(ch);
-  saveRoster(roster);
-  return ch;
-}
-
-function getChar(uid) {
-  var roster = getRoster();
-  return roster.chars.find(function(c) { return c.uid === uid; });
-}
-
-
-function gainExp(uid, amount) {
+function _gainExp(uid, amount) {
   var roster = getRoster();
   var ch = roster.chars.find(function(c) { return c.uid === uid; });
   if (!ch || ch.lv >= MAX_LEVEL) return { leveled: 0, prevLv: ch ? ch.lv : 0 };

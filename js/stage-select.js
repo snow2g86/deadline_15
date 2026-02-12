@@ -1,45 +1,9 @@
 // stage-select.js — 스테이지 선택 페이지 전용 스크립트
-// G/ROSTER/CD 의존 없이 STAGES + localStorage 직접 조작
-
-var MIN_P = 5;
-var SAVE_KEY = 'game_save';
-var ROSTER_KEY = 'game_roster';
-var PARTY_KEY = 'game_party';
-var NAV_KEY = 'game_nav';
-var CD = (typeof JAB !== 'undefined') ? JAB : {};
+// 스테이지 선택 및 파티 검증 로직
 
 // ── 뷰 상태 ────────────────────────────────
 var _viewMode = 'episodes'; // 'episodes' | 'stages'
 var _selectedEp = null;
-
-// ── localStorage 조작 ────────────────────
-function loadSave() {
-  try {
-    var d = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (d) return d;
-  } catch (_) {}
-  return {};
-}
-
-function loadParty() {
-  try {
-    var r = localStorage.getItem(PARTY_KEY);
-    if (r) return JSON.parse(r);
-  } catch (_) {}
-  return [];
-}
-
-function saveNav(data) {
-  try { localStorage.setItem(NAV_KEY, JSON.stringify(data)); } catch (_) {}
-}
-
-function getRoster() {
-  try {
-    var raw = localStorage.getItem(ROSTER_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return { chars: [], nextId: 1 };
-}
 
 // ── 뒤로가기 ──────────────────────────────
 function goBack() {
