@@ -160,7 +160,8 @@ Object.assign(window._LANG_ko, {
         "bridge_placed": "다리가 설치되었습니다!",
         "climbed_wall": "벽을 넘었습니다!",
         "select_potion_target": "대상을 선택하세요",
-        "potion_no_target": "대상이 없습니다"
+        "potion_no_target": "대상이 없습니다",
+        "evasion": "회피!"
     },
     "results": {
         "battle_detail": "📈 처치 {kills}체 · 총 {exp} EXP (÷{survivors}명)",

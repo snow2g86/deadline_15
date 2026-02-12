@@ -161,7 +161,8 @@ Object.assign(window._LANG_en, {
         "bridge_placed": "Bridge placed!",
         "climbed_wall": "Climbed over wall!",
         "select_potion_target": "Select target",
-        "potion_no_target": "No valid target"
+        "potion_no_target": "No valid target",
+        "evasion": "Evaded!"
     },
     "results": {
         "battle_detail": "\ud83d\udcc8 Killed {kills} \u00b7 Total {exp} EXP (\u00f7{survivors})",

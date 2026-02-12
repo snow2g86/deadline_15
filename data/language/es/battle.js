@@ -160,7 +160,8 @@ Object.assign(window._LANG_es, {
         "bridge_placed": "\u00a1Puente colocado!",
         "climbed_wall": "\u00a1Escalado el muro!",
         "select_potion_target": "Selecciona objetivo",
-        "potion_no_target": "Sin objetivo"
+        "potion_no_target": "Sin objetivo",
+        "evasion": "¡Esquivado!"
     },
     "results": {
         "battle_detail": "📈 Asesinados {kills} · Total {exp} EXP (÷{survivors})",
