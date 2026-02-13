@@ -137,7 +137,7 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 .anim-preview{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;
   padding:16px;display:flex;align-items:center;justify-content:center;min-height:240px;position:relative;overflow:hidden}
 
-.anim-preview-inner{width:320px;height:400px;background-size:1280px 400px;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;display:block}
+.anim-preview-inner{width:400px;height:400px;background-size:1600px 400px;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;display:block}
 
 .anim-controls{display:flex;gap:8px;justify-content:center;align-items:center}
 .anim-btn{padding:6px 12px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);
@@ -349,7 +349,7 @@ function renderAttackAnimationSection() {
           if (!playBtn.classList.contains('playing')) return;
 
           const frameNum = frames[currentIdx];
-          const posX = frameNum * 320; // 각 프레임은 320px
+          const posX = frameNum * 400; // 각 프레임은 400px (정사각형)
           inner.style.backgroundPosition = `-${posX}px 0`;
 
           currentIdx = (currentIdx + 1) % frames.length;
