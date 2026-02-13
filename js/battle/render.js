@@ -344,21 +344,24 @@ Object.assign(G, {
 		const unitEl = document.getElementById('u-' + uId);
 		if (!unitEl) return;
 
+		// gender 변환: 'm' → '01', 'f' → '02'
+		const genderCode = gender === 'm' ? '01' : gender === 'f' ? '02' : '01';
+
 		// 공격 애니메이션 오버레이 생성
 		const overlay = document.createElement('div');
 		overlay.id = 'atk-anim-' + uId;
 		overlay.style.cssText = `
 			position: absolute;
-			width: 400px;
-			height: 400px;
-			background-image: url('image/character/${cls}_${gender}_attack.png');
-			background-size: 1600px 400px;
+			width: 200px;
+			height: 200px;
+			background-image: url('image/character/${cls}_${genderCode}_attack.png');
+			background-size: 800px 200px;
 			background-repeat: no-repeat;
 			background-position: 0 0;
 			image-rendering: pixelated;
 			pointer-events: none;
-			left: ${unitEl.offsetLeft - 150}px;
-			top: ${unitEl.offsetTop - 180}px;
+			left: ${unitEl.offsetLeft - 50}px;
+			top: ${unitEl.offsetTop - 80}px;
 			z-index: 2000;
 		`;
 
@@ -368,7 +371,7 @@ Object.assign(G, {
 		// 프레임 애니메이션 (0 → 1 → 2 → 3 → 제거)
 		let frame = 0;
 		const interval = setInterval(() => {
-			const posX = frame * 400;
+			const posX = frame * 200;
 			overlay.style.backgroundPosition = `-${posX}px 0`;
 			frame++;
 			if (frame >= 4) {
