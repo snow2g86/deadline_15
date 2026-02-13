@@ -121,11 +121,40 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 .stage-name{font-size:16px;font-weight:900;color:var(--gold)}
 .stage-info{display:flex;flex-direction:column;gap:6px}
 
+/* Attack Animation Section */
+.anim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px}
+
+.anim-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:12px;transition:all .2s;cursor:pointer}
+.anim-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
+
+.anim-header{display:flex;gap:12px;align-items:center}
+.anim-icon{font-size:36px;line-height:1;flex-shrink:0}
+.anim-info{flex:1;min-width:0}
+.anim-name{font-size:14px;font-weight:900;color:var(--gold);margin:0}
+.anim-role{font-size:10px;color:var(--dim);margin-top:2px}
+
+.anim-preview{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;
+  padding:16px;display:flex;align-items:center;justify-content:center;min-height:240px;position:relative;overflow:hidden}
+
+.anim-preview-inner{width:320px;height:400px;background-size:1280px 400px;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;display:block}
+
+.anim-controls{display:flex;gap:8px;justify-content:center;align-items:center}
+.anim-btn{padding:6px 12px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);
+  border-radius:6px;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;transition:all .2s;white-space:nowrap}
+.anim-btn:hover{background:rgba(240,192,64,.2);border-color:rgba(240,192,64,.5)}
+.anim-btn.playing{background:rgba(240,192,64,.3);border-color:var(--gold)}
+
+.anim-speed{display:flex;gap:6px;align-items:center;font-size:10px;color:var(--dim)}
+.anim-speed-input{width:40px;padding:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:4px;color:var(--text);font-size:11px}
+
 /* Responsive */
 @media(max-width:768px){
   .header h1{font-size:22px}
   .content{padding:20px 12px 20px}
   .card-grid{grid-template-columns:1fr}
+  .anim-grid{grid-template-columns:1fr}
   table{font-size:11px}
   thead th{font-size:9px;padding:6px 2px}
   tbody td{padding:6px 2px}
@@ -160,6 +189,10 @@ th:nth-child(2),td:nth-child(2){text-align:left}
     <div class="panel active" id="p-characters">
       <div class="sec-head">CLASSES OVERVIEW</div>
       <div id="class-cards" class="card-grid"></div>
+
+      <div style="margin-top:40px"></div>
+      <div class="sec-head">ATTACK ANIMATION</div>
+      <div id="attack-anim-section"></div>
 
       <div style="margin-top:40px"></div>
       <div class="sec-head">RESOURCE SYSTEM</div>
@@ -246,6 +279,104 @@ function roleStyle(role) {
 
 function resColor(res) {
   return res === 'fury' ? 'var(--fury)' : res === 'energy' ? 'var(--energy)' : res === 'mana' ? 'var(--mana)' : 'var(--dim)';
+}
+
+// 공격 애니메이션 섹션 렌더링
+function renderAttackAnimationSection() {
+  const container = document.getElementById('attack-anim-section');
+  container.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'anim-grid';
+
+  PLAYER_CLASSES.forEach(cls => {
+    const d = JAB[cls]; if (!d) return;
+    const role = getRole(cls);
+
+    const card = document.createElement('div');
+    card.className = 'anim-card';
+
+    const previewId = 'anim-preview-' + cls;
+    const playBtnId = 'anim-play-' + cls;
+    const speedInputId = 'anim-speed-' + cls;
+
+    card.innerHTML = `
+      <div class="anim-header">
+        <div class="anim-icon"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:100%;height:100%;image-rendering:pixelated;border-radius:4px"></div>
+        <div class="anim-info">
+          <div class="anim-name">${cls}</div>
+          <span class="anim-role" style="${roleStyle(role)}">${role}</span>
+        </div>
+      </div>
+
+      <div class="anim-preview" id="${previewId}">
+        <div class="anim-preview-inner" style="background-image:url('image/character/${cls}_01_attack.png');background-position:0 0"></div>
+      </div>
+
+      <div class="anim-controls">
+        <button class="anim-btn" id="${playBtnId}">▶ 재생</button>
+        <div class="anim-speed">
+          <span>속도:</span>
+          <input type="number" class="anim-speed-input" id="${speedInputId}" value="100" min="50" max="200" step="50">
+          <span>ms</span>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+
+    // 재생 버튼 이벤트
+    setTimeout(() => {
+      const playBtn = document.getElementById(playBtnId);
+      const speedInput = document.getElementById(speedInputId);
+      const preview = document.getElementById(previewId);
+
+      if (!playBtn) return;
+
+      playBtn.onclick = async () => {
+        const isPlaying = playBtn.classList.contains('playing');
+        if (isPlaying) return;
+
+        playBtn.classList.add('playing');
+        playBtn.textContent = '⏸ 중지';
+
+        const frames = [0, 1, 2, 3]; // 프레임 인덱스 (0-3)
+        const speed = parseInt(speedInput.value) || 100;
+        let currentIdx = 0;
+        const inner = preview.querySelector('.anim-preview-inner');
+
+        const playFrame = () => {
+          if (!playBtn.classList.contains('playing')) return;
+
+          const frameNum = frames[currentIdx];
+          const posX = frameNum * 320; // 각 프레임은 320px
+          inner.style.backgroundPosition = `-${posX}px 0`;
+
+          currentIdx = (currentIdx + 1) % frames.length;
+
+          if (playBtn.classList.contains('playing')) {
+            setTimeout(playFrame, speed);
+          }
+        };
+
+        // 첫 프레임 표시 후 시작
+        inner.style.backgroundPosition = '0 0';
+        currentIdx = 1;
+        setTimeout(playFrame, speed);
+
+        // 중지하기
+        playBtn.onclick = () => {
+          playBtn.classList.remove('playing');
+          playBtn.textContent = '▶ 재생';
+          inner.style.backgroundPosition = '0 0';
+          currentIdx = 0;
+          playBtn.onclick = arguments.callee;
+        };
+      };
+    }, 0);
+  });
+
+  container.appendChild(grid);
 }
 
 // 클래스 카드 렌더링
@@ -1018,6 +1149,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof loadI18n === 'function') await loadI18n();
   renderClassCards();
+  renderAttackAnimationSection();
   renderResBlocks();
   renderItemTable();
   renderBattlePotionCards();
