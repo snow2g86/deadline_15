@@ -254,29 +254,6 @@ Object.assign(G, {
 		else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
 		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
 	},
-	// ── 공격 애니메이션 (프레임 시퀀스) ────────
-	playAttackAnimation(a, callback) {
-		const origImg = document.getElementById('u-' + a.id);
-		if (!origImg) { callback(); return; }
-
-		const origSrc = origImg.src;
-		const frames = ['attack_1', 'attack_2', 'attack_3', 'attack_4'];
-		let frameIdx = 0;
-
-		const playNextFrame = () => {
-			if (frameIdx < frames.length) {
-				const newSrc = origSrc.replace(/_(attack_\d|0[12])?\.png$/, '_' + frames[frameIdx] + '.png');
-				origImg.src = newSrc;
-				frameIdx++;
-				setTimeout(playNextFrame, 100);
-			} else {
-				origImg.src = origSrc;
-				callback();
-			}
-		};
-
-		playNextFrame();
-	},
 
 	doAtk(a, tgt) {
 		if(tgt._siegeEvasion>0&&Math.random()<0.3){tgt._siegeEvasion--;this.floatT(tgt.x,tgt.y,t('messages.evasion'),'heal');a.ha=true;a.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.chkAutoEnd();return}

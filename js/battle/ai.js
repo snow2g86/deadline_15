@@ -329,8 +329,7 @@ Object.assign(G, {
   async eAtkAsync(a,tgt){
     if(tgt.team==='ally')this.scrollToUnit(tgt);
     await sl(250);
-    // 적 공격 애니메이션
-    await new Promise(resolve => this.playAttackAnimation(a, resolve));
+    // 공격 애니메이션은 vfxAtk에서 처리됨 (showAttackAnim 호출)
     await this.eAtk(a,tgt);
     await sl(tgt.hp<=0?500:300)},
   async eAtk(a,tgt){
