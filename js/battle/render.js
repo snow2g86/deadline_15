@@ -335,49 +335,4 @@ Object.assign(G, {
 		return enabled
 	},
 	hideAM() { document.getElementById('action-menu').classList.remove('show') },
-
-	// ── 공격 애니메이션 렌더링 ──────────────────────────
-	showAttackAnim(uId, gender, cls) {
-		const u = this.units.find(u => u.id === uId);
-		if (!u || !cls || !gender) return;
-
-		const unitEl = document.getElementById('u-' + uId);
-		if (!unitEl) return;
-
-		// gender 변환: 'm' → '01', 'f' → '02'
-		const genderCode = gender === 'm' ? '01' : gender === 'f' ? '02' : '01';
-
-		// 공격 애니메이션 오버레이 생성
-		const overlay = document.createElement('div');
-		overlay.id = 'atk-anim-' + uId;
-		overlay.style.cssText = `
-			position: absolute;
-			width: 200px;
-			height: 200px;
-			background-image: url('image/character/${cls}_${genderCode}_attack.png');
-			background-size: 800px 200px;
-			background-repeat: no-repeat;
-			background-position: 0 0;
-			image-rendering: pixelated;
-			pointer-events: none;
-			left: ${unitEl.offsetLeft - 50}px;
-			top: ${unitEl.offsetTop - 80}px;
-			z-index: 2000;
-		`;
-
-		const world = document.getElementById('iso-world');
-		world.appendChild(overlay);
-
-		// 프레임 애니메이션 (0 → 1 → 2 → 3 → 제거)
-		let frame = 0;
-		const interval = setInterval(() => {
-			const posX = frame * 200;
-			overlay.style.backgroundPosition = `-${posX}px 0`;
-			frame++;
-			if (frame >= 4) {
-				clearInterval(interval);
-				overlay.remove();
-			}
-		}, 150); // 150ms per frame
-	},
 });
