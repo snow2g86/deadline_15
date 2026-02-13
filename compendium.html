@@ -149,6 +149,11 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 .anim-speed-input{width:40px;padding:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);
   border-radius:4px;color:var(--text);font-size:11px}
 
+.anim-gender-btn{padding:8px 16px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);
+  border-radius:6px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;transition:all .2s}
+.anim-gender-btn:hover{background:rgba(240,192,64,.2);border-color:rgba(240,192,64,.5)}
+.anim-gender-btn.active{background:rgba(240,192,64,.3);border-color:var(--gold)}
+
 /* Responsive */
 @media(max-width:768px){
   .header h1{font-size:22px}
@@ -192,6 +197,10 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 
       <div style="margin-top:40px"></div>
       <div class="sec-head">ATTACK ANIMATION</div>
+      <div style="margin-bottom:16px;display:flex;gap:8px;justify-content:center">
+        <button class="anim-gender-btn active" data-gender="m">♂ Male</button>
+        <button class="anim-gender-btn" data-gender="f">♀ Female</button>
+      </div>
       <div id="attack-anim-section"></div>
 
       <div style="margin-top:40px"></div>
@@ -266,6 +275,7 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 
 <script>
 const PLAYER_CLASSES = ['warrior','knight','assassin','mage','archer','priest','novice','summoner','shaman','brawler','lancer','sapper'];
+let currentAnimGender = 'm'; // 공격 애니메이션 성별 (m/f)
 
 function getRole(cls) {
   if (cls === 'priest') return 'healer';
@@ -310,7 +320,7 @@ function renderAttackAnimationSection() {
       </div>
 
       <div class="anim-preview" id="${previewId}">
-        <div class="anim-preview-inner" style="background-image:url('image/character/${cls}_01_attack.png');background-position:0 0"></div>
+        <div class="anim-preview-inner" data-gender-prefix="${cls}" style="background-image:url('image/character/${cls}_01_attack.png');background-position:0 0"></div>
       </div>
 
       <div class="anim-controls">
@@ -1161,6 +1171,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAIInfo();
   renderStageCards();
   renderDifficultyChart();
+
+  // 공격 애니메이션 성별 선택 이벤트
+  document.querySelectorAll('.anim-gender-btn').forEach(btn => {
+    btn.onclick = () => {
+      const gender = btn.dataset.gender; // m or f
+      const genderCode = gender === 'm' ? '01' : '02';
+      currentAnimGender = genderCode;
+
+      // 버튼 상태 업데이트
+      document.querySelectorAll('.anim-gender-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // 모든 preview-inner 요소의 배경이미지 업데이트
+      document.querySelectorAll('.anim-preview-inner').forEach(el => {
+        const prefix = el.dataset.genderPrefix;
+        el.style.backgroundImage = `url('image/character/${prefix}_${genderCode}_attack.png')`;
+        el.style.backgroundPosition = '0 0';
+      });
+    };
+  });
 });
 </script>
 </body>

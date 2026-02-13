@@ -82,6 +82,8 @@ Object.assign(G, {
     vfxAtk(attacker, target) {
         this.faceDir(attacker.id, target.x - attacker.x, target.y - attacker.y);
         this.atkAnimU(attacker.id);
+        // 공격 애니메이션 표시
+        this.showAttackAnim(attacker.id, attacker.gender, attacker.cls);
         const ax = this.uSX(attacker.x, attacker.y) + UCX, ay = this.uSY(attacker.x, attacker.y) + UCY;
         const tx = this.uSX(target.x, target.y) + UCX, ty = this.uSY(target.x, target.y) + UCY;
         const cls = attacker.cls;
