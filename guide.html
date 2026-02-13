@@ -127,15 +127,15 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
             <div class="tactic-desc">전투에서 경험치를 얻어 클랜원을 강화하세요. 최대 레벨 15까지 성장 가능합니다.</div>
           </div>
           <div class="tactic-item">
-            <div class="tactic-title">🎯 전직 (아카데미)</div>
-            <div class="tactic-desc">노비스만 다른 직업으로 전직 가능합니다. 아카데미에서 전직서를 사용하세요. 레벨, 경험치, 잠재력 등급은 유지됩니다.</div>
+            <div class="tactic-title">🎯 전직 (상점 구매 → 아카데미 사용)</div>
+            <div class="tactic-desc">노비스만 다른 직업으로 전직 가능합니다. 상점에서 전직서를 구매한 후 아카데미에서 사용하세요. 레벨, 경험치, 잠재력 등급(S/A/B/C)은 유지되며, 스탯은 새 직업의 기본값 × 등급보정(S:1.1배, A:1.0배, B:0.9배, C:0.8배) + 새로운 잠재력 × (레벨-1)로 재계산됩니다.</div>
           </div>
           <div class="tactic-item">
             <div class="tactic-title">📊 자원 시스템</div>
             <div class="tactic-desc">
               <strong>분노(Fury, MAX 10):</strong> 전사/기사/창술사 - 공격 시 +1, 피격 시 +2 충전. MAX 도달 시 패시브 자동 발동 후 0으로 리셋.<br/>
-              <strong>에너지(Energy, MAX 100):</strong> 암살자/궁수/공병 - 매턴 자동 회복. 스킬 사용 시 소비.<br/>
-              <strong>마나(Mana, MAX 100-120):</strong> 마법사/성직자/소환사/샤먼 - 매턴 자동 회복. 마법/힐 스킬 사용 시 소비.
+              <strong>에너지(Energy, MAX 100):</strong> 궁수/암살자/격투가/창술사/공병/노비스 - 매턴 자동 회복(8~15). 스킬 사용 시 소비.<br/>
+              <strong>마나(Mana, MAX 100-120):</strong> 마법사/성직자/소환사/주술사 - 매턴 자동 회복. 마법/힐 스킬 사용 시 소비.
             </div>
           </div>
           <div class="tactic-item">
@@ -327,8 +327,8 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
               <span class="role-class">🪨 돌던지기</span>
               <span class="role-class">📈 전직 가능</span>
             </div>
-            <div class="role-pros"><strong>강점:</strong> 높은 성장률. 아카데미에서 11개 직업으로 전직 가능.</div>
-            <div class="role-cons"><strong>약점:</strong> 기본 능력은 평균 이하. 빠른 전직 권장.</div>
+            <div class="role-pros"><strong>강점:</strong> 높은 성장률. 상점에서 전직서 구매 → 아카데미에서 11개 직업 중 선택 가능.</div>
+            <div class="role-cons"><strong>약점:</strong> 기본 능력은 평균 이하. 초기에는 약함. 전직 권장.</div>
           </div>
         </div>
       </div>
@@ -383,11 +383,13 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
           <div class="tactic-item">
             <div class="tactic-title">📜 전직 시스템</div>
             <div class="tactic-desc">
-              노비스만 전직 가능합니다. 전직서 종류:<br>
-              • 근접 전직서 (150G): 전사/기사/도적/격투가/창병/공병<br>
+              노비스만 전직 가능합니다. 상점에서 전직서를 구매하여 아카데미에서 사용하세요.<br>
+              <strong>전직서 종류:</strong><br>
+              • 근접 전직서 (150G): 전사/기사/암살자/격투가/창술사/공병<br>
               • 원거리 전직서 (150G): 궁수/마법사/소환사/주술사<br>
-              • 힐러 전직서 (120G): 사제<br>
-              • 범용 전직서 (200G): 모든 11개 직업
+              • 힐러 전직서 (120G): 성직자<br>
+              • 범용 전직서 (200G): 모든 11개 직업<br>
+              <strong>전직 효과:</strong> 직업만 변경되며, 레벨/경험치/잠재력 등급은 유지됩니다. 스탯은 새 직업 기준으로 재계산됩니다.
             </div>
           </div>
           <div class="tactic-item">
