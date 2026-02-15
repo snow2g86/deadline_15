@@ -389,7 +389,7 @@
   .eq-inv-enhance-lv{font-size:11px}
   .eq-inv-stats{font-size:11px}
   .eq-inv-btn{padding:7px 10px;font-size:11px}
-  .eq-inv-list{grid-template-columns:repeat(4,1fr);gap:12px}
+  .eq-inv-list{grid-template-columns:repeat(2,1fr);gap:12px}
 }
 
 /* ═══ 장비 상세보기 모달 ═══ */
