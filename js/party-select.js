@@ -1283,7 +1283,7 @@ function renderInventoryInModal(ch) {
 
     // 사용가능 직업 아이콘들 (좌측 상단, 제한된 경우만 표시)
     var clsIconHtml = '';
-    var totalClasses = Object.keys(CD).length;
+    var totalClasses = 12; // 전체 12개 직업
     if (item.clsRestrict && item.clsRestrict.length > 0 && item.clsRestrict.length < totalClasses) {
       clsIconHtml = '<div class="eq-inv-cls-icons">';
       for (var c = 0; c < item.clsRestrict.length; c++) {
