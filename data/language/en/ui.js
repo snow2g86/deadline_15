@@ -16,7 +16,8 @@ Object.assign(window._LANG_en, {
         "potion_use_success": "+{exp} EXP gained!",
         "potion_levelup_multi": " levels up!",
         "no_items": "No items in inventory",
-        "no_available_chars": "No available characters"
+        "no_available_chars": "No available characters",
+        "select_unit": "Select Unit"
     },
     "academy": {
         "title": "Academy",

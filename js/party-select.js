@@ -37,7 +37,7 @@ var _party = [];
 var _cStage = null;
 var _practiceMode = false;
 var _pFilter = 'all';
-var _activePageTab = 'party';
+var _activePageTab = localStorage.getItem('ps_active_tab') || 'party';
 
 // ── 장비 상태 ──────────────────────────
 var _selUid = null;
@@ -55,9 +55,24 @@ function updatePageGold() {
   if (el) el.textContent = loadGold().toLocaleString();
 }
 
+// ── 출격 버튼 활성화 상태 ──────────────────
+function updateStartButtonVisibility() {
+  var psStartBtn = document.getElementById('ps-start');
+  if (psStartBtn) {
+    // localStorage에서 출격 가능 여부 확인
+    var canEnable = localStorage.getItem('ps_can_start') === 'true';
+    psStartBtn.disabled = !canEnable;
+    // 비활성화되면 숨김, 활성화되면 표시
+    psStartBtn.style.display = canEnable ? '' : 'none';
+  }
+}
+
 // ── 탭 전환 ─────────────────────────────
 function switchPageTab(tab) {
   _activePageTab = tab;
+  // localStorage에 현재 탭 저장
+  localStorage.setItem('ps_active_tab', tab);
+
   var tabs = document.querySelectorAll('.game-tabs .game-tab');
   tabs.forEach(function(btn) {
     btn.classList.toggle('active', btn.getAttribute('data-ptab') === tab);
@@ -66,6 +81,13 @@ function switchPageTab(tab) {
   document.getElementById('section-equip').style.display = tab === 'equip' ? '' : 'none';
   document.getElementById('section-item').style.display = tab === 'item' ? '' : 'none';
   document.getElementById('section-enhance').style.display = tab === 'enhance' ? '' : 'none';
+
+  // 파티 탭이 아니면 출격 버튼 숨기기
+  var psStartBtn = document.getElementById('ps-start');
+  if (psStartBtn) {
+    psStartBtn.style.display = tab === 'party' ? '' : 'none';
+  }
+
   if (tab === 'equip') {
     _gold = loadGold();
     eqRenderAll();
@@ -83,21 +105,17 @@ function switchPageTab(tab) {
 
 // ── 뒤로가기 ────────────────────────────
 function partyBack() {
-  if (_cStage) location.href = 'stage-select.html';
-  else location.href = 'index.html';
+  // 출격 버튼 비활성화
+  localStorage.setItem('ps_can_start', 'false');
+  location.href = 'index.html';
 }
 
 // ── 출격 확인 ────────────────────────────
 function confirmP() {
-  if (_party.length < MIN_P) return;
-  saveNav({ cStage: _cStage, party: _party, practiceMode: _practiceMode });
+  var activeParty = getActiveParty();
+  if (activeParty.length < MIN_P) return;
+  saveNav({ cStage: _cStage, party: activeParty, practiceMode: _practiceMode });
   location.href = 'battle.html';
-}
-
-// ── 파티 슬롯 제거 ──────────────────────
-function pRemAt(i) {
-  _party.splice(i, 1);
-  renderParty();
 }
 
 // ── 캐릭터 방출 ─────────────────────────
@@ -131,7 +149,7 @@ function releaseChar(uid) {
       gold += price;
       saveGold(gold);
       updatePageGold();
-      renderParty();
+      renderPartySlots();
     }
   );
 }
@@ -163,14 +181,396 @@ function filterBy(key) {
   renderParty();
 }
 
-// ── 파티 렌더링 (lobby.js rP() 대체) ────
+// ═══════════════════════════════════════════
+// 다중 파티 시스템 (Multi-Party System)
+// ═══════════════════════════════════════════
+
+// ── 전역 상태 ──────────────────────────────
+var _parties = null;          // 다중 파티 데이터
+var _currentPartyId = null;   // 현재 선택된 파티 ID
+var _unitModalSlotIdx = null; // 모달에서 선택할 슬롯 인덱스
+
+// ── 파티 탭 렌더링 ────────────────────────
+function renderPartyTabs() {
+  var container = document.getElementById('party-tabs');
+  if (!container || !_parties) return;
+
+  container.innerHTML = '';
+
+  _parties.parties.forEach(function(party) {
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex; align-items:center; gap:6px; width:100%;';
+
+    // 삭제 버튼 (2개 이상일 때만 표시)
+    if (_parties.parties.length > 2) {
+      var delBtn = document.createElement('button');
+      delBtn.className = 'party-tab-delete';
+      delBtn.textContent = '✕';
+      delBtn.title = '파티 삭제';
+      delBtn.onclick = function(e) {
+        e.stopPropagation();
+        if (confirm(party.name + '을(를) 삭제하시겠습니까?')) {
+          deleteParty(party.id);
+        }
+      };
+      wrapper.appendChild(delBtn);
+    }
+
+    var btn = document.createElement('button');
+    btn.className = 'party-tab' + (_currentPartyId === party.id ? ' active' : '');
+    btn.textContent = party.name;
+    btn.style.flex = '1';
+    btn.onclick = function() {
+      setActiveParty(party.id);
+    };
+    wrapper.appendChild(btn);
+
+    container.appendChild(wrapper);
+  });
+
+  // 파티 추가 버튼 (최대 5개까지만)
+  if (_parties.parties.length < 5) {
+    var addBtn = document.createElement('button');
+    addBtn.className = 'party-tabs-add';
+    addBtn.textContent = '+';
+    addBtn.onclick = addParty;
+    container.appendChild(addBtn);
+  }
+}
+
+// ── 파티 슬롯 렌더링 ────────────────────────
+function renderPartySlots() {
+  var container = document.getElementById('party-slots');
+  if (!container || !_parties) return;
+
+  var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
+  if (!activeParty) return;
+
+  container.innerHTML = '';
+  var roster = getRoster();
+
+  // 파티 슬롯 그리드 생성
+  var slotRow = document.createElement('div');
+  slotRow.className = 'party-slot-row';
+
+  activeParty.slots.forEach(function(uid, idx) {
+    var slot = document.createElement('div');
+    slot.className = 'party-slot' + (uid ? ' filled' : ' empty');
+
+    if (uid) {
+      var ch = roster.chars.find(function(c) { return c.uid === uid; });
+      if (ch) {
+        var content = document.createElement('div');
+        content.className = 'party-slot-content';
+        content.innerHTML = '<div class="party-slot-icon">' +
+          charSprite(ch.cls, 40, ch.gender) + '</div>' +
+          '<div class="party-slot-name">' + (ch.customName || t('character.names.' + ch.nameId)) + '</div>' +
+          '<div class="party-slot-level">Lv.' + ch.lv + '</div>';
+        slot.appendChild(content);
+
+        // 제거 버튼
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'party-slot-remove';
+        removeBtn.textContent = '✕';
+        removeBtn.onclick = function(e) {
+          e.stopPropagation();
+          removeFromSlot(idx);
+        };
+        slot.appendChild(removeBtn);
+      }
+    } else {
+      slot.innerHTML = '<div class="party-slot-content">+</div>';
+    }
+
+    slot.onclick = function() {
+      openUnitModal(idx);
+    };
+
+    slotRow.appendChild(slot);
+  });
+
+  container.appendChild(slotRow);
+
+  // 파티 카운터 업데이트
+  var counter = document.getElementById('ps-counter');
+  var count = activeParty.slots.filter(function(uid) { return uid !== null; }).length;
+  if (counter) {
+    var readyClass = count >= MIN_P ? ' ready' : '';
+    counter.textContent = count + ' / 5';
+    counter.className = 'ps-counter' + readyClass;
+  }
+
+  // 출격 버튼 활성/비활성화 업데이트
+  var psStartBtn = document.getElementById('ps-start');
+  if (psStartBtn) {
+    var canStart = count >= MIN_P && localStorage.getItem('ps_can_start') === 'true';
+    psStartBtn.disabled = !canStart;
+    // 조건을 만족하지 않으면 숨김
+    psStartBtn.style.display = (count >= MIN_P && localStorage.getItem('ps_can_start') === 'true') ? '' : 'none';
+  }
+}
+
+// ── 활성 파티 변경 ────────────────────────
+function setActiveParty(partyId) {
+  if (!_parties) return;
+  _currentPartyId = partyId;
+  _parties.activePartyId = partyId;
+  saveParties(_parties);
+  renderPartyTabs();
+  renderPartySlots();
+  updateStartButtonVisibility();
+}
+
+// ── 파티 추가 ────────────────────────────
+function addParty() {
+  if (!_parties || _parties.parties.length >= 5) return;
+  var newId = _parties.nextPartyId++;
+  _parties.parties.push({
+    id: newId,
+    name: '파티 ' + newId,
+    slots: [null, null, null, null, null]
+  });
+  saveParties(_parties);
+  renderPartyTabs();
+  setActiveParty(newId);
+}
+
+// ── 파티 삭제 ────────────────────────────
+function deleteParty(partyId) {
+  if (!_parties || _parties.parties.length <= 2) return;
+  _parties.parties = _parties.parties.filter(function(p) { return p.id !== partyId; });
+  if (_currentPartyId === partyId) {
+    _currentPartyId = _parties.parties[0].id;
+    _parties.activePartyId = _currentPartyId;
+  }
+  saveParties(_parties);
+  renderPartyTabs();
+  renderPartySlots();
+}
+
+// ── 슬롯에서 유닛 제거 ────────────────────
+function removeFromSlot(slotIdx) {
+  if (!_parties) return;
+  var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
+  if (activeParty) {
+    activeParty.slots[slotIdx] = null;
+    saveParties(_parties);
+    renderPartySlots();
+  }
+}
+
+// ── 유닛 선택 모달 열기 ────────────────────
+function openUnitModal(slotIdx) {
+  _unitModalSlotIdx = slotIdx;
+  var modal = document.getElementById('unit-select-modal-overlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    renderUnitFilterTabs();
+    renderUnitCards('all');
+  }
+}
+
+// ── 유닛 선택 모달 닫기 ────────────────────
+function closeUnitModal() {
+  var modal = document.getElementById('unit-select-modal-overlay');
+  if (modal) modal.style.display = 'none';
+  _unitModalSlotIdx = null;
+}
+
+// ── 모달 필터 탭 렌더링 ────────────────────
+function renderUnitFilterTabs() {
+  var container = document.getElementById('unit-filter-tabs');
+  if (!container) return;
+
+  container.innerHTML = '';
+  var filters = [
+    { key: 'all', label: t('common.all') },
+    { key: 'role_melee', label: t('roles.melee') },
+    { key: 'role_ranged', label: t('roles.ranged') },
+    { key: 'role_healer', label: t('roles.healer') }
+  ];
+
+  filters.forEach(function(f) {
+    var btn = document.createElement('button');
+    btn.className = 'unit-filter-tab' + (_pFilter === f.key ? ' active' : '');
+    btn.textContent = f.label;
+    btn.onclick = function() {
+      _pFilter = f.key;
+      renderUnitCards(f.key);
+      btn.parentNode.querySelectorAll('.unit-filter-tab').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ── 모달 유닛 카드 렌더링 ────────────────────
+function renderUnitCards(filter) {
+  var container = document.getElementById('unit-cards-grid');
+  if (!container || !_parties) return;
+
+  var roster = getRoster();
+  var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
+  if (!activeParty) return;
+
+  var inv = loadInventory();  // 장비 목록 미리 로드
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+
+  // 필터링
+  if (filter !== 'all') {
+    if (filter.startsWith('role_')) {
+      var role = filter.replace('role_', '');
+      alive = alive.filter(function(c) { return ROLE_MAP[c.cls] === role; });
+    } else if (filter.startsWith('cls_')) {
+      var cls = filter.replace('cls_', '');
+      alive = alive.filter(function(c) { return c.cls === cls; });
+    }
+  }
+
+  // 정렬: 파티원 우선 → 레벨 내림차순
+  var inPartyIds = new Set(activeParty.slots.filter(function(uid) { return uid; }));
+  alive.sort(function(a, b) {
+    var aInParty = inPartyIds.has(a.uid) ? 1 : 0;
+    var bInParty = inPartyIds.has(b.uid) ? 1 : 0;
+    if (bInParty !== aInParty) return bInParty - aInParty;
+    return b.lv - a.lv;
+  });
+
+  container.innerHTML = '';
+
+  // 필터 결과가 없을 때
+  if (alive.length === 0) {
+    var emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'text-align:center; padding:40px 20px; color:rgba(255,255,255,.5);';
+    emptyMsg.textContent = t('party.no_available_chars');
+    container.appendChild(emptyMsg);
+    return;
+  }
+
+  alive.forEach(function(ch) {
+    var card = document.createElement('div');
+    var isInParty = inPartyIds.has(ch.uid);
+    card.className = 'unit-card' + (isInParty ? ' in-party' : '');
+
+    var grade = potGrade(ch);
+    var bonus = calcEquipBonus(ch);
+    var skills = getCharSkills(ch.cls);
+
+    // 등급별 색상
+    var gradeColor = GRADE_COLORS[grade] || '#9ca3af';
+    var gradeBg = grade === 'S' ? 'rgba(240,192,64,.15)' :
+                  grade === 'A' ? 'rgba(96,165,250,.15)' :
+                  grade === 'B' ? 'rgba(74,222,128,.15)' :
+                  'rgba(156,163,175,.15)';
+
+    var html = '<div class="unit-card-header">' +
+      '<div class="unit-card-icon">' +
+        charSprite(ch.cls, 60, ch.gender) +
+        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 24) + '</div>' +
+      '</div>' +
+      '<div class="unit-card-grade" style="background:' + gradeBg + '; border-color:' + gradeColor + '; color:' + gradeColor + ';">' + grade + '</div>' +
+    '</div>';
+
+    html += '<div class="unit-card-meta">' +
+      'Lv.' + ch.lv + ' • ' + t('classes.' + ch.cls) + '<br/>' +
+      (ch.customName || t('character.names.' + ch.nameId)) +
+    '</div>';
+
+    html += '<div class="unit-card-stats">' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">HP:</span>' +
+        '<span class="unit-card-stat-value">' + ch.hp +
+        (bonus.hp > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.hp + '</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">ATK:</span>' +
+        '<span class="unit-card-stat-value">' + ch.atk +
+        (bonus.atk > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.atk + '</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">DEF:</span>' +
+        '<span class="unit-card-stat-value">' + ch.def +
+        (bonus.def > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.def + '</span>' : '') +
+        '</span>' +
+      '</div>' +
+    '</div>';
+
+    // 장비 슬롯
+    html += '<div class="unit-card-equips">';
+    ['weapon', 'offhand', 'helmet', 'armor', 'boots', 'necklace', 'earring', 'ring'].forEach(function(slot) {
+      var eqId = (ch.equip && ch.equip[slot]) ? ch.equip[slot] : null;
+      var eq = null;
+      if (eqId) {
+        eq = inv.find(function(item) { return item.eid === eqId && item.type === 'equip'; });
+      }
+      if (eq) {
+        html += '<div class="unit-card-equip-slot filled" data-rarity="' + eq.rarity + '">' +
+          (eq.rarity.charAt(0).toUpperCase()) +
+          '<span class="unit-card-equip-lv">+' + (eq.enhanceLv || 0) + '</span>' +
+        '</div>';
+      } else {
+        html += '<div class="unit-card-equip-slot"></div>';
+      }
+    });
+    html += '</div>';
+
+    // 스킬
+    if (skills.length > 0) {
+      html += '<div class="unit-card-skills">';
+      skills.forEach(function(sk) {
+        var lv = getCharSkillLv(ch, sk.id);
+        if (lv > 0) {
+          html += '<span class="unit-card-skill">' + sk.icon +
+            '<span class="unit-card-skill-lv">' + lv + '</span></span>';
+        }
+      });
+      html += '</div>';
+    }
+
+    card.innerHTML = html;
+    card.onclick = function() {
+      selectUnitForSlot(ch.uid);
+    };
+
+    container.appendChild(card);
+  });
+}
+
+// ── 유닛 선택 및 슬롯 할당 ────────────────────
+function selectUnitForSlot(uid) {
+  if (_unitModalSlotIdx === null || !_parties) return;
+
+  var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
+  if (!activeParty) return;
+
+  // 이미 다른 슬롯에 있는 유닛이면 제거
+  for (var i = 0; i < activeParty.slots.length; i++) {
+    if (activeParty.slots[i] === uid) {
+      activeParty.slots[i] = null;
+      break;
+    }
+  }
+
+  // 새 슬롯에 할당
+  activeParty.slots[_unitModalSlotIdx] = uid;
+  saveParties(_parties);
+  closeUnitModal();
+  renderPartySlots();
+}
+
+// ── 파티 렌더링 (legacy.js rP() 대체) ────
+// ── 파티 렌더링 (카드 그리드 방식) ────
 function renderParty() {
   var roster = getRoster();
   var inParty = {};
   _party.forEach(function(uid) { inParty[uid] = true; });
   var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
 
-  // ── 탭 렌더링 ──
+  // ── 탭 렌더링 (변경 없음) ──
   var tabEl = document.getElementById('ps-tabs');
   if (tabEl) {
     var ownedRoles = {};
@@ -207,7 +607,7 @@ function renderParty() {
     });
   }
 
-  // ── 필터링 ──
+  // ── 필터링 (변경 없음) ──
   var filtered = alive;
   if (_pFilter.startsWith('role_')) {
     var role = _pFilter.slice(5);
@@ -217,10 +617,21 @@ function renderParty() {
     filtered = alive.filter(function(c) { return c.cls === cls; });
   }
 
-  // ── 정렬: 클래스별 → 레벨 내림차순 → 이름순 ──
+  // ── 정렬: 파티원(레벨순) → 클랜원(클래스→레벨→이름순) ──
   var clsOrder = Object.keys(JAB);
   var names = t('character.names');
   filtered.sort(function(a, b) {
+    // 파티원을 먼저 표시
+    var aInParty = inParty[a.uid] ? 1 : 0;
+    var bInParty = inParty[b.uid] ? 1 : 0;
+    if (bInParty !== aInParty) return bInParty - aInParty;
+    
+    // 파티원 내에서는 레벨 내림차순
+    if (aInParty && bInParty) {
+      if (b.lv !== a.lv) return b.lv - a.lv;
+    }
+    
+    // 클랜원 내에서는 클래스 → 레벨 → 이름
     var ci = clsOrder.indexOf(a.cls) - clsOrder.indexOf(b.cls);
     if (ci !== 0) return ci;
     if (b.lv !== a.lv) return b.lv - a.lv;
@@ -229,78 +640,135 @@ function renderParty() {
     return aName.localeCompare(bName);
   });
 
-  // ── 로스터 리스트 렌더링 ──
-  var ro = document.getElementById('ps-roster'); ro.innerHTML = '';
+  // ── 카드 그리드 렌더링 (NEW) ──
+  var grid = document.getElementById('ps-chars');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
   filtered.forEach(function(ch) {
-    var sel = !!inParty[ch.uid];
+    var isInParty = !!inParty[ch.uid];
     var d = JAB[ch.cls];
     var grade = potGrade(ch);
-    var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
+    var gClr = grade === 'S' ? '#f0c040' : 
+                grade === 'A' ? '#60a5fa' : 
+                grade === 'B' ? '#4ade80' : '#9ca3af';
+    
     var atMax = ch.lv >= MAX_LEVEL;
     var expNeed = atMax ? 1 : expForLevel(ch.lv);
     var expPct = atMax ? 100 : Math.min(100, Math.round(((ch.exp || 0) / expNeed) * 100));
-    var row = document.createElement('div');
-    row.className = 'rl-row' + (sel ? ' selected' : '');
+    
     var charName = ch.customName || names[ch.nameId] || d.icon;
-    if (!ch.equip) ch.equip = { weapon:null,offhand:null,helmet:null,armor:null,boots:null,necklace:null,earring:null,ring:null };
-    var eqB = typeof calcEquipBonus === 'function' ? calcEquipBonus(ch) : {hp:0,atk:0,def:0,move:0,range:0};
-    var eqHp = eqB.hp ? '<span style="color:#4ade80">+' + eqB.hp + '</span>' : '';
-    var eqAtk = eqB.atk ? '<span style="color:#4ade80">+' + eqB.atk + '</span>' : '';
-    var eqDef = eqB.def ? '<span style="color:#4ade80">+' + eqB.def + '</span>' : '';
+    
+    // 장비 보너스
+    if (!ch.equip) ch.equip = {
+      weapon:null, offhand:null, helmet:null, armor:null, 
+      boots:null, necklace:null, earring:null, ring:null
+    };
+    var eqB = typeof calcEquipBonus === 'function' ? 
+              calcEquipBonus(ch) : {hp:0, atk:0, def:0, move:0, range:0};
+    
+    // 스킬 정보
     var skillInfo = formatPartyCharSkills(ch);
+    
+    // 파티 순번 찾기
+    var partyIndex = -1;
+    if (isInParty) {
+      partyIndex = _party.indexOf(ch.uid);
+    }
+    
+    // 카드 생성
+    var card = document.createElement('div');
+    card.className = 'ps-char-card' + (isInParty ? ' in-party' : '');
+    
     const iconSize = (ch.cls === 'brawler' || ch.cls === 'assassin') ? 51 : 60;
-    row.innerHTML =
-      '<div class="rl-icon">' + charSprite(ch.cls, iconSize, ch.gender) +
-        '<span class="rl-grade" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>' +
-      '<div class="rl-info">' +
-      '<div class="rl-top"><span class="rl-lv">Lv.' + ch.lv + '</span><span class="rl-cls">' + t('classes.' + ch.cls) + '</span></div>' +
-      '<div class="rl-top"><span class="rl-name">' + charName + '</span><button class="rl-rename" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">&#9998;</button></div>' +
-      '<div class="rl-stats">HP <b>' + ch.hp + '</b>' + eqHp + ' ATK <b>' + ch.atk + '</b>' + eqAtk + ' DEF <b>' + ch.def + '</b>' + eqDef + ' MOV <b>' + ch.move + '</b> RNG <b>' + ch.range + '</b></div>' +
-      '<div class="rl-pot">' + t('party.potential_stats', { hp: ch.pot.hp, atk: ch.pot.atk, def: ch.pot.def }) + '</div>' +
-      '<div class="rl-exp"><div class="rl-exp-fill" style="width:' + expPct + '%"></div></div>' +
-      (skillInfo ? '<div class="rl-skills">' + skillInfo + '</div>' : '') +
-      '</div>' +
-      '<div class="rl-actions">' +
-      '<div class="rl-btn ' + (sel ? 'chk' : 'add') + '">' + (sel ? '\u2713' : '+') + '</div>' +
-      (sel ? '' : '<button class="rl-release" onclick="event.stopPropagation();releaseChar(' + ch.uid + ')">' + t('party.release') + '</button>') +
-      '</div>';
-    row.onclick = (function(chUid, wasSel) {
+    
+    var html = '';
+    
+    // 파티 배지 (파티원만)
+    if (isInParty) {
+      html += '<div class="ps-party-badge">' +
+              '<span>' + (partyIndex + 1) + '</span>✓</div>';
+    }
+    
+    // 캐릭터 아이콘 + 등급
+    html += '<div class="ps-char-icon">' + 
+            charSprite(ch.cls, iconSize, ch.gender) +
+            '<span class="ps-grade-badge" style="color:' + gClr + ';border-color:' + gClr + '">' + 
+            grade + '</span></div>';
+    
+    // 캐릭터 정보
+    html += '<div class="ps-char-info">';
+    
+    // 레벨 + 클래스
+    html += '<div class="ps-char-meta">' +
+            '<span class="ps-char-level">Lv.' + ch.lv + '</span>' +
+            '<span class="ps-char-cls">' + t('classes.' + ch.cls) + '</span>' +
+            '</div>';
+    
+    // 이름 + 이름변경 버튼
+    html += '<div class="ps-char-name">' +
+            '<span>' + charName + '</span>' +
+            '<button class="ps-rename-btn" onclick="event.stopPropagation();renameChar(' + ch.uid + ')">✎</button>' +
+            '</div>';
+    
+    // 스탯 (콤팩트)
+    html += '<div class="ps-char-stats">' +
+            'HP <b>' + ch.hp + '</b>' + (eqB.hp ? '<span class="eq-bonus">+' + eqB.hp + '</span>' : '') + ' ' +
+            'ATK <b>' + ch.atk + '</b>' + (eqB.atk ? '<span class="eq-bonus">+' + eqB.atk + '</span>' : '') + ' ' +
+            'DEF <b>' + ch.def + '</b>' + (eqB.def ? '<span class="eq-bonus">+' + eqB.def + '</span>' : '') +
+            '</div>';
+    
+    // 잠재력
+    html += '<div class="ps-char-potential">' +
+            t('party.potential_stats', {
+              hp: ch.pot.hp, 
+              atk: ch.pot.atk, 
+              def: ch.pot.def
+            }) + '</div>';
+    
+    // EXP 바
+    html += '<div class="ps-char-exp">' +
+            '<div class="ps-char-exp-fill" style="width:' + expPct + '%"></div>' +
+            '</div>';
+    
+    // 스킬 (있으면)
+    if (skillInfo) {
+      html += '<div class="ps-char-skills">' + skillInfo + '</div>';
+    }
+    
+    html += '</div>'; // .ps-char-info
+    
+    // 방출 버튼 (파티원 제외)
+    if (!isInParty) {
+      html += '<button class="ps-release-btn" onclick="event.stopPropagation();releaseChar(' + ch.uid + ')">' +
+              t('party.release') + '</button>';
+    }
+    
+    card.innerHTML = html;
+    
+    // 카드 클릭: 파티 추가/제거
+    card.onclick = (function(chUid, wasSel) {
       return function() {
         if (wasSel) {
           _party = _party.filter(function(u) { return u !== chUid; });
         } else if (_party.length < MAX_P) {
           _party.push(chUid);
         }
-        renderParty();
+        renderPartySlots();
       };
-    })(ch.uid, sel);
-    ro.appendChild(row);
+    })(ch.uid, isInParty);
+    
+    grid.appendChild(card);
   });
 
-  // ── 파티 슬롯 (좌측) ──
-  var pp = document.getElementById('ps-party'); pp.innerHTML = '';
-  for (var i = 0; i < MAX_P; i++) {
-    var s = document.createElement('div');
-    s.className = 'party-slot';
-    s.innerHTML = '<span class="ps-num">' + (i + 1) + '</span>';
-    if (i < _party.length) {
-      var pch = getChar(_party[i]);
-      if (pch) {
-        var pd = JAB[pch.cls];
-        s.classList.add('filled');
-        s.innerHTML = '<span class="ps-num">' + (i + 1) + '</span>' +
-          clsIcon(pch.cls, 20) +
-          '<span class="ps-lv">Lv' + pch.lv + '</span><span class="ps-x">\u2715</span>';
-        s.onclick = (function(idx) { return function() { pRemAt(idx); }; })(i);
-      }
-    }
-    pp.appendChild(s);
-  }
-
-  // ── 카운터 & 출격 버튼 ──
+  // ── 카운터 & 출격 버튼 업데이트 ──
   var n = _party.length;
-  document.getElementById('ps-counter').textContent = n + ' / ' + MAX_P;
-  document.getElementById('ps-counter').style.color = n >= MIN_P ? 'var(--green)' : 'var(--blue)';
+  var counterEl = document.getElementById('ps-counter');
+  if (counterEl) {
+    counterEl.textContent = n + ' / ' + MAX_P;
+    counterEl.className = 'ps-counter' + (n >= MIN_P ? ' ready' : '');
+  }
+  
   var startBtn = document.getElementById('ps-start');
   if (_cStage) {
     startBtn.textContent = t('party.start_battle');
@@ -1118,14 +1586,23 @@ var init = async function() {
   var nav = loadNav();
   _cStage = (nav && nav.cStage) ? nav.cStage : null;
   _practiceMode = (nav && nav.practiceMode) ? nav.practiceMode : false;
-  _party = loadParty();
+
+  // 다중 파티 로드 (레거시 마이그레이션 포함)
+  _parties = loadParties();
+  _currentPartyId = _parties.activePartyId;
+
   loadGlobalBattleItems();
-  // 죽은 유닛 제거
+
+  // 죽은 유닛 제거 (모든 파티에서)
   var roster = getRoster();
-  _party = _party.filter(function(uid) {
-    var ch = roster.chars.find(function(c) { return c.uid === uid; });
-    return ch && !ch.dead;
+  _parties.parties.forEach(function(party) {
+    party.slots = party.slots.filter(function(uid) {
+      if (!uid) return true;
+      var ch = roster.chars.find(function(c) { return c.uid === uid; });
+      return ch && !ch.dead;
+    });
   });
+  saveParties(_parties);
 
   // Migrate: 인벤토리 장비 아이템의 equipped 필드 정규화
   try {
@@ -1143,8 +1620,40 @@ var init = async function() {
     btn.onclick = function() { switchPageTab(btn.getAttribute('data-ptab')); };
   });
 
+  // localStorage에서 저장된 탭 상태 복원
+  var savedTab = localStorage.getItem('ps_active_tab') || 'party';
+  switchPageTab(savedTab);
+
+  // 모달 닫기 버튼 바인딩
+  var unitModalClose = document.getElementById('unit-modal-close');
+  if (unitModalClose) {
+    unitModalClose.onclick = closeUnitModal;
+  }
+
+  // 모달 오버레이 클릭으로 닫기
+  var unitModalOverlay = document.getElementById('unit-select-modal-overlay');
+  if (unitModalOverlay) {
+    unitModalOverlay.onclick = function(e) {
+      if (e.target === unitModalOverlay) closeUnitModal();
+    };
+  }
+
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && unitModalOverlay && unitModalOverlay.style.display === 'flex') {
+      closeUnitModal();
+    }
+  });
+
   updatePageGold();
-  renderParty();
+
+  // 다중 파티 UI 렌더링
+  renderPartyTabs();
+  renderPartySlots();
+
+  // 출격 버튼 표시 여부 업데이트
+  updateStartButtonVisibility();
+
   renderBottomNav();
   setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
 };

@@ -31,7 +31,13 @@ function renderBottomNav() {
     var btn = e.target.closest('.bnav-tab');
     if (btn) {
       var tab = NAV_TABS.find(function(x) { return x.tab === btn.getAttribute('data-tab'); });
-      if (tab && tab.href) location.href = tab.href;
+      if (tab && tab.href) {
+        // party-select로 이동할 때 출격 버튼 비활성화
+        if (tab.href === 'party-select.html') {
+          localStorage.setItem('ps_can_start', 'false');
+        }
+        location.href = tab.href;
+      }
     }
   });
 }

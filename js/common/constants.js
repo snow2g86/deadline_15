@@ -4,7 +4,8 @@
 // ── localStorage 키 ────────────────────────────
 const SAVE_KEY = 'game_save';
 const ROSTER_KEY = 'game_roster';
-const PARTY_KEY = 'game_party';
+const PARTY_KEY = 'game_party'; // 레거시 (마이그레이션용)
+const PARTIES_KEY = 'game_parties'; // 다중 파티 (신규)
 const NAV_KEY = 'game_nav';
 const INVENTORY_KEY = 'game_inventory';
 const SHOP_KEY = 'game_shop';

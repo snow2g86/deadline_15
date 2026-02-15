@@ -16,7 +16,8 @@ Object.assign(window._LANG_es, {
         "potion_use_success": "+{exp} EXP obtenido!",
         "potion_levelup_multi": " niveles arriba!",
         "no_items": "No hay objetos en el inventario",
-        "no_available_chars": "No hay personajes disponibles"
+        "no_available_chars": "No hay personajes disponibles",
+        "select_unit": "Seleccionar Unidad"
     },
     "academy": {
         "title": "Academia",

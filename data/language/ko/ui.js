@@ -16,7 +16,8 @@ Object.assign(window._LANG_ko, {
         "potion_use_success": "+{exp} EXP 획득!",
         "potion_levelup_multi": "단계 레벨업!",
         "no_items": "보유한 아이템이 없습니다",
-        "no_available_chars": "사용 가능한 캐릭터가 없습니다"
+        "no_available_chars": "사용 가능한 캐릭터가 없습니다",
+        "select_unit": "유닛 선택"
     },
     "academy": {
         "title": "아카데미",

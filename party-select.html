@@ -56,20 +56,48 @@
 		</div>
 
 		<!-- Party section -->
-		<div id="section-party">
-			<div class="ps-layout">
-				<div class="ps-left">
-					<div class="ps-counter" id="ps-counter">0 / 5</div>
-					<div class="ps-party" id="ps-party"></div>
-				</div>
-				<div class="ps-right">
-					<div class="ps-tabs" id="ps-tabs"></div>
-					<div class="ps-roster" id="ps-roster"></div>
-				</div>
+	<div id="section-party">
+		<div class="ps-layout">
+			<!-- Left: Party tabs (Multiple parties) -->
+			<div class="ps-left">
+				<div class="ps-counter" id="ps-counter">0 / 5</div>
+				<div class="party-tabs" id="party-tabs"></div>
 			</div>
-			<button class="ps-start" id="ps-start" disabled onclick="confirmP()" data-i18n="party.start_battle">DEADLINE
-				15</button>
+
+			<!-- Right: Party slots grid (5 slots per party) -->
+			<div class="ps-right">
+				<div class="party-slots" id="party-slots"></div>
+				<!-- Start Battle Button -->
+				<button class="ps-start" id="ps-start" disabled onclick="confirmP()" data-i18n="party.start_battle">DEADLINE 15</button>
+			</div>
 		</div>
+
+		<!-- Hidden: Legacy character list (for future roster view) -->
+		<div id="legacy-char-view" style="display:none">
+			<div class="ps-header">
+				<div class="ps-counter" id="ps-counter">0 / 5</div>
+				<div class="ps-tabs" id="ps-tabs"></div>
+			</div>
+			<div class="ps-chars" id="ps-chars"></div>
+		</div>
+	</div>
+
+	<!-- Unit Selection Modal (Full-screen overlay) -->
+	<div id="unit-select-modal-overlay" class="unit-modal-overlay" style="display:none">
+		<div id="unit-select-modal-content" class="unit-modal-content">
+			<!-- Modal header -->
+			<div class="unit-modal-header">
+				<h2 data-i18n="party.select_unit">유닛 선택</h2>
+				<button id="unit-modal-close" class="unit-modal-close">✕</button>
+			</div>
+
+			<!-- Filter tabs -->
+			<div class="unit-filter-tabs" id="unit-filter-tabs"></div>
+
+			<!-- Unit cards grid -->
+			<div class="unit-cards-grid" id="unit-cards-grid"></div>
+		</div>
+	</div>
 
 		<!-- Item section -->
 		<div id="section-item" style="display:none">

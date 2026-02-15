@@ -225,6 +225,8 @@ function startStage(stageId, practiceMode) {
     location.href = 'battle.html';
   } else {
     saveNav({ cStage: stage, practiceMode: practiceMode });
+    // 출격 버튼 활성화
+    localStorage.setItem('ps_can_start', 'true');
     location.href = 'party-select.html';
   }
 
