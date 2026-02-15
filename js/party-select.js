@@ -1281,9 +1281,10 @@ function renderInventoryInModal(ch) {
       enhanceLvHtml = '<span class="eq-inv-enhance-lv">+' + item.enhanceLv + '</span>';
     }
 
-    // 사용가능 직업 아이콘들 (좌측 상단)
+    // 사용가능 직업 아이콘들 (좌측 상단, 제한된 경우만 표시)
     var clsIconHtml = '';
-    if (item.clsRestrict && item.clsRestrict.length > 0) {
+    var totalClasses = Object.keys(CD).length;
+    if (item.clsRestrict && item.clsRestrict.length > 0 && item.clsRestrict.length < totalClasses) {
       clsIconHtml = '<div class="eq-inv-cls-icons">';
       for (var c = 0; c < item.clsRestrict.length; c++) {
         clsIconHtml += '<div class="eq-inv-cls-icon">' + clsIcon(item.clsRestrict[c], 16) + '</div>';
