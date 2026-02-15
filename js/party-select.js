@@ -1292,13 +1292,6 @@ function renderInventoryInModal(ch) {
       clsIconHtml += '</div>';
     }
 
-    // 직업 제한 텍스트 경고 (하단)
-    var restrictInfo = '';
-    if (item.clsRestrict && item.clsRestrict.length > 0 && !canEquipThis) {
-      var allowedClasses = item.clsRestrict.map(function(cls) { return t('classes.' + cls); }).join(', ');
-      restrictInfo = '<span class="eq-inv-restrict" title="허용 직업: ' + allowedClasses + '">🔒 ' + allowedClasses + '</span>';
-    }
-
     // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
     var itemEmoji = getEquipEmoji(item.templateId);
     var card = document.createElement('div');
@@ -1336,8 +1329,7 @@ function renderInventoryInModal(ch) {
             : '')
           )
         ) +
-      '</div>' +
-      restrictInfo;
+      '</div>';
 
     // 이벤트 리스너
     var equipBtn = card.querySelector('.eq-equip-btn');
