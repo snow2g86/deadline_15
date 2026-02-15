@@ -1311,7 +1311,6 @@ function renderInventoryInModal(ch) {
       '<div class="eq-inv-info">' +
         '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
         '<span class="eq-inv-name">' +
-          (item.enhanceLv > 0 ? 'Lv.' + item.enhanceLv + ' ' : '') +
           t('equip.item.' + item.templateId) +
           enhanceLvHtml +
         '</span>' +
