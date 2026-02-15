@@ -6,7 +6,7 @@ const JAB = {
   },
   "knight": {
     "icon":"🛡️", "res":"fury", "maxRes": 10, "resRec": 0,
-    "base": { "hp": 150, "atk": 15, "def": 14, "move": 2, "range": 1 },
+    "base": { "hp": 150, "atk": 15, "def": 14, "move": 3, "range": 1 },
     "growth": { "hp": [12,18], "atk": [1,2], "def": [1,3] }
   },
   "assassin": {
