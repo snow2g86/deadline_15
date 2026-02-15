@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/common.css">
     <script src="data/jab.js"></script>
     <script src="js/skills.js"></script>
+    <script src="js/common/constants.js"></script>
+    <script src="js/common/render.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#333; line-height:1.6; }
@@ -202,7 +204,7 @@ function renderCards() {
         // Skills
         html += '<div class="skill-section"><div style="font-weight:600;font-size:.85em;color:#667eea;margin-bottom:6px">기본 스킬</div>';
         skills.forEach(sk => {
-            html += `<div class="skill-item"><span class="sk-icon">${sk.icon}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
+            html += `<div class="skill-item"><span class="sk-icon">${skillIcon(sk.id, 18)}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
         });
 
         if (learnables.length) {
@@ -211,12 +213,12 @@ function renderCards() {
             if (actives.length) {
                 html += '<div style="font-weight:600;font-size:.85em;color:#f57c00;margin:10px 0 6px">습득형 스킬</div>';
                 actives.forEach(sk => {
-                    html += `<div class="skill-item"><span class="sk-icon">${sk.icon}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
+                    html += `<div class="skill-item"><span class="sk-icon">${skillIcon(sk.id, 18)}</span><span class="skill-name">${sk.name}</span> <span style="color:#999;font-size:.8em;margin-left:4px">${sk.costType} ${sk.cost}</span></div><div class="skill-desc">${sk.desc}</div>`;
                 });
             }
             if (passives.length) {
                 passives.forEach(sk => {
-                    html += `<div class="passive-item"><strong>${sk.icon} ${sk.name}</strong> (패시브)<br>${sk.desc}</div>`;
+                    html += `<div class="passive-item"><strong>${skillIcon(sk.id, 18)} ${sk.name}</strong> (패시브)<br>${sk.desc}</div>`;
                 });
             }
         }
@@ -293,7 +295,7 @@ function renderSkills() {
     html += '<table class="skill-table"><thead><tr><th>클래스</th><th>스킬명</th><th>설명</th><th>비용</th></tr></thead><tbody>';
     CLASSES.forEach(cls => {
         getSkills(cls).forEach(sk => {
-            html += `<tr><td>${JAB[cls].icon} ${cls}</td><td><strong>${sk.icon} ${sk.name}</strong></td><td>${sk.desc}</td><td>${sk.cost} ${sk.costType}</td></tr>`;
+            html += `<tr><td>${JAB[cls].icon} ${cls}</td><td><strong>${skillIcon(sk.id, 16)} ${sk.name}</strong></td><td>${sk.desc}</td><td>${sk.cost} ${sk.costType}</td></tr>`;
         });
     });
     html += '</tbody></table>';
@@ -305,7 +307,7 @@ function renderSkills() {
         const learnables = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
         learnables.forEach(sk => {
             const isPassive = sk.passive;
-            html += `<tr class="${isPassive?'passive-row':''}"><td>${JAB[cls].icon} ${cls}</td><td><strong>${sk.icon} ${sk.name}</strong></td><td>${isPassive?'<span style="color:#f57c00">패시브</span>':'액티브'}</td><td>${sk.desc}</td><td>${isPassive?'-':sk.cost+' '+sk.costType}</td></tr>`;
+            html += `<tr class="${isPassive?'passive-row':''}"><td>${JAB[cls].icon} ${cls}</td><td><strong>${skillIcon(sk.id, 16)} ${sk.name}</strong></td><td>${isPassive?'<span style="color:#f57c00">패시브</span>':'액티브'}</td><td>${sk.desc}</td><td>${isPassive?'-':sk.cost+' '+sk.costType}</td></tr>`;
         });
     });
     html += '</tbody></table>';
@@ -793,17 +795,17 @@ function selectDemoCls(cls) {
     const skills = getSkills(cls);
     skills.forEach(sk => {
         const hasVfx = SKILL_VFX[sk.id];
-        html += `<div class="vfx-skill-item"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${sk.id}')">시연</button>` : ''}</div>`;
+        html += `<div class="vfx-skill-item"><span class="sk-icon">${skillIcon(sk.id, 20)}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${sk.id}')">시연</button>` : ''}</div>`;
     });
     const learnables = Object.entries(LEARNABLE_SKILLS).filter(([k,v]) => v.cls === cls);
     if (learnables.length) {
         html += '<div style="font-weight:600;font-size:.85em;color:#f57c00;margin:12px 0 6px">습득형 스킬</div>';
         learnables.forEach(([key, sk]) => {
             if (sk.passive) {
-                html += `<div class="vfx-skill-item" style="background:#fffde7"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost" style="color:#f57c00">패시브</span></div>`;
+                html += `<div class="vfx-skill-item" style="background:#fffde7"><span class="sk-icon">${skillIcon(sk.id, 20)}</span><span class="sk-name">${sk.name}</span><span class="sk-cost" style="color:#f57c00">패시브</span></div>`;
             } else {
                 const hasVfx = SKILL_VFX[key];
-                html += `<div class="vfx-skill-item"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${key}')">시연</button>` : ''}</div>`;
+                html += `<div class="vfx-skill-item"><span class="sk-icon">${skillIcon(sk.id, 20)}</span><span class="sk-name">${sk.name}</span><span class="sk-cost">${sk.cost} ${sk.costType}</span>${hasVfx ? `<button class="vfx-demo-btn" onclick="playVfx('${key}')">시연</button>` : ''}</div>`;
             }
         });
     }
