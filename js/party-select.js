@@ -261,7 +261,7 @@ function renderPartySlots() {
           skills.forEach(function(sk) {
             var lv = getCharSkillLv(ch, sk.id);
             if (lv > 0) {
-              skillsHtml += '<span class="ps-skill" title="Lv' + lv + '">' + sk.icon + '</span>';
+              skillsHtml += '<span class="ps-skill" title="Lv' + lv + '">' + skillIcon(sk.id, 16) + '</span>';
             }
           });
         } else {
@@ -558,7 +558,7 @@ function renderUnitCards(filter) {
       skills.forEach(function(sk) {
         var lv = getCharSkillLv(ch, sk.id);
         if (lv > 0) {
-          html += '<span class="unit-card-skill">' + sk.icon +
+          html += '<span class="unit-card-skill">' + skillIcon(sk.id, 20) +
             '<span class="unit-card-skill-lv">' + lv + '</span></span>';
         }
       });
@@ -1019,7 +1019,7 @@ function renderChars() {
       skills.forEach(function(sk) {
         var lv = getCharSkillLv(ch, sk.id);
         if (lv > 0) {
-          html += '<span class="unit-card-skill">' + sk.icon +
+          html += '<span class="unit-card-skill">' + skillIcon(sk.id, 20) +
             '<span class="unit-card-skill-lv">' + lv + '</span></span>';
         }
       });
