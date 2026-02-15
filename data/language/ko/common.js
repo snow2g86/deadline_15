@@ -17,6 +17,7 @@ Object.assign(window._LANG_ko, {
         "turn": "턴",
         "wave": "웨이브",
         "select_unit": "유닛을 선택하세요",
+        "all": "전체",
         "move": "이동",
         "range": "사거리",
         "type": "종류"
@@ -62,5 +63,11 @@ Object.assign(window._LANG_ko, {
         "nav_stage": "🗺 스테이지",
         "nav_item": "🧪 아이템",
         "nav_class": "🎴 직업"
+    },
+    "group": {
+        "beginner": "🎓 노비스",
+        "melee": "⚔️ 근접",
+        "ranged": "🏹 원거리",
+        "support": "✨ 서포트"
     }
 });

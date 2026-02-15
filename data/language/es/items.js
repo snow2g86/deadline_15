@@ -110,21 +110,23 @@ Object.assign(window._LANG_es, {
         "party_member": "Grupo",
         "select_char": "Selecciona un personaje",
         "slots_title": "Ranuras de Equipo",
+        "stats_title": "Información de Estadísticas",
         "inventory": "Inventario",
         "no_items": "Sin equipamiento",
         "equip_btn": "Equipar",
         "equipped": "Equipado",
+        "unequip_btn": "Desequipar",
         "sell": "Vender",
         "sell_btn": "Vender {gold}O",
         "sell_confirm": "Vender {name}?\n+{gold}O",
         "filter_armor": "Armadura",
         "filter_accessory": "Accesorio",
         "rarity": {
-            "common": "Común",
-            "uncommon": "Poco Común",
-            "rare": "Raro",
-            "epic": "Épico",
-            "legendary": "Legendario"
+            "common": "D - Común",
+            "uncommon": "C - Poco Común",
+            "rare": "B - Raro",
+            "epic": "A - Épico",
+            "legendary": "S - Legendario"
         },
         "slot": {
             "weapon": "Arma",

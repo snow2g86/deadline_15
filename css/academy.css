@@ -33,7 +33,6 @@
 
 .cs-card:hover {
   border-color: #9333ea;
-  transform: translateY(-2px);
   background: rgba(147, 51, 234, .1)
 }
 
@@ -130,7 +129,6 @@
 }
 
 .sb-btn:hover {
-  transform: scale(1.05)
 }
 
 .sb-btn.disabled {

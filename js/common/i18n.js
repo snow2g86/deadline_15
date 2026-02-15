@@ -35,7 +35,7 @@ function _loadScript(src) {
 const _I18N_CACHE_KEY = 'game_i18n_cache';
 const _I18N_LANG_KEY = 'game_i18n_lang';
 const _I18N_VER_KEY = 'game_i18n_ver';
-const _I18N_VERSION = 9; // bump when language data changes
+const _I18N_VERSION = 10; // bump when language data changes
 const _LANG_PARTS = ['common','battle','stages','classes','skills','items','ui','character'];
 
 // 다중 파일 병렬 로드

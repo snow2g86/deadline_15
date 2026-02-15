@@ -110,21 +110,23 @@ Object.assign(window._LANG_ko, {
         "party_member": "파티",
         "select_char": "캐릭터를 선택하세요",
         "slots_title": "장비 슬롯",
+        "stats_title": "스탯 정보",
         "inventory": "인벤토리",
         "no_items": "장비가 없습니다",
         "equip_btn": "장착",
         "equipped": "장착 중",
+        "unequip_btn": "장착해제",
         "sell": "판매",
         "sell_btn": "{gold}G 판매",
         "sell_confirm": "{name}을(를) 판매하시겠습니까?\n+{gold}G",
         "filter_armor": "방어구",
         "filter_accessory": "장신구",
         "rarity": {
-            "common": "일반",
-            "uncommon": "고급",
-            "rare": "희귀",
-            "epic": "영웅",
-            "legendary": "전설"
+            "common": "D - 일반",
+            "uncommon": "C - 고급",
+            "rare": "B - 희귀",
+            "epic": "A - 영웅",
+            "legendary": "S - 전설"
         },
         "slot": {
             "weapon": "무기",

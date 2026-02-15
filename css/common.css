@@ -185,7 +185,6 @@ body {
 }
 
 .modal-btn:hover {
-  transform: scale(1.05)
 }
 
 .modal-btn:disabled,
@@ -442,7 +441,7 @@ body:not([data-page="battle"]) {
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;
   padding:10px 12px;transition:all .2s}
 .game-card:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06);
-  transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+  box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .game-card-icon{font-size:28px;flex-shrink:0}
 .game-card-info{flex:1;min-width:0}
 .game-card-name{font-weight:700;font-size:12px}
@@ -452,7 +451,7 @@ body:not([data-page="battle"]) {
 .game-btn{font-weight:700;font-size:11px;padding:6px 14px;border-radius:6px;border:none;
   cursor:pointer;color:#fff;transition:all .15s;white-space:nowrap;
   box-shadow:0 2px 4px rgba(0,0,0,.2)}
-.game-btn:hover{transform:scale(1.05);filter:brightness(1.1)}
+.game-btn:hover{filter:brightness(1.1)}
 .game-btn:active{transform:scale(.97)}
 .game-btn.disabled{opacity:.35;cursor:default;transform:none;filter:none}
 .game-btn--gold{background:linear-gradient(135deg,var(--gold),#d4a017);color:#1a1a2e}
@@ -522,7 +521,6 @@ body:not([data-page="battle"]) {
 }
 
 .cc-release-btn:hover {
-  transform: scale(1.05);
   box-shadow: 0 2px 4px rgba(239, 68, 68, .4)
 }
 

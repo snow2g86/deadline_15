@@ -22,20 +22,14 @@ function renderHideout() {
 	var table = document.createElement('div');
 	table.className = 'hideout-table';
 	ct.appendChild(table);
-	// 캐릭터 결정
-	var roster, party, chars = [];
+	// 캐릭터 결정 (최대 10명, 레벨 높은 순)
+	var roster, chars = [];
 	try { roster = JSON.parse(localStorage.getItem('game_roster')); } catch(_) {}
-	try { party = JSON.parse(localStorage.getItem('game_party')); } catch(_) {}
 	if (roster && roster.chars) {
-		if (party && party.length) {
-			chars = party.map(function(uid) {
-				return roster.chars.find(function(c) { return c.uid === uid; });
-			}).filter(function(c) { return c && !c.dead; });
-		}
-		if (!chars.length) {
-			chars = roster.chars.filter(function(c) { return !c.dead; })
-				.sort(function(a, b) { return b.lv - a.lv; }).slice(0, 10);
-		}
+		// 살아있는 모든 캐릭터를 레벨 높은 순으로 정렬해서 최대 10명 표시
+		chars = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); })
+			.sort(function(a, b) { return b.lv - a.lv; })
+			.slice(0, 10);
 	}
 	if (!chars.length) return;
 	var names = _resolve(_i18nData, 'character.names') || [];

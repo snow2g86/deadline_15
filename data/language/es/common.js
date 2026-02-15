@@ -17,6 +17,7 @@ Object.assign(window._LANG_es, {
         "turn": "Turno",
         "wave": "Ola",
         "select_unit": "Selecciona una unidad",
+        "all": "Todos",
         "move": "Mov",
         "range": "Rango",
         "type": "Tipo"
@@ -61,5 +62,11 @@ Object.assign(window._LANG_es, {
         "nav_stage": "🗺 Escenario",
         "nav_item": "🧪 Objeto",
         "nav_class": "🎴 Clase"
+    },
+    "group": {
+        "beginner": "🎓 Novato",
+        "melee": "⚔️ Melé",
+        "ranged": "🏹 Rango",
+        "support": "✨ Soporte"
     }
 });

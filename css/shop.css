@@ -9,7 +9,7 @@
 /* ═══ Shop Card ═══ */
 .shop-card{width:100%;background:rgba(255,255,255,.04);border:2px solid rgba(34,197,94,.15);
   border-radius:10px;padding:10px 8px;text-align:center;position:relative;transition:all .2s}
-.shop-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.shop-card:hover{border-color:var(--green)}
 .shop-card.sold{opacity:.4;pointer-events:none}
 .shop-grade{position:absolute;top:4px;right:6px;font-weight:900;font-size:12px;text-shadow:0 0 6px rgba(0,0,0,.5)}
 .shop-icon{font-size:28px;margin-bottom:4px}
@@ -19,7 +19,7 @@
 .shop-pot{font-size:8px;color:#64748b;margin-top:3px}
 .shop-btn{font-weight:700;font-size:10px;padding:5px 12px;border-radius:5px;border:none;cursor:pointer;
   background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;margin-top:6px;transition:all .15s}
-.shop-btn:hover{transform:scale(1.05)}.shop-btn.disabled{opacity:.3;cursor:default}
+.shop-btn:hover{}.shop-btn.disabled{opacity:.3;cursor:default}
 .shop-btn.sold-btn{background:#475569}
 
 
@@ -64,7 +64,7 @@
 .gold-ad-name{font-size:12px;font-weight:900;color:var(--text);line-height:1.4}
 .gold-ad-btn{font-weight:700;font-size:11px;padding:8px 14px;border-radius:6px;border:none;cursor:pointer;
   background:linear-gradient(135deg,#f0c040,#d97706);color:#1a1a2e;transition:all .15s;white-space:nowrap;width:100%}
-.gold-ad-btn:hover{transform:scale(1.05)}
+.gold-ad-btn:hover{}
 .gold-ad-btn.disabled{opacity:.4;cursor:default;background:#475569;color:var(--dim)}
 
 /* ═══ Gacha Pity (spans 2 cols) ═══ */
@@ -83,7 +83,7 @@
 .gacha-desc{font-size:9px;color:var(--dim);margin-bottom:8px;flex:1}
 .gacha-btn{font-weight:700;font-size:11px;padding:8px 10px;border-radius:6px;border:none;cursor:pointer;
   background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;transition:all .15s;width:100%}
-.gacha-btn:hover{transform:scale(1.05)}
+.gacha-btn:hover{}
 .gacha-btn.disabled{opacity:.3;cursor:default}
 .gacha-btn-multi{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important}
 

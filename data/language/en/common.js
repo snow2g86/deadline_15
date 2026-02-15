@@ -17,6 +17,7 @@ Object.assign(window._LANG_en, {
         "turn": "Turn",
         "wave": "Wave",
         "select_unit": "Select a unit",
+        "all": "All",
         "move": "Move",
         "range": "Range",
         "type": "Type"
@@ -61,5 +62,11 @@ Object.assign(window._LANG_en, {
         "nav_stage": "\ud83d\uddfa Stage",
         "nav_item": "\ud83e\uddea Item",
         "nav_class": "\ud83c\udfb4 Class"
+    },
+    "group": {
+        "beginner": "\ud83c\udf93 Novice",
+        "melee": "\u2694 Melee",
+        "ranged": "\ud83c\uddaf Ranged",
+        "support": "\u2728 Support"
     }
 });

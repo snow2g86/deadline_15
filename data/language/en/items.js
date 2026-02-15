@@ -110,21 +110,23 @@ Object.assign(window._LANG_en, {
         "party_member": "Party",
         "select_char": "Select a character",
         "slots_title": "Equipment Slots",
+        "stats_title": "Stat Info",
         "inventory": "Inventory",
         "no_items": "No equipment",
         "equip_btn": "Equip",
         "equipped": "Equipped",
+        "unequip_btn": "Unequip",
         "sell": "Sell",
         "sell_btn": "Sell {gold}G",
         "sell_confirm": "Sell {name}?\n+{gold}G",
         "filter_armor": "Armor",
         "filter_accessory": "Accessory",
         "rarity": {
-            "common": "Common",
-            "uncommon": "Uncommon",
-            "rare": "Rare",
-            "epic": "Epic",
-            "legendary": "Legendary"
+            "common": "D - Common",
+            "uncommon": "C - Uncommon",
+            "rare": "B - Rare",
+            "epic": "A - Epic",
+            "legendary": "S - Legendary"
         },
         "slot": {
             "weapon": "Weapon",

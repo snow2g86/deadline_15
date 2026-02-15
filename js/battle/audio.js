@@ -140,23 +140,30 @@ Object.assign(G, {
   bgmStart(){
     this.bgmStop();
     if(!this._sett.bgmOn)return;
+
+    // 외부 오디오 파일 시도 (있으면 사용, 없으면 procedural 사용)
+    if(this._bgmAudioPath){
+      this._bgmStartExternal();
+      return;
+    }
+
     const ctx=this.sfxCtx();
-    const vol=0.14*this._sett.bgmVol;
+    const vol=0.16*this._sett.bgmVol;
     const master=ctx.createGain();master.gain.setValueAtTime(vol,ctx.currentTime);
     master.connect(ctx.destination);
 
     const comp=ctx.createDynamicsCompressor();
-    comp.threshold.setValueAtTime(-18,ctx.currentTime);
-    comp.ratio.setValueAtTime(8,ctx.currentTime);
-    comp.knee.setValueAtTime(6,ctx.currentTime);
+    comp.threshold.setValueAtTime(-20,ctx.currentTime);
+    comp.ratio.setValueAtTime(10,ctx.currentTime);
+    comp.knee.setValueAtTime(4,ctx.currentTime);
     comp.connect(master);
 
-    const BPM=82, eighth=60/BPM/2;
-    // 어두운 단조 베이스 진행 (Dm-Bb-Gm-A-Dm-C-Bb-A)
-    const bassN=[73.4,58.3,49,55,73.4,65.4,58.3,55,
-                 73.4,49,55,58.3,65.4,55,49,73.4,
-                 58.3,49,55,65.4,73.4,58.3,49,55,
-                 65.4,73.4,58.3,55,49,55,58.3,73.4];
+    const BPM=130, eighth=60/BPM/2;
+    // 더 긴장감 있는 베이스 진행 (Em-Bm-G-Bm-Em-Am-G-A)
+    const bassN=[82.4,61.7,49,61.7,82.4,55,49,55,
+                 82.4,49,61.7,55,49,61.7,82.4,55,
+                 61.7,49,55,82.4,49,61.7,55,49,
+                 55,82.4,61.7,49,55,49,61.7,82.4];
 
     let beatIdx=0;
     const startT=ctx.currentTime+0.05;
@@ -194,55 +201,65 @@ Object.assign(G, {
 
         // ═══ 서브 드론 (저음 긴장감) ═══
         if(b===0){
-          note('sine',bassN[ci]/2,t,eighth*7.8,0.06,0);
-          note('sine',bassN[ci]/2*1.005,t,eighth*7.8,0.04,3);
+          note('sine',bassN[ci]/2,t,eighth*7.8,0.08,0);
+          note('sine',bassN[ci]/2*1.005,t,eighth*7.8,0.05,3);
         }
 
         // ═══ 베이스 라인 (무겁고 어두운) ═══
         const bF=bassN[ci];
         if(b%2===0){
-          note('sawtooth',bF,t,eighth*1.6,0.22,-3);
-          note('sine',bF/2,t,eighth*1.6,0.10,0);
+          note('sawtooth',bF,t,eighth*1.6,0.28,-3);
+          note('sine',bF/2,t,eighth*1.6,0.12,0);
         } else if(b===3||b===7){
-          note('sawtooth',bF*1.5,t,eighth*0.6,0.10,-3);
+          note('sawtooth',bF*1.5,t,eighth*0.6,0.14,-3);
         }
 
-        // ═══ 킥 드럼 (무거운) ═══
+        // ═══ 킥 드럼 (강렬한) ═══
         if(b===0||b===4){
           const ko=ctx.createOscillator(),kg=ctx.createGain();
-          ko.type='sine';ko.frequency.setValueAtTime(80,t);
-          ko.frequency.exponentialRampToValueAtTime(25,t+0.18);
-          kg.gain.setValueAtTime(b===0?0.40:0.28,t);kg.gain.exponentialRampToValueAtTime(0.001,t+0.18);
-          ko.connect(kg);kg.connect(comp);ko.start(t);ko.stop(t+0.19);
-          noise(t,0.03,0.12,1500);
+          ko.type='sine';ko.frequency.setValueAtTime(95,t);
+          ko.frequency.exponentialRampToValueAtTime(20,t+0.2);
+          kg.gain.setValueAtTime(b===0?0.50:0.35,t);kg.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+          ko.connect(kg);kg.connect(comp);ko.start(t);ko.stop(t+0.21);
+          noise(t,0.04,0.16,1200);
         }
         // 고스트 킥
         if(b===3&&beat32>=16){
           const ko=ctx.createOscillator(),kg=ctx.createGain();
-          ko.type='sine';ko.frequency.setValueAtTime(70,t);
-          ko.frequency.exponentialRampToValueAtTime(25,t+0.1);
-          kg.gain.setValueAtTime(0.12,t);kg.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-          ko.connect(kg);kg.connect(comp);ko.start(t);ko.stop(t+0.11);
+          ko.type='sine';ko.frequency.setValueAtTime(85,t);
+          ko.frequency.exponentialRampToValueAtTime(25,t+0.12);
+          kg.gain.setValueAtTime(0.18,t);kg.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+          ko.connect(kg);kg.connect(comp);ko.start(t);ko.stop(t+0.13);
         }
 
-        // ═══ 스네어 (날카로운) ═══
+        // ═══ 스네어 (더 강렬한) ═══
         if(b===2||b===6){
-          noise(t,0.10,0.22,2500);
-          note('triangle',160,t,0.05,0.08,0);
-          noise(t+0.03,0.06,0.06,1800);
+          noise(t,0.12,0.28,2200);
+          note('triangle',180,t,0.06,0.10,0);
+          noise(t+0.04,0.08,0.10,1600);
         }
         // 고스트 스네어
         if((b===5||b===7)&&beat16>=8){
-          noise(t,0.04,0.06,3000);
+          noise(t,0.06,0.10,2800);
         }
 
-        // ═══ 하이햇 (미니멀) ═══
+        // ═══ 하이햇 (강한 리듬) ═══
         if(b%2===0){
-          noise(t,0.025,beat16%4===0?0.07:0.04,10000);
+          noise(t,0.03,beat16%4===0?0.10:0.06,10000);
         }
         // 오픈 하이햇
         if(beat32%16===14&&b===6){
-          noise(t,0.12,0.10,7000);
+          noise(t,0.14,0.13,6500);
+        }
+
+        // ═══ 멜로디 라인 (현악 느낌) ═══
+        if(beat32%16<8){
+          const melodyFreqs=[82.4,98,110,123.47,82.4,110,98,123.47];
+          const mf=melodyFreqs[(beatIdx/2)%8];
+          if(b===0||b===4){
+            note('triangle',mf*2,t+eighth*0.5,eighth*0.8,0.07,0);
+            note('sine',mf*2.05,t+eighth*0.5,eighth*0.8,0.03,5);
+          }
         }
 
         beatIdx++;
@@ -252,13 +269,45 @@ Object.assign(G, {
     this._bgm={master,comp,timer:null};
     schedule();
   },
+  _bgmAudioPath:null,
+  _bgmAudioSource:null,
+
+  _bgmStartExternal(){
+    const ctx=this.sfxCtx();
+    fetch(this._bgmAudioPath)
+      .then(r=>r.arrayBuffer())
+      .then(buf=>ctx.decodeAudioData(buf,(decoded)=>{
+        if(!this._bgm||!this._bgmAudioPath)return;
+        const src=ctx.createBufferSource();
+        src.buffer=decoded;
+        const vol=this._sett.bgmVol*0.85;
+        const gain=ctx.createGain();
+        gain.gain.setValueAtTime(vol,ctx.currentTime);
+        src.connect(gain);
+        gain.connect(ctx.destination);
+        src.loop=true;
+        src.start(ctx.currentTime);
+        this._bgmAudioSource=src;
+      }))
+      .catch(e=>console.log('BGM load failed, using procedural',e));
+  },
+
   bgmStop(){
+    if(this._bgmAudioSource){
+      try{this._bgmAudioSource.stop()}catch(e){}
+      this._bgmAudioSource=null;
+      return;
+    }
     if(!this._bgm)return;
     if(this._bgm.timer){clearTimeout(this._bgm.timer);this._bgm.timer=null}
     const m=this._bgm.master,ctx=this.sfxCtx(),t=ctx.currentTime;
     m.gain.linearRampToValueAtTime(0,t+0.6);
     setTimeout(()=>{try{m.disconnect()}catch(e){}},700);
     this._bgm=null;
+  },
+
+  setBattleMusic(audioPath){
+    this._bgmAudioPath=audioPath;
   },
 
   sfxKill(){const c=this.sfxCtx(),t=c.currentTime;

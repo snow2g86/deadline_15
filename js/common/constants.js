@@ -40,3 +40,27 @@ const ROLE_MAP = {
   shaman: 'ranged',
   priest: 'healer'
 };
+
+// ── 직업군 매핑 (UI 필터용) ────────────────────
+const CLASS_GROUP_MAP = {
+  'novice': 'beginner',      // 전제
+  'warrior': 'melee',        // 근접
+  'knight': 'melee',
+  'assassin': 'melee',
+  'brawler': 'melee',
+  'lancer': 'melee',
+  'archer': 'ranged',        // 원거리
+  'mage': 'ranged',
+  'summoner': 'ranged',
+  'shaman': 'ranged',
+  'priest': 'support',       // 서포트
+  'sapper': 'support'
+};
+
+// 직업군 정보 (필터 UI용)
+const CLASS_GROUPS = {
+  'beginner': { key: 'beginner', label: 'group.beginner', icon: '🎓' },
+  'melee': { key: 'melee', label: 'group.melee', icon: '⚔️' },
+  'ranged': { key: 'ranged', label: 'group.ranged', icon: '🏹' },
+  'support': { key: 'support', label: 'group.support', icon: '✨' }
+};

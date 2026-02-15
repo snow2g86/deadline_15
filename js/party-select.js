@@ -42,6 +42,7 @@ var _activePageTab = localStorage.getItem('ps_active_tab') || 'party';
 // ── 장비 상태 ──────────────────────────
 var _selUid = null;
 var _invFilter = 'all';
+var _eqFilter = 'all';
 var _gold = 0;
 
 // ── 전체 아군 공유 아이템 ──────────────
@@ -198,44 +199,14 @@ function renderPartyTabs() {
   container.innerHTML = '';
 
   _parties.parties.forEach(function(party) {
-    var wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:flex; align-items:center; gap:6px; width:100%;';
-
-    // 삭제 버튼 (2개 이상일 때만 표시)
-    if (_parties.parties.length > 2) {
-      var delBtn = document.createElement('button');
-      delBtn.className = 'party-tab-delete';
-      delBtn.textContent = '✕';
-      delBtn.title = '파티 삭제';
-      delBtn.onclick = function(e) {
-        e.stopPropagation();
-        if (confirm(party.name + '을(를) 삭제하시겠습니까?')) {
-          deleteParty(party.id);
-        }
-      };
-      wrapper.appendChild(delBtn);
-    }
-
     var btn = document.createElement('button');
     btn.className = 'party-tab' + (_currentPartyId === party.id ? ' active' : '');
     btn.textContent = party.name;
-    btn.style.flex = '1';
     btn.onclick = function() {
       setActiveParty(party.id);
     };
-    wrapper.appendChild(btn);
-
-    container.appendChild(wrapper);
+    container.appendChild(btn);
   });
-
-  // 파티 추가 버튼 (최대 5개까지만)
-  if (_parties.parties.length < 5) {
-    var addBtn = document.createElement('button');
-    addBtn.className = 'party-tabs-add';
-    addBtn.textContent = '+';
-    addBtn.onclick = addParty;
-    container.appendChild(addBtn);
-  }
 }
 
 // ── 파티 슬롯 렌더링 ────────────────────────
@@ -260,13 +231,46 @@ function renderPartySlots() {
     if (uid) {
       var ch = roster.chars.find(function(c) { return c.uid === uid; });
       if (ch) {
-        var content = document.createElement('div');
-        content.className = 'party-slot-content';
-        content.innerHTML = '<div class="party-slot-icon">' +
-          charSprite(ch.cls, 40, ch.gender) + '</div>' +
-          '<div class="party-slot-name">' + (ch.customName || t('character.names.' + ch.nameId)) + '</div>' +
-          '<div class="party-slot-level">Lv.' + ch.lv + '</div>';
-        slot.appendChild(content);
+        var charName = ch.customName || t('character.names')[ch.nameId] || JAB[ch.cls].icon;
+        var bonus = calcEquipBonus(ch);
+        var skills = getCharSkills(ch.cls);
+
+        // 1줄: 아이콘 + 기본정보 + 제거버튼
+        var header = document.createElement('div');
+        header.className = 'party-slot-header';
+        header.innerHTML =
+          '<div class="party-slot-icon">' + charSprite(ch.cls, 40, ch.gender) + '</div>' +
+          '<div class="party-slot-info">' +
+            '<div class="party-slot-level"><span class="ps-level-text">Lv.' + ch.lv + '</span> <span class="sb-cls-label">' + t('classes.' + ch.cls) + '</span></div>' +
+            '<div class="party-slot-name">' + charName + '</div>' +
+          '</div>';
+        slot.appendChild(header);
+
+        // 2줄: 스탯 + 스킬
+        var footer = document.createElement('div');
+        footer.className = 'party-slot-footer';
+
+        var statsHtml = '<div class="party-slot-stats">' +
+          '<span class="ps-stat-item">HP ' + ch.hp + (bonus.hp > 0 ? '<span class="bonus">+' + bonus.hp + '</span>' : '') + '</span>' +
+          '<span class="ps-stat-item">ATK ' + ch.atk + (bonus.atk > 0 ? '<span class="bonus">+' + bonus.atk + '</span>' : '') + '</span>' +
+          '<span class="ps-stat-item">DEF ' + ch.def + (bonus.def > 0 ? '<span class="bonus">+' + bonus.def + '</span>' : '') + '</span>' +
+        '</div>';
+
+        var skillsHtml = '<div class="party-slot-skills">';
+        if (skills.length > 0) {
+          skills.forEach(function(sk) {
+            var lv = getCharSkillLv(ch, sk.id);
+            if (lv > 0) {
+              skillsHtml += '<span class="ps-skill" title="Lv' + lv + '">' + sk.icon + '</span>';
+            }
+          });
+        } else {
+          skillsHtml += '<span class="ps-skill-none">-</span>';
+        }
+        skillsHtml += '</div>';
+
+        footer.innerHTML = statsHtml + skillsHtml;
+        slot.appendChild(footer);
 
         // 제거 버튼
         var removeBtn = document.createElement('button');
@@ -382,22 +386,46 @@ function renderUnitFilterTabs() {
   var container = document.getElementById('unit-filter-tabs');
   if (!container) return;
 
-  container.innerHTML = '';
-  var filters = [
-    { key: 'all', label: t('common.all') },
-    { key: 'role_melee', label: t('roles.melee') },
-    { key: 'role_ranged', label: t('roles.ranged') },
-    { key: 'role_healer', label: t('roles.healer') }
-  ];
+  // 소유한 캐릭터들의 직업군 수집
+  var roster = getRoster();
+  var existingGroups = new Set();
 
-  filters.forEach(function(f) {
+  roster.chars.forEach(function(ch) {
+    if (!ch.dead && !ch.cls.startsWith('summon_')) {
+      var group = CLASS_GROUP_MAP[ch.cls];
+      if (group) existingGroups.add(group);
+    }
+  });
+
+  container.innerHTML = '';
+
+  // "전체" 필터 먼저 추가
+  var allBtn = document.createElement('button');
+  allBtn.className = 'unit-filter-tab' + (_pFilter === 'all' ? ' active' : '');
+  allBtn.textContent = t('common.all');
+  allBtn.onclick = function() {
+    _pFilter = 'all';
+    renderUnitCards('all');
+    container.querySelectorAll('.unit-filter-tab').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    allBtn.classList.add('active');
+  };
+  container.appendChild(allBtn);
+
+  // 직업군별 필터 추가 (고정 순서: beginner, melee, ranged, support)
+  var groupOrder = ['beginner', 'melee', 'ranged', 'support'];
+  groupOrder.forEach(function(groupKey) {
+    if (!existingGroups.has(groupKey)) return; // 소유한 직업이 없으면 스킵
+
     var btn = document.createElement('button');
-    btn.className = 'unit-filter-tab' + (_pFilter === f.key ? ' active' : '');
-    btn.textContent = f.label;
+    var filterKey = 'group_' + groupKey;
+    btn.className = 'unit-filter-tab' + (_pFilter === filterKey ? ' active' : '');
+    btn.textContent = t('group.' + groupKey);
     btn.onclick = function() {
-      _pFilter = f.key;
-      renderUnitCards(f.key);
-      btn.parentNode.querySelectorAll('.unit-filter-tab').forEach(function(b) {
+      _pFilter = filterKey;
+      renderUnitCards(filterKey);
+      container.querySelectorAll('.unit-filter-tab').forEach(function(b) {
         b.classList.remove('active');
       });
       btn.classList.add('active');
@@ -420,7 +448,10 @@ function renderUnitCards(filter) {
 
   // 필터링
   if (filter !== 'all') {
-    if (filter.startsWith('role_')) {
+    if (filter.startsWith('group_')) {
+      var groupKey = filter.replace('group_', '');
+      alive = alive.filter(function(c) { return CLASS_GROUP_MAP[c.cls] === groupKey; });
+    } else if (filter.startsWith('role_')) {
       var role = filter.replace('role_', '');
       alive = alive.filter(function(c) { return ROLE_MAP[c.cls] === role; });
     } else if (filter.startsWith('cls_')) {
@@ -443,7 +474,7 @@ function renderUnitCards(filter) {
   // 필터 결과가 없을 때
   if (alive.length === 0) {
     var emptyMsg = document.createElement('div');
-    emptyMsg.style.cssText = 'text-align:center; padding:40px 20px; color:rgba(255,255,255,.5);';
+    emptyMsg.className = 'unit-cards-empty';
     emptyMsg.textContent = t('party.no_available_chars');
     container.appendChild(emptyMsg);
     return;
@@ -474,8 +505,8 @@ function renderUnitCards(filter) {
     '</div>';
 
     html += '<div class="unit-card-meta">' +
-      'Lv.' + ch.lv + ' • ' + t('classes.' + ch.cls) + '<br/>' +
-      (ch.customName || t('character.names.' + ch.nameId)) +
+      '<div class="unit-card-level-cls">Lv.' + ch.lv + ' <span class="sb-cls-label">' + t('classes.' + ch.cls) + '</span></div>' +
+      '<div class="unit-card-name">' + (ch.customName || t('character.names.' + ch.nameId)) + '</div>' +
     '</div>';
 
     html += '<div class="unit-card-stats">' +
@@ -483,18 +514,21 @@ function renderUnitCards(filter) {
         '<span class="unit-card-stat-label">HP:</span>' +
         '<span class="unit-card-stat-value">' + ch.hp +
         (bonus.hp > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.hp + '</span>' : '') +
+        (ch.pot && ch.pot.hp ? '<span class="unit-card-stat-potential">(+' + ch.pot.hp + ')</span>' : '') +
         '</span>' +
       '</div>' +
       '<div class="unit-card-stat">' +
         '<span class="unit-card-stat-label">ATK:</span>' +
         '<span class="unit-card-stat-value">' + ch.atk +
         (bonus.atk > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.atk + '</span>' : '') +
+        (ch.pot && ch.pot.atk ? '<span class="unit-card-stat-potential">(+' + ch.pot.atk + ')</span>' : '') +
         '</span>' +
       '</div>' +
       '<div class="unit-card-stat">' +
         '<span class="unit-card-stat-label">DEF:</span>' +
         '<span class="unit-card-stat-value">' + ch.def +
         (bonus.def > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.def + '</span>' : '') +
+        (ch.pot && ch.pot.def ? '<span class="unit-card-stat-potential">(+' + ch.pot.def + ')</span>' : '') +
         '</span>' +
       '</div>' +
     '</div>';
@@ -787,6 +821,59 @@ function renderParty() {
 // ══════════════════════════════════════════════
 
 
+// ── 장비 탭 필터 탭 렌더링 ────────────────────
+function renderEquipFilterTabs() {
+  var container = document.getElementById('eq-filter-tabs');
+  if (!container) return;
+
+  // 소유한 캐릭터들의 직업군 수집
+  var roster = getRoster();
+  var existingGroups = new Set();
+
+  roster.chars.forEach(function(ch) {
+    if (!ch.dead && !ch.cls.startsWith('summon_')) {
+      var group = CLASS_GROUP_MAP[ch.cls];
+      if (group) existingGroups.add(group);
+    }
+  });
+
+  container.innerHTML = '';
+
+  // "전체" 필터 먼저 추가
+  var allBtn = document.createElement('button');
+  allBtn.className = 'eq-filter-tab' + (_eqFilter === 'all' ? ' active' : '');
+  allBtn.textContent = t('common.all');
+  allBtn.onclick = function() {
+    _eqFilter = 'all';
+    renderChars();
+    container.querySelectorAll('.eq-filter-tab').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    allBtn.classList.add('active');
+  };
+  container.appendChild(allBtn);
+
+  // 직업군별 필터 추가 (고정 순서: beginner, melee, ranged, support)
+  var groupOrder = ['beginner', 'melee', 'ranged', 'support'];
+  groupOrder.forEach(function(groupKey) {
+    if (!existingGroups.has(groupKey)) return; // 소유한 직업이 없으면 스킵
+
+    var btn = document.createElement('button');
+    var filterKey = 'group_' + groupKey;
+    btn.className = 'eq-filter-tab' + (_eqFilter === filterKey ? ' active' : '');
+    btn.textContent = t('group.' + groupKey);
+    btn.onclick = function() {
+      _eqFilter = filterKey;
+      renderChars();
+      container.querySelectorAll('.eq-filter-tab').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+    };
+    container.appendChild(btn);
+  });
+}
+
 // ── Character card grid ──
 function renderChars() {
   var el = document.getElementById('eq-chars');
@@ -808,6 +895,17 @@ function renderChars() {
     return b.lv - a.lv;
   });
 
+  // 필터링
+  if (_eqFilter !== 'all') {
+    if (_eqFilter.startsWith('group_')) {
+      var groupKey = _eqFilter.replace('group_', '');
+      alive = alive.filter(function(c) { return CLASS_GROUP_MAP[c.cls] === groupKey; });
+    } else if (_eqFilter.startsWith('cls_')) {
+      var cls = _eqFilter.replace('cls_', '');
+      alive = alive.filter(function(c) { return c.cls === cls; });
+    }
+  }
+
   var inv = loadInventory();
   var invEquips = inv.filter(function(it) { return it.type === 'equip' && !it.equipped; });
 
@@ -817,10 +915,18 @@ function renderChars() {
     var isInParty = !!partySet[ch.uid];
 
     var card = document.createElement('div');
-    card.className = 'eq-char-card' + (_selUid === ch.uid ? ' active' : '');
+    card.className = 'unit-card' + (_selUid === ch.uid ? ' active' : '');
 
     var grade = potGrade(ch);
-    var gClr = grade === 'S' ? '#f0c040' : grade === 'A' ? '#60a5fa' : grade === 'B' ? '#4ade80' : '#9ca3af';
+    var bonus = calcEquipBonus(ch);
+    var skills = getCharSkills(ch.cls);
+
+    // 등급별 색상
+    var gradeColor = GRADE_COLORS[grade] || '#9ca3af';
+    var gradeBg = grade === 'S' ? 'rgba(240,192,64,.15)' :
+                  grade === 'A' ? 'rgba(96,165,250,.15)' :
+                  grade === 'B' ? 'rgba(74,222,128,.15)' :
+                  'rgba(156,163,175,.15)';
 
     var html = '';
 
@@ -829,8 +935,48 @@ function renderChars() {
       html += '<div class="eq-char-badge">' + t('equip.party_member') + '</div>';
     }
 
-    // 장비 슬롯 그리드 (윗쪽)
-    html += '<div class="eq-char-equips">';
+    // 헤더: 아이콘 + 등급
+    html += '<div class="unit-card-header">' +
+      '<div class="unit-card-icon">' +
+        charSprite(ch.cls, 60, ch.gender) +
+        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 24) + '</div>' +
+      '</div>' +
+      '<div class="unit-card-grade" style="background:' + gradeBg + '; border-color:' + gradeColor + '; color:' + gradeColor + ';">' + grade + '</div>' +
+    '</div>';
+
+    // 메타: 레벨 + 클래스 + 이름
+    html += '<div class="unit-card-meta">' +
+      '<div class="unit-card-level-cls">Lv.' + ch.lv + ' <span class="sb-cls-label">' + t('classes.' + ch.cls) + '</span></div>' +
+      '<div class="unit-card-name">' + charName + '</div>' +
+    '</div>';
+
+    // 스탯: HP/ATK/DEF + 보너스 + 잠재력
+    html += '<div class="unit-card-stats">' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">HP:</span>' +
+        '<span class="unit-card-stat-value">' + ch.hp +
+        (bonus.hp > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.hp + '</span>' : '') +
+        (ch.pot && ch.pot.hp ? '<span class="unit-card-stat-potential">(+' + ch.pot.hp + ')</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">ATK:</span>' +
+        '<span class="unit-card-stat-value">' + ch.atk +
+        (bonus.atk > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.atk + '</span>' : '') +
+        (ch.pot && ch.pot.atk ? '<span class="unit-card-stat-potential">(+' + ch.pot.atk + ')</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">DEF:</span>' +
+        '<span class="unit-card-stat-value">' + ch.def +
+        (bonus.def > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.def + '</span>' : '') +
+        (ch.pot && ch.pot.def ? '<span class="unit-card-stat-potential">(+' + ch.pot.def + ')</span>' : '') +
+        '</span>' +
+      '</div>' +
+    '</div>';
+
+    // 장비 슬롯 그리드
+    html += '<div class="unit-card-equips">';
     ensureEquipSlots(ch);
     if (!ch.battle_potions) ch.battle_potions = [];
     if (!ch.siege_items) ch.siege_items = [];
@@ -854,7 +1000,7 @@ function renderChars() {
         hasUpgrade = betterExists;
       }
 
-      var slotClass = 'eq-char-slot';
+      var slotClass = 'unit-card-equip-slot';
       if (equipped) {
         slotClass += ' filled';
         if (hasUpgrade) slotClass += ' upgrade';
@@ -867,18 +1013,18 @@ function renderChars() {
     }
     html += '</div>';
 
-    // 캐릭터 이미지 + 등급 배지
-    const eqIconSize = (ch.cls === 'brawler' || ch.cls === 'assassin') ? 51 : 60;
-    html += '<div class="eq-char-icon">' + charSprite(ch.cls, eqIconSize, ch.gender) +
-      '<span class="eq-grade-badge" style="color:' + gClr + ';border-color:' + gClr + '">' + grade + '</span></div>';
-
-    // 캐릭터 정보
-    html += '<div class="eq-char-info">';
-    html += '<div class="eq-char-meta"><span class="eq-char-level">Lv.' + ch.lv + '</span> <span class="eq-char-cls">' + t('classes.' + ch.cls) + '</span></div>';
-    html += '<div class="eq-char-name">' + charName + '</div>';
-    html += '</div>';
-
-    // 포션 & 공성 아이템 (아래쪽)
+    // 스킬 정보 (있는 경우)
+    if (skills.length > 0) {
+      html += '<div class="unit-card-skills">';
+      skills.forEach(function(sk) {
+        var lv = getCharSkillLv(ch, sk.id);
+        if (lv > 0) {
+          html += '<span class="unit-card-skill">' + sk.icon +
+            '<span class="unit-card-skill-lv">' + lv + '</span></span>';
+        }
+      });
+      html += '</div>';
+    }
 
     card.innerHTML = html;
     card.className += (isInParty ? ' party-member' : '');
@@ -908,8 +1054,8 @@ function showEquipModal() {
     var header = document.createElement('div');
     header.className = 'eq-modal-header';
     header.innerHTML =
-      '<div class="eq-modal-title">⚔️ ' + t('equip.detail_title') + '</div>' +
-      '<button class="eq-modal-close" onclick="hideEquipModal()">&times;</button>';
+      '<h2>⚔️ ' + t('equip.detail_title') + '</h2>' +
+      '<button class="eq-modal-close" onclick="hideEquipModal()">✕</button>';
 
     var body = document.createElement('div');
     body.className = 'eq-modal-body';
@@ -1043,18 +1189,6 @@ function renderModalBody() {
     html += '</div>'; // .eq-section
   }
 
-  // 포션 섹션
-  html += '<div class="eq-section">';
-  html += '<div class="eq-section-title">💊 전투 포션 (최대 2개)</div>';
-  html += '<div class="eq-potions" id="eq-potions-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>';
-  html += '</div>';
-
-  // 공성 아이템 섹션
-  html += '<div class="eq-section">';
-  html += '<div class="eq-section-title">⚙️ 공성 아이템 (최대 2개)</div>';
-  html += '<div class="eq-sieges" id="eq-sieges-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>';
-  html += '</div>';
-
   html += '</div>'; // .eq-left
 
   // ──── 우측 패널: 인벤토리 ────
@@ -1079,10 +1213,6 @@ function renderModalBody() {
   html += '</div>'; // .eq-body-layout
 
   body.innerHTML = html;
-
-  // ── 포션/공성 리스트 렌더링 (에러 시 인벤토리 렌더링 보호) ──
-  try { renderBattlePotionsList(); } catch (_) {}
-  try { renderSiegeItemsList(); } catch (_) {}
 
   // ── Bind slot click (unequip) ──
   body.querySelectorAll('.eq-slot.filled').forEach(function(el) {
@@ -1145,7 +1275,20 @@ function renderInventoryInModal(ch) {
     var statsArr = [];
     for (var st in item.stats) statsArr.push(t('common.' + st) + '+' + item.stats[st]);
 
-    // 클래스 제한 정보
+    // 강화 레벨 표시
+    var enhanceLvHtml = '';
+    if (item.enhanceLv > 0) {
+      enhanceLvHtml = '<span class="eq-inv-enhance-lv">+' + item.enhanceLv + '</span>';
+    }
+
+    // 직업 제한 아이콘 (우측 상단, 조건부)
+    var clsIconHtml = '';
+    if (item.clsRestrict && item.clsRestrict.length > 0 && !canEquipThis) {
+      var firstCls = item.clsRestrict[0];
+      clsIconHtml = '<div class="eq-inv-cls-icon">' + clsIcon(firstCls, 20) + '</div>';
+    }
+
+    // 직업 제한 텍스트 경고 (하단)
     var restrictInfo = '';
     if (item.clsRestrict && item.clsRestrict.length > 0 && !canEquipThis) {
       var allowedClasses = item.clsRestrict.map(function(cls) { return t('classes.' + cls); }).join(', ');
@@ -1154,33 +1297,62 @@ function renderInventoryInModal(ch) {
 
     // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
     var itemEmoji = getEquipEmoji(item.templateId);
-    var row = document.createElement('div');
-    row.className = 'eq-inv-row' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
-    row.innerHTML =
+    var card = document.createElement('div');
+    card.className = 'eq-inv-card' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
+
+    // 새로운 카드 HTML 구조
+    card.innerHTML =
+      '<div class="eq-inv-header">' +
+        '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' +
+          t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() +
+        '</span>' +
+        clsIconHtml +
+      '</div>' +
       '<div class="eq-inv-info">' +
-      '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' + t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() + '</span>' +
-      '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
-      '<span class="eq-inv-name">' + t('equip.item.' + item.templateId) + '</span>' +
-      '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' +
-      (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
-      restrictInfo +
+        '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
+        '<span class="eq-inv-name">' +
+          (item.enhanceLv > 0 ? 'Lv.' + item.enhanceLv + ' ' : '') +
+          t('equip.item.' + item.templateId) +
+          enhanceLvHtml +
+        '</span>' +
+        (statsArr.length ? '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' : '') +
+        (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
       '</div>' +
       '<div class="eq-inv-actions">' +
-      (isEquippedHere ? '<span class="eq-inv-equipped">' + t('equip.equipped') + '</span>' :
-        (canEquipThis ? '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' : '') +
-        (!isEquipped ? '<button class="eq-inv-btn eq-sell-btn">' + t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>' : '')
-      ) +
-      '</div>';
+        (isEquippedHere ?
+          '<button class="eq-inv-btn eq-unequip-btn">' + t('equip.unequip_btn') + '</button>'
+        :
+          (canEquipThis && !isEquippedOther ?
+            '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' +
+            '<button class="eq-inv-btn eq-sell-btn">' +
+              t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>'
+          :
+            (!isEquipped ?
+              '<button class="eq-inv-btn eq-sell-btn">' +
+                t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>'
+            : '')
+          )
+        ) +
+      '</div>' +
+      restrictInfo;
 
-    var equipBtn = row.querySelector('.eq-equip-btn');
+    // 이벤트 리스너
+    var equipBtn = card.querySelector('.eq-equip-btn');
     if (equipBtn) {
       equipBtn.onclick = function() { equipItemInModal(_selUid, item.eid); };
     }
-    var sellBtn = row.querySelector('.eq-sell-btn');
+
+    var sellBtn = card.querySelector('.eq-sell-btn');
     if (sellBtn) {
       sellBtn.onclick = function() { sellEquipInModal(item.eid); };
     }
-    list.appendChild(row);
+
+    var unequipBtn = card.querySelector('.eq-unequip-btn');
+    if (unequipBtn) {
+      unequipBtn.onclick = function() { unequipItemInModal(_selUid, item.slot); };
+    }
+
+    list.appendChild(card);
   });
 }
 
@@ -1193,6 +1365,13 @@ function equipItemInModal(uid, eid) {
 
 function sellEquipInModal(eid) {
   sellEquip(eid);
+  renderChars(); // 카드 리스트 갱신
+  renderModalBody(); // 모달 내용 갱신
+}
+
+// ── 모달 내 장비 장착해제 (갱신 포함) ──
+function unequipItemInModal(uid, slot) {
+  unequipItem(uid, slot);
   renderChars(); // 카드 리스트 갱신
   renderModalBody(); // 모달 내용 갱신
 }
@@ -1293,6 +1472,7 @@ function sellEquip(eid) {
 }
 
 function eqRenderAll() {
+  renderEquipFilterTabs();
   renderChars();
 }
 

@@ -27,7 +27,7 @@
 #btn-end-turn{font-family:'Cinzel',serif;font-weight:700;font-size:11px;
   background:linear-gradient(135deg,var(--gold),#d4a017);color:#1a1a2e;border:none;
   padding:5px 12px;border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s}
-#btn-end-turn:hover{transform:scale(1.05);filter:brightness(1.1)}
+#btn-end-turn:hover{filter:brightness(1.1)}
 #btn-end-turn:disabled{opacity:.4;cursor:default;transform:none}
 
 /* ═══ Map ═══ */
@@ -135,7 +135,7 @@
   padding:6px 16px;border-radius:5px;cursor:pointer;border:none;transition:all .15s}
 #tc-box .tc-btns .tc-yes{background:var(--blue);color:#fff}
 #tc-box .tc-btns .tc-no{background:#475569;color:#e2e8f0}
-#tc-box .tc-btns button:hover{transform:scale(1.05)}
+#tc-box .tc-btns button:hover{}
 #tc-box .tc-skip{display:flex;align-items:center;justify-content:center;gap:4px;
   font-size:10px;color:var(--dim);cursor:pointer;user-select:none}
 #tc-box .tc-skip input{width:13px;height:13px;accent-color:var(--blue);cursor:pointer}

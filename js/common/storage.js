@@ -69,15 +69,18 @@ function loadParties() {
     if (raw) return JSON.parse(raw);
   } catch (_) {}
 
-  // 첫 로드: 레거시 데이터 마이그레이션
+  // 첫 로드: 레거시 데이터 마이그레이션 + 파티 5개 기본 설정
   const oldParty = loadParty();
   const newData = {
     parties: [
       { id: 1, name: '파티 1', slots: oldParty && oldParty.length > 0 ? oldParty : [null, null, null, null, null] },
-      { id: 2, name: '파티 2', slots: [null, null, null, null, null] }
+      { id: 2, name: '파티 2', slots: [null, null, null, null, null] },
+      { id: 3, name: '파티 3', slots: [null, null, null, null, null] },
+      { id: 4, name: '파티 4', slots: [null, null, null, null, null] },
+      { id: 5, name: '파티 5', slots: [null, null, null, null, null] }
     ],
     activePartyId: 1,
-    nextPartyId: 3
+    nextPartyId: 6
   };
 
   // 마이그레이션 완료 후 레거시 키 삭제

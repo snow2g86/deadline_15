@@ -9,11 +9,11 @@ var GACHA_COST_10 = 2700;
 var GACHA_MULTI_COUNT = 11;
 
 var RARITY = {
-  common:    { tier: 0, color: '#9ca3af' },
-  uncommon:  { tier: 1, color: '#4ade80' },
-  rare:      { tier: 2, color: '#60a5fa' },
-  epic:      { tier: 3, color: '#a78bfa' },
-  legendary: { tier: 4, color: '#f0c040' }
+  common:    { tier: 0, grade: 'D', color: '#9ca3af' },
+  uncommon:  { tier: 1, grade: 'C', color: '#4ade80' },
+  rare:      { tier: 2, grade: 'B', color: '#60a5fa' },
+  epic:      { tier: 3, grade: 'A', color: '#a78bfa' },
+  legendary: { tier: 4, grade: 'S', color: '#f0c040' }
 };
 
 var GACHA_RATE = { common: .60, uncommon: .35, rare: .045, epic: .0045, legendary: .0005 };
