@@ -1281,11 +1281,14 @@ function renderInventoryInModal(ch) {
       enhanceLvHtml = '<span class="eq-inv-enhance-lv">+' + item.enhanceLv + '</span>';
     }
 
-    // 직업 제한 아이콘 (우측 상단, 조건부)
+    // 사용가능 직업 아이콘들 (좌측 상단)
     var clsIconHtml = '';
-    if (item.clsRestrict && item.clsRestrict.length > 0 && !canEquipThis) {
-      var firstCls = item.clsRestrict[0];
-      clsIconHtml = '<div class="eq-inv-cls-icon">' + clsIcon(firstCls, 20) + '</div>';
+    if (item.clsRestrict && item.clsRestrict.length > 0) {
+      clsIconHtml = '<div class="eq-inv-cls-icons">';
+      for (var c = 0; c < item.clsRestrict.length; c++) {
+        clsIconHtml += '<div class="eq-inv-cls-icon">' + clsIcon(item.clsRestrict[c], 16) + '</div>';
+      }
+      clsIconHtml += '</div>';
     }
 
     // 직업 제한 텍스트 경고 (하단)
@@ -1303,10 +1306,10 @@ function renderInventoryInModal(ch) {
     // 새로운 카드 HTML 구조
     card.innerHTML =
       '<div class="eq-inv-header">' +
+        clsIconHtml +
         '<span class="eq-inv-rarity" style="color:' + rc + ';border-color:' + rc + '">' +
           t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() +
         '</span>' +
-        clsIconHtml +
       '</div>' +
       '<div class="eq-inv-info">' +
         '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
