@@ -499,7 +499,7 @@ function renderUnitCards(filter) {
     var html = '<div class="unit-card-header">' +
       '<div class="unit-card-icon">' +
         charSprite(ch.cls, 60, ch.gender) +
-        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 24) + '</div>' +
+        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 20) + '</div>' +
       '</div>' +
       '<div class="unit-card-grade" style="background:' + gradeBg + '; border-color:' + gradeColor + '; color:' + gradeColor + ';">' + grade + '</div>' +
     '</div>';
@@ -939,7 +939,7 @@ function renderChars() {
     html += '<div class="unit-card-header">' +
       '<div class="unit-card-icon">' +
         charSprite(ch.cls, 60, ch.gender) +
-        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 24) + '</div>' +
+        '<div class="unit-card-cls-icon">' + clsIcon(ch.cls, 20) + '</div>' +
       '</div>' +
       '<div class="unit-card-grade" style="background:' + gradeBg + '; border-color:' + gradeColor + '; color:' + gradeColor + ';">' + grade + '</div>' +
     '</div>';
@@ -1287,7 +1287,7 @@ function renderInventoryInModal(ch) {
     if (item.clsRestrict && item.clsRestrict.length > 0 && item.clsRestrict.length < totalClasses) {
       clsIconHtml = '<div class="eq-inv-cls-icons">';
       for (var c = 0; c < item.clsRestrict.length; c++) {
-        clsIconHtml += '<div class="eq-inv-cls-icon">' + clsIcon(item.clsRestrict[c], 16) + '</div>';
+        clsIconHtml += '<div class="eq-inv-cls-icon">' + clsIcon(item.clsRestrict[c], 20) + '</div>';
       }
       clsIconHtml += '</div>';
     }
