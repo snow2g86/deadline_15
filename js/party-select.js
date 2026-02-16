@@ -1272,7 +1272,8 @@ function renderInventoryInModal(ch) {
     }
     var isEquippedOther = isEquipped && !isEquippedHere;
     var statsArr = [];
-    for (var st in item.stats) statsArr.push(t('common.' + st) + '+' + item.stats[st]);
+    var enhancedStats = getEnhancedStats(item);
+    for (var st in enhancedStats) statsArr.push(t('common.' + st) + '+' + enhancedStats[st]);
 
     // 강화 레벨 표시
     var enhanceLvHtml = '';
