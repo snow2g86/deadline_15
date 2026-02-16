@@ -1826,7 +1826,7 @@ function renderEnhanceList() {
   for (var i = 0; i < enhanceable.length; i++) {
     var item = enhanceable[i];
     var enhancedStats = getEnhancedStats(item);
-    var currentStats = item.stats;
+    var currentStats = enhancedStats;
     var rate = calcEnhanceRate(item);
     var ratePercent = Math.round(rate * 100);
     var costGold = calcEnhanceCost(item);
@@ -1837,8 +1837,8 @@ function renderEnhanceList() {
     var nextLvl = item.enhanceLv + 1;
     var nextMult = 1 + getEnhanceMultiplier(nextLvl);
     var nextStats = {};
-    for (var stat in currentStats) {
-      nextStats[stat] = Math.round(currentStats[stat] * nextMult);
+    for (var stat in item.stats) {
+      nextStats[stat] = Math.round(item.stats[stat] * nextMult);
     }
 
     var gainText = '';
