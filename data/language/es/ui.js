@@ -73,7 +73,13 @@ Object.assign(window._LANG_es, {
         "skillbook_gained": "Libro de habilidades obtenido: {skill}",
         "sacrifice_select_more": "Selecciona un sacrificio",
         "more_points": "puntos necesarios",
-        "promote_btn_help": "Se requieren 4 puntos"
+        "promote_btn_help": "Se requieren 4 puntos",
+        "tab_rename": "Renombrar",
+        "rename_subtitle": "Puedes renombrar tus unidades",
+        "rename_title": "Renombrar Unidad",
+        "rename_button": "Renombrar",
+        "rename_success": "¡El nombre de {name} ha sido cambiado",
+        "no_rename_units": "No hay unidades vivas disponibles"
     },
     "guide": {
         "item_info_title": "💡 Información de Ítems",

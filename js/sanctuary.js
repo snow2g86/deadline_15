@@ -80,10 +80,13 @@ function switchTab(tab) {
   });
   var sub = document.getElementById('sanc-subtitle');
   if (sub) {
-    sub.textContent = tab === 'resurrect' ? t('sanctuary.subtitle') : t('sanctuary.promote_subtitle');
+    if (tab === 'resurrect') sub.textContent = t('sanctuary.subtitle');
+    else if (tab === 'promote') sub.textContent = t('sanctuary.promote_subtitle');
+    else if (tab === 'rename') sub.textContent = t('sanctuary.rename_subtitle');
   }
   if (tab === 'resurrect') renderResurrect();
-  else renderPromote();
+  else if (tab === 'promote') renderPromote();
+  else if (tab === 'rename') renderRename();
 }
 
 // ── 부활 비용 ────────────────────────────
@@ -569,10 +572,119 @@ function executePromote(targetUid, sacrificeUids) {
   }, 100);
 }
 
+// ── 개명 렌더링 ─────────────────────────
+function renderRename() {
+  var list = document.getElementById('sanc-list');
+  var roster = getRoster();
+  var names = t('character.names');
+  var candidates = roster.chars.filter(function(c) {
+    return !c.dead && !c.cls.startsWith('summon_');
+  });
+  list.innerHTML = '';
+
+  if (!candidates.length) {
+    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('sanctuary.no_rename_units') + '</div>';
+    return;
+  }
+
+  candidates.forEach(function(ch) {
+    var d = JAB[ch.cls];
+    var charName = ch.customName || names[ch.nameId] || d.icon;
+
+    var el = document.createElement('div');
+    el.className = 'game-card';
+    el.innerHTML =
+      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
+      '<div class="game-card-sub">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div></div>' +
+      '<button class="game-btn game-btn--blue">' + t('sanctuary.rename_button') + '</button>';
+    el.querySelector('.game-btn').onclick = (function(uid) {
+      return function() {
+        showRenameModal(uid);
+      };
+    })(ch.uid);
+    list.appendChild(el);
+  });
+}
+
+// ── 개명 모달 표시 ─────────────────────
+function showRenameModal(uid) {
+  var roster = getRoster();
+  var ch = roster.chars.find(function(c) { return c.uid === uid; });
+  if (!ch) return;
+
+  var d = JAB[ch.cls];
+  var names = t('character.names');
+  var currentName = ch.customName || names[ch.nameId] || d.icon;
+
+  var ov = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = t('sanctuary.rename_title');
+  document.getElementById('modal-title').className = '';
+
+  document.getElementById('modal-sub').innerHTML =
+    '<div class="rename-char-info">' +
+      clsIcon(ch.cls, 24) + ' <span>' + currentName + ' (Lv.' + ch.lv + ')</span>' +
+    '</div>' +
+    '<input type="text" id="rename-input" class="rename-input" ' +
+      'placeholder="' + currentName + '" maxlength="10" />';
+
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+
+  var confirmBtn = document.createElement('button');
+  confirmBtn.className = 'modal-btn primary';
+  confirmBtn.textContent = t('common.confirm');
+  confirmBtn.onclick = function() {
+    var newName = document.getElementById('rename-input').value.trim();
+    ov.classList.remove('show');
+    executeRename(uid, newName);
+  };
+
+  var cb = document.createElement('button');
+  cb.className = 'modal-btn secondary';
+  cb.textContent = t('common.cancel');
+  cb.onclick = function() { ov.classList.remove('show'); };
+
+  bt.appendChild(cb);
+  bt.appendChild(confirmBtn);
+  ov.classList.add('show');
+
+  // 자동 포커스
+  setTimeout(function() {
+    var inp = document.getElementById('rename-input');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+// ── 개명 실행 ────────────────────────────
+function executeRename(uid, newName) {
+  var roster = getRoster();
+  var ch = roster.chars.find(function(c) { return c.uid === uid; });
+  if (!ch) return;
+
+  var d = JAB[ch.cls];
+  var names = t('character.names');
+
+  // 공백만 있는 이름 차단
+  if (newName.length === 0) {
+    delete ch.customName;
+  } else {
+    ch.customName = newName;
+  }
+
+  saveRoster(roster);
+  renderRename();
+
+  var displayName = ch.customName || names[ch.nameId] || d.icon;
+  setTimeout(function() {
+    showAlert(t('sanctuary.rename_success', { name: displayName }));
+  }, 100);
+}
+
 // ── 기존 renderSanctuary 래퍼 ────────────
 function renderSanctuary() {
   if (_currentTab === 'resurrect') renderResurrect();
-  else renderPromote();
+  else if (_currentTab === 'promote') renderPromote();
+  else if (_currentTab === 'rename') renderRename();
 }
 
 // ── 초기화 ───────────────────────────────

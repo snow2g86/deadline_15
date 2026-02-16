@@ -73,7 +73,13 @@ Object.assign(window._LANG_en, {
         "skillbook_gained": "Skill Book gained: {skill}",
         "sacrifice_select_more": "Select a sacrifice",
         "more_points": "points needed",
-        "promote_btn_help": "4 points required"
+        "promote_btn_help": "4 points required",
+        "tab_rename": "Rename",
+        "rename_subtitle": "You can rename your units",
+        "rename_title": "Rename Unit",
+        "rename_button": "Rename",
+        "rename_success": "{name}'s name has been changed",
+        "no_rename_units": "No living units available"
     },
     "guide": {
         "item_info_title": "\ud83d\udca1 Item Information",

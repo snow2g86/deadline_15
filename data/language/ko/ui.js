@@ -73,6 +73,12 @@ Object.assign(window._LANG_ko, {
         "skillbook_gained": "스킬북 획득: {skill}",
         "sacrifice_select_more": "제물을 선택하세요",
         "more_points": "포인트 필요",
-        "promote_btn_help": "4점 필요"
+        "promote_btn_help": "4점 필요",
+        "tab_rename": "개명",
+        "rename_subtitle": "유닛의 이름을 변경할 수 있습니다",
+        "rename_title": "이름 변경",
+        "rename_button": "개명",
+        "rename_success": "{name}의 이름이 변경되었습니다",
+        "no_rename_units": "살아있는 유닛이 없습니다"
     }
 });
