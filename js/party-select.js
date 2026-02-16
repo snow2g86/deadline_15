@@ -1842,9 +1842,12 @@ function renderEnhanceList() {
     }
 
     var gainText = '';
-    if (currentStats.atk) gainText += ' ATK+' + (nextStats.atk - currentStats.atk);
-    if (currentStats.def) gainText += ' DEF+' + (nextStats.def - currentStats.def);
-    if (currentStats.hp) gainText += ' HP+' + (nextStats.hp - currentStats.hp);
+    var gainHp = nextStats.hp - currentStats.hp;
+    var gainAtk = nextStats.atk - currentStats.atk;
+    var gainDef = nextStats.def - currentStats.def;
+    if (gainHp > 0) gainText += ' HP+' + gainHp;
+    if (gainAtk > 0) gainText += ' ATK+' + gainAtk;
+    if (gainDef > 0) gainText += ' DEF+' + gainDef;
 
     // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
     var itemEmoji = getEquipEmoji(item.templateId);
