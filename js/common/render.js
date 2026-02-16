@@ -25,3 +25,16 @@ function charSprite(cls, size, gender) {
   const suffix = (gender || 'm') === 'f' ? '02' : '01';
   return '<img src="image/character/' + cls + '_' + suffix + '.png" width="' + size + '" style="image-rendering:pixelated">';
 }
+
+// ── 탭 전환 유틸 ────────────────────────────
+function toggleTabButtons(tab) {
+  document.querySelectorAll('.game-tab').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+}
+
+// ── Gold UI 업데이트 ────────────────────────────
+function updatePageGold(elementId) {
+  var el = document.getElementById(elementId);
+  if (el) el.textContent = (_gold || 0).toLocaleString();
+}

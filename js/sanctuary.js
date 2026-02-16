@@ -7,8 +7,7 @@ var _currentTab = 'resurrect';
 var _gold = 0;
 
 function updateGoldUI() {
-  var el = document.getElementById('sanc-gold-val');
-  if (el) el.textContent = _gold.toLocaleString();
+  updatePageGold('sanc-gold-val');
 }
 
 // ── 파티 체크 ────────────────────────────
@@ -75,9 +74,7 @@ function formatSkillLvs(ch) {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  document.querySelectorAll('.game-tab').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
+  toggleTabButtons(tab);
   var sub = document.getElementById('sanc-subtitle');
   if (sub) {
     if (tab === 'resurrect') sub.textContent = t('sanctuary.subtitle');

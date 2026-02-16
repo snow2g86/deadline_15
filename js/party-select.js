@@ -1,9 +1,6 @@
 // party-select.js — 파티 편성 + 장비 관리 통합 페이지
 // 공통 모듈에서 공유 함수 로드
 
-// 역할 i18n 매핑
-var ROLE_I18N = { melee: 'roles.melee', ranged: 'roles.ranged', healer: 'roles.healer' };
-
 // ── 스킬 정보 포맷팅 ──────────────────────
 function formatPartyCharSkills(ch) {
   var skills = getCharSkills(ch.cls);
@@ -1645,27 +1642,6 @@ function showPotionUseModal(potionId) {
   });
 }
 
-function gainExp(uid, amount) {
-  var roster = getRoster();
-  var ch = roster.chars.find(function(c) { return c.uid === uid; });
-  if (!ch || ch.lv >= MAX_LEVEL) return { leveled: 0, prevLv: ch ? ch.lv : 0 };
-  var prevLv = ch.lv;
-  ch.exp = (ch.exp || 0) + amount;
-  var leveled = 0;
-  while (ch.lv < MAX_LEVEL) {
-    var need = expForLevel(ch.lv);
-    if (ch.exp < need) break;
-    ch.exp -= need;
-    ch.lv++;
-    ch.hp = Math.round(ch.hp + ch.pot.hp);
-    ch.atk = Math.round(ch.atk + ch.pot.atk);
-    ch.def = Math.round(ch.def + ch.pot.def);
-    leveled++;
-  }
-  if (ch.lv >= MAX_LEVEL) ch.exp = 0;
-  saveRoster(roster);
-  return { leveled: leveled, prevLv: prevLv };
-}
 
 // ═══════════════════════════════════════════
 // 전투 포션 & 공성 아이템 관리
@@ -2125,38 +2101,3 @@ function executeEnhance(targetEid, materialEid) {
   updatePageGold();
 }
 
-// ── 유틸 함수 ──────────────────────
-function getItemMeta(item) {
-  var rarity = item.rarity || 'common';
-  return {
-    type: item.type,
-    name: t('equip.item.' + item.templateId),
-    rarity: rarity,
-    rarityColor: RARITY[rarity].color
-  };
-}
-
-// ── 액션 함수들 ──────────────────────
-function invSellItem(eid) {
-  var inv = loadInventory();
-  var item = inv.find(function(x) { return x.eid === eid; });
-  if (!item || item.equipped) return;
-
-  var meta = getItemMeta(item);
-  var sellPrice = SELL_PRICE[item.rarity] || 0;
-
-  showModal(t('equip.sell'), meta.name + ' - ' + sellPrice + 'G', [
-    { label: t('common.cancel'), fn: function() { hideModal(); } },
-    { label: t('equip.sell'), fn: function() {
-      var idx = inv.indexOf(item);
-      inv.splice(idx, 1);
-      saveInventory(inv);
-      _gold += sellPrice;
-      saveGold(_gold);
-      updatePageGold();
-      renderChars();
-      renderModalBody();
-      hideModal();
-    }}
-  ]);
-}

@@ -32,8 +32,7 @@ var SCROLL_COST = 400;
 // ── 골드 관리 ─────────────────────────────
 
 function updateGoldUI() {
-  var el = document.getElementById('shop-gold-val');
-  if (el) el.textContent = _gold.toLocaleString();
+  updatePageGold('shop-gold-val');
 }
 
 // 현재 골드 (페이지 내 캐시)
@@ -42,28 +41,6 @@ var _gold = 0;
 // ── 로스터 직접 조작 ─────────────────────
 
 // Character functions moved to js/common/character.js
-
-function _gainExp(uid, amount) {
-  var roster = getRoster();
-  var ch = roster.chars.find(function(c) { return c.uid === uid; });
-  if (!ch || ch.lv >= MAX_LEVEL) return { leveled: 0, prevLv: ch ? ch.lv : 0 };
-  var prevLv = ch.lv;
-  ch.exp = (ch.exp || 0) + amount;
-  var leveled = 0;
-  while (ch.lv < MAX_LEVEL) {
-    var need = expForLevel(ch.lv);
-    if (ch.exp < need) break;
-    ch.exp -= need;
-    ch.lv++;
-    ch.hp = Math.round(ch.hp + ch.pot.hp);
-    ch.atk = Math.round(ch.atk + ch.pot.atk);
-    ch.def = Math.round(ch.def + ch.pot.def);
-    leveled++;
-  }
-  if (ch.lv >= MAX_LEVEL) ch.exp = 0;
-  saveRoster(roster);
-  return { leveled: leveled, prevLv: prevLv };
-}
 
 
 // ── 상점 데이터 ──────────────────────────
@@ -230,8 +207,7 @@ function updateShopTimer() {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  var btns = document.querySelectorAll('.game-tab');
-  btns.forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
+  toggleTabButtons(tab);
   renderShop();
 }
 

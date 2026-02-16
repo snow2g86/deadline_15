@@ -7,8 +7,7 @@ var _currentTab = 'classchange';
 var _gold = 0;
 
 function updateGoldUI() {
-  var el = document.getElementById('acad-gold-val');
-  if (el) el.textContent = _gold.toLocaleString();
+  updatePageGold('acad-gold-val');
 }
 
 function previewClassChange(ch, newCls) {
@@ -51,9 +50,7 @@ function changeClass(uid, newCls) {
 // ── 탭 전환 ──────────────────────────────
 function switchTab(tab) {
   _currentTab = tab;
-  document.querySelectorAll('.game-tab').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
+  toggleTabButtons(tab);
   var sub = document.getElementById('acad-subtitle');
   if (sub) {
     sub.textContent = tab === 'classchange' ? t('academy.subtitle') : t('academy.skillbook_subtitle');
