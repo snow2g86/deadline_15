@@ -212,19 +212,21 @@
 }
 
 .ps-grade-badge {
-  position: absolute;
-  bottom: -2px;
-  left: -2px;
-  font-size: 9px;
-  font-weight: 900;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, .7);
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 5px;
   border: 1px solid;
+  border-radius: 3px;
+  min-width: 20px;
+  text-align: center;
+  margin-left: 4px;
+}
+
+.ps-grade-text {
+  margin-left: 10px;
 }
 
 /* ── 캐릭터 정보 ── */

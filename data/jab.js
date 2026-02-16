@@ -21,12 +21,12 @@ const JAB = {
   },
   "archer": {
     "icon":"🏹", "res":"energy", "maxRes": 100, "resRec": 12,
-    "base": { "hp": 60, "atk": 28, "def": 3, "move": 3, "range": 4 },
+    "base": { "hp": 60, "atk": 28, "def": 3, "move": 4, "range": 4 },
     "growth": { "hp": [5,9], "atk": [2,4], "def": [0,2] }
   },
   "priest": {
     "icon":"✝️", "res":"mana", "maxRes": 100, "resRec": 10,
-    "base": { "hp": 70, "atk": 20, "def": 5, "move": 3, "range": 3 },
+    "base": { "hp": 70, "atk": 20, "def": 5, "move": 2, "range": 6 },
     "growth": { "hp": [6,10], "atk": [1,3], "def": [1,2] }
   },
   "novice": {

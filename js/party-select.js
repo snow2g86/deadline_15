@@ -234,6 +234,8 @@ function renderPartySlots() {
         var charName = ch.customName || t('character.names')[ch.nameId] || JAB[ch.cls].icon;
         var bonus = calcEquipBonus(ch);
         var skills = getCharSkills(ch.cls);
+        var grade = potGrade(ch);
+        var gradeColor = GRADE_COLORS[grade] || '#9ca3af';
 
         // 1줄: 아이콘 + 기본정보 + 제거버튼
         var header = document.createElement('div');
@@ -242,7 +244,7 @@ function renderPartySlots() {
           '<div class="party-slot-icon">' + charSprite(ch.cls, 40, ch.gender) + '</div>' +
           '<div class="party-slot-info">' +
             '<div class="party-slot-level"><span class="ps-level-text">Lv.' + ch.lv + '</span> <span class="sb-cls-label">' + t('classes.' + ch.cls) + '</span></div>' +
-            '<div class="party-slot-name">' + charName + '</div>' +
+            '<div class="party-slot-name">' + charName + '<span class="ps-grade-text" style="color:' + gradeColor + '">' + grade + '</span></div>' +
           '</div>';
         slot.appendChild(header);
 
