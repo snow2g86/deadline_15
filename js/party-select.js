@@ -929,11 +929,6 @@ function renderChars() {
 
     var html = '';
 
-    // 파티원 배지
-    if (isInParty) {
-      html += '<div class="eq-char-badge">' + t('equip.party_member') + '</div>';
-    }
-
     // 헤더: 아이콘 + 등급
     html += '<div class="unit-card-header">' +
       '<div class="unit-card-icon">' +
