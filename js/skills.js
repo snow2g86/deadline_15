@@ -48,9 +48,9 @@ const SKILLS = {
 	},
 	shaman: [
 		{ id: 'shaman_curse', name: '쇠약의 저주', icon: '☠️',
-			desc: '지정 적 1인에게 2턴간 최대 체력 1% 피해 입힘', cost: 100, costType: 'mana', curseRange: 5 },
+			desc: '지정 적에게 저주 부여 (이동 시마다 최대 체력 1% 피해)', cost: 100, costType: 'mana', curseRange: 5 },
 		{ id: 'shaman_exalt', name: '고양', icon: '🔺',
-			desc: '지정 아군 1인에게 2턴간 공격력 10% 증가', cost: 50, costType: 'mana', exaltRange: 5 }
+			desc: '지정 아군 1인에게 공격력 10% 증가 (2회 공격 한정)', cost: 50, costType: 'mana', exaltRange: 5 }
 	],
 	summoner: [
 		{ id: 'summoner_summon_spirit', name: '정령소환', icon: '✨',

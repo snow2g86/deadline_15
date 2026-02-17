@@ -175,14 +175,6 @@ function tickBuffs(unit) {
 		unit._sanctuaryTurns--;
 		if (unit._sanctuaryTurns <= 0) { unit._sanctuaryHeal = 0; }
 	}
-	if (unit._curseTurns > 0 && unit._curseAtk > 0) {
-		const curseDmg = Math.max(1, Math.round(unit.mhp * 0.01));
-		unit.hp = Math.max(1, unit.hp - curseDmg);
-		G.floatT(unit.x, unit.y, `-${curseDmg}`, 'damage');
-		G.floatT(unit.x, unit.y, t('messages.shaman_curse_tick') || '☠️ 저주', 'debuff');
-		unit._curseTurns--;
-		if (unit._curseTurns <= 0) { unit._curseAtk = 0; }
-	}
 	if (unit.buffs) {
 		for (let i = unit.buffs.length - 1; i >= 0; i--) {
 			unit.buffs[i].duration--;
@@ -217,7 +209,7 @@ function getSkillBuffs(unit) {
 	if (unit._phalanxTurns > 0) buffs.push({ icon: '🛡️', type: 'buff', turns: unit._phalanxTurns });
 	if (unit.isSummon && unit._empowerTurns > 0) buffs.push({ icon: '⬆️', type: 'buff', turns: unit._empowerTurns });
 	if (unit._rootedTurns > 0) buffs.push({ icon: '🌿', type: 'debuff', turns: unit._rootedTurns });
-	if (unit._curseTurns > 0) buffs.push({ icon: '☠️', type: 'debuff', turns: unit._curseTurns });
+	if (unit._cursed) buffs.push({ icon: '☠️', type: 'debuff', turns: 0 });
 	if (unit.cls === 'lancer' && unit.skillLv && unit.skillLv['lancer_spearwall'] >= 1) buffs.push({ icon: '🔱', type: 'buff', turns: 0 });
 	if (unit.cls === 'brawler' && unit.skillLv && unit.skillLv['brawler_counter'] >= 1) buffs.push({ icon: '🔁', type: 'buff', turns: 0 });
 	if (unit.cls === 'shaman' && unit.skillLv && unit.skillLv['shaman_medium'] >= 1 && unit.channeling) buffs.push({ icon: '🔮', type: 'buff', turns: 0 });

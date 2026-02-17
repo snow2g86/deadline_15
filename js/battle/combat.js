@@ -4,6 +4,8 @@
 
 Object.assign(G, {
 	selU(u) {
+		// 현재 행동 유닛이 아니면 선택 불가 (다른 아군 클릭 방지)
+		if (this.curUnit && u.id !== this.curUnit.id && u.team === 'ally') return;
 		if (this.phase !== 'player' || this.over || this.anim || this.awPM) return;
 		if (u.team === 'ally' && u.ha && !u.waited) return;
 		if (u.team === 'ally' && u.waited) {
@@ -15,7 +17,7 @@ Object.assign(G, {
 				if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
 				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
 			}
-			this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rNav(); this.scrollToUnit(u); this.sfxSelect(); return
+			this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rTurnOrder(); this.scrollToUnit(u); this.sfxSelect(); return
 		}
 		this.sel = u; this.awPM = true;
 		if (u.team === 'ally' && !u.ha) {
@@ -23,9 +25,9 @@ Object.assign(G, {
 			if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
 			else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
 		}
-		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rNav(); this.scrollToUnit(u); this.sfxSelect()
+		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rTurnOrder(); this.scrollToUnit(u); this.sfxSelect()
 	},
-	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rNav() },
+	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rTurnOrder() },
 	cellCk(x, y) {
 		if (this.phase !== 'player' || this.over || this.anim) return; const cl = this.uAt(x, y), s = this.sel;
 		if (this.awPM && s) {
@@ -56,16 +58,13 @@ Object.assign(G, {
 			}
 			const hasRange = this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0;
 			if (!hasRange && !cl) { this.clrSel(); return }
-			s.ha = true; s.waited = true; this.awPM = false; this.hideAM(); this.clrSel();
-			if (cl && cl.team !== 'enemy') { const nu = this.uAt(x, y); if (nu) this.selU(nu) }
-			this.chkAutoEnd(); return
-		}
-		if (!s) { if (cl && cl.team === 'ally') this.selU(cl); return }
+					}
+		if (!s) { if (cl && cl.team === 'ally' && (!this.curUnit || cl.id === this.curUnit.id)) this.selU(cl); return }
 		if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
 		if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
 		if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
 		if (!cl && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
-		if (cl && cl.team === 'ally') { this.selU(cl); return } this.clrSel()
+		if (cl && cl.team === 'ally') { if (!this.curUnit || cl.id === this.curUnit.id) this.selU(cl); return } this.clrSel()
 	},
 	actMove() { if (!this.sel) return; this.hideAM(); const u = this.sel; this.mvT = (u.hm || u.mo) ? [] : this.mvC(u); this.rTer(); this.floatT(u.x, u.y, t('messages.select_move_target'), 'heal') },
 	actAttack() { if (!this.sel) return; this.hideAM(); const msg = this.sel.role === 'healer' ? t('messages.select_heal_target') : t('messages.select_attack_target'); this.floatT(this.sel.x, this.sel.y, msg, 'heal') },
@@ -149,7 +148,7 @@ Object.assign(G, {
 		}
 		this.potionMode = false; this._curPotion = null; this.potionTargets = [];
 		u.ha = true; this.awPM = false; this.hideAM();
-		this.rUnits(); this.clrSel(); this.chkAutoEnd();
+		this.rUnits(); this.clrSel(); this.endUnitTurn(u);
 	},
 	actSiege(idx) {
 		if (!this.sel || !this.awPM) return;
@@ -241,7 +240,7 @@ Object.assign(G, {
 		if (def.effect === 'climb') {
 			setTimeout(() => { this.scrollToUnit(u); this.showAM(u); this.showUI(u) }, 340);
 		} else {
-			this.clrSel(); this.chkAutoEnd();
+			this.clrSel(); this.endUnitTurn(u);
 		}
 	},
 
@@ -249,6 +248,15 @@ Object.assign(G, {
 	skMul(u, skId) { const lv = Math.min((u.skillLv && u.skillLv[skId]) || 1, 10); return 1 + 0.1 * (lv - 1) },
 	doMv(u, tx, ty) {
 		const _mxp = this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y, exp: _mxp }; this._mvU(u, tx, ty); u.hm = true; u.mo = true; this.awPM = true; this.sfxMove();
+
+		// 저주 피해 적용: 이동할 때마다 최대 체력 1% 피해
+		if (u._cursed && u.mhp > 0) {
+			const curseDmg = Math.max(1, Math.round(u.mhp * 0.01));
+			u.hp = Math.max(1, u.hp - curseDmg);
+			this.floatT(u.x, u.y, `-${curseDmg}`, 'damage');
+			this.floatT(u.x, u.y, t('messages.shaman_curse_tick') || '☠️ 저주', 'debuff');
+		}
+
 		this.chkTrap(u); chkTrapDetect(u);
 		const a = this.atkC(u); if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
 		else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
@@ -256,7 +264,21 @@ Object.assign(G, {
 	},
 
 	doAtk(a, tgt) {
-		if(tgt._siegeEvasion>0&&Math.random()<0.3){tgt._siegeEvasion--;this.floatT(tgt.x,tgt.y,t('messages.evasion'),'heal');a.ha=true;a.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.chkAutoEnd();return}
+		// 고양 버프 카운터 감소: 2회 공격 한정
+		if (a.buffs) {
+			for (let i = a.buffs.length - 1; i >= 0; i--) {
+				const b = a.buffs[i];
+				if (b.source === 'shaman_exalt' && b._attackCount > 0) {
+					b._attackCount--;
+					if (b._attackCount <= 0) {
+						a.buffs.splice(i, 1);
+						this.floatT(a.x, a.y, t('messages.buff_end') || '버프 해제', 'debuff');
+					}
+				}
+			}
+		}
+
+		if(tgt._siegeEvasion>0&&Math.random()<0.3){tgt._siegeEvasion--;this.floatT(tgt.x,tgt.y,t('messages.evasion'),'heal');a.ha=true;a.hm=true;this.awPM=false;this.hideAM();this.rUnits();this.clrSel();this.endUnitTurn(a);return}
 		const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x,tgt.y,a.x,a.y) <= tgt.range && Math.random() < 0.3;
 		if (bCounter) {
 			// 공격 애니메이션 후 약간의 텀 후에 반격(격투가 카운터) 시작 (약 420ms 지연)
@@ -283,18 +305,27 @@ Object.assign(G, {
 		}
 		a.ha = true; a.hm = true; this.awPM = false; this.hideAM();
 		if (tgt.hp <= 0) {
-			this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500)
+			this.screenShake(); this.sfxKill(); this.sfxDeath(); this.vfxDeath(tgt); this.deathA(tgt.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.endUnitTurn(a) }, 500)
 		}
-		else if (a.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(a); this.deathA(a.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.chkAutoEnd() }, 500) }
-		else { this.rUnits(); this.clrSel(); this.chkAutoEnd() }
+		else if (a.hp <= 0) { this.screenShake(); this.sfxDeath(); this.vfxDeath(a); this.deathA(a.id); setTimeout(() => { this._rmDead(); this.rUnits(); this.chkEnd(); this.clrSel(); this.endUnitTurn(a) }, 500) }
+		else {
+			// 반격 가능 여부 체크: 반격이 발생하면 420ms + 애니메이션 시간 대기
+			const canCounterAttack = tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0);
+			if (canCounterAttack) {
+				setTimeout(() => { this.rUnits(); this.clrSel(); this.endUnitTurn(a) }, 650)
+			} else {
+				this.rUnits(); this.clrSel(); this.endUnitTurn(a)
+			}
+		}
 	},
 	doHeal(h, tgt) {
 		let amt = Math.round(h.atk * 1.5);
 		if (h.skillLv && h.skillLv['priest_divinegrace'] >= 1) amt = Math.round(amt * 1.2);
 		this._grantExp(h, 'heal'); tgt.hp = Math.min(tgt.mhp, tgt.hp + amt); this.vfxHeal(tgt); this.vfxBuff(tgt); this.sfxHeal(); this.floatT(tgt.x, tgt.y, `+${amt}`, 'heal');
-		h.ha = true; h.hm = true; this.awPM = false; this.hideAM(); this.rUnits(); this.clrSel(); this.chkAutoEnd()
+		h.ha = true; h.hm = true; this.awPM = false; this.hideAM();
+		setTimeout(() => { this.rUnits(); this.clrSel(); this.endUnitTurn(h) }, 300)
 	},
-	actWait() { if (!this.sel) return; this.sel.ha = true; this.sel.waited = true; if (this.sel.team === 'ally') this.allyPos[this.sel.id] = { x: this.sel.x, y: this.sel.y }; this.awPM = false; this.hideAM(); this.sfxWait(); this.rUnits(); this.clrSel(); this.chkAutoEnd() },
+	actWait() { if (!this.sel) return; const u = this.sel; u.ha = true; u.waited = true; if (u.team === 'ally') this.allyPos[u.id] = { x: u.x, y: u.y }; this.awPM = false; this.hideAM(); this.sfxWait(); this.rUnits(); this.clrSel(); this.endUnitTurn(u) },
 	actCancel() {
 		if (!this.sel) return;
 		if (this.skillMenuOpen) { this.hideSkillMenu(); return }
@@ -323,11 +354,15 @@ Object.assign(G, {
 			const result = handler.target(u, sk, this);
 			if (result === null) {
 				this.skillMode = false; this._curSkill = null;
+				this.skillFailedMsg = true;
+				this.showAM(u); this.rTer();
+				setTimeout(() => { this.skillFailedMsg = false }, 100);
 				return;
 			}
 			if (result === 'instant') {
-				this.skillMode = false;
+				this.skillMode = false; this._curSkill = null;
 				this.doSkill(u, u.x, u.y);
+				this.rUnits(); // 즉시 시전 스킬 후 UI 업데이트
 				return;
 			}
 			this.atkT = result;
@@ -377,7 +412,7 @@ Object.assign(G, {
 		this.floatT(u.x, u.y, t('messages.channel_cancel'), 'damage');
 		u.channeling = null;
 		u.ha = true; u.hm = true; this.awPM = false; this.skillMode = false; this._curSkill = null; this.hideAM();
-		this.sfxUIClick(); this.rUnits(); this.clrSel(); this.chkAutoEnd()
+		this.sfxUIClick(); this.rUnits(); this.clrSel(); this.endUnitTurn(u)
 	},
 
 });

@@ -12,9 +12,8 @@ registerSkill('shaman_curse', {
 		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0);
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 
-		// 2턴간 최대 체력 1% 피해 적용
-		if (!tgt._curseTurns) tgt._curseTurns = 0;
-		tgt._curseTurns = 2;
+		// 저주 적용: 이동 시마다 최대 체력 1% 피해
+		tgt._cursed = true;
 		tgt._curseAtk = u.atk;
 
 		G.sfxAtk(u.cls);
@@ -39,9 +38,9 @@ registerSkill('shaman_exalt', {
 		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='ally' && v.hp>0);
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 
-		// 2턴간 공격력 10% 증가 버프
+		// 2회 공격 한정 버프
 		if (!tgt.buffs) tgt.buffs = [];
-		tgt.buffs.push({ type: 'atk_up', duration: 2, value: 10, source: 'shaman_exalt' });
+		tgt.buffs.push({ type: 'atk_up', duration: 999, value: 10, source: 'shaman_exalt', _attackCount: 2 });
 
 		G.sfxHeal();
 		G.floatT(tgt.x, tgt.y, t('messages.shaman_exalt'), 'buff');
