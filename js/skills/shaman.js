@@ -4,31 +4,52 @@
 
 // ── 쇠약의 저주 ─────────────────────────
 registerSkill('shaman_curse', {
-	target(u, sk, G) { return 'instant'; },
+	target(u, sk, G) {
+		const cr = sk.curseRange || 5;
+		return G.units.filter(v => v.team==='enemy' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=cr).map(v => ({x:v.x,y:v.y}));
+	},
 	exec(u, tx, ty, sk, G) {
-		u.channeling = 'shaman_curse';
+		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0);
+		if (!tgt) { _skillRefund(u, sk, G); return; }
+
+		// 2턴간 최대 체력 1% 피해 적용
+		if (!tgt._curseTurns) tgt._curseTurns = 0;
+		tgt._curseTurns = 2;
+		tgt._curseAtk = u.atk;
+
+		G.sfxAtk(u.cls);
+		G.floatT(tgt.x, tgt.y, t('messages.shaman_curse'), 'debuff');
 		G.floatT(u.x, u.y, t('messages.shaman_curse'), 'heal');
 		G.vfxFlash('rgba(147,51,234,.15)');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:22,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:8,colors:['#9333ea','#a855f7'],shape:'star',speed:2,spread:10,decay:0.025,size:4,vy:-1}),80);
-		G.sfxAtk(u.cls); G._grantExp(u, 'attack');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:22,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#9333ea','#a855f7'],shape:'star',speed:2,spread:10,decay:0.025,size:4,vy:-1}),80);
+
+		G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}
 });
 
 // ── 고양 ────────────────────────────────
 registerSkill('shaman_exalt', {
-	target(u, sk, G) { return 'instant'; },
+	target(u, sk, G) {
+		const er = sk.exaltRange || 5;
+		return G.units.filter(v => v.team==='ally' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=er && v.id!==u.id).map(v => ({x:v.x,y:v.y}));
+	},
 	exec(u, tx, ty, sk, G) {
-		u.channeling = 'shaman_exalt';
+		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='ally' && v.hp>0);
+		if (!tgt) { _skillRefund(u, sk, G); return; }
+
+		// 2턴간 공격력 10% 증가 버프
+		if (!tgt.buffs) tgt.buffs = [];
+		tgt.buffs.push({ type: 'atk_up', duration: 2, value: 10, source: 'shaman_exalt' });
+
+		G.sfxHeal();
+		G.floatT(tgt.x, tgt.y, t('messages.shaman_exalt'), 'buff');
 		G.floatT(u.x, u.y, t('messages.shaman_exalt'), 'heal');
 		G.vfxFlash('rgba(245,158,11,.15)');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:22,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:8,colors:['#f59e0b','#fbbf24'],shape:'diamond',speed:1.5,spread:10,decay:0.025,size:3,vy:-1.5}),80);
-		G.sfxHeal();
-		G.alive('ally').forEach(a => {
-			if (a.id !== u.id) G.vfxSpawn(G.uSX(a.x,a.y)+UCX, G.uSY(a.x,a.y)+UCY, {count:6,colors:['#f59e0b','#fbbf24'],shape:'spark',speed:2,spread:6,decay:0.03,size:3});
-		});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:22,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#f59e0b','#fbbf24'],shape:'diamond',speed:1.5,spread:10,decay:0.025,size:3,vy:-1.5}),80);
+
 		G._grantExp(u, 'heal');
 		_skillDone(u, G);
 	}

@@ -48,9 +48,9 @@ const SKILLS = {
 	},
 	shaman: [
 		{ id: 'shaman_curse', name: '쇠약의 저주', icon: '☠️',
-			desc: '매턴 적 1명에게 최대HP 1.0% 피해(보스 0.4%). 해제까지 이동/행동 불가', cost: 100, costType: 'mana' },
+			desc: '지정 적 1인에게 2턴간 최대 체력 1% 피해 입힘', cost: 100, costType: 'mana', curseRange: 5 },
 		{ id: 'shaman_exalt', name: '고양', icon: '🔺',
-			desc: '전체 아군 데미지 25% 증가. 해제까지 이동/행동 불가', cost: 50, costType: 'mana' }
+			desc: '지정 아군 1인에게 2턴간 공격력 10% 증가', cost: 50, costType: 'mana', exaltRange: 5 }
 	],
 	summoner: [
 		{ id: 'summoner_summon_spirit', name: '정령소환', icon: '✨',
@@ -79,7 +79,7 @@ const LEARNABLE_SKILLS = {
 	},
 	knight_sacrifice: {
 		id: 'knight_sacrifice', name: '희생', icon: '🛡️',
-		desc: '2턴간 지정 아군 피해를 100% 대신 받음', cost: 5, costType: 'fury', sacrificeRange: 5,
+		desc: '지정 아군의 2번 피해를 100% 대신 받음', cost: 5, costType: 'fury', sacrificeRange: 5,
 		cls: 'knight'
 	},
 	knight_capture: {

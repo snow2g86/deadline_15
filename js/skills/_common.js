@@ -39,7 +39,15 @@ function applyDmgToAlly(tgt, dmg, ctx) {
 	let actual = tgt;
 	if (tgt._sacrificeKnight) {
 		const knight = ctx.units.find(v => v.id === tgt._sacrificeKnight && v.hp > 0);
-		if (knight) actual = knight;
+		if (knight && knight._sacrificeDmgCount > 0) {
+			actual = knight;
+			knight._sacrificeDmgCount--;
+			if (knight._sacrificeDmgCount <= 0) {
+				delete tgt._sacrificeKnight;
+				delete knight._sacrificeTarget;
+				ctx.floatT(knight.x, knight.y, t('messages.knight_sacrifice_end'), 'heal');
+			}
+		}
 	}
 	if (actual === tgt) {
 		const psKnight = ctx.units.filter(v =>
@@ -167,6 +175,14 @@ function tickBuffs(unit) {
 		unit._sanctuaryTurns--;
 		if (unit._sanctuaryTurns <= 0) { unit._sanctuaryHeal = 0; }
 	}
+	if (unit._curseTurns > 0 && unit._curseAtk > 0) {
+		const curseDmg = Math.max(1, Math.round(unit.mhp * 0.01));
+		unit.hp = Math.max(1, unit.hp - curseDmg);
+		G.floatT(unit.x, unit.y, `-${curseDmg}`, 'damage');
+		G.floatT(unit.x, unit.y, t('messages.shaman_curse_tick') || '☠️ 저주', 'debuff');
+		unit._curseTurns--;
+		if (unit._curseTurns <= 0) { unit._curseAtk = 0; }
+	}
 	if (unit.buffs) {
 		for (let i = unit.buffs.length - 1; i >= 0; i--) {
 			unit.buffs[i].duration--;
@@ -189,7 +205,7 @@ function getSkillBuffs(unit) {
 	if (unit.cls === 'knight' && unit.skillLv && unit.skillLv['knight_painshare'] >= 1)
 		buffs.push({ icon: '💔', type: 'buff', turns: 0 });
 	if (unit._sacrificeKnight) buffs.push({ icon: '🛡️', type: 'buff', turns: 0 });
-	if (unit._sacrificeTurns > 0) buffs.push({ icon: '🛡️', type: 'buff', turns: unit._sacrificeTurns });
+	if (unit._sacrificeDmgCount > 0) buffs.push({ icon: '🛡️', type: 'buff', turns: unit._sacrificeDmgCount });
 	if (unit._tenacityDef) buffs.push({ icon: '💪', type: 'buff', turns: 1 });
 	if (unit.cls === 'warrior' && unit.skillLv && unit.skillLv['warrior_bloodthirst'] >= 1)
 		buffs.push({ icon: '🩸', type: 'buff', turns: 0 });
@@ -201,6 +217,7 @@ function getSkillBuffs(unit) {
 	if (unit._phalanxTurns > 0) buffs.push({ icon: '🛡️', type: 'buff', turns: unit._phalanxTurns });
 	if (unit.isSummon && unit._empowerTurns > 0) buffs.push({ icon: '⬆️', type: 'buff', turns: unit._empowerTurns });
 	if (unit._rootedTurns > 0) buffs.push({ icon: '🌿', type: 'debuff', turns: unit._rootedTurns });
+	if (unit._curseTurns > 0) buffs.push({ icon: '☠️', type: 'debuff', turns: unit._curseTurns });
 	if (unit.cls === 'lancer' && unit.skillLv && unit.skillLv['lancer_spearwall'] >= 1) buffs.push({ icon: '🔱', type: 'buff', turns: 0 });
 	if (unit.cls === 'brawler' && unit.skillLv && unit.skillLv['brawler_counter'] >= 1) buffs.push({ icon: '🔁', type: 'buff', turns: 0 });
 	if (unit.cls === 'shaman' && unit.skillLv && unit.skillLv['shaman_medium'] >= 1 && unit.channeling) buffs.push({ icon: '🔮', type: 'buff', turns: 0 });
