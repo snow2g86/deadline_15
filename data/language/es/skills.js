@@ -71,7 +71,7 @@ Object.assign(window._LANG_es, {
         "summoner_summon_spirit": "Invocar espíritu magia a distancia (5 turnos, 50% poder ataque)",
         "summoner_summon_golem": "Invocar golem cuerpo a cuerpo (5 turnos, 120% HP/DEF, 50% poder ataque)",
         "knight_painshare": "Recibir 1/3 del daño de aliados cercanos en 5 celdas (Pasiva)",
-        "knight_sacrifice": "Redirigir 100% del daño de un aliado a sí mismo durante 2 turnos",
+        "knight_sacrifice": "Redirigir 100% de los próximos 2 ataques de daño de un aliado a sí mismo",
         "knight_capture": "Atraer enemigo dentro de 5 celdas a celda adyacente vacía",
         "knight_tenacity": "Prevenir que HP llegue a 0 + aumento masivo de DEF (1 vez por etapa, Pasiva)",
         "warrior_cleave": "Infligir ATK×1.2 de daño a todos los enemigos adyacentes",

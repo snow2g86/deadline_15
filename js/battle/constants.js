@@ -52,6 +52,7 @@ function toBattleStats(uid) {
     role: ROLE_MAP[ch.cls],
     res: d.res === 'mana' ? d.maxRes : 0,
     maxRes: d.maxRes, resType: d.res, resRec: d.resRec,
+    actionRec: ch.actionRec || d.actionRec || 1.0,
     skillLv: ch.skillLv || {},
     gender: ch.gender || 'm'
   };

@@ -77,16 +77,18 @@ function ensureRoster() {
 	var used = {}, chars = [], nextId = 1;
 	function rollPot(g) {
 		var roll = function(mm) { return +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1); };
-		return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) };
+		return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def), actionRec: +(0.05 + Math.random() * 0.15).toFixed(2) };
 	}
 	for (var i = 0; i < 5; i++) {
 		var nameId;
 		do { nameId = Math.floor(Math.random() * totalNames); } while (used[nameId]);
 		used[nameId] = true;
+		var p = rollPot(nov.growth);
 		chars.push({
 			uid: nextId++, cls: 'novice', nameId: nameId, lv: 1, exp: 0, dead: false,
 			hp: nov.base.hp, atk: nov.base.atk, def: nov.base.def,
-			move: nov.base.move, range: nov.base.range, pot: rollPot(nov.growth),
+			move: nov.base.move, range: nov.base.range, pot: p,
+			actionRec: nov.actionRec + p.actionRec,
 			gender: Math.random() < 0.5 ? 'm' : 'f'
 		});
 	}

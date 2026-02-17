@@ -71,7 +71,7 @@ Object.assign(window._LANG_en, {
         "summoner_summon_spirit": "Summon ranged magic spirit (5 turns, 50% attack power)",
         "summoner_summon_golem": "Summon melee golem (5 turns, 120% HP/DEF, 50% attack power)",
         "knight_painshare": "Take 1/3 of nearby allies' damage within 5 cells (Passive)",
-        "knight_sacrifice": "Redirect 100% of target ally's damage to self for 2 turns",
+        "knight_sacrifice": "Redirect 100% of target ally's next 2 damage attacks to self",
         "knight_capture": "Pull enemy within 5 cells to adjacent empty cell",
         "knight_tenacity": "Prevent HP from reaching 0 + massive DEF boost (once per stage, Passive)",
         "warrior_cleave": "Deal ATK\u00d71.2 damage to all adjacent enemies",

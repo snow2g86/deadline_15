@@ -56,8 +56,7 @@ Object.assign(G, {
 			if (!cl && (this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0) && !this.mvT.some(c => c.x === x && c.y === y) && !this.atkT.some(c => c.x === x && c.y === y) && !this.healT.some(c => c.x === x && c.y === y)) {
 				this.mvT = []; this.atkT = []; this.healT = []; this.rTer(); this.showAM(s); return;
 			}
-			const hasRange = this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0;
-			if (!hasRange && !cl) { this.clrSel(); return }
+			if (!cl) return
 					}
 		if (!s) { if (cl && cl.team === 'ally' && (!this.curUnit || cl.id === this.curUnit.id)) this.selU(cl); return }
 		if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }

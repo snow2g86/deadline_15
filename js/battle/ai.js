@@ -2,103 +2,89 @@
 //  battle/ai.js — AI turns, movement, tactics
 // ═══════════════════════════════════════════
 Object.assign(G, {
-  endTurn(){if(this.phase!=='player'||this.over||this.awPM||this.anim)return;
-    document.getElementById('turn-confirm').classList.remove('show');
-    this.clrSel();this.phase='enemy';this.uUI();this.turnFlash('enemy');this.sfxTurnEnemy();
-    document.getElementById('enemy-banner').classList.add('show');setTimeout(()=>this.doET(),800)},
-  chkAutoEnd(){if(this.phase!=='player'||this.over||this.anim||this.awPM)return;
-    const al=this.alive('ally');if(!al.length||!al.every(u=>u.ha))return;
-    if(this.autoEndSkip){setTimeout(()=>this.endTurn(),350);return}
-    document.getElementById('turn-confirm').classList.add('show')},
-  confirmEndTurn(yes){
-    document.getElementById('turn-confirm').classList.remove('show');
-    if(yes)setTimeout(()=>this.endTurn(),100)},
-  autoEndSkip:false,
-  setAutoEnd(v){this.autoEndSkip=v},
-  async doET(){const s=this.cStage;
-    if(s&&this.turn%s.si===0&&this.eSpwn<s.tot){this.showWv(t('messages.wave_info',{count:s.tot-this.eSpwn}));this.sfxWave();this.spawnW();this.rUnits();await sl(600);this.hideWv()}
-    this.alive('enemy').forEach(u=>{
-      if(u.stunned>0)u.stunned--;
-      if(u.frozen>0)u.frozen--;
-      if(u._siegeShield>0)u._siegeShield--;
-      if(u._siegeEvasion>0)u._siegeEvasion--;
-      if(u.siegeItems){u.siegeItems.forEach(item=>{if(item.cooldown>0)item.cooldown--})}
-      tickBuffs(u);
-      if(u.resType==='mana'){u.res=Math.min(u.maxRes,u.res+u.resRec)}
-      else if(u.resType==='energy'){
-        let rec=u.resRec;
-        if(u.cls==='assassin'){const tl=this.ter[u.y]?this.ter[u.y][u.x]:null;if(tl==='forest')rec*=2}
-        u.res=Math.min(u.maxRes,u.res+rec);
-        if(u.cls==='sapper'&&u.res>=20&&!this.traps.find(tr=>tr.x===u.x&&tr.y===u.y)){
-          u.res-=20;
-          this.traps.push({x:u.x,y:u.y,dmg:u.atk*2,id:this.traps.length,team:'enemy'});
-          this.floatT(u.x,u.y,t('messages.trap_placed'),'heal');
-        }
+  // 개별 유닛 행동 완료 후 호출
+  endUnitTurn(u) {
+    u.actionPow -= 5;
+    u.ha = false;
+    u.hm = false;
+    u.mo = false;
+
+    // 자원 회복
+    if (u.resType === 'mana') {
+      u.res = Math.min(u.maxRes, u.res + u.resRec);
+    } else if (u.resType === 'energy') {
+      let rec = u.resRec;
+      if (u.cls === 'assassin') {
+        const tl = this.ter[u.y] ? this.ter[u.y][u.x] : null;
+        if (tl === 'forest') rec *= 2;
       }
-    });this.rUnits();
-    this.anim=true;for(const e of[...this.alive('enemy')]){if(this.over)break;await this.eAI(e);await sl(500)}
-    this.anim=false;document.getElementById('enemy-banner').classList.remove('show');this.chkEnd();
-    if(!this.over){this.turn++;this.phase='player';this.turnFlash('player');this.sfxTurnPlayer();
-      this.alive('ally').filter(u=>u.channeling==='shaman_curse').forEach(u=>{
-        const enemies=this.alive('enemy');
-        if(enemies.length){
-          const tgt=enemies[Math.floor(Math.random()*enemies.length)];
-          const pct=tgt.isBoss?0.004:0.01;
-          const dmg=Math.max(1,Math.round(tgt.mhp*pct));
-          tgt.hp=Math.max(0,tgt.hp-dmg);
-          this.floatT(tgt.x,tgt.y,`-${dmg}`,'damage');
-          this.floatT(tgt.x,tgt.y,t('messages.curse'),'damage');
-          this.vfxSpawn(this.uSX(tgt.x,tgt.y)+UCX,this.uSY(tgt.x,tgt.y)+UCY,{count:6,colors:['#9333ea','#581c87','#a855f7'],shape:'spark',speed:2,spread:8,decay:0.03,size:3});
-          if(tgt.hp<=0){this.sfxDeath();this.vfxDeath(tgt);this.deathA(tgt.id);this._rmDead();
-            setTimeout(()=>{this.rUnits();this.chkEnd()},500)}
-        }
-      });
-      if(this.poisonMists&&this.poisonMists.length){
-        this.poisonMists.forEach(pm=>{
-          this.alive('enemy').forEach(e=>{
-            if(mh(e.x,e.y,pm.cx,pm.cy)<=1){
-              const dmg=Math.max(1,Math.round(pm.atk*0.3));
-              e.hp=Math.max(0,e.hp-dmg);
-              this.floatT(e.x,e.y,`-${dmg}`,'damage');
-              this.vfxSpawn(this.uSX(e.x,e.y)+UCX,this.uSY(e.x,e.y)+UCY,{count:4,colors:['#22c55e','#4ade80'],shape:'spark',speed:2,spread:6,decay:0.03,size:3});
-              if(e.hp<=0){this.sfxDeath();this.vfxDeath(e);this.deathA(e.id)}
-            }
-          });
-          pm.turns--;
-        });
-        this.poisonMists=this.poisonMists.filter(pm=>pm.turns>0);
-        this._rmDead();this.rUnits();
+      u.res = Math.min(u.maxRes, u.res + rec);
+    }
+
+    // 버프 틱
+    tickBuffs(u);
+
+    // stunned/frozen 감소
+    if (u.stunned > 0) u.stunned--;
+    if (u.frozen > 0) u.frozen--;
+
+    // 게임 종료 체크
+    this.chkEnd();
+
+    // 다음 행동으로 이동
+    this.actCount++;
+    this.nextAction();
+  },
+
+  // 다음 유닛 행동 처리
+  async nextAction() {
+    if (this.over) return;
+
+    const stage = this.cStage;
+    // 웨이브 스폰 체크
+    if (stage && this.eSpwn < stage.tot) {
+      const interval = stage.si * 2;
+      if (this.actCount > 0 && this.actCount % interval === 0) {
+        this.showWv(t('messages.wave_info', { count: stage.tot - this.eSpwn }));
+        this.sfxWave();
+        this.spawnW();
+        this.rUnits();
+        await sl(600);
+        this.hideWv();
       }
-      this.alive('ally').forEach(u=>{
-        if(u.isSummon&&u.summonTurns!==undefined){
-          u.summonTurns--;
-          if(u.summonTurns<=0){
-            const summoner=this.units.find(s=>s.id===u.summonerId&&s.hp>0&&s.skillLv&&s.skillLv['summoner_soulbond']>=1);
-            if(summoner){summoner.res=Math.min(summoner.maxRes,summoner.res+40);this.floatT(summoner.x,summoner.y,t('messages.soulbond_restore'),'heal')}
-            this.floatT(u.x,u.y,t('messages.unsummoned'),'damage');
-            this.vfxDeath(u);
-            setTimeout(()=>{
-              this.units=this.units.filter(v=>v.id!==u.id);
-              this.rUnits();
-            },500);
-            return}
-        }
-        if(u.channeling){
-          u.hm=true;u.ha=true;u.waited=true;u.mo=false;
-          return}
-        u.hm=false;u.ha=false;u.waited=false;u.mo=false;u._spearwallUsed=false;
-        if(u._sacrificeTurns>0){u._sacrificeTurns--;if(u._sacrificeTurns<=0){this.units.forEach(v=>{if(v._sacrificeKnight===u.id)v._sacrificeKnight=null});u._sacrificeTarget=null;this.floatT(u.x,u.y,t('messages.knight_sacrifice_end'),'damage')}}
-        if(u.stunned>0)u.stunned--;
-        if(u.frozen>0)u.frozen--;
-        tickBuffs(u);
-        if(u.resType==='mana'){u.res=Math.min(u.maxRes,u.res+u.resRec)}
-        else if(u.resType==='energy'){
-          let rec=u.resRec;
-          if(u.cls==='assassin'){const tl=this.ter[u.y]?this.ter[u.y][u.x]:null;if(tl==='forest')rec*=2}
-          u.res=Math.min(u.maxRes,u.res+rec)}
-        if(u.resType==='fury'&&u.cls==='warrior'&&u.skillLv&&u.skillLv['warrior_bloodthirst']>=1){u.res=Math.min(u.maxRes,u.res+1)}
-      });
-      this.uUI();this.clrSel();this.rMM();this._autoSave()}},
+    }
+
+    const nextU = this.advanceTick();
+    if (!nextU) return;
+
+    this.curUnit = nextU;
+    this.clrSel();
+    this.rTurnOrder(); // 순서 패널 갱신
+
+    if (nextU.team === 'ally') {
+      this.phase = 'player';
+      this.turnFlash('player');
+      this.uUI();
+
+      // stunned 유닛이면 자동 스킵
+      if (nextU.stunned > 0) {
+        setTimeout(() => this.endUnitTurn(nextU), 300);
+      } else {
+        // 행동 가능한 아군 자동 선택
+        setTimeout(() => this.selU(nextU), 100);
+      }
+    } else {
+      this.phase = 'enemy';
+      this.uUI();
+      this.anim = true;
+      setTimeout(async () => {
+        if (!this.over) await this.eAI(nextU);
+        this.anim = false;
+        this.endUnitTurn(nextU);
+      }, 300);
+    }
+  },
+
   _autoSave(){try{saveBattle({stage:this.cStage,party:this.party,practiceMode:this.practiceMode,ter:this.ter,turn:this.turn,eSpwn:this.eSpwn,eQ:this.eQ,breached:this.breached,gateHP:this.gateHP,wallHP:this.wallHP,nid:this.nid,units:this.units.map(u=>{const o={...u};delete o._el;return o}),battleExp:this.battleExp,allyPos:this.allyPos,_killCount:this._killCount,_killExpPool:this._killExpPool,_deadAllyUids:this._deadAllyUids,_siegeItems:this._siegeItems,_siegeInvIndices:this._siegeInvIndices,_battlePotions:this._battlePotions,_battlePotionIndices:this._battlePotionIndices})}catch(e){}},
   selectTarget(u,inRange,profile){
     if(!inRange.length)return null;
@@ -210,34 +196,62 @@ Object.assign(G, {
 
     return false;
   },
-  async eAI(u){const al=this.alive('ally');if(!al.length&&!this.hasAllyWall())return;
-    const profile=AI_PROFILES[u.cls]||AI_PROFILES.novice;
-    if(profile.avoidCombat&&u.hp>u.mhp*0.7){
-      await this.eMv(u,al);return
+  async eAI(u) {
+    const al = this.alive('ally');
+    if (!al.length && !this.hasAllyWall()) return;
+    const profile = AI_PROFILES[u.cls] || AI_PROFILES.novice;
+
+    if (profile.avoidCombat && u.hp > u.mhp * 0.7) {
+      await this.eMv(u, al);
+      return;
     }
-    const inR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&!isStealthed(v)}).map(c=>this.uAt(c.x,c.y));
-    if(inR.length&&profile.targetPriority!=='never'){
-      if(await this.tryUseSkill(u,profile)){return}
-      const target=this.selectTarget(u,inR,profile);
-      if(target){await this.eAtkAsync(u,target);return}
+
+    const inR = this.atkC(u).filter(c => {
+      const v = this.uAt(c.x, c.y);
+      return v && v.team === 'ally' && !isStealthed(v);
+    }).map(c => this.uAt(c.x, c.y));
+
+    if (inR.length && profile.targetPriority !== 'never') {
+      if (await this.tryUseSkill(u, profile)) return;
+      const target = this.selectTarget(u, inR, profile);
+      if (target) {
+        await this.eAtkAsync(u, target);
+        return;
+      }
     }
-    if(await this.trySiegeItemUse(u)){return}
-    const gAtk=this.tryGateAtk(u);
-    if(gAtk){await sl(250);return}
-    const wClimb=await this.tryWallClimb(u);
-    if(wClimb)return;
-    await this.eMv(u,al);
-    if(this.over)return;
-    if(profile.avoidCombat&&u.hp>u.mhp*0.7)return;
+
+    if (await this.trySiegeItemUse(u)) return;
+
+    const gAtk = this.tryGateAtk(u);
+    if (gAtk) {
+      await sl(250);
+      return;
+    }
+
+    const wClimb = await this.tryWallClimb(u);
+    if (wClimb) return;
+
+    await this.eMv(u, al);
+    if (this.over) return;
+    if (profile.avoidCombat && u.hp > u.mhp * 0.7) return;
+
     await sl(200);
-    const postR=this.atkC(u).filter(c=>{const v=this.uAt(c.x,c.y);return v&&v.team==='ally'&&!isStealthed(v)}).map(c=>this.uAt(c.x,c.y));
-    if(postR.length&&profile.targetPriority!=='never'){
-      if(await this.tryUseSkill(u,profile)){return}
-      const target=this.selectTarget(u,postR,profile);
-      if(target){await this.eAtkAsync(u,target);return}
+    const postR = this.atkC(u).filter(c => {
+      const v = this.uAt(c.x, c.y);
+      return v && v.team === 'ally' && !isStealthed(v);
+    }).map(c => this.uAt(c.x, c.y));
+
+    if (postR.length && profile.targetPriority !== 'never') {
+      if (await this.tryUseSkill(u, profile)) return;
+      const target = this.selectTarget(u, postR, profile);
+      if (target) {
+        await this.eAtkAsync(u, target);
+        return;
+      }
     }
+
     this.tryGateAtk(u);
-    },
+  },
   analyzeSituation(u){
     const al=this.alive('ally');
     const hpPct=u.hp/u.mhp;

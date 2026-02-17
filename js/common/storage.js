@@ -24,10 +24,11 @@ function loadGold() {
   return 0;
 }
 
-function saveGold(gold) {
+function saveGold(gold, cleared) {
   try {
     const d = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
     d.gold = gold;
+    if (cleared) d.cleared = cleared;
     localStorage.setItem(SAVE_KEY, JSON.stringify(d));
   } catch (_) {}
 }
@@ -36,7 +37,45 @@ function saveGold(gold) {
 function getRoster() {
   try {
     const raw = localStorage.getItem(ROSTER_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const roster = JSON.parse(raw);
+      // 마이그레이션: pot 및 actionRec 필드 추가
+      let needsSave = false;
+      if (roster.chars && Array.isArray(roster.chars)) {
+        for (const ch of roster.chars) {
+          if (ch && typeof ch === 'object') {
+            // pot 필드 없으면 생성 (잠재력이 없는 구 캐릭터)
+            if (!ch.pot) {
+              const g = JAB[ch.cls] && JAB[ch.cls].growth;
+              if (g) {
+                ch.pot = {
+                  hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * 0.5).toFixed(1),
+                  atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * 0.5).toFixed(1),
+                  def: +(g.def[0] + (g.def[1] - g.def[0]) * 0.5).toFixed(1),
+                  actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
+                };
+                needsSave = true;
+              }
+            }
+            // pot.actionRec 필드 없으면 추가 (기존 pot 객체)
+            if (ch.pot && !ch.pot.actionRec) {
+              ch.pot.actionRec = +(0.05 + Math.random() * 0.15).toFixed(2);
+              needsSave = true;
+            }
+            // actionRec 필드 없으면 생성
+            if (!ch.actionRec) {
+              const baseRec = (JAB[ch.cls] && JAB[ch.cls].actionRec) || 1.0;
+              ch.actionRec = baseRec + (ch.pot && ch.pot.actionRec || 0);
+              needsSave = true;
+            }
+          }
+        }
+      }
+      if (needsSave) {
+        try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (_) {}
+      }
+      return roster;
+    }
   } catch (_) {}
   return { chars: [], nextId: 1 };
 }

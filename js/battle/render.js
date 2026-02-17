@@ -83,7 +83,7 @@ Object.assign(G, {
 			let hlTile = existingHlTiles.get(pos);
 			if (!hlTile) {
 				hlTile = document.createElement('div'); hlTile.className = 'iso-tile iso-tile-hl'; hlTile.dataset.pos = pos; hlTile.style.cursor = 'pointer';
-				hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && u.team === 'ally' && !G.sel) { G.selU(u); return } if (u && u.team === 'ally' && G.sel && u.id === G.sel.id) { G.clrSel(); return } G.cellCk(c, r) });
+				hlTile.addEventListener('click', e => { e.stopPropagation(); const rect = w.getBoundingClientRect(); const px = e.clientX - rect.left, py = e.clientY - rect.top; const hit = G.isoHit(px, py); if (!hit) return; const { c, r } = hit; if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return; if (G.awPM) { G.cellCk(c, r); return } const u = G.uAt(c, r); if (u && u.team === 'ally' && !G.sel) { G.selU(u); return } if (u && u.team === 'ally' && G.sel && u.id === G.sel.id) { G.clrSel(); return } if (u && u.team === 'enemy' && !G.sel && !G.awPM) { G.showEnemyPopup(u); return } G.cellCk(c, r) });
 				w.appendChild(hlTile);
 			}
 			if (hlTile.innerHTML) hlTile.innerHTML = '';
@@ -127,7 +127,9 @@ Object.assign(G, {
 				mpFill.style.background = resClr(u);
 			}
 			const isSel = this.sel && this.sel.id === u.id;
+			const isCur = this.curUnit && this.curUnit.id === u.id;
 			el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
+			el.classList.toggle('cur-turn', !!isCur);
 			el.classList.toggle('stealthed', isStealthed(u)); el.classList.toggle('stunned', u.stunned > 0 || u.frozen > 0);
 			el.classList.toggle('potion-target', this.potionMode && this.potionTargets && this.potionTargets.some(pt => pt.id === u.id));
 			let stunLabel = el.querySelector('.stun-label'); if (u.stunned > 0 || u.frozen > 0) { if (!stunLabel) { stunLabel = document.createElement('div'); stunLabel.className = 'stun-label'; el.appendChild(stunLabel) } stunLabel.textContent = u.frozen > 0 ? '❄️' + u.frozen : u.stunned } else if (stunLabel) stunLabel.remove();
@@ -161,7 +163,7 @@ Object.assign(G, {
 		this.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
 			this.allyPos[u.id] = {x: 99, y: 99};
 		});
-		this.rMM(); this.rNav()
+		this.rMM(); this.rTurnOrder()
 	},
 
 	floatT(x, y, t, tp) {
@@ -196,7 +198,8 @@ Object.assign(G, {
 			btn.onclick = () => G.cancelChannel();
 			const btnDash = document.getElementById('btn-dash');
 			m.insertBefore(btn, btnDash);
-			btnDash.style.display = 'none';
+			btnDash.style.display = '';
+			btnDash.textContent = t('battle.wait');
 			m.classList.add('show'); return
 		}
 		if (this.skillMenuOpen) { this.showSkillSubMenu(u); return }
@@ -206,6 +209,24 @@ Object.assign(G, {
 	showMainMenu(u) {
 		const m = document.getElementById('action-menu');
 		m.querySelectorAll('.am-skill, .am-item').forEach(e => e.remove());
+
+		// 스킬 사용 불가 상황 처리 (주술사 등)
+		if (this.skillFailedMsg) {
+			document.getElementById('btn-move').style.display = 'none';
+			document.getElementById('btn-attack').style.display = 'none';
+			document.getElementById('btn-skill').style.display = 'none';
+			document.getElementById('btn-item').style.display = 'none';
+			const btnDash = document.getElementById('btn-dash');
+			btnDash.textContent = t('battle.wait');
+			btnDash.style.display = '';
+			const btnCancel = document.getElementById('btn-cancel');
+			btnCancel.textContent = '⟲ ' + t('battle.cancel');
+			btnCancel.style.display = '';
+			btnCancel.onclick = () => G.hideSkillMenu();
+			m.classList.add('show');
+			return;
+		}
+
 		document.getElementById('btn-move').style.display = (!u.hm && !u.mo) ? '' : 'none';
 		const btnAttack = document.getElementById('btn-attack');
 		if (u.role === 'healer') {

@@ -71,7 +71,7 @@ Object.assign(window._LANG_ko, {
         "summoner_summon_spirit": "원거리 마법 공격 정령 소환 (5턴, 공격력 50%)",
         "summoner_summon_golem": "근접 공격 골램 소환 (5턴, HP/DEF 120%, 공격력 50%)",
         "knight_painshare": "5칸 내 아군 피해의 1/3을 대신 받음 (패시브)",
-        "knight_sacrifice": "2턴간 지정 아군 피해를 100% 대신 받음",
+        "knight_sacrifice": "지정 아군의 2번 피해를 100% 대신 받음",
         "knight_capture": "5칸 내 적을 기사 인근 빈 칸으로 끌어옴",
         "knight_tenacity": "HP 0 방지 + DEF 대폭 증가 (스테이지 1회, 패시브)",
         "warrior_cleave": "인접 모든 적에게 ATK×1.2 데미지",

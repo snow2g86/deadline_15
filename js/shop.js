@@ -75,7 +75,8 @@ function genRotatingItems() {
     var pot = {
       hp: +(d.growth.hp[0] + Math.random() * (d.growth.hp[1] - d.growth.hp[0])).toFixed(1),
       atk: +(d.growth.atk[0] + Math.random() * (d.growth.atk[1] - d.growth.atk[0])).toFixed(1),
-      def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1)
+      def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1),
+      actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
     };
     var name = charNames[Math.floor(Math.random() * charNames.length)];
     var g = d.growth;
@@ -292,8 +293,7 @@ function renderCharCard(item, list) {
     '<div class="shop-icon">' + clsIcon(item.cls, 36) + '</div>' +
     '<div class="shop-name">' + item.name + '</div>' +
     '<div class="shop-cls">' + t('classes.' + item.cls) + ' \xb7 ' + t('class_desc.' + item.cls) + '</div>' +
-    '<div class="shop-stats">' + t('common.hp') + ' ' + d.base.hp + ' ' + t('common.atk') + ' ' + d.base.atk + ' ' + t('common.def') + ' ' + d.base.def + '</div>' +
-    '<div class="shop-pot">' + t('common.potential') + ' ' + t('common.hp') + '+' + item.pot.hp + ' ' + t('common.atk') + '+' + item.pot.atk + ' ' + t('common.def') + '+' + item.pot.def + '</div>' +
+    '<div class="shop-stats" style="color:#fff"><div>HP : ' + d.base.hp + '<span style="color:var(--dim)">(+' + item.pot.hp + ')</span></div><div>ATK:' + d.base.atk + '<span style="color:var(--dim)">(+' + item.pot.atk + ')</span></div><div>DEF:' + d.base.def + '<span style="color:var(--dim)">(+' + item.pot.def + ')</span></div><div>AR:' + d.actionRec + '<span style="color:var(--dim)">(+' + item.pot.actionRec + ')</span></div></div>' +
     '<button class="shop-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + recruitBtn + '</button>';
   if (!item.sold) {
     el.querySelector('.shop-btn').onclick = function() {
@@ -507,7 +507,8 @@ function doGachaAdMerc() {
   var pot = {
     hp: +(d.growth.hp[0] + Math.random() * (d.growth.hp[1] - d.growth.hp[0])).toFixed(1),
     atk: +(d.growth.atk[0] + Math.random() * (d.growth.atk[1] - d.growth.atk[0])).toFixed(1),
-    def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1)
+    def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1),
+    actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
   };
   var names = t('character.names');
   var nameIdx = Math.floor(Math.random() * names.length);

@@ -9,41 +9,44 @@ Object.assign(G, {
     if(t&&TI[t].buff){const b=TI[t].buff;buffs.push({icon:b.icon,type:b.type,turns:0})}
     getSkillBuffs(u).forEach(b=>buffs.push(b));
     if(u.cls==='assassin'&&t==='forest')buffs.push({icon:'🌙',type:'buff',turns:0});
-    if(u.ha)buffs.push({icon:'✓',type:'debuff',turns:0});
-    else if(u.waited)buffs.push({icon:'⏸',type:'neutral',turns:0});
-    if(u.mo&&!u.ha)buffs.push({icon:'👣',type:'neutral',turns:0});
+    if(u._rootedTurns>0)buffs.push({icon:'🔗',type:'debuff',turns:u._rootedTurns});
     return buffs;
   },
-  rNav(){
+  rTurnOrder(){
     const nav=document.getElementById('ally-nav');
-    const allAllies=this.units.filter(u=>u.team==='ally');
+    const alive=this.units.filter(u=>u.hp>0);
+    // 다음 행동까지 남은 tick 계산
+    const withTicks=alive.map(u=>({
+      u,
+      ticksLeft: u.actionPow>=5 ? 0 : (5-u.actionPow)/u.actionRec
+    }));
+    withTicks.sort((a,b)=>a.ticksLeft-b.ticksLeft);
+
     nav.innerHTML='';
-    allAllies.forEach(u=>{
-      const dead=u.hp<=0;
-      const isSel=this.sel&&this.sel.id===u.id;
-      const d=JAB[u.cls];
-      const pct=dead?0:Math.round(u.hp/u.mhp*100);
-      const hpColor=pct>60?'#22c55e':pct>30?'#eab308':'#ef4444';
-      const buffs=dead?[]:this.getBuffs(u);
-
+    withTicks.forEach(({u,ticksLeft})=>{
+      const isCur=this.curUnit&&this.curUnit.id===u.id;
       const el=document.createElement('div');
-      el.className='an-unit'+(dead?' dead':'')+(isSel?' selected':'')+(u.ha&&!dead?' acted-nav':'');
+      const isEnemy=u.team==='enemy';
+      el.className=`an-unit${isEnemy?' enemy-nav':''}${isCur?' cur-nav':''}`;
 
-      let bh='';
-      buffs.forEach(b=>{
-        const tl=b.turns>0?`<span class="bf-turn">${b.turns}</span>`:'';
-        bh+=`<span class="an-buff ${b.type}">${b.icon}${tl}</span>`;
-      });
+      // 행동력 바: actionPow/5 비율
+      const apPct=Math.min(100,(u.actionPow/5)*100);
+      const apDisplay=u.actionPow.toFixed(1);
+      const recDisplay=u.actionRec.toFixed(1);
+      const tickDisplay=u.actionPow>=5?'✓':ticksLeft.toFixed(1);
 
-      const resColor=u.resType==='mana'?'#4488ff':u.resType==='energy'?'#f0c040':'#ff6644';
-      const resPct=dead?0:(u.maxRes?Math.round(u.res/u.maxRes*100):0);
+      el.innerHTML=`<div class="an-icon">${clsIcon(u.cls,18)}</div>
+        <div class="an-apbar"><div style="height:${apPct}%"></div></div>
+        <div class="an-info">
+          <div class="an-ap-text">${apDisplay}/5</div>
+          <div class="an-rec-text">${recDisplay}x</div>
+          <div class="an-tick-text">${tickDisplay}</div>
+        </div>`;
 
-      const buffsDiv=bh?`<div class="an-buffs">${bh}</div>`:'';
-      el.innerHTML=`${buffsDiv}<div class="an-vres"><div class="an-vres-fill" style="height:${resPct}%;background:${resColor}"></div></div><div class="an-vhp"><div class="an-vhp-fill" style="height:${pct}%;background:${hpColor}"></div></div><div class="an-icon">${clsIcon(u.cls,18)}</div>`;
-
-      if(!dead)el.onclick=()=>{if(this.awPM)return;this.selU(u)};
+      if(u.team==='ally')el.onclick=()=>{if(this.awPM)return;if(!this.curUnit||u.id===this.curUnit.id)this.selU(u)};
       nav.appendChild(el);
     });
+    this.rInfoPanel();
   },
 
   rMM(){
@@ -121,20 +124,72 @@ Object.assign(G, {
     const br=s?this.breached:0,blim=s?Math.ceil(s.tot/4):0;
     document.getElementById('stage-info').innerHTML=`STAGE ${s?s.id:1} <span style="color:var(--dim);font-size:9px">${s?t('stages.stage_'+s.id+'_name'):''}</span>
       <div class="si-turn">TURN ${this.turn} · ${t('battle.summon')} ${this.eSpwn}/${s?s.tot:'?'} · ${t('battle.remaining')} ${en}체 · <span style="color:${br>0?'#ef4444':'var(--dim)'}">
-${t('battle.breach')} ${br}/${blim}</span></div>`;
-    document.getElementById('btn-end-turn').disabled=this.phase!=='player'},
-  showUI(u){const p=document.getElementById('info-panel'),tc=u.team==='ally'?'ally-card':'enemy-card';
-    let h=this.iCard(u,tc,true);if(u.team==='ally'){(u.role==='healer'?this.healT:this.atkT).forEach(t=>{
-      const tu=this.uAt(t.x,t.y);if(tu)h+=this.iCard(tu,tu.team==='ally'?'ally-card':'enemy-card',false)})}p.innerHTML=h},
-  iCard(u,cc,m){const p=Math.round(u.hp/u.mhp*100);
+${t('battle.breach')} ${br}/${blim}</span></div>`},
+  showUI(){this.rInfoPanel()},
+  defI(){this.rInfoPanel()},
+  rInfoPanel(){
+    const p=document.getElementById('info-panel');
+    const allies=this.units.filter(u=>u.hp>0&&u.team==='ally');
+    const selId=this.sel?this.sel.id:(this.curUnit?this.curUnit.id:null);
     const rl={'mana':'MP','energy':'EP','fury':'FP'};
     const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
-    const rn=rl[u.resType]||'',rpct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
-    return`<div class="info-card ${cc}" ${m?'style="border-width:2px"':''}>
-      <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,18)}</span><span class="ic-name">${u.name}</span><span class="ic-class">${t('classes.' + u.cls)}</span></div>
-      <div class="ic-stats"><span>HP <b>${u.hp}/${u.mhp}</b></span><span style="color:${rc[u.resType]}">${rn} <b>${u.res}/${u.maxRes}</b></span><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div></div>`},
-  defI(){const a=this.alive('ally').length,e=this.alive('enemy').length;
-    document.getElementById('info-panel').innerHTML=`<div style="display:flex;gap:12px;align-items:center;font-size:11px"><span style="color:var(--blue)">${t('battle.allies', {count: a})}</span><span style="color:var(--red)">${t('battle.enemies', {count: e})}</span><span style="color:var(--dim)">${t('battle.select_unit_touch')}</span></div>`},
+    let html='';
+    allies.forEach(u=>{
+      const isSel=u.id===selId;
+      const hpPct=Math.round(u.hp/u.mhp*100);
+      const rn=rl[u.resType]||'';
+      const resPct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
+      const buffs=this.getBuffs(u);
+      const buffHtml=buffs.map(b=>`<span class="buff-icon">${b.icon}</span>`).join('');
+      html+=`<div class="info-card ally-card${isSel?' ip-sel':''}" data-uid="${u.id}">
+        <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,14)}</span><span class="ic-name">${u.name}</span><span class="ic-class">${t('classes.'+u.cls)}</span></div>
+        <div class="ic-bar-row"><span class="ic-blabel">HP</span><div class="ic-bar"><div class="ic-bfill ${hpPct<=25?'low':''}" style="width:${hpPct}%"></div></div><span class="ic-bval">${u.hp}/${u.mhp}</span></div>
+        ${rn?`<div class="ic-bar-row"><span class="ic-blabel" style="color:${rc[u.resType]}">${rn}</span><div class="ic-bar"><div class="ic-bfill" style="width:${resPct}%;background:${rc[u.resType]}"></div></div><span class="ic-bval">${u.res}/${u.maxRes}</span></div>`:''}
+        <div class="ic-stats"><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div>
+        ${buffHtml?`<div class="ic-buffs">${buffHtml}</div>`:''}
+      </div>`;
+    });
+    p.innerHTML=html;
+    // 선택 유닛으로 자동 스크롤
+    if(selId){const el=p.querySelector(`[data-uid="${selId}"]`);if(el)el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
+  },
+  // ── 적 유닛 정보 팝업 ──
+  showEnemyPopup(u){
+    this.hideEnemyPopup();
+    const rl={'mana':'MP','energy':'EP','fury':'FP'};
+    const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
+    const hpPct=Math.round(u.hp/u.mhp*100);
+    const rn=rl[u.resType]||'';
+    const resPct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
+    const buffs=this.getBuffs(u);
+    const buffHtml=buffs.map(b=>`<span class="buff-icon">${b.icon}</span>`).join('');
+    const pop=document.createElement('div');
+    pop.id='enemy-popup';
+    pop.innerHTML=`
+      <div class="ep-head"><span class="ep-icon">${clsIcon(u.cls,16)}</span><span class="ep-name">${u.name}</span><span class="ep-cls">${t('classes.'+u.cls)}</span></div>
+      <div class="ep-bar"><span class="ep-blbl">HP</span><div class="ep-btrack"><div class="ep-bfill ${hpPct<=25?'low':''}" style="width:${hpPct}%"></div></div><span class="ep-bval">${u.hp}/${u.mhp}</span></div>
+      ${rn?`<div class="ep-bar"><span class="ep-blbl" style="color:${rc[u.resType]}">${rn}</span><div class="ep-btrack"><div class="ep-bfill" style="width:${resPct}%;background:${rc[u.resType]}"></div></div><span class="ep-bval">${u.res}/${u.maxRes}</span></div>`:''}
+      <div class="ep-stats"><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div>
+      ${buffHtml?`<div class="ep-buffs">${buffHtml}</div>`:''}`;
+    document.getElementById('iso-world').appendChild(pop);
+    // 위치: 유닛 스프라이트 기준, 화면 넘어가면 아래쪽으로 표시
+    const sx=this.uSX(u.x,u.y)+UCX;
+    const sy=this.uSY(u.x,u.y)-10;
+    pop.style.left=sx+'px';pop.style.top=sy+'px';
+    requestAnimationFrame(()=>{
+      const rect=pop.getBoundingClientRect();
+      if(rect.top<0)pop.classList.add('below');
+      pop.classList.add('show');
+    });
+    // 다른 곳 클릭/터치 시 즉시 닫기
+    this._epClose=e=>{e.stopPropagation();this.hideEnemyPopup()};
+    document.addEventListener('pointerdown',this._epClose,{capture:true,once:true});
+  },
+  hideEnemyPopup(){
+    const old=document.getElementById('enemy-popup');
+    if(old)old.remove();
+    if(this._epClose){document.removeEventListener('pointerdown',this._epClose,{capture:true});this._epClose=null}
+  },
   showWv(t){const b=document.getElementById('wave-banner');b.textContent=t;b.classList.add('show')},
   hideWv(){document.getElementById('wave-banner').classList.remove('show')},
   showRes(win,msg){const ov=document.getElementById('modal-overlay');

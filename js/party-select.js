@@ -253,6 +253,7 @@ function renderPartySlots() {
           '<span class="ps-stat-item">HP ' + ch.hp + (bonus.hp > 0 ? '<span class="bonus">+' + bonus.hp + '</span>' : '') + '</span>' +
           '<span class="ps-stat-item">ATK ' + ch.atk + (bonus.atk > 0 ? '<span class="bonus">+' + bonus.atk + '</span>' : '') + '</span>' +
           '<span class="ps-stat-item">DEF ' + ch.def + (bonus.def > 0 ? '<span class="bonus">+' + bonus.def + '</span>' : '') + '</span>' +
+          '<span class="ps-stat-item">AR ' + (ch.actionRec || JAB[ch.cls].actionRec || 1.0).toFixed(2) + '</span>' +
         '</div>';
 
         var skillsHtml = '<div class="party-slot-skills">';
@@ -528,6 +529,12 @@ function renderUnitCards(filter) {
         '<span class="unit-card-stat-value">' + ch.def +
         (bonus.def > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.def + '</span>' : '') +
         (ch.pot && ch.pot.def ? '<span class="unit-card-stat-potential">(+' + ch.pot.def + ')</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">AR:</span>' +
+        '<span class="unit-card-stat-value">' + (ch.actionRec || JAB[ch.cls].actionRec || 1.0).toFixed(2) +
+        (ch.pot && ch.pot.actionRec ? '<span class="unit-card-stat-potential">(+' + ch.pot.actionRec.toFixed(2) + ')</span>' : '') +
         '</span>' +
       '</div>' +
     '</div>';
@@ -965,6 +972,12 @@ function renderChars() {
         '<span class="unit-card-stat-value">' + ch.def +
         (bonus.def > 0 ? '<span class="unit-card-stat-bonus">+' + bonus.def + '</span>' : '') +
         (ch.pot && ch.pot.def ? '<span class="unit-card-stat-potential">(+' + ch.pot.def + ')</span>' : '') +
+        '</span>' +
+      '</div>' +
+      '<div class="unit-card-stat">' +
+        '<span class="unit-card-stat-label">AR:</span>' +
+        '<span class="unit-card-stat-value">' + (ch.actionRec || JAB[ch.cls].actionRec || 1.0).toFixed(2) +
+        (ch.pot && ch.pot.actionRec ? '<span class="unit-card-stat-potential">(+' + ch.pot.actionRec.toFixed(2) + ')</span>' : '') +
         '</span>' +
       '</div>' +
     '</div>';

@@ -99,11 +99,14 @@ function renderAcademy() {
     var el = document.createElement('div');
     el.className = 'game-card';
     var btnText = hasScroll ? t('academy.class_change_btn') : t('academy.class_change_btn_noscroll');
+    var potStr = (ch.pot && ch.pot.hp) ? '+' + ch.pot.hp + '/+' + ch.pot.atk + '/+' + ch.pot.def + (ch.pot.actionRec ? '/+' + ch.pot.actionRec.toFixed(2) : '') : '−';
+    var arStr = (ch.pot && ch.pot.actionRec) ? '+' + ch.pot.actionRec.toFixed(2) : '−';
     el.innerHTML =
       '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="game-card-info">' +
         '<div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
-        '<div class="game-card-sub">HP ' + ch.hp + ' \xb7 ATK ' + ch.atk + ' \xb7 DEF ' + ch.def + '</div>' +
+        '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + arStr + '</div>' +
+        '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">잠재력: <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
       '</div>' +
       '<button class="game-btn game-btn--purple' + (hasScroll ? '' : ' disabled') + '" ' + (hasScroll ? '' : 'disabled') + '>' + btnText + '</button>';
     el.querySelector('.game-btn').onclick = (function(uid) {

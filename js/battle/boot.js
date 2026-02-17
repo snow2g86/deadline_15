@@ -78,7 +78,7 @@ Object.assign(G, {
         this.layW(); this.vfxInit(); this.rTer(); this.rUnits(); this.uUI(); this.defI(); this.rMM();
         this.bgmStart();
         this._hideLoading();
-        setTimeout(() => this.scrollToAllies(), 50);
+        setTimeout(() => { this.scrollToAllies(); this.nextAction(); }, 50);
       } else { location.href = 'index.html' }
     } else if (nav?.cStage) {
       this.cStage = nav.cStage; this.practiceMode = nav.practiceMode || false;
@@ -87,7 +87,7 @@ Object.assign(G, {
       this._initBattleListeners();
       this.eSpwn = 0; this.eQ = [...this.cStage.en];
       this.init();
-      this._showLoading(this.cStage.name).then(() => this.bgmStart());
+      this._showLoading(this.cStage.name).then(() => { this.bgmStart(); this.nextAction(); });
     } else { location.href = 'index.html' }
   },
 });
@@ -100,7 +100,7 @@ document.addEventListener('keydown', e => {
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
-  G.loadSett();
+  if (G.loadSett) G.loadSett();
   const goldData = loadGoldData();
   G.gold = goldData.gold;
   G.cleared = goldData.cleared;

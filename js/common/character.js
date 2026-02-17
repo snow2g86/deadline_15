@@ -66,7 +66,8 @@ function gradeMultiplier(grade) {
 function _rollPotential(cls) {
   const g = JAB[cls].growth;
   const roll = mm => +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1);
-  return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) };
+  const rollActionRec = () => +(0.05 + Math.random() * 0.15).toFixed(2);
+  return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def), actionRec: rollActionRec() };
 }
 
 function _rollPotentialWithGrade(cls, targetGrade) {
@@ -89,7 +90,8 @@ function _rollPotentialWithGrade(cls, targetGrade) {
   return {
     hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * mid).toFixed(1),
     atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * mid).toFixed(1),
-    def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1)
+    def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1),
+    actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
   };
 }
 
@@ -135,6 +137,7 @@ function addChar(cls, nameId, pot, gender) {
     move: d.base.move,
     range: d.base.range,
     pot: pot,
+    actionRec: d.actionRec + (pot.actionRec || 0),
     gender: gender || (Math.random() < 0.5 ? 'm' : 'f')
   };
 

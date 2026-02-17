@@ -62,7 +62,7 @@ registerSkill('knight_sacrifice', {
 		const ally = G.units.find(v => v.x===tx && v.y===ty && v.team==='ally' && v.hp>0 && v.id!==u.id && mh(u.x,u.y,v.x,v.y)<=sr);
 		if (!ally) { _skillRefund(u, sk, G); return; }
 		ally._sacrificeKnight = u.id;
-		u._sacrificeTurns = 2; u._sacrificeTarget = ally.id;
+		u._sacrificeDmgCount = 2; u._sacrificeTarget = ally.id;
 		G.floatT(u.x, u.y, t('messages.knight_sacrifice'), 'heal');
 		G.floatT(ally.x, ally.y, t('messages.knight_sacrifice_protect'), 'heal');
 		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:15,colors:['#60a5fa','#3b82f6','#fff'],shape:'ring',speed:3,spread:14,decay:0.02,size:6});

@@ -15,8 +15,8 @@
 .shop-icon{font-size:28px;margin-bottom:4px}
 .shop-name{font-weight:900;font-size:12px;color:var(--text)}
 .shop-cls{font-size:9px;color:var(--dim);margin-top:2px}
-.shop-stats{font-size:9px;color:var(--dim);margin-top:3px}
-.shop-pot{font-size:8px;color:#64748b;margin-top:3px}
+.shop-stats{font-size:9px;color:var(--dim);margin-top:3px;text-align:left;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.shop-pot{font-size:8px;color:var(--dim);margin-top:3px}
 .shop-btn{font-weight:700;font-size:10px;padding:5px 12px;border-radius:5px;border:none;cursor:pointer;
   background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;margin-top:6px;transition:all .15s}
 .shop-btn:hover{}.shop-btn.disabled{opacity:.3;cursor:default}

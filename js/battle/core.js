@@ -9,6 +9,7 @@ const G = {
     cStage: null, eSpwn: 0, eQ: [], cleared: new Set(),
     party: [], camDir: 0, battleExp: {}, traps: [], poisonMists: [], eFormPos: [],
     _killCount: 0, _killExpPool: 0, _deadAllyUids: [],
+    curUnit: null, actCount: 0,
 
     g2v(c, r) {
         switch (this.camDir) {
@@ -105,6 +106,7 @@ const G = {
         this.sel = null; this.over = false; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this.anim = false; this.camDir = 0;
         this.breached = 0; this.battleExp = {}; this.allyPos = {}; this.traps = []; this.eFormPos = [];
         this._killCount = 0; this._killExpPool = 0; this._deadAllyUids = [];
+        this.curUnit = null; this.actCount = 0;
         this.siegeMode = false; this._curSiege = null; this.itemMenuOpen = false;
         this._battlePotions = []; this._battlePotionIndices = [];
         this._siegeItems = []; this._siegeInvIndices = [];
@@ -239,12 +241,13 @@ const G = {
         }
     },
     addU(team, src, x, y) {
-        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '', gender = 'm';
+        let cls, hp, mhp, atk, def, mv, rng, role, resType, maxRes, resRec, initRes, uid = 0, lv = 1, name = '', gender = 'm', actionRec = 1.0;
         if (team === 'ally' && typeof src === 'number') {
             const bs = toBattleStats(src);
             if (!bs) return null;
             cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
             role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res; uid = bs.uid; lv = bs.lv; name = bs.name; gender = bs.gender || 'm';
+            actionRec = bs.actionRec;
         } else {
             cls = src; const d = JAB[cls], s = this.cStage;
             hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
@@ -252,11 +255,15 @@ const G = {
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
             mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
             gender = Math.random() < 0.5 ? 'm' : 'f';
+            actionRec = d.actionRec || 1.0;
         }
         const u = {
             id: this.nid++, uid, team, cls, lv, x, y, hp, mhp, atk, def, move: mv, range: rng, role, name, gender,
             res: initRes, maxRes, resType, resRec,
-            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0
+            actionPow: 0,
+            actionRec: actionRec,
+            hm: false, ha: false, waited: false, mo: false, furyBuff: 0, defBuff: 0, stunned: 0,
+            channeling: null
         };
         if (team === 'enemy') {
             u.origSpawn = { x, y };
@@ -366,6 +373,30 @@ const G = {
                 const k = K(nx, ny); if (!vis.has(k) || vis.get(k) > nc) { vis.set(k, nc); q.push({ x: nx, y: ny, c: nc }) }
             }
         } return res
+    },
+
+    // 행동력 기반 턴 시스템: 다음 행동 유닛까지 행동력 진행
+    advanceTick() {
+        const alive = this.units.filter(u => u.hp > 0);
+        const ready = alive.filter(u => u.actionPow >= 5);
+
+        // 행동 가능한 유닛이 있으면 즉시 반환
+        if (ready.length > 0) {
+            return this.getNextUnit();
+        }
+
+        // 없으면 가장 빨리 5가 되는 최소 delta 계산
+        const minDelta = Math.min(...alive.map(u => (5 - u.actionPow) / u.actionRec));
+        alive.forEach(u => u.actionPow += u.actionRec * minDelta);
+
+        return this.getNextUnit();
+    },
+
+    // actionPow가 가장 높은 유닛 반환 (동점이면 actionRec 높은 쪽 우선)
+    getNextUnit() {
+        const ready = this.units.filter(u => u.hp > 0 && u.actionPow >= 5);
+        if (ready.length === 0) return null;
+        return ready.sort((a, b) => b.actionPow - a.actionPow || b.actionRec - a.actionRec)[0];
     },
 
 };

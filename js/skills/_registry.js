@@ -11,16 +11,14 @@ function _skillDone(u, G, opts) {
 	u.ha = true; u.hm = true; G.awPM = false;
 	G.skillMode = false; G._curSkill = null; G.hideAM();
 	if (opts && opts.rTer) G.rTer();
-	if (opts && opts.delay) {
-		setTimeout(() => {
-			if (opts.rmDead) G._rmDead();
-			G.rUnits();
-			if (opts.chkEnd) G.chkEnd();
-			G.clrSel(); G.chkAutoEnd();
-		}, opts.delay);
-	} else {
-		G.rUnits(); G.clrSel(); G.chkAutoEnd();
-	}
+	// 기본 delay: 300ms (VFX 애니메이션 완료 대기)
+	const delay = (opts && opts.delay !== undefined) ? opts.delay : 300;
+	setTimeout(() => {
+		if (opts && opts.rmDead) G._rmDead();
+		G.rUnits();
+		if (opts && opts.chkEnd) G.chkEnd();
+		G.clrSel(); G.endUnitTurn(u);
+	}, delay);
 }
 
 // 스킬 실패 시 비용 환불 + 행동 종료
