@@ -27,7 +27,7 @@ Object.assign(G, {
 		}
 		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rTurnOrder(); this.scrollToUnit(u); this.sfxSelect()
 	},
-	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.rTer(); this.rUnits(); this.defI(); this.rTurnOrder() },
+	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.hideEnemyPopup(); this.rTer(); this.rUnits(); this.defI(); this.rTurnOrder() },
 	cellCk(x, y) {
 		if (this.phase !== 'player' || this.over || this.anim) return; const cl = this.uAt(x, y), s = this.sel;
 		if (this.awPM && s) {
@@ -249,12 +249,19 @@ Object.assign(G, {
 	doMv(u, tx, ty) {
 		const _mxp = this._grantExp(u, 'move'); this.preMv = { x: u.x, y: u.y, exp: _mxp }; this._mvU(u, tx, ty); u.hm = true; u.mo = true; this.awPM = true; this.sfxMove();
 
-		// 저주 피해 적용: 이동할 때마다 최대 체력 1% 피해
+		// 저주 피해 적용: 이동할 때마다 최대 체력 5% 피해, 5회 후 제거
 		if (u._cursed && u.mhp > 0) {
-			const curseDmg = Math.max(1, Math.round(u.mhp * 0.01));
+			const curseDmg = Math.max(1, Math.round(u.mhp * 0.05));
 			u.hp = Math.max(1, u.hp - curseDmg);
+			u._curseDmgCount = (u._curseDmgCount || 0) + 1;
 			this.floatT(u.x, u.y, `-${curseDmg}`, 'damage');
-			this.floatT(u.x, u.y, t('messages.shaman_curse_tick') || '☠️ 저주', 'debuff');
+			this.floatT(u.x, u.y, `☠️ 저주 (${u._curseDmgCount}/5)`, 'debuff');
+			if (u._curseDmgCount >= 5) {
+				u._cursed = false;
+				u._curseAtk = 0;
+				u._curseDmgCount = 0;
+				this.floatT(u.x, u.y, t('messages.curse_end') || '☠️ 저주 해제', 'heal');
+			}
 		}
 
 		this.chkTrap(u); chkTrapDetect(u);

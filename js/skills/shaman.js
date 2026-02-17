@@ -12,9 +12,10 @@ registerSkill('shaman_curse', {
 		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0);
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 
-		// 저주 적용: 이동 시마다 최대 체력 1% 피해
+		// 저주 적용: 이동 시마다 최대 체력 5% 피해, 5회 후 제거
 		tgt._cursed = true;
 		tgt._curseAtk = u.atk;
+		tgt._curseDmgCount = 0; // 0/5
 
 		G.sfxAtk(u.cls);
 		G.floatT(tgt.x, tgt.y, t('messages.shaman_curse'), 'debuff');
