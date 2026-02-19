@@ -29,36 +29,60 @@ Object.assign(G, {
 	},
 	clrSel() { this.sel = null; this.mvT = []; this.atkT = []; this.healT = []; this.awPM = false; this.skillMode = false; this.skillMenuOpen = false; this._curSkill = null; this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false; this.preMv = null; this.hideAM(); this.hideEnemyPopup(); this.rTer(); this.rUnits(); this.defI(); this.rTurnOrder() },
 	cellCk(x, y) {
-		if (this.phase !== 'player' || this.over || this.anim) return; const cl = this.uAt(x, y), s = this.sel;
+		if (this.phase !== 'player' || this.over || this.anim) return;
+		const cl = this.uAt(x, y), s = this.sel;
+
+		// 범위 지정 모드에서의 클릭 처리
 		if (this.awPM && s) {
+			// 포션 선택 모드
 			if (this.potionMode) {
 				const potTarget = this.potionTargets.find(t => t.x === x && t.y === y);
 				if (potTarget) { this.doPotion(potTarget); return }
+				// 범위 외 클릭: 취소
 				this.potionMode = false; this._curPotion = null;
 				this.potionTargets = []; this.rTer(); this.showAM(s); return;
 			}
+
+			// 공성 아이템 선택 모드
 			if (this.siegeMode) {
 				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSiege(s, x, y); return }
+				// 범위 외 클릭: 취소
 				this.siegeMode = false; this._curSiege = null;
 				this.atkT = []; this.rTer(); this.showAM(s); return;
 			}
+
+			// 스킬 선택 모드
 			if (this.skillMode) {
 				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSkill(s, x, y); return }
+				// 범위 외 클릭: 취소
 				this.skillMode = false; const a = this.atkC(s);
 				if (s.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== s.id }) }
 				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
 				this.rTer(); this.showAM(s); return
 			}
-			if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
-			if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
-			if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
-			if (!cl && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
-			if (!cl && (this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0) && !this.mvT.some(c => c.x === x && c.y === y) && !this.atkT.some(c => c.x === x && c.y === y) && !this.healT.some(c => c.x === x && c.y === y)) {
+
+			// 일반 행동 모드: 이동/공격/힐
+			const isValidMove = this.mvT.some(c => c.x === x && c.y === y);
+			const isValidAttack = this.atkT.some(c => c.x === x && c.y === y);
+			const isValidHeal = this.healT.some(c => c.x === x && c.y === y);
+			const hasRangeActive = this.mvT.length > 0 || this.atkT.length > 0 || this.healT.length > 0;
+
+			// 범위 내 행동 수행
+			if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && isValidMove) { this.doMv(s, x, y); return }
+			if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && isValidAttack) { this.doAtk(s, cl); return }
+			if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && isValidHeal) { this.doHeal(s, cl); return }
+			if (!cl && isValidMove) { this.doMv(s, x, y); return }
+
+			// 범위 외 클릭: 자동 취소
+			if (hasRangeActive && !isValidMove && !isValidAttack && !isValidHeal) {
 				this.mvT = []; this.atkT = []; this.healT = []; this.rTer(); this.showAM(s); return;
 			}
-			if (!cl) return
-					}
+		}
+
+		// 선택 중인 유닛이 없을 때
 		if (!s) { if (cl && cl.team === 'ally' && (!this.curUnit || cl.id === this.curUnit.id)) this.selU(cl); return }
+
+		// 유닛 선택 상태에서의 클릭 (범위 표시 없음)
 		if (cl && cl.team === 'enemy' && s.cls === 'assassin' && s.team === 'ally' && !s.ha && this.ter[y] && this.ter[y][x] === 'forest' && this.mvT.some(c => c.x === x && c.y === y)) { this.doMv(s, x, y); return }
 		if (cl && cl.team === 'enemy' && s.team === 'ally' && !s.ha && this.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return }
 		if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && this.healT.some(c => c.x === x && c.y === y)) { this.doHeal(s, cl); return }
