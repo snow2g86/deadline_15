@@ -2,37 +2,6 @@
 //  skills/mage.js — 마법사 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 화염폭발 (기본) ──────────────────────
-registerSkill('mage_fireburst', {
-	target(u, sk, G) {
-		const cells = [];
-		for (let x=0; x<COLS; x++) for (let y=0; y<ROWS; y++) {
-			if (mh(u.x,u.y,x,y)<=u.range && mh(u.x,u.y,x,y)>0) cells.push({x,y});
-		}
-		return cells;
-	},
-	exec(u, tx, ty, sk, G) {
-		for (let dx=-1; dx<=1; dx++) for (let dy=-1; dy<=1; dy++) {
-			const px=tx+dx, py=ty+dy;
-			if (px<0||px>=COLS||py<0||py>=ROWS) continue;
-			const tgt = G.units.find(v => v.hp>0 && v.x===px && v.y===py && v.team==='enemy');
-			if (tgt) {
-				const dmg = Math.max(1, u.atk - tgt.def); tgt.hp = Math.max(0, tgt.hp - dmg);
-				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:5,spread:12,decay:0.025,size:4});
-				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
-			}
-		}
-		G.sfxAtk(u.cls); G.sfxExplosion(); G.screenShake(true); G.vfxFlash('rgba(255,80,0,.25)'); G._grantExp(u, 'attack');
-		G.floatT(u.x, u.y, t('messages.mage_fireball'), 'heal');
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:35,colors:['#f44','#f80','#ff4','#fff'],shape:'spark',speed:7,spread:26,decay:0.015,size:7});
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:6,colors:['#ff440055'],shape:'ring',speed:0,spread:5,decay:0.01,size:22});
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:10,colors:['#ff8800','#ffcc00'],shape:'circle',speed:2,spread:18,decay:0.012,size:5,gravity:0.06});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:15,colors:['#ff4400','#ff8800'],shape:'star',speed:3,spread:20,decay:0.02,size:4,vy:-2}),80);
-		_skillDone(u, G, {delay:500, chkEnd:true});
-	}
-});
-
 // ── 빙결 (습득형) ────────────────────────
 registerSkill('mage_freeze', {
 	target(u, sk, G) {

@@ -2,26 +2,6 @@
 //  skills/brawler.js — 무투가 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 무장해제 (기본) ──────────────────────
-registerSkill('brawler_disarm', {
-	target(u, sk, G) {
-		const dr = sk.disarmRange || 1;
-		return G.units.filter(v => v.team==='enemy' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=dr).map(v => ({x:v.x,y:v.y}));
-	},
-	exec(u, tx, ty, sk, G) {
-		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0);
-		if (!tgt) { _skillRefund(u, sk, G); return; }
-		tgt.disarmed = 3;
-		G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
-		G.floatT(tgt.x, tgt.y, t('messages.atk_reduced'), 'damage');
-		G.floatT(u.x, u.y, t('messages.brawler_disarm'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:16,colors:['#f97316','#fbbf24','#fff'],shape:'ring',speed:4,spread:14,decay:0.02,size:6});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#f97316','#fbbf24'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
-		G._grantExp(u, 'attack');
-		_skillDone(u, G);
-	}
-});
-
 // ── 연타 (습득형) ──────────────────────
 registerSkill('brawler_flurry', {
 	target(u, sk, G) {

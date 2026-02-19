@@ -2,29 +2,6 @@
 //  skills/archer.js — 궁수 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 도약 (기본) ──────────────────────────
-registerSkill('archer_dash', {
-	target(u, sk, G) {
-		const cells = [];
-		for (let x=0; x<COLS; x++) for (let y=0; y<ROWS; y++) {
-			if (mh(u.x,u.y,x,y)<=sk.dashRange && mh(u.x,u.y,x,y)>0 && !G.uAt(x,y)) cells.push({x,y});
-		}
-		return cells;
-	},
-	exec(u, tx, ty, sk, G) {
-		if (G.uAt(tx,ty)) { _skillRefund(u, sk, G); return; }
-		const startX = u.x, startY = u.y;
-		u._gdx = tx-u.x; u._gdy = ty-u.y; u.x = tx; u.y = ty; u.mo = true;
-		G.vfxSpawn(G.uSX(startX,startY)+UCX, G.uSY(startY,startY)+UCY, {count:12,colors:['#ccf','#99f','#66f'],shape:'spark',speed:3,spread:10,decay:0.02,size:2});
-		G.animU(u.id, tx, ty);
-		G.floatT(u.x, u.y, t('messages.archer_leap'), 'heal');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:15,colors:['#ff8','#ff0','#fff'],shape:'spark',speed:5,spread:15,decay:0.02,size:3});
-		G.allyPos[u.id] = {x:u.x,y:u.y};
-		G._grantExp(u, 'move'); G.sfxMove();
-		_skillDone(u, G, {delay:340});
-	}
-});
-
 // ── 저격 (습득형) ────────────────────────
 registerSkill('archer_snipe', {
 	target(u, sk, G) {

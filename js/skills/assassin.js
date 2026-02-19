@@ -2,28 +2,6 @@
 //  skills/assassin.js — 암살자 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 암살 (기본) ──────────────────────────
-registerSkill('assassin_assassinate', {
-	target(u, sk, G) { return 'instant'; },
-	exec(u, tx, ty, sk, G) {
-		const tgt = G.units.find(v => v.x===u.x && v.y===u.y && v.team==='enemy' && v.hp>0);
-		if (!tgt) { _skillRefund(u, sk, G); return; }
-		const dmg = Math.max(1, u.atk*5 - tgt.def);
-		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:25,colors:['#7c3aed','#a855f7','#4c1d95'],shape:'spark',speed:6,spread:18,decay:0.018,size:6});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#7c3aed44'],shape:'ring',speed:0,spread:4,decay:0.012,size:16});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#a855f7','#c4b5fd'],shape:'star',speed:3,spread:12,decay:0.025,size:4}),70);
-		G.screenShake(true); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.vfxFlash('rgba(124,58,237,.25)');
-		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		G.floatT(u.x, u.y, t('messages.assassin_assassinate'), 'heal');
-		if (tgt.hp<=0) {G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
-		G._grantExp(u, 'attack');
-		const esc = G._findAdj(u.x, u.y, null);
-		if (esc) { G._mvU(u, esc.x, esc.y); u.mo = true; }
-		_skillDone(u, G, {delay:500, chkEnd:true});
-	}
-});
-
 // ── 습격 (습득형) ────────────────────────
 registerSkill('assassin_ambush', {
 	target(u, sk, G) {

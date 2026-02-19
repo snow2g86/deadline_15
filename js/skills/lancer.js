@@ -2,34 +2,6 @@
 //  skills/lancer.js — 창술사 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 관통 (기본) ──────────────────────────
-registerSkill('lancer_pierce', {
-	target(u, sk, G) {
-		const dirs = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
-		return dirs.map(d => ({x:u.x+d.x,y:u.y+d.y})).filter(p => p.x>=0 && p.x<COLS && p.y>=0 && p.y<ROWS);
-	},
-	exec(u, tx, ty, sk, G) {
-		const dx = tx-u.x, dy = ty-u.y;
-		for (let i=1; i<=sk.pierceLen; i++) {
-			const px = u.x+dx*i, py = u.y+dy*i;
-			if (px<0||px>=COLS||py<0||py>=ROWS) continue;
-			const tgt = G.units.find(v => v.hp>0 && v.x===px && v.y===py && v.team!==u.team);
-			if (tgt) {
-				const dmg = Math.max(1, u.atk - tgt.def); tgt.hp = Math.max(0, tgt.hp - dmg);
-				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:12,colors:['#6af','#48f','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:3,colors:['#6af','#48f'],shape:'slash',speed:3,spread:6,decay:0.03,size:3});
-				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
-			}
-		}
-		G.sfxAtk(u.cls); G.screenShake(); G._grantExp(u, 'attack');
-		G.floatT(u.x, u.y, t('messages.lancer_pierce'), 'heal');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:16,colors:['#6af','#48f','#aaf'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:4,colors:['#6af44'],shape:'ring',speed:0,spread:3,decay:0.015,size:12});
-		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
-	}
-});
-
 // ── 돌격 (습득형) ──────────────────────
 registerSkill('lancer_charge', {
 	target(u, sk, G) {

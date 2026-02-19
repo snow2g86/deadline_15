@@ -2,28 +2,6 @@
 //  skills/warrior.js — 전사 스킬 핸들러
 // ═══════════════════════════════════════════
 
-// ── 강타 (기본) ──────────────────────────
-registerSkill('warrior_powersmash', {
-	target(u, sk, G) {
-		const dirs = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
-		return dirs.map(d => ({x:u.x+d.x,y:u.y+d.y})).filter(p => p.x>=0 && p.x<COLS && p.y>=0 && p.y<ROWS);
-	},
-	exec(u, tx, ty, sk, G) {
-		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.hp>0 && v.team!==u.team);
-		if (!tgt) { _skillRefund(u, sk, G); return; }
-		const dmg = Math.max(1, Math.round(u.atk*1.5 - tgt.def));
-		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
-		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:10,colors:['#fff','#ff8800','#ffcc00'],shape:'cross',speed:3,spread:10,decay:0.03,size:5});
-		procFury(u, tgt, G);
-		G.floatT(u.x, u.y, t('messages.warrior_strike'), 'heal');
-		G._grantExp(u, 'attack');
-		if (tgt.hp<=0) { G.screenShake(); G.sfxKill(); G.sfxDeath(); G.vfxDeath(tgt); G.deathA(tgt.id); G._rmDead(); }
-		_skillDone(u, G, {delay:500, chkEnd:true});
-	}
-});
-
 // ── 휘두르기 (습득형) ────────────────────
 registerSkill('warrior_cleave', {
 	target(u, sk, G) { return 'instant'; },
