@@ -129,7 +129,7 @@ var init = async function() {
   await i18nInit();
   render();
   renderBottomNav();
-  setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
+  hideSplash();
 };
 
 // ── 클래스 아이콘 반환 ──────────────────────

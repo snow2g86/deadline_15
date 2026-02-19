@@ -47,8 +47,7 @@
 .unit-sprite.ally .hp-fill{background:#22c55e}
 .unit-sprite.enemy .hp-fill{background:var(--red)}
 .unit-sprite.enemy .u-icon{filter:drop-shadow(0 0 5px rgba(239,68,68,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}
-.unit-sprite.cur-turn .u-shadow{width:36px;height:8px;background:rgba(250,204,21,.6);box-shadow:0 0 10px 3px rgba(250,204,21,.4);animation:curTurnPulse 1.2s ease-in-out infinite}
-@keyframes curTurnPulse{0%,100%{box-shadow:0 0 8px 2px rgba(250,204,21,.3);opacity:.8}50%{box-shadow:0 0 14px 5px rgba(250,204,21,.6);opacity:1}}
+.unit-sprite.cur-turn .u-icon{filter:drop-shadow(0 0 5px rgba(250,204,21,.7)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}
 
 /* ═══ Unit Animations ═══ */
 @keyframes atkShake{0%,100%{transform:translate(0)}25%{transform:translate(-3px,-2px)}50%{transform:translate(3px,2px)}75%{transform:translate(-2px,-1px)}}

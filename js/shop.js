@@ -76,7 +76,7 @@ function genRotatingItems() {
       hp: +(d.growth.hp[0] + Math.random() * (d.growth.hp[1] - d.growth.hp[0])).toFixed(1),
       atk: +(d.growth.atk[0] + Math.random() * (d.growth.atk[1] - d.growth.atk[0])).toFixed(1),
       def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1),
-      actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
+      actionRec: rollActionRec()
     };
     var name = charNames[Math.floor(Math.random() * charNames.length)];
     var g = d.growth;
@@ -88,7 +88,7 @@ function genRotatingItems() {
     var grade = avg >= 0.85 ? 'S' : avg >= 0.65 ? 'A' : avg >= 0.35 ? 'B' : 'C';
     var baseCost = { 'S': 900, 'A': 700, 'B': 550, 'C': 450 };
     var cost = Math.round(baseCost[grade] * (0.9 + avg * 0.2));
-    items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false, gender: Math.random() < 0.5 ? 'm' : 'f' });
+    items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false, gender: randomGender() });
   }
   // 스킬북 6개 (중복 없음)
   if (typeof LEARNABLE_SKILLS !== 'undefined') {
@@ -508,7 +508,7 @@ function doGachaAdMerc() {
     hp: +(d.growth.hp[0] + Math.random() * (d.growth.hp[1] - d.growth.hp[0])).toFixed(1),
     atk: +(d.growth.atk[0] + Math.random() * (d.growth.atk[1] - d.growth.atk[0])).toFixed(1),
     def: +(d.growth.def[0] + Math.random() * (d.growth.def[1] - d.growth.def[0])).toFixed(1),
-    actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
+    actionRec: rollActionRec()
   };
   var names = t('character.names');
   var nameIdx = Math.floor(Math.random() * names.length);
@@ -799,5 +799,5 @@ var init = async function() {
   renderBottomNav();
   // 타이머를 1초마다 업데이트
   setInterval(updateShopTimer, 1000);
-  setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
+  hideSplash();
 };

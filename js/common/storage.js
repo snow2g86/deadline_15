@@ -52,14 +52,14 @@ function getRoster() {
                   hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * 0.5).toFixed(1),
                   atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * 0.5).toFixed(1),
                   def: +(g.def[0] + (g.def[1] - g.def[0]) * 0.5).toFixed(1),
-                  actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
+                  actionRec: rollActionRec()
                 };
                 needsSave = true;
               }
             }
             // pot.actionRec 필드 없으면 추가 (기존 pot 객체)
             if (ch.pot && !ch.pot.actionRec) {
-              ch.pot.actionRec = +(0.05 + Math.random() * 0.15).toFixed(2);
+              ch.pot.actionRec = rollActionRec();
               needsSave = true;
             }
             // actionRec 필드 없으면 생성

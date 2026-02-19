@@ -34,16 +34,19 @@ function _summonerExec(u, tx, ty, sk, G) {
 	} else {
 		hp = Math.round(u.mhp*1.2); atk = Math.round(u.atk*0.5); def = Math.round(u.def*1.2); move = 2; range = 1; role = 'melee';
 	}
-	const summonName = isSpirit ? '정령' : '골램';
+	const summonName = t('classes.' + summonCls);
 	const summon = {
-		id: G.nid++, uid: 0, team: 'ally', cls: summonCls,
+		id: G.nid++, uid: 0, name: summonName, team: 'ally', cls: summonCls,
 		isSummon: true, summonerId: u.id,
 		x: tx, y: ty, hp, mhp: hp, atk, def,
 		move, range, role,
 		res: 0, maxRes: 0, resType: 'none', resRec: 0,
 		summonTurns: 5,
+		actionPow: 0, actionRec: 1.0,
+		gender: u.gender || 'm',
 		hm: false, ha: false, waited: false, mo: false,
-		furyBuff: 0, defBuff: 0, stunned: 0
+		furyBuff: 0, defBuff: 0, stunned: 0, frozen: 0,
+		skillLv: {}, buffs: []
 	};
 	G.units.push(summon);
 	G.floatT(tx, ty, t('messages.sapper_summon', {name:summonName}), 'heal');

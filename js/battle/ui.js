@@ -131,20 +131,18 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`},
     const p=document.getElementById('info-panel');
     const allies=this.units.filter(u=>u.hp>0&&u.team==='ally');
     const selId=this.sel?this.sel.id:(this.curUnit?this.curUnit.id:null);
-    const rl={'mana':'MP','energy':'EP','fury':'FP'};
-    const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
     let html='';
     allies.forEach(u=>{
       const isSel=u.id===selId;
       const hpPct=Math.round(u.hp/u.mhp*100);
-      const rn=rl[u.resType]||'';
+      const rn=RES_LABEL[u.resType]||'';
       const resPct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
       const buffs=this.getBuffs(u);
       const buffHtml=buffs.map(b=>`<span class="buff-icon">${b.icon}</span>`).join('');
       html+=`<div class="info-card ally-card${isSel?' ip-sel':''}" data-uid="${u.id}">
         <div class="ic-top"><span class="ic-icon">${clsIcon(u.cls,14)}</span><span class="ic-name">${u.name}</span><span class="ic-class">${t('classes.'+u.cls)}</span></div>
         <div class="ic-bar-row"><span class="ic-blabel">HP</span><div class="ic-bar"><div class="ic-bfill ${hpPct<=25?'low':''}" style="width:${hpPct}%"></div></div><span class="ic-bval">${u.hp}/${u.mhp}</span></div>
-        ${rn?`<div class="ic-bar-row"><span class="ic-blabel" style="color:${rc[u.resType]}">${rn}</span><div class="ic-bar"><div class="ic-bfill" style="width:${resPct}%;background:${rc[u.resType]}"></div></div><span class="ic-bval">${u.res}/${u.maxRes}</span></div>`:''}
+        ${rn?`<div class="ic-bar-row"><span class="ic-blabel" style="color:${RES_COLOR[u.resType]}">${rn}</span><div class="ic-bar"><div class="ic-bfill" style="width:${resPct}%;background:${RES_COLOR[u.resType]}"></div></div><span class="ic-bval">${u.res}/${u.maxRes}</span></div>`:''}
         <div class="ic-stats"><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div>
         ${buffHtml?`<div class="ic-buffs">${buffHtml}</div>`:''}
       </div>`;
@@ -156,10 +154,8 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`},
   // ── 적 유닛 정보 팝업 ──
   showEnemyPopup(u){
     this.hideEnemyPopup();
-    const rl={'mana':'MP','energy':'EP','fury':'FP'};
-    const rc={'mana':'#4488ff','energy':'#f0c040','fury':'#ff6644'};
     const hpPct=Math.round(u.hp/u.mhp*100);
-    const rn=rl[u.resType]||'';
+    const rn=RES_LABEL[u.resType]||'';
     const resPct=u.maxRes?Math.round(u.res/u.maxRes*100):0;
     const buffs=this.getBuffs(u);
     const buffHtml=buffs.map(b=>`<span class="buff-icon">${b.icon}</span>`).join('');
@@ -168,7 +164,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`},
     pop.innerHTML=`
       <div class="ep-head"><span class="ep-icon">${clsIcon(u.cls,16)}</span><span class="ep-name">${u.name}</span><span class="ep-cls">${t('classes.'+u.cls)}</span></div>
       <div class="ep-bar"><span class="ep-blbl">HP</span><div class="ep-btrack"><div class="ep-bfill ${hpPct<=25?'low':''}" style="width:${hpPct}%"></div></div><span class="ep-bval">${u.hp}/${u.mhp}</span></div>
-      ${rn?`<div class="ep-bar"><span class="ep-blbl" style="color:${rc[u.resType]}">${rn}</span><div class="ep-btrack"><div class="ep-bfill" style="width:${resPct}%;background:${rc[u.resType]}"></div></div><span class="ep-bval">${u.res}/${u.maxRes}</span></div>`:''}
+      ${rn?`<div class="ep-bar"><span class="ep-blbl" style="color:${RES_COLOR[u.resType]}">${rn}</span><div class="ep-btrack"><div class="ep-bfill" style="width:${resPct}%;background:${RES_COLOR[u.resType]}"></div></div><span class="ep-bval">${u.res}/${u.maxRes}</span></div>`:''}
       <div class="ep-stats"><span>ATK <b>${u.atk}</b></span><span>DEF <b>${u.def}</b></span><span>RNG <b>${u.range}</b></span></div>
       ${buffHtml?`<div class="ep-buffs">${buffHtml}</div>`:''}`;
     document.getElementById('iso-world').appendChild(pop);

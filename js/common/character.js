@@ -1,6 +1,10 @@
 // js/common/character.js — 캐릭터 관련 유틸리티
 // 캐릭터 조회, 경험치, 등급 계산 등을 중앙화합니다
 
+// ── 공통 유틸리티 ────────────────────────────
+function randomGender() { return Math.random() < 0.5 ? 'm' : 'f'; }
+function rollActionRec() { return +(0.05 + Math.random() * 0.15).toFixed(2); }
+
 // ── 캐릭터 조회 ────────────────────────────
 function getChar(uid) {
   const roster = getRoster();
@@ -66,7 +70,6 @@ function gradeMultiplier(grade) {
 function _rollPotential(cls) {
   const g = JAB[cls].growth;
   const roll = mm => +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1);
-  const rollActionRec = () => +(0.05 + Math.random() * 0.15).toFixed(2);
   return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def), actionRec: rollActionRec() };
 }
 
@@ -91,7 +94,7 @@ function _rollPotentialWithGrade(cls, targetGrade) {
     hp: +(g.hp[0] + (g.hp[1] - g.hp[0]) * mid).toFixed(1),
     atk: +(g.atk[0] + (g.atk[1] - g.atk[0]) * mid).toFixed(1),
     def: +(g.def[0] + (g.def[1] - g.def[0]) * mid).toFixed(1),
-    actionRec: +(0.05 + Math.random() * 0.15).toFixed(2)
+    actionRec: rollActionRec()
   };
 }
 
@@ -138,7 +141,7 @@ function addChar(cls, nameId, pot, gender) {
     range: d.base.range,
     pot: pot,
     actionRec: d.actionRec + (pot.actionRec || 0),
-    gender: gender || (Math.random() < 0.5 ? 'm' : 'f')
+    gender: gender || randomGender()
   };
 
   roster.chars.push(ch);

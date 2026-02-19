@@ -73,7 +73,7 @@ Object.assign(G, {
                     hp: d.base.hp, atk: d.base.atk, def: d.base.def,
                     move: d.base.move, range: d.base.range,
                     pot: { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def) },
-                    gender: Math.random() < 0.5 ? 'm' : 'f'
+                    gender: randomGender()
                   };
                   rd.chars.push(ch);
                   localStorage.setItem('game_roster', JSON.stringify(rd));

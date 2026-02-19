@@ -229,13 +229,23 @@ Object.assign(G, {
 
 		document.getElementById('btn-move').style.display = (!u.hm && !u.mo) ? '' : 'none';
 		const btnAttack = document.getElementById('btn-attack');
+		m.querySelectorAll('.am-healer-atk').forEach(e => e.remove());
 		if (u.role === 'healer') {
 			btnAttack.textContent = t('battle.heal');
-			btnAttack.style.display = (!u.ha && this.healT.length > 0) ? '' : 'none'
+			btnAttack.style.display = (!u.ha && this.healT.length > 0) ? '' : 'none';
+			btnAttack.onclick = () => G.actHeal();
+			if (!u.ha && this.atkT.length > 0) {
+				const atkBtn = document.createElement('button');
+				atkBtn.className = 'am-healer-atk';
+				atkBtn.textContent = t('battle.attack');
+				atkBtn.onclick = () => G.actAttack();
+				btnAttack.after(atkBtn);
+			}
 		}
 		else {
 			btnAttack.textContent = t('battle.attack');
-			btnAttack.style.display = (!u.ha && this.atkT.length > 0) ? '' : 'none'
+			btnAttack.style.display = (!u.ha && this.atkT.length > 0) ? '' : 'none';
+			btnAttack.onclick = () => G.actAttack();
 		}
 		const skills = getUnitSkills(u);
 		const hasUsableSkill = !u.ha && skills.some(sk => this.canUseSkill(u, sk));
@@ -325,7 +335,8 @@ Object.assign(G, {
 	hideAllMenuButtons() {
 		['btn-move', 'btn-attack', 'btn-skill', 'btn-item', 'btn-dash', 'btn-cancel'].forEach(id => {
 			document.getElementById(id).style.display = 'none'
-		})
+		});
+		document.getElementById('action-menu').querySelectorAll('.am-healer-atk').forEach(e => e.remove());
 	},
 	canUseSkill(u, sk) {
 		if (sk.passive) return false;

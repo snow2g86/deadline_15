@@ -417,5 +417,5 @@ var init = async function() {
   updateGoldUI();
   switchTab('classchange');
   renderBottomNav();
-  setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
+  hideSplash();
 };

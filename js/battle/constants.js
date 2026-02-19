@@ -62,11 +62,11 @@ function toBattleStats(uid) {
 function markDead(uid) {
   try {
     const roster = getRoster();
-    const ch = roster.find(c => c.uid === uid);
+    const ch = roster.chars.find(c => c.uid === uid);
     if(ch) {
       ch.dead = true;
       ch.diedAt = Date.now();
-      saveRoster({ chars: roster, nextId: Math.max(...roster.map(c=>c.uid||0))+1 });
+      saveRoster(roster);
     }
   } catch(e) {}
 }
@@ -94,3 +94,7 @@ const AI_PROFILES = {
 };
 
 const AI_MISTAKE_CHANCE = 0.3;
+
+// ── 리소스 UI 상수 ──
+const RES_LABEL = { mana: 'MP', energy: 'EP', fury: 'FP' };
+const RES_COLOR = { mana: '#4488ff', energy: '#f0c040', fury: '#ff6644' };

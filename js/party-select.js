@@ -1755,13 +1755,13 @@ var init = async function() {
 
   loadGlobalBattleItems();
 
-  // 죽은 유닛 제거 (모든 파티에서)
+  // 사망한 캐릭터를 파티슬롯에서 제거
   var roster = getRoster();
   _parties.parties.forEach(function(party) {
-    party.slots = party.slots.filter(function(uid) {
-      if (!uid) return true;
+    party.slots = party.slots.map(function(uid) {
+      if (!uid) return null;
       var ch = roster.chars.find(function(c) { return c.uid === uid; });
-      return ch && !ch.dead;
+      return (ch && ch.dead) ? null : uid;
     });
   });
   saveParties(_parties);
@@ -1817,7 +1817,7 @@ var init = async function() {
   updateStartButtonVisibility();
 
   renderBottomNav();
-  setTimeout(function() { document.getElementById('splash').style.display = 'none'; }, 300);
+  hideSplash();
 };
 
 // ═══════════════════════════════════════════

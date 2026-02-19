@@ -3,6 +3,12 @@
 // ═══════════════════════════════════════════
 
 Object.assign(G, {
+	// 공격/힐 타겟 설정 헬퍼
+	_setTargets(u) {
+		const a = this.atkC(u);
+		this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' });
+		this.healT = u.role === 'healer' ? a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) : [];
+	},
 	selU(u) {
 		// 현재 행동 유닛이 아니면 선택 불가 (다른 아군 클릭 방지)
 		if (this.curUnit && u.id !== this.curUnit.id && u.team === 'ally') return;
@@ -12,18 +18,12 @@ Object.assign(G, {
 			u.ha = false; u.waited = false;
 			this.sel = u; this.awPM = true; this.mvT = [];
 			if (u.channeling) { this.atkT = []; this.healT = [] }
-			else {
-				const a = this.atkC(u);
-				if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
-				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
-			}
+			else { this._setTargets(u) }
 			this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rTurnOrder(); this.scrollToUnit(u); this.sfxSelect(); return
 		}
 		this.sel = u; this.awPM = true;
 		if (u.team === 'ally' && !u.ha) {
-			this.mvT = []; const a = this.atkC(u);
-			if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
-			else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+			this.mvT = []; this._setTargets(u);
 		}
 		else { this.mvT = []; this.atkT = []; this.healT = [] } this.rTer(); this.rUnits(); this.showAM(u); this.showUI(u); this.rTurnOrder(); this.scrollToUnit(u); this.sfxSelect()
 	},
@@ -55,9 +55,7 @@ Object.assign(G, {
 			if (this.skillMode) {
 				if (this.atkT.some(c => c.x === x && c.y === y)) { this.doSkill(s, x, y); return }
 				// 범위 외 클릭: 취소
-				this.skillMode = false; const a = this.atkC(s);
-				if (s.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== s.id }) }
-				else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
+				this.skillMode = false; this._setTargets(s);
 				this.rTer(); this.showAM(s); return
 			}
 
@@ -73,9 +71,10 @@ Object.assign(G, {
 			if (cl && cl.team === 'ally' && s.role === 'healer' && !s.ha && cl.id !== s.id && isValidHeal) { this.doHeal(s, cl); return }
 			if (!cl && isValidMove) { this.doMv(s, x, y); return }
 
-			// 범위 외 클릭: 자동 취소
+			// 범위 외 클릭: 범위 재계산 후 행동메뉴 복귀
 			if (hasRangeActive && !isValidMove && !isValidAttack && !isValidHeal) {
-				this.mvT = []; this.atkT = []; this.healT = []; this.rTer(); this.showAM(s); return;
+				this.mvT = []; this._setTargets(s);
+				this.rTer(); this.showAM(s); return;
 			}
 		}
 
@@ -90,7 +89,8 @@ Object.assign(G, {
 		if (cl && cl.team === 'ally') { if (!this.curUnit || cl.id === this.curUnit.id) this.selU(cl); return } this.clrSel()
 	},
 	actMove() { if (!this.sel) return; this.hideAM(); const u = this.sel; this.mvT = (u.hm || u.mo) ? [] : this.mvC(u); this.rTer(); this.floatT(u.x, u.y, t('messages.select_move_target'), 'heal') },
-	actAttack() { if (!this.sel) return; this.hideAM(); const msg = this.sel.role === 'healer' ? t('messages.select_heal_target') : t('messages.select_attack_target'); this.floatT(this.sel.x, this.sel.y, msg, 'heal') },
+	actAttack() { if (!this.sel) return; this.hideAM(); this.healT = []; this.rTer(); this.floatT(this.sel.x, this.sel.y, t('messages.select_attack_target'), 'heal') },
+	actHeal() { if (!this.sel) return; this.hideAM(); this.atkT = []; this.rTer(); this.floatT(this.sel.x, this.sel.y, t('messages.select_heal_target'), 'heal') },
 	showSkillMenu() { if (!this.sel || !this.awPM) return; this.skillMenuOpen = true; this.showAM(this.sel) },
 	hideSkillMenu() { if (!this.sel) return; this.skillMenuOpen = false; this.showAM(this.sel) },
 	actItem() {
@@ -288,7 +288,7 @@ Object.assign(G, {
 		}
 
 		this.chkTrap(u); chkTrapDetect(u);
-		const a = this.atkC(u); if (u.role === 'healer') { this.atkT = []; this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
+		const a = this.atkC(u); if (u.role === 'healer') { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id }) }
 		else { this.atkT = a.filter(c => { const v = this.uAt(c.x, c.y); return v && v.team === 'enemy' }); this.healT = [] }
 		this.mvT = []; setTimeout(() => { this.scrollToUnit(u); this.rTer(); this.showAM(u); this.showUI(u) }, 340)
 	},

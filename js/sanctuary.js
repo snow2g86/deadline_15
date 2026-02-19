@@ -32,9 +32,7 @@ function nextGrade(grade) {
   return i < GRADE_ORDER.length - 1 ? GRADE_ORDER[i + 1] : null;
 }
 
-function gradeMultiplier(grade) {
-  return grade === 'S' ? 1.1 : grade === 'A' ? 1.0 : grade === 'B' ? 0.9 : 0.8;
-}
+// gradeMultiplier: common/character.js에서 로드
 
 // 제물 포인트 계산: 윗등급=4, 같은등급=2, 한단계아래=1
 function sacrificePoints(sacGrade, targetGrade) {
@@ -47,18 +45,7 @@ function sacrificePoints(sacGrade, targetGrade) {
 }
 
 
-function getCharSkills(cls) {
-  var sk = SKILLS[cls];
-  if (!sk) return [];
-  var arr = Array.isArray(sk) ? sk.slice() : [sk];
-  if (typeof LEARNABLE_SKILLS !== 'undefined') {
-    Object.keys(LEARNABLE_SKILLS).forEach(function(skId) {
-      var lsk = LEARNABLE_SKILLS[skId];
-      if (lsk.cls === cls) arr.push(lsk);
-    });
-  }
-  return arr;
-}
+// getCharSkills: common/character.js에서 로드
 
 function formatSkillLvs(ch) {
   var skills = getCharSkills(ch.cls);

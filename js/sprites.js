@@ -1005,7 +1005,8 @@ function _svgSprite(cls, size, gender) {
   return `<svg viewBox="0 0 ${w} ${h}" width="${size}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">${out}</svg>`;
 }
 
-function charSprite(cls, size, gender) {
+// charSprite 위임: common/render.js의 charSprite()가 이 함수를 호출
+function _charSprite(cls, size, gender) {
   if (cls.startsWith('summon_')) return _svgSprite(cls, size, gender);
   const suffix = (gender || 'm') === 'f' ? '02' : '01';
   return `<img src="image/character/${cls}_${suffix}.png" width="${size}" style="image-rendering:pixelated;vertical-align:middle" alt="${cls}">`;

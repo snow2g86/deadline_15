@@ -28,6 +28,19 @@ Object.assign(G, {
     if (u.stunned > 0) u.stunned--;
     if (u.frozen > 0) u.frozen--;
 
+    // 소환수 턴 감소 및 소멸
+    if (u.isSummon && u.summonTurns !== undefined) {
+      u.summonTurns--;
+      if (u._empowerTurns > 0) u._empowerTurns--;
+      if (u.summonTurns <= 0) {
+        u.hp = 0;
+        this.floatT(u.x, u.y, t('messages.unsummoned'), 'damage');
+        this.vfxDeath(u); this.deathA(u.id);
+        this._rmDead();
+        setTimeout(() => this.rUnits(), 500);
+      }
+    }
+
     // 게임 종료 체크
     this.chkEnd();
 
@@ -196,60 +209,44 @@ Object.assign(G, {
 
     return false;
   },
+  // 사거리 내 아군(적 입장) 탐색 헬퍼
+  _visibleAllies(u) {
+    return this.atkC(u).filter(c => {
+      const v = this.uAt(c.x, c.y);
+      return v && v.team === 'ally' && !isStealthed(v);
+    }).map(c => this.uAt(c.x, c.y));
+  },
+  // 공격 시도 헬퍼
+  async _tryAttack(u, targets, profile) {
+    if (!targets.length || profile.targetPriority === 'never') return false;
+    if (await this.tryUseSkill(u, profile)) return true;
+    const target = this.selectTarget(u, targets, profile);
+    if (target) { await this.eAtkAsync(u, target); return true; }
+    return false;
+  },
   async eAI(u) {
     const al = this.alive('ally');
     if (!al.length && !this.hasAllyWall()) return;
     const profile = AI_PROFILES[u.cls] || AI_PROFILES.novice;
 
-    if (profile.avoidCombat && u.hp > u.mhp * 0.7) {
-      await this.eMv(u, al);
-      return;
-    }
+    if (profile.avoidCombat && u.hp > u.mhp * 0.7) { await this.eMv(u, al); return; }
 
-    const inR = this.atkC(u).filter(c => {
-      const v = this.uAt(c.x, c.y);
-      return v && v.team === 'ally' && !isStealthed(v);
-    }).map(c => this.uAt(c.x, c.y));
+    // 이동 전 공격 시도
+    if (await this._tryAttack(u, this._visibleAllies(u), profile)) return;
 
-    if (inR.length && profile.targetPriority !== 'never') {
-      if (await this.tryUseSkill(u, profile)) return;
-      const target = this.selectTarget(u, inR, profile);
-      if (target) {
-        await this.eAtkAsync(u, target);
-        return;
-      }
-    }
-
-    if (await this.trySiegeItemUse(u)) return;
-
-    const gAtk = this.tryGateAtk(u);
-    if (gAtk) {
-      await sl(250);
-      return;
-    }
-
-    const wClimb = await this.tryWallClimb(u);
-    if (wClimb) return;
+    if (this.tryGateAtk(u)) { await sl(250); return; }
+    if (await this.tryWallClimb(u)) return;
 
     await this.eMv(u, al);
     if (this.over) return;
     if (profile.avoidCombat && u.hp > u.mhp * 0.7) return;
 
+    // 이동 후 공격 시도
     await sl(200);
-    const postR = this.atkC(u).filter(c => {
-      const v = this.uAt(c.x, c.y);
-      return v && v.team === 'ally' && !isStealthed(v);
-    }).map(c => this.uAt(c.x, c.y));
+    if (await this._tryAttack(u, this._visibleAllies(u), profile)) return;
 
-    if (postR.length && profile.targetPriority !== 'never') {
-      if (await this.tryUseSkill(u, profile)) return;
-      const target = this.selectTarget(u, postR, profile);
-      if (target) {
-        await this.eAtkAsync(u, target);
-        return;
-      }
-    }
-
+    // 이동 후에도 공격 불가 시에만 공성아이템 시도
+    if (await this.trySiegeItemUse(u)) return;
     this.tryGateAtk(u);
   },
   analyzeSituation(u){
@@ -286,11 +283,33 @@ Object.assign(G, {
     }
     return best
   },
+  _siegeBomb(u){
+    let best=null,bestD=Infinity;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const d=mh(u.x,u.y,c,r);
+      if(d<1||d>3)continue;
+      const tile=this.ter[r][c];
+      if(tile==='wall'||tile==='gate'||tile==='rock'){if(d<bestD){bestD=d;best={x:c,y:r}}}
+    }
+    if(!best)return false;
+    this.ter[best.y][best.x]='plain';
+    const wk=best.x+','+best.y;
+    if(this.wallHP[wk])this.wallHP[wk]=0;
+    if(this.gateHP[wk])this.gateHP[wk]=0;
+    this.floatT(best.x,best.y,t('messages.wall_destroyed'),'damage');
+    this.vfxSiege('siege_bomb',best.x,best.y);this.sfxAtk(u.cls);this.screenShake();this.rTer();
+    return true;
+  },
   async useSiegeItem(u,item){
     try{
-      const sitemap={'bomb':await(async()=>{const range=3;let best=null,bestD=Infinity;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const d=mh(u.x,u.y,c,r);if(d<1||d>range)continue;const tile=this.ter[r][c];if(tile==='wall'||tile==='gate'||tile==='rock'){if(d<bestD){bestD=d;best={x:c,y:r}}}}if(!best)return false;this.ter[best.y][best.x]='plain';const wk=best.x+','+best.y;if(this.wallHP[wk])this.wallHP[wk]=0;if(this.gateHP[wk])this.gateHP[wk]=0;this.floatT(best.x,best.y,t('messages.wall_destroyed'),'damage');this.vfxSiege('siege_bomb',best.x,best.y);this.sfxAtk(u.cls);this.screenShake();this.rTer();return true})()||false,'shield':async()=>{u._siegeShield=3;this.floatT(u.x,u.y,'🛡️','heal');this.sfxAtk(u.cls);return true},'evasion':async()=>{u._siegeEvasion=1;this.floatT(u.x,u.y,'⚡','heal');this.sfxAtk(u.cls);return true}};
-      if(sitemap[item.type]){
-        const success=await sitemap[item.type]();
+      const actions={
+        bomb:()=>this._siegeBomb(u),
+        shield:()=>{u._siegeShield=3;this.floatT(u.x,u.y,'🛡️','heal');this.sfxAtk(u.cls);return true},
+        evasion:()=>{u._siegeEvasion=1;this.floatT(u.x,u.y,'⚡','heal');this.sfxAtk(u.cls);return true}
+      };
+      const fn=actions[item.type];
+      if(fn){
+        const success=await fn();
         if(success){
           item.cooldown=3;
           return true
@@ -302,9 +321,10 @@ Object.assign(G, {
   async trySiegeItemUse(u){
     if(!u.siegeItems||!u.siegeItems.length)return false;
     const situation=this.analyzeSituation(u);
+    // blocked: 이동 불가 시에만 공성아이템 사용
     if(situation.type==='blocked'){const item=this.selectSiegeItem(u,situation);if(!item)return false;return await this.useSiegeItem(u,item)}
-    if(situation.nearbyTerrain>0){const bomb=u.siegeItems.find(i=>i.type==='bomb'&&i.cooldown===0);if(bomb)return await this.useSiegeItem(u,bomb)}
-    if(situation.severity<0.15)return false;
+    // 위험도 낮으면 사용 안함
+    if(situation.severity<0.3)return false;
     const item=this.selectSiegeItem(u,situation);
     if(!item)return false;
     return await this.useSiegeItem(u,item)

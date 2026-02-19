@@ -72,13 +72,13 @@ const JAB = {
     "actionRec": 1.5
   },
   "summon_spirit": {
-    "icon":"✨", "res":"none", "maxRes": 0, "resRec": 0,
+    "icon":"✨", "isSummon":true, "res":"none", "maxRes": 0, "resRec": 0,
     "base": { "hp": 15, "atk": 15, "def": 0, "move": 3, "range": 3 },
     "growth": { "hp": [0,0], "atk": [0,0], "def": [0,0] },
     "actionRec": 1.0
   },
   "summon_golem": {
-    "icon":"🗿", "res":"none", "maxRes": 0, "resRec": 0,
+    "icon":"🗿", "isSummon":true, "res":"none", "maxRes": 0, "resRec": 0,
     "base": { "hp": 30, "atk": 12, "def": 5, "move": 2, "range": 1 },
     "growth": { "hp": [0,0], "atk": [0,0], "def": [0,0] },
     "actionRec": 1.0

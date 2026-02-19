@@ -77,7 +77,7 @@ function ensureRoster() {
 	var used = {}, chars = [], nextId = 1;
 	function rollPot(g) {
 		var roll = function(mm) { return +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1); };
-		return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def), actionRec: +(0.05 + Math.random() * 0.15).toFixed(2) };
+		return { hp: roll(g.hp), atk: roll(g.atk), def: roll(g.def), actionRec: rollActionRec() };
 	}
 	for (var i = 0; i < 5; i++) {
 		var nameId;
@@ -89,11 +89,17 @@ function ensureRoster() {
 			hp: nov.base.hp, atk: nov.base.atk, def: nov.base.def,
 			move: nov.base.move, range: nov.base.range, pot: p,
 			actionRec: nov.actionRec + p.actionRec,
-			gender: Math.random() < 0.5 ? 'm' : 'f'
+			gender: randomGender()
 		});
 	}
 	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
 	localStorage.setItem('game_party', JSON.stringify(chars.map(function(c) { return c.uid; })));
+	var uids = chars.map(function(c) { return c.uid; });
+	while (uids.length < 5) uids.push(null);
+	localStorage.setItem('game_parties', JSON.stringify({
+		parties: [{ id: 0, slots: uids.slice(0, 5) }],
+		activePartyId: 0
+	}));
 	localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
 }
 
@@ -104,16 +110,218 @@ function renderGold() {
 	} catch(_) {}
 }
 
+// ═══════════════════════════════════════════════════════════
+// 게임 데이터 검증 및 복구 시스템
+// ═══════════════════════════════════════════════════════════
+function validateAndRepairGameData() {
+	var repaired = false;
+	var errors = [];
+
+	// 1. ROSTER 검증
+	try {
+		var raw = localStorage.getItem('game_roster');
+		if (!raw || raw === '{}' || raw === '[]') {
+			errors.push('roster_empty');
+			throw new Error('Invalid roster');
+		}
+		var roster = JSON.parse(raw);
+		if (!roster.chars || !Array.isArray(roster.chars)) {
+			errors.push('roster_structure');
+			throw new Error('Invalid roster structure');
+		}
+
+		// 각 캐릭터 필드 검증 및 복구
+		var usedUids = new Set();
+		roster.chars = roster.chars.filter(function(c) {
+			if (!c || typeof c !== 'object') return false;
+			if (!c.uid || typeof c.uid !== 'number') return false;
+			if (usedUids.has(c.uid)) { errors.push('duplicate_uid_' + c.uid); return false; }
+			usedUids.add(c.uid);
+
+			// 필수 필드 검증 및 기본값 설정
+			if (!c.cls) c.cls = 'novice';
+			if (!JAB[c.cls]) c.cls = 'novice';
+			if (typeof c.lv !== 'number' || c.lv < 1) c.lv = 1;
+			if (typeof c.exp !== 'number' || c.exp < 0) c.exp = 0;
+			if (typeof c.hp !== 'number' || c.hp <= 0) c.hp = JAB[c.cls].base.hp || 10;
+			if (typeof c.atk !== 'number' || c.atk <= 0) c.atk = JAB[c.cls].base.atk || 1;
+			if (typeof c.def !== 'number' || c.def < 0) c.def = JAB[c.cls].base.def || 0;
+			if (!c.pot || typeof c.pot !== 'object') c.pot = { hp: 0.5, atk: 0.5, def: 0.5 };
+			if (typeof c.pot.hp !== 'number') c.pot.hp = 0.5;
+			if (typeof c.pot.atk !== 'number') c.pot.atk = 0.5;
+			if (typeof c.pot.def !== 'number') c.pot.def = 0.5;
+			if (typeof c.move !== 'number') c.move = JAB[c.cls].base.move || 3;
+			if (typeof c.range !== 'number') c.range = JAB[c.cls].base.range || 1;
+			if (typeof c.dead !== 'boolean') c.dead = false;
+			if (!c.gender) c.gender = 'm';
+			if (c.dead && typeof c.diedAt !== 'number') delete c.diedAt;
+
+			return true;
+		});
+
+		if (!roster.nextId || typeof roster.nextId !== 'number') {
+			roster.nextId = Math.max(...roster.chars.map(c => c.uid || 0)) + 1;
+			repaired = true;
+		}
+
+		if (repaired || errors.length > 0) {
+			localStorage.setItem('game_roster', JSON.stringify(roster));
+			if (errors.length > 0) console.warn('[GameData] Roster repaired:', errors);
+		}
+	} catch(e) {
+		console.error('[GameData] Roster validation failed:', e.message, errors);
+		ensureRoster();
+		repaired = true;
+	}
+
+	// 2. PARTIES 검증
+	try {
+		var raw = localStorage.getItem('game_parties');
+		if (!raw || raw === '{}' || raw === '[]') throw new Error('Invalid parties');
+		var parties = JSON.parse(raw);
+		if (!parties.parties || !Array.isArray(parties.parties)) throw new Error('Invalid parties structure');
+
+		var roster = JSON.parse(localStorage.getItem('game_roster')) || { chars: [] };
+		var validUids = new Set(roster.chars.map(c => c.uid));
+
+		// 각 파티의 슬롯 검증 및 정규화 (5슬롯 유지)
+		parties.parties.forEach(function(party, idx) {
+			if (!party.slots || !Array.isArray(party.slots)) party.slots = [];
+
+			// 1. 유효한 uid만 필터링
+			party.slots = party.slots.map(function(uid) {
+				if (!uid) return null;
+				return validUids.has(uid) ? uid : null;
+			});
+
+			// 2. 슬롯 개수를 5개로 정규화 (부족하면 null 추가, 초과하면 제거)
+			while (party.slots.length < 5) party.slots.push(null);
+			party.slots = party.slots.slice(0, 5);
+
+			// 3. 파티 ID 검증
+			if (typeof party.id !== 'number') party.id = idx;
+		});
+
+		if (!parties.activePartyId || typeof parties.activePartyId !== 'number') {
+			parties.activePartyId = 0;
+		}
+
+		localStorage.setItem('game_parties', JSON.stringify(parties));
+		if (errors.length > 0) console.warn('[GameData] Parties repaired:', errors);
+	} catch(e) {
+		console.error('[GameData] Parties validation failed:', e.message);
+		// 파티 초기화 (5슬롯 고정)
+		var roster = JSON.parse(localStorage.getItem('game_roster')) || { chars: [] };
+		var initialSlots = [
+			roster.chars[0]?.uid || null,
+			roster.chars[1]?.uid || null,
+			roster.chars[2]?.uid || null,
+			roster.chars[3]?.uid || null,
+			roster.chars[4]?.uid || null
+		];
+		localStorage.setItem('game_parties', JSON.stringify({
+			parties: [{ id: 0, slots: initialSlots }],
+			activePartyId: 0
+		}));
+		repaired = true;
+	}
+
+	// 3. INVENTORY 검증
+	try {
+		var raw = localStorage.getItem('game_inventory');
+		var inv = raw ? JSON.parse(raw) : [];
+		if (!Array.isArray(inv)) throw new Error('Invalid inventory structure');
+
+		inv = inv.filter(function(item) {
+			return item && item.id && (item.type === 'skill' || item.type === 'equip' || item.type === 'potion');
+		});
+
+		localStorage.setItem('game_inventory', JSON.stringify(inv));
+	} catch(e) {
+		console.error('[GameData] Inventory validation failed:', e.message);
+		localStorage.setItem('game_inventory', JSON.stringify([]));
+		repaired = true;
+	}
+
+	// 4. GOLD 검증
+	try {
+		var raw = localStorage.getItem('game_save');
+		var save = raw ? JSON.parse(raw) : {};
+		if (typeof save.gold !== 'number' || save.gold < 0) save.gold = 2000;
+		localStorage.setItem('game_save', JSON.stringify(save));
+	} catch(e) {
+		console.error('[GameData] Gold validation failed:', e.message);
+		localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
+		repaired = true;
+	}
+
+	// 5. CLEARED 검증
+	try {
+		var raw = localStorage.getItem('game_cleared');
+		var cleared = raw ? JSON.parse(raw) : [];
+		if (!Array.isArray(cleared)) cleared = [];
+		cleared = cleared.filter(id => typeof id === 'number' && id > 0 && id <= 100);
+		localStorage.setItem('game_cleared', JSON.stringify(cleared));
+	} catch(e) {
+		console.error('[GameData] Cleared validation failed:', e.message);
+		localStorage.setItem('game_cleared', JSON.stringify([]));
+		repaired = true;
+	}
+
+	// 6. BATTLE_ITEMS 검증
+	try {
+		var raw = localStorage.getItem('game_battle_items');
+		var items = raw ? JSON.parse(raw) : [];
+		if (!Array.isArray(items)) items = [];
+		items = items.filter(item => item && item.id && typeof item.count === 'number' && item.count >= 0);
+		localStorage.setItem('game_battle_items', JSON.stringify(items));
+	} catch(e) {
+		console.error('[GameData] Battle items validation failed:', e.message);
+		localStorage.setItem('game_battle_items', JSON.stringify([]));
+		repaired = true;
+	}
+
+	// UI에 검증 결과 표시
+	setTimeout(function() {
+		var statusDiv = document.createElement('div');
+		statusDiv.id = 'gamedata-status';
+		statusDiv.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;padding:12px 16px;border-radius:6px;font-size:13px;font-weight:bold;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+		if (repaired) {
+			statusDiv.style.backgroundColor = '#f97316';
+			statusDiv.textContent = '⚠️ 데이터 복구됨';
+		} else {
+			statusDiv.style.backgroundColor = '#22c55e';
+			statusDiv.textContent = '✅ 데이터 정상';
+		}
+		document.body.appendChild(statusDiv);
+		setTimeout(function() {
+			statusDiv.style.opacity = '0.5';
+		}, 3000);
+	}, 500);
+
+	return !repaired;
+}
+
 var init = async function() {
 	await i18nInit();
 	ensureRoster();
+	var dataValid = validateAndRepairGameData();
+
+	// 파티 슬롯 검증
+	try {
+		var parties = JSON.parse(localStorage.getItem('game_parties'));
+		var partySlots = parties?.parties?.[0]?.slots?.length || 0;
+		// 슬롯 수 검증 (5개 아니면 에러)
+	} catch(e) {
+		console.error('[PartySlots] 파티 검증 실패:', e.message);
+	}
 	// Migrate: add gender to existing characters without one
 	try {
 		var raw = localStorage.getItem('game_roster');
 		if (raw) {
 			var rd = JSON.parse(raw), changed = false;
 			rd.chars.forEach(function(c) {
-				if (!c.gender) { c.gender = Math.random() < 0.5 ? 'm' : 'f'; changed = true; }
+				if (!c.gender) { c.gender = randomGender(); changed = true; }
 			});
 			if (changed) localStorage.setItem('game_roster', JSON.stringify(rd));
 		}
@@ -167,7 +375,5 @@ var init = async function() {
 		}
 	} catch(_) {}
 
-	setTimeout(function() {
-		document.getElementById('splash').style.display = 'none';
-	}, 1000);
+	hideSplash(1000);
 };

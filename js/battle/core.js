@@ -254,7 +254,7 @@ const G = {
             role = ROLE_MAP[cls]; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
             if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk) }
             mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
-            gender = Math.random() < 0.5 ? 'm' : 'f';
+            gender = randomGender();
             actionRec = d.actionRec || 1.0;
         }
         const u = {
