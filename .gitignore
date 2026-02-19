@@ -1,1 +1,9 @@
 /skills/
+
+# Claude Code
+.claude/
+
+# bkit plugin
+docs/.bkit-memory.json
+docs/.pdca-status.json
+docs/.pdca-snapshots/
