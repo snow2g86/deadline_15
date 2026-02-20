@@ -86,14 +86,15 @@ function renderStages() {
 
   var epStages = STAGES.filter(function(st) { return ep.stages.indexOf(st.id) !== -1; });
 
-  // unlock된 스테이지만 (에피소드 내 첫 번째 + 클리어된 다음)
-  var available = epStages.filter(function(_, i) { return i === 0 || cleared.has(epStages[i - 1].id); });
-
-  available.forEach(function(st, index) {
+  // 모든 스테이지 렌더링 (unlock 여부는 UI에만 반영)
+  epStages.forEach(function(st, index) {
     var stageIndex = index + 1;
     var cl = cleared.has(st.id);
+    // unlock 조건: 첫 번째 스테이지 또는 이전 스테이지 클리어
+    var unlocked = index === 0 || cleared.has(epStages[index - 1].id);
+
     var b = document.createElement('div');
-    b.className = 'stage-btn' + (cl ? ' cleared' : '');
+    b.className = 'stage-btn' + (cl ? ' cleared' : '') + (unlocked ? '' : ' locked');
 
     b.innerHTML =
       '<div class="sb-header">' +
@@ -105,11 +106,13 @@ function renderStages() {
         'ℹ️ ' + t('stage.info') +
       '</button>';
 
-    b.onclick = (function(stage) {
-      return function() {
-        startStage(stage.id, false);
-      };
-    })(st);
+    if (unlocked) {
+      b.onclick = (function(stage) {
+        return function() {
+          startStage(stage.id, false);
+        };
+      })(st);
+    }
 
     l.appendChild(b);
   });
