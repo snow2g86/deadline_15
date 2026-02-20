@@ -16,10 +16,10 @@ Object.assign(G, {
     const nav=document.getElementById('ally-nav');
     const alive=this.units.filter(u=>u.hp>0);
     // 다음 행동까지 남은 tick 계산
-    const withTicks=alive.map(u=>({
-      u,
-      ticksLeft: u.actionPow>=5 ? 0 : (5-u.actionPow)/u.actionRec
-    }));
+    const withTicks=alive.map(u=>{
+      const rec=u.actionRec||1.0;
+      return {u, ticksLeft: u.actionPow>=4.999 ? 0 : (5-u.actionPow)/rec};
+    });
     withTicks.sort((a,b)=>a.ticksLeft-b.ticksLeft);
 
     nav.innerHTML='';
@@ -30,10 +30,11 @@ Object.assign(G, {
       el.className=`an-unit${isEnemy?' enemy-nav':''}${isCur?' cur-nav':''}`;
 
       // 행동력 바: actionPow/5 비율
-      const apPct=Math.min(100,(u.actionPow/5)*100);
-      const apDisplay=u.actionPow.toFixed(1);
-      const recDisplay=u.actionRec.toFixed(1);
-      const tickDisplay=u.actionPow>=5?'✓':ticksLeft.toFixed(1);
+      const ap=u.actionPow||0, rec=u.actionRec||1.0;
+      const apPct=Math.min(100,(ap/5)*100);
+      const apDisplay=ap.toFixed(1);
+      const recDisplay=rec.toFixed(1);
+      const tickDisplay=ap>=4.999?'✓':ticksLeft.toFixed(1);
 
       el.innerHTML=`<div class="an-icon">${clsIcon(u.cls,18)}</div>
         <div class="an-apbar"><div style="height:${apPct}%"></div></div>
@@ -273,7 +274,7 @@ ${t('battle.breach')} ${br}/${blim}</span></div>`},
     if(this._bgm&&this._bgm.master){this._bgm.master.gain.setValueAtTime(0.12*(v/100),this.sfxCtx().currentTime)}this.saveSett()},
   setSFXVol(v){this._sett.sfxVol=v/100;document.getElementById('sp-sfx-val').textContent=v;
     if(this._sfxGainNode&&this._sett.sfxOn)this._sfxGainNode.gain.setValueAtTime(v/100,this.sfxCtx().currentTime);this.saveSett()},
-  setSpeed(v){const spd=100/v;this._sett.speed=spd;
+  setSpeed(v){const spd=v>0?100/v:1;this._sett.speed=spd;
     document.getElementById('sp-speed-val').textContent=spd.toFixed(1)+'x';this.saveSett()},
   surrender(){if(this.over)return;
     this.closeSettings();

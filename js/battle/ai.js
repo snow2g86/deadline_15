@@ -4,7 +4,7 @@
 Object.assign(G, {
   // 개별 유닛 행동 완료 후 호출
   endUnitTurn(u) {
-    u.actionPow -= 5;
+    u.actionPow = Math.max(0, (u.actionPow || 0) - 5);
     u.ha = false;
     u.hm = false;
     u.mo = false;

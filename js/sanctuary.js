@@ -131,7 +131,7 @@ function renderResurrect() {
     el.innerHTML =
       '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
-      '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + ((ch.actionRec || '−').toFixed(2)) + '</div></div>' +
+      '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + (ch.actionRec ? ch.actionRec.toFixed(2) : '−') + '</div></div>' +
       '<button class="game-btn game-btn--purple' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
     el.querySelector('.game-btn').onclick = (function(uid, cost) {
       return function() {
@@ -582,7 +582,7 @@ function renderRename() {
     el.innerHTML =
       '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
       '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
-      '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + ((ch.actionRec || '−').toFixed(2)) + '</div></div>' +
+      '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + (ch.actionRec ? ch.actionRec.toFixed(2) : '−') + '</div></div>' +
       '<button class="game-btn game-btn--blue">' + t('sanctuary.rename_button') + '</button>';
     el.querySelector('.game-btn').onclick = (function(uid) {
       return function() {

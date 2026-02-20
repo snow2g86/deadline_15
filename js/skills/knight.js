@@ -2,6 +2,29 @@
 //  skills/knight.js — 기사 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 스위치 (기본 스킬) ──────────────────
+registerSkill('knight_switch', {
+	target(u, sk, G) {
+		const sr = sk.switchRange || 2;
+		return G.units.filter(v => v.team==='ally' && v.hp>0 && v.id!==u.id && mh(u.x,u.y,v.x,v.y)<=sr).map(v => ({x:v.x,y:v.y}));
+	},
+	exec(u, tx, ty, sk, G) {
+		const sr = sk.switchRange || 2;
+		const ally = G.units.find(v => v.x===tx && v.y===ty && v.team==='ally' && v.hp>0 && v.id!==u.id && mh(u.x,u.y,v.x,v.y)<=sr);
+		if (!ally) { _skillRefund(u, sk, G); return; }
+		const ox = u.x, oy = u.y;
+		u.x = ally.x; u.y = ally.y;
+		ally.x = ox; ally.y = oy;
+		G.animU(u.id, u.x, u.y);
+		G.animU(ally.id, ally.x, ally.y);
+		G.floatT(u.x, u.y, t('messages.knight_switch'), 'heal');
+		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:12,colors:['#60a5fa','#93c5fd','#fff'],shape:'ring',speed:3,spread:12,decay:0.025,size:5});
+		G.vfxSpawn(G.uSX(ally.x,ally.y)+UCX, G.uSY(ally.x,ally.y)+UCY, {count:12,colors:['#60a5fa','#93c5fd','#fff'],shape:'ring',speed:3,spread:12,decay:0.025,size:5});
+		G.sfxMove(); procFury(u, u, G);
+		_skillDone(u, G, {delay:340});
+	}
+});
+
 // ── 차징 (습득형) ────────────────────────
 registerSkill('knight_charge', {
 	target(u, sk, G) {

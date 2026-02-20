@@ -66,7 +66,10 @@ Object.assign(G, {
         this.battleExp = bs.battleExp || {};
         this.allyPos = bs.allyPos || {};
         this._killCount = bs._killCount || 0; this._killExpPool = bs._killExpPool || 0; this._deadAllyUids = bs._deadAllyUids || [];
-        this.units = bs.units; this.phase = 'player'; this.sel = null; this.over = false;
+        this.units = bs.units;
+        // 구버전 세이브 마이그레이션: actionRec/actionPow 방어
+        this.units.forEach(u => { if (!u.actionRec) u.actionRec = JAB[u.cls]?.actionRec || 1.0; if (u.actionPow == null) u.actionPow = 0; });
+        this.phase = 'player'; this.sel = null; this.over = false;
         this.awPM = false; this.anim = false; this.camDir = 0;
         this.siegeMode = false; this._curSiege = null; this.potionMode = false; this._curPotion = null; this.potionTargets = []; this.itemMenuOpen = false;
         this._siegeItems = bs._siegeItems || []; this._siegeInvIndices = bs._siegeInvIndices || [];

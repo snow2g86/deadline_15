@@ -13,7 +13,7 @@ const CLAB = ['N', 'E', 'S', 'W'], CARR = ['▲', '▶', '▼', '◀'];
 
 function mh(a, b, c, d) { return Math.abs(a - c) + Math.abs(b - d) }
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } }
-function sl(ms) { return new Promise(r => setTimeout(r, ms * G._sett.speed)) }
+function sl(ms) { return new Promise(r => setTimeout(r, ms * (G._sett.speed || 1))) }
 
 // ════════════════════════════════════════════
 //  Section 2: Storage & Battle-specific functions

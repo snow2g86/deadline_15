@@ -378,7 +378,9 @@ const G = {
     // 행동력 기반 턴 시스템: 다음 행동 유닛까지 행동력 진행
     advanceTick() {
         const alive = this.units.filter(u => u.hp > 0);
-        const ready = alive.filter(u => u.actionPow >= 5);
+        // actionRec undefined 방어
+        alive.forEach(u => { if (!u.actionRec) u.actionRec = 1.0; });
+        const ready = alive.filter(u => u.actionPow >= 4.999);
 
         // 행동 가능한 유닛이 있으면 즉시 반환
         if (ready.length > 0) {
@@ -387,14 +389,14 @@ const G = {
 
         // 없으면 가장 빨리 5가 되는 최소 delta 계산
         const minDelta = Math.min(...alive.map(u => (5 - u.actionPow) / u.actionRec));
-        alive.forEach(u => u.actionPow += u.actionRec * minDelta);
+        alive.forEach(u => { u.actionPow = Math.round((u.actionPow + u.actionRec * minDelta) * 1000) / 1000; });
 
         return this.getNextUnit();
     },
 
     // actionPow가 가장 높은 유닛 반환 (동점이면 actionRec 높은 쪽 우선)
     getNextUnit() {
-        const ready = this.units.filter(u => u.hp > 0 && u.actionPow >= 5);
+        const ready = this.units.filter(u => u.hp > 0 && u.actionPow >= 4.999);
         if (ready.length === 0) return null;
         return ready.sort((a, b) => b.actionPow - a.actionPow || b.actionRec - a.actionRec)[0];
     },
