@@ -380,10 +380,12 @@ const AI = {
       EventBus.emit('unit_killed', { killer: a, target: tgt });
       UnitManager.rmDead();
       Renderer.rUnits();
+      TurnManager.chkEnd();
     } else if (a.hp <= 0) {
       EventBus.emit('unit_killed', { killer: tgt, target: a });
       UnitManager.rmDead();
       Renderer.rUnits();
+      TurnManager.chkEnd();
     } else {
       Renderer.rUnits();
     }
