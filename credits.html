@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>DEADLINE 15</title>
+	<link rel="stylesheet" href="css/common.css">
+	<script type="text/javascript" src="js/common/i18n.js"></script>
+	<style>
+		body[data-page="credits"] {
+			display: flex;
+			flex-direction: column;
+			height: 100dvh;
+			overflow: hidden
+		}
+
+		body[data-page="credits"] #top-nav {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 60px;
+			padding: 0 16px;
+			z-index: 1000;
+			background: var(--panel);
+			border-bottom: 1px solid rgba(255, 255, 255, .08)
+		}
+
+		body[data-page="credits"] main {
+			margin-top: 60px;
+			flex: 1;
+			overflow-y: auto;
+			padding: 20px 16px 40px;
+			display: flex;
+			flex-direction: column;
+			align-items: center
+		}
+
+		.cr-container {
+			width: 100%;
+			max-width: 400px;
+			display: flex;
+			flex-direction: column;
+			gap: 16px
+		}
+
+		.cr-section {
+			background: rgba(255, 255, 255, .04);
+			border: 1px solid rgba(255, 255, 255, .08);
+			border-radius: 10px;
+			padding: 14px 16px
+		}
+
+		.cr-title {
+			font-size: 11px;
+			font-weight: 900;
+			color: var(--gold);
+			letter-spacing: 1px;
+			margin-bottom: 10px
+		}
+
+		.cr-person {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 8px 0;
+			border-bottom: 1px solid rgba(255, 255, 255, .04)
+		}
+
+		.cr-person:last-child {
+			border-bottom: none;
+			padding-bottom: 0
+		}
+
+		.cr-avatar {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, .06);
+			border: 1px solid rgba(255, 255, 255, .1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 16px;
+			flex-shrink: 0
+		}
+
+		.cr-info {
+			flex: 1;
+			min-width: 0
+		}
+
+		.cr-name {
+			font-size: 13px;
+			font-weight: 700;
+			color: var(--text)
+		}
+
+		.cr-tag {
+			display: inline-block;
+			font-size: 9px;
+			font-weight: 700;
+			padding: 1px 6px;
+			border-radius: 3px;
+			margin-left: 4px;
+			vertical-align: middle
+		}
+
+		.cr-tag.reddit {
+			color: #ff4500;
+			background: rgba(255, 69, 0, .1);
+			border: 1px solid rgba(255, 69, 0, .2)
+		}
+
+		.cr-role {
+			font-size: 10px;
+			color: var(--dim);
+			margin-top: 2px
+		}
+
+		.cr-footer {
+			text-align: center;
+			font-size: 9px;
+			color: rgba(255, 255, 255, .2);
+			margin-top: 8px
+		}
+
+		@media(min-width:1024px) {
+			body[data-page="credits"] #top-nav {
+				height: 64px
+			}
+
+			body[data-page="credits"] main {
+				margin-top: 64px
+			}
+
+			.cr-container {
+				max-width: 500px
+			}
+
+			.cr-name {
+				font-size: 15px
+			}
+
+			.cr-role {
+				font-size: 11px
+			}
+		}
+	</style>
+	<script>
+		var init = async function () {
+			await i18nInit();
+		};
+	</script>
+</head>
+
+<body data-page="credits" onload="init();">
+	<header id="top-nav">
+		<button id="nav-back" onclick="location.href='settings.html'">
+			<svg viewBox="0 0 24 24">
+				<polyline points="15 18 9 12 15 6" />
+			</svg>
+		</button>
+		<div id="nav-title">Credits</div>
+	</header>
+	<main>
+		<div class="cr-container">
+
+			<div class="cr-section">
+				<div class="cr-title">SPECIAL THANKS</div>
+				<div class="cr-person">
+					<div class="cr-avatar">🤝</div>
+					<div class="cr-info">
+						<div class="cr-name">philgooch <span class="cr-tag reddit">Reddit</span></div>
+						<div class="cr-role">Feedback & Support</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="cr-footer">DEADLINE 15 &copy; 2026 show4you</div>
+		</div>
+	</main>
+</body>
+
+</html>

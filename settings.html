@@ -71,7 +71,9 @@
 
 				+ '<div class="sp-divider"></div>'
 				+ '<div style="text-align:center;margin-top:4px">'
-				+ '<a href="licenses.html" class="sp-link">' + t('settings.licenses') + '</a></div>';
+				+ '<a href="licenses.html" class="sp-link">' + t('settings.licenses') + '</a>'
+				+ '<br/>'
+				+ '<a href="credits.html" class="sp-link">Credits</a></div>';
 
 			// 이벤트 바인딩
 			c.querySelector('#ls-bgm').onchange = function(e) { s.bgmOn = e.target.checked; saveSettings(s); };

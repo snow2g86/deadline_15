@@ -164,6 +164,8 @@ const BattleInit = {
     Renderer.rTerBg(); Renderer.rTer(); Renderer.rUnits();
     Renderer.uUI(); Renderer.defI(); Renderer.rMM();
 
+    // 전투 시작 음악 재생
+    GameStore._sett.bgmOn = true;
     Audio.bgmStart();
     this._hideLoading();
 
@@ -183,7 +185,7 @@ const BattleInit = {
       if (nav.party) GameStore.party = nav.party; else GameStore.party = loadParty();
       if (!GameStore.party || GameStore.party.length < MIN_P) { location.href = 'index.html'; return; }
       this.initBattle();
-      this._showLoading(GameStore.cStage.name).then(() => { Audio.bgmStart(); TurnManager.nextAction(); });
+      this._showLoading(GameStore.cStage.name).then(() => { GameStore._sett.bgmOn = true; Audio.bgmStart(); TurnManager.nextAction(); });
     } else {
       location.href = 'index.html';
     }
