@@ -1472,7 +1472,7 @@
   position: relative;
   overflow: hidden;
   padding: 8px 10px;
-  gap: 6px;
+  gap: 0px;
   height: auto;
   min-height: 90px;
 }
@@ -2218,9 +2218,11 @@
 }
 
 .party-slot-skills {
-  display: flex;
-  gap: 4px;
+  display: inline-flex;
+  gap: 2px;
   flex-shrink: 0;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 .ps-skill {

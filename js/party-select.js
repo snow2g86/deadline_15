@@ -237,39 +237,57 @@ function renderPartySlots() {
         // 1줄: 아이콘 + 기본정보 + 제거버튼
         var header = document.createElement('div');
         header.className = 'party-slot-header';
-        header.innerHTML =
-          '<div class="party-slot-icon">' + charSprite(ch.cls, 40, ch.gender) + '</div>' +
-          '<div class="party-slot-info">' +
-            '<div class="party-slot-level"><span class="ps-level-text">Lv.' + ch.lv + '</span> <span class="sb-cls-label">' + t('classes.' + ch.cls) + '</span></div>' +
-            '<div class="party-slot-name">' + charName + '<span class="ps-grade-text" style="color:' + gradeColor + '">' + grade + '</span></div>' +
-          '</div>';
-        slot.appendChild(header);
-
-        // 2줄: 스탯 + 스킬
-        var footer = document.createElement('div');
-        footer.className = 'party-slot-footer';
-
-        var statsHtml = '<div class="party-slot-stats">' +
-          '<span class="ps-stat-item">HP ' + ch.hp + (bonus.hp > 0 ? '<span class="bonus">+' + bonus.hp + '</span>' : '') + '</span>' +
-          '<span class="ps-stat-item">ATK ' + ch.atk + (bonus.atk > 0 ? '<span class="bonus">+' + bonus.atk + '</span>' : '') + '</span>' +
-          '<span class="ps-stat-item">DEF ' + ch.def + (bonus.def > 0 ? '<span class="bonus">+' + bonus.def + '</span>' : '') + '</span>' +
-          '<span class="ps-stat-item">AR ' + (ch.actionRec || JAB[ch.cls].actionRec || 1.0).toFixed(2) + '</span>' +
-        '</div>';
-
-        var skillsHtml = '<div class="party-slot-skills">';
+        // 스킬 아이콘 빌드
+        var skillIcons = [];
         if (skills.length > 0) {
           skills.forEach(function(sk) {
             var lv = getCharSkillLv(ch, sk.id);
-            if (lv > 0) {
-              skillsHtml += '<span class="ps-skill" title="Lv' + lv + '">' + skillIcon(sk.id, 16) + '</span>';
-            }
+            if (lv > 0) skillIcons.push({ id: sk.id, lv: lv });
           });
-        } else {
-          skillsHtml += '<span class="ps-skill-none">-</span>';
         }
-        skillsHtml += '</div>';
 
-        footer.innerHTML = statsHtml + skillsHtml;
+        // 헤더: 아이콘 + 정보 (직업명 옆에 스킬 아이콘)
+        var iconDiv = document.createElement('div'); iconDiv.className = 'party-slot-icon';
+        iconDiv.insertAdjacentHTML('afterbegin', charSprite(ch.cls, 40, ch.gender));
+
+        var infoDiv = document.createElement('div'); infoDiv.className = 'party-slot-info';
+        var levelDiv = document.createElement('div'); levelDiv.className = 'party-slot-level';
+        var lvText = document.createElement('span'); lvText.className = 'ps-level-text'; lvText.textContent = 'Lv.' + ch.lv;
+        var clsLabel = document.createElement('span'); clsLabel.className = 'sb-cls-label'; clsLabel.textContent = t('classes.' + ch.cls);
+        levelDiv.appendChild(lvText);
+        levelDiv.appendChild(document.createTextNode(' '));
+        levelDiv.appendChild(clsLabel);
+        if (skillIcons.length > 0) {
+          var skillSpan = document.createElement('span'); skillSpan.className = 'party-slot-skills';
+          skillIcons.forEach(function(si) {
+            var sk = document.createElement('span'); sk.className = 'ps-skill'; sk.title = 'Lv' + si.lv;
+            sk.insertAdjacentHTML('afterbegin', skillIcon(si.id, 14));
+            skillSpan.appendChild(sk);
+          });
+          levelDiv.appendChild(skillSpan);
+        }
+        var nameDiv = document.createElement('div'); nameDiv.className = 'party-slot-name';
+        nameDiv.appendChild(document.createTextNode(charName));
+        var gradeSpan = document.createElement('span'); gradeSpan.className = 'ps-grade-text'; gradeSpan.style.color = gradeColor; gradeSpan.textContent = grade;
+        nameDiv.appendChild(gradeSpan);
+        infoDiv.appendChild(levelDiv); infoDiv.appendChild(nameDiv);
+        header.appendChild(iconDiv); header.appendChild(infoDiv);
+        slot.appendChild(header);
+
+        // 2줄: 스탯
+        var footer = document.createElement('div');
+        footer.className = 'party-slot-footer';
+        var statsDiv = document.createElement('div'); statsDiv.className = 'party-slot-stats';
+        [['HP', ch.hp, bonus.hp], ['ATK', ch.atk, bonus.atk], ['DEF', ch.def, bonus.def]].forEach(function(s) {
+          var span = document.createElement('span'); span.className = 'ps-stat-item';
+          span.textContent = s[0] + ' ' + s[1];
+          if (s[2] > 0) { var b = document.createElement('span'); b.className = 'bonus'; b.textContent = '+' + s[2]; span.appendChild(b); }
+          statsDiv.appendChild(span);
+        });
+        var arSpan = document.createElement('span'); arSpan.className = 'ps-stat-item';
+        arSpan.textContent = 'AR ' + (ch.actionRec || JAB[ch.cls].actionRec || 1.0).toFixed(2);
+        statsDiv.appendChild(arSpan);
+        footer.appendChild(statsDiv);
         slot.appendChild(footer);
 
         // 제거 버튼
