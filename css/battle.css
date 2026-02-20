@@ -29,14 +29,14 @@
 #map-container{flex:1;overflow:auto;position:relative;cursor:pointer;
   background:radial-gradient(ellipse at 50% 30%,rgba(20,40,80,.4),transparent 70%),var(--bg)}
 #iso-world{position:absolute;transition:none}
-.iso-tile{position:absolute;pointer-events:none;transition:filter .1s}
+.iso-tile{position:absolute;pointer-events:none}
 .iso-tile-hl{pointer-events:auto}
 .iso-tile-obj{position:absolute;pointer-events:none}
 
 /* ═══ Unit Sprites ═══ */
 .unit-sprite{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  pointer-events:none;z-index:10;
-  transition:left .32s cubic-bezier(.4,0,.2,1),top .32s cubic-bezier(.4,0,.2,1)}
+  pointer-events:none;z-index:10;will-change:transform;
+  transition:transform .32s cubic-bezier(.4,0,.2,1)}
 .unit-sprite .u-icon{filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));line-height:0}
 .unit-sprite.acted{opacity:.7}
 .unit-sprite .u-shadow{width:30px;height:5px;background:rgba(0,0,0,.35);border-radius:50%;margin-top:-2px}
@@ -47,21 +47,28 @@
 .unit-sprite.ally .hp-fill{background:#22c55e}
 .unit-sprite.enemy .hp-fill{background:var(--red)}
 .unit-sprite.enemy .u-icon{filter:drop-shadow(0 0 5px rgba(239,68,68,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}
-.unit-sprite.cur-turn .u-icon{filter:drop-shadow(0 0 5px rgba(250,204,21,.7)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+.unit-sprite.cur-turn .u-icon{
+  filter:drop-shadow(0 0 8px rgba(250,204,21,.8)) drop-shadow(0 0 3px rgba(250,204,21,.5)) drop-shadow(0 2px 4px rgba(0,0,0,.8));
+  animation:goldAura 2s ease-in-out infinite}
+@keyframes goldAura{0%,100%{filter:drop-shadow(0 0 6px rgba(250,204,21,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+  50%{filter:drop-shadow(0 0 12px rgba(250,204,21,1)) drop-shadow(0 0 4px rgba(250,204,21,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.8))}}
 
 /* ═══ Unit Animations ═══ */
 @keyframes atkShake{0%,100%{transform:translate(0)}25%{transform:translate(-3px,-2px)}50%{transform:translate(3px,2px)}75%{transform:translate(-2px,-1px)}}
-.unit-sprite.shaking .u-icon{animation:hitFlash .25s ease-out}
+.unit-sprite.shaking .u-icon{animation:hitFlash .25s ease-out,atkShake .25s ease}
 @keyframes hitFlash{0%{opacity:1}10%{opacity:.3}30%{opacity:1}}
 .unit-sprite.attacking .u-icon{animation:atkSwing .35s ease-out}
 @keyframes atkSwing{0%{transform:scale(1)}30%{transform:scale(1.3) translateY(-4px)}100%{transform:scale(1)}}
 .unit-sprite.moving .u-icon{animation:moveHop .32s ease-in-out}
 @keyframes moveHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.unit-sprite.shaking{animation:atkShake .25s ease}
 @keyframes spawnPop{0%{opacity:0;transform:scale(.3) translateY(8px)}60%{opacity:1;transform:scale(1.12) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
-.unit-sprite.spawning{animation:spawnPop .4s ease-out}
-@keyframes deathDissolve{0%{opacity:1;filter:brightness(1)}30%{opacity:.8;filter:brightness(2) saturate(0)}70%{opacity:.3;filter:brightness(3) saturate(0) blur(2px)}100%{opacity:0;filter:brightness(4) saturate(0) blur(6px);transform:scale(.7)}}
+.unit-sprite.spawning .u-icon{animation:spawnPop .4s ease-out}
+.unit-sprite.spawning{opacity:0;animation:spawnFade .4s ease-out forwards}
+@keyframes spawnFade{0%{opacity:0}100%{opacity:1}}
+@keyframes deathDissolve{0%{opacity:1;filter:brightness(1)}30%{opacity:.8;filter:brightness(2) saturate(0)}70%{opacity:.3;filter:brightness(3) saturate(0)}100%{opacity:0;filter:brightness(4) saturate(0)}}
 .unit-sprite.dying{animation:deathDissolve .6s ease-out forwards}
+.unit-sprite.dying .u-icon{animation:deathShrink .6s ease-out forwards}
+@keyframes deathShrink{0%{transform:scale(1)}100%{transform:scale(.7)}}
 @keyframes screenShake{0%,100%{transform:translate(0)}10%{transform:translate(-4px,-3px)}30%{transform:translate(4px,2px)}50%{transform:translate(-3px,3px)}70%{transform:translate(3px,-2px)}90%{transform:translate(-2px,1px)}}
 #iso-world.screen-shake{animation:screenShake .3s ease}
 @keyframes screenShakeHeavy{0%,100%{transform:translate(0)}8%{transform:translate(-8px,-6px)}20%{transform:translate(7px,5px)}32%{transform:translate(-6px,4px)}44%{transform:translate(5px,-5px)}56%{transform:translate(-4px,3px)}68%{transform:translate(6px,-3px)}80%{transform:translate(-3px,4px)}92%{transform:translate(2px,-2px)}}
@@ -76,11 +83,21 @@
 #turn-flash.skill-flash{animation:skillFlash .4s ease-out}
 
 /* ═══ Tile Highlights ═══ */
-.iso-tile.hl-move{background:rgba(59,130,246,.2);box-shadow:inset 0 0 0 2px rgba(59,130,246,.7)}
-.iso-tile.hl-attack{background:rgba(239,68,68,.2);box-shadow:inset 0 0 0 2px rgba(239,68,68,.7)}
-.iso-tile.hl-heal{background:rgba(34,197,94,.2);box-shadow:inset 0 0 0 2px rgba(34,197,94,.7)}
+.iso-tile.hl-move{background:rgba(59,130,246,.15);box-shadow:inset 0 0 0 2px rgba(59,130,246,.6);
+  animation:movePulse 1.4s ease-in-out infinite}
+@keyframes movePulse{0%,100%{background:rgba(59,130,246,.1);box-shadow:inset 0 0 0 2px rgba(59,130,246,.4)}
+  50%{background:rgba(59,130,246,.25);box-shadow:inset 0 0 0 2px rgba(59,130,246,.8)}}
+.iso-tile.hl-attack{background:rgba(239,68,68,.28);box-shadow:inset 0 0 0 2px rgba(239,68,68,.85);
+  animation:atkPulse 1.2s ease-in-out infinite}
+@keyframes atkPulse{0%,100%{background:rgba(239,68,68,.18);box-shadow:inset 0 0 0 2px rgba(239,68,68,.6)}
+  50%{background:rgba(239,68,68,.4);box-shadow:inset 0 0 0 2px rgba(239,68,68,1)}}
+.iso-tile.hl-heal{background:rgba(34,197,94,.28);box-shadow:inset 0 0 0 2px rgba(34,197,94,.85);
+  animation:healPulse 1.2s ease-in-out infinite}
+@keyframes healPulse{0%,100%{background:rgba(34,197,94,.18);box-shadow:inset 0 0 0 2px rgba(34,197,94,.6)}
+  50%{background:rgba(34,197,94,.4);box-shadow:inset 0 0 0 2px rgba(34,197,94,1)}}
 .iso-tile.hl-selected{background:rgba(240,192,64,.15);box-shadow:inset 0 0 0 2px rgba(240,192,64,.9);animation:selPulse 1.2s ease-in-out infinite}
 @keyframes selPulse{0%,100%{opacity:1}50%{opacity:.45}}
+.iso-tile-hl.fow-dark{background:rgba(10,14,26,.55)!important;box-shadow:none!important;animation:none!important}
 
 /* ═══ VFX ═══ */
 #vfx-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:350}
@@ -92,17 +109,14 @@
 @keyframes isoFloat{0%{opacity:1;transform:translateY(0) scale(1)}70%{opacity:1;transform:translateY(-22px) scale(1.12)}100%{opacity:0;transform:translateY(-36px) scale(.9)}}
 
 /* ═══ Action Menu ═══ */
-#action-menu{position:absolute;z-index:9999;display:none;flex-direction:column;gap:3px;
+#action-menu{position:absolute;z-index:500;display:none;flex-direction:column;gap:3px;
   background:rgba(17,24,39,.95);border:1px solid var(--gold-d);border-radius:6px;padding:5px;box-shadow:0 4px 20px rgba(0,0,0,.7)}
 #action-menu.show{display:flex}
 #action-menu button{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:11px;
-  padding:4px 12px;border:1px solid rgba(255,255,255,.15);border-radius:4px;cursor:pointer;color:#fff;transition:all .15s}
+  min-width:100px;text-align:left;padding:4px 12px;border:1px solid rgba(255,255,255,.15);border-radius:4px;cursor:pointer;color:#fff;transition:all .15s}
 #action-menu button:hover{filter:brightness(1.2)}
-#btn-move{background:#10b981}#btn-attack{background:#ef4444}#btn-skill{background:#7c3aed}#btn-item{background:#f59e0b}#btn-dash{background:var(--blue)}#btn-cancel{background:#4b5563}
-#action-menu .am-skill{background:#7c3aed}
-#action-menu .am-skill:disabled{opacity:.35;cursor:default}
-#action-menu .am-item{background:#d97706}
-#action-menu .am-item:disabled{opacity:.35;cursor:default}
+#action-menu button{background:rgba(55,65,81,.9)}
+#action-menu button:disabled{opacity:.35;cursor:default}
 
 .unit-sprite.potion-target{animation:potion-pulse 0.6s ease-in-out infinite alternate;filter:brightness(1.3) drop-shadow(0 0 6px #22c55e)}
 @keyframes potion-pulse{from{filter:brightness(1.1) drop-shadow(0 0 4px #22c55e)}to{filter:brightness(1.4) drop-shadow(0 0 8px #4ade80)}}
@@ -265,16 +279,17 @@
 .sp-btn.danger:hover{background:rgba(239,68,68,.1)}
 
 /* ═══ Full-Screen Utility ═══ */
-.full-screen{position:fixed;inset:0;z-index:600;
+.full-screen{position:fixed;inset:0;z-index:9000;
   background:radial-gradient(ellipse at 50% 30%,#1a2340,#0a0e1a);
   display:none;flex-direction:column;align-items:center;overflow-y:auto;padding:16px}
 .full-screen.show{display:flex}
 .full-screen.hidden{display:none}
 
 /* ═══ Stealth (Assassin) ═══ */
-.unit-sprite.stealthed{opacity:.5;filter:drop-shadow(0 0 6px rgba(139,92,246,.5))}
-.unit-sprite.stealthed .u-icon{animation:stealthPulse 2s ease-in-out infinite}
+.unit-sprite.stealthed.ally{opacity:.5;filter:drop-shadow(0 0 6px rgba(139,92,246,.5))}
+.unit-sprite.stealthed.ally .u-icon{animation:stealthPulse 2s ease-in-out infinite}
 @keyframes stealthPulse{0%,100%{opacity:.4}50%{opacity:.7}}
+.unit-sprite.stealthed.enemy{opacity:0;pointer-events:none}
 
 /* ═══ Stunned (Trap/Immobilized) ═══ */
 .unit-sprite.stunned{filter:grayscale(1) brightness(0.85)}

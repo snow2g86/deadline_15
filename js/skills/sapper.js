@@ -2,6 +2,42 @@
 //  skills/sapper.js — 공병 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 함정 설치 (기본 스킬) ────────────────
+registerSkill('sapper_trap', {
+	target(u, sk, G) {
+		const tr = sk.trapRange || 1;
+		const cells = [];
+		for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++) {
+			if (mh(u.x, u.y, x, y) > 0 && mh(u.x, u.y, x, y) <= tr) {
+				const ti = TI[G.ter[y][x]]; if (!ti || !ti.pass) continue;
+				if (G.uAt(x, y)) continue;
+				if (G.traps.find(t2 => t2.x === x && t2.y === y)) continue;
+				cells.push({x, y});
+			}
+		}
+		return cells;
+	},
+	exec(u, tx, ty, sk, G) {
+		const ti = TI[G.ter[ty][tx]];
+		if (!ti || !ti.pass || G.uAt(tx, ty) || G.traps.find(t2 => t2.x === tx && t2.y === ty)) {
+			_skillRefund(u, sk, G); return;
+		}
+		const trapDmg = Math.round(u.atk * 2);
+		const enhanced = u.skillLv && u.skillLv['sapper_enhancedtrap'] >= 1;
+		G.traps.push({
+			x: tx, y: ty, team: u.team,
+			dmg: enhanced ? Math.round(trapDmg * 1.3) : trapDmg,
+			stun: enhanced ? 3 : 2
+		});
+		G.sfxUIClick();
+		G.floatT(tx, ty, t('messages.trap_installed'), 'heal');
+		G.vfxSpawn(G.uSX(tx, ty) + UCX, G.uSY(tx, ty) + UCY,
+			{count: 12, colors: ['#f59e0b', '#fbbf24', '#fff'], shape: 'ring', speed: 3, spread: 10, decay: 0.025, size: 5});
+		G._grantExp(u, 'attack');
+		_skillDone(u, G, {rTer: true});
+	}
+});
+
 // ── 굴착 (습득형) ────────────────────────
 registerSkill('sapper_excavate', {
 	target(u, sk, G) {

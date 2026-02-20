@@ -2,6 +2,32 @@
 //  skills/priest.js — 사제 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 집단 치유 (기본 스킬) ────────────────
+registerSkill('priest_massheal', {
+	target(u, sk, G) { return 'instant'; },
+	exec(u, tx, ty, sk, G) {
+		const hr = sk.healRange || 6;
+		const targets = G.units.filter(v => v.team === 'ally' && v.hp > 0 && v.hp < v.mhp && mh(u.x, u.y, v.x, v.y) <= hr);
+		if (!targets.length) { _skillRefund(u, sk, G); return; }
+		let healAmt = Math.max(1, Math.round(u.atk * 0.8));
+		if (u.skillLv && u.skillLv['priest_divinegrace'] >= 1) healAmt = Math.round(healAmt * 1.2);
+		targets.forEach(tgt => {
+			const heal = Math.min(tgt.mhp - tgt.hp, healAmt);
+			tgt.hp += heal;
+			G.floatT(tgt.x, tgt.y, `+${heal}`, 'heal');
+			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
+				{count: 8, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.025, size: 4});
+		});
+		G.sfxHeal();
+		G.floatT(u.x, u.y, t('messages.priest_mass_heal'), 'heal');
+		G.vfxFlash('rgba(74,222,128,.15)');
+		G.vfxSpawn(G.uSX(u.x, u.y) + UCX, G.uSY(u.x, u.y) + UCY,
+			{count: 22, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 4, spread: 18, decay: 0.018, size: 8});
+		G._grantExp(u, 'heal');
+		_skillDone(u, G);
+	}
+});
+
 // ── 정화 (습득형) ────────────────────────
 registerSkill('priest_purify', {
 	target(u, sk, G) {

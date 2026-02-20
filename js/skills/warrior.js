@@ -2,6 +2,32 @@
 //  skills/warrior.js — 전사 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 강타 (기본 스킬) ────────────────────
+registerSkill('warrior_powersmash', {
+	target(u, sk, G) {
+		return G.units.filter(v => v.team==='enemy' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=u.range).map(v => ({x:v.x,y:v.y}));
+	},
+	exec(u, tx, ty, sk, G) {
+		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=u.range);
+		if (!tgt) { _skillRefund(u, sk, G); return; }
+		const mul = G.skMul(u,'warrior_powersmash');
+		const dmg = Math.max(1, Math.round(u.atk*1.5*mul) - tgt.def);
+		tgt.hp = Math.max(0, tgt.hp - dmg);
+		G.vfxAtk(u, tgt); G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
+		G.floatT(tgt.x, tgt.y, '-' + dmg, 'damage');
+		G.floatT(u.x, u.y, t('skills.warrior_powersmash'), 'heal');
+		G.vfxFlash('rgba(255,100,0,.15)');
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY,
+			{count:16,colors:['#ff4400','#ff8800','#fff'],shape:'spark',speed:5,spread:14,decay:0.02,size:5});
+		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY,
+			{count:4,colors:['#ff440044'],shape:'ring',speed:0,spread:4,decay:0.015,size:12});
+		procFury(u, tgt, G);
+		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
+		G._grantExp(u, 'attack');
+		_skillDone(u, G, {delay:500, chkEnd:true});
+	}
+});
+
 // ── 휘두르기 (습득형) ────────────────────
 registerSkill('warrior_cleave', {
 	target(u, sk, G) { return 'instant'; },

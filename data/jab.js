@@ -19,7 +19,7 @@ const JAB = {
   },
   "mage": {
     "icon":"🔮", "res":"mana", "maxRes": 120, "resRec": 12,
-    "base": { "hp": 65, "atk": 30, "def": 4, "move": 3, "range": 3 },
+    "base": { "hp": 65, "atk": 30, "def": 4, "move": 3, "range": 4 },
     "growth": { "hp": [5,8], "atk": [2,5], "def": [0,1] },
     "actionRec": 0.5
   },
@@ -61,7 +61,7 @@ const JAB = {
   },
   "lancer": {
     "icon":"🔱", "res":"fury", "maxRes": 10, "resRec": 0,
-    "base": { "hp": 95, "atk": 28, "def": 12, "move": 3, "range": 1 },
+    "base": { "hp": 95, "atk": 28, "def": 12, "move": 3, "range": 2 },
     "growth": { "hp": [8,13], "atk": [2,4], "def": [1,3] },
     "actionRec": 1.0
   },

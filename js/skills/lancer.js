@@ -2,6 +2,57 @@
 //  skills/lancer.js — 창술사 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 관통 (기본 스킬) ────────────────────
+registerSkill('lancer_pierce', {
+	target(u, sk, G) {
+		const len = sk.pierceLen || 3;
+		const dirs = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+		const targets = [];
+		dirs.forEach(d => {
+			const line = [];
+			for (let i = 1; i <= len; i++) {
+				const px = u.x + d.x * i, py = u.y + d.y * i;
+				if (px < 0 || px >= COLS || py < 0 || py >= ROWS) break;
+				line.push({x: px, y: py});
+				if (!TI[G.ter[py][px]].pass) break;
+			}
+			if (line.some(c => G.units.some(v => v.hp > 0 && v.x === c.x && v.y === c.y && v.team === 'enemy'))) {
+				line.forEach(c => targets.push(c));
+			}
+		});
+		return targets;
+	},
+	exec(u, tx, ty, sk, G) {
+		const len = sk.pierceLen || 3;
+		const dx = Math.sign(tx - u.x), dy = Math.sign(ty - u.y);
+		if (dx !== 0 && dy !== 0) { _skillRefund(u, sk, G); return; }
+		const hit = [];
+		for (let i = 1; i <= len; i++) {
+			const px = u.x + dx * i, py = u.y + dy * i;
+			if (px < 0 || px >= COLS || py < 0 || py >= ROWS) break;
+			const tgt = G.units.find(v => v.hp > 0 && v.x === px && v.y === py && v.team === 'enemy');
+			if (tgt) hit.push(tgt);
+			if (!TI[G.ter[py][px]].pass) break;
+		}
+		if (!hit.length) { _skillRefund(u, sk, G); return; }
+		hit.forEach(tgt => {
+			const dmg = Math.max(1, Math.round(u.atk * 1.0 * G.skMul(u, 'lancer_pierce')) - tgt.def);
+			tgt.hp = Math.max(0, tgt.hp - dmg);
+			G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
+			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
+				{count: 14, colors: ['#60a5fa', '#3b82f6', '#fff'], shape: 'spark', speed: 5, spread: 14, decay: 0.02, size: 5});
+			if (tgt.hp <= 0) { G.screenShake(); G.sfxKill(); G.sfxDeath(); G.vfxDeath(tgt); G.deathA(tgt.id); }
+		});
+		G.sfxAtk(u.cls); G.screenShake();
+		G.floatT(u.x, u.y, t('messages.lancer_pierce'), 'heal');
+		G.vfxFlash('rgba(96,165,250,.15)');
+		G.vfxSpawn(G.uSX(u.x + dx, u.y + dy) + UCX, G.uSY(u.x + dx, u.y + dy) + UCY,
+			{count: 6, colors: ['#60a5fa44'], shape: 'ring', speed: 0, spread: 4, decay: 0.015, size: 14});
+		procFury(u, hit[0], G); G._grantExp(u, 'attack');
+		_skillDone(u, G, {delay: 500, rmDead: true, chkEnd: true});
+	}
+});
+
 // ── 돌격 (습득형) ──────────────────────
 registerSkill('lancer_charge', {
 	target(u, sk, G) {

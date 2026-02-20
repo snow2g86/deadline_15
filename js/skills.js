@@ -271,6 +271,7 @@ function getUnitSkills(u) {
 
 // ── 은신 판정 ──────────────────────────────
 function isStealthed(u) {
+	if (u.stealthBroken) return false;
 	return u.cls === 'assassin' && G.ter[u.y] && G.ter[u.y][u.x] === 'forest';
 }
 

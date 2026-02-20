@@ -33,14 +33,18 @@
 <script src="js/skills/lancer.js"></script>
 <script src="js/skills/sapper.js"></script>
 <script src="js/sprites.js"></script>
+<script src="js/battle/event.js"></script>
+<script src="js/battle/state.js"></script>
 <script src="js/battle/constants.js"></script>
-<script src="js/battle/core.js"></script>
-<script src="js/battle/combat.js"></script>
+<script src="js/battle/buff.js"></script>
+<script src="js/battle/grid.js"></script>
+<script src="js/battle/unit.js"></script>
+<script src="js/battle/turn.js"></script>
+<script src="js/battle/action.js"></script>
+<script src="js/battle/ai.js"></script>
 <script src="js/battle/render.js"></script>
-<script src="js/battle/ui.js"></script>
 <script src="js/battle/vfx.js"></script>
 <script src="js/battle/audio.js"></script>
-<script src="js/battle/ai.js"></script>
 <script src="js/battle/end.js"></script>
 <script src="js/battle/boot.js"></script>
 </head>
@@ -59,7 +63,7 @@
       <button class="cam-btn" onclick="G.rotCam(-1)" title="카메라 좌회전 (Q)"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
       <button class="cam-btn" onclick="G.rotCam(1)" title="카메라 우회전 (E)"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
     </div>
-    <div id="stage-info">STAGE 1<div class="si-turn">TURN 1</div></div>
+    <div id="stage-info">STAGE 1<div class="si-turn"></div></div>
     <div class="tb-right"></div>
   </div>
   <div id="map-container">

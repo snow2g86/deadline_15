@@ -37,6 +37,11 @@ const FURY_PASSIVES = {
 // ── 아군 피해 적용 래퍼 ────────────────────
 function applyDmgToAlly(tgt, dmg, ctx) {
 	let actual = tgt;
+	// ctx.units가 없으면 안전하게 반환 (GameStore 사용)
+	if (!ctx || !ctx.units) {
+		if (GameStore && GameStore.units) ctx = { ...ctx, units: GameStore.units, floatT: ctx?.floatT, vfxSpawn: ctx?.vfxSpawn, uSX: ctx?.uSX, uSY: ctx?.uSY };
+		else return tgt;
+	}
 	if (tgt._sacrificeKnight) {
 		const knight = ctx.units.find(v => v.id === tgt._sacrificeKnight && v.hp > 0);
 		if (knight && knight._sacrificeDmgCount > 0) {
@@ -45,7 +50,7 @@ function applyDmgToAlly(tgt, dmg, ctx) {
 			if (knight._sacrificeDmgCount <= 0) {
 				delete tgt._sacrificeKnight;
 				delete knight._sacrificeTarget;
-				ctx.floatT(knight.x, knight.y, t('messages.knight_sacrifice_end'), 'heal');
+				if (ctx.floatT) ctx.floatT(knight.x, knight.y, t('messages.knight_sacrifice_end'), 'heal');
 			}
 		}
 	}

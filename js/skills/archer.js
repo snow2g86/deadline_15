@@ -2,6 +2,32 @@
 //  skills/archer.js — 궁수 스킬 핸들러
 // ═══════════════════════════════════════════
 
+// ── 도약 (기본 스킬) ────────────────────
+registerSkill('archer_dash', {
+	target(u, sk, G) {
+		const range = sk.dashRange || 4;
+		const cells = [];
+		for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++) {
+			if (mh(u.x, u.y, x, y) > 0 && mh(u.x, u.y, x, y) <= range) {
+				const ti = TI[G.ter[y][x]]; if (!ti || !ti.pass) continue;
+				if (G.uAt(x, y)) continue;
+				cells.push({x, y});
+			}
+		}
+		return cells;
+	},
+	exec(u, tx, ty, sk, G) {
+		const ti = TI[G.ter[ty][tx]];
+		if (!ti || !ti.pass || G.uAt(tx, ty)) { _skillRefund(u, sk, G); return; }
+		G._mvU(u, tx, ty); u.mo = true;
+		G.floatT(u.x, u.y, t('messages.archer_leap'), 'heal');
+		G.vfxSpawn(G.uSX(u.x, u.y) + UCX, G.uSY(u.x, u.y) + UCY,
+			{count: 14, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'spark', speed: 4, spread: 12, decay: 0.02, size: 4});
+		G.sfxMove(); G._grantExp(u, 'move');
+		_skillDone(u, G, {delay: 400});
+	}
+});
+
 // ── 저격 (습득형) ────────────────────────
 registerSkill('archer_snipe', {
 	target(u, sk, G) {
