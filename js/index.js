@@ -285,7 +285,7 @@ function validateAndRepairGameData() {
 	setTimeout(function() {
 		var statusDiv = document.createElement('div');
 		statusDiv.id = 'gamedata-status';
-		statusDiv.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;padding:12px 16px;border-radius:6px;font-size:13px;font-weight:bold;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+		statusDiv.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;padding:12px 16px;border-radius:6px;font-size:13px;font-weight:bold;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);opacity:1;transition:opacity 0.5s ease;';
 		if (repaired) {
 			statusDiv.style.backgroundColor = '#f97316';
 			statusDiv.textContent = '⚠️ 데이터 복구됨';
@@ -295,7 +295,11 @@ function validateAndRepairGameData() {
 		}
 		document.body.appendChild(statusDiv);
 		setTimeout(function() {
-			statusDiv.style.opacity = '0.5';
+			statusDiv.style.opacity = '0';
+			// opacity 0으로 변환 후 0.5초 뒤에 DOM에서 완전 제거
+			setTimeout(function() {
+				statusDiv.remove();
+			}, 500);
 		}, 3000);
 	}, 500);
 
