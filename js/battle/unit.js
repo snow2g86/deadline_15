@@ -171,7 +171,7 @@ const UnitManager = {
     // 고지대
     const ta = S.ter[a.y] && S.ter[a.y][a.x], tt = S.ter[t.y] && S.ter[t.y][t.x];
     if (ta === 'hill' && tt !== 'hill') { add += TACTIC.high; tags.push('high'); }
-    return { mul: 1 + add, tags };
+    return { mul: 1 + Math.min(add, TACTIC.cap), tags, capped: add > TACTIC.cap };
   },
 
   // ── 일반 공격 회피 판정 (공격받는 쪽 기준) ──
