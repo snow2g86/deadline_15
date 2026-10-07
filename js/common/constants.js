@@ -25,8 +25,13 @@ const GRADE_COLORS = {
   C: '#9ca3af'
 };
 
+// ── 지휘관 (고유 주인공) ──────────────────────
+const COMMANDER_CLS = 'commander';
+const COMMANDER_DEFAULT_NAME = '리안'; // 스토리 기본 이름 (data/story 의 cast.commander.name 과 맞춤). 플레이어가 바꾸면 customName
+
 // ── 역할 매핑 ────────────────────────────────
 const ROLE_MAP = {
+  commander: 'melee',
   warrior: 'melee',
   knight: 'melee',
   assassin: 'melee',
@@ -43,6 +48,7 @@ const ROLE_MAP = {
 
 // ── 직업군 매핑 (UI 필터용) ────────────────────
 const CLASS_GROUP_MAP = {
+  'commander': 'melee',       // 지휘관 (고유 주인공)
   'novice': 'beginner',      // 전제
   'warrior': 'melee',        // 근접
   'knight': 'melee',

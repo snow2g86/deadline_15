@@ -1,4 +1,11 @@
 const JAB = {
+  // 지휘관: 플레이어 클랜의 고유 주인공 (1명만 존재, 항상 출전, 쓰러지면 패배, 고용·전직 불가)
+  "commander": {
+    "icon":"🎖️", "res":"energy", "maxRes": 100, "resRec": 12, "unique": true,
+    "base": { "hp": 110, "atk": 22, "def": 10, "move": 3, "range": 1 },
+    "growth": { "hp": [8,12], "atk": [2,3], "def": [1,2] },
+    "actionRec": 1.1
+  },
   "warrior": {
     "icon":"⚔️", "res":"fury", "maxRes": 10, "resRec": 0,
     "base": { "hp": 100, "atk": 25, "def": 10, "move": 3, "range": 1 },

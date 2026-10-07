@@ -1,6 +1,23 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
+    "commander_setup": {
+        "title": "지휘관",
+        "sub": "클랜을 이끌 지휘관을 정하세요",
+        "male": "남성",
+        "female": "여성",
+        "name": "이름",
+        "confirm": "출정",
+        "edit": "지휘관 설정",
+        "name_ph": "이름 입력 (최대 10자)"
+    },
+    "commander_msg": {
+        "rally": "📯 돌격 명령!",
+        "rally_buff": "공격 +{n}%",
+        "order": "🚩 지휘!",
+        "fallen": "지휘관이 쓰러졌다… 클랜은 퇴각한다"
+    },
     "classes": {
+        "commander": "지휘관",
         "warrior": "전사",
         "knight": "기사",
         "assassin": "암살자",
@@ -15,6 +32,7 @@ Object.assign(window._LANG_ko, {
         "sapper": "공병"
     },
     "class_desc": {
+        "commander": "클랜의 주인공 · 명령과 버프",
         "warrior": "균형 근접 딜러",
         "knight": "방어 탱커",
         "assassin": "고속 암살자",

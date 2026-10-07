@@ -1,6 +1,8 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "skills": {
+        "commander_rally": "Arenga",
+        "commander_order": "Mando",
         "warrior_powersmash": "Golpe Poderoso",
         "knight_switch": "Cambio",
         "archer_dash": "Carrera",
@@ -54,6 +56,8 @@ Object.assign(window._LANG_es, {
         "priest_divinegrace": "Gracia Divina"
     },
     "skills_desc": {
+        "commander_rally": "Aliados a 3 casillas +20% ATQ (2 turnos)",
+        "commander_order": "Un aliado actúa justo después",
         "warrior_powersmash": "Atacar con daño 1.5x poder de ataque",
         "knight_switch": "Cambiar posiciones con aliado dentro del rango de movimiento",
         "archer_dash": "Mover instantáneamente 1.5x rango de movimiento",

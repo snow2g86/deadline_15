@@ -1,6 +1,8 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
     "skills": {
+        "commander_rally": "Rally",
+        "commander_order": "Command",
         "warrior_powersmash": "Power Smash",
         "knight_switch": "Switch",
         "archer_dash": "Dash",
@@ -54,6 +56,8 @@ Object.assign(window._LANG_en, {
         "priest_divinegrace": "Divine Grace"
     },
     "skills_desc": {
+        "commander_rally": "Allies within 3 tiles gain +20% ATK (2 turns)",
+        "commander_order": "An ally takes the very next turn",
         "warrior_powersmash": "Attack with 1.5x attack power damage",
         "knight_switch": "Swap positions with ally within movement range",
         "archer_dash": "Instantly move 1.5x movement range",

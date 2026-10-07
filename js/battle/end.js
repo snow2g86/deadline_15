@@ -60,7 +60,7 @@ const BattleEnd = {
           else shouldGiveUnit = (stageId % 5 === 0);
 
           if (shouldGiveUnit) {
-            const NON_NOVICE = Object.keys(JAB).filter(k => k !== 'novice' && !k.startsWith('summon_'));
+            const NON_NOVICE = Object.keys(JAB).filter(k => k !== 'novice' && !k.startsWith('summon_') && !JAB[k].unique);
             const rCls = NON_NOVICE[Math.floor(Math.random() * NON_NOVICE.length)];
             const d = JAB[rCls];
             if (d) {

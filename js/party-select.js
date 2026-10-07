@@ -309,6 +309,7 @@ function removeFromSlot(slotIdx) {
   if (!_parties) return;
   var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
   if (activeParty) {
+    if (activeParty.slots[slotIdx] === commanderUid()) return; // 지휘관은 항상 출전
     activeParty.slots[slotIdx] = null;
     saveParties(_parties);
     renderPartySlots();

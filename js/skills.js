@@ -6,6 +6,13 @@
 
 // ── 스킬 데이터 정의 ──────────────────────
 const SKILLS = {
+	// 지휘관: 명령형 스킬 2개 (기본)
+	commander: [
+		{ id: 'commander_rally', name: '돌격 명령', icon: '📯',
+		  desc: '반경 3칸 클랜원의 공격력 +20% (2턴)', cost: 40, costType: 'energy', rallyRange: 3, rallyPct: 20, rallyTurns: 2 },
+		{ id: 'commander_order', name: '지휘', icon: '🚩',
+		  desc: '클랜원 한 명의 다음 차례를 즉시 앞당김', cost: 60, costType: 'energy', orderRange: 4 },
+	],
 	warrior: {
 		id: 'warrior_powersmash', name: '강타', icon: '⚡',
 		desc: '공격력 1.5배의 데미지로 공격', cost: 3, costType: 'fury'

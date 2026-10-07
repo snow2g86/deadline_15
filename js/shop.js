@@ -65,7 +65,7 @@ function loadShop() {
 
 
 function genRotatingItems() {
-  var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon'); });
+  var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon') && !JAB[c].unique; });
   var items = [];
   var charNames = t('character.names');
   // 캐릭터 6개
@@ -503,7 +503,7 @@ function doGachaAdItem() {
 
 function doGachaAdMerc() {
   setGachaAdCooldown('merc');
-  var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon'); });
+  var classes = Object.keys(JAB).filter(function(c) { return !c.startsWith('summon') && !JAB[c].unique; });
   var cls = classes[Math.floor(Math.random() * classes.length)];
   var d = JAB[cls];
   var pot = {

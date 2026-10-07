@@ -103,6 +103,7 @@ const UnitManager = {
         if (u.team === 'ally' && u.uid && !u._counted) {
           u._counted = true;
           S._deadAllyUids.push(u.uid);
+          if (u.cls === COMMANDER_CLS) S._commanderFallen = true; // chkEnd에서 패배 처리
         }
       }
     });

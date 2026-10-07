@@ -93,7 +93,8 @@ function ensureRoster() {
 		});
 	}
 	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
-	saveParties(createDefaultParties(chars.map(function(c) { return c.uid; })));
+	getRoster(); // 지휘관 자동 추가 (storage.js)
+	saveParties(createDefaultParties(chars.map(function(c) { return c.uid; }))); // 저장 시 지휘관이 첫 칸으로 고정됨
 	localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
 }
 
@@ -296,6 +297,9 @@ var init = async function() {
 	await i18nInit();
 	ensureRoster();
 	var dataValid = validateAndRepairGameData();
+	// 지휘관: 아직 정하지 않았으면 남·여·이름 설정 화면, 로비 왼쪽 위에 다시 열기 버튼
+	CommanderSetup.ensure(function () { renderCommanderBtn(); if (typeof renderHideout === 'function') renderHideout(); });
+	renderCommanderBtn();
 
 	// 파티 슬롯 검증
 	try {
@@ -367,3 +371,16 @@ var init = async function() {
 
 	hideSplash(1000);
 };
+
+// 로비의 지휘관 버튼 (초상화 + 이름) → 설정 화면 다시 열기
+function renderCommanderBtn() {
+	var ch = getRoster().chars.find(function(c) { return c && c.cls === COMMANDER_CLS; });
+	var old = document.querySelector('.lobby-cmd-btn'); if (old) old.remove();
+	if (!ch) return;
+	var b = document.createElement('button'); b.className = 'lobby-cmd-btn'; b.title = t('commander_setup.edit');
+	var img = document.createElement('img'); img.src = 'image/character/commander_0' + (ch.gender === 'f' ? 2 : 1) + '.png'; img.alt = '';
+	var sp = document.createElement('span'); sp.textContent = ch.customName || COMMANDER_DEFAULT_NAME;
+	b.append(img, sp);
+	b.onclick = function() { CommanderSetup.open(function() { renderCommanderBtn(); if (typeof renderHideout === 'function') renderHideout(); }); };
+	document.body.appendChild(b);
+}

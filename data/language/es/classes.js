@@ -1,6 +1,23 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
+    "commander_setup": {
+        "title": "Comandante",
+        "sub": "Elige al comandante que guiará tu clan",
+        "male": "Hombre",
+        "female": "Mujer",
+        "name": "Nombre",
+        "confirm": "Partir",
+        "edit": "Comandante",
+        "name_ph": "Escribe un nombre (máx. 10)"
+    },
+    "commander_msg": {
+        "rally": "📯 ¡Arenga!",
+        "rally_buff": "ATQ +{n}%",
+        "order": "🚩 ¡Mando!",
+        "fallen": "El comandante ha caído... el clan se retira"
+    },
     "classes": {
+        "commander": "Comandante",
         "warrior": "Guerrero",
         "knight": "Caballero",
         "assassin": "Asesino",
@@ -15,6 +32,7 @@ Object.assign(window._LANG_es, {
         "sapper": "Zapador"
     },
     "class_desc": {
+        "commander": "Héroe del clan · órdenes y mejoras",
         "warrior": "Atacante cuerpo a cuerpo equilibrado",
         "knight": "Tanque defensivo",
         "assassin": "Asesino rápido",

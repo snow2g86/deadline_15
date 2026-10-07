@@ -212,6 +212,13 @@ const TurnManager = {
 
     const al = UnitManager.alive('ally'), en = UnitManager.alive('enemy');
 
+    // 지휘관(고유 주인공)이 쓰러지면 즉시 패배
+    if (S._commanderFallen || S.units.some(u => u.team === 'ally' && u.cls === COMMANDER_CLS && u.hp <= 0)) {
+      FSM.transition(BattleState.BATTLE_END);
+      EventBus.emit('battle_end', { win: false, message: t('commander_msg.fallen') });
+      return;
+    }
+
     // 소환사 사망 시 소환수 제거
     S.units.filter(u => u.cls === 'summoner' && u.hp <= 0).forEach(deadS => {
       const summons = S.units.filter(s => s.isSummon && s.summonerId === deadS.id);

@@ -1,6 +1,8 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "skills": {
+        "commander_rally": "돌격 명령",
+        "commander_order": "지휘",
         "warrior_powersmash": "강타",
         "knight_switch": "스위치",
         "archer_dash": "도약",
@@ -54,6 +56,8 @@ Object.assign(window._LANG_ko, {
         "priest_divinegrace": "신의 은총"
     },
     "skills_desc": {
+        "commander_rally": "반경 3칸 클랜원의 공격력 +20% (2턴)",
+        "commander_order": "클랜원 한 명의 다음 차례를 즉시 앞당김",
         "warrior_powersmash": "공격력 1.5배의 데미지로 공격",
         "knight_switch": "이동 범위 내 아군과 위치 교환",
         "archer_dash": "이동 범위의 1.5배를 즉각 이동",

@@ -1,6 +1,23 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
+    "commander_setup": {
+        "title": "Commander",
+        "sub": "Choose the commander who leads your clan",
+        "male": "Male",
+        "female": "Female",
+        "name": "Name",
+        "confirm": "Set out",
+        "edit": "Commander",
+        "name_ph": "Enter a name (max 10)"
+    },
+    "commander_msg": {
+        "rally": "📯 Rally!",
+        "rally_buff": "ATK +{n}%",
+        "order": "🚩 Command!",
+        "fallen": "The commander has fallen... the clan retreats"
+    },
     "classes": {
+        "commander": "Commander",
         "warrior": "Warrior",
         "knight": "Knight",
         "assassin": "Assassin",
@@ -15,6 +32,7 @@ Object.assign(window._LANG_en, {
         "sapper": "Sapper"
     },
     "class_desc": {
+        "commander": "Clan hero · orders & buffs",
         "warrior": "Balanced melee dealer",
         "knight": "Defensive tank",
         "assassin": "Fast assassin",

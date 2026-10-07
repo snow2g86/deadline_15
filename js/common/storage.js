@@ -94,6 +94,12 @@ function getRoster() {
           }
         }
       }
+      // 지휘관(고유 주인공)이 없으면 추가 — 기존 세이브 포함 1명만
+      if (roster.chars && roster.chars.length && typeof JAB !== 'undefined' && JAB[COMMANDER_CLS] &&
+          !roster.chars.some(c => c && c.cls === COMMANDER_CLS)) {
+        roster.chars.unshift(_newCommander(roster.nextId++));
+        needsSave = true;
+      }
       if (needsSave) {
         try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (_) {}
       }
@@ -101,6 +107,20 @@ function getRoster() {
     }
   } catch (_) {}
   return { chars: [], nextId: 1 };
+}
+
+// 지휘관 캐릭터 생성 (잠재력은 성장 범위의 중간, 성별 기본 남 — 파티 화면에서 바꿀 수 있음)
+function _newCommander(uid) {
+  const d = JAB[COMMANDER_CLS], g = d.growth, mid = mm => +(mm[0] + (mm[1] - mm[0]) * 0.6).toFixed(1);
+  const pot = { hp: mid(g.hp), atk: mid(g.atk), def: mid(g.def), actionRec: 0.12 };
+  return { uid, cls: COMMANDER_CLS, nameId: null, customName: COMMANDER_DEFAULT_NAME, lv: 1, exp: 0, dead: false,
+    hp: d.base.hp, atk: d.base.atk, def: d.base.def, move: d.base.move, range: d.base.range,
+    pot, actionRec: d.actionRec + pot.actionRec, gender: 'm' };
+}
+// 지휘관 uid (없으면 null)
+function commanderUid() {
+  const c = getRoster().chars.find(ch => ch && ch.cls === COMMANDER_CLS);
+  return c ? c.uid : null;
 }
 
 function saveRoster(data) {
@@ -150,6 +170,7 @@ function loadParties() {
       if (d && Array.isArray(d.parties) && d.parties.length) {
         // 활성 파티 id가 실제로 없으면(예: 예전 세이브의 id 0) 첫 파티로 맞춤
         if (!d.parties.some(p => p.id === d.activePartyId)) d.activePartyId = d.parties[0].id;
+        if (_pinCommander(d)) saveParties(d);
         if (typeof d.nextPartyId !== 'number') {
           // 예전 첫 실행 세이브(파티 1개, nextPartyId 없음) → 새 게임과 같은 5파티 구조로 채움
           let next = Math.max(...d.parties.map(p => +p.id || 0)) + 1;
@@ -169,7 +190,25 @@ function loadParties() {
   return newData;
 }
 
+// 모든 파티에 지휘관을 첫 칸으로 고정 (다른 칸에 있으면 옮기고, 빈 칸이 없으면 마지막 칸과 교체)
+function _pinCommander(data) {
+  const cu = commanderUid(); if (cu == null || !data || !data.parties) return false;
+  let changed = false;
+  data.parties.forEach(p => {
+    if (!p.slots) return;
+    if (p.slots[0] === cu) return;
+    const i = p.slots.indexOf(cu);
+    if (i > 0) p.slots[i] = null;
+    p.slots.unshift(cu);
+    // 5칸 유지: 비어 있는 칸부터 빼고, 없으면 마지막 칸을 뺌
+    while (p.slots.length > 5) { const e = p.slots.lastIndexOf(null); p.slots.splice(e > 0 ? e : p.slots.length - 1, 1); }
+    changed = true;
+  });
+  return changed;
+}
+
 function saveParties(data) {
+  _pinCommander(data);
   try {
     localStorage.setItem(PARTIES_KEY, JSON.stringify(data));
   } catch (_) {}

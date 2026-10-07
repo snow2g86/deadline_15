@@ -762,3 +762,24 @@ body[data-page="skill-balance-report"] main {
 .toast.ok{border-color:rgba(34,197,94,.5);color:#86efac}
 .toast.warn{border-color:rgba(249,115,22,.6);color:#fdba74}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ── 지휘관 설정 화면 (js/common/commander.js) ── */
+.cmd-setup{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(30,41,70,.92),rgba(5,8,15,.96))}
+.cmd-box{width:min(440px,100%);background:#141b29;border:1px solid #2c3648;border-radius:16px;padding:22px 20px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.12) inset}
+.cmd-title{font-family:'Cinzel','Noto Sans KR',serif;font-size:22px;font-weight:800;color:#f5c45a;letter-spacing:.04em}
+.cmd-sub{color:#94a3b8;font-size:13px;margin:4px 0 16px}
+.cmd-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.cmd-card{background:#0f1520;border:2px solid #2c3648;border-radius:12px;padding:8px 6px 10px;cursor:pointer;color:#cbd5e1;font:inherit;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .15s,transform .15s}
+.cmd-card img{width:100%;max-width:150px;aspect-ratio:962/1087;object-fit:contain;image-rendering:pixelated}
+.cmd-card:hover{transform:translateY(-2px)}
+.cmd-card.on{border-color:#f59e0b;color:#f5c45a;box-shadow:0 0 18px rgba(245,158,11,.25)}
+.cmd-name{display:flex;align-items:center;gap:10px;margin-bottom:16px;color:#94a3b8;font-size:13px}
+.cmd-name input{flex:1;min-width:0;background:#0b111b;border:1px solid #2c3648;border-radius:8px;color:#e2e8f0;padding:9px 12px;font:inherit;font-size:15px}
+.cmd-name input:focus{outline:none;border-color:#f59e0b}
+.cmd-ok{width:100%;background:linear-gradient(#f5b03a,#d9860b);color:#1b1206;border:0;border-radius:10px;padding:12px;font:inherit;font-size:16px;font-weight:800;cursor:pointer}
+.lobby-cmd-btn{position:absolute;left:16px;top:70px;z-index:5;display:flex;align-items:center;gap:6px;background:rgba(15,21,32,.85);border:1px solid #2c3648;
+  border-radius:999px;padding:5px 12px 5px 5px;color:#e2e8f0;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.lobby-cmd-btn img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#1e2a3a}

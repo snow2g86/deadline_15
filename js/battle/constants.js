@@ -64,6 +64,7 @@ function markDead(uid) {
   try {
     const roster = getRoster();
     const ch = roster.chars.find(c => c.uid === uid);
+    if (ch && ch.cls === COMMANDER_CLS) return; // 지휘관은 패배로 끝나므로 사망 처리하지 않음
     if(ch) {
       ch.dead = true;
       ch.diedAt = Date.now();

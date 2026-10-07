@@ -123,7 +123,7 @@ const GameStore = {
     this.eSpwn = 0; this.eQ = [];
     this.battleExp = {}; this.allyPos = {}; this.traps = [];
     this.poisonMists = []; this.eFormPos = []; this.fogVisible = new Set();
-    this._killCount = 0; this._killExpPool = 0; this._deadAllyUids = [];
+    this._killCount = 0; this._killExpPool = 0; this._deadAllyUids = []; this._commanderFallen = false;
     this.preMv = null; this._curSkill = null;
     this.breached = 0; this.gateHP = {}; this.wallHP = {};
     this._battlePotions = []; this._battlePotionIndices = [];
