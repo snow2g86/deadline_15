@@ -60,26 +60,10 @@ const Renderer = {
       let bgTile = existingBgTiles.get(pos);
       if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; w.appendChild(bgTile); }
       while (bgTile.firstChild) bgTile.removeChild(bgTile.firstChild);
-      if (h > 0) {
-        const cy = ((TH * 2 - 1) / H * 100).toFixed(1);
-        const ang = Math.round(Math.atan2(TW - 1, TH - 1) * 180 / Math.PI);
-        bgTile.style.background = `conic-gradient(from 0deg at 50% ${cy}%,${clr.tc} 0deg ${ang}deg,${clr.rc} ${ang}deg 180deg,${clr.lc} 180deg ${360 - ang}deg,${clr.tc} ${360 - ang}deg 360deg)`;
-      } else if (tp === 'forest') {
-        const fb = clr.tc, fl = clr.lc, fd = clr.rc;
-        bgTile.style.background = [
-          `radial-gradient(circle 18px at 26% 24%,${fb},${fl} 42%,transparent 72%)`,
-          `radial-gradient(circle 20px at 68% 20%,${fb},${fl} 42%,transparent 72%)`,
-          `radial-gradient(circle 22px at 48% 46%,${fb},${fl} 42%,transparent 72%)`,
-          `radial-gradient(ellipse 2.5px 11px at 26% 54%,${fd},transparent 90%)`,
-          `radial-gradient(ellipse 2.5px 11px at 68% 48%,${fd},transparent 90%)`,
-          fd
-        ].join(',');
-      } else if (tp === 'rock') {
-        bgTile.style.background = `linear-gradient(135deg,${clr.tc} 25%,${clr.rc} 45%,${clr.tc} 55%,${clr.rc} 75%,${clr.tc})`;
-      } else if (tp === 'water') {
-        const wA = (S.cStage && S.cStage.mapType === 'volcano') ? 'rgba(140,40,20,.12)' : 'rgba(40,90,140,.12)';
-        bgTile.style.background = `repeating-linear-gradient(0deg,transparent,transparent 5px,${wA} 5px,${wA} 6px),${clr.tc}`;
-      } else { bgTile.style.background = clr.tc; }
+      // 절차적 텍스처 (terrain-tex.js) — 종류·테마 색·위치별 변형으로 캐시
+      bgTile.style.background = `url(${TerrainTex.get(tp, clr, TerrainTex.variantOf(c, r), h)}) 0 0 / ${W}px ${H}px no-repeat`;
+      bgTile.classList.toggle('t-water', tp === 'water');
+      bgTile.classList.toggle('t-lava', tp === 'water' && !!S.cStage && S.cStage.mapType === 'volcano');
       bgTile.style.clipPath = clip;
 
       let hlTile = existingHlTiles.get(pos);

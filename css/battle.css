@@ -52,6 +52,13 @@
   background:radial-gradient(ellipse at 50% 30%,rgba(20,40,80,.4),transparent 70%),var(--bg)}
 #iso-world{position:absolute;transition:none}
 .iso-tile{position:absolute;pointer-events:none}
+/* 물 타일: 텍스처 위로 은은한 반짝임이 흘러감 */
+.iso-tile-bg.t-water::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 35%,rgba(180,220,255,.16) 50%,transparent 65%) 0 0/300% 100%;
+  animation:waterShimmer 4s linear infinite}
+.iso-tile-bg.t-lava::after{background-image:linear-gradient(115deg,transparent 30%,rgba(255,140,40,.28) 50%,transparent 70%);animation-duration:2.6s}
+@keyframes waterShimmer{from{background-position:150% 0}to{background-position:-150% 0}}
+@media (prefers-reduced-motion:reduce){.iso-tile-bg.t-water::after{animation:none}}
 .iso-tile-hl{pointer-events:auto}
 .iso-tile-obj{position:absolute;pointer-events:none}
 
