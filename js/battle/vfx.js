@@ -13,9 +13,9 @@ const VFX = {
   },
 
   _subscribe() {
-    EventBus.on('unit_attacked', ({ attacker, target, damage, counter, isSplash }) => {
+    EventBus.on('unit_attacked', ({ attacker, target, damage, counter, isSplash, isSupport }) => {
       // 스플래시는 공격자가 다시 휘두르지 않음 — 본 타격과 같은 타이밍에 이펙트만
-      const hitMs = isSplash ? this.atkHitDelay(attacker.cls) : this.vfxAtk(attacker, target);
+      const hitMs = isSplash ? this.atkHitDelay(attacker.cls, attacker) : this.vfxAtk(attacker, target);
       const tactic = !isSplash && attacker._lastTactic; attacker._lastTactic = null;
       setTimeout(() => {
         this.shakeU(target.id);
@@ -24,9 +24,10 @@ const VFX = {
           tactic.tags.map(k => t('battle.tactic_' + k)).join('·') + ` +${Math.round((tactic.mul - 1) * 100)}%`, 'tactic');
       }, hitMs);
       if (counter) Renderer.floatT(attacker.x, attacker.y, t('messages.brawler_counter'), 'heal');
+      if (isSupport) Renderer.floatT(attacker.x, attacker.y, t('battle.support_hit'), 'tactic');
     });
     EventBus.on('unit_killed', ({ killer, target }) => {
-      const hitMs = killer ? this.atkHitDelay(killer.cls) : 0;
+      const hitMs = killer ? this.atkHitDelay(killer.cls, killer) : 0;
       setTimeout(() => { this.screenShake(); this.vfxDeath(target); this.deathA(target.id); }, hitMs);
     });
     EventBus.on('unit_healed', ({ healer, target, amount }) => {
@@ -311,19 +312,31 @@ const VFX = {
     const u = GameStore.units.find(v => v.id === id); if (!u) return;
     const sdx = this._g2sx(u._gdx, u._gdy);
     if (!sdx) return;
-    const img = el.querySelector('.u-icon img');
+    const img = el.querySelector('.u-icon > img, .u-icon > .rig');
     if (img) img.style.transform = sdx < 0 ? 'scaleX(-1)' : '';
+    const icon = el.querySelector('.u-icon'); if (icon) Rig.refreshFlip(icon);
   },
 
   animU(id, x, y) {
     const el = document.getElementById('u-' + id); if (!el) return;
-    el.classList.add('moving'); setTimeout(() => el.classList.remove('moving'), 340);
+    el.classList.add('moving');
     const u = GameStore.units.find(v => v.id === id);
+    // 달리기 동작: 이동하는 동안 유지, 멈추면 대기/전투대기로 (여러 칸 이동 시 타이머 연장)
+    const icon = el.querySelector('.u-icon');
+    if (u && icon) Rig.setLoop(icon, u, 'run');
+    el.classList.toggle('running', !!(u && Rig.sheet(u, 'run')));
+    clearTimeout(el._moveT);
+    el._moveT = setTimeout(() => { el.classList.remove('moving', 'running'); if (u && icon) Rig.setLoop(icon, u, Renderer.loopKind(u)); }, 420);
     if (u && (u._gdx || u._gdy)) this._applyFace(id);
     el.style.transform = `translate(${Grid.uSX(x, y)}px,${Grid.uSY(x, y)}px)`;
     const v = Grid.g2v(x, y); el.style.zIndex = 100 + v.vc + v.vr;
   },
 
-  shakeU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('shaking'); setTimeout(() => el.classList.remove('shaking'), 300); } },
+  shakeU(id) {
+    const el = document.getElementById('u-' + id); if (!el) return;
+    el.classList.add('shaking'); setTimeout(() => el.classList.remove('shaking'), 300);
+    const u = GameStore.units.find(v => v.id === id);
+    if (u && u.hp > 0) Rig.playOnce(el.querySelector('.u-icon'), u, 'hit'); // 피격 동작 (시트가 있을 때)
+  },
   deathA(id) { const el = document.getElementById('u-' + id); if (el) el.classList.add('dying'); },
 };

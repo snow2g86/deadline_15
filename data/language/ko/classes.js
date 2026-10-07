@@ -42,6 +42,7 @@ Object.assign(window._LANG_ko, {
         "healer": "힐러"
     },
     "terrain": {
+        "shallow": "여울",
         "plain": "평지",
         "forest": "숲",
         "hill": "언덕",

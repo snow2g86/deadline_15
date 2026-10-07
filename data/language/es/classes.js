@@ -42,6 +42,7 @@ Object.assign(window._LANG_es, {
         "healer": "Sanador"
     },
     "terrain": {
+        "shallow": "Bajío",
         "plain": "Llanura",
         "forest": "Bosque",
         "hill": "Colina",

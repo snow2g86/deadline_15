@@ -87,6 +87,8 @@
 .unit-sprite.shaking .u-icon{animation:hitFlash .25s ease-out,atkShake .25s ease}
 @keyframes hitFlash{0%{opacity:1}10%{opacity:.3}30%{opacity:1}}
 .unit-sprite.moving .u-icon{animation:moveHop .32s ease-in-out}
+/* 달리기 시트가 있으면 점프하듯 튀는 이동 연출은 끔 (달리기 동작과 겹치면 어색함) */
+.unit-sprite.moving.running .u-icon{animation:none}
 @keyframes moveHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes spawnPop{0%{opacity:0;transform:scale(.3) translateY(8px)}60%{opacity:1;transform:scale(1.12) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
 .unit-sprite.spawning .u-icon{animation:spawnPop .4s ease-out}
@@ -522,3 +524,13 @@
 .rs-cond.ok .rs-mark{color:#4ade80}
 .rs-new{margin-left:auto;font-size:9px;font-weight:900;color:#1a1206;background:#facc15;border-radius:999px;padding:0 6px}
 @media (prefers-reduced-motion:reduce){.rs-star{animation:none;opacity:1;transform:none}}
+
+/* ── 적 행동 예고 ── */
+.intent-layer{position:absolute;left:0;top:0;pointer-events:none;z-index:95;overflow:visible}
+.intent-layer line{stroke:#ff5a5a;stroke-width:1.6;stroke-dasharray:5 4;opacity:.6;animation:intentDash 1.2s linear infinite}
+@keyframes intentDash{to{stroke-dashoffset:-18}}
+.u-intent{position:absolute;top:-14px;right:-4px;z-index:13;pointer-events:auto;font-size:11px;font-weight:800;line-height:1;
+  padding:2px 4px;border-radius:9px;background:rgba(127,29,29,.85);color:#fecaca;border:1px solid #f87171;
+  box-shadow:0 0 6px rgba(248,113,113,.55);animation:intentPulse 1.4s ease-in-out infinite}
+@keyframes intentPulse{50%{box-shadow:0 0 12px rgba(248,113,113,.9)}}
+.unit-sprite.enemy .u-intent{display:none}

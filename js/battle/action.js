@@ -25,7 +25,7 @@ const ActionManager = {
 
   clrSel() {
     const S = GameStore;
-    S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.healT = [];
+    S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.healT = []; S._shove = false;
     S._curSkill = null; S.preMv = null;
     if (FSM.isPlayerTurn()) FSM.transition(BattleState.PLAYER_IDLE);
     Renderer.hideAM(); Renderer.hideEnemyPopup();
@@ -58,6 +58,14 @@ const ActionManager = {
     if (!FSM.acceptsCellClick()) return;
 
     const cl = UnitManager.uAt(x, y), s = S.sel;
+
+    // 밀치기 대상 선택 (ATTACK_MODE 화면을 빌려 씀)
+    if (S._shove && s) {
+      if (cl && S.atkT.some(c => c.x === x && c.y === y)) { this.doShove(s, cl); return; }
+      S._shove = false; this._setTargets(s);
+      FSM.transition(BattleState.UNIT_SELECTED);
+      Renderer.rTer(); Renderer.showAM(s); return;
+    }
 
     // 스킬 타겟 모드
     if (FSM.is(BattleState.SKILL_TARGET)) {
@@ -198,9 +206,63 @@ const ActionManager = {
     Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
   },
 
+  // ── 전술 행동 ──
+  actShove() {
+    const S = GameStore, u = S.sel; if (!u) return;
+    const ts = UnitManager.shoveTargets(u); if (!ts.length) return;
+    Renderer.hideAM();
+    S._shove = true; S.atkT = ts.map(v => ({ x: v.x, y: v.y })); S.coverT = []; S.healT = [];
+    FSM.transition(BattleState.ATTACK_MODE);
+    Renderer.rTer();
+    Renderer.floatT(u.x, u.y, t('messages.select_shove_target'), 'heal');
+  },
+
+  // 밀치기: 1칸 밀어냄. 막히면 충돌 피해, 유닛과 부딪히면 둘 다 피해. 밀려난 쪽은 바라보는 방향 유지(등이 드러나지 않음)
+  doShove(a, tgt) {
+    const S = GameStore, plan = UnitManager.shovePlan(a, tgt);
+    S._shove = false; S.atkT = [];
+    if (!plan.ok) return;
+    this._grantExp(a, 'attack');
+    VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y);
+    const hitMs = VFX.playAtkMotion(a, tgt);
+    a.ha = true; a.hm = true;
+    Renderer.hideAM(); FSM.transition(BattleState.ANIMATING);
+    const hurt = (v, dmg) => {
+      const actual = v.team === 'ally' ? applyDmgToAlly(v, dmg, G) : (v.hp = Math.max(0, v.hp - dmg), v);
+      Renderer.floatT(actual.x, actual.y, '-' + dmg, 'damage'); VFX.shakeU(actual.id);
+      if (actual.hp <= 0) EventBus.emit('unit_killed', { killer: a, target: actual });
+    };
+    setTimeout(() => {
+      if (plan.to) {
+        const gx = tgt._gdx, gy = tgt._gdy;
+        tgt.x = plan.to.x; tgt.y = plan.to.y;
+        VFX.animU(tgt.id, tgt.x, tgt.y); tgt._gdx = gx; tgt._gdy = gy;
+        Renderer.floatT(tgt.x, tgt.y, t('messages.shoved'), 'debuff');
+        Grid.chkTrap(tgt);
+        if (tgt.hp <= 0) EventBus.emit('unit_killed', { killer: a, target: tgt });
+      } else {
+        Renderer.floatT(tgt.x, tgt.y, t('messages.shove_crash'), 'tactic'); VFX.screenShake();
+        const mul = plan.hit === 'unit' ? TACTICS_ACT.shoveUnit : TACTICS_ACT.shoveCollide;
+        hurt(tgt, Math.max(1, Math.round(a.atk * mul)));
+        if (plan.other) hurt(plan.other, Math.max(1, Math.round(a.atk * mul)));
+      }
+      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 450);
+    }, hitMs);
+  },
+
+  // 방어 태세 / 경계: 이번 차례를 끝내고 다음 자기 차례까지 유지
+  actStance(kind) {
+    const S = GameStore, u = S.sel; if (!u || u.ha) return;
+    if (kind === 'defend') u._defend = true; else u._overwatch = true;
+    Renderer.floatT(u.x, u.y, t(kind === 'defend' ? 'messages.defend_on' : 'messages.overwatch_on'), 'heal');
+    VFX.vfxBuff(u);
+    this.actWait();
+  },
+
   actCancel() {
     const S = GameStore;
     if (!S.sel) return;
+    if (S._shove) { S._shove = false; this._setTargets(S.sel); FSM.transition(BattleState.UNIT_SELECTED); Renderer.rTer(); Renderer.showAM(S.sel); return; }
 
     if (S._skillMenuOpen) { this.hideSkillMenu(); return; }
     if (S._itemMenuOpen) { this.hideItemMenu(); return; }
@@ -293,6 +355,7 @@ const ActionManager = {
     }
 
     const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
+    let sup = null;
     if (bCounter) {
       setTimeout(() => {
         const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def);
@@ -320,6 +383,15 @@ const ActionManager = {
       if (a._lastCrit) { Renderer.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); VFX.screenShake(); }
       if (a.furyBuff > 0) Renderer.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
       procFury(a, tgt, G);
+      // 지원 공격: 대상 옆의 클랜원이 확률로 추가 타격 (반격보다 먼저)
+      sup = UnitManager.rollSupport(a, tgt);
+      if (sup) {
+        this._grantExp(sup.sp, 'attack');
+        setTimeout(() => {
+          UnitManager.emitSupport(sup);
+          if (tgt.hp <= 0) EventBus.emit('unit_killed', { killer: sup.sp, target: tgt });
+        }, 380);
+      }
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
         setTimeout(() => {
           this._grantExp(tgt, 'attack');
@@ -327,25 +399,26 @@ const ActionManager = {
           const da = applyDmgToAlly(a, cdmg, G);
           EventBus.emit('unit_attacked', { attacker: tgt, target: da, damage: cdmg, isCounter: true });
           procFury(tgt, a, G);
-        }, 420);
+        }, sup ? 820 : 420);
       }
     }
 
     a.ha = true; a.hm = true;
     Renderer.hideAM();
+    const extra = sup ? 450 : 0; // 지원 공격 연출 시간
 
     if (tgt.hp <= 0) {
-      EventBus.emit('unit_killed', { killer: a, target: tgt });
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650);
+      if (!sup) EventBus.emit('unit_killed', { killer: a, target: tgt }); // 지원 공격 처치는 위에서 처리
+      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
     } else if (a.hp <= 0) {
       EventBus.emit('unit_killed', { killer: tgt, target: a });
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650);
+      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
     } else {
       const canCounter = tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0);
       if (canCounter) {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650);
+        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
       } else {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 500);
+        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 500 + extra);
       }
     }
   },

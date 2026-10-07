@@ -39,6 +39,14 @@ const TurnManager = {
       u.res = Math.min(u.maxRes, u.res + rec);
     }
 
+    // 용암 옆에서 행동을 마치면 화상 (사망하지는 않음)
+    if (u.hp > 1 && UnitManager.nearLava(u.x, u.y)) {
+      const burn = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * TACTIC.lavaBurn)));
+      u.hp -= burn;
+      Renderer.floatT(u.x, u.y, '\uD83D\uDD25 -' + burn, 'damage');
+      Renderer.rUnits();
+    }
+
     // BuffSystem 틱
     BuffSystem.tick(u);
 
@@ -172,6 +180,7 @@ const TurnManager = {
     if (!nextU) return;
 
     S.curUnit = nextU;
+    nextU._defend = false; nextU._overwatch = false; // 방어 태세·경계는 다음 자기 차례에 풀림
     ActionManager.clrSel();
     Renderer.rTurnOrder();
 

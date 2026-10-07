@@ -147,6 +147,21 @@ const TerrainTex = {
         const [x, y] = pt(0.7), L = 6 + rnd() * 6;
         ctx.beginPath(); ctx.moveTo(x - L, y); ctx.quadraticCurveTo(x - L / 2, y - 1.6, x, y); ctx.quadraticCurveTo(x + L / 2, y + 1.6, x + L, y); ctx.stroke();
       }
+    } else if (tp === 'shallow') {
+      // 여울: 밝은 얕은 물 + 바닥 자갈이 비침 + 잔물결
+      const sg = ctx.createRadialGradient(TWp, THp, 2, TWp, THp, TWp);
+      sg.addColorStop(0, this._lit(clr.tc, 0.12)); sg.addColorStop(1, this._dk(clr.tc, 0.08));
+      ctx.fillStyle = sg; ctx.fillRect(0, 0, W, THp * 2);
+      for (let i = 0; i < 7; i++) {
+        const [x, y] = pt(0.75);
+        ctx.fillStyle = `rgba(0,0,0,${0.12 + rnd() * 0.1})`;
+        ctx.beginPath(); ctx.ellipse(x, y, 1.5 + rnd() * 2, 0.8 + rnd(), 0, 0, 6.3); ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,.30)'; ctx.lineWidth = 0.7; ctx.lineCap = 'round';
+      for (let i = 0; i < 3; i++) {
+        const [x, y] = pt(0.6), L = 4 + rnd() * 4;
+        ctx.beginPath(); ctx.moveTo(x - L, y); ctx.quadraticCurveTo(x, y - 1.4, x + L, y); ctx.stroke();
+      }
     } else if (tp === 'wall') {
       // 윗면 석판
       ctx.strokeStyle = this._dk(clr.tc, 0.35); ctx.lineWidth = 0.7;
@@ -160,7 +175,7 @@ const TerrainTex = {
 
     // ── 가장자리: 위쪽 두 변은 밝게, 아래 두 변은 어둡게 → 격자 구분 ──
     ctx.lineWidth = 1;
-    ctx.strokeStyle = tp === 'water' ? 'rgba(160,210,255,.18)' : 'rgba(255,255,255,.10)';
+    ctx.strokeStyle = (tp === 'water' || tp === 'shallow') ? 'rgba(160,210,255,.18)' : 'rgba(255,255,255,.10)';
     ctx.beginPath(); ctx.moveTo(0.5, THp); ctx.lineTo(TWp, 0.5); ctx.lineTo(W - 0.5, THp); ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.28)';
     ctx.beginPath(); ctx.moveTo(0.5, THp); ctx.lineTo(TWp, THp * 2 - 0.5); ctx.lineTo(W - 0.5, THp); ctx.stroke();

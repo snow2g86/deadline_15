@@ -84,7 +84,7 @@ const Grid = {
         S.ter[r] = [];
         for (let c = 0; c < COLS; c++) {
           const rn = Math.random(); let acc = 0;
-          S.ter[r][c] = (acc += d.rock, rn < acc) ? 'rock' : (acc += d.hill, rn < acc) ? 'hill' : (acc += d.forest, rn < acc) ? 'forest' : (acc += (d.water || 0), rn < acc) ? 'water' : 'plain';
+          S.ter[r][c] = (acc += d.rock, rn < acc) ? 'rock' : (acc += d.hill, rn < acc) ? 'hill' : (acc += d.forest, rn < acc) ? 'forest' : (acc += (d.water || 0), rn < acc) ? 'water' : (acc += (d.shallow || 0), rn < acc) ? 'shallow' : 'plain';
         }
       }
     }

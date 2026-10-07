@@ -8,6 +8,7 @@ const TI = {
   hill:   { cost:2,       z:1, label:'',  pass:true,  tc:'#5a4828', lc:'#2a2010', rc:'#1e1808', buff:{type:'buff',icon:'⛰️'} },
   rock:   { cost:Infinity,z:2, label:'',  pass:false, tc:'#2e2e3e', lc:'#161622', rc:'#0e0e18', buff:null },
   water:  { cost:Infinity,z:0, label:'',  pass:false, tc:'#162e55', lc:'#102240', rc:'#0c1a35', buff:null },
+  shallow:{ cost:2,       z:0, label:'',  pass:true,  tc:'#2c5a6e', lc:'#1e4454', rc:'#163644', buff:{type:'debuff',icon:'💧'} },
   wall:   { cost:Infinity,z:2, label:'',  pass:false, tc:'#504868', lc:'#261e38', rc:'#1a1428', buff:null },
   gate:   { cost:1,       z:0, label:'',  pass:true,  tc:'#3a3048', lc:'#2e2840', rc:'#262035', buff:null }
 };
@@ -21,7 +22,7 @@ const MAP_THEMES = {
       rock:   { tc:'#3a3a40', lc:'#1e1e28', rc:'#141420' },
       water:  { tc:'#1a3558', lc:'#122840', rc:'#0e2035' },
     },
-    dist: { rock:.05, hill:.10, forest:.15, water:0 }
+    dist: { rock:.05, hill:.10, forest:.15, water:0, shallow:.04 }
   },
   canyon: {
     colors: {
@@ -31,7 +32,7 @@ const MAP_THEMES = {
       rock:   { tc:'#4a4048', lc:'#2e2830', rc:'#201c24' },
       water:  { tc:'#1a3558', lc:'#122840', rc:'#0e2035' },
     },
-    dist: { rock:.20, hill:.20, forest:.08, water:0 }
+    dist: { rock:.20, hill:.20, forest:.08, water:0, shallow:.03 }
   },
   jungle: {
     colors: {
@@ -41,7 +42,7 @@ const MAP_THEMES = {
       rock:   { tc:'#2a3230', lc:'#1a2220', rc:'#101816' },
       water:  { tc:'#1a4048', lc:'#103038', rc:'#0a242e' },
     },
-    dist: { rock:.05, hill:.05, forest:.40, water:.08 }
+    dist: { rock:.05, hill:.05, forest:.40, water:.08, shallow:.08 }
   },
   desert: {
     colors: {
@@ -71,7 +72,7 @@ const MAP_THEMES = {
       rock:   { tc:'#8090a0', lc:'#607080', rc:'#405060' },
       water:  { tc:'#a0c8f0', lc:'#80b0dc', rc:'#6098c8' },
     },
-    dist: { rock:.15, hill:.20, forest:.10, water:.15 }
+    dist: { rock:.15, hill:.20, forest:.10, water:.08, shallow:.08 }
   },
   ruins: {
     colors: {
@@ -81,7 +82,7 @@ const MAP_THEMES = {
       rock:   { tc:'#3a3a40', lc:'#2a2a30', rc:'#1a1a20' },
       water:  { tc:'#1a2a38', lc:'#0a1a28', rc:'#000a18' },
     },
-    dist: { rock:.35, hill:.15, forest:.08, water:.05 }
+    dist: { rock:.35, hill:.15, forest:.08, water:.05, shallow:.03 }
   },
   swamp: {
     colors: {
@@ -91,7 +92,7 @@ const MAP_THEMES = {
       rock:   { tc:'#3a4a48', lc:'#2a3a38', rc:'#1a2a28' },
       water:  { tc:'#1a3a28', lc:'#0a2a18', rc:'#001a08' },
     },
-    dist: { rock:.08, hill:.10, forest:.25, water:.30 }
+    dist: { rock:.08, hill:.10, forest:.25, water:.12, shallow:.20 }
   },
   fortress: {
     colors: {
@@ -101,7 +102,7 @@ const MAP_THEMES = {
       rock:   { tc:'#4a4850', lc:'#3a3840', rc:'#2a2830' },
       water:  { tc:'#2a3848', lc:'#1a2838', rc:'#0a1828' },
     },
-    dist: { rock:.25, hill:.15, forest:.05, water:.05 }
+    dist: { rock:.25, hill:.15, forest:.05, water:.05, shallow:.03 }
   },
   abyss: {
     colors: {

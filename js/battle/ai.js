@@ -135,7 +135,53 @@ const AI = {
     if (UnitManager.inZoc(u, m.x, m.y) && best < 0) s -= 15;  // 공격도 못 하면서 발만 묶이는 칸
     if (tile === 'forest') s += 5;
     if (tile === 'hill' && u.range > 1) s += 8;
+    if (tile === 'shallow') s -= 8;                       // 여울: 피해 증가
+    // 상대가 경계 중이면 그 사거리 안 칸은 피함 (공격할 수 없는 칸일 때만)
+    if (best < 0 && GameStore.units.some(a => a.hp > 0 && a._overwatch && a.team !== u.team && mh(a.x, a.y, m.x, m.y) <= a.range)) s -= 20;
+    if (UnitManager.nearLava(m.x, m.y)) s -= 10;          // 용암 옆: 화상
+    // 예고한 대상을 칠 수 있는 칸 우선
+    if (u._intent) {
+      const it = al.find(a => a.id === u._intent);
+      if (it && it.hp > 0 && mh(m.x, m.y, it.x, it.y) <= rng && !UnitManager.coverOf(me, it)) s += 30;
+    }
     return Math.random() < AI_MISTAKE_CHANCE ? s * 0.3 : s;
+  },
+
+  // ── 행동 예고 ──
+  // 각 적이 "지금 행동한다면" 노릴 클랜원을 예측해 e._intent에 기록한다 (무작위 요소 없이 결정적).
+  // 이동 가능 칸(진격 제한 포함)에서 엄호되지 않은 클랜원을 칠 수 있으면 처치 가능 > 전술 보너스 > 낮은 HP 순.
+  // 실제 AI도 _tryAttack/_tacticScore에서 이 대상을 우선하므로 예고가 대체로 맞는다.
+  planIntents() {
+    const S = GameStore;
+    const al = UnitManager.alive('ally').filter(a => !isStealthed(a));
+    S.units.forEach(e => {
+      if (e.team !== 'enemy') return;
+      e._intent = null;
+      if (e.hp <= 0 || !al.length || UnitManager.isCC(e)) return;
+      const profile = AI_PROFILES[e.cls] || AI_PROFILES.novice;
+      if (profile.targetPriority === 'never' || (profile.avoidCombat && e.hp > e.mhp * 0.7)) return;
+      const o = e.origSpawn || { x: e.x, y: e.y };
+      let lim = S.cStage && S.cStage.style === 'defense' ? 15 : 5;
+      if (profile.style === 'defensive') lim = S.cStage && S.cStage.style === 'defense' ? 12 : 3;
+      if (profile.style === 'support') lim = S.cStage && S.cStage.style === 'defense' ? 10 : 2;
+      const canMove = !BuffSystem.has(e, BuffType.ROOT) && (e.isBoss || mh(e.x, e.y, o.x, o.y) < lim);
+      const spots = [{ x: e.x, y: e.y }].concat(canMove
+        ? Grid.eMvCells(e).filter(m => e.isBoss || mh(m.x, m.y, o.x, o.y) <= lim) : []);
+      let best = null, bs = -Infinity;
+      for (const p of spots) {
+        const tile = S.ter[p.y] && S.ter[p.y][p.x];
+        const rng = e.range + (tile === 'hill' && e.range > 1 ? TACTIC.highRange : 0);
+        const me = { id: e.id, team: e.team, cls: e.cls, x: p.x, y: p.y };
+        for (const a of al) {
+          if (mh(p.x, p.y, a.x, a.y) > rng || UnitManager.coverOf(me, a)) continue;
+          const tb = UnitManager.tacticBonus(me, a);
+          const dmg = Math.max(1, Math.round((e.atk - a.def) * tb.mul));
+          const sc = (a.hp <= dmg ? 1000 : 0) + (tb.mul - 1) * 100 - a.hp / a.mhp * 50 - (p.x === e.x && p.y === e.y ? 0 : 1);
+          if (sc > bs) { bs = sc; best = a; }
+        }
+      }
+      e._intent = best ? best.id : null;
+    });
   },
 
   // ── 사거리 내 아군(적 입장) 탐색 ──
@@ -152,7 +198,9 @@ const AI = {
     if (await this.tryUseSkill(u, profile)) return true;
     // 처치 가능하거나 전술 보너스가 큰 대상이 있으면 우선 (실수 확률만큼은 평소 우선순위대로)
     let target = null;
-    if (Math.random() >= AI_MISTAKE_CHANCE) {
+    // 예고한 대상을 칠 수 있으면 그대로 (플레이어가 예고를 보고 대응할 수 있게)
+    if (u._intent) target = targets.find(a => a.id === u._intent) || null;
+    if (!target && Math.random() >= AI_MISTAKE_CHANCE) {
       let bs = 29;
       for (const a of targets) {
         const tb = UnitManager.tacticBonus(u, a);
@@ -180,7 +228,7 @@ const AI = {
     if (await this.tryWallClimb(u)) return;
 
     await this.eMv(u, al);
-    if (FSM.is(BattleState.BATTLE_END)) return;
+    if (FSM.is(BattleState.BATTLE_END) || u.hp <= 0) return; // 이동 중 함정·경계에 쓰러짐
     if (profile.avoidCombat && u.hp > u.mhp * 0.7) return;
 
     // 이동 후 공격 시도
@@ -189,7 +237,9 @@ const AI = {
 
     // 이동 후에도 공격 불가 시 공성아이템 시도
     if (await this.trySiegeItemUse(u)) return;
-    this.tryGateAtk(u);
+    if (this.tryGateAtk(u)) return;
+    // 방어형(기사·창병)은 칠 대상이 없으면 방어 태세
+    if (profile.style === 'defensive') { u._defend = true; Renderer.floatT(u.x, u.y, t('messages.defend_on'), 'heal'); }
   },
 
   // ── 상황 분석 ──
@@ -368,6 +418,7 @@ const AI = {
     // 브로울러 카운터 체크
     const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1
       && !UnitManager.isCC(tgt) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
+    let supKiller = null;
 
     if (bCounter) {
       await sl(420);
@@ -399,6 +450,10 @@ const AI = {
       }
       procFury(a, tgt);
 
+      // 지원 공격 (대상 옆의 같은 편이 확률로 추가 타격)
+      const sup = UnitManager.rollSupport(a, tgt);
+      if (sup) { await sl(380); UnitManager.emitSupport(sup); if (tgt.hp <= 0) supKiller = sup.sp; }
+
       // 반격
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !UnitManager.isCC(tgt)) {
         await sl(420);
@@ -411,7 +466,7 @@ const AI = {
 
     // 사망 처리
     if (tgt.hp <= 0) {
-      EventBus.emit('unit_killed', { killer: a, target: tgt });
+      EventBus.emit('unit_killed', { killer: supKiller || a, target: tgt });
       UnitManager.rmDead();
       Renderer.rUnits();
       TurnManager.chkEnd();
@@ -433,11 +488,28 @@ const AI = {
     await sl(340);
     Grid.chkTrap(u);
     Grid.chkSpearwall(u);
+    await this._overwatch(u);
     if (u.hp <= 0) {
       EventBus.emit('unit_killed', { killer: null, target: u, reason: 'trap_or_spearwall' });
       UnitManager.rmDead();
       Renderer.rUnits();
     }
+  },
+
+  // ── 경계 발동: 이동을 마친 e가 경계 중인 상대의 사거리 안이면 선제 공격 (한 번만) ──
+  async _overwatch(e) {
+    if (e.hp <= 0 || isStealthed(e)) return;
+    const w = GameStore.units.find(a => a.hp > 0 && a._overwatch && a.team !== e.team && !UnitManager.isCC(a) &&
+      Grid.atkCells(a).some(c => c.x === e.x && c.y === e.y) && !UnitManager.coverOf(a, e));
+    if (!w) return;
+    w._overwatch = false;
+    Renderer.floatT(w.x, w.y, t('messages.overwatch_fire'), 'tactic');
+    VFX.faceDir(w.id, e.x - w.x, e.y - w.y);
+    const dmg = Math.max(1, Math.round(calcDmg(w, e) * TACTICS_ACT.overwatchMul * UnitManager.shieldMul(e)));
+    e.hp = Math.max(0, e.hp - dmg);
+    EventBus.emit('unit_attacked', { attacker: w, target: e, damage: dmg });
+    await sl(550);
+    if (e.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: e }); UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); }
   },
 
   // ── 돌파 체크 ──

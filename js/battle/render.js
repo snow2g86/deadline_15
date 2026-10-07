@@ -156,7 +156,9 @@ const Renderer = {
         counter = calcDmg(tgt, a);
         a._gdx = gx; a._gdy = gy; tgt._lastTactic = tT;
       }
+      const sp = !kill && UnitManager.supporterOf(a, tgt);
       return { dmg, kill, tags: tb.tags, pct: Math.round((tb.mul - 1) * 100),
+        support: sp ? Math.round(SUPPORT.chance * 100) : 0, shallow: tile === 'shallow',
         evade: tile === 'forest' ? Math.round(TACTIC.forestEvade * 100) : 0,
         shield: UnitManager.shieldMul(tgt) < 1, counter };
     } finally { Math.random = R; a._lastTactic = keepT; a._lastCrit = keepC; }
@@ -166,7 +168,7 @@ const Renderer = {
   rPreview() {
     const S = GameStore, w = document.getElementById('iso-world');
     w.querySelectorAll('.dmg-prev').forEach(e => e.remove());
-    if (!S.sel || !(FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE))) return;
+    if (!S.sel || S._shove || !(FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE))) return;
     S.atkT.forEach(c => {
       const v = UnitManager.uAt(c.x, c.y); if (!v || v.team === S.sel.team) return;
       const p = this.previewAttack(S.sel, v);
@@ -178,6 +180,8 @@ const Renderer = {
       if (p.pct) sub.push(p.tags.map(k => t('battle.tactic_' + k)).join('·') + ' +' + p.pct + '%');
       if (p.shield) sub.push('\uD83D\uDEE1\uFE0F\u00BD');
       if (p.evade) sub.push(t('battle.tactic_evade', { n: p.evade }));
+      if (p.shallow) sub.push(t('battle.tactic_shallow', { n: Math.round(TACTIC.shallowVuln * 100) }));
+      if (p.support) sub.push(t('battle.preview_support', { n: p.support }));
       if (p.counter) sub.push(t('battle.preview_counter', { n: p.counter }));
       if (sub.length) { const s2 = document.createElement('div'); s2.className = 'dp-sub'; s2.textContent = sub.join('  '); el.appendChild(s2); }
       el.style.left = (Grid.uSX(v.x, v.y) + UW / 2) + 'px';
@@ -205,8 +209,12 @@ const Renderer = {
         spriteEl.textContent = ''; // placeholder
         iconDiv.append(spriteEl);
         // Use charSprite which returns safe markup
-        iconDiv.insertAdjacentHTML('beforeend', charSprite(u.cls, UI, u.gender));
+        // 캐릭터마다 몸 높이가 같아지도록 크기·발끝 위치 보정 (rig.js CHAR_FIG)
+        const fit = Rig.fit(u, UI);
+        iconDiv.insertAdjacentHTML('beforeend', charSprite(u.cls, fit.size, u.gender));
         if (iconDiv.querySelector('span')) iconDiv.querySelector('span').remove();
+        if (fit.mb) iconDiv.style.marginBottom = fit.mb + 'px';
+        Rig.attach(iconDiv, u, fit.size); // 컷아웃 리그가 있는 캐릭터는 부위별로 움직이는 리그로 교체 (rig.js)
         const shadow = document.createElement('div'); shadow.className = 'u-shadow';
         const hpBg = document.createElement('div'); hpBg.className = 'hp-bg';
         const hpFill = document.createElement('div'); hpFill.className = 'hp-fill'; hpBg.appendChild(hpFill);
@@ -236,6 +244,7 @@ const Renderer = {
       const isCur = S.curUnit && S.curUnit.id === u.id;
       el.classList.toggle('acted', u.team === 'ally' && u.ha && !isSel); el.classList.remove('ally', 'enemy'); el.classList.add(u.team);
       el.classList.toggle('cur-turn', !!isCur);
+      if (!el.classList.contains('moving')) Rig.setLoop(el.querySelector('.u-icon'), u, this.loopKind(u));
       el.classList.toggle('stealthed', isStealthed(u));
       el.classList.toggle('stunned', UnitManager.isCC(u));
       el.classList.toggle('potion-target', FSM.is(BattleState.ITEM_TARGET) && S.potionTargets && S.potionTargets.some(pt => pt.id === u.id));
@@ -248,7 +257,10 @@ const Renderer = {
       const fx = [];
       const tile = S.ter[u.y] ? S.ter[u.y][u.x] : null;
       if (tile && TI[tile] && TI[tile].buff) fx.push({ icon: TI[tile].buff.icon, cls: TI[tile].buff.type });
+      if (UnitManager.nearLava(u.x, u.y)) fx.push({ icon: '\uD83D\uDD25', cls: 'debuff' }); // 용암 옆: 행동 종료 시 화상
       if (UnitManager.hasGuard(u)) fx.push({ icon: '\uD83D\uDEE1\uFE0F', cls: 'cover' }); // 엄호받는 중
+      if (u._defend) fx.push({ icon: '\uD83E\uDDF1', cls: 'buff' });    // 방어 태세
+      if (u._overwatch) fx.push({ icon: '\uD83D\uDC41', cls: 'buff' }); // 경계
       if (u.furyBuff > 0) fx.push({ icon: '\uD83D\uDCA2', cls: 'buff' });
       if (u.defBuff > 0) fx.push({ icon: '\uD83D\uDEE1\uFE0F', cls: 'buff' });
       if (u.disarmed > 0) fx.push({ icon: '\uD83E\uDD1B', cls: 'debuff' });
@@ -278,11 +290,64 @@ const Renderer = {
       }
     });
     if (S._showThreat && !this._threatPending) { this._threatPending = true; requestAnimationFrame(() => { this._threatPending = false; this.rTer(); }); }
+    if (!this._intentPending) { this._intentPending = true; requestAnimationFrame(() => { this._intentPending = false; this.rIntent(); }); }
     [...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove(); });
     S.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
       S.allyPos[u.id] = { x: 99, y: 99 };
     });
     this.rMM(); this.rTurnOrder();
+  },
+
+  // ── 적 행동 예고 ──
+  // 플레이어 쪽 진행 중에는 AI.planIntents()로 다시 예측하고(적 행동 중에는 고정),
+  // 노려지는 클랜원 위에 🎯(노리는 적 수) 배지와 적→대상 점선 화살표를 그린다.
+  rIntent() {
+    const S = GameStore, w = document.getElementById('iso-world'); if (!w) return;
+    const ended = FSM.is(BattleState.BATTLE_END);
+    if (!ended && !FSM.is(BattleState.AI_TURN)) AI.planIntents();
+    const cnt = {}, pairs = [];
+    if (!ended) S.units.forEach(e => {
+      if (e.team !== 'enemy' || e.hp <= 0 || !e._intent || isStealthed(e) || !S.fogVisible.has(e.x + ',' + e.y)) return;
+      const a = S.units.find(v => v.id === e._intent && v.hp > 0); if (!a) return;
+      cnt[a.id] = (cnt[a.id] || 0) + 1; pairs.push([e, a]);
+    });
+    S.units.forEach(u => {
+      const el = document.getElementById('u-' + u.id); if (!el) return;
+      const n = cnt[u.id] || 0;
+      let b = el._intentEl;
+      if (n) {
+        if (!b) { b = document.createElement('div'); b.className = 'u-intent'; el.appendChild(b); el._intentEl = b; }
+        b.textContent = '\uD83C\uDFAF' + (n > 1 ? n : '');
+        b.title = t('battle.intent_tip', { n });
+      } else if (b) { b.remove(); el._intentEl = null; }
+    });
+    const NS = 'http://www.w3.org/2000/svg';
+    let svg = w.querySelector('svg.intent-layer');
+    if (!svg) {
+      svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'intent-layer');
+      svg.innerHTML = '<defs><marker id="intent-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff5a5a"/></marker></defs><g></g>';
+      w.appendChild(svg);
+    }
+    svg.setAttribute('width', w.style.width ? parseInt(w.style.width) : w.clientWidth);
+    svg.setAttribute('height', w.style.height ? parseInt(w.style.height) : w.clientHeight);
+    const g = svg.querySelector('g'); g.textContent = '';
+    pairs.forEach(([e, a]) => {
+      const x1 = Grid.uSX(e.x, e.y) + UW / 2, y1 = Grid.uSY(e.x, e.y) + UCY + 8;
+      const x2 = Grid.uSX(a.x, a.y) + UW / 2, y2 = Grid.uSY(a.x, a.y) + UCY + 8;
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, k = Math.min(18, L / 3); // 대상 몸통 앞에서 멈춤
+      const ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+      ln.setAttribute('x2', x2 - (x2 - x1) / L * k); ln.setAttribute('y2', y2 - (y2 - y1) / L * k);
+      ln.setAttribute('marker-end', 'url(#intent-arrow)');
+      g.appendChild(ln);
+    });
+  },
+
+  // 반복 동작 선택: 자기 차례이거나 상대가 3칸 안에 있으면 전투대기, 아니면 대기
+  loopKind(u) {
+    const S = GameStore;
+    if (S.curUnit && S.curUnit.id === u.id) return 'combat';
+    return S.units.some(v => v.hp > 0 && v.team !== u.team && !isStealthed(v) && mh(u.x, u.y, v.x, v.y) <= 3) ? 'combat' : 'idle';
   },
 
   // ══════════════════════════════════════════
@@ -335,7 +400,7 @@ const Renderer = {
   showAM(u) {
     const S = GameStore;
     const m = document.getElementById('action-menu');
-    m.querySelectorAll('.am-skill, .am-item, .am-healer-atk, .am-head').forEach(e => e.remove());
+    m.querySelectorAll('.am-skill, .am-item, .am-healer-atk, .am-head, .am-tac').forEach(e => e.remove());
     m.style.left = (Grid.uSX(u.x, u.y) + UW + 2) + 'px';
     m.style.top = Grid.uSY(u.x, u.y) + 'px'; m.style.zIndex = 500;
     const wasShown = m.classList.contains('show');
@@ -407,6 +472,19 @@ const Renderer = {
     this._amBtn(btnItem, { icon: '🎒', label: t('battle.item'), ac: 'item', key: 'I', sub: t('battle.am_count', { n: itemCnt }) });
     btnItem.style.display = (!u.ha && itemCnt > 0) ? '' : 'none';
 
+    // 전술 행동: 밀치기(인접 적이 있을 때) · 방어 태세 · 경계
+    if (!u.ha) {
+      const m = document.getElementById('action-menu');
+      const tac = (icon, label, key, sub, fn) => {
+        const b = document.createElement('button'); b.className = 'am-tac';
+        this._amBtn(b, { icon, label, ac: 'wait', key, sub }); b.onclick = fn; m.insertBefore(b, btnDash);
+      };
+      const ns = UnitManager.shoveTargets(u).length;
+      if (ns) tac('🫸', t('battle.shove'), 'P', t('battle.am_shove_sub', { n: ns }), () => ActionManager.actShove());
+      tac('🛡️', t('battle.defend'), 'D', t('battle.am_defend_sub'), () => ActionManager.actStance('defend'));
+      tac('👁', t('battle.overwatch'), 'O', t('battle.am_overwatch_sub'), () => ActionManager.actStance('overwatch'));
+    }
+
     // 대기 버튼
     this._amBtn(btnDash, { icon: '⏸', label: t('battle.wait'), ac: 'wait', key: 'W', sub: t('battle.am_wait_sub') });
     btnDash.style.display = '';
@@ -475,7 +553,7 @@ const Renderer = {
     ['btn-move', 'btn-attack', 'btn-skill', 'btn-item', 'btn-dash', 'btn-cancel'].forEach(id => {
       document.getElementById(id).style.display = 'none';
     });
-    document.getElementById('action-menu').querySelectorAll('.am-healer-atk').forEach(e => e.remove());
+    document.getElementById('action-menu').querySelectorAll('.am-healer-atk, .am-tac').forEach(e => e.remove());
   },
 
   // 스킬 사용 불가 사유 → null(사용 가능) 또는 i18n 키 접미사 (battle.reason_*)

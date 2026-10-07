@@ -122,6 +122,7 @@ function calcDmg(attacker, target) {
 	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_up') def = Math.round(def * (1 + b.value / 100)) });
 	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_down') def = Math.round(def * (1 - b.value / 100)) });
 	if (target._phalanxDef > 0) def += target._phalanxDef;
+	if (target._defend) def = Math.round(def * TACTICS_ACT.defendDef); // 방어 태세
 	let dmg = Math.max(1, atk - def);
 	if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
 	if (G.units.some(u => u.team === attacker.team && u.hp > 0 && u.channeling === 'shaman_exalt')) {
@@ -135,6 +136,10 @@ function calcDmg(attacker, target) {
 	if (typeof UnitManager !== 'undefined' && UnitManager.tacticBonus) {
 		const tb = UnitManager.tacticBonus(attacker, target);
 		if (tb.tags.length) { dmg = Math.max(1, Math.round(dmg * tb.mul)); attacker._lastTactic = tb; }
+	}
+	// 여울: 얕은 물에 서 있는 대상은 피해 증가
+	if (GameStore.ter && GameStore.ter[target.y] && GameStore.ter[target.y][target.x] === 'shallow') {
+		dmg = Math.max(1, Math.round(dmg * (1 + TACTIC.shallowVuln)));
 	}
 	attacker._lastCrit = false;
 	if (attacker.cls === 'archer' && attacker.skillLv && attacker.skillLv['archer_weakspot'] >= 1) {

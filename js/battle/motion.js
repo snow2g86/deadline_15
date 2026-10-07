@@ -8,9 +8,11 @@
 //   r=전방 기울기(deg, +가 앞으로), sx/sy=스케일, g=발광(0~1), a=투명도
 // hit = 타격 프레임(진행률) — 이 시점에 타격 이펙트/데미지 숫자가 뜬다
 const ATK_MOTIONS = {
-  warrior: { dur: 440, hit: .42, glow: '#cfe3ff', trail: 'arc', color: '#e5efff', keys: [
-    { o: 0 }, { o: .28, f: -5, u: 3, r: -18, sx: .96, sy: 1.06 },
-    { o: .42, f: 12, u: -1, r: 22, sx: 1.08, sy: .92 }, { o: .6, f: 9, r: 14, sx: 1.03, sy: .97 }, { o: 1 }] },
+  // rigKeys: 컷아웃 리그(rig.js)가 있는 캐릭터용 몸 전체 이동 — 기울기는 리그 부위가 담당
+  warrior: { dur: 560, hit: .5, glow: '#cfe3ff', trail: 'arc', color: '#e5efff', keys: [
+    { o: 0 }, { o: .3, f: -5, u: 3, r: -18, sx: .96, sy: 1.06 },
+    { o: .5, f: 12, u: -1, r: 22, sx: 1.08, sy: .92 }, { o: .72, f: 9, r: 14, sx: 1.03, sy: .97 }, { o: 1 }],
+    rigKeys: [{ o: 0 }, { o: .3, f: -4, u: 1 }, { o: .5, f: 10, sx: 1.03, sy: .97 }, { o: .72, f: 8 }, { o: 1 }] },
   knight: { dur: 400, hit: .45, glow: '#ffd76a', trail: 'bash', color: '#ffcc44', keys: [
     { o: 0 }, { o: .3, f: -4, r: -6, sx: .94, sy: 1.04 },
     { o: .45, f: 10, r: 4, sx: 1.1, sy: .94 }, { o: .65, f: 6, r: 2 }, { o: 1 }] },
@@ -50,7 +52,11 @@ Object.assign(VFX, {
   atkMotion(cls) { return ATK_MOTIONS[cls] || ATK_MOTIONS._default; },
 
   // 타격 프레임까지의 지연(ms) — 모션 없이 이펙트 타이밍만 맞출 때 사용
-  atkHitDelay(cls) { const m = this.atkMotion(cls); return Math.round(m.dur * m.hit); },
+  // u를 넘기면 그 유닛의 스프라이트 시트 타격 시점을 우선 사용
+  atkHitDelay(cls, u) {
+    const sh = u && Rig.sheet(u, 'attack'); if (sh) return Rig.sheetHitMs(sh);
+    const m = this.atkMotion(cls); return Math.round(m.dur * m.hit);
+  },
 
   // 공격자 화면 좌표 기준 방향 벡터 (정규화)
   _atkDir(attacker, target) {
@@ -58,20 +64,27 @@ Object.assign(VFX, {
     const dy = Grid.uSY(target.x, target.y) - Grid.uSY(attacker.x, attacker.y);
     const len = Math.hypot(dx, dy);
     if (len) return { x: dx / len, y: dy / len };
-    const img = document.querySelector('#u-' + attacker.id + ' .u-icon img');
+    const img = document.querySelector('#u-' + attacker.id + ' .u-icon > img, #u-' + attacker.id + ' .u-icon > .rig');
     return { x: img && img.style.transform.includes('-1') ? -1 : 1, y: 0 };
   },
 
   // 공격 모션 재생 → 타격 지연(ms) 반환
   playAtkMotion(attacker, target) {
     const m = this.atkMotion(attacker.cls);
-    const hitMs = Math.round(m.dur * m.hit);
     const icon = document.querySelector('#u-' + attacker.id + ' .u-icon');
+    // 스프라이트 시트가 있으면 시트 재생 (자체 타격 섬광이 있어 무기 궤적 생략)
+    const sh = icon && !_reduceMotion() && Rig.sheet(attacker, 'attack');
+    if (sh) return Rig.playOnce(icon, attacker, 'attack');
+    const hitMs = Math.round(m.dur * m.hit);
     const dir = this._atkDir(attacker, target);
     const face = dir.x < 0 ? -1 : 1;
     if (icon && icon.animate && !_reduceMotion()) {
       if (icon._atkAnim) icon._atkAnim.cancel();
-      const frames = m.keys.map(k => {
+      // 컷아웃 리그: 부위는 Rig.play가 움직이고, 몸 전체는 rigKeys(없으면 기울기를 줄인 기본 키)로 이동
+      const rigged = !!icon._rig;
+      if (rigged) Rig.play(icon, m.dur);
+      const keys = !rigged ? m.keys : (m.rigKeys || m.keys.map(k => Object.assign({}, k, { r: (k.r || 0) * .3 })));
+      const frames = keys.map(k => {
         const f = (k.f || 0) * _MS, u = (k.u || 0) * _MS, g = k.g || 0;
         return {
           // easing은 구간별 적용 → 타격 프레임(hit)이 실제 시간과 일치
@@ -86,7 +99,8 @@ Object.assign(VFX, {
       anim.onfinish = anim.oncancel = () => { if (icon._atkAnim === anim) icon._atkAnim = null; };
       icon._atkAnim = anim;
     }
-    this._atkTrail(m, attacker, target, dir, face, hitMs);
+    // 자체 무기 궤적(smear)이 있는 리그는 canvas 궤적 생략 — 투사체(마법·화살 등)는 그대로
+    if (!(icon && icon._rig && icon._rig.def.smear)) this._atkTrail(m, attacker, target, dir, face, hitMs);
     return hitMs;
   },
 

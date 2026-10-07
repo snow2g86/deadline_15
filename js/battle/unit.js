@@ -160,7 +160,7 @@ const UnitManager = {
     // 후방/측면: 대상이 바라보는 방향(_gdx,_gdy)과 공격 방향의 각도
     const fx = t._gdx || 0, fy = t._gdy || 0;
     const dx = a.x - t.x, dy = a.y - t.y;
-    if ((fx || fy) && (dx || dy)) {
+    if ((fx || fy) && (dx || dy) && !t._defend) { // 방어 태세는 후방·측면 보너스를 받지 않음
       const cos = (dx * fx + dy * fy) / (Math.hypot(dx, dy) * Math.hypot(fx, fy));
       if (cos < -0.5) { add += TACTIC.back; tags.push('back'); }
       else if (cos <= 0.5) { add += TACTIC.side; tags.push('side'); }
@@ -194,6 +194,61 @@ const UnitManager = {
     if (COVER_IGNORE_CLASSES.includes(u.cls)) return false;
     return GameStore.units.some(g => g.hp > 0 && g.team !== u.team && GUARD_CLASSES.includes(g.cls) &&
       !this.isCC(g) && mh(g.x, g.y, x, y) === 1);
+  },
+
+  // ── 밀치기 ──
+  // a가 인접한 t를 a→t 방향으로 1칸 밀 때의 결과 (부작용 없음)
+  // 반환: { ok, to:{x,y} | null, hit: 'wall'|'unit'|null, other: 부딪힌 유닛 }
+  shovePlan(a, t) {
+    const dx = Math.sign(t.x - a.x), dy = Math.sign(t.y - a.y);
+    if (mh(a.x, a.y, t.x, t.y) !== 1 || t.isBoss) return { ok: false };
+    const nx = t.x + dx, ny = t.y + dy;
+    const tile = this.tileAt(nx, ny);
+    if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS || !tile || !TI[tile].pass) return { ok: true, to: null, hit: 'wall' };
+    const o = this.uAt(nx, ny);
+    if (o && o.hp > 0) return { ok: true, to: null, hit: 'unit', other: o };
+    return { ok: true, to: { x: nx, y: ny }, hit: null };
+  },
+  // 밀칠 수 있는 인접 적 목록
+  shoveTargets(a) {
+    return GameStore.units.filter(v => v.hp > 0 && v.team !== a.team && !isStealthed(v) && mh(a.x, a.y, v.x, v.y) === 1 && this.shovePlan(a, v).ok);
+  },
+
+  // ── 지원 공격 ──
+  // 공격자 a와 같은 편이며 대상 바로 옆(1칸)에 있고 행동 가능한 유닛 중 공격력이 가장 높은 하나
+  // (힐러·소환수·무장해제·은신 중인 유닛 제외)
+  supporterOf(a, tgt) {
+    return GameStore.units.filter(p => p.hp > 0 && p.id !== a.id && p.team === a.team && !p.isSummon &&
+      p.role !== 'healer' && !this.isCC(p) && !(p.disarmed > 0) && !BuffSystem.has(p, BuffType.DISARM) &&
+      !isStealthed(p) && mh(p.x, p.y, tgt.x, tgt.y) === 1)
+      .sort((x, y) => y.atk - x.atk)[0] || null;
+  },
+
+  // 지원 공격 판정 + 피해 적용 (연출은 호출한 쪽에서 지연 후 emitSupport)
+  // 반환: { sp, dmg } | null
+  rollSupport(a, tgt) {
+    if (tgt.hp <= 0) return null;
+    const sp = this.supporterOf(a, tgt);
+    if (!sp || Math.random() >= SUPPORT.chance) return null;
+    let dmg = Math.max(1, Math.round(calcDmg(sp, tgt) * SUPPORT.mul * this.shieldMul(tgt)));
+    sp._lastTactic = null; // 지원 타격에는 전술 표시 생략
+    const actual = tgt.team === 'ally' ? applyDmgToAlly(tgt, dmg, G) : (tgt.hp = Math.max(0, tgt.hp - dmg), tgt);
+    return { sp, dmg, actual };
+  },
+
+  emitSupport(r) {
+    VFX.faceDir(r.sp.id, r.actual.x - r.sp.x, r.actual.y - r.sp.y);
+    EventBus.emit('unit_attacked', { attacker: r.sp, target: r.actual, damage: r.dmg, isSupport: true });
+    procFury(r.sp, r.actual, G);
+  },
+
+  // ── 지형 ──
+  tileAt(x, y) { return GameStore.ter[y] ? GameStore.ter[y][x] : null; },
+  isLavaMap() { return !!GameStore.cStage && GameStore.cStage.mapType === 'volcano'; },
+  // 용암(화산 맵의 물 타일)과 상하좌우로 붙어 있는가
+  nearLava(x, y) {
+    if (!this.isLavaMap()) return false;
+    return [[0, -1], [0, 1], [-1, 0], [1, 0]].some(([dx, dy]) => this.tileAt(x + dx, y + dy) === 'water');
   },
 
   // 표시용: 옆에 엄호해 줄 수 있는 탱커가 있는가 (방향 무관)
