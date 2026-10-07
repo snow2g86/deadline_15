@@ -272,7 +272,7 @@ function renderClassCards() {
         ${skillIcon(sk.id, 16)}
         <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
         <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
-        <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost} ${sk.costType}</span>
+        <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost} ${t('resources.' + sk.costType)}</span>
       </div>`
     ).join('');
 
@@ -286,7 +286,7 @@ function renderClassCards() {
             ${skillIcon(sk.id, 16)}
             <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
             <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
-            <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost || '—'} ${sk.costType || '—'}</span>
+            <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost || '—'} ${sk.costType ? t('resources.' + sk.costType) : ''}</span>
           </div>`
         ).join('')}
       </div>`;
@@ -325,8 +325,8 @@ function renderClassCards() {
       <div class="class-card-header">
         <div class="class-icon"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:100%;height:100%;image-rendering:pixelated;border-radius:4px"></div>
         <div class="class-meta">
-          <div class="class-name">${cls}</div>
-          <span class="role-tag" style="${roleStyle(role)}">${role}</span>
+          <div class="class-name">${t('classes.' + cls)}</div>
+          <span class="role-tag" style="${roleStyle(role)}">${t('roles.' + role)}</span>
         </div>
       </div>
 
@@ -339,7 +339,7 @@ function renderClassCards() {
       </div>
 
       <div class="res-info">
-        <span style="color:${resColor(d.res)};font-weight:700">${d.res.toUpperCase()} ${d.maxRes}</span>
+        <span style="color:${resColor(d.res)};font-weight:700">${t('resources.' + d.res)} ${d.maxRes}</span>
         <span style="color:var(--dim);font-size:10px">${d.resRec > 0 ? '턴당 +'+d.resRec : d.res === 'fury' ? '전투 시 충전' : d.resRec === 0 ? '매턴 회복' : ''}</span>
       </div>
 
@@ -1017,6 +1017,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof loadI18n === 'function') await loadI18n();
+  const navTitle = document.getElementById('nav-title');
+  if (navTitle) navTitle.textContent = t('nav.compendium');
   renderClassCards();
   renderResBlocks();
   renderItemTable();

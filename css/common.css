@@ -80,9 +80,10 @@ body {
 }
 
 /* ═══ Custom Scrollbar (Game Theme) ═══ */
+/* 평소엔 은은하게, 마우스를 올리면 금색 */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--gold-d) rgba(10, 14, 26, .6)
+  scrollbar-color: rgba(240, 192, 64, .28) transparent
 }
 
 ::-webkit-scrollbar {
@@ -91,18 +92,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(10, 14, 26, .6);
-  border-left: 1px solid rgba(240, 192, 64, .08)
+  background: transparent
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--gold), var(--gold-d));
-  border-radius: 3px;
-  border: 1px solid rgba(240, 192, 64, .3)
+  background: rgba(240, 192, 64, .28);
+  border-radius: 3px
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #f5d060, var(--gold))
+  background: rgba(240, 192, 64, .6)
 }
 
 ::-webkit-scrollbar-corner {
@@ -745,3 +744,7 @@ body[data-page="skill-balance-report"] main {
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:36px 16px;text-align:center;
   font-size:12px;color:var(--dim);border:1px dashed rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.02)}
 .empty-state .es-ic{font-size:30px;line-height:1;opacity:.7;filter:grayscale(.3)}
+.empty-state{max-width:480px;margin:0 auto}
+.empty-state .es-btn{margin-top:4px;padding:6px 14px;border-radius:8px;border:1px solid rgba(240,192,64,.45);background:rgba(240,192,64,.1);
+  color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.empty-state .es-btn:hover{background:rgba(240,192,64,.2)}

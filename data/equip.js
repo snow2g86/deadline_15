@@ -3,6 +3,8 @@
 // ═══════════════════════════════════════════
 
 var EQUIP_SLOTS = ['weapon','offhand','helmet','armor','boots','necklace','earring','ring'];
+// 슬롯 종류 표시용 이모지 (이미지 아이콘 대신 — design policy)
+var EQUIP_SLOT_ICONS = { weapon:'🗡️', offhand:'🛡️', helmet:'🪖', armor:'🥋', boots:'👢', necklace:'📿', earring:'✨', ring:'💍' };
 
 var GACHA_COST_1 = 300;
 var GACHA_COST_10 = 2700;

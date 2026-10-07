@@ -290,7 +290,9 @@ function renderCharCard(item, list) {
   var recruitBtn = item.sold ? t('shop.recruit_complete') : t('shop.recruit', { gold: item.cost });
   el.innerHTML =
     '<div class="shop-grade" style="color:' + gClr + '">' + grade + '</div>' +
-    '<div class="shop-icon">' + clsIcon(item.cls, 36) + '</div>' +
+    // 영입될 캐릭터 실제 모습(성별 포함) + 직업 아이콘 배지
+    '<div class="shop-icon shop-merc">' + charSprite(item.cls, 52, item.gender) +
+      '<span class="shop-merc-cls">' + clsIcon(item.cls, 18) + '</span></div>' +
     '<div class="shop-name">' + item.name + '</div>' +
     '<div class="shop-cls">' + t('classes.' + item.cls) + ' \xb7 ' + t('class_desc.' + item.cls) + '</div>' +
     '<div class="shop-stats" style="color:#fff"><div>HP : ' + d.base.hp + '<span style="color:var(--dim)">(+' + item.pot.hp + ')</span></div><div>ATK:' + d.base.atk + '<span style="color:var(--dim)">(+' + item.pot.atk + ')</span></div><div>DEF:' + d.base.def + '<span style="color:var(--dim)">(+' + item.pot.def + ')</span></div><div>AR:' + d.actionRec + '<span style="color:var(--dim)">(+' + item.pot.actionRec + ')</span></div></div>' +

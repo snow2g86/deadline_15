@@ -111,7 +111,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
       <div class="guide-section">
         <div class="guide-sec-head">🎮 게임 기본</div>
         <p class="guide-text">
-          <strong>Deadline 15</strong>는 턴 기반 전략 RPG입니다. 클랜원들을 모집하고 훈련시켜 10개 스테이지의 도전을 이겨내세요.
+          <strong>Deadline 15</strong>는 턴 기반 전략 RPG입니다. 클랜원들을 모집하고 훈련시켜 10개 에피소드, 100개 스테이지의 도전을 이겨내세요.
         </p>
       </div>
 
@@ -653,6 +653,13 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 </main>
 
 <script>
+// 상단 바 제목
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof loadI18n === 'function') await loadI18n();
+  const navTitle = document.getElementById('nav-title');
+  if (navTitle && typeof t === 'function') navTitle.textContent = t('nav.guide');
+});
+
 // 탭 전환
 document.querySelectorAll('.guide-tab-btn').forEach(btn => {
   btn.onclick = () => {

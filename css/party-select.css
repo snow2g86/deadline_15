@@ -1967,6 +1967,18 @@
   background: rgba(255, 255, 255, .08);
 }
 
+.unit-card-equip-slot .ucs-ic {
+  font-size: 13px;
+  line-height: 1;
+  opacity: .38;
+  filter: grayscale(1);
+}
+
+.unit-card-equip-slot.filled .ucs-ic {
+  opacity: 1;
+  filter: none;
+}
+
 .unit-card-equip-slot img {
   width: 100%;
   height: 100%;

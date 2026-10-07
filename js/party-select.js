@@ -1032,9 +1032,10 @@ function renderChars() {
         if (hasUpgrade) slotClass += ' upgrade';
       }
 
-      html += '<div class="' + slotClass + '"' +
+      // 슬롯 종류를 아이콘으로 표시 (비었으면 흐리게), 이름은 툴팁
+      html += '<div class="' + slotClass + '" title="' + t('equip.slot.' + slot) + '"' +
               (equipped ? ' data-rarity="' + equipped.rarity + '"' : '') + '>' +
-              (equipped ? '' : '-') +
+              '<span class="ucs-ic">' + (EQUIP_SLOT_ICONS[slot] || '·') + '</span>' +
               '</div>';
     }
     html += '</div>';
@@ -1285,7 +1286,7 @@ function renderInventoryInModal(ch) {
   });
 
   if (!equips.length) {
-    list.innerHTML = '<div class="eq-inv-empty">' + t('equip.no_items') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">🗡️</span>' + t('equip.no_items') + '</div>';
     return;
   }
 
@@ -1518,7 +1519,8 @@ function renderItemTab() {
   var sieges = inv.filter(function(it) { return it.type === 'siege'; });
 
   if (!potions.length && !sieges.length) {
-    list.innerHTML = '<div class="item-empty">' + t('party.no_items') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">🎒</span>' + t('party.no_items') +
+      '<button class="es-btn" onclick="location.href=\'shop.html\'">🛒 ' + t('nav.shop') + '</button></div>';
     return;
   }
 
@@ -1898,8 +1900,8 @@ function renderEnhanceList() {
   }
 
   if (enhanceable.length === 0) {
-    html = '<div style="text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;">' +
-           t('enhance.no_items') + '</div>';
+    html = '<div class="empty-state"><span class="es-ic">🔨</span>' + t('enhance.no_items') +
+           '<button class="es-btn" onclick="location.href=\'shop.html\'">🛒 ' + t('nav.shop') + '</button></div>';
   }
 
   document.getElementById('enhance-list').innerHTML = html;
