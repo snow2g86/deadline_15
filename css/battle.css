@@ -117,6 +117,8 @@
   50%{background:rgba(34,197,94,.4);box-shadow:inset 0 0 0 2px rgba(34,197,94,1)}}
 .iso-tile.hl-selected{background:rgba(240,192,64,.15);box-shadow:inset 0 0 0 2px rgba(240,192,64,.9);animation:selPulse 1.2s ease-in-out infinite}
 @keyframes selPulse{0%,100%{opacity:1}50%{opacity:.45}}
+.iso-tile.hl-cover{background:repeating-linear-gradient(45deg,rgba(148,163,184,.18) 0 6px,rgba(148,163,184,.06) 6px 12px);
+  box-shadow:inset 0 0 0 2px rgba(148,163,184,.6)}
 .iso-tile-hl.fow-dark{background:rgba(10,14,26,.55)!important;box-shadow:none!important;animation:none!important}
 
 /* ═══ VFX ═══ */
@@ -371,6 +373,7 @@
 .u-badge{width:16px;height:16px;border-radius:50%;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.5)}
 .u-badge.buff{background:rgba(34,197,94,.7)}
 .u-badge.debuff{background:rgba(239,68,68,.7)}
+.u-badge.cover{background:rgba(59,130,246,.75)}
 
 /* ═══ EXP Float Text ═══ */
 .float-text.exp{color:#a78bfa}

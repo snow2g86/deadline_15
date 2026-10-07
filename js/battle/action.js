@@ -25,17 +25,29 @@ const ActionManager = {
 
   clrSel() {
     const S = GameStore;
-    S.sel = null; S.mvT = []; S.atkT = []; S.healT = [];
+    S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.healT = [];
     S._curSkill = null; S.preMv = null;
     if (FSM.isPlayerTurn()) FSM.transition(BattleState.PLAYER_IDLE);
     Renderer.hideAM(); Renderer.hideEnemyPopup();
     Renderer.rTer(); Renderer.rUnits(); Renderer.defI(); Renderer.rTurnOrder();
   },
 
+  // 공격 가능 칸(atkT)과 엄호로 막힌 칸(coverT)을 계산
+  _enemyTargets(u, cells) {
+    const S = GameStore;
+    S.atkT = []; S.coverT = [];
+    cells.forEach(c => {
+      const v = UnitManager.uAt(c.x, c.y);
+      if (!v || v.team !== 'enemy' || isStealthed(v)) return;
+      (UnitManager.coverOf(u, v) ? S.coverT : S.atkT).push(c);
+    });
+    return S.atkT;
+  },
+
   _setTargets(u) {
     const S = GameStore;
     const a = Grid.atkCells(u);
-    S.atkT = a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'enemy' && !isStealthed(v); });
+    this._enemyTargets(u, a);
     S.healT = u.role === 'healer' ? a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id; }) : [];
   },
 
@@ -86,6 +98,13 @@ const ActionManager = {
     }
 
     // ATTACK_MODE: 공격 범위만 처리
+    if ((FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE)) && s && cl && cl.team === 'enemy' &&
+        (S.coverT || []).some(c => c.x === x && c.y === y)) {
+      const g = UnitManager.coverOf(s, cl);
+      Renderer.floatT(cl.x, cl.y, t('messages.covered'), 'debuff');
+      if (g) VFX.vfxBuff(g);
+      return;
+    }
     if (FSM.is(BattleState.ATTACK_MODE) && s) {
       if (cl && cl.team === 'enemy' && S.atkT.some(c => c.x === x && c.y === y)) { this.doAtk(s, cl); return; }
       // 범위 밖 → 메뉴 복원
@@ -246,13 +265,8 @@ const ActionManager = {
     Grid.chkTrap(u); chkTrapDetect(u);
 
     const a = Grid.atkCells(u);
-    if (u.role === 'healer') {
-      S.atkT = a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'enemy' && !isStealthed(v); });
-      S.healT = a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id; });
-    } else {
-      S.atkT = a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'enemy' && !isStealthed(v); });
-      S.healT = [];
-    }
+    this._enemyTargets(u, a);
+    S.healT = u.role === 'healer' ? a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id; }) : [];
     S.mvT = [];
     setTimeout(() => {
       Renderer.scrollToUnit(u); Renderer.rTer(); Renderer.showAM(u); Renderer.showUI(u);

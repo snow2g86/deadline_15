@@ -96,6 +96,10 @@ const AI_PROFILES = {
 
 const AI_MISTAKE_CHANCE = 0.3;
 
+// ── 엄호(Cover): 탱커가 아군 앞을 막으면 뒤의 아군은 일반 공격 대상이 될 수 없다 ──
+const GUARD_CLASSES = ['knight'];          // 엄호를 제공하는 직업
+const COVER_IGNORE_CLASSES = ['assassin']; // 엄호를 무시하고 뒤를 노리는 직업
+
 // ── 리소스 UI 상수 ──
 const RES_LABEL = { mana: 'MP', energy: 'EP', fury: 'FP' };
 const RES_COLOR = { mana: '#4488ff', energy: '#f0c040', fury: '#ff6644' };

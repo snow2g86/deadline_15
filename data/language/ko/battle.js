@@ -3,6 +3,7 @@ Object.assign(window._LANG_ko, {
     "battle": {
         "loading_title": "전투 준비 중...",
         "loading_tips": [
+            "기사 바로 뒤의 아군은 앞쪽 적의 공격을 받지 않습니다 (암살자 제외)",
             "숲 지형에서는 회피율이 증가합니다",
             "힐러를 후방에 배치하면 생존율이 높아집니다",
             "암살자는 숲에서 은신할 수 있습니다",
@@ -81,6 +82,7 @@ Object.assign(window._LANG_ko, {
         "battle_summary": "📈 처치 {kills}체 · 총 {exp} EXP",
         "select_move_target": "이동할 곳을 선택하세요",
         "select_attack_target": "공격할 대상을 선택하세요",
+        "covered": "🛡️ 엄호됨 — 앞의 기사를 먼저!",
         "select_heal_target": "치유할 대상을 선택하세요",
         "item_system_preparing": "아이템 시스템 준비 중",
         "heal": "💚 치유",

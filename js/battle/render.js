@@ -112,11 +112,14 @@ const Renderer = {
         if (S.mvT.some(m => m.x === c && m.y === r)) hl = 'move';
         else if (S.atkT.some(a => a.x === c && a.y === r)) hl = 'attack';
         else if (S.healT.some(h => h.x === c && h.y === r)) hl = 'heal';
+        else if ((FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE)) &&
+          (S.coverT || []).some(a => a.x === c && a.y === r)) hl = 'cover';
         if (S.sel.x === c && S.sel.y === r) hl = 'selected';
       }
       hlTile.classList.toggle('hl-move', hl === 'move');
       hlTile.classList.toggle('hl-attack', hl === 'attack');
       hlTile.classList.toggle('hl-heal', hl === 'heal');
+      hlTile.classList.toggle('hl-cover', hl === 'cover');
       hlTile.classList.toggle('hl-selected', hl === 'selected');
       hlTile.classList.toggle('fow-dark', !S.fogVisible.has(pos));
     });
@@ -180,6 +183,7 @@ const Renderer = {
       const fx = [];
       const tile = S.ter[u.y] ? S.ter[u.y][u.x] : null;
       if (tile && TI[tile] && TI[tile].buff) fx.push({ icon: TI[tile].buff.icon, cls: TI[tile].buff.type });
+      if (UnitManager.hasGuard(u)) fx.push({ icon: '\uD83D\uDEE1\uFE0F', cls: 'cover' }); // 엄호받는 중
       if (u.furyBuff > 0) fx.push({ icon: '\uD83D\uDCA2', cls: 'buff' });
       if (u.defBuff > 0) fx.push({ icon: '\uD83D\uDEE1\uFE0F', cls: 'buff' });
       if (u.disarmed > 0) fx.push({ icon: '\uD83E\uDD1B', cls: 'debuff' });

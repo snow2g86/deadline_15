@@ -3,6 +3,7 @@ Object.assign(window._LANG_en, {
     "battle": {
         "loading_title": "Preparing for battle...",
         "loading_tips": [
+            "Allies right behind a knight cannot be attacked from the front (except by assassins)",
             "Evasion increases on forest tiles",
             "Place healers in the back for better survival",
             "Assassins can stealth in forests",
@@ -82,6 +83,7 @@ Object.assign(window._LANG_en, {
         "battle_summary": "\ud83d\udcc8 Killed {kills} \u00b7 Total {exp} EXP",
         "select_move_target": "Select where to move",
         "select_attack_target": "Select an attack target",
+        "covered": "🛡️ Covered — defeat the knight first!",
         "select_heal_target": "Select a target to heal",
         "item_system_preparing": "Item system under preparation",
         "heal": "\ud83d\udc9a Heal",

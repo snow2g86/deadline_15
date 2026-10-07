@@ -118,7 +118,7 @@ const AI = {
   _visibleAllies(u) {
     return Grid.atkCells(u).filter(c => {
       const v = UnitManager.uAt(c.x, c.y);
-      return v && v.team === 'ally' && !isStealthed(v);
+      return v && v.team === 'ally' && !isStealthed(v) && !UnitManager.coverOf(u, v); // 엄호된 아군은 노릴 수 없음
     }).map(c => UnitManager.uAt(c.x, c.y));
   },
 

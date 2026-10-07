@@ -3,6 +3,7 @@ Object.assign(window._LANG_es, {
     "battle": {
         "loading_title": "Preparando batalla...",
         "loading_tips": [
+            "Los aliados justo detrás de un caballero no pueden ser atacados de frente (salvo por asesinos)",
             "La evasion aumenta en los bosques",
             "Coloca sanadores atras para mejor supervivencia",
             "Los asesinos pueden ocultarse en bosques",
@@ -81,6 +82,7 @@ Object.assign(window._LANG_es, {
         "battle_summary": "📈 Asesinados {kills} · Total {exp} EXP",
         "select_move_target": "Selecciona dónde moverte",
         "select_attack_target": "Selecciona un objetivo de ataque",
+        "covered": "🛡️ Cubierto — ¡derrota primero al caballero!",
         "select_heal_target": "Selecciona un objetivo para sanar",
         "item_system_preparing": "Sistema de objetos en preparación",
         "heal": "💚 Curar",

@@ -140,4 +140,21 @@ const UnitManager = {
   isStunned(u) { return BuffSystem.has(u, BuffType.STUN) || u.stunned > 0; },
   isFrozen(u) { return BuffSystem.has(u, BuffType.FREEZE) || u.frozen > 0; },
   isCC(u) { return this.isStunned(u) || this.isFrozen(u); },
+
+  // ── 엄호 ──
+  // target 바로 옆(1칸)에 같은 편 탱커가 있고, 그 탱커가 attacker에게 더 가까우면(=앞을 막고 있으면)
+  // 엄호해 주는 탱커를 반환. 일반 단일 공격만 막는다 (스킬·광역·반격은 적용 안 함)
+  coverOf(attacker, target) {
+    if (!attacker || !target || COVER_IGNORE_CLASSES.includes(attacker.cls)) return null;
+    const dT = mh(attacker.x, attacker.y, target.x, target.y);
+    return GameStore.units.find(g => g.hp > 0 && g.id !== target.id && g.team === target.team &&
+      GUARD_CLASSES.includes(g.cls) && !this.isCC(g) &&
+      mh(g.x, g.y, target.x, target.y) === 1 && mh(attacker.x, attacker.y, g.x, g.y) < dT) || null;
+  },
+
+  // 표시용: 옆에 엄호해 줄 수 있는 탱커가 있는가 (방향 무관)
+  hasGuard(u) {
+    return !GUARD_CLASSES.includes(u.cls) && GameStore.units.some(g => g.hp > 0 && g.id !== u.id && g.team === u.team &&
+      GUARD_CLASSES.includes(g.cls) && !this.isCC(g) && mh(g.x, g.y, u.x, u.y) === 1);
+  },
 };
