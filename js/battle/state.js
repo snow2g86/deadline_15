@@ -114,7 +114,7 @@ const GameStore = {
   _siegeItems: [],
   _siegeInvIndices: [],
 
-  _sett: { bgmVol: 0.6, sfxVol: 0.8, bgmOn: true, sfxOn: true, speed: 1, language: null },
+  _sett: { bgmVol: 0.5, sfxVol: 0.7, bgmOn: true, sfxOn: true, speed: 1, language: null }, // 기본값은 settings.html과 동일
 
   reset() {
     this.ter = []; this.units = []; this.nid = 1; this.turn = 1; this._turnActed = {};

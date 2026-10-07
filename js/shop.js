@@ -552,7 +552,7 @@ function buildTabAdCard(type, descKey, fn) {
     '<div class="gold-ad-info">' +
       '<div class="gold-ad-name">' + t(descKey) + '</div>' +
     '</div>' +
-    '<button class="gold-ad-btn disabled" disabled>📋 추후 개발</button>';
+    '<button class="gold-ad-btn disabled" disabled>📋 ' + t('common.coming_soon') + '</button>';
   return card;
 }
 
@@ -581,7 +581,7 @@ function renderGoldShop(list) {
   adCard.innerHTML =
     '<div class="gold-ad-icon">&#127916;</div>' +
     '<div class="gold-ad-info"><div class="gold-ad-name">' + t('shop.gold_ad_title') + ' ' + t('shop.gold_ad_desc') + '</div></div>' +
-    '<button class="gold-ad-btn disabled" disabled>📋 추후 개발</button>';
+    '<button class="gold-ad-btn disabled" disabled>📋 ' + t('common.coming_soon') + '</button>';
   adSection.appendChild(adCard);
   list.appendChild(adSection);
 
@@ -797,6 +797,10 @@ var init = async function() {
   _gold = loadGold();
   updateGoldUI();
   loadShop();
+  // 다른 화면에서 shop.html?tab=scroll 처럼 특정 탭으로 들어올 수 있음
+  var qTab = new URLSearchParams(location.search).get('tab');
+  if (qTab && ['mercenary','consumable','equip','skill','scroll','gold'].indexOf(qTab) !== -1) _currentTab = qTab;
+  toggleTabButtons(_currentTab);
   renderShop();
   renderBottomNav();
   // 타이머를 1초마다 업데이트

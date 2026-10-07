@@ -129,7 +129,7 @@ function renderResurrect() {
     el.className = 'game-card';
     var charName = ch.customName || names[ch.nameId] || d.icon;
     el.innerHTML =
-      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-icon">' + charPortrait(ch, 40) + '</div>' +
       '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
       '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + (ch.actionRec ? ch.actionRec.toFixed(2) : '−') + '</div></div>' +
       '<button class="game-btn game-btn--purple' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + t('sanctuary.resurrect_button', { cost: cost }) + '</button>';
@@ -230,14 +230,14 @@ function renderPromote() {
     var el = document.createElement('div');
     el.className = 'promote-card';
     el.innerHTML =
-      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-icon">' + charPortrait(ch, 40) + '</div>' +
       '<div class="game-card-info">' +
         '<div class="game-card-name">' + charName +
           ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span>' +
           ' <span class="promote-grade" style="color:' + gClr + '">' + grade + '</span>' +
         '</div>' +
         '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + ((ch.actionRec || JAB[ch.cls].actionRec || 1.0)).toFixed(2) + '</div>' +
-        '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">잠재력: <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
+        '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">' + t('stats.potential') + ': <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
         (skillInfo ? '<div class="sanc-skill-info">' + skillInfo + '</div>' : '') +
       '</div>' +
       '<button class="promote-btn' + (hasSacrifice ? '' : ' disabled') + '" ' + (hasSacrifice ? '' : 'disabled') + '>' +
@@ -580,7 +580,7 @@ function renderRename() {
     var el = document.createElement('div');
     el.className = 'game-card';
     el.innerHTML =
-      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-icon">' + charPortrait(ch, 40) + '</div>' +
       '<div class="game-card-info"><div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span></div>' +
       '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + (ch.actionRec ? ch.actionRec.toFixed(2) : '−') + '</div></div>' +
       '<button class="game-btn game-btn--blue">' + t('sanctuary.rename_button') + '</button>';

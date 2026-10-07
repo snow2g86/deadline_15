@@ -18,6 +18,17 @@ function skillIcon(skillId, size, fallback) {
   return fallback || '❓';
 }
 
+// ── 캐릭터 초상화 (얼굴 원형 크롭) ────────────────────────────
+// 전투 화면 Renderer.portrait와 같은 방식. 목록 카드에서 같은 직업끼리도 구분되도록 사용
+function charPortrait(ch, size) {
+  size = size || 32;
+  var d = typeof JAB !== 'undefined' ? JAB[ch.cls] : null;
+  if (ch.cls.indexOf('summon_') === 0 || (d && d.isSummon)) return clsIcon(ch.cls, size);
+  var suffix = (ch.gender || 'm') === 'f' ? '02' : '01';
+  return '<span class="char-portrait" style="width:' + size + 'px;height:' + size + 'px;background-image:url(image/character/' +
+    ch.cls + '_' + suffix + '.png)"></span>';
+}
+
 // ── 캐릭터 스프라이트 ────────────────────────────
 function charSprite(cls, size, gender) {
   if (typeof _charSprite === 'function') {

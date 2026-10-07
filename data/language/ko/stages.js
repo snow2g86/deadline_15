@@ -311,6 +311,8 @@ Object.assign(window._LANG_ko, {
         "title": "스테이지 선택",
         "subtitle": "진입할 스테이지를 선택하세요",
         "select_episode": "에피소드를 선택하세요",
+        "tip_enemy_knight": "적 기사 바로 뒤의 적은 엄호받고, 기사 옆에 들어가면 멈춥니다 — 기사를 먼저 노리거나 측면·후방으로 돌아가세요",
+        "tip_enemy_assassin": "적 암살자는 엄호를 무시하고 후열을 노립니다 — 힐러·원거리 옆을 비우지 마세요",
         "total_progress": "전체 진행도 {n} / {total}",
         "unlock_after": "EP.{ep} 클리어 시 해금",
         "ep_done": "완료",

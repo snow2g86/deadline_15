@@ -70,6 +70,8 @@ Object.assign(window._LANG_ko, {
         "camera_rotate_right": "카메라 우회전 (E)"
     },
     "messages": {
+        "data_ok": "데이터 정상",
+        "data_repaired": "데이터를 복구했습니다",
         "victory": "🏆 VICTORY",
         "defeat": "💀 DEFEAT",
         "level_up": "⬆ Lv.{from}→{to}",

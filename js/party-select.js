@@ -499,13 +499,14 @@ function renderUnitCards(filter) {
       if (eqId) {
         eq = inv.find(function(item) { return item.eid === eqId && item.type === 'equip'; });
       }
+      // 장비 탭 카드와 같이 슬롯 종류 아이콘 표시 (비었으면 흐리게)
+      var ic = '<span class="ucs-ic">' + (EQUIP_SLOT_ICONS[slot] || '·') + '</span>';
       if (eq) {
-        html += '<div class="unit-card-equip-slot filled" data-rarity="' + eq.rarity + '">' +
-          (eq.rarity.charAt(0).toUpperCase()) +
+        html += '<div class="unit-card-equip-slot filled" data-rarity="' + eq.rarity + '" title="' + t('equip.slot.' + slot) + '">' + ic +
           '<span class="unit-card-equip-lv">+' + (eq.enhanceLv || 0) + '</span>' +
         '</div>';
       } else {
-        html += '<div class="unit-card-equip-slot"></div>';
+        html += '<div class="unit-card-equip-slot" title="' + t('equip.slot.' + slot) + '">' + ic + '</div>';
       }
     });
     html += '</div>';
@@ -1242,7 +1243,7 @@ function renderItemTab() {
   if (potions.length > 0) {
     var potionSection = document.createElement('div');
     potionSection.className = 'item-section';
-    potionSection.innerHTML = '<div class="item-section-title">💊 경험치 물약</div>';
+    potionSection.innerHTML = '<div class="item-section-title">💊 ' + t('party.sec_exp_potions') + '</div>';
 
     // 물약 종류별 그룹핑
     var groups = {};
@@ -1282,7 +1283,7 @@ function renderItemTab() {
   if (sieges.length > 0) {
     var siegeSection = document.createElement('div');
     siegeSection.className = 'item-section';
-    siegeSection.innerHTML = '<div class="item-section-title">⚙️ 공성 아이템</div>';
+    siegeSection.innerHTML = '<div class="item-section-title">⚙️ ' + t('party.sec_siege_items') + '</div>';
 
     // 공성 아이템 종류별 그룹핑
     var siegeGroups = {};
@@ -1401,7 +1402,7 @@ function renderBattlePotionsList() {
   var availablePotions = inv.filter(function(item) { return item.type === 'battle_potion'; });
 
   if (availablePotions.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;">인벤토리에 포션이 없습니다</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">🧪</span>' + t('party.no_potions') + '</div>';
     return;
   }
 
@@ -1457,7 +1458,7 @@ function renderSiegeItemsList() {
   var availableSieges = inv.filter(function(item) { return item.type === 'siege'; });
 
   if (availableSieges.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;">인벤토리에 공성 아이템이 없습니다</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">⚙️</span>' + t('party.no_siege') + '</div>';
     return;
   }
 
@@ -1733,9 +1734,9 @@ function showEnhanceConfirmModal(targetEid, materialEid) {
         '<div class="enhance-confirm-value">' + t('equip.item.' + target.templateId) + (target.enhanceLv > 0 ? ' +' + target.enhanceLv : '') + '</div>' +
       '</div>' +
       '<div class="enhance-confirm-section" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);">' +
-        '<div class="enhance-confirm-label" style="color:#4ade80;">✨ 성공 시 보상 (+' + nextLvl + ')</div>' +
+        '<div class="enhance-confirm-label" style="color:#4ade80;">✨ ' + t('enhance.success_reward', { lv: nextLvl }) + '</div>' +
         '<div class="enhance-confirm-value" style="color:#4ade80;font-size:14px;font-weight:700;">' + gainHtml + '</div>' +
-        '<div style="font-size:10px;color:#4ade80;margin-top:4px;">확률: <span style="font-size:12px;font-weight:700;">' + ratePercent + '%</span></div>' +
+        '<div style="font-size:10px;color:#4ade80;margin-top:4px;">' + t('enhance.rate') + ': <span style="font-size:12px;font-weight:700;">' + ratePercent + '%</span></div>' +
         pityHtml +
       '</div>' +
       '<div class="enhance-confirm-section">' +

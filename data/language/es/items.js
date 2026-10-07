@@ -177,6 +177,8 @@ Object.assign(window._LANG_es, {
         }
     },
     "enhance": {
+        "success_reward": "Recompensa si tiene éxito (+{lv})",
+        "rate": "Probabilidad",
         "subtitle": "Mejora de Equipo",
         "button_enhance": "Mejorar",
         "select_material": "Seleccionar Material",

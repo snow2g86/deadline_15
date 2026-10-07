@@ -307,6 +307,8 @@ Object.assign(window._LANG_es, {
         "title": "Selección de Etapa",
         "subtitle": "Selecciona una etapa para entrar",
         "select_episode": "Selecciona un episodio",
+        "tip_enemy_knight": "Los enemigos justo detrás de un caballero están cubiertos y te detienes al pisar a su lado — derriba primero al caballero o flanquéalo",
+        "tip_enemy_assassin": "Los asesinos enemigos ignoran la cobertura para llegar a tu retaguardia — protege a sanadores y unidades a distancia",
         "total_progress": "Progreso total {n} / {total}",
         "unlock_after": "Completa EP.{ep} para desbloquear",
         "ep_done": "Completado",

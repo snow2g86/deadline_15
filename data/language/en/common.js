@@ -1,6 +1,7 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
     "common": {
+        "coming_soon": "Coming soon",
         "game_title": "DEADLINE 15",
         "loading": "Loading...",
         "confirm": "Confirm",

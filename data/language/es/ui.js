@@ -1,6 +1,10 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "party": {
+        "sec_exp_potions": "Pociones de EXP",
+        "sec_siege_items": "Objetos de asedio",
+        "no_potions": "No hay pociones en el inventario",
+        "no_siege": "No hay objetos de asedio en el inventario",
         "party_n": "Grupo {n}",
         "title": "Composición del Equipo",
         "subtitle": "Compón un equipo de 5 miembros del clan",
@@ -25,6 +29,7 @@ Object.assign(window._LANG_es, {
         "subtitle": "Promociona novatos a clases m\u00e1s fuertes",
         "class_change_btn": "Promover",
         "class_change_btn_noscroll": "Pergamino Necesario",
+        "buy_scroll": "Comprar pergamino",
         "no_novice": "No hay novatos disponibles para promoci\u00f3n",
         "select_scroll": "Selecciona un pergamino de cambio de clase",
         "no_scroll": "No hay pergaminos. Compra uno en la tienda.",

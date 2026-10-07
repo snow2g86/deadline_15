@@ -1,6 +1,7 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "common": {
+        "coming_soon": "추후 개발",
         "game_title": "DEADLINE 15",
         "loading": "불러오는 중...",
         "confirm": "확인",

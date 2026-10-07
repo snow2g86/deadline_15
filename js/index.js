@@ -276,14 +276,9 @@ function validateAndRepairGameData() {
 	setTimeout(function() {
 		var statusDiv = document.createElement('div');
 		statusDiv.id = 'gamedata-status';
-		statusDiv.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;padding:12px 16px;border-radius:6px;font-size:13px;font-weight:bold;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);opacity:1;transition:opacity 0.5s ease;';
-		if (repaired) {
-			statusDiv.style.backgroundColor = '#f97316';
-			statusDiv.textContent = '⚠️ 데이터 복구됨';
-		} else {
-			statusDiv.style.backgroundColor = '#22c55e';
-			statusDiv.textContent = '✅ 데이터 정상';
-		}
+		// 상단 설정 버튼을 가리지 않도록 하단 중앙 토스트로 표시
+		statusDiv.className = 'toast ' + (repaired ? 'warn' : 'ok');
+		statusDiv.textContent = repaired ? '⚠️ ' + t('messages.data_repaired') : '✓ ' + t('messages.data_ok');
 		document.body.appendChild(statusDiv);
 		setTimeout(function() {
 			statusDiv.style.opacity = '0';

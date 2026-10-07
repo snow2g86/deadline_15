@@ -1,6 +1,10 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
     "party": {
+        "sec_exp_potions": "EXP Potions",
+        "sec_siege_items": "Siege Items",
+        "no_potions": "No potions in inventory",
+        "no_siege": "No siege items in inventory",
         "party_n": "Party {n}",
         "title": "Party Composition",
         "subtitle": "Compose a party of 5 clan members",
@@ -25,6 +29,7 @@ Object.assign(window._LANG_en, {
         "subtitle": "Promote novices to stronger classes",
         "class_change_btn": "Promote",
         "class_change_btn_noscroll": "Scroll Required",
+        "buy_scroll": "Buy scroll",
         "no_novice": "No novices available for promotion",
         "select_scroll": "Select a class change scroll to use",
         "no_scroll": "No scrolls available. Buy one at the shop.",

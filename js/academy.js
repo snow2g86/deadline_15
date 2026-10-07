@@ -102,15 +102,18 @@ function renderAcademy() {
     var potStr = (ch.pot && ch.pot.hp) ? '+' + ch.pot.hp + '/+' + ch.pot.atk + '/+' + ch.pot.def + (ch.pot.actionRec ? '/+' + ch.pot.actionRec.toFixed(2) : '') : '−';
     var arStr = (ch.pot && ch.pot.actionRec) ? '+' + ch.pot.actionRec.toFixed(2) : '−';
     el.innerHTML =
-      '<div class="game-card-icon">' + clsIcon(ch.cls, 28) + '</div>' +
+      '<div class="game-card-icon">' + charPortrait(ch, 40) + '</div>' +
       '<div class="game-card-info">' +
         '<div class="game-card-name">' + charName + ' <span style="color:#64748b;font-size:10px">Lv.' + ch.lv + '</span> <span style="color:' + gClr + ';font-size:10px;font-weight:900">' + grade + '</span></div>' +
         '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + arStr + '</div>' +
-        '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">잠재력: <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
+        '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">' + t('stats.potential') + ': <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
       '</div>' +
-      '<button class="game-btn game-btn--purple' + (hasScroll ? '' : ' disabled') + '" ' + (hasScroll ? '' : 'disabled') + '>' + btnText + '</button>';
+      // 전직서가 없으면 비활성 버튼 대신 상점 전직서 탭으로 안내
+      '<button class="game-btn game-btn--purple' + (hasScroll ? '' : ' game-btn--ghost') + '" title="' + (hasScroll ? '' : t('academy.class_change_btn_noscroll')) + '">' +
+        (hasScroll ? btnText : '🛒 ' + t('academy.buy_scroll')) + '</button>';
     el.querySelector('.game-btn').onclick = (function(uid) {
       return function() {
+        if (!hasScroll) { location.href = 'shop.html?tab=scroll'; return; }
         showScrollSelectModal(uid);
       };
     })(ch.uid);

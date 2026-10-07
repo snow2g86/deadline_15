@@ -177,6 +177,8 @@ Object.assign(window._LANG_ko, {
         }
     },
     "enhance": {
+        "success_reward": "성공 시 보상 (+{lv})",
+        "rate": "확률",
         "subtitle": "장비 강화",
         "button_enhance": "강화",
         "select_material": "재료 선택",

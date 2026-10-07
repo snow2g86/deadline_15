@@ -178,7 +178,12 @@ function showStageInfo(stageId) {
     }).join('');
 
   // 전략 팁 HTML
-  var tipsHTML = (st.strategyTips || [])
+  // 스테이지 데이터 팁 + 적 구성에 따른 전술 팁 (적 기사 → 엄호·제압 구역 / 암살자 → 엄호 무시 주의)
+  var tipKeys = (st.strategyTips || []).slice();
+  var enemyCls = (st.en || []).concat(st.boss ? [st.boss.cls] : []);
+  if (enemyCls.indexOf('knight') !== -1) tipKeys.push('stage.tip_enemy_knight');
+  if (enemyCls.indexOf('assassin') !== -1) tipKeys.push('stage.tip_enemy_assassin');
+  var tipsHTML = tipKeys
     .map(function(key) { return '<li>' + t(key) + '</li>'; })
     .join('');
 

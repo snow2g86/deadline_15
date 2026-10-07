@@ -71,6 +71,8 @@ Object.assign(window._LANG_en, {
         "camera_rotate_right": "Rotate camera right (E)"
     },
     "messages": {
+        "data_ok": "Save data OK",
+        "data_repaired": "Save data repaired",
         "victory": "\ud83c\udfc6 VICTORY",
         "defeat": "\ud83d\udc80 DEFEAT",
         "level_up": "\u2b06 Lv.{from}\u2192{to}",

@@ -70,6 +70,8 @@ Object.assign(window._LANG_es, {
         "camera_rotate_right": "Girar cámara derecha (E)"
     },
     "messages": {
+        "data_ok": "Datos correctos",
+        "data_repaired": "Datos reparados",
         "victory": "🏆 VICTORIA",
         "defeat": "💀 DERROTA",
         "level_up": "⬆ Nv.{from}→{to}",

@@ -1,6 +1,10 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "party": {
+        "sec_exp_potions": "경험치 물약",
+        "sec_siege_items": "공성 아이템",
+        "no_potions": "인벤토리에 포션이 없습니다",
+        "no_siege": "인벤토리에 공성 아이템이 없습니다",
         "party_n": "파티 {n}",
         "title": "파티 편성",
         "subtitle": "5명의 클랜원을 편성하세요",
@@ -25,6 +29,7 @@ Object.assign(window._LANG_ko, {
         "subtitle": "노비스를 전직시켜 더 강한 직업으로 성장하세요",
         "class_change_btn": "전직",
         "class_change_btn_noscroll": "전직서 필요",
+        "buy_scroll": "전직서 구매",
         "no_novice": "전직 가능한 노비스가 없습니다",
         "select_scroll": "사용할 전직서를 선택하세요",
         "no_scroll": "보유한 전직서가 없습니다. 상점에서 구매하세요.",
