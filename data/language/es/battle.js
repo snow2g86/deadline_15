@@ -36,6 +36,7 @@ Object.assign(window._LANG_es, {
         "enemy": "Enemigo",
         "turn_order": "ORDEN",
         "acting": "ACTÚA",
+        "turn_n": "Turno {n}",
         "player_phase": "JUGADOR",
         "enemy_phase": "ENEMIGO",
         "enemy_left": "{n} enemigos",

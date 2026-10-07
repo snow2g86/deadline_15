@@ -72,6 +72,7 @@ const GameStore = {
   units: [],
   nid: 1,
   turn: 1,
+  _turnActed: {}, // 이번 턴에 행동을 마친 아군 id
   sel: null,
   curUnit: null,
   actCount: 0,
@@ -116,7 +117,7 @@ const GameStore = {
   _sett: { bgmVol: 0.6, sfxVol: 0.8, bgmOn: true, sfxOn: true, speed: 1, language: null },
 
   reset() {
-    this.ter = []; this.units = []; this.nid = 1; this.turn = 1;
+    this.ter = []; this.units = []; this.nid = 1; this.turn = 1; this._turnActed = {};
     this.sel = null; this.curUnit = null; this.actCount = 0;
     this.mvT = []; this.atkT = []; this.healT = [];
     this.eSpwn = 0; this.eQ = [];

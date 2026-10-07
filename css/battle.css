@@ -21,6 +21,7 @@
 .si-title{display:flex;align-items:baseline;gap:6px;white-space:nowrap;max-width:100%;overflow:hidden}
 .si-no{font-family:'Cinzel',serif;font-size:12px;font-weight:900;color:var(--gold);letter-spacing:1px;text-shadow:0 0 8px rgba(240,192,64,.35)}
 .si-name{font-size:11px;font-weight:700;color:#e5e7eb;overflow:hidden;text-overflow:ellipsis}
+.si-turnno{font-size:10px;font-weight:800;color:#93c5fd;padding:0 6px;border-radius:999px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3)}
 .si-chips{display:flex;gap:4px}
 .si-chip{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 7px;border-radius:999px;font-size:10px;font-weight:700;
   color:#cbd5e1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap}

@@ -91,7 +91,23 @@ const TurnManager = {
 
     EventBus.emit('turn_end', { unit: u });
     S.actCount++;
+    this._countTurn(u);
     this.nextAction();
+  },
+
+  // 턴 = 살아있는 아군(소환수 제외) 전원이 한 번씩 행동을 마친 주기
+  _countTurn(u) {
+    const S = GameStore;
+    if (u.team !== 'ally' || u.isSummon) return;
+    S._turnActed = S._turnActed || {};
+    S._turnActed[u.id] = true;
+    const allies = S.units.filter(v => v.team === 'ally' && !v.isSummon && v.hp > 0);
+    if (allies.length && allies.every(v => S._turnActed[v.id])) {
+      S.turn = (S.turn || 1) + 1;
+      S._turnActed = {};
+      EventBus.emit('round_end', { turn: S.turn });
+      Renderer.uUI();
+    }
   },
 
   // ── 웨이브 스폰 ──

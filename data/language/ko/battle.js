@@ -36,6 +36,7 @@ Object.assign(window._LANG_ko, {
         "enemy": "적군",
         "turn_order": "행동 순서",
         "acting": "행동 중",
+        "turn_n": "{n}턴",
         "player_phase": "아군 턴",
         "enemy_phase": "적군 턴",
         "enemy_left": "적 {n}",

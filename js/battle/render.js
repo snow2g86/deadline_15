@@ -600,6 +600,7 @@ const Renderer = {
     const title = el('div', 'si-title');
     el('span', 'si-no', 'STAGE ' + (s ? s.id : 1), title);
     if (s) el('span', 'si-name', t('stages.stage_' + s.id + '_name'), title);
+    el('span', 'si-turnno', t('battle.turn_n', { n: S.turn || 1 }), title);
     const chips = el('div', 'si-chips');
     // 적 증원 진행도: 남은 증원이 0이 되면 완료 표시
     const wave = el('span', 'si-chip wave' + (S.eSpwn >= tot ? ' done' : ''), undefined, chips);

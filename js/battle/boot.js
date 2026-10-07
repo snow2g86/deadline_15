@@ -136,7 +136,7 @@ const BattleInit = {
   resumeBattle(bs) {
     const S = GameStore;
     S.cStage = bs.stage; S.party = bs.party; S.practiceMode = bs.practiceMode || false;
-    S.ter = bs.ter; S.turn = bs.turn; S.eSpwn = bs.eSpwn; S.eQ = bs.eQ;
+    S.ter = bs.ter; S.turn = bs.turn || 1; S._turnActed = bs._turnActed || {}; S.eSpwn = bs.eSpwn; S.eQ = bs.eQ;
     S.breached = bs.breached; S.gateHP = bs.gateHP; S.wallHP = bs.wallHP; S.nid = bs.nid;
     S.battleExp = bs.battleExp || {};
     S.allyPos = bs.allyPos || {};
@@ -164,8 +164,7 @@ const BattleInit = {
     Renderer.rTerBg(); Renderer.rTer(); Renderer.rUnits();
     Renderer.uUI(); Renderer.defI(); Renderer.rMM();
 
-    // 전투 시작 음악 재생
-    GameStore._sett.bgmOn = true;
+    // 전투 시작 음악 재생 (설정에서 꺼져 있으면 bgmStart가 무시)
     Audio.bgmStart();
     this._hideLoading();
 
@@ -185,7 +184,7 @@ const BattleInit = {
       if (nav.party) GameStore.party = nav.party; else GameStore.party = loadParty();
       if (!GameStore.party || GameStore.party.length < MIN_P) { location.href = 'index.html'; return; }
       this.initBattle();
-      this._showLoading(GameStore.cStage.name).then(() => { GameStore._sett.bgmOn = true; Audio.bgmStart(); TurnManager.nextAction(); });
+      this._showLoading(GameStore.cStage.name).then(() => { Audio.bgmStart(); TurnManager.nextAction(); });
     } else {
       location.href = 'index.html';
     }
