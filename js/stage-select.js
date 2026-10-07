@@ -32,6 +32,20 @@ function renderEpisodes() {
   var totalCleared = EPISODES.reduce(function(a, e) { return a + e.stages.filter(function(s) { return cleared.has(s); }).length; }, 0);
   if (sub) sub.textContent = t('stage.total_progress', { n: totalCleared, total: totalStages });
 
+  // 스토리 다시 보기 (본 장면이 있을 때만)
+  if (typeof Story !== 'undefined') {
+    var seen = {};
+    try { seen = JSON.parse(localStorage.getItem('game_story_seen')) || {}; } catch (_) {}
+    if (Object.keys(seen).length) {
+      var rb = document.createElement('button');
+      rb.type = 'button';
+      rb.className = 'story-replay-btn';
+      rb.textContent = '\uD83D\uDCDC ' + t('story.replay');
+      rb.onclick = function() { Story.openReplay(); };
+      l.appendChild(rb);
+    }
+  }
+
   EPISODES.forEach(function(ep) {
     // 해금 로직: EP.1 항상 해금, 이후 에피소드는 이전 에피소드 스테이지 전체 클리어 시 해금
     var unlocked = ep.id === 1;
@@ -240,10 +254,21 @@ function showStageInfo(stageId) {
 
 
 // ── 스테이지 진입 (모드 선택) ──────────────
+// 출전 전 스토리(에피소드 첫 진입 프롤로그 → 스테이지 pre)를 먼저 보여준 뒤 기존 출전 흐름으로 이동
+var _startingStage = false;
 function startStage(stageId, practiceMode) {
   var stage = STAGES.find(function(s) { return s.id === stageId; });
-  if (!stage) return;
+  if (!stage || _startingStage) return;
+  if (typeof Story === 'undefined') { _launchStage(stage, practiceMode); return; }
+  _startingStage = true;
+  closeModal();
+  Story.beforeStage(stage).then(function() {
+    _startingStage = false;
+    _launchStage(stage, practiceMode);
+  });
+}
 
+function _launchStage(stage, practiceMode) {
   var party = loadParty();
   var roster = getRoster();
 

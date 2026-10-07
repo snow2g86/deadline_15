@@ -71,5 +71,17 @@ Object.assign(window._LANG_es, {
         "melee": "⚔️ Melé",
         "ranged": "🏹 Rango",
         "support": "✨ Soporte"
+    },
+    "story": {
+        "skip": "Saltar",
+        "next": "Siguiente",
+        "replay": "Ver historia de nuevo",
+        "replay_empty": "Aún no has visto ninguna escena",
+        "prologue": "Prólogo",
+        "epilogue": "Epílogo",
+        "part_pre": "Antes del combate",
+        "part_post": "Tras la victoria",
+        "part_battle": "En combate",
+        "commander": "Comandante"
     }
 });

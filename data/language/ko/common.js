@@ -72,5 +72,17 @@ Object.assign(window._LANG_ko, {
         "melee": "⚔️ 근접",
         "ranged": "🏹 원거리",
         "support": "✨ 서포트"
+    },
+    "story": {
+        "skip": "건너뛰기",
+        "next": "다음",
+        "replay": "스토리 다시 보기",
+        "replay_empty": "아직 본 이야기가 없습니다",
+        "prologue": "프롤로그",
+        "epilogue": "에필로그",
+        "part_pre": "전투 전",
+        "part_post": "승리 후",
+        "part_battle": "전투 중",
+        "commander": "지휘관"
     }
 });

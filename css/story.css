@@ -1,0 +1,290 @@
+/* css/story.css — 스토리 대사 연출 (js/common/story.js) */
+/* 톤: 어두운 남색 바탕 + 금색 강조, Noto Sans KR */
+
+.story-layer {
+  --st-gold: #f59e0b;
+  --st-gold-l: #fbbf24;
+  --st-bg: #0a0e1a;
+  --st-panel: rgba(15, 23, 42, .94);
+  --st-text: #e2e8f0;
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--st-text);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.story-layer.open { display: block; animation: stFadeIn .25s ease both }
+.story-layer.closing { animation: stFadeOut .18s ease both }
+@keyframes stFadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes stFadeOut { from { opacity: 1 } to { opacity: 0 } }
+
+/* 배경: 일반 장면은 어둡게, 전투 대사는 맵이 비치도록 아래쪽만 어둡게 */
+.st-dim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(30, 41, 80, .55), transparent 70%),
+    linear-gradient(180deg, rgba(5, 8, 18, .88), rgba(5, 8, 18, .96));
+}
+.story-layer.battle .st-dim {
+  background: linear-gradient(180deg, rgba(5, 8, 18, .05) 30%, rgba(5, 8, 18, .55) 62%, rgba(5, 8, 18, .85));
+}
+
+/* 상단: 장면 제목 + 건너뛰기 */
+.st-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  pointer-events: none;
+}
+.st-title {
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--st-gold-l);
+  text-shadow: 0 0 18px rgba(245, 158, 11, .35);
+  border-left: 3px solid var(--st-gold);
+  padding: 2px 0 2px 10px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: stTitleIn .5s ease both;
+}
+@keyframes stTitleIn { from { opacity: 0; transform: translateX(-12px) } to { opacity: 1; transform: none } }
+.st-skip {
+  pointer-events: auto;
+  margin-left: auto;
+  flex: none;
+  font: 700 12px 'Noto Sans KR', sans-serif;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, .8);
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.st-skip:hover, .st-skip:focus-visible { color: var(--st-gold-l); border-color: var(--st-gold); background: rgba(30, 41, 59, .9); outline: none }
+
+/* 장면: 초상화 + 대화창 */
+.st-scene {
+  position: absolute;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(820px, calc(100% - 24px));
+}
+
+/* 초상화: 캐릭터 그림의 상반신 크롭 */
+.st-pt {
+  position: absolute;
+  bottom: calc(100% - 26px);
+  width: 210px;
+  height: 230px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s, filter .25s, transform .25s;
+  filter: brightness(.38) saturate(.6);
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+}
+.st-pt.left { left: 0 }
+.st-pt.right { right: 0 }
+.st-pt img {
+  position: absolute;
+  width: 165%;
+  left: -32%;
+  top: -6%;
+  image-rendering: pixelated;
+}
+.st-pt.right img { transform: scaleX(-1) } /* 오른쪽 인물은 안쪽(왼쪽)을 보게 */
+.st-pt.show { opacity: 1 }
+.st-pt.speaking { filter: none; transform: translateY(-4px) }
+.st-pt.enter.left { animation: stPtInL .3s ease-out }
+.st-pt.enter.right { animation: stPtInR .3s ease-out }
+@keyframes stPtInL { from { transform: translateX(-24px); opacity: 0 } }
+@keyframes stPtInR { from { transform: translateX(24px); opacity: 0 } }
+/* 보스: 붉은 기운 */
+.st-pt.boss img { filter: sepia(.5) saturate(2.4) hue-rotate(-30deg) drop-shadow(0 0 10px rgba(239, 68, 68, .85)) }
+.st-pt.boss.speaking { animation: stBossAura 1.6s ease-in-out infinite }
+@keyframes stBossAura { 0%, 100% { filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0)) } 50% { filter: drop-shadow(0 0 14px rgba(239, 68, 68, .6)) } }
+.story-layer.narration .st-pt { opacity: .18; filter: brightness(.3) saturate(.4); transform: none }
+
+/* 대화창 */
+.st-box {
+  position: relative;
+  min-height: 112px;
+  padding: 26px 22px 18px;
+  background: var(--st-panel);
+  border: 1px solid rgba(245, 158, 11, .45);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+.st-box::before { /* 금색 상단 장식선 */
+  content: '';
+  position: absolute;
+  left: 18px; right: 18px; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--st-gold), transparent);
+  opacity: .7;
+}
+.st-box.boss { border-color: rgba(239, 68, 68, .6); box-shadow: 0 10px 40px rgba(0, 0, 0, .55), 0 0 24px rgba(239, 68, 68, .18) }
+.st-name {
+  position: absolute;
+  top: -15px;
+  left: 18px;
+  font-weight: 900;
+  font-size: 14px;
+  color: #1a1206;
+  background: linear-gradient(180deg, var(--st-gold-l), var(--st-gold));
+  border-radius: 6px;
+  padding: 4px 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .45);
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.st-name.right { left: auto; right: 18px }
+.st-name.boss { color: #fff; background: linear-gradient(180deg, #ef4444, #991b1b) }
+.st-text {
+  font-size: 17px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  min-height: 2em;
+}
+.st-next {
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  font-size: 11px;
+  color: var(--st-gold);
+  animation: stBlink 1s ease-in-out infinite;
+}
+.story-layer.typing .st-next { visibility: hidden }
+@keyframes stBlink { 0%, 100% { opacity: .25; transform: translateY(0) } 50% { opacity: 1; transform: translateY(3px) } }
+
+/* 내레이션: 초상화 없이 가운데 */
+.story-layer.narration .st-box { text-align: center; border-color: rgba(148, 163, 184, .3); background: rgba(10, 14, 26, .88) }
+.story-layer.narration .st-box::before { opacity: .35 }
+.story-layer.narration .st-text { font-style: italic; color: #cbd5e1 }
+
+/* 감정 표현 */
+.st-box.shake { animation: stShake .35s ease }
+.st-box.mood-shout .st-text { font-weight: 900; font-size: 19px }
+.st-box.mood-angry .st-text { color: #fecaca }
+.st-box.mood-worried .st-text, .st-box.mood-sad .st-text { color: #c7d2fe }
+.st-box.mood-happy .st-text { color: #fef3c7 }
+@keyframes stShake {
+  0%, 100% { transform: translateX(0) }
+  20% { transform: translateX(-6px) }
+  40% { transform: translateX(5px) }
+  60% { transform: translateX(-3px) }
+  80% { transform: translateX(2px) }
+}
+
+/* 전투 중 짧은 대사: 작게 */
+.story-layer.battle .st-scene { width: min(640px, calc(100% - 24px)); bottom: max(130px, env(safe-area-inset-bottom)) }
+.story-layer.battle .st-pt { width: 150px; height: 160px }
+.story-layer.battle .st-box { min-height: 84px; padding: 22px 18px 14px }
+.story-layer.battle .st-text { font-size: 15px }
+.story-layer.battle .st-title { display: none }
+
+/* 좁은 화면 (모바일) */
+@media (max-width: 600px) {
+  .st-scene { width: calc(100% - 16px) }
+  .st-pt { width: 130px; height: 150px; bottom: calc(100% - 18px) }
+  .story-layer.battle .st-pt { width: 104px; height: 116px }
+  .st-box { min-height: 104px; padding: 22px 14px 16px }
+  .st-text { font-size: 15px; line-height: 1.6 }
+  .story-layer.battle .st-text { font-size: 14px }
+  .st-name { font-size: 13px; padding: 3px 11px; top: -13px; left: 12px }
+  .st-name.right { right: 12px }
+  .st-title { font-size: 13px }
+  .st-skip { padding: 5px 11px }
+  .story-layer.battle .st-scene { bottom: 110px }
+}
+
+/* ── 스토리 다시 보기 목록 ── */
+.story-replay {
+  position: fixed;
+  inset: 0;
+  z-index: 9400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(5, 8, 18, .75);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.story-replay.show { display: flex }
+.sr-box {
+  width: min(460px, 100%);
+  max-height: min(78vh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: #111827;
+  border: 1px solid rgba(245, 158, 11, .4);
+  border-radius: 12px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, .6);
+  overflow: hidden;
+}
+.sr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  font-weight: 900;
+  font-size: 16px;
+  color: #fbbf24;
+  border-bottom: 1px solid rgba(148, 163, 184, .15);
+}
+.sr-close { background: none; border: 0; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 2px 6px }
+.sr-close:hover { color: #fbbf24 }
+.sr-list { overflow-y: auto; padding: 8px 12px 14px }
+.sr-ep { font-size: 12px; font-weight: 700; color: #f59e0b; letter-spacing: 1px; margin: 12px 4px 6px }
+.sr-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: 400 14px 'Noto Sans KR', sans-serif;
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, .6);
+  border: 1px solid rgba(148, 163, 184, .15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.sr-item::before { content: '\25B6'; font-size: 10px; color: #f59e0b; margin-right: 8px }
+.sr-item.ep { font-weight: 700 }
+.sr-item:hover { border-color: #f59e0b; background: rgba(30, 41, 59, .95) }
+.sr-empty { text-align: center; color: #64748b; padding: 28px 0; font-size: 14px }
+
+/* 스테이지 선택 화면의 다시 보기 버튼 */
+.story-replay-btn {
+  display: block;
+  margin: 0 auto 12px;
+  font: 700 13px 'Noto Sans KR', sans-serif;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, .08);
+  border: 1px solid rgba(245, 158, 11, .4);
+  border-radius: 999px;
+  padding: 7px 18px;
+  cursor: pointer;
+}
+.story-replay-btn:hover { background: rgba(245, 158, 11, .18) }

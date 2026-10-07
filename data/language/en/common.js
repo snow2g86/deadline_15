@@ -71,5 +71,17 @@ Object.assign(window._LANG_en, {
         "melee": "\u2694 Melee",
         "ranged": "\ud83c\uddaf Ranged",
         "support": "\u2728 Support"
+    },
+    "story": {
+        "skip": "Skip",
+        "next": "Next",
+        "replay": "Replay Story",
+        "replay_empty": "No story scenes viewed yet",
+        "prologue": "Prologue",
+        "epilogue": "Epilogue",
+        "part_pre": "Before Battle",
+        "part_post": "After Victory",
+        "part_battle": "In Battle",
+        "commander": "Commander"
     }
 });
