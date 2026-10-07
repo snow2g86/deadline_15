@@ -507,3 +507,18 @@
 .rr-lv{font-size:9px;color:var(--dim);font-weight:700}
 .res-row.lvup .rr-lv{color:#facc15;animation:tiDot 1.2s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){#modal-box.result,.res-row{animation:none;opacity:1}}
+
+/* ═══ 결과 화면 별점 ═══ */
+.res-stars{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.22)}
+.rs-big{display:flex;justify-content:center;gap:6px;margin-bottom:6px}
+.rs-star{font-size:28px;line-height:1;color:rgba(255,255,255,.15);transform:scale(.6);opacity:0;animation:rsPop .35s cubic-bezier(.2,.9,.3,1.4) forwards}
+.rs-star.on{color:#facc15;text-shadow:0 0 10px rgba(250,204,21,.6)}
+.rs-star.new{animation-name:rsPopNew}
+@keyframes rsPop{to{transform:scale(1);opacity:1}}
+@keyframes rsPopNew{60%{transform:scale(1.35);opacity:1}to{transform:scale(1);opacity:1}}
+.rs-cond{display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8;padding:1px 0}
+.rs-cond.ok{color:#e5e7eb}
+.rs-mark{width:14px;text-align:center;font-weight:900;color:#64748b}
+.rs-cond.ok .rs-mark{color:#4ade80}
+.rs-new{margin-left:auto;font-size:9px;font-weight:900;color:#1a1206;background:#facc15;border-radius:999px;padding:0 6px}
+@media (prefers-reduced-motion:reduce){.rs-star{animation:none;opacity:1;transform:none}}

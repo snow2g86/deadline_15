@@ -303,6 +303,13 @@ Object.assign(window._LANG_es, {
         "stage_100_story": "Derrota al dios supremo que trae el fin de todas las cosas",
         "enemy_count": "Enemigos {count}"
     },
+    "stars": {
+        "title": "Objetivos de estrellas",
+        "cond_clear": "Completa la fase",
+        "cond_nodeath": "Completa sin bajas",
+        "cond_turns": "Completa en {n} turnos o menos",
+        "bonus": "Recompensa por estrella nueva"
+    },
     "stage": {
         "title": "Selección de Etapa",
         "subtitle": "Selecciona una etapa para entrar",

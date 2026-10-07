@@ -33,6 +33,29 @@ function saveGold(gold, cleared) {
   } catch (_) {}
 }
 
+// ── 스테이지 별점 ────────────────────────────
+// game_save.stars = { [stageId]: [클리어, 전사자 없음, N턴 이내] } (0/1). 조건별로 따로 누적
+function starTurnLimit(stage) {
+  if (!stage) return 0;
+  return stage.starTurns || Math.ceil((stage.tot || 6) * 0.75) + 4;
+}
+
+function loadStars() { return loadSave().stars || {}; }
+
+function stageStars(stageId) { return (loadStars()[stageId] || [0, 0, 0]).reduce((a, b) => a + (b ? 1 : 0), 0); }
+
+// 이번 판 결과(flags)를 합쳐 저장하고, 새로 얻은 별 인덱스를 반환
+function saveStageStars(stageId, flags) {
+  const d = loadSave();
+  d.stars = d.stars || {};
+  const prev = d.stars[stageId] || [0, 0, 0];
+  const merged = prev.map((v, i) => (v || flags[i]) ? 1 : 0);
+  const newly = merged.map((v, i) => v && !prev[i] ? i : -1).filter(i => i >= 0);
+  d.stars[stageId] = merged;
+  saveSave(d);
+  return { merged, newly };
+}
+
 // ── Roster 데이터 ────────────────────────────
 function getRoster() {
   try {

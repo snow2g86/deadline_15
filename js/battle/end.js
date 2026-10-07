@@ -35,6 +35,18 @@ const BattleEnd = {
         S._bonusReward = firstClearBonus;
       }
 
+      // 별점: ★1 클리어 / ★2 전사자 없음 / ★3 N턴 이내. 처음 얻은 ★2·★3마다 골드 보너스 (연습 모드 제외)
+      S._starResult = null;
+      if (!S.practiceMode && S.cStage) {
+        const limit = starTurnLimit(S.cStage);
+        const flags = [1, S._deadAllyUids.length === 0 ? 1 : 0, (S.turn || 1) <= limit ? 1 : 0];
+        const r = saveStageStars(S.cStage.id, flags);
+        const each = 100 + S.cStage.id * 10;
+        const bonus = r.newly.filter(i => i > 0).length * each;
+        S._starResult = { flags, merged: r.merged, newly: r.newly, limit, turn: S.turn || 1, bonus };
+        S.gold += bonus;
+      }
+
       S.gold += reward + firstClearBonus;
       saveGold(S.gold, [...S.cleared]);
 

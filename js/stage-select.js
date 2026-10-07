@@ -44,6 +44,7 @@ function renderEpisodes() {
 
     // 진행률 계산
     var clearCount = ep.stages.filter(function(sid) { return cleared.has(sid); }).length;
+    var epStars = ep.stages.reduce(function(a, sid) { return a + stageStars(sid); }, 0);
 
     var done = clearCount === ep.stages.length;
     var card = document.createElement('div');
@@ -56,7 +57,7 @@ function renderEpisodes() {
       '<div class="ep-header">' +
         '<div class="ep-num">EP.' + ep.id + '</div>' +
         tag +
-        '<div class="ep-progress">' + clearCount + '/' + ep.stages.length + '</div>' +
+        '<div class="ep-progress"><span class="ep-stars">\u2605 ' + epStars + '/' + (ep.stages.length * 3) + '</span> ' + clearCount + '/' + ep.stages.length + '</div>' +
       '</div>' +
       '<div class="ep-name">' + t('episode.' + ep.id + '.name') + '</div>' +
       '<div class="ep-desc">' + t('episode.' + ep.id + '.desc') + '</div>' +
@@ -111,9 +112,11 @@ function renderStages() {
       : isNext ? '<span class="sb-badge next">NEXT</span>'
       : !unlocked ? '<span class="sb-badge lock">\uD83D\uDD12</span>' : '';
     var bossTag = st.boss && st.boss.name ? '<div class="sb-boss">\uD83D\uDC80 ' + st.boss.name + '</div>' : '';
+    var starArr = loadStars()[st.id] || [0, 0, 0];
+    var starHtml = cl ? '<span class="sb-stars">' + starArr.map(function(v) { return '<i class="' + (v ? 'on' : '') + '">\u2605</i>'; }).join('') + '</span>' : '';
     b.innerHTML =
       '<div class="sb-header">' +
-        '<div class="sb-num">EP.' + ep.id + '-' + stageIndex + '</div>' + badge +
+        '<div class="sb-num">EP.' + ep.id + '-' + stageIndex + '</div>' + starHtml + badge +
         '<div class="sb-rec-level">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
       '</div>' +
       '<div class="sb-name">' + t('stages.stage_' + st.id + '_name') + '</div>' + bossTag +
@@ -208,6 +211,12 @@ function showStageInfo(stageId) {
         '<div class="si-stage-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
       '</div>' +
       bossHTML +
+      // 별 조건
+      '<div class="si-section"><div class="si-section-title">\u2B50 ' + t('stars.title') + '</div><ul class="si-stars">' +
+        [t('stars.cond_clear'), t('stars.cond_nodeath'), t('stars.cond_turns', { n: starTurnLimit(st) })].map(function(c, i) {
+          var got = (loadStars()[st.id] || [0, 0, 0])[i];
+          return '<li class="' + (got ? 'on' : '') + '"><i>\u2605</i>' + c + '</li>';
+        }).join('') + '</ul></div>' +
       '<div class="si-section">' +
         '<div class="si-section-header">' +
           '<div class="si-section-title">' + t('stage.enemy_composition') + '</div>' +

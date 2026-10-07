@@ -892,7 +892,22 @@ const Renderer = {
         autoRevived > 0 ? t('stage.auto_revived', { count: autoRevived }) : null, t('stage.no_clear_recorded')]
         .filter(Boolean).forEach(x => el('div', '', x, pr));
     }
+    // 별점
+    if (win && S._starResult) {
+      const sr = S._starResult;
+      const box = el('div', 'res-stars');
+      const big = el('div', 'rs-big', undefined, box);
+      sr.merged.forEach((v, i) => el('span', 'rs-star' + (v ? ' on' : '') + (sr.newly.includes(i) ? ' new' : ''), '\u2605', big).style.animationDelay = (0.2 + i * 0.15) + 's');
+      const conds = [t('stars.cond_clear'), t('stars.cond_nodeath'), t('stars.cond_turns', { n: sr.limit })];
+      conds.forEach((c, i) => {
+        const row = el('div', 'rs-cond' + (sr.flags[i] ? ' ok' : ''), undefined, box);
+        el('span', 'rs-mark', sr.flags[i] ? '\u2713' : '\u2715', row);
+        el('span', 'rs-lb', c + (i === 2 ? ' (' + t('battle.turn_n', { n: sr.turn }) + ')' : ''), row);
+        if (sr.newly.includes(i)) el('span', 'rs-new', 'NEW', row);
+      });
+    }
     const rewards = [];
+    if (win && S._starResult && S._starResult.bonus) rewards.push(['\u2B50', t('stars.bonus'), '+' + S._starResult.bonus + ' G']);
     if (win && actualReward) rewards.push(['🪙', t('messages.reward'), '+' + actualReward + ' G']);
     if (win && S._firstClearBonus) { rewards.push(['🎉', t('messages.first_clear_bonus'), '+' + S._firstClearBonus + ' G']); S._firstClearBonus = 0; }
     if (win && S._firstClearUnit) { rewards.push(['🎁', t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) }), '']); S._firstClearUnit = null; }

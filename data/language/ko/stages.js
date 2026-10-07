@@ -307,6 +307,13 @@ Object.assign(window._LANG_ko, {
         "stage_100_story": "모든 것의 끝을 가져오는 최종 신을 무찌르라",
         "enemy_count": "적 {count}체"
     },
+    "stars": {
+        "title": "별 조건",
+        "cond_clear": "스테이지 클리어",
+        "cond_nodeath": "전사자 없이 클리어",
+        "cond_turns": "{n}턴 이내 클리어",
+        "bonus": "새 별 보상"
+    },
     "stage": {
         "title": "스테이지 선택",
         "subtitle": "진입할 스테이지를 선택하세요",

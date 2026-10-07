@@ -307,6 +307,13 @@ Object.assign(window._LANG_en, {
         "stage_100_story": "Defeat the ultimate god bringing the end of all things",
         "enemy_count": "Enemies {count}"
     },
+    "stars": {
+        "title": "Star goals",
+        "cond_clear": "Clear the stage",
+        "cond_nodeath": "Clear with no fallen allies",
+        "cond_turns": "Clear within {n} turns",
+        "bonus": "New star reward"
+    },
     "stage": {
         "title": "Stage Selection",
         "subtitle": "Select a stage to enter",
