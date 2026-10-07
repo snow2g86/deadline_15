@@ -195,10 +195,11 @@ function renderPartyTabs() {
 
   container.innerHTML = '';
 
-  _parties.parties.forEach(function(party) {
+  _parties.parties.forEach(function(party, i) {
     var btn = document.createElement('button');
     btn.className = 'party-tab' + (_currentPartyId === party.id ? ' active' : '');
-    btn.textContent = party.name;
+    // 저장된 이름은 한국어 고정이거나(storage.js) 없을 수 있어(첫 실행 index.js) 순번 기반 번역 라벨 사용
+    btn.textContent = t('party.party_n', { n: i + 1 });
     btn.onclick = function() {
       setActiveParty(party.id);
     };

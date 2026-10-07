@@ -23,6 +23,8 @@ Object.assign(window._LANG_en, {
         "type": "Type"
     },
     "nav": {
+        "sortie": "Sortie",
+        "guide": "Guide",
         "stage": "Stage",
         "party": "Party",
         "sanctuary": "Sanctuary",

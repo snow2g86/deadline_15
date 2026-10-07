@@ -1,6 +1,7 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "party": {
+        "party_n": "Grupo {n}",
         "title": "Composición del Equipo",
         "subtitle": "Compón un equipo de 5 miembros del clan",
         "member_count": "{current} / 5",

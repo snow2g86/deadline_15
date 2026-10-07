@@ -37,8 +37,11 @@
 .hideout-unit{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.7));
   transition:left 3.5s ease-in-out,top 3.5s ease-in-out}
-.hideout-unit .hu-shadow{width:20px;height:5px;background:rgba(0,0,0,.3);border-radius:50%;margin-top:1px}
-.hideout-unit .hu-name{font-size:12px;color:rgba(255,255,255,.5);margin-top:1px;white-space:nowrap;text-shadow:0 1px 2px #000;font-weight:700}
+.hideout-unit .hu-icon{line-height:0;animation:hideoutIdle 2.4s ease-in-out infinite}
+.hideout-unit .hu-shadow{width:28px;height:6px;background:rgba(0,0,0,.4);border-radius:50%;margin-top:-2px}
+.hideout-unit .hu-name{font-size:10px;color:#e5e7eb;margin-top:3px;padding:1px 7px;white-space:nowrap;font-weight:700;
+  background:rgba(10,8,6,.72);border:1px solid rgba(240,192,64,.22);border-radius:999px}
+.hideout-unit .hu-name b{color:var(--gold);font-weight:900;margin-right:1px}
 @keyframes hideoutFloat{0%{transform:translateY(-8px) scale(1.01)}50%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(-8px) scale(1.01)}}
 @keyframes hideoutIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .hideout-label{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:4;
@@ -58,6 +61,22 @@
 .popup-icon{font-size:28px;display:block}
 .popup-label{font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.5px}
 .popup-btn:hover .popup-label{color:var(--gold)}
+
+/* ═══ 출격 버튼 (메인 CTA) ═══ */
+.lobby-cta{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:120px;height:78px;margin-top:-8px;
+  border:2px solid #f5d060;border-radius:14px;cursor:pointer;color:#1a1206;font-family:'Cinzel','Noto Sans KR',serif;font-weight:900;
+  background:linear-gradient(180deg,#ffe28a,#f0c040 45%,#c8961e);
+  box-shadow:0 6px 20px rgba(240,192,64,.35),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18);
+  transition:transform .15s,box-shadow .15s;animation:ctaGlow 2.4s ease-in-out infinite}
+.lobby-cta:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(240,192,64,.5),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18)}
+.lobby-cta:active{transform:translateY(-1px) scale(.98)}
+.lobby-cta .cta-ic{font-size:24px;line-height:1}
+.lobby-cta .cta-lb{font-size:16px;letter-spacing:2px}
+@keyframes ctaGlow{0%,100%{box-shadow:0 6px 20px rgba(240,192,64,.3),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18)}
+  50%{box-shadow:0 6px 28px rgba(240,192,64,.55),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18)}}
+.lobby-popups{align-items:flex-end}
+@media(max-width:480px){.hideout-table{width:104px;height:104px}}
+@media (prefers-reduced-motion:reduce){.lobby-cta,.hideout-unit .hu-icon{animation:none}}
 
 /* ═══ PC (1024px+) ═══ */
 @media(min-width:1024px){

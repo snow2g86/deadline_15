@@ -97,7 +97,7 @@ function renderResurrect() {
   list.innerHTML = '';
 
   if (!dead.length) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('sanctuary.no_dead_units') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">🕊️</span>' + t('sanctuary.no_dead_units') + '</div>';
     return;
   }
 
@@ -207,7 +207,7 @@ function renderPromote() {
   });
 
   if (!promotable.length) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('sanctuary.no_promotable') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">⭐</span>' + t('sanctuary.no_promotable') + '</div>';
     return;
   }
 
@@ -569,7 +569,7 @@ function renderRename() {
   list.innerHTML = '';
 
   if (!candidates.length) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('sanctuary.no_rename_units') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">✏️</span>' + t('sanctuary.no_rename_units') + '</div>';
     return;
   }
 

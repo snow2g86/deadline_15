@@ -20,14 +20,17 @@ function goBack() {
 function renderEpisodes() {
   var l = document.getElementById('stage-list');
   l.innerHTML = '';
-  var sub = document.querySelector('.stage-subtitle');
-  if (sub) sub.textContent = t('stage.select_episode');
-
   var title = document.getElementById('nav-title');
   if (title) title.textContent = t('stage.select_episode');
 
   var save = loadSave();
   var cleared = new Set(save.cleared || []);
+
+  // 부제: 제목과 중복되던 문구 대신 전체 진행도
+  var sub = document.querySelector('.stage-subtitle');
+  var totalStages = EPISODES.reduce(function(a, e) { return a + e.stages.length; }, 0);
+  var totalCleared = EPISODES.reduce(function(a, e) { return a + e.stages.filter(function(s) { return cleared.has(s); }).length; }, 0);
+  if (sub) sub.textContent = t('stage.total_progress', { n: totalCleared, total: totalStages });
 
   EPISODES.forEach(function(ep) {
     // 해금 로직: EP.1 항상 해금, 이후 에피소드는 이전 에피소드 스테이지 전체 클리어 시 해금
@@ -42,11 +45,17 @@ function renderEpisodes() {
     // 진행률 계산
     var clearCount = ep.stages.filter(function(sid) { return cleared.has(sid); }).length;
 
+    var done = clearCount === ep.stages.length;
     var card = document.createElement('div');
-    card.className = 'episode-card' + (unlocked ? '' : ' locked');
+    card.className = 'episode-card' + (unlocked ? '' : ' locked') + (done ? ' done' : unlocked ? ' current' : '');
+    // 상태 태그: 잠김(해금 조건) / 진행 중 / 완료
+    var tag = !unlocked ? '<span class="ep-tag lock">\uD83D\uDD12 ' + t('stage.unlock_after', { ep: ep.id - 1 }) + '</span>'
+      : done ? '<span class="ep-tag done">\u2713 ' + t('stage.ep_done') + '</span>'
+      : '<span class="ep-tag cur">\u25B6 ' + t('stage.ep_current') + '</span>';
     card.innerHTML =
       '<div class="ep-header">' +
         '<div class="ep-num">EP.' + ep.id + '</div>' +
+        tag +
         '<div class="ep-progress">' + clearCount + '/' + ep.stages.length + '</div>' +
       '</div>' +
       '<div class="ep-name">' + t('episode.' + ep.id + '.name') + '</div>' +
@@ -93,15 +102,21 @@ function renderStages() {
     // unlock 조건: 첫 번째 스테이지 또는 이전 스테이지 클리어
     var unlocked = index === 0 || cleared.has(epStages[index - 1].id);
 
+    var isNext = unlocked && !cl;
     var b = document.createElement('div');
-    b.className = 'stage-btn' + (cl ? ' cleared' : '') + (unlocked ? '' : ' locked');
+    b.className = 'stage-btn' + (cl ? ' cleared' : '') + (unlocked ? '' : ' locked') + (isNext ? ' next' : '') + (st.boss ? ' boss' : '');
 
+    // 상태 배지: 클리어 ✓ / 다음 도전 / 잠김
+    var badge = cl ? '<span class="sb-badge clear">\u2713 CLEAR</span>'
+      : isNext ? '<span class="sb-badge next">NEXT</span>'
+      : !unlocked ? '<span class="sb-badge lock">\uD83D\uDD12</span>' : '';
+    var bossTag = st.boss && st.boss.name ? '<div class="sb-boss">\uD83D\uDC80 ' + st.boss.name + '</div>' : '';
     b.innerHTML =
       '<div class="sb-header">' +
-        '<div class="sb-num">EP.' + ep.id + '-' + stageIndex + '</div>' +
+        '<div class="sb-num">EP.' + ep.id + '-' + stageIndex + '</div>' + badge +
         '<div class="sb-rec-level">' + t('stage.recommended_level', {level: st.recommendedLevel}) + '</div>' +
       '</div>' +
-      '<div class="sb-name">' + t('stages.stage_' + st.id + '_name') + '</div>' +
+      '<div class="sb-name">' + t('stages.stage_' + st.id + '_name') + '</div>' + bossTag +
       '<button class="sb-info-btn" onclick="event.stopPropagation(); showStageInfo(' + st.id + ')">' +
         'ℹ️ ' + t('stage.info') +
       '</button>';

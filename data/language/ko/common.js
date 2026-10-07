@@ -23,6 +23,8 @@ Object.assign(window._LANG_ko, {
         "type": "종류"
     },
     "nav": {
+        "sortie": "출격",
+        "guide": "가이드",
         "stage": "스테이지",
         "party": "파티",
         "sanctuary": "성소",

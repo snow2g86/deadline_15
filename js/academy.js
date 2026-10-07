@@ -83,7 +83,7 @@ function renderAcademy() {
   list.innerHTML = '';
 
   if (!novices.length) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_novice') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">🎓</span>' + t('academy.no_novice') + '</div>';
     return;
   }
 
@@ -130,7 +130,7 @@ function showScrollSelectModal(uid) {
 
   if (!scrolls.length) {
     document.getElementById('modal-sub').innerHTML =
-      '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_scroll') + '</div>';
+      '<div class="empty-state"><span class="es-ic">📜</span>' + t('academy.no_scroll') + '</div>';
     var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
     var cb = document.createElement('button');
     cb.className = 'modal-btn secondary';
@@ -230,7 +230,7 @@ function renderSkillBooks() {
   list.innerHTML = '';
 
   if (!inv.length) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_skillbooks') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">📕</span>' + t('academy.no_skillbooks') + '</div>';
     return;
   }
 
@@ -268,7 +268,7 @@ function renderSkillBooks() {
     list.appendChild(el);
   });
   if (!hasBooks) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.no_skillbooks') + '</div>';
+    list.innerHTML = '<div class="empty-state"><span class="es-ic">📕</span>' + t('academy.no_skillbooks') + '</div>';
   }
 }
 
@@ -293,7 +293,7 @@ function showSkillBookTargets(idx) {
 
   if (!targets.length) {
     document.getElementById('modal-sub').innerHTML =
-      '<div style="color:var(--dim);font-size:12px;text-align:center;padding:20px">' + t('academy.skillbook_no_target') + '</div>';
+      '<div class="empty-state"><span class="es-ic">👥</span>' + t('academy.skillbook_no_target') + '</div>';
     var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
     var cb = document.createElement('button');
     cb.className = 'modal-btn secondary';

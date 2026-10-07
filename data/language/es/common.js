@@ -23,6 +23,8 @@ Object.assign(window._LANG_es, {
         "type": "Tipo"
     },
     "nav": {
+        "sortie": "Salir",
+        "guide": "Guía",
         "stage": "Escenario",
         "party": "Equipo",
         "sanctuary": "Santuario",

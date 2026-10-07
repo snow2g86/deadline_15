@@ -33,24 +33,23 @@ function renderHideout() {
 	}
 	if (!chars.length) return;
 	var names = _resolve(_i18nData, 'character.names') || [];
-	chars.forEach(function(ch) {
+	// 원탁 둘레 타원 위에 균등 배치 (겹침 방지). 시작 각도만 랜덤
+	var start = Math.random() * Math.PI * 2, n = chars.length;
+	chars.forEach(function(ch, i) {
 		var wrap = document.createElement('div');
 		wrap.className = 'hideout-unit';
-		// 4사분면 랜덤 배치 (중앙 원탁 회피 - 안전 거리 확보)
-		var cx, cy, q = Math.floor(Math.random() * 4);
-		switch (q) {
-			case 0: cx = 5 + Math.random() * 30; cy = 10 + Math.random() * 28; break;      // 좌상
-			case 1: cx = 65 + Math.random() * 30; cy = 10 + Math.random() * 28; break;    // 우상
-			case 2: cx = 5 + Math.random() * 30; cy = 62 + Math.random() * 28; break;     // 좌하
-			default: cx = 65 + Math.random() * 30; cy = 62 + Math.random() * 28;          // 우하
-		}
+		var ang = start + i / n * Math.PI * 2;
+		var cx = 50 + Math.cos(ang) * 34, cy = 52 + Math.sin(ang) * 33;
 		wrap.style.left = cx + '%';
 		wrap.style.top = cy + '%';
 		wrap.style.transform = 'translate(-50%,-50%)';
-		// 캐릭터 이미지
+		wrap.style.zIndex = 5 + Math.round(cy); // 원탁보다 위, 아래쪽 캐릭터일수록 앞에
+		// 캐릭터 이미지 (제자리 숨쉬기 애니메이션은 캐릭터마다 박자를 다르게)
 		var icon = document.createElement('div');
+		icon.className = 'hu-icon';
+		icon.style.animationDelay = (-Math.random() * 2.4).toFixed(2) + 's';
 		var suffix = (ch.gender || 'm') === 'f' ? '02' : '01';
-		icon.innerHTML = '<img src="image/character/' + ch.cls + '_' + suffix + '.png" width="40" style="image-rendering:pixelated">';
+		icon.innerHTML = '<img src="image/character/' + ch.cls + '_' + suffix + '.png" width="48" style="image-rendering:pixelated">';
 		wrap.appendChild(icon);
 		// 그림자
 		var sh = document.createElement('div');
@@ -60,7 +59,8 @@ function renderHideout() {
 		var nm = document.createElement('div');
 		nm.className = 'hu-name';
 		var charName = ch.customName || names[ch.nameId] || '???';
-		nm.textContent = 'Lv.' + ch.lv + ' ' + charName;
+		var lv = document.createElement('b'); lv.textContent = 'Lv.' + ch.lv;
+		nm.append(lv, ' ' + charName);
 		wrap.appendChild(nm);
 		ct.appendChild(wrap);
 	});
