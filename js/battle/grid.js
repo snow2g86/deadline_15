@@ -47,7 +47,7 @@ const Grid = {
   tSX(c, r) { const v = this.g2v(c, r); return this.isoX(v.vc, v.vr); },
   tSY(c, r, z) { const v = this.g2v(c, r); return this.isoY(v.vc, v.vr, z); },
   uSX(c, r) { return this.tSX(c, r) + TW - UCX; },
-  uSY(c, r) { const t = GameStore.ter[r] ? GameStore.ter[r][c] : null; return this.tSY(c, r, t ? TI[t].z : 0) - 22; },
+  uSY(c, r) { const t = GameStore.ter[r] ? GameStore.ter[r][c] : null; return this.tSY(c, r, t ? TI[t].z : 0) - UOY; },
 
   // ── 지형 생성 ──
   genT() {

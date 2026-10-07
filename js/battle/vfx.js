@@ -13,14 +13,18 @@ const VFX = {
   },
 
   _subscribe() {
-    EventBus.on('unit_attacked', ({ attacker, target, damage, counter }) => {
-      this.vfxAtk(attacker, target);
-      this.shakeU(target.id);
-      Renderer.floatT(target.x, target.y, `-${damage}`, 'damage');
+    EventBus.on('unit_attacked', ({ attacker, target, damage, counter, isSplash }) => {
+      // 스플래시는 공격자가 다시 휘두르지 않음 — 본 타격과 같은 타이밍에 이펙트만
+      const hitMs = isSplash ? this.atkHitDelay(attacker.cls) : this.vfxAtk(attacker, target);
+      setTimeout(() => {
+        this.shakeU(target.id);
+        Renderer.floatT(target.x, target.y, `-${damage}`, 'damage');
+      }, hitMs);
       if (counter) Renderer.floatT(attacker.x, attacker.y, t('messages.brawler_counter'), 'heal');
     });
     EventBus.on('unit_killed', ({ killer, target }) => {
-      this.screenShake(); this.vfxDeath(target); this.deathA(target.id);
+      const hitMs = killer ? this.atkHitDelay(killer.cls) : 0;
+      setTimeout(() => { this.screenShake(); this.vfxDeath(target); this.deathA(target.id); }, hitMs);
     });
     EventBus.on('unit_healed', ({ healer, target, amount }) => {
       this.vfxHeal(target);
@@ -124,6 +128,21 @@ const VFX = {
       } else if (p.shape === 'diamond') {
         ctx.beginPath(); const s = p.size * p.life;
         ctx.moveTo(0, -s); ctx.lineTo(s, 0); ctx.lineTo(0, s); ctx.lineTo(-s, 0); ctx.closePath(); ctx.fill();
+      } else if (p.shape === 'arcSlash') {
+        // 초승달 모양 무기 궤적 (rotation이 궤적 시작 각도, rotSpd로 휘두름)
+        ctx.strokeStyle = p.color; ctx.lineCap = 'round';
+        ctx.lineWidth = p.size * .32 * p.life; ctx.beginPath(); ctx.arc(0, 0, p.size, 0, 1.8); ctx.stroke();
+        ctx.lineWidth = p.size * .12 * p.life; ctx.beginPath(); ctx.arc(0, 0, p.size * .8, .2, 1.6); ctx.stroke();
+      } else if (p.shape === 'streak') {
+        // 공격 방향으로 뻗는 잔상 (rotation = 진행 방향)
+        const g = ctx.createLinearGradient(-p.size, 0, 0, 0);
+        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, p.color);
+        ctx.strokeStyle = g; ctx.lineWidth = 3 * p.life + 1; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-p.size, 0); ctx.lineTo(0, 0); ctx.stroke();
+      } else if (p.shape === 'implode') {
+        // 마력 집중 — 바깥에서 안으로 수축하는 고리
+        ctx.strokeStyle = p.color; ctx.lineWidth = 2.5 * (1 - p.life) + .5;
+        ctx.beginPath(); ctx.arc(0, 0, p.size * p.life + 1, 0, Math.PI * 2); ctx.stroke();
       } else if (p.shape === 'cross') {
         ctx.strokeStyle = p.color; ctx.lineWidth = p.size * p.life * 0.5; ctx.lineCap = 'round';
         const s = p.size * 2; ctx.beginPath();
@@ -143,11 +162,15 @@ const VFX = {
   },
 
   // ── 공격 VFX ──
+  // 공격 모션 재생 + 타격 프레임에 직업별 타격 이펙트 → 타격 지연(ms) 반환
   vfxAtk(attacker, target) {
     this.faceDir(attacker.id, target.x - attacker.x, target.y - attacker.y);
-    this.atkAnimU(attacker.id);
-    const u = GameStore.units.find(v => v.id === attacker.id);
-    if (u) this.showAttackAnim(u.id, u.gender, u.cls);
+    const hitMs = this.playAtkMotion(attacker, target);
+    setTimeout(() => this._vfxHit(attacker, target), hitMs);
+    return hitMs;
+  },
+
+  _vfxHit(attacker, target) {
     const ax = Grid.uSX(attacker.x, attacker.y) + UCX, ay = Grid.uSY(attacker.x, attacker.y) + UCY;
     const tx = Grid.uSX(target.x, target.y) + UCX, ty = Grid.uSY(target.x, target.y) + UCY;
     const cls = attacker.cls;
@@ -299,33 +322,5 @@ const VFX = {
   },
 
   shakeU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('shaking'); setTimeout(() => el.classList.remove('shaking'), 300); } },
-  atkAnimU(id) { const el = document.getElementById('u-' + id); if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 380); } },
   deathA(id) { const el = document.getElementById('u-' + id); if (el) el.classList.add('dying'); },
-
-  // ── 공격 스프라이트 시트 애니메이션 ──
-  showAttackAnim(uId, gender, cls) {
-    // 공격 애니메이션 이미지 파일이 없으면 무시
-    try {
-      const genderCode = gender === 'f' ? '02' : '01';
-      const sheetPath = `image/character/${cls}_${genderCode}_attack.png`;
-      const w = document.getElementById('iso-world'); if (!w) return;
-      const el = document.getElementById('u-' + uId); if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const wRect = w.getBoundingClientRect();
-      const overlay = document.createElement('div');
-      overlay.className = 'atk-anim-overlay';
-      overlay.style.cssText = `position:absolute;width:400px;height:400px;z-index:2000;pointer-events:none;background-image:url('${sheetPath}');background-size:1600px 400px;background-position:0 0;`;
-      overlay.style.left = (parseFloat(el.style.transform?.match(/translate\(([^,]+)/)?.[1]) || 0) - 176 + 'px';
-      overlay.style.top = (parseFloat(el.style.transform?.match(/,\s*([^)]+)/)?.[1]) || 0) - 170 + 'px';
-      w.appendChild(overlay);
-      let frame = 0;
-      const interval = setInterval(() => {
-        frame++;
-        if (frame >= 4) { clearInterval(interval); overlay.remove(); return; }
-        overlay.style.backgroundPosition = `-${frame * 400}px 0`;
-      }, 150);
-    } catch(e) {
-      // 공격 애니메이션 오류는 무시 (이미지 파일 없는 경우)
-    }
-  },
 };

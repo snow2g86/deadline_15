@@ -141,7 +141,7 @@ const Renderer = {
         spriteEl.textContent = ''; // placeholder
         iconDiv.append(spriteEl);
         // Use charSprite which returns safe markup
-        iconDiv.insertAdjacentHTML('beforeend', charSprite(u.cls, 36, u.gender));
+        iconDiv.insertAdjacentHTML('beforeend', charSprite(u.cls, UI, u.gender));
         if (iconDiv.querySelector('span')) iconDiv.querySelector('span').remove();
         const shadow = document.createElement('div'); shadow.className = 'u-shadow';
         const hpBg = document.createElement('div'); hpBg.className = 'hp-bg';
@@ -241,151 +241,164 @@ const Renderer = {
   // ══════════════════════════════════════════
   //  Action Menu
   // ══════════════════════════════════════════
+  // 메뉴 버튼 공통 렌더: [아이콘][라벨 + 보조줄][단축키]
+  //   ac = 강조색 클래스(move/attack/skill/item/wait/cancel), key = 단축키, sub = 보조 설명(비용·사용 불가 사유)
+  _amBtn(btn, { icon, label, ac, key, sub, warn }) {
+    btn.textContent = '';
+    btn.className = btn.className.replace(/\bac-\S+/g, '').trim() + ' ac-' + ac;
+    const ic = document.createElement('span'); ic.className = 'am-ic'; ic.innerHTML = icon;
+    const tx = document.createElement('span'); tx.className = 'am-tx';
+    const lb = document.createElement('span'); lb.className = 'am-lb'; lb.textContent = String(label).replace(/^[^\p{L}\p{N}]+/u, '');
+    tx.appendChild(lb);
+    if (sub) { const sb = document.createElement('span'); sb.className = 'am-sub' + (warn ? ' warn' : ''); sb.textContent = sub; tx.appendChild(sb); }
+    btn.append(ic, tx);
+    if (key) { const k = document.createElement('kbd'); k.className = 'am-key'; k.textContent = key; btn.appendChild(k); btn.dataset.key = key.toLowerCase(); }
+    else delete btn.dataset.key;
+    return btn;
+  },
+
+  _amHead(m, text) {
+    const h = document.createElement('div'); h.className = 'am-head'; h.textContent = text;
+    m.insertBefore(h, m.firstChild);
+  },
+
   showAM(u) {
     const S = GameStore;
     const m = document.getElementById('action-menu');
+    m.querySelectorAll('.am-skill, .am-item, .am-healer-atk, .am-head').forEach(e => e.remove());
     m.style.left = (Grid.uSX(u.x, u.y) + UW + 2) + 'px';
     m.style.top = Grid.uSY(u.x, u.y) + 'px'; m.style.zIndex = 500;
+    const wasShown = m.classList.contains('show');
     if (u.channeling) {
       this.hideAllMenuButtons();
-      document.getElementById('btn-cancel').style.display = 'none';
       const btn = document.createElement('button'); btn.className = 'am-skill';
-      btn.textContent = t('messages.unlock');
+      this._amBtn(btn, { icon: '🔓', label: t('messages.unlock'), ac: 'skill', key: '1' });
       btn.onclick = () => ActionManager.cancelChannel();
       const btnDash = document.getElementById('btn-dash');
       m.insertBefore(btn, btnDash);
+      this._amBtn(btnDash, { icon: '⏸', label: t('battle.wait'), ac: 'wait', key: 'W' });
       btnDash.style.display = '';
-      btnDash.textContent = t('battle.wait');
-      m.classList.add('show'); return;
+    } else if (S._skillMenuOpen) this.showSkillSubMenu(u);
+    else if (S._itemMenuOpen) this.showItemSubMenu(u);
+    else this.showMainMenu(u);
+    m.classList.add('show');
+    this._placeAM(m, u);
+    if (!wasShown) { m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); }
+  },
+
+  // 메뉴가 화면 오른쪽(행동 순서 패널)과 겹치면 유닛 왼쪽으로 뒤집기
+  _placeAM(m, u) {
+    m.classList.remove('flip');
+    m.style.left = (Grid.uSX(u.x, u.y) + UW + 2) + 'px';
+    const r = m.getBoundingClientRect();
+    const nav = document.getElementById('ally-nav');
+    const limit = Math.min(window.innerWidth, nav && nav.offsetWidth ? nav.getBoundingClientRect().left : window.innerWidth) - 8;
+    if (r.right > limit) {
+      m.style.left = (Grid.uSX(u.x, u.y) - r.width - 2) + 'px';
+      m.classList.add('flip');
     }
-    if (S._skillMenuOpen) { this.showSkillSubMenu(u); return; }
-    if (S._itemMenuOpen) { this.showItemSubMenu(u); return; }
-    this.showMainMenu(u);
   },
 
   showMainMenu(u) {
     const S = GameStore;
-    const m = document.getElementById('action-menu');
-    m.querySelectorAll('.am-skill, .am-item, .am-healer-atk').forEach(e => e.remove());
+    const btnMove = document.getElementById('btn-move'), btnAttack = document.getElementById('btn-attack');
+    const btnSkill = document.getElementById('btn-skill'), btnItem = document.getElementById('btn-item');
+    const btnDash = document.getElementById('btn-dash'), btnCancel = document.getElementById('btn-cancel');
 
     if (S._skillFailedMsg) {
-      document.getElementById('btn-move').style.display = 'none';
-      document.getElementById('btn-attack').style.display = 'none';
-      document.getElementById('btn-skill').style.display = 'none';
-      document.getElementById('btn-item').style.display = 'none';
-      const btnDash = document.getElementById('btn-dash');
-      btnDash.textContent = t('battle.wait'); btnDash.style.display = '';
-      const btnCancel = document.getElementById('btn-cancel');
-      btnCancel.textContent = t('battle.cancel'); btnCancel.style.display = '';
+      this.hideAllMenuButtons();
+      this._amBtn(btnDash, { icon: '⏸', label: t('battle.wait'), ac: 'wait', key: 'W' }); btnDash.style.display = '';
+      this._amBtn(btnCancel, { icon: '↩', label: t('battle.cancel'), ac: 'cancel', key: 'Esc' }); btnCancel.style.display = '';
       btnCancel.onclick = () => ActionManager.hideSkillMenu();
-      m.classList.add('show'); return;
+      return;
     }
 
     // 이동 버튼: 이동 전이면 표시
-    document.getElementById('btn-move').style.display = (!u.hm && !u.mo) ? '' : 'none';
+    this._amBtn(btnMove, { icon: '👣', label: t('battle.move'), ac: 'move', key: 'M', sub: t('battle.am_move_sub', { n: u.move }) });
+    btnMove.style.display = (!u.hm && !u.mo) ? '' : 'none';
 
     // 공격 버튼: 힐러 → "공격&회복" 단일 버튼, 비힐러 → "공격"
-    const btnAttack = document.getElementById('btn-attack');
-    if (u.role === 'healer') {
-      btnAttack.textContent = t('battle.attack_heal');
-      btnAttack.style.display = (!u.ha && (S.atkT.length > 0 || S.healT.length > 0)) ? '' : 'none';
-      btnAttack.onclick = () => ActionManager.actAttack();
-    } else {
-      btnAttack.textContent = t('battle.attack');
-      btnAttack.style.display = (!u.ha && S.atkT.length > 0) ? '' : 'none';
-      btnAttack.onclick = () => ActionManager.actAttack();
-    }
+    const isHealer = u.role === 'healer';
+    const nTgt = S.atkT.length + (isHealer ? S.healT.length : 0);
+    this._amBtn(btnAttack, { icon: isHealer ? '✚' : '⚔️', label: t(isHealer ? 'battle.attack_heal' : 'battle.attack'), ac: 'attack', key: 'A',
+      sub: t('battle.am_targets', { n: nTgt }) });
+    btnAttack.style.display = (!u.ha && nTgt > 0) ? '' : 'none';
+    btnAttack.onclick = () => ActionManager.actAttack();
 
     // 스킬 버튼: active 스킬이 1개라도 있으면 표시 (개별 disable은 서브메뉴에서)
-    const skills = getUnitSkills(u);
-    const hasActiveSkill = !u.ha && skills.some(sk => !sk.passive);
-    document.getElementById('btn-skill').style.display = hasActiveSkill ? '' : 'none';
+    const actives = getUnitSkills(u).filter(sk => !sk.passive);
+    const usable = actives.filter(sk => this.canUseSkill(u, sk)).length;
+    this._amBtn(btnSkill, { icon: '🔱', label: t('battle.skill'), ac: 'skill', key: 'S',
+      sub: t('battle.am_usable', { n: usable, total: actives.length }), warn: usable === 0 });
+    btnSkill.style.display = (!u.ha && actives.length) ? '' : 'none';
 
     // 아이템 버튼
-    const hasPotion = S._battlePotions && S._battlePotions.length > 0;
-    const hasSiege = S._siegeItems && S._siegeItems.length > 0;
-    document.getElementById('btn-item').style.display = (!u.ha && (hasPotion || hasSiege)) ? '' : 'none';
+    const itemCnt = (S._battlePotions || []).reduce((a, p) => a + (p.quantity || 1), 0) + (S._siegeItems || []).reduce((a, p) => a + (p.quantity || 1), 0);
+    this._amBtn(btnItem, { icon: '🎒', label: t('battle.item'), ac: 'item', key: 'I', sub: t('battle.am_count', { n: itemCnt }) });
+    btnItem.style.display = (!u.ha && itemCnt > 0) ? '' : 'none';
 
     // 대기 버튼
-    const btnDash = document.getElementById('btn-dash');
-    btnDash.textContent = t('battle.wait'); btnDash.style.display = '';
+    this._amBtn(btnDash, { icon: '⏸', label: t('battle.wait'), ac: 'wait', key: 'W', sub: t('battle.am_wait_sub') });
+    btnDash.style.display = '';
 
     // 취소/되돌리기 버튼
-    const btnCancel = document.getElementById('btn-cancel');
-    if (S.preMv) {
-      btnCancel.textContent = t('battle.undo_move');
-      btnCancel.style.display = '';
-    } else {
-      btnCancel.style.display = 'none';
-    }
+    this._amBtn(btnCancel, { icon: '↩', label: t('battle.undo_move'), ac: 'cancel', key: 'Esc' });
+    btnCancel.style.display = S.preMv ? '' : 'none';
     btnCancel.onclick = () => ActionManager.actCancel();
-    m.classList.add('show');
   },
 
   showSkillSubMenu(u) {
     const m = document.getElementById('action-menu');
     this.hideAllMenuButtons();
-    m.querySelectorAll('.am-skill').forEach(e => e.remove());
-    const skills = getUnitSkills(u);
+    this._amHead(m, t('battle.skill'));
     const btnDash = document.getElementById('btn-dash');
-    skills.forEach((sk, idx) => {
+    let n = 0;
+    getUnitSkills(u).forEach((sk, idx) => {
       if (sk.passive) return;
+      const reason = this.skillBlockReason(u, sk);
+      const cost = sk.cost ? `${sk.cost} ${t('resources.' + (sk.costType || u.resType))}` : '';
       const btn = document.createElement('button'); btn.className = 'am-skill';
-      btn.textContent = t('skills.' + sk.id);
-      btn.disabled = !this.canUseSkill(u, sk);
+      this._amBtn(btn, { icon: skillIcon(sk.id, 16, sk.icon), label: t('skills.' + sk.id), ac: 'skill', key: String(++n),
+        sub: reason ? t('battle.reason_' + reason, { cost }) : cost, warn: !!reason });
+      btn.disabled = !!reason;
+      btn.title = t('skills_desc.' + sk.id) !== 'skills_desc.' + sk.id ? t('skills_desc.' + sk.id) : (sk.desc || '');
       btn.onclick = () => ActionManager.actSkill(idx);
       m.insertBefore(btn, btnDash);
     });
-    btnDash.style.display = 'none';
     const btnCancel = document.getElementById('btn-cancel');
-    btnCancel.textContent = t('battle.cancel'); btnCancel.style.display = '';
+    this._amBtn(btnCancel, { icon: '↩', label: t('battle.cancel'), ac: 'cancel', key: 'Esc' }); btnCancel.style.display = '';
     btnCancel.onclick = () => ActionManager.hideSkillMenu();
-    m.classList.add('show');
   },
 
   showItemSubMenu(u) {
     const S = GameStore;
     const m = document.getElementById('action-menu');
     this.hideAllMenuButtons();
-    m.querySelectorAll('.am-skill,.am-item').forEach(e => e.remove());
+    this._amHead(m, t('battle.item'));
     const btnDash = document.getElementById('btn-dash');
-    const potionSeen = {};
-    if (S._battlePotions) {
-      S._battlePotions.forEach((pot, idx) => {
-        const def = BATTLE_POTIONS[pot.potionId]; if (!def) return;
-        const key = pot.potionId;
-        if (!potionSeen[key]) potionSeen[key] = { def, count: 0, firstIdx: idx };
-        potionSeen[key].count += pot.quantity || 1;
+    let n = 0;
+    const addItem = (icon, label, count, onclick) => {
+      const btn = document.createElement('button'); btn.className = 'am-item';
+      this._amBtn(btn, { icon, label, ac: 'item', key: String(++n), sub: '×' + count });
+      btn.onclick = onclick;
+      m.insertBefore(btn, btnDash);
+    };
+    const group = (list, findDef, idKey) => {
+      const seen = {};
+      (list || []).forEach((it, idx) => {
+        const def = findDef(it[idKey]); if (!def) return;
+        if (!seen[it[idKey]]) seen[it[idKey]] = { def, count: 0, firstIdx: idx };
+        seen[it[idKey]].count += it.quantity || 1;
       });
-      Object.keys(potionSeen).forEach(key => {
-        const { def, count, firstIdx } = potionSeen[key];
-        const btn = document.createElement('button'); btn.className = 'am-item';
-        btn.textContent = t('battle_potions.' + def.id) + ' x' + count;
-        btn.onclick = () => ActionManager.actPotion(firstIdx);
-        m.insertBefore(btn, btnDash);
-      });
-    }
-    const siegeSeen = {};
-    if (S._siegeItems) {
-      S._siegeItems.forEach((si, idx) => {
-        const def = SIEGE_ITEMS.find(d => d.id === si.siegeId); if (!def) return;
-        const key = si.siegeId;
-        if (!siegeSeen[key]) siegeSeen[key] = { def, count: 0, firstIdx: idx };
-        siegeSeen[key].count += si.quantity || 1;
-      });
-      Object.keys(siegeSeen).forEach(key => {
-        const { def, count, firstIdx } = siegeSeen[key];
-        const btn = document.createElement('button'); btn.className = 'am-item';
-        btn.textContent = t('shop.' + def.id) + (count > 1 ? ' x' + count : '');
-        btn.onclick = () => ActionManager.actSiege(firstIdx);
-        m.insertBefore(btn, btnDash);
-      });
-    }
-    btnDash.style.display = 'none';
+      return Object.values(seen);
+    };
+    group(S._battlePotions, id => BATTLE_POTIONS[id], 'potionId').forEach(({ def, count, firstIdx }) =>
+      addItem(def.icon || '🧪', t('battle_potions.' + def.id), count, () => ActionManager.actPotion(firstIdx)));
+    group(S._siegeItems, id => SIEGE_ITEMS.find(d => d.id === id), 'siegeId').forEach(({ def, count, firstIdx }) =>
+      addItem(def.icon || '📦', t('shop.' + def.id), count, () => ActionManager.actSiege(firstIdx)));
     const btnCancel = document.getElementById('btn-cancel');
-    btnCancel.textContent = t('battle.cancel'); btnCancel.style.display = '';
+    this._amBtn(btnCancel, { icon: '↩', label: t('battle.cancel'), ac: 'cancel', key: 'Esc' }); btnCancel.style.display = '';
     btnCancel.onclick = () => ActionManager.hideItemMenu();
-    m.classList.add('show');
   },
 
   hideAllMenuButtons() {
@@ -395,32 +408,29 @@ const Renderer = {
     document.getElementById('action-menu').querySelectorAll('.am-healer-atk').forEach(e => e.remove());
   },
 
-  canUseSkill(u, sk) {
+  // 스킬 사용 불가 사유 → null(사용 가능) 또는 i18n 키 접미사 (battle.reason_*)
+  skillBlockReason(u, sk) {
     const S = GameStore;
-    if (sk.passive) return false;
-    let enabled = u.res >= sk.cost && !u.ha;
+    if (sk.passive || u.ha) return 'acted';
+    if (sk.id === 'assassin_ambush' && !isStealthed(u)) return 'need_stealth';
     if (sk.id === 'assassin_assassinate') {
-      const overlapping = isStealthed(u) && S.units.some(v =>
-        v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
-      enabled = enabled && overlapping;
+      const overlapping = isStealthed(u) && S.units.some(v => v.x === u.x && v.y === u.y && v.team === 'enemy' && v.hp > 0);
+      if (!overlapping) return 'need_overlap';
     }
-    if (sk.id === 'assassin_ambush') { if (!isStealthed(u)) enabled = false; }
-    if (sk.id.startsWith('summoner_summon_')) {
-      const currentSummons = S.units.filter(s => s.isSummon && s.summonerId === u.id);
-      if (currentSummons.length >= 1) enabled = false;
-    }
+    if (sk.id.startsWith('summoner_summon_') && S.units.some(s => s.isSummon && s.summonerId === u.id)) return 'summon_exists';
     if (sk.id === 'archer_snipe') {
       const sMin = sk.snipeMin || 5, sMax = sk.snipeMax || 10;
-      const hasTarget = S.units.some(v => v.team === 'enemy' && v.hp > 0 && mh(u.x, u.y, v.x, v.y) >= sMin && mh(u.x, u.y, v.x, v.y) <= sMax);
-      if (!hasTarget) enabled = false;
+      if (!S.units.some(v => v.team === 'enemy' && v.hp > 0 && mh(u.x, u.y, v.x, v.y) >= sMin && mh(u.x, u.y, v.x, v.y) <= sMax)) return 'no_target';
     }
     if (sk.id === 'sapper_excavate') {
       const er = sk.excavateRange || 1;
-      const hasRock = S.ter.some((row, y) => row.some((ti, x) => ti === 'rock' && mh(u.x, u.y, x, y) <= er && mh(u.x, u.y, x, y) > 0));
-      if (!hasRock) enabled = false;
+      if (!S.ter.some((row, y) => row.some((ti, x) => ti === 'rock' && mh(u.x, u.y, x, y) <= er && mh(u.x, u.y, x, y) > 0))) return 'no_rock';
     }
-    return enabled;
+    if (u.res < sk.cost) return 'no_res';
+    return null;
   },
+
+  canUseSkill(u, sk) { return !this.skillBlockReason(u, sk); },
 
   hideAM() { document.getElementById('action-menu').classList.remove('show'); },
 
@@ -438,6 +448,22 @@ const Renderer = {
     return buffs;
   },
 
+  // 원형 초상화: 캐릭터 이미지의 얼굴 부분 크롭 (소환수는 SVG 스프라이트)
+  portrait(u, cls) {
+    const pt = document.createElement('div'); pt.className = cls;
+    if (u.cls.startsWith('summon_')) { pt.classList.add('svg'); pt.insertAdjacentHTML('afterbegin', charSprite(u.cls, 22, u.gender)); }
+    else pt.style.backgroundImage = `url(image/character/${u.cls}_${u.gender === 'f' ? '02' : '01'}.png)`;
+    return pt;
+  },
+
+  unitName(u) { return u.name || t((u.cls.startsWith('summon_') ? 'summon_types.' : 'classes.') + u.cls); },
+
+  // 목록/카드 → 맵 유닛 강조
+  linkHover(el, u) {
+    el.onmouseenter = () => { const s = document.getElementById('u-' + u.id); if (s) s.classList.add('nav-hover'); };
+    el.onmouseleave = () => { const s = document.getElementById('u-' + u.id); if (s) s.classList.remove('nav-hover'); };
+  },
+
   rTurnOrder() {
     const S = GameStore;
     const nav = document.getElementById('ally-nav');
@@ -450,27 +476,26 @@ const Renderer = {
     });
     withTicks.sort((a, b) => a.ticksLeft - b.ticksLeft);
     while (nav.firstChild) nav.removeChild(nav.firstChild);
-    withTicks.forEach(({ u, ticksLeft }) => {
+    const head = document.createElement('div'); head.className = 'an-head'; head.textContent = t('battle.turn_order');
+    nav.appendChild(head);
+    const div = (cls, parent) => { const d = document.createElement('div'); d.className = cls; if (parent) parent.appendChild(d); return d; };
+    withTicks.forEach(({ u, ticksLeft }, i) => {
       const isCur = S.curUnit && S.curUnit.id === u.id;
-      const el = document.createElement('div');
-      const isEnemy = u.team === 'enemy';
-      el.className = 'an-unit' + (isEnemy ? ' enemy-nav' : '') + (isCur ? ' cur-nav' : '');
-      const ap = u.actionPow || 0, rec = u.actionRec || 1.0;
-      const apPct = Math.min(100, (ap / 5) * 100);
-      const apDisplay = ap.toFixed(1);
-      const recDisplay = rec.toFixed(1);
-      const tickDisplay = ap >= 4.999 ? '\u2713' : ticksLeft.toFixed(1);
-      // Build DOM safely
-      const iconWrap = document.createElement('div'); iconWrap.className = 'an-icon';
-      iconWrap.insertAdjacentHTML('afterbegin', clsIcon(u.cls, 18));
-      const apbar = document.createElement('div'); apbar.className = 'an-apbar';
-      const apbarFill = document.createElement('div'); apbarFill.style.height = apPct + '%'; apbar.appendChild(apbarFill);
-      const info = document.createElement('div'); info.className = 'an-info';
-      const apText = document.createElement('div'); apText.className = 'an-ap-text'; apText.textContent = apDisplay + '/5';
-      const recText = document.createElement('div'); recText.className = 'an-rec-text'; recText.textContent = recDisplay + 'x';
-      const tickText = document.createElement('div'); tickText.className = 'an-tick-text'; tickText.textContent = tickDisplay;
-      info.appendChild(apText); info.appendChild(recText); info.appendChild(tickText);
-      el.appendChild(iconWrap); el.appendChild(apbar); el.appendChild(info);
+      const ready = u.actionPow >= 4.999;
+      const el = div('an-unit ' + u.team + (u.isBoss ? ' boss' : '') + (isCur ? ' cur-nav' : ''));
+      div('an-order', el).textContent = i + 1;
+      el.appendChild(this.portrait(u, 'an-portrait'));
+      const body = div('an-body', el);
+      const name = this.unitName(u);
+      div('an-name', body).textContent = name;
+      el.title = `${name} · HP ${u.hp}/${u.mhp} · AP ${(u.actionPow || 0).toFixed(1)}/5 (${(u.actionRec || 1).toFixed(1)}x)`;
+      const hpPct = Math.max(0, u.hp / u.mhp * 100);
+      const hp = div('an-bar an-hp' + (hpPct <= 30 ? ' low' : ''), body);
+      div('', hp).style.width = hpPct + '%';
+      div('', div('an-bar an-ap', body)).style.width = Math.min(100, (u.actionPow || 0) / 5 * 100) + '%';
+      const eta = div('an-eta' + (ready ? ' ready' : ''), el);
+      eta.textContent = isCur ? t('battle.acting') : ready ? '\u2713' : ticksLeft.toFixed(1);
+      this.linkHover(el, u);
       if (u.team === 'ally') el.onclick = () => {
         if (!FSM.isPlayerTurn()) return;
         if (!S.curUnit || u.id === S.curUnit.id) ActionManager.selU(u);
@@ -561,25 +586,40 @@ const Renderer = {
     const S = GameStore;
     const ti = document.getElementById('turn-indicator');
     const phase = S.curUnit ? (S.curUnit.team === 'ally' ? 'player' : 'enemy') : 'player';
-    ti.textContent = phase === 'player' ? 'PLAYER' : 'ENEMY'; ti.className = phase;
+    if (!ti.classList.contains(phase)) {
+      ti.textContent = '';
+      const dot = document.createElement('span'); dot.className = 'ti-dot';
+      ti.append(dot, t(phase === 'player' ? 'battle.player_phase' : 'battle.enemy_phase'));
+      ti.className = phase;
+    }
     const s = S.cStage, en = UnitManager.alive('enemy').length;
-    const br = s ? S.breached : 0, blim = s ? Math.ceil(s.tot / 4) : 0;
+    const tot = s ? s.tot : 0, br = s ? S.breached : 0, blim = s ? Math.ceil(s.tot / 4) : 0;
     const infoEl = document.getElementById('stage-info');
     infoEl.textContent = '';
-    const stageText = document.createTextNode('STAGE ' + (s ? s.id : 1) + ' ');
-    infoEl.appendChild(stageText);
-    const nameSpan = document.createElement('span');
-    nameSpan.style.cssText = 'color:var(--dim);font-size:9px';
-    nameSpan.textContent = s ? t('stages.stage_' + s.id + '_name') : '';
-    infoEl.appendChild(nameSpan);
-    const turnDiv = document.createElement('div');
-    turnDiv.className = 'si-turn';
-    const brSpan = document.createElement('span');
-    brSpan.style.color = br > 0 ? '#ef4444' : 'var(--dim)';
-    brSpan.textContent = t('battle.breach') + ' ' + br + '/' + blim;
-    turnDiv.appendChild(document.createTextNode(t('battle.summon') + ' ' + S.eSpwn + '/' + (s ? s.tot : '?') + ' \u00B7 ' + t('battle.remaining') + ' ' + en + '\uCCB4 \u00B7 '));
-    turnDiv.appendChild(brSpan);
-    infoEl.appendChild(turnDiv);
+    const el = (tag, cls, txt, parent) => { const e = document.createElement(tag); e.className = cls; if (txt !== undefined) e.textContent = txt; (parent || infoEl).appendChild(e); return e; };
+    const title = el('div', 'si-title');
+    el('span', 'si-no', 'STAGE ' + (s ? s.id : 1), title);
+    if (s) el('span', 'si-name', t('stages.stage_' + s.id + '_name'), title);
+    const chips = el('div', 'si-chips');
+    // 적 증원 진행도: 남은 증원이 0이 되면 완료 표시
+    const wave = el('span', 'si-chip wave' + (S.eSpwn >= tot ? ' done' : ''), undefined, chips);
+    wave.title = t('battle.summon') + ' ' + S.eSpwn + '/' + tot;
+    el('span', 'si-ic', '⚑', wave);
+    const wbar = el('span', 'si-wbar', undefined, wave);
+    el('span', '', undefined, wbar).style.width = (tot ? S.eSpwn / tot * 100 : 0) + '%';
+    el('span', 'si-v', S.eSpwn + '/' + tot, wave);
+    const foe = el('span', 'si-chip foe', undefined, chips);
+    foe.title = t('battle.remaining');
+    el('span', 'si-ic', '⚔', foe);
+    el('span', 'si-v', t('battle.enemy_left', { n: en }), foe);
+    // 돌파: 한도 1 전부터 경고, 한도 도달 시 패배
+    if (blim) {
+      const danger = br >= blim - 1 && br > 0;
+      const brc = el('span', 'si-chip breach' + (br > 0 ? ' hit' : '') + (danger ? ' danger' : ''), undefined, chips);
+      brc.title = t('battle.breach_tip', { n: blim });
+      el('span', 'si-ic', '⚠', brc);
+      el('span', 'si-v', t('battle.breach') + ' ' + br + '/' + blim, brc);
+    }
   },
 
   showUI() { this.rInfoPanel(); },
@@ -599,17 +639,23 @@ const Renderer = {
       const buffs = this.getBuffs(u);
 
       const card = document.createElement('div');
-      card.className = 'info-card ally-card' + (isSel ? ' ip-sel' : '');
+      const isCur = S.curUnit && S.curUnit.id === u.id;
+      card.className = 'info-card ally-card' + (isSel ? ' ip-sel' : '') + (isCur ? ' ip-cur' : '') + (u.ha && !isCur ? ' ip-done' : '');
       card.dataset.uid = u.id;
 
-      // Top row
+      // Top row: 초상화 + 이름/직업
       const top = document.createElement('div'); top.className = 'ic-top';
-      const iconSpan = document.createElement('span'); iconSpan.className = 'ic-icon';
-      iconSpan.insertAdjacentHTML('afterbegin', clsIcon(u.cls, 14));
-      const nameSpan = document.createElement('span'); nameSpan.className = 'ic-name'; nameSpan.textContent = u.name;
-      const clsSpan = document.createElement('span'); clsSpan.className = 'ic-class'; clsSpan.textContent = t('classes.' + u.cls);
-      top.appendChild(iconSpan); top.appendChild(nameSpan); top.appendChild(clsSpan);
+      top.appendChild(this.portrait(u, 'ic-portrait'));
+      const nm = document.createElement('div'); nm.className = 'ic-nm';
+      const nameSpan = document.createElement('span'); nameSpan.className = 'ic-name'; nameSpan.textContent = this.unitName(u);
+      const clsSpan = document.createElement('span'); clsSpan.className = 'ic-class'; clsSpan.textContent = 'Lv.' + (u.lv || 1) + ' ' + t('classes.' + u.cls);
+      nm.append(nameSpan, clsSpan); top.appendChild(nm);
       card.appendChild(top);
+      this.linkHover(card, u);
+      card.onclick = () => {
+        if (!FSM.isPlayerTurn()) { this.scrollToUnit(u); return; }
+        if (!S.curUnit || u.id === S.curUnit.id) ActionManager.selU(u); else this.scrollToUnit(u);
+      };
 
       // HP bar
       const hpRow = document.createElement('div'); hpRow.className = 'ic-bar-row';
@@ -672,11 +718,9 @@ const Renderer = {
 
     // Head
     const head = document.createElement('div'); head.className = 'ep-head';
-    const epIcon = document.createElement('span'); epIcon.className = 'ep-icon';
-    epIcon.insertAdjacentHTML('afterbegin', clsIcon(u.cls, 16));
-    const epName = document.createElement('span'); epName.className = 'ep-name'; epName.textContent = u.name;
-    const epCls = document.createElement('span'); epCls.className = 'ep-cls'; epCls.textContent = t('classes.' + u.cls);
-    head.appendChild(epIcon); head.appendChild(epName); head.appendChild(epCls);
+    const epName = document.createElement('span'); epName.className = 'ep-name' + (u.isBoss ? ' boss' : ''); epName.textContent = this.unitName(u);
+    const epCls = document.createElement('span'); epCls.className = 'ep-cls'; epCls.textContent = 'Lv.' + (u.lv || 1) + ' ' + t('classes.' + u.cls);
+    head.append(this.portrait(u, 'ic-portrait enemy'), epName, epCls);
     pop.appendChild(head);
 
     // HP bar
@@ -726,8 +770,10 @@ const Renderer = {
     const sy = Grid.uSY(u.x, u.y) - 10;
     pop.style.left = sx + 'px'; pop.style.top = sy + 'px';
     requestAnimationFrame(() => {
+      // 맵 영역 위쪽(상단 바 아래)을 넘으면 유닛 아래로 뒤집기
       const rect = pop.getBoundingClientRect();
-      if (rect.top < 0) pop.classList.add('below');
+      const mapTop = document.getElementById('map-container').getBoundingClientRect().top;
+      if (rect.top < mapTop + 4) pop.classList.add('below');
       pop.classList.add('show');
     });
     this._epClose = e => { e.stopPropagation(); this.hideEnemyPopup(); };
@@ -762,39 +808,52 @@ const Renderer = {
     const deadAllyCount = S._deadAllyUids.length;
     const autoRevived = S._autoRevivedCount || 0;
 
-    const lines = [];
-    if (S.practiceMode) {
-      lines.push('\uD83C\uDF93 ' + t('stage.practice_mode_active'));
-      lines.push(t('stage.reduced_gold') + ' (70%)');
-      lines.push('\uD83D\uDCCA ' + t('stage.full_exp') + ' (100%)');
-      if (autoRevived > 0) lines.push('\u2764 ' + t('stage.auto_revived', { count: autoRevived }));
-      lines.push('\u26A0\uFE0F ' + t('stage.no_clear_recorded'));
-      lines.push('');
-    }
-    lines.push(msg);
-    if (win && actualReward) lines.push(t('messages.reward') + ': ' + actualReward + ' Gold');
-    if (win && S._firstClearBonus) { lines.push('\uD83C\uDF89 ' + t('messages.first_clear_bonus') + ': +' + S._firstClearBonus + ' Gold'); S._firstClearBonus = 0; }
-    if (win && S._firstClearUnit) { lines.push('\uD83C\uDF81 ' + t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) })); S._firstClearUnit = null; }
-    if (win && S._droppedBook) { lines.push('\uD83D\uDCD5 ' + t('academy.skillbook_drop', { skill: t('skills.' + S._droppedBook) })); S._droppedBook = null; }
-    if (deadAllyCount) lines.push('\uD83D\uDC80 \uC804\uC0AC\uC790: ' + deadAllyCount + '\uBA85 (\uC131\uC18C\uC5D0\uC11C \uBD80\uD65C \uAC00\uB2A5)');
-    if (S._expResults && S._expResults.length) {
-      lines.push('');
-      lines.push(t('results.battle_detail', { kills: S._deadEnemyCount || 0, exp: S._totalExp || 0, survivors: S._expResults.length }));
-      S._expResults.forEach(r => {
-        const ch = getChar(r.uid); if (!ch) return;
-        const charName = ch.customName || t('character.names')[ch.nameId] || JAB[ch.cls].icon;
-        let line = charName + ': +' + r.exp + ' EXP';
-        if (r.leveled > 0) line += ' Lv.' + r.prevLv + '\u2192' + ch.lv;
-        lines.push(line);
-      });
-    }
-
+    // 결과 본문: 섹션별 DOM (메시지 → 보상 → 전사자 → 클랜원 경험치)
     const subEl = document.getElementById('modal-sub');
     subEl.textContent = '';
-    lines.forEach((line, i) => {
-      if (i > 0) subEl.appendChild(document.createElement('br'));
-      subEl.appendChild(document.createTextNode(line));
-    });
+    const box = document.getElementById('modal-box');
+    box.classList.remove('win', 'lose'); box.classList.add('result', win ? 'win' : 'lose');
+    const el = (tag, cls, txt, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; (parent || subEl).appendChild(e); return e; };
+    el('div', 'res-msg', msg);
+    if (S.practiceMode) {
+      const pr = el('div', 'res-note');
+      [t('stage.practice_mode_active'), t('stage.reduced_gold') + ' (70%)', t('stage.full_exp') + ' (100%)',
+        autoRevived > 0 ? t('stage.auto_revived', { count: autoRevived }) : null, t('stage.no_clear_recorded')]
+        .filter(Boolean).forEach(x => el('div', '', x, pr));
+    }
+    const rewards = [];
+    if (win && actualReward) rewards.push(['🪙', t('messages.reward'), '+' + actualReward + ' G']);
+    if (win && S._firstClearBonus) { rewards.push(['🎉', t('messages.first_clear_bonus'), '+' + S._firstClearBonus + ' G']); S._firstClearBonus = 0; }
+    if (win && S._firstClearUnit) { rewards.push(['🎁', t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) }), '']); S._firstClearUnit = null; }
+    if (win && S._droppedBook) { rewards.push(['📕', t('academy.skillbook_drop', { skill: t('skills.' + S._droppedBook) }), '']); S._droppedBook = null; }
+    if (rewards.length) {
+      const rw = el('div', 'res-rewards');
+      rewards.forEach(([ic, label, val]) => {
+        const r = el('div', 'res-reward', undefined, rw);
+        el('span', 'rr-ic', ic, r); el('span', 'rr-lb', String(label).replace(/^[^\p{L}\p{N}]+/u, ''), r);
+        if (val) el('span', 'rr-v', val, r);
+      });
+    }
+    if (deadAllyCount) el('div', 'res-fallen', '💀 ' + t('results.fallen', { n: deadAllyCount }));
+    if (S._expResults && S._expResults.length) {
+      el('div', 'res-head', t('results.battle_detail', { kills: S._deadEnemyCount || 0, exp: S._totalExp || 0, survivors: S._expResults.length }));
+      const list = el('div', 'res-exp');
+      S._expResults.forEach((r, i) => {
+        const ch = getChar(r.uid); if (!ch) return;
+        const row = el('div', 'res-row' + (r.leveled > 0 ? ' lvup' : ''), undefined, list);
+        row.style.animationDelay = (0.15 + i * 0.08) + 's';
+        row.appendChild(this.portrait({ cls: ch.cls, gender: ch.gender }, 'ic-portrait'));
+        const mid = el('div', 'rr-mid', undefined, row);
+        el('div', 'rr-name', ch.customName || t('character.names')[ch.nameId] || t('classes.' + ch.cls), mid);
+        // 다음 레벨까지 경험치 진행도 (최대 레벨이면 가득)
+        const need = ch.lv >= MAX_LEVEL ? 0 : expForLevel(ch.lv);
+        const bar = el('div', 'rr-bar', undefined, mid);
+        el('div', '', undefined, bar).style.width = (need ? Math.min(100, (ch.exp || 0) / need * 100) : 100) + '%';
+        const right = el('div', 'rr-right', undefined, row);
+        el('div', 'rr-exp', '+' + r.exp + ' EXP', right);
+        el('div', 'rr-lv', r.leveled > 0 ? 'LV ' + r.prevLv + ' → ' + ch.lv : 'Lv.' + ch.lv, right);
+      });
+    }
 
     const bt = document.getElementById('modal-buttons');
     while (bt.firstChild) bt.removeChild(bt.firstChild);

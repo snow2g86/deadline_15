@@ -198,6 +198,13 @@ document.addEventListener('keydown', e => {
   if (e.key === 'q' || e.key === 'Q') Renderer.rotCam(-1);
   if (e.key === 'e' || e.key === 'E') Renderer.rotCam(1);
   if (e.key === 'Escape') Renderer.closeSettings();
+  // 행동 메뉴 단축키: 메뉴에 표시된 data-key 버튼을 그대로 클릭 (M/A/S/I/W, 서브메뉴 1~9, Esc/Backspace 취소)
+  const m = document.getElementById('action-menu');
+  if (!m || !m.classList.contains('show') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest && e.target.closest('input,textarea,select')) return;
+  const k = (e.key === 'Escape' || e.key === 'Backspace') ? 'esc' : e.key === ' ' ? 'w' : e.key.toLowerCase();
+  const btn = [...m.querySelectorAll('button[data-key]')].find(b => b.dataset.key === k && b.style.display !== 'none' && !b.disabled);
+  if (btn) { e.preventDefault(); btn.click(); }
 });
 
 // ── 페이지 로드 ──
@@ -215,4 +222,29 @@ window.addEventListener('DOMContentLoaded', async () => {
 // ── 리사이즈 ──
 window.addEventListener('resize', () => {
   if (GameStore.ter && GameStore.ter.length) Grid.layWorld();
+});
+
+// ── 마우스 드래그로 맵 이동 (터치는 기본 스크롤 사용) ──
+window.addEventListener('DOMContentLoaded', () => {
+  const ct = document.getElementById('map-container'); if (!ct) return;
+  let drag = null;
+  ct.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, sl: ct.scrollLeft, st: ct.scrollTop, moved: false };
+  });
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return; // 작은 흔들림은 클릭으로 취급
+    drag.moved = true; ct.classList.add('panning');
+    ct.scrollLeft = drag.sl - dx; ct.scrollTop = drag.st - dy;
+  });
+  window.addEventListener('pointerup', () => {
+    if (drag && drag.moved) {
+      // 드래그 직후의 click은 타일 선택으로 처리되지 않도록 한 번 막는다
+      ct.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+      setTimeout(() => ct.classList.remove('panning'), 0);
+    }
+    drag = null;
+  });
 });

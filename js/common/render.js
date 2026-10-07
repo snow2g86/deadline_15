@@ -9,12 +9,13 @@ function clsIcon(cls, size) {
   return '<img class="cls-icon" src="image/icon/jab/' + cls + '.png" alt="' + cls + '" style="width:' + size + 'px;height:' + size + 'px">';
 }
 
-function skillIcon(skillId, size) {
+// fallback: SKILL_ICONS 미정의 시 대신 표시할 값 (예: 스킬 데이터의 이모지). 생략 시 '❓'
+function skillIcon(skillId, size, fallback) {
   if (typeof SKILL_ICONS !== 'undefined' && SKILL_ICONS[skillId]) {
     const iconPath = SKILL_ICONS[skillId];
     return '<img class="skill-icon" src="' + iconPath + '" alt="' + skillId + '" style="width:' + size + 'px;height:' + size + 'px;image-rendering:pixelated">';
   }
-  return '❓';
+  return fallback || '❓';
 }
 
 // ── 캐릭터 스프라이트 ────────────────────────────
