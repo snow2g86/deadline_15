@@ -124,6 +124,7 @@ const Grid = {
       const occHidden = occ && occ.team !== u.team && isStealthed(occ);
       if (c > 0 && (!occ || occHidden)) res.push({ x, y });
       if (c > 0 && occ && occ.team !== u.team && !occHidden && isStealth && S.ter[y] && S.ter[y][x] === 'forest') res.push({ x, y });
+      if (c > 0 && UnitManager.inZoc(u, x, y)) continue; // 제압 구역: 들어가면 더 못 감
       for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
         const nx = x + dx, ny = y + dy;
         if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
@@ -162,6 +163,7 @@ const Grid = {
       const occ = UnitManager.uAt(x, y);
       const occStealth = occ && isStealthed(occ);
       if (c > 0 && (!occ || occStealth)) res.push({ x, y });
+      if (c > 0 && UnitManager.inZoc(u, x, y)) continue; // 제압 구역: 들어가면 더 못 감
       for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
         const nx = x + dx, ny = y + dy;
         if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
@@ -181,8 +183,11 @@ const Grid = {
   // ── 공격/힐 범위 ──
   atkCells(u) {
     const cells = [];
+    // 고지대: 언덕 위 원거리 유닛은 사거리 +1
+    const onHill = GameStore.ter[u.y] && GameStore.ter[u.y][u.x] === 'hill';
+    const rng = u.range + (onHill && u.range > 1 ? TACTIC.highRange : 0);
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
-      if (mh(u.x, u.y, c, r) <= u.range && !(c === u.x && r === u.y)) cells.push({ x: c, y: r });
+      if (mh(u.x, u.y, c, r) <= rng && !(c === u.x && r === u.y)) cells.push({ x: c, y: r });
     return cells;
   },
 

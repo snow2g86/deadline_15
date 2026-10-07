@@ -3,6 +3,10 @@ Object.assign(window._LANG_es, {
     "battle": {
         "loading_title": "Preparando batalla...",
         "loading_tips": [
+            "Atacar por la espalda inflige +30%, por el flanco +15%",
+            "Rodea a un enemigo entre dos unidades para un +20% de pinza",
+            "Las colinas dan +15% de daño y +1 de alcance a las unidades a distancia",
+            "Los enemigos se detienen al pisar junto a un caballero (zona de control)",
             "Los aliados justo detrás de un caballero no pueden ser atacados de frente (salvo por asesinos)",
             "La evasion aumenta en los bosques",
             "Coloca sanadores atras para mejor supervivencia",
@@ -37,6 +41,10 @@ Object.assign(window._LANG_es, {
         "enemy": "Enemigo",
         "turn_order": "ORDEN",
         "acting": "ACTÚA",
+        "tactic_back": "Espalda",
+        "tactic_side": "Flanco",
+        "tactic_pincer": "Pinza",
+        "tactic_high": "Altura",
         "turn_n": "Turno {n}",
         "player_phase": "JUGADOR",
         "enemy_phase": "ENEMIGO",

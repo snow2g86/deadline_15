@@ -16,9 +16,12 @@ const VFX = {
     EventBus.on('unit_attacked', ({ attacker, target, damage, counter, isSplash }) => {
       // 스플래시는 공격자가 다시 휘두르지 않음 — 본 타격과 같은 타이밍에 이펙트만
       const hitMs = isSplash ? this.atkHitDelay(attacker.cls) : this.vfxAtk(attacker, target);
+      const tactic = !isSplash && attacker._lastTactic; attacker._lastTactic = null;
       setTimeout(() => {
         this.shakeU(target.id);
         Renderer.floatT(target.x, target.y, `-${damage}`, 'damage');
+        if (tactic) Renderer.floatT(target.x, target.y,
+          tactic.tags.map(k => t('battle.tactic_' + k)).join('·') + ` +${Math.round((tactic.mul - 1) * 100)}%`, 'tactic');
       }, hitMs);
       if (counter) Renderer.floatT(attacker.x, attacker.y, t('messages.brawler_counter'), 'heal');
     });

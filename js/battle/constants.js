@@ -98,7 +98,16 @@ const AI_MISTAKE_CHANCE = 0.3;
 
 // ── 엄호(Cover): 탱커가 아군 앞을 막으면 뒤의 아군은 일반 공격 대상이 될 수 없다 ──
 const GUARD_CLASSES = ['knight'];          // 엄호를 제공하는 직업
-const COVER_IGNORE_CLASSES = ['assassin']; // 엄호를 무시하고 뒤를 노리는 직업
+const COVER_IGNORE_CLASSES = ['assassin']; // 엄호·제압 구역을 무시하는 직업
+
+// ── 전술 보너스 (데미지 배율 가산) ──
+const TACTIC = {
+  back: 0.30,      // 대상의 등 뒤에서 공격
+  side: 0.15,      // 대상의 옆에서 공격
+  pincer: 0.20,    // 대상 반대편에 같은 편이 붙어 있음 (협공)
+  high: 0.15,      // 언덕에서 언덕 아닌 곳을 공격 (고지대)
+  highRange: 1,    // 언덕 위 원거리 유닛 사거리 보너스
+};
 
 // ── 리소스 UI 상수 ──
 const RES_LABEL = { mana: 'MP', energy: 'EP', fury: 'FP' };

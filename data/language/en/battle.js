@@ -3,6 +3,10 @@ Object.assign(window._LANG_en, {
     "battle": {
         "loading_title": "Preparing for battle...",
         "loading_tips": [
+            "Attacks from behind deal +30%, from the side +15%",
+            "Sandwich an enemy between two units for a +20% pincer bonus",
+            "Hills give +15% damage and +1 range to ranged units",
+            "Enemies stop moving when they step next to a knight (zone of control)",
             "Allies right behind a knight cannot be attacked from the front (except by assassins)",
             "Evasion increases on forest tiles",
             "Place healers in the back for better survival",
@@ -38,6 +42,10 @@ Object.assign(window._LANG_en, {
         "enemy": "Enemy",
         "turn_order": "TURN ORDER",
         "acting": "ACTING",
+        "tactic_back": "Back",
+        "tactic_side": "Flank",
+        "tactic_pincer": "Pincer",
+        "tactic_high": "High",
         "turn_n": "Turn {n}",
         "player_phase": "PLAYER",
         "enemy_phase": "ENEMY",

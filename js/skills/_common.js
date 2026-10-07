@@ -130,6 +130,12 @@ function calcDmg(attacker, target) {
 	if (attacker.cls === 'mage' && attacker.skillLv && attacker.skillLv['mage_manasurge'] >= 1 && attacker.res >= attacker.maxRes * 0.8) {
 		dmg = Math.max(1, Math.round(dmg * 1.2));
 	}
+	// 전술 보너스 (후방·측면·협공·고지대) — 표시용으로 공격자에 기록
+	attacker._lastTactic = null;
+	if (typeof UnitManager !== 'undefined' && UnitManager.tacticBonus) {
+		const tb = UnitManager.tacticBonus(attacker, target);
+		if (tb.tags.length) { dmg = Math.max(1, Math.round(dmg * tb.mul)); attacker._lastTactic = tb; }
+	}
 	attacker._lastCrit = false;
 	if (attacker.cls === 'archer' && attacker.skillLv && attacker.skillLv['archer_weakspot'] >= 1) {
 		if (Math.random() < 0.3) { dmg = Math.max(1, Math.round(dmg * 1.5)); attacker._lastCrit = true; }

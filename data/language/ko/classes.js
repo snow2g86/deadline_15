@@ -56,7 +56,7 @@ Object.assign(window._LANG_ko, {
     },
     "terrain_buff_desc": {
         "forest": "DEF+3",
-        "hill": "ATK+5"
+        "hill": "ATK+15%·원거리 사거리+1"
     },
     "summon_types": {
         "summon_spirit": "정령",

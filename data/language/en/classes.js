@@ -56,7 +56,7 @@ Object.assign(window._LANG_en, {
     },
     "terrain_buff_desc": {
         "forest": "DEF+3",
-        "hill": "ATK+5"
+        "hill": "ATK+15%, ranged +1 range"
     },
     "summon_types": {
         "summon_spirit": "Spirit",

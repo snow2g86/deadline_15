@@ -3,6 +3,10 @@ Object.assign(window._LANG_ko, {
     "battle": {
         "loading_title": "전투 준비 중...",
         "loading_tips": [
+            "적의 등 뒤에서 공격하면 +30%, 옆에서 공격하면 +15% 피해를 줍니다",
+            "적을 사이에 두고 양쪽에서 공격하면 협공 +20%",
+            "언덕에서는 공격 +15%, 원거리 유닛은 사거리 +1",
+            "기사 옆 칸에 들어간 적은 그 자리에서 멈춥니다 (제압 구역)",
             "기사 바로 뒤의 아군은 앞쪽 적의 공격을 받지 않습니다 (암살자 제외)",
             "숲 지형에서는 회피율이 증가합니다",
             "힐러를 후방에 배치하면 생존율이 높아집니다",
@@ -37,6 +41,10 @@ Object.assign(window._LANG_ko, {
         "enemy": "적군",
         "turn_order": "행동 순서",
         "acting": "행동 중",
+        "tactic_back": "후방",
+        "tactic_side": "측면",
+        "tactic_pincer": "협공",
+        "tactic_high": "고지",
         "turn_n": "{n}턴",
         "player_phase": "아군 턴",
         "enemy_phase": "적군 턴",

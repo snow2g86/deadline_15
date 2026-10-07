@@ -152,6 +152,35 @@ const UnitManager = {
       mh(g.x, g.y, target.x, target.y) === 1 && mh(attacker.x, attacker.y, g.x, g.y) < dT) || null;
   },
 
+  // ── 전술 보너스 ──
+  // 반환: { mul: 배율, tags: ['back'|'side'|'pincer'|'high'] }
+  tacticBonus(a, t) {
+    const S = GameStore, tags = [];
+    let add = 0;
+    // 후방/측면: 대상이 바라보는 방향(_gdx,_gdy)과 공격 방향의 각도
+    const fx = t._gdx || 0, fy = t._gdy || 0;
+    const dx = a.x - t.x, dy = a.y - t.y;
+    if ((fx || fy) && (dx || dy)) {
+      const cos = (dx * fx + dy * fy) / (Math.hypot(dx, dy) * Math.hypot(fx, fy));
+      if (cos < -0.5) { add += TACTIC.back; tags.push('back'); }
+      else if (cos <= 0.5) { add += TACTIC.side; tags.push('side'); }
+    }
+    // 협공: 공격자 반대편(내적 < 0)에 공격자 편 유닛이 대상과 붙어 있음
+    if (S.units.some(p => p.hp > 0 && p.id !== a.id && p.team === a.team && mh(p.x, p.y, t.x, t.y) === 1 &&
+        (p.x - t.x) * dx + (p.y - t.y) * dy < 0)) { add += TACTIC.pincer; tags.push('pincer'); }
+    // 고지대
+    const ta = S.ter[a.y] && S.ter[a.y][a.x], tt = S.ter[t.y] && S.ter[t.y][t.x];
+    if (ta === 'hill' && tt !== 'hill') { add += TACTIC.high; tags.push('high'); }
+    return { mul: 1 + add, tags };
+  },
+
+  // ── 제압 구역(ZOC): 이 칸이 상대 편 탱커의 바로 옆인가 ──
+  inZoc(u, x, y) {
+    if (COVER_IGNORE_CLASSES.includes(u.cls)) return false;
+    return GameStore.units.some(g => g.hp > 0 && g.team !== u.team && GUARD_CLASSES.includes(g.cls) &&
+      !this.isCC(g) && mh(g.x, g.y, x, y) === 1);
+  },
+
   // 표시용: 옆에 엄호해 줄 수 있는 탱커가 있는가 (방향 무관)
   hasGuard(u) {
     return !GUARD_CLASSES.includes(u.cls) && GameStore.units.some(g => g.hp > 0 && g.id !== u.id && g.team === u.team &&

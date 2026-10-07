@@ -153,7 +153,11 @@ const Renderer = {
         const mpFill = document.createElement('div'); mpFill.className = 'mp-fill'; mpBg.appendChild(mpFill);
         el.appendChild(iconDiv); el.appendChild(shadow); el.appendChild(hpBg); el.appendChild(mpBg);
         w.appendChild(el);
-        if (u.team === 'enemy') { u._gdx = 0; u._gdy = 1; VFX._applyFace(u.id); }
+        if (u._gdx === undefined && u._gdy === undefined) {
+          // 초기 방향: 적은 아래(아군 쪽), 아군은 위(적 쪽)를 바라봄 — 후방 공격 판정 기준
+          u._gdx = 0; u._gdy = u.team === 'enemy' ? 1 : -1;
+        }
+        VFX._applyFace(u.id);
       }
       const inFog = u.team === 'enemy' && !S.fogVisible.has(u.x + ',' + u.y);
       el.style.display = inFog ? 'none' : '';
