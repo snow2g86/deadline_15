@@ -86,48 +86,63 @@ function saveRoster(data) {
   } catch (_) {}
 }
 
-// ── Party 데이터 (레거시 - 마이그레이션용) ────────────────────────────
-function loadParty() {
+// ── Party 데이터 ────────────────────────────
+// 파티 저장소는 game_parties(다중 파티) 하나뿐. game_party(단일 목록)는 예전 세이브 마이그레이션용으로만 읽는다.
+// 기본 구조: 파티 5개(id 1~5), 5슬롯 고정. 표시 이름은 화면에서 t('party.party_n')로 만든다.
+function createDefaultParties(firstSlots) {
+  const slots = (firstSlots || []).slice(0, 5);
+  while (slots.length < 5) slots.push(null);
+  const parties = [{ id: 1, slots: slots }];
+  for (let i = 2; i <= 5; i++) parties.push({ id: i, slots: [null, null, null, null, null] });
+  return { parties: parties, activePartyId: 1, nextPartyId: 6 };
+}
+
+function _loadLegacyParty() {
   try {
     const r = localStorage.getItem(PARTY_KEY);
-    if (r) return JSON.parse(r);
+    if (r) { const p = JSON.parse(r); if (Array.isArray(p)) return p; }
   } catch (_) {}
   return [];
 }
 
+// 하위 호환 API: 활성 파티의 UID 배열 (빈 슬롯 제외)
+function loadParty() { return getActiveParty(); }
+
+// 하위 호환 API: 활성 파티의 슬롯을 주어진 UID 배열로 교체
 function saveParty(party) {
-  try {
-    localStorage.setItem(PARTY_KEY, JSON.stringify(party));
-  } catch (_) {}
+  const data = loadParties();
+  const active = data.parties.find(p => p.id === data.activePartyId) || data.parties[0];
+  const slots = (party || []).slice(0, 5);
+  while (slots.length < 5) slots.push(null);
+  active.slots = slots;
+  saveParties(data);
 }
 
-// ── Multi-Party 데이터 (신규) ────────────────────────────
+// ── Multi-Party 데이터 ────────────────────────────
 function loadParties() {
   try {
     const raw = localStorage.getItem(PARTIES_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && Array.isArray(d.parties) && d.parties.length) {
+        // 활성 파티 id가 실제로 없으면(예: 예전 세이브의 id 0) 첫 파티로 맞춤
+        if (!d.parties.some(p => p.id === d.activePartyId)) d.activePartyId = d.parties[0].id;
+        if (typeof d.nextPartyId !== 'number') {
+          // 예전 첫 실행 세이브(파티 1개, nextPartyId 없음) → 새 게임과 같은 5파티 구조로 채움
+          let next = Math.max(...d.parties.map(p => +p.id || 0)) + 1;
+          while (d.parties.length < 5) d.parties.push({ id: next++, slots: [null, null, null, null, null] });
+          d.nextPartyId = next;
+          saveParties(d);
+        }
+        return d;
+      }
+    }
   } catch (_) {}
 
-  // 첫 로드: 레거시 데이터 마이그레이션 + 파티 5개 기본 설정
-  const oldParty = loadParty();
-  const newData = {
-    parties: [
-      { id: 1, name: '파티 1', slots: oldParty && oldParty.length > 0 ? oldParty : [null, null, null, null, null] },
-      { id: 2, name: '파티 2', slots: [null, null, null, null, null] },
-      { id: 3, name: '파티 3', slots: [null, null, null, null, null] },
-      { id: 4, name: '파티 4', slots: [null, null, null, null, null] },
-      { id: 5, name: '파티 5', slots: [null, null, null, null, null] }
-    ],
-    activePartyId: 1,
-    nextPartyId: 6
-  };
-
-  // 마이그레이션 완료 후 레거시 키 삭제
+  // 첫 로드: 예전 단일 파티(game_party) 마이그레이션 후 레거시 키 삭제
+  const newData = createDefaultParties(_loadLegacyParty());
   saveParties(newData);
-  try {
-    localStorage.removeItem(PARTY_KEY);
-  } catch (_) {}
-
+  try { localStorage.removeItem(PARTY_KEY); } catch (_) {}
   return newData;
 }
 

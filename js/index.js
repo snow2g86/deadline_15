@@ -93,13 +93,7 @@ function ensureRoster() {
 		});
 	}
 	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
-	localStorage.setItem('game_party', JSON.stringify(chars.map(function(c) { return c.uid; })));
-	var uids = chars.map(function(c) { return c.uid; });
-	while (uids.length < 5) uids.push(null);
-	localStorage.setItem('game_parties', JSON.stringify({
-		parties: [{ id: 0, slots: uids.slice(0, 5) }],
-		activePartyId: 0
-	}));
+	saveParties(createDefaultParties(chars.map(function(c) { return c.uid; })));
 	localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
 }
 
@@ -202,11 +196,11 @@ function validateAndRepairGameData() {
 			if (typeof party.id !== 'number') party.id = idx;
 		});
 
-		if (!parties.activePartyId || typeof parties.activePartyId !== 'number') {
-			parties.activePartyId = 0;
+		if (!parties.parties.some(function(p) { return p.id === parties.activePartyId; })) {
+			parties.activePartyId = parties.parties.length ? parties.parties[0].id : 1;
 		}
 
-		localStorage.setItem('game_parties', JSON.stringify(parties));
+		saveParties(parties);
 		if (errors.length > 0) console.warn('[GameData] Parties repaired:', errors);
 	} catch(e) {
 		console.error('[GameData] Parties validation failed:', e.message);
@@ -219,10 +213,7 @@ function validateAndRepairGameData() {
 			roster.chars[3]?.uid || null,
 			roster.chars[4]?.uid || null
 		];
-		localStorage.setItem('game_parties', JSON.stringify({
-			parties: [{ id: 0, slots: initialSlots }],
-			activePartyId: 0
-		}));
+		saveParties(createDefaultParties(initialSlots));
 		repaired = true;
 	}
 
