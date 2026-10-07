@@ -14,7 +14,7 @@ D = os.path.join(ROOT, 'tools', '_work', 'anim'); OUT = os.path.join(D, 'sheets'
 os.makedirs(OUT, exist_ok=True)
 # 동작별 변환 구간: (프레임 수, 시작초, 끝초, 추가 옵션)
 SPEC = {'idle': (12, 0, 2.3, []), 'combat': (12, 0, 2.3, []), 'run': (14, 0.25, 2.75, ['--body-median']),
-        'hit': (9, 0, 1.55, []), 'attack': (18, 0.1, 2.95, [])}
+        'hit': (9, 0, 1.55, []), 'attack': (14, 0.1, 2.0, [])}
 
 def parse(path):
     name = os.path.basename(path)[:-4]

@@ -121,6 +121,16 @@
       "who": "young female adventurer with a dagger",
       "pron": "she",
       "action": "Wind-up: she pulls the dagger back at her side. Strike: she steps forward and makes one quick forward stab toward the right."
+    },
+    "commander_01": {
+      "who": "young clan commander in a navy cape and steel breastplate holding a longsword",
+      "pron": "he",
+      "action": "Wind-up: he raises the longsword high with his cape swinging behind him. Strike: he steps forward and brings the longsword down in one decisive diagonal slash in front of him toward the right."
+    },
+    "commander_02": {
+      "who": "elegant female clan commander in a navy cape and ornate breastplate holding a slender longsword",
+      "pron": "she",
+      "action": "Wind-up: she draws the slender longsword back gracefully with her cape swinging behind her. Strike: she steps forward and makes one swift elegant lunging slash toward the right."
     }
   },
   "motions": {
