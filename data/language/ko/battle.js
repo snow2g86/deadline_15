@@ -3,6 +3,7 @@ Object.assign(window._LANG_ko, {
     "battle": {
         "loading_title": "전투 준비 중...",
         "loading_tips": [
+            "적이 다음 행동에 공격할 수 있는 칸은 위협 범위 버튼(T)으로 확인하세요",
             "적의 등 뒤에서 공격하면 +30%, 옆에서 공격하면 +15% 피해를 줍니다",
             "적을 사이에 두고 양쪽에서 공격하면 협공 +20%",
             "언덕에서는 공격 +15%, 원거리 유닛은 사거리 +1",
@@ -41,6 +42,9 @@ Object.assign(window._LANG_ko, {
         "enemy": "적군",
         "turn_order": "행동 순서",
         "acting": "행동 중",
+        "threat_title": "적 위협 범위 (T)",
+        "tactic_evade": "회피 {n}%",
+        "preview_counter": "반격 -{n}",
         "tactic_back": "후방",
         "tactic_side": "측면",
         "tactic_pincer": "협공",

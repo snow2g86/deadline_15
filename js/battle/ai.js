@@ -114,6 +114,30 @@ const AI = {
     return false;
   },
 
+  // ── 전술 이동 점수 ──
+  // 후보 칸 m에서: 공격 가능한(엄호 안 된) 아군이 있으면 가점 + 그 공격의 전술 보너스만큼 추가,
+  // 상대 기사 제압 구역에 들어가면 감점, 숲(회피)·언덕(원거리)은 가점.
+  // AI_MISTAKE_CHANCE 확률로 전술 판단을 약하게 해 항상 완벽하지는 않게 한다.
+  _tacticScore(u, m, al) {
+    const S = GameStore;
+    const tile = S.ter[m.y] && S.ter[m.y][m.x];
+    const me = { id: u.id, team: u.team, cls: u.cls, x: m.x, y: m.y };
+    const rng = u.range + (tile === 'hill' && u.range > 1 ? TACTIC.highRange : 0);
+    let best = -1;
+    for (const a of al) {
+      if (a.hp <= 0 || isStealthed(a) || mh(m.x, m.y, a.x, a.y) > rng) continue;
+      if (UnitManager.coverOf(me, a)) continue;
+      const tb = UnitManager.tacticBonus(me, a);
+      const killable = a.hp <= Math.max(1, Math.round((u.atk - a.def) * tb.mul));
+      best = Math.max(best, (tb.mul - 1) * 100 + (killable ? 25 : 0));
+    }
+    let s = best >= 0 ? 40 + best : 0;
+    if (UnitManager.inZoc(u, m.x, m.y) && best < 0) s -= 15;  // 공격도 못 하면서 발만 묶이는 칸
+    if (tile === 'forest') s += 5;
+    if (tile === 'hill' && u.range > 1) s += 8;
+    return Math.random() < AI_MISTAKE_CHANCE ? s * 0.3 : s;
+  },
+
   // ── 사거리 내 아군(적 입장) 탐색 ──
   _visibleAllies(u) {
     return Grid.atkCells(u).filter(c => {
@@ -126,7 +150,17 @@ const AI = {
   async _tryAttack(u, targets, profile) {
     if (!targets.length || profile.targetPriority === 'never') return false;
     if (await this.tryUseSkill(u, profile)) return true;
-    const target = this.selectTarget(u, targets, profile);
+    // 처치 가능하거나 전술 보너스가 큰 대상이 있으면 우선 (실수 확률만큼은 평소 우선순위대로)
+    let target = null;
+    if (Math.random() >= AI_MISTAKE_CHANCE) {
+      let bs = 29;
+      for (const a of targets) {
+        const tb = UnitManager.tacticBonus(u, a);
+        const sc = (tb.mul - 1) * 100 + (a.hp <= Math.max(1, Math.round((u.atk - a.def) * tb.mul)) ? 100 : 0);
+        if (sc > bs) { bs = sc; target = a; }
+      }
+    }
+    target = target || this.selectTarget(u, targets, profile);
     if (target) { await this.eAtkAsync(u, target); return true; }
     return false;
   },
@@ -479,6 +513,7 @@ const AI = {
         if (tr === 'forest') score += 50;
         if (bt) score += (mh(u.x, u.y, bt.x, bt.y) - mh(m.x, m.y, bt.x, bt.y)) * 10;
         score += (m.y - u.y) * 3;
+        score += this._tacticScore(u, m, al);
         if (score > bestScore) { bestScore = score; bestMove = m; }
       }
       if (bestMove) {
@@ -547,6 +582,7 @@ const AI = {
       let s = 0;
       if (bt) s += (mh(u.x, u.y, bt.x, bt.y) - mh(c.x, c.y, bt.x, bt.y)) * 10;
       s += (c.y - u.y) * (3 + profile.advanceBonus * 0.3);
+      s += this._tacticScore(u, c, al);
       if (s > bs) { bs = s; bc = c; }
     }
     if (bc) {

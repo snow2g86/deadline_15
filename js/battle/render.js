@@ -89,7 +89,9 @@ const Renderer = {
     const S = GameStore;
     if (!this._bgReady) { this.rTerBg(); }
     Grid.calcFOW();
+    const threat = S._showThreat ? this.calcThreat() : null;
     this._hlTiles.forEach((hlTile, pos) => {
+      hlTile.classList.toggle('hl-threat', !!threat && threat.has(pos));
       const [c, r] = pos.split(',').map(Number);
       let hl = '';
       if (S.sel) {
@@ -106,6 +108,81 @@ const Renderer = {
       hlTile.classList.toggle('hl-cover', hl === 'cover');
       hlTile.classList.toggle('hl-selected', hl === 'selected');
       hlTile.classList.toggle('fow-dark', !S.fogVisible.has(pos));
+    });
+    this.rPreview();
+  },
+
+  // ── 적 위협 범위: 보이는 적들이 이동 후 공격할 수 있는 칸 ──
+  calcThreat() {
+    const S = GameStore, set = new Set();
+    S.units.forEach(e => {
+      if (e.team !== 'enemy' || e.hp <= 0 || isStealthed(e) || !S.fogVisible.has(e.x + ',' + e.y)) return;
+      if (UnitManager.isCC(e) || (AI_PROFILES[e.cls] && AI_PROFILES[e.cls].targetPriority === 'never')) return;
+      const spots = [{ x: e.x, y: e.y }].concat(BuffSystem.has(e, BuffType.ROOT) ? [] : Grid.eMvCells(e));
+      spots.forEach(p => {
+        const tile = S.ter[p.y] && S.ter[p.y][p.x];
+        const rng = e.range + (tile === 'hill' && e.range > 1 ? TACTIC.highRange : 0);
+        for (let dy = -rng; dy <= rng; dy++) for (let dx = -rng; dx <= rng; dx++) {
+          const x = p.x + dx, y = p.y + dy;
+          if ((dx || dy) && Math.abs(dx) + Math.abs(dy) <= rng && x >= 0 && x < COLS && y >= 0 && y < ROWS) set.add(x + ',' + y);
+        }
+      });
+    });
+    return set;
+  },
+
+  toggleThreat(force) {
+    const S = GameStore;
+    S._showThreat = typeof force === 'boolean' ? force : !S._showThreat;
+    const b = document.getElementById('threat-btn'); if (b) b.classList.toggle('on', S._showThreat);
+    this.rTer();
+  },
+
+  // ── 공격 예상 (부작용 없이 계산) ──
+  // 반환: { dmg, kill, tags, pct, evade, shield, counter }
+  previewAttack(a, tgt) {
+    const R = Math.random, keepT = a._lastTactic, keepC = a._lastCrit;
+    Math.random = () => 0.999; // 치명타 등 확률 요소는 제외한 기대값
+    try {
+      const tb = UnitManager.tacticBonus(a, tgt);
+      let dmg = Math.max(1, Math.round(calcDmg(a, tgt) * UnitManager.shieldMul(tgt)));
+      const kill = dmg >= tgt.hp;
+      const tile = GameStore.ter[tgt.y] && GameStore.ter[tgt.y][tgt.x];
+      let counter = 0;
+      // 살아남고 사거리 안이며 행동 불능이 아니면 반격 (반격 시 공격자는 대상을 바라보고 있음)
+      if (!kill && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !UnitManager.isCC(tgt)) {
+        const gx = a._gdx, gy = a._gdy, tT = tgt._lastTactic;
+        a._gdx = tgt.x - a.x; a._gdy = tgt.y - a.y;
+        counter = calcDmg(tgt, a);
+        a._gdx = gx; a._gdy = gy; tgt._lastTactic = tT;
+      }
+      return { dmg, kill, tags: tb.tags, pct: Math.round((tb.mul - 1) * 100),
+        evade: tile === 'forest' ? Math.round(TACTIC.forestEvade * 100) : 0,
+        shield: UnitManager.shieldMul(tgt) < 1, counter };
+    } finally { Math.random = R; a._lastTactic = keepT; a._lastCrit = keepC; }
+  },
+
+  // 공격 모드일 때 공격 가능한 적 머리 위에 예상 피해 표시
+  rPreview() {
+    const S = GameStore, w = document.getElementById('iso-world');
+    w.querySelectorAll('.dmg-prev').forEach(e => e.remove());
+    if (!S.sel || !(FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE))) return;
+    S.atkT.forEach(c => {
+      const v = UnitManager.uAt(c.x, c.y); if (!v || v.team === S.sel.team) return;
+      const p = this.previewAttack(S.sel, v);
+      const el = document.createElement('div'); el.className = 'dmg-prev' + (p.kill ? ' kill' : '');
+      const main = document.createElement('div'); main.className = 'dp-main';
+      main.textContent = (p.kill ? '\uD83D\uDC80 ' : '') + '-' + p.dmg;
+      el.appendChild(main);
+      const sub = [];
+      if (p.pct) sub.push(p.tags.map(k => t('battle.tactic_' + k)).join('·') + ' +' + p.pct + '%');
+      if (p.shield) sub.push('\uD83D\uDEE1\uFE0F\u00BD');
+      if (p.evade) sub.push(t('battle.tactic_evade', { n: p.evade }));
+      if (p.counter) sub.push(t('battle.preview_counter', { n: p.counter }));
+      if (sub.length) { const s2 = document.createElement('div'); s2.className = 'dp-sub'; s2.textContent = sub.join('  '); el.appendChild(s2); }
+      el.style.left = (Grid.uSX(v.x, v.y) + UW / 2) + 'px';
+      el.style.top = (Grid.uSY(v.x, v.y) - 6) + 'px';
+      w.appendChild(el);
     });
   },
 
@@ -200,6 +277,7 @@ const Renderer = {
         if (turnLabel) turnLabel.remove();
       }
     });
+    if (S._showThreat && !this._threatPending) { this._threatPending = true; requestAnimationFrame(() => { this._threatPending = false; this.rTer(); }); }
     [...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove(); });
     S.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
       S.allyPos[u.id] = { x: 99, y: 99 };

@@ -197,6 +197,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'q' || e.key === 'Q') Renderer.rotCam(-1);
   if (e.key === 'e' || e.key === 'E') Renderer.rotCam(1);
   if (e.key === 'Escape') Renderer.closeSettings();
+  if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !(e.target.closest && e.target.closest('input,textarea,select'))) Renderer.toggleThreat();
   // 행동 메뉴 단축키: 메뉴에 표시된 data-key 버튼을 그대로 클릭 (M/A/S/I/W, 서브메뉴 1~9, Esc/Backspace 취소)
   const m = document.getElementById('action-menu');
   if (!m || !m.classList.contains('show') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -214,6 +215,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   GameStore.cleared = goldData.cleared;
 
   await i18nInit();
+  const threatBtn = document.getElementById('threat-btn');
+  if (threatBtn) threatBtn.title = t('battle.threat_title');
 
   loadTilesets().then(() => BattleInit._initBattlePage());
 });

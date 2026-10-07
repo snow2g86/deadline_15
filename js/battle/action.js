@@ -177,8 +177,7 @@ const ActionManager = {
       S.healT = [];
       FSM.transition(BattleState.ATTACK_MODE);
     }
-    Renderer.rTer();
-    Renderer.floatT(S.sel.x, S.sel.y, t('messages.select_attack_target'), 'heal');
+    Renderer.rTer(); // 대상마다 예상 피해가 표시되므로 별도 안내 문구는 띄우지 않음
   },
 
   actHeal() {

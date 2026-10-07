@@ -124,6 +124,10 @@
   50%{background:rgba(34,197,94,.4);box-shadow:inset 0 0 0 2px rgba(34,197,94,1)}}
 .iso-tile.hl-selected{background:rgba(240,192,64,.15);box-shadow:inset 0 0 0 2px rgba(240,192,64,.9);animation:selPulse 1.2s ease-in-out infinite}
 @keyframes selPulse{0%,100%{opacity:1}50%{opacity:.45}}
+.iso-tile.hl-threat::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(-45deg,rgba(239,68,68,.22) 0 4px,rgba(239,68,68,.06) 4px 9px)}
+.cam-btn.on{background:rgba(239,68,68,.22);border-color:#ef4444;box-shadow:0 0 10px rgba(239,68,68,.35)}
+.cam-btn.on svg{stroke:#fca5a5}
 .iso-tile.hl-cover{background:repeating-linear-gradient(45deg,rgba(148,163,184,.18) 0 6px,rgba(148,163,184,.06) 6px 12px);
   box-shadow:inset 0 0 0 2px rgba(148,163,184,.6)}
 .iso-tile-hl.fow-dark{background:rgba(10,14,26,.55)!important;box-shadow:none!important;animation:none!important}
@@ -142,6 +146,16 @@
 .float-text.damage{color:#ff5252}
 .float-text.heal{color:#5eff9a;font-size:15px}
 .float-text.tactic{color:#fbbf24;font-size:12px;font-family:'Noto Sans KR',sans-serif}
+
+/* ═══ 공격 예상 표시 ═══ */
+.dmg-prev{position:absolute;transform:translate(-50%,-100%);z-index:450;pointer-events:none;text-align:center;white-space:nowrap;
+  padding:2px 7px 3px;border-radius:6px;background:rgba(10,14,26,.9);border:1px solid rgba(239,68,68,.6);box-shadow:0 3px 10px rgba(0,0,0,.5);
+  animation:dpIn .15s ease-out}
+.dmg-prev.kill{border-color:#facc15;box-shadow:0 0 10px rgba(250,204,21,.45)}
+.dmg-prev .dp-main{font-family:'Cinzel','Noto Sans KR',serif;font-weight:900;font-size:14px;color:#ff6b6b;line-height:1.1}
+.dmg-prev.kill .dp-main{color:#facc15}
+.dmg-prev .dp-sub{font-size:9px;font-weight:700;color:#cbd5e1;margin-top:1px}
+@keyframes dpIn{from{opacity:0;transform:translate(-50%,-90%)}to{opacity:1;transform:translate(-50%,-100%)}}
 
 /* ═══ Action Menu ═══ */
 #action-menu{position:absolute;z-index:500;display:none;flex-direction:column;gap:2px;min-width:156px;padding:5px;

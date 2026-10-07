@@ -3,6 +3,7 @@ Object.assign(window._LANG_es, {
     "battle": {
         "loading_title": "Preparando batalla...",
         "loading_tips": [
+            "Pulsa el botón de amenaza (T) para ver las casillas que los enemigos pueden atacar",
             "Atacar por la espalda inflige +30%, por el flanco +15%",
             "Rodea a un enemigo entre dos unidades para un +20% de pinza",
             "Las colinas dan +15% de daño y +1 de alcance a las unidades a distancia",
@@ -41,6 +42,9 @@ Object.assign(window._LANG_es, {
         "enemy": "Enemigo",
         "turn_order": "ORDEN",
         "acting": "ACTÚA",
+        "threat_title": "Alcance de amenaza enemigo (T)",
+        "tactic_evade": "Esquiva {n}%",
+        "preview_counter": "Contraataque -{n}",
         "tactic_back": "Espalda",
         "tactic_side": "Flanco",
         "tactic_pincer": "Pinza",

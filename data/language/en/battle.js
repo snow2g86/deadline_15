@@ -3,6 +3,7 @@ Object.assign(window._LANG_en, {
     "battle": {
         "loading_title": "Preparing for battle...",
         "loading_tips": [
+            "Press the threat button (T) to see every tile enemies can attack next",
             "Attacks from behind deal +30%, from the side +15%",
             "Sandwich an enemy between two units for a +20% pincer bonus",
             "Hills give +15% damage and +1 range to ranged units",
@@ -42,6 +43,9 @@ Object.assign(window._LANG_en, {
         "enemy": "Enemy",
         "turn_order": "TURN ORDER",
         "acting": "ACTING",
+        "threat_title": "Enemy threat range (T)",
+        "tactic_evade": "Evade {n}%",
+        "preview_counter": "Counter -{n}",
         "tactic_back": "Back",
         "tactic_side": "Flank",
         "tactic_pincer": "Pincer",
