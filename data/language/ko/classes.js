@@ -55,7 +55,7 @@ Object.assign(window._LANG_ko, {
         "hill": "고지"
     },
     "terrain_buff_desc": {
-        "forest": "DEF+3",
+        "forest": "회피 15%",
         "hill": "ATK+15%·원거리 사거리+1"
     },
     "summon_types": {

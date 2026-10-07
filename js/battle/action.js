@@ -286,8 +286,8 @@ const ActionManager = {
       }
     }
 
-    if (tgt._siegeEvasion > 0 && Math.random() < 0.3) {
-      tgt._siegeEvasion--;
+    if (UnitManager.rollEvade(tgt)) {
+      VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
       Renderer.floatT(tgt.x, tgt.y, t('messages.evasion'), 'heal');
       a.ha = true; a.hm = true;
       Renderer.hideAM(); Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); return;
@@ -304,7 +304,7 @@ const ActionManager = {
     } else {
       let dmg = calcDmg(a, tgt);
       this._grantExp(a, 'attack');
-      if (tgt._siegeShield > 0) { dmg = Math.max(1, Math.round(dmg * 0.5)); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
+      if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
       tgt.hp = Math.max(0, tgt.hp - dmg);
       EventBus.emit('unit_attacked', { attacker: a, target: tgt, damage: dmg });
       if (a.cls === 'mage') {

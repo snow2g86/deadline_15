@@ -55,7 +55,7 @@ Object.assign(window._LANG_es, {
         "hill": "Terreno Alto"
     },
     "terrain_buff_desc": {
-        "forest": "DEF+3",
+        "forest": "Esquiva 15%",
         "hill": "ATK+15%, alcance +1 a distancia"
     },
     "summon_types": {

@@ -8,7 +8,7 @@ Object.assign(window._LANG_es, {
             "Las colinas dan +15% de daño y +1 de alcance a las unidades a distancia",
             "Los enemigos se detienen al pisar junto a un caballero (zona de control)",
             "Los aliados justo detrás de un caballero no pueden ser atacados de frente (salvo por asesinos)",
-            "La evasion aumenta en los bosques",
+            "Las unidades en el bosque esquivan el 15% de los ataques normales",
             "Coloca sanadores atras para mejor supervivencia",
             "Los asesinos pueden ocultarse en bosques",
             "Usa muros para bloquear avances enemigos",

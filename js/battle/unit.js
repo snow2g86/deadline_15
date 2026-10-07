@@ -174,6 +174,21 @@ const UnitManager = {
     return { mul: 1 + add, tags };
   },
 
+  // ── 일반 공격 회피 판정 (공격받는 쪽 기준) ──
+  // 공성아이템 회피 버프(30%, 발동 시 소모) → 숲 지형(TACTIC.forestEvade). 반환: 'siege' | 'forest' | null
+  rollEvade(tgt) {
+    if (BuffSystem.has(tgt, BuffType.EVASION) && Math.random() < 0.3) {
+      BuffSystem.remove(tgt, BuffType.EVASION, 'siege');
+      return 'siege';
+    }
+    const tile = GameStore.ter[tgt.y] && GameStore.ter[tgt.y][tgt.x];
+    if (tile === 'forest' && Math.random() < TACTIC.forestEvade) return 'forest';
+    return null;
+  },
+
+  // 공성아이템 방어막: 받는 피해 50%
+  shieldMul(tgt) { return BuffSystem.has(tgt, BuffType.SHIELD) ? 0.5 : 1; },
+
   // ── 제압 구역(ZOC): 이 칸이 상대 편 탱커의 바로 옆인가 ──
   inZoc(u, x, y) {
     if (COVER_IGNORE_CLASSES.includes(u.cls)) return false;

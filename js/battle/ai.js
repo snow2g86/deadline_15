@@ -324,10 +324,10 @@ const AI = {
 
   // ── 적 공격 실행 ──
   async eAtk(a, tgt) {
-    // 회피 체크 (공성 아이템)
-    if (BuffSystem.has(a, BuffType.EVASION) && Math.random() < 0.3) {
-      BuffSystem.remove(a, BuffType.EVASION, 'siege');
-      EventBus.emit('evasion', { unit: a });
+    // 회피 체크 (공격받는 쪽 기준: 공성아이템 회피 / 숲 지형)
+    if (UnitManager.rollEvade(tgt)) {
+      VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
+      EventBus.emit('evasion', { unit: tgt });
       return;
     }
 
@@ -342,10 +342,10 @@ const AI = {
       EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
     } else {
       let dmg = calcDmg(a, tgt);
-      // 방어막 감소
-      if (BuffSystem.has(a, BuffType.SHIELD)) {
-        dmg = Math.max(1, Math.round(dmg * 0.5));
-        EventBus.emit('shield_active', { unit: a });
+      // 방어막: 공격받는 쪽 피해 50%
+      if (UnitManager.shieldMul(tgt) < 1) {
+        dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt)));
+        EventBus.emit('shield_active', { unit: tgt });
       }
       const actual = tgt.team === 'ally' ? applyDmgToAlly(tgt, dmg, G) : (tgt.hp = Math.max(0, tgt.hp - dmg), tgt);
       EventBus.emit('unit_attacked', { attacker: a, target: actual, damage: dmg, counter: false });

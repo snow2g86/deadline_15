@@ -8,7 +8,7 @@ Object.assign(window._LANG_en, {
             "Hills give +15% damage and +1 range to ranged units",
             "Enemies stop moving when they step next to a knight (zone of control)",
             "Allies right behind a knight cannot be attacked from the front (except by assassins)",
-            "Evasion increases on forest tiles",
+            "Units on forest tiles evade normal attacks 15% of the time",
             "Place healers in the back for better survival",
             "Assassins can stealth in forests",
             "Use walls to block enemy advances",
