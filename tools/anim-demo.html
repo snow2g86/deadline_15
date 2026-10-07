@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anim Demo</title>
+<!-- 개발용: 게임과 같은 코드(rig.js SPRITE_SHEETS)로 캐릭터의 5가지 동작을 한 화면에서 재생 -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 14px;font-size:13px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+select,button{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.card h2{font-size:15px;margin:0}.meta{color:var(--sub);font-size:12px;margin-bottom:8px}
+.stage{position:relative;height:250px;border-radius:8px;overflow:hidden;background:radial-gradient(ellipse at 50% 86%,#2e4a30 0 30%,transparent 31%),linear-gradient(#0f1a14,#16241a)}
+.small{height:96px;margin-top:8px}
+.u{position:absolute;left:50%;bottom:14%;line-height:0;transform-origin:50% 100%}
+.foe{position:absolute;right:6%;bottom:16%;font-size:24px;opacity:.5}
+</style>
+</head>
+<body>
+<h1>캐릭터 동작 미리보기</h1>
+<p class="lead">게임과 같은 코드로 재생합니다. 위는 3배, 아래는 실제 게임 크기. 시트가 없는 동작은 정지 그림으로 보입니다.</p>
+<div class="bar"><label>캐릭터 <select id="who"></select></label></div>
+<div class="grid" id="grid"></div>
+<script>var VFX = {}; const UI = 52;</script>
+<script src="../js/battle/motion.js"></script>
+<script src="../js/battle/rig.js"></script>
+<script>
+Rig.base = '../';
+const KINDS = [['idle', '대기', '평소 반복'], ['combat', '전투대기', '자기 차례·적 3칸 안'], ['run', '달리기', '이동 중'],
+  ['hit', '피격', '피해를 받을 때'], ['attack', '공격', '공격할 때']];
+const sel = document.getElementById('who');
+Object.keys(CHAR_FIG).sort().forEach(k => { const o = document.createElement('option'); o.value = k;
+  o.textContent = k + (SPRITE_SHEETS[k] ? ' ✓' : ''); sel.appendChild(o); });
+sel.value = 'knight_01';
+let timers = [];
+function build() {
+  timers.forEach(clearInterval); timers = [];
+  const [cls, g] = sel.value.split('_'), u = { cls, gender: g === '02' ? 'f' : 'm' };
+  const grid = document.getElementById('grid'); grid.textContent = '';
+  KINDS.forEach(([k, name, when]) => {
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `<h2>${name}</h2><div class="meta">${when}${Rig.sheet(u, k) ? '' : ' · 시트 없음'}</div><div class="stage" data-s="3"></div><div class="stage small" data-s="1"></div>`;
+    grid.appendChild(card);
+    card.querySelectorAll('.stage').forEach(st => {
+      const s = +st.dataset.s, fit = Rig.fit(u, UI);
+      st.insertAdjacentHTML('beforeend', '<div class="foe">👹</div>');
+      const icon = document.createElement('div'); icon.className = 'u';
+      icon.style.cssText += `;margin-left:${-fit.size / 2}px;transform:scale(${s});margin-bottom:${fit.mb * s}px`;
+      icon.insertAdjacentHTML('beforeend', `<img src="../image/character/${sel.value}.png" width="${fit.size}" style="image-rendering:pixelated">`);
+      st.appendChild(icon); Rig.attach(icon, u, fit.size);
+      if (k === 'hit' || k === 'attack') {
+        Rig.setLoop(icon, u, 'combat');
+        const go = () => Rig.playOnce(icon, u, k); go(); timers.push(setInterval(go, 1600));
+      } else Rig.setLoop(icon, u, k);
+    });
+  });
+}
+sel.onchange = build; build();
+</script>
+</body>
+</html>

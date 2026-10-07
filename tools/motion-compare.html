@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion Compare</title>
+<!-- 개발용 비교 페이지: 전사 공격 모션 3가지 방식
+     A) 현재 코드 모션(이미지 한 장을 통째로 기울이기)  B) 3D 모델 → 2D 스프라이트 시트  C) 2D 조각(컷아웃) 애니메이션 -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}
+p.lead{color:var(--sub);margin:0 0 16px;font-size:13px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+button{background:var(--acc);color:#111;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+button.ghost{background:transparent;color:var(--tx);border:1px solid var(--line)}
+label{color:var(--sub);font-size:13px;display:flex;gap:6px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{font-size:15px;margin:0 0 2px}
+.card .meta{color:var(--sub);font-size:12px;margin-bottom:10px}
+.stage{position:relative;height:240px;border-radius:8px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 85%,#2e4a30 0 30%,transparent 31%),linear-gradient(#0f1a14,#16241a)}
+.small{height:90px;margin-top:8px}
+.anchor{position:absolute;left:50%;bottom:14%;width:0;height:0}
+.foe{position:absolute;right:8%;bottom:16%;font-size:28px;opacity:.55}
+.small .foe{font-size:16px}
+ul{margin:10px 0 0;padding-left:18px;color:var(--sub);font-size:12px}
+/* A: 현재 방식 */
+.a-icon{position:absolute;left:0;bottom:0;transform-origin:50% 90%;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+/* B: 스프라이트 시트 */
+.b-spr{position:absolute;bottom:0;background-repeat:no-repeat;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+/* C: 컷아웃 — 원본 크기(962x1087) 레이어를 겹치고 컨테이너를 축소 */
+.c-rig{position:absolute;left:0;bottom:0;width:962px;height:1087px;transform-origin:0 100%}
+.c-rig img{position:absolute;left:0;top:0;width:962px;height:1087px;image-rendering:pixelated}
+.c-body{transform-origin:480px 1000px}
+.c-sword{transform-origin:750px 520px}
+.c-arm{transform-origin:260px 600px}
+.c-smear{position:absolute;left:0;top:0;opacity:0;overflow:visible;pointer-events:none}
+</style>
+</head>
+<body>
+<h1>전사 공격 모션 비교</h1>
+<p class="lead">세 방식 모두 같은 전사 그림에서 출발했습니다. 위는 3배 확대, 아래는 실제 게임 크기(52px)입니다.</p>
+<div class="bar">
+  <button id="play">▶ 공격 재생</button>
+  <button class="ghost" id="loop">반복 재생 켜기</button>
+  <label><input type="range" id="speed" min="0.25" max="1.5" step="0.25" value="1"> 속도 <span id="sv">1x</span></label>
+</div>
+<div class="grid">
+  <div class="card">
+    <h2>A. 현재 방식 (코드 모션)</h2>
+    <div class="meta">그림 한 장을 기울이고 밀기 · 추가 비용 0</div>
+    <div class="stage" data-k="a" data-s="3"></div>
+    <div class="stage small" data-k="a" data-s="1"></div>
+    <ul><li>가볍고 12직업 모두 이미 적용됨</li><li>팔·검이 따로 움직이지 않아 "몸통 박치기"처럼 보임</li></ul>
+  </div>
+  <div class="card">
+    <h2>B. 3D 모델 → 2D 스프라이트</h2>
+    <div class="meta">Higgsfield 3D 변환 38크레딧 · 12프레임 렌더</div>
+    <div class="stage" data-k="b" data-s="3"></div>
+    <div class="stage small" data-k="b" data-s="1"></div>
+    <ul><li>관절이 실제로 움직여 가장 부드러움</li><li>원본 도트 화풍과 달라짐, 대검은 변환 중 사라져 코드로 다시 붙임</li></ul>
+  </div>
+  <div class="card">
+    <h2>C. 2D 조각(컷아웃) 애니메이션</h2>
+    <div class="meta">원본 그림을 검·몸통으로 잘라 코드로 회전 · 추가 비용 0</div>
+    <div class="stage" data-k="c" data-s="3"></div>
+    <div class="stage small" data-k="c" data-s="1"></div>
+    <ul><li>원본 도트 그림 그대로, 등 뒤의 대검을 머리 위로 넘겨 두 손으로 내려침</li><li>직업마다 자를 영역을 지정해야 하고 팔 관절은 표현 한계</li></ul>
+  </div>
+</div>
+<script>
+const IMG = '../image/character/warrior_01.png';
+const SHEET = '_work/warrior_3d_attack.png', FR = 12, CW = 160, CH = 83;
+const GAME = 52; // 게임 아이콘 폭
+let speed = 1, loop = false;
+
+// A: motion.js의 전사 키프레임 그대로 (o,f,u,r,sx,sy) — 전사 그림은 오른쪽을 바라봄
+const AK = { dur: 440, keys: [{ o: 0 }, { o: .28, f: -5, u: 3, r: -18, sx: .96, sy: 1.06 },
+  { o: .42, f: 12, u: -1, r: 22, sx: 1.08, sy: .92 }, { o: .6, f: 9, r: 14, sx: 1.03, sy: .97 }, { o: 1 }] };
+
+function build(st) {
+  const k = st.dataset.k, s = +st.dataset.s, w = GAME * s, anchor = document.createElement('div');
+  anchor.className = 'anchor'; st.appendChild(anchor);
+  const foe = document.createElement('div'); foe.className = 'foe'; foe.textContent = '👹'; st.appendChild(foe);
+  if (k === 'a') {
+    const im = new Image(); im.src = IMG; im.className = 'a-icon'; im.style.width = w + 'px'; im.style.marginLeft = -w / 2 + 'px';
+    anchor.appendChild(im); st._play = () => {
+      const ms = (UI_S => (36 / 36) * UI_S)(GAME / 36) * s;
+      return im.animate(AK.keys.map(q => ({ offset: q.o,
+        transform: `translate(${(q.f || 0) * ms}px,${-(q.u || 0) * ms}px) rotate(${(q.r || 0)}deg) scale(${q.sx || 1},${q.sy || 1})` })),
+        { duration: AK.dur / speed, easing: 'ease-in-out' });
+    };
+  } else if (k === 'b') {
+    // 몸통 높이를 원본 그림의 몸통 높이에 맞춤 (원본: 폭 52px일 때 몸통 약 46px, 시트: 69px)
+    const z = (46 * s) / 69, el = document.createElement('div');
+    el.className = 'b-spr'; el.style.transform = 'scaleX(-1)'; el.style.width = CW * z + 'px'; el.style.height = CH * z + 'px';
+    el.style.marginLeft = -(87 * z) + 'px'; // 휴지 자세 몸통 중심(반전 후 x≈87)을 기준점에
+    el.style.backgroundImage = `url(${SHEET})`; el.style.backgroundSize = `${CW * FR * z}px ${CH * z}px`;
+    anchor.appendChild(el);
+    st._play = () => el.animate([{ backgroundPositionX: '0px' }, { backgroundPositionX: -(CW * FR * z) + 'px' }],
+      { duration: 2233 * 0.55 / speed, easing: `steps(${FR})` });
+  } else {
+    const z = w / 962, rig = document.createElement('div'); rig.className = 'c-rig';
+    rig.style.transform = `scale(${z})`; rig.style.marginLeft = -w / 2 + 'px';
+    // 같은 그림을 세 조각으로 잘라 겹침: 몸통 / 검(날 + 손잡이를 쥔 오른손) / 왼팔
+    const BLADE = 'M0 40 L150 40 L345 175 L330 300 L280 300 L0 165 Z';
+    const HILT = 'M590 320 L780 335 L820 430 L962 530 L962 630 L880 640 L780 650 L670 640 L600 560 L570 430 Z';
+    const ARM = 'M160 600 L305 600 L315 700 L295 815 L190 820 L148 765 L152 640 Z';
+    const layer = (cls, clip) => { const d = document.createElement('div'); d.className = cls;
+      d.style.cssText = 'position:absolute;left:0;top:0;width:962px;height:1087px';
+      if (clip) { const im = new Image(); im.src = IMG; im.style.clipPath = clip; d.appendChild(im); } return d; };
+    const mover = layer('c-mover');                                   // 전체 전진·후퇴
+    const body = new Image(); body.src = IMG; body.className = 'c-body';
+    body.style.clipPath = `path(evenodd,'M0 0 H962 V1087 H0 Z ${BLADE} ${HILT} ${ARM}')`;
+    const sw = layer('c-sword', `path('${BLADE} ${HILT}')`);          // 회전 기준: 오른손(750,520)
+    const arm = layer('c-arm', `path('${ARM}')`);                      // 회전 기준: 왼쪽 어깨(260,600)
+    // 궤적: 등 뒤(왼쪽 위) → 머리 위 → 앞쪽(오른쪽) 아래로 그리는 시계 방향 호
+    const smear = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    smear.setAttribute('width', 962); smear.setAttribute('height', 1087); smear.setAttribute('class', 'c-smear');
+    smear.innerHTML = '<path d="M182,62 A650,650 0 0 1 1098,978" fill="none" stroke="rgba(229,239,255,.75)" stroke-width="80" stroke-linecap="round"/>' +
+      '<path d="M182,62 A650,650 0 0 1 1098,978" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round"/>';
+    // 원본에서 머리에 가려 안 보이던 검 가운데 부분 — 검을 들어 올린 동안만 보이게 직접 그림
+    const bridge = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    bridge.setAttribute('width', 962); bridge.setAttribute('height', 1087); bridge.style.cssText = 'position:absolute;left:0;top:0;opacity:0';
+    bridge.innerHTML = '<defs><linearGradient id="bl" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#e3e9ee"/><stop offset=".55" stop-color="#aeb9c2"/><stop offset="1" stop-color="#7d8892"/></linearGradient></defs>' +
+      '<polygon points="330,180 680,352 630,452 282,282" fill="url(#bl)" stroke="#1d1a22" stroke-width="14" stroke-linejoin="round"/>';
+    sw.prepend(bridge);
+    mover.append(body, sw, arm, smear); rig.appendChild(mover); anchor.appendChild(rig);
+    st._play = () => {
+      const d = 560 / speed, o = { duration: d };
+      // 구간별 이징: 준비는 천천히 감속, 내려치기는 가속, 복귀는 부드럽게 (전체 이징을 걸면 키프레임 시점이 밀림)
+      const E = ['cubic-bezier(.2,.6,.3,1)', 'cubic-bezier(.6,0,1,.6)', 'ease-out', 'ease-in-out'];
+      const K = (arr) => arr.map((k, i) => (i < E.length ? Object.assign({ easing: E[i] }, k) : k));
+      // 원본 전사는 오른쪽을 바라봄 → 검은 등 뒤(왼쪽 위)에서 시계 방향으로 머리 위를 넘어 앞쪽(오른쪽) 아래로 내려침
+      // 준비(.3): 몸을 뒤로 젖히며 검을 더 뒤로 당김 / 타격(.5): 앞으로 내딛으며 두 손이 몸 앞(430,660)에서 손잡이를 쥐고 내려침
+      mover.animate(K([{ transform: 'none' }, { offset: .3, transform: 'translate(-24px,-8px)' },
+        { offset: .5, transform: 'translate(60px,12px)' }, { offset: .72, transform: 'translate(50px,8px)' }, { transform: 'none' }]), o);
+      body.animate(K([{ transform: 'none' }, { offset: .3, transform: 'rotate(-5deg)' },
+        { offset: .5, transform: 'rotate(6deg) scale(1.02,.97)' }, { offset: .72, transform: 'rotate(4deg)' }, { transform: 'none' }]), o);
+      sw.animate(K([{ transform: 'none' }, { offset: .3, transform: 'translate(20px,-30px) rotate(-18deg)' },
+        { offset: .5, transform: 'translate(-320px,140px) rotate(190deg)' },
+        { offset: .72, transform: 'translate(-310px,146px) rotate(198deg)' }, { transform: 'none' }]), o);
+      arm.animate(K([{ transform: 'none' }, { offset: .3, transform: 'rotate(-171deg)' },
+        { offset: .5, transform: 'rotate(-87deg)' }, { offset: .72, transform: 'rotate(-90deg)' }, { transform: 'none' }]), o);
+      bridge.animate([{ opacity: 0 }, { offset: .36, opacity: 0 }, { offset: .4, opacity: 1 }, { offset: .9, opacity: 1 }, { offset: .97, opacity: 0 }, { opacity: 0 }], o);
+      smear.animate([{ opacity: 0 }, { offset: .42, opacity: 0 }, { offset: .47, opacity: .85 },
+        { offset: .6, opacity: 0 }, { opacity: 0 }], o);
+      return body.getAnimations()[0];
+    };
+  }
+}
+const stages = [...document.querySelectorAll('.stage')]; stages.forEach(build);
+function playAll() { stages.forEach(s => s._play()); }
+document.getElementById('play').onclick = playAll;
+let timer = null;
+document.getElementById('loop').onclick = e => {
+  loop = !loop; e.target.textContent = loop ? '반복 재생 끄기' : '반복 재생 켜기';
+  clearInterval(timer); if (loop) { playAll(); timer = setInterval(playAll, 1600 / speed); }
+};
+document.getElementById('speed').oninput = e => {
+  speed = +e.target.value; document.getElementById('sv').textContent = speed + 'x';
+  if (loop) { clearInterval(timer); timer = setInterval(playAll, 1600 / speed); }
+};
+</script>
+</body>
+</html>

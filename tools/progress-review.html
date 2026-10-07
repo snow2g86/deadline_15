@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion Review</title>
+<!-- 개발용: 생성된 동작 시트(tools/build-review.py → manifest.json)를 캐릭터·동작·시드별로 반복 재생해 검토 -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 12px;font-size:13px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.bar button{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font:inherit;font-size:13px}
+.bar button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
+.bar button .n{opacity:.6;margin-left:4px;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.card b{font-size:13px}.card .s{color:var(--sub);font-size:11px;margin-left:6px}
+.row{display:flex;gap:6px;margin-top:6px}
+.cell{position:relative;flex:1;height:170px;border-radius:6px;overflow:hidden;background:radial-gradient(ellipse at 50% 88%,#2e4a30 0 28%,transparent 29%),linear-gradient(#0f1a14,#16241a)}
+.cell.small{flex:0 0 70px}
+.cell .tag{position:absolute;left:4px;top:2px;font-size:10px;color:var(--sub)}
+.spr{position:absolute;left:50%;bottom:10px;background-repeat:no-repeat}
+.empty{color:var(--sub);padding:30px 0;text-align:center}
+</style>
+</head>
+<body>
+<h1>생성된 동작 검토</h1>
+<p class="lead">이펙트 제거를 거친 시트를 반복 재생합니다. 왼쪽 큰 칸은 2.5배, 오른쪽 작은 칸은 실제 게임 크기입니다.</p>
+<div class="bar" id="motions"></div>
+<div class="grid" id="grid"></div>
+<script>
+const NAMES = { combat: '전투대기', idle: '대기', run: '달리기', hit: '피격', attack: '공격' };
+const DUR = { combat: 1600, idle: 2400, run: 1500, hit: 520, attack: 1300 };
+const FIG_H = 50;
+let man = {}, cur = 'combat';
+function sprite(cell, sh, motion, scale) {
+  const z = (FIG_H * scale) / (sh.body[1] - sh.body[0]), W = sh.w * z, H = sh.h * z;
+  const el = document.createElement('div'); el.className = 'spr';
+  el.style.cssText += `;width:${W}px;height:${H}px;margin-left:${-sh.cx * z}px;margin-bottom:${-(sh.h - sh.body[1]) * z}px;` +
+    `background-image:url(${sh.src});background-size:${W * sh.frames}px ${H}px`;
+  cell.appendChild(el);
+  el.animate([{ backgroundPositionX: '0px' }, { backgroundPositionX: -(W * sh.frames) + 'px' }],
+    { duration: DUR[motion], easing: `steps(${sh.frames})`, iterations: Infinity, delay: motion === 'hit' || motion === 'attack' ? 0 : -Math.random() * DUR[motion],
+      endDelay: motion === 'hit' || motion === 'attack' ? 600 : 0 });
+}
+function render() {
+  const bar = document.getElementById('motions'); bar.textContent = '';
+  Object.keys(NAMES).forEach(m => {
+    const n = Object.values(man).filter(c => c[m]).length;
+    const b = document.createElement('button'); b.className = m === cur ? 'on' : '';
+    b.innerHTML = `${NAMES[m]}<span class="n">${n}/24</span>`; b.onclick = () => { cur = m; render(); }; bar.appendChild(b);
+  });
+  const grid = document.getElementById('grid'); grid.textContent = '';
+  const keys = Object.keys(man).filter(k => man[k][cur]).sort();
+  if (!keys.length) { grid.innerHTML = '<div class="empty">아직 생성된 시트가 없습니다</div>'; return; }
+  keys.forEach(k => {
+    man[k][cur].sort((a, b) => a.seed - b.seed).forEach(sh => {
+      const card = document.createElement('div'); card.className = 'card';
+      card.innerHTML = `<b>${k}</b><span class="s">${NAMES[cur]} · seed ${sh.seed}${sh.edge_touch && sh.edge_touch.length ? ' · ⚠ 영상 밖 잘림' : ''}</span>`;
+      const row = document.createElement('div'); row.className = 'row'; card.appendChild(row);
+      const big = document.createElement('div'); big.className = 'cell'; const sm = document.createElement('div'); sm.className = 'cell small';
+      row.append(big, sm); grid.appendChild(card);
+      sprite(big, sh, cur, 2.5); sprite(sm, sh, cur, 1);
+    });
+  });
+}
+fetch('_work/anim/sheets/manifest.json?' + Date.now()).then(r => r.json()).then(m => { man = m; render(); })
+  .catch(() => { document.getElementById('grid').innerHTML = '<div class="empty">manifest.json이 아직 없습니다</div>'; });
+</script>
+</body>
+</html>

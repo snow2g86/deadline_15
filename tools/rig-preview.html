@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rig Preview</title>
+<!-- 개발용: js/battle/rig.js의 모든 캐릭터 컷아웃 리그를 한 화면에서 확인 (휴지 / 타격 순간 / 재생) -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:16px}
+h1{font-size:17px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+button{background:var(--acc);color:#111;border:0;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
+button.ghost{background:transparent;color:var(--tx);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+.card b{font-size:12px}.card span{color:var(--sub);font-size:11px;margin-left:6px}
+.row{display:flex;gap:4px;margin-top:6px}
+.cell{position:relative;flex:1;height:200px;border-radius:6px;overflow:hidden;background:linear-gradient(#0f1a14,#1b2b1f)}
+.cell .tag{position:absolute;left:4px;top:2px;font-size:10px;color:var(--sub);z-index:2}
+.cell .line{position:absolute;left:0;right:0;border-top:1px dashed rgba(250,204,21,.45);z-index:1}
+.u{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) scale(3);transform-origin:50% 100%;line-height:0;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.8))}
+.cell.play{cursor:pointer}
+</style>
+</head>
+<body>
+<h1>컷아웃 리그 미리보기</h1>
+<p class="lead">왼쪽: 서 있을 때(원본과 같아야 함) · 가운데: 타격 순간 · 오른쪽: 클릭하면 재생. 노란 점선 = 같은 몸 높이(머리·발) 기준선, 3배 확대.</p>
+<div class="bar"><button id="all">▶ 전체 재생</button><button class="ghost" id="loop">반복 켜기</button></div>
+<div class="grid" id="grid"></div>
+<script>var VFX = {}; const UI = 52;</script>
+<script src="../js/battle/motion.js"></script>
+<script src="../js/battle/rig.js"></script>
+<script>Rig.base = '../';</script>
+<script>
+const keys = Object.keys(CUTOUT_RIGS).sort();
+const grid = document.getElementById('grid'), players = [];
+const SC = 3;
+function unit(k, frac, cell) {
+  const [cls, g] = k.split('_'), u = { cls, gender: g === '02' ? 'f' : 'm' };
+  const fit = Rig.fit(u, UI), icon = document.createElement('div');
+  icon.className = 'u'; icon.style.marginBottom = fit.mb * SC + 'px';
+  Rig.attach(icon, u, fit.size); cell.appendChild(icon);
+  const m = ATK_MOTIONS[cls] || ATK_MOTIONS._default;
+  const play = () => Rig.play(icon, m.dur * 2); // 미리보기는 2배 느리게
+  if (frac !== null) {
+    Rig.play(icon, m.dur);
+    icon.querySelectorAll('*').forEach(el => el.getAnimations().forEach(a => { a.pause(); a.currentTime = m.dur * frac; }));
+  }
+  return play;
+}
+keys.forEach(k => {
+  const cls = k.split('_')[0], m = ATK_MOTIONS[cls] || ATK_MOTIONS._default, def = CUTOUT_RIGS[k];
+  const card = document.createElement('div'); card.className = 'card';
+  card.innerHTML = `<b>${k}</b><span>${def.preset || 'chop'} · 타격 ${m.hit}</span>`;
+  const row = document.createElement('div'); row.className = 'row';
+  card.appendChild(row); grid.appendChild(card); // 문서에 붙인 뒤에 애니메이션 생성
+  [['서 있음', null, false], ['타격', m.hit, false], ['재생 ▶', null, true]].forEach(([tag, fr, pl]) => {
+    const c = document.createElement('div'); c.className = 'cell' + (pl ? ' play' : '');
+    c.innerHTML = `<div class="tag">${tag}</div><div class="line" style="bottom:${22 + FIG_FOOT * SC}px"></div><div class="line" style="bottom:${22 + (FIG_FOOT + FIG_H) * SC}px"></div>`;
+    row.appendChild(c);
+    const p = unit(k, fr === null ? null : fr, c);
+    if (pl) { c.onclick = p; players.push(p); }
+  });
+});
+document.getElementById('all').onclick = () => players.forEach(p => p());
+let t = null;
+document.getElementById('loop').onclick = e => {
+  if (t) { clearInterval(t); t = null; e.target.textContent = '반복 켜기'; }
+  else { players.forEach(p => p()); t = setInterval(() => players.forEach(p => p()), 1600); e.target.textContent = '반복 끄기'; }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Sprite Render</title>
+<!-- 개발용 도구: 리깅된 GLB 애니메이션을 게임 시점(아이소메트릭)으로 프레임별 렌더링해 스프라이트 시트 PNG로 만든다.
+     사용: tools/sprite-render.html?glb=<파일>&frames=12&size=256&dir=0&px=96&weapon=greatsword
+     dir = 카메라가 보는 캐릭터 방향(0~3, 90° 단위), px = 픽셀아트용 저해상도 렌더 크기(0이면 끔),
+     weapon = 오른손 뼈대에 붙일 무기(3D 변환 시 손에 든 무기가 빠지는 경우), wr = 무기 회전 x,y,z(도).
+     결과는 window.__sheet(dataURL)에 담긴다. -->
+<style>body{margin:0;background:#222;color:#ddd;font:12px sans-serif}canvas{background:transparent}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="log"></div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const q = new URLSearchParams(location.search);
+const FRAMES = +(q.get('frames') || 12), SIZE = +(q.get('size') || 256), DIR = +(q.get('dir') || 0);
+const PX = +(q.get('px') || 0), RS = PX || SIZE; // 실제 렌더 해상도
+const WR = (q.get('wr') || '0,0,0').split(',').map(v => +v * Math.PI / 180);
+const log = m => { document.getElementById('log').textContent += m + '\n'; };
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(RS, RS); renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 2.2));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(2, 4, 3); scene.add(sun);
+
+const gltf = await new GLTFLoader().loadAsync(q.get('glb'));
+const model = gltf.scene; scene.add(model);
+model.rotation.y = DIR * Math.PI / 2;
+
+// ── 무기: 오른손 뼈대에 절차적 대검 부착 ──
+if (q.get('weapon') === 'greatsword') {
+  const hand = model.getObjectByName('RightHand');
+  const hs = new THREE.Vector3(); hand.getWorldScale(hs); const k = 1 / hs.x; // 뼈대 스케일 보정
+  const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: .45, metalness: .3, flatShading: true });
+  const sw = new THREE.Group();
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(.17, .95, .04), mat(0xc9d3da)); blade.position.y = .62;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(.12, .2, 4), mat(0xc9d3da)); tip.position.y = 1.19; tip.scale.z = .3; tip.rotation.y = Math.PI / 4;
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(.36, .07, .08), mat(0xc8962e)); guard.position.y = .13;
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(.035, .035, .2, 6), mat(0x5a3a1e)); grip.position.y = 0;
+  const pommel = new THREE.Mesh(new THREE.SphereGeometry(.04, 6, 4), mat(0xc8962e)); pommel.position.y = -.11;
+  sw.add(blade, tip, guard, grip, pommel);
+  sw.scale.setScalar(k); sw.rotation.set(WR[0], WR[1], WR[2]);
+  hand.add(sw);
+}
+const clip = gltf.animations[0];
+log('clips: ' + gltf.animations.map(a => a.name + ' ' + a.duration.toFixed(2) + 's').join(', '));
+const mixer = new THREE.AnimationMixer(model);
+const act = clip ? mixer.clipAction(clip) : null; if (act) act.play();
+
+// 전 프레임에 걸친 바운딩 박스로 카메라 고정 (프레임마다 크기·위치가 흔들리지 않게)
+const box = new THREE.Box3();
+for (let i = 0; i < FRAMES; i++) { mixer.setTime(clip ? clip.duration * i / FRAMES : 0); model.updateMatrixWorld(true); box.expandByObject(model); }
+const ctr = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+const R = Math.max(sz.x, sz.y, sz.z) * 0.55;
+const cam = new THREE.OrthographicCamera(-R, R, R, -R, 0.01, 100);
+// 게임 타일 시점: 대각선 위에서 약 30° 내려다봄
+cam.position.set(ctr.x + 4, ctr.y + 3.2, ctr.z + 4); cam.lookAt(ctr);
+
+const sheet = document.createElement('canvas'); sheet.width = SIZE * FRAMES; sheet.height = SIZE;
+const sc = sheet.getContext('2d');
+for (let i = 0; i < FRAMES; i++) {
+  mixer.setTime(clip ? clip.duration * i / FRAMES : 0);
+  renderer.render(scene, cam);
+  if (PX) {
+    // 픽셀아트 느낌: 저해상도 렌더 + 1px 어두운 외곽선 후 최근접 확대
+    const t = document.createElement('canvas'); t.width = t.height = RS;
+    const tc = t.getContext('2d'); tc.drawImage(renderer.domElement, 0, 0);
+    const d = tc.getImageData(0, 0, RS, RS), a = d.data, o = new Uint8ClampedArray(a);
+    const A = (x, y) => (x < 0 || y < 0 || x >= RS || y >= RS) ? 0 : a[(y * RS + x) * 4 + 3];
+    for (let y = 0; y < RS; y++) for (let x = 0; x < RS; x++) {
+      const j = (y * RS + x) * 4;
+      if (a[j + 3] < 128) {
+        o[j + 3] = 0;
+        if (A(x - 1, y) >= 128 || A(x + 1, y) >= 128 || A(x, y - 1) >= 128 || A(x, y + 1) >= 128) { o[j] = 20; o[j + 1] = 16; o[j + 2] = 22; o[j + 3] = 255; }
+      } else o[j + 3] = 255;
+    }
+    tc.putImageData(new ImageData(o, RS, RS), 0, 0);
+    sc.imageSmoothingEnabled = false;
+    sc.drawImage(t, i * SIZE, 0, SIZE, SIZE);
+  } else sc.drawImage(renderer.domElement, i * SIZE, 0);
+}
+window.__sheet = sheet.toDataURL('image/png');
+window.__info = { frames: FRAMES, size: SIZE, duration: clip ? clip.duration : 0 };
+document.body.appendChild(sheet); sheet.style.maxWidth = '100%';
+log('done');
+</script>
+</body>
+</html>

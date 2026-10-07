@@ -1,0 +1,149 @@
+{
+  "_comment": "로컬 영상 생성(tools/local-video.py --prompt-file)용 공격 프롬프트. 최종 프롬프트 = template의 {who}/{action}을 캐릭터별 값으로 채움. 기사(남)는 knight_01 확정본 기준.",
+  "template": "Retro 16-bit pixel art sprite animation of the same {who} performing ONE single attack toward the right. {action} Then {pron} recovers and returns to the exact starting pose. Only one attack, no spinning, no second hit, no jumping. Strong anticipation and follow-through, but simple and readable. ABSOLUTELY NO visual effects of any kind: no slash trails, no motion lines, no speed lines, no glow, no aura, no sparks, no flash, no impact burst, no particles, no dust, no smoke, no blood, no magic circles, no energy, no swirls, no shapes or patterns in the background, nothing green. Only the character itself moves; the background stays a perfectly flat uniform pure green the whole time. Same pixel art style, colors and proportions as the first frame, crisp pixel edges. Locked static camera, no zoom, flat solid pure green background, no shadow, no ground.",
+  "chars": {
+    "warrior_01": {
+      "who": "warrior with a huge two-handed greatsword resting on his shoulder",
+      "pron": "he",
+      "action": "Wind-up: he leans back and lifts the greatsword high over his head with both hands, his back partly turning to the camera. Strike: he steps forward and brings the greatsword down in one heavy two-handed overhead chop in front of him toward the right."
+    },
+    "warrior_02": {
+      "who": "female warrior with a huge two-handed greatsword resting on her shoulder",
+      "pron": "she",
+      "action": "Wind-up: she leans back and lifts the greatsword high over her head with both hands, her back partly turning to the camera. Strike: she steps forward and brings the greatsword down in one heavy two-handed overhead chop in front of her toward the right."
+    },
+    "knight_01": {
+      "who": "armored knight",
+      "pron": "he",
+      "action": "Wind-up: he twists his upper body far back, turning so his back and shoulder partly face the camera, and raises the sword high behind his head. Strike: he steps forward and swings the sword down in one big powerful diagonal slash in front of him toward the right, with his full body weight."
+    },
+    "knight_02": {
+      "who": "female armored knight with a large shield and a sword",
+      "pron": "she",
+      "action": "Wind-up: she raises the shield in front and pulls the sword back high behind her. Strike: she steps forward and swings the sword in one strong diagonal slash past the shield toward the right."
+    },
+    "lancer_01": {
+      "who": "spearman holding a long spear upright",
+      "pron": "he",
+      "action": "Wind-up: he lowers the spear to horizontal pointing right and pulls it back with both hands, crouching. Strike: he lunges forward and drives the spear in one long straight thrust toward the right."
+    },
+    "lancer_02": {
+      "who": "female spear fighter holding a long spear upright",
+      "pron": "she",
+      "action": "Wind-up: she lowers the spear to horizontal pointing right and pulls it back with both hands, crouching. Strike: she lunges forward and drives the spear in one long straight thrust toward the right."
+    },
+    "assassin_01": {
+      "who": "hooded assassin with a dagger",
+      "pron": "he",
+      "action": "Wind-up: he crouches low and draws the dagger back. Strike: he dashes a short step forward and makes one quick sharp slash with the dagger toward the right."
+    },
+    "assassin_02": {
+      "who": "female ninja with a small blade",
+      "pron": "she",
+      "action": "Wind-up: she crouches low and draws the blade back. Strike: she dashes a short step forward and makes one quick sharp slash toward the right."
+    },
+    "archer_01": {
+      "who": "elf archer with a bow",
+      "pron": "he",
+      "action": "Wind-up: he raises the bow pointing right and pulls the bowstring back to his cheek, aiming. Strike: he releases the string, the bow snaps forward with a small recoil, the arrow flies off to the right out of view."
+    },
+    "archer_02": {
+      "who": "female elf archer with a bow",
+      "pron": "she",
+      "action": "Wind-up: she raises the bow pointing right and pulls the bowstring back to her cheek, aiming. Strike: she releases the string, the bow snaps forward with a small recoil, the arrow flies off to the right out of view."
+    },
+    "mage_01": {
+      "who": "old wizard with a wooden staff",
+      "pron": "he",
+      "action": "Wind-up: he raises the staff high with both hands as if gathering power. Strike: he thrusts the head of the staff forward toward the right in one strong casting motion."
+    },
+    "mage_02": {
+      "who": "female mage holding a glowing orb in her hand",
+      "pron": "she",
+      "action": "Wind-up: she pulls the orb back close to her body. Strike: she pushes her hand with the orb forward toward the right in one strong casting motion, palm open."
+    },
+    "priest_01": {
+      "who": "old priest with a jeweled staff",
+      "pron": "he",
+      "action": "Wind-up: he lifts the staff high above his head. Strike: he brings the staff down and points its head forward toward the right in one strong holy smite motion."
+    },
+    "priest_02": {
+      "who": "female priest with a golden staff",
+      "pron": "she",
+      "action": "Wind-up: she lifts the staff high above her head. Strike: she brings the staff down and points its head forward toward the right in one strong holy smite motion."
+    },
+    "shaman_01": {
+      "who": "tribal shaman holding a crystal orb",
+      "pron": "he",
+      "action": "Wind-up: he lifts the orb up near his face. Strike: he thrusts the orb forward toward the right with an outstretched arm in one strong casting motion."
+    },
+    "shaman_02": {
+      "who": "shrine maiden holding a paper talisman",
+      "pron": "she",
+      "action": "Wind-up: she raises the paper talisman up between two fingers. Strike: she flicks her arm forward and throws the talisman toward the right in one quick motion."
+    },
+    "summoner_01": {
+      "who": "young summoner with glasses holding an open book",
+      "pron": "he",
+      "action": "Wind-up: he lifts the open book up and raises his free hand. Strike: he thrusts his free hand forward toward the right in one strong summoning gesture while holding the book."
+    },
+    "summoner_02": {
+      "who": "female summoner with a crystal staff",
+      "pron": "she",
+      "action": "Wind-up: she raises the staff high. Strike: she swings the staff forward and points its crystal toward the right in one strong summoning motion."
+    },
+    "brawler_01": {
+      "who": "bald monk fighter",
+      "pron": "he",
+      "action": "Wind-up: he takes a stance and pulls his right fist back to his hip. Strike: he steps forward and throws one powerful straight punch toward the right, arm fully extended."
+    },
+    "brawler_02": {
+      "who": "female martial artist in a white gi",
+      "pron": "she",
+      "action": "Wind-up: she takes a stance and pulls her fist back to her hip. Strike: she steps forward and throws one powerful straight punch toward the right, arm fully extended."
+    },
+    "sapper_01": {
+      "who": "engineer in a hard hat holding a big wrench",
+      "pron": "he",
+      "action": "Wind-up: he raises the big wrench high over his head with both hands. Strike: he steps forward and smashes the wrench down in front of him toward the right in one heavy blow."
+    },
+    "sapper_02": {
+      "who": "female engineer in a hard hat holding a tool",
+      "pron": "she",
+      "action": "Wind-up: she raises the tool high over her head. Strike: she steps forward and smashes it down in front of her toward the right in one heavy blow."
+    },
+    "novice_01": {
+      "who": "young adventurer with a short sword and a round shield",
+      "pron": "he",
+      "action": "Wind-up: he raises the round shield and pulls the short sword back. Strike: he steps forward and makes one horizontal slash toward the right."
+    },
+    "novice_02": {
+      "who": "young female adventurer with a dagger",
+      "pron": "she",
+      "action": "Wind-up: she pulls the dagger back at her side. Strike: she steps forward and makes one quick forward stab toward the right."
+    }
+  },
+  "motions": {
+    "_comment": "attack은 template 사용. 나머지는 여기 text의 {who}/{pron}을 채움. frames는 영상 프레임 수(24fps, 17k+5 단위로 서버가 맞춤). loop=true면 게임에서 반복 재생",
+    "idle": {
+      "frames": 56,
+      "loop": true,
+      "text": "Retro 16-bit pixel art sprite animation of the same {who}, an almost still idle loop. {Pron} stands in place facing right and barely moves: only a very slow, very small breathing motion of the chest and shoulders, one or two pixels at most. The head, weapon, arms and feet stay still. {Pron} returns to the exact starting pose at the end so it loops seamlessly. Same pixel art style, colors and proportions as the first frame, crisp pixel edges. ABSOLUTELY NO visual effects of any kind: no slash trails, no motion lines, no speed lines, no glow, no aura, no sparks, no flash, no impact burst, no particles, no dust, no smoke, no blood, no magic circles, no energy, no swirls, no shapes or patterns in the background, nothing green. Only the character itself moves; the background stays a perfectly flat uniform pure green the whole time. Locked static camera, no zoom, flat solid pure green background, no shadow, no ground."
+    },
+    "combat": {
+      "frames": 56,
+      "loop": true,
+      "text": "Retro 16-bit pixel art sprite animation of the same {who}, a calm battle-ready idle loop. {Pron} holds a steady guard pose facing right, weapon ready, and moves only slightly: a small breathing motion and a tiny shift of weight, the weapon barely moving. No bouncing, no big movement, the feet stay planted, and {pron} returns to the exact starting pose at the end so it loops seamlessly. Same pixel art style, colors and proportions as the first frame, crisp pixel edges. ABSOLUTELY NO visual effects of any kind: no slash trails, no motion lines, no speed lines, no glow, no aura, no sparks, no flash, no impact burst, no particles, no dust, no smoke, no blood, no magic circles, no energy, no swirls, no shapes or patterns in the background, nothing green. Only the character itself moves; the background stays a perfectly flat uniform pure green the whole time. Locked static camera, no zoom, flat solid pure green background, no shadow, no ground."
+    },
+    "run": {
+      "frames": 73,
+      "loop": true,
+      "text": "Retro 16-bit pixel art sprite animation of the same {who} jogging lightly in place toward the right, like on a treadmill. A small, compact jog cycle: short steps, knees only slightly raised, a gentle body bob, arms with only a small swing, the weapon held close to the body and kept steady. Calm and restrained, not a sprint, no leaning, no big strides. The body stays at the same spot in the frame and does not travel across the screen. {Pron} starts from the starting pose, jogs several steps in place, then stops back in the exact starting pose. Same pixel art style, colors and proportions as the first frame, crisp pixel edges. ABSOLUTELY NO visual effects of any kind: no slash trails, no motion lines, no speed lines, no glow, no aura, no sparks, no flash, no impact burst, no particles, no dust, no smoke, no blood, no magic circles, no energy, no swirls, no shapes or patterns in the background, nothing green. Only the character itself moves; the background stays a perfectly flat uniform pure green the whole time. Locked static camera, no zoom, flat solid pure green background, no shadow, no ground."
+    },
+    "hit": {
+      "frames": 39,
+      "loop": false,
+      "text": "Retro 16-bit pixel art sprite animation of the same {who} getting hit by a blow from the right. {Pron} flinches hard: the head and upper body snap backward to the left, a short stagger step back, then {pron} quickly recovers and returns to the exact starting pose. One single quick reaction. Same pixel art style, colors and proportions as the first frame, crisp pixel edges. ABSOLUTELY NO visual effects of any kind: no slash trails, no motion lines, no speed lines, no glow, no aura, no sparks, no flash, no impact burst, no particles, no dust, no smoke, no blood, no magic circles, no energy, no swirls, no shapes or patterns in the background, nothing green. Only the character itself moves; the background stays a perfectly flat uniform pure green the whole time. Locked static camera, no zoom, flat solid pure green background, no shadow, no ground."
+    }
+  }
+}

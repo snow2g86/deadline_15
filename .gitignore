@@ -7,3 +7,6 @@
 docs/.bkit-memory.json
 docs/.pdca-status.json
 docs/.pdca-snapshots/
+
+# 모션 시험 제작 산출물 (3D 모델 등, 용량 큼)
+tools/_work/

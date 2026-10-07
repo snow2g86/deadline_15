@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sheet Preview</title>
+<!-- 개발용: 영상 생성 → 스프라이트 시트(video-to-sheet.py) 결과를 현재 컷아웃 리그와 비교 -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 14px;font-size:13px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+label{color:var(--sub);font-size:13px;display:flex;gap:6px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{font-size:15px;margin:0 0 2px}.meta{color:var(--sub);font-size:12px;margin-bottom:10px}
+.stage{position:relative;height:260px;border-radius:8px;overflow:hidden;background:radial-gradient(ellipse at 50% 86%,#2e4a30 0 26%,transparent 27%),linear-gradient(#0f1a14,#16241a)}
+.small{height:100px;margin-top:8px}
+.anchor{position:absolute;left:50%;bottom:12%;width:0;height:0}
+.foe{position:absolute;right:8%;bottom:14%;font-size:28px;opacity:.5}.small .foe{font-size:16px}
+.still{position:absolute;bottom:0;image-rendering:pixelated}
+.spr{position:absolute;bottom:0;background-repeat:no-repeat;image-rendering:auto}
+.strip{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.strip img{height:110px;background:#1e2833;border-radius:6px}
+ul{margin:10px 0 0;padding-left:18px;color:var(--sub);font-size:12px}
+</style>
+</head>
+<body>
+<h1>기사 공격 — 영상 생성 모델 비교</h1>
+<p class="lead">공격 영상을 생성해 16프레임으로 자르고 배경을 지운 결과입니다. 위는 3배, 아래는 실제 게임 크기.</p>
+<div class="bar">
+  <label><input type="range" id="speed" min="0.25" max="1.5" step="0.25" value="1"> 속도 <span id="sv">1x</span></label>
+</div>
+<div class="grid" id="grid"></div>
+<div id="strips"></div>
+<script>var VFX = {}; const UI = 52;</script>
+<script src="../js/battle/motion.js"></script>
+<script src="../js/battle/rig.js"></script>
+<script>
+Rig.base = '../';
+const U = { cls: 'knight', gender: 'm' };
+// 비교 샘플: 같은 기사·같은 프롬프트(첫 샘플 제외)로 모델만 바꿈
+const SAMPLES = [
+  { id: 'still', name: '원본 그림', meta: '현재 정지 이미지' },
+  { id: 'rig', name: '현재: 2D 조각 모션', meta: '방패 밀치기 (rig.js)' },
+  { id: '_bold', skip: true },
+  { id: 'knight_attack', name: 'Kling 3.0 std (첫 샘플)', meta: '4.5크레딧 · 이전 프롬프트', note: '몸을 돌리고 중간 프레임이 번짐' },
+  { id: 'knight_klingpro', name: 'Kling 3.0 pro', meta: '5.25크레딧 · 다듬은 프롬프트', note: '깔끔한 내려치기, 방패에 초록 섬광 1프레임' },
+  { id: 'knight_minimax', name: 'MiniMax H3 Max 480p', meta: '7.5크레딧 · 다듬은 프롬프트', note: '도트 화풍 유지, 길게 치켜든 뒤 빠르게 내려침' },
+  { id: 'knight_local', name: 'MiniMax H3 로컬 (MLX Core)', meta: '0크레딧 · 이 Mac에서 약 2.5분 · 480p 8bit turbo', note: 'API판과 비슷한 품질, 타격 순간 섬광 1프레임' },
+  { id: 'knight_pad19half', name: '게임 적용: B 중간까지 (여백 넓혀 재생성)', meta: '0크레딧 · 캐릭터를 작게 배치해 동작이 영상 밖으로 안 잘림', note: '현재 게임에 들어간 버전' },
+  { id: 'knight_one_19half', name: '한 번 강하게 베기 B — 중간까지', meta: '0크레딧 · seed 19 영상을 베기 직후에서 끊음', note: '비틀어 치켜들기 → 한 번 베기 → 내딛기에서 끝 (끝나면 원래 그림으로 돌아옴)' },
+  { id: 'knight_one_5', name: '한 번 강하게 베기 A (로컬)', meta: '0크레딧 · 단일 베기 프롬프트 · seed 5' },
+  { id: 'knight_one_19', name: '한 번 강하게 베기 B (로컬)', meta: '0크레딧 · 단일 베기 프롬프트 · seed 19' },
+  { id: 'knight_one_42', name: '한 번 강하게 베기 C (로컬)', meta: '0크레딧 · 단일 베기 프롬프트 · seed 42' },
+  { id: 'knight_bold_11', name: '과감한 공격 A (로컬)', meta: '0크레딧 · 회전 베기 프롬프트 · seed 11' },
+  { id: 'knight_bold_23', name: '과감한 공격 B (로컬)', meta: '0크레딧 · 회전 베기 프롬프트 · seed 23' },
+  { id: 'knight_bold_37', name: '과감한 공격 C (로컬)', meta: '0크레딧 · 회전 베기 프롬프트 · seed 37' },
+  { id: 'knight_grok', name: 'Grok 1.5 Lite 720p', meta: '3크레딧 · 다듬은 프롬프트', note: '뒤로 크게 젖혔다가 앞으로 내려침 (마지막 프레임 고정 미지원)' },
+];
+let speed = 1;
+const grid = document.getElementById('grid'), strips = document.getElementById('strips');
+// 과감한 공격 카드를 원본·현재 바로 뒤로
+{ const pick = x => x.id.startsWith('knight_pad') || x.id.startsWith('knight_one') || x.id.startsWith('knight_bold');
+  const b = SAMPLES.filter(pick); const rest = SAMPLES.filter(x => !pick(x) && !x.skip);
+  SAMPLES.length = 0; SAMPLES.push(...rest.slice(0, 2), ...b, ...rest.slice(2)); }
+SAMPLES.forEach(sm => {
+  const card = document.createElement('div'); card.className = 'card';
+  card.innerHTML = `<h2>${sm.name}</h2><div class="meta">${sm.meta}</div><div class="stage" data-s="3"></div><div class="stage small" data-s="1"></div>` +
+    (sm.note ? `<ul><li>${sm.note}</li></ul>` : '');
+  grid.appendChild(card);
+  if (!['still', 'rig'].includes(sm.id)) {
+    const st = document.createElement('div'); st.className = 'strip';
+    st.innerHTML = `<div class="meta">${sm.name} — 시트 16프레임</div><img src="_work/${sm.id}_sheet.png" alt="">`; strips.appendChild(st);
+  }
+  card.querySelectorAll('.stage').forEach(async st => {
+    const s = +st.dataset.s, a = document.createElement('div'); a.className = 'anchor'; st.appendChild(a);
+    const foe = document.createElement('div'); foe.className = 'foe'; foe.textContent = '👹'; st.appendChild(foe);
+    const fit = Rig.fit(U, UI);
+    if (sm.id === 'still') {
+      const im = new Image(); im.src = '../image/character/knight_01.png'; im.className = 'still';
+      im.style.width = fit.size * s + 'px'; im.style.marginLeft = -fit.size * s / 2 + 'px'; im.style.marginBottom = fit.mb * s + 'px'; a.appendChild(im);
+    } else if (sm.id === 'rig') {
+      const ic = document.createElement('div'); ic.style.cssText = `position:absolute;bottom:${fit.mb * s}px;left:${-fit.size * s / 2}px;transform:scale(${s});transform-origin:0 100%;line-height:0`;
+      a.appendChild(ic); Rig.attach(ic, U, fit.size);
+      const m = ATK_MOTIONS.knight; const loop = () => { Rig.play(ic, m.dur / speed); setTimeout(loop, 1400 / speed); }; loop();
+    } else {
+      const meta = await (await fetch(`_work/${sm.id}_sheet.png.json`)).json();
+      // 서 있는 자세의 몸 높이를 게임 기준(FIG_H)에 맞추고, 발끝을 같은 선에
+      const z = (FIG_H * s) / (meta.body[1] - meta.body[0]), el = document.createElement('div'); el.className = 'spr';
+      el.style.width = meta.w * z + 'px'; el.style.height = meta.h * z + 'px'; el.style.marginLeft = -(meta.w * z) / 2 + 'px';
+      el.style.marginBottom = (FIG_FOOT * s - (meta.h - meta.body[1]) * z) + 'px';
+      el.style.backgroundImage = `url(_work/${sm.id}_sheet.png)`; el.style.backgroundSize = `${meta.w * meta.frames * z}px ${meta.h * z}px`;
+      a.appendChild(el);
+      let an = null; const play = () => { if (an) an.cancel();
+        an = el.animate([{ backgroundPositionX: '0px' }, { backgroundPositionX: -(meta.w * meta.frames * z) + 'px' }],
+          { duration: 1300 / speed, easing: `steps(${meta.frames})`, iterations: Infinity }); };
+      play(); st._replay = play;
+    }
+  });
+});
+document.getElementById('speed').oninput = e => { speed = +e.target.value; document.getElementById('sv').textContent = speed + 'x';
+  document.querySelectorAll('.stage').forEach(st => st._replay && st._replay()); };
+</script>
+</body>
+</html>

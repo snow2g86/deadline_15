@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Music Review</title>
+<!-- 개발용: tools/gen-music.py로 만든 곡 후보를 듣고 비교. "이음새 듣기"는 곡 끝 4초 → 처음으로 반복되는 부분을 재생 -->
+<style>
+:root{--bg:#10141c;--card:#1a2130;--line:#2c3648;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px;max-width:880px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 16px;font-size:13px}
+.group{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.group h2{font-size:15px;margin:0 0 2px}.group .d{color:var(--sub);font-size:12px;margin-bottom:10px}
+.cand{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+.cand b{width:70px}.cand audio{flex:1;min-width:240px;height:36px}
+button{background:transparent;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:12px}
+button:hover{border-color:var(--acc)}
+.miss{color:var(--sub);font-size:12px}
+</style>
+</head>
+<body>
+<h1>게임 음원 후보 듣기</h1>
+<p class="lead">로컬 ACE-Step 1.5(XL Turbo)로 만든 곡입니다. 반복 BGM은 "이음새 듣기"로 끝→처음이 자연스럽게 이어지는지 확인할 수 있습니다.</p>
+<div id="list"></div>
+<script>
+const G = [
+  ['lobby', '로비·메인 BGM', '클랜 거점 · 어쿠스틱 기타·류트·플루트 · 88 BPM', true],
+  ['battle', '일반 전투 BGM', '전술 RPG 전투 · 현악 오스티나토·스네어·브라스 · 128 BPM', true],
+  ['boss', '보스 전투 BGM', '어둡고 웅장 · 타이코·팀파니·파이프 오르간 · 150 BPM', true],
+  ['victory', '승리 징글', '10초 · 밝은 팡파르', false],
+  ['defeat', '패배 징글', '10초 · 느린 현악·피아노', false],
+];
+const ac = new (window.AudioContext || window.webkitAudioContext)(); let seam = null;
+async function seamTest(url) {
+  if (seam) { try { seam.stop(); } catch (e) {} seam = null; }
+  document.querySelectorAll('audio').forEach(a => a.pause());
+  const buf = await ac.decodeAudioData(await (await fetch(url)).arrayBuffer());
+  const s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(ac.destination);
+  s.start(0, Math.max(0, buf.duration - 4)); seam = s; setTimeout(() => { if (seam === s) { s.stop(); seam = null; } }, 9000);
+}
+const list = document.getElementById('list');
+G.forEach(([id, name, d, loop]) => {
+  const g = document.createElement('div'); g.className = 'group';
+  g.innerHTML = `<h2>${name}</h2><div class="d">${d}</div>`;
+  [1, 2].forEach(n => {
+    const url = `_work/music/${id}_${n}.mp3`;
+    const row = document.createElement('div'); row.className = 'cand';
+    row.innerHTML = `<b>후보 ${n}</b><audio controls preload="none" src="${url}"></audio>` + (loop ? '<button>이음새 듣기</button>' : '');
+    const a = row.querySelector('audio');
+    a.onerror = () => { row.innerHTML = `<b>후보 ${n}</b><span class="miss">아직 생성 중이거나 없음</span>`; };
+    fetch(url, { method: 'HEAD' }).then(r => { if (!r.ok) a.onerror(); });
+    const b = row.querySelector('button'); if (b) b.onclick = () => seamTest(url);
+    g.appendChild(row);
+  });
+  list.appendChild(g);
+});
+</script>
+</body>
+</html>
