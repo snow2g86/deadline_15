@@ -304,18 +304,18 @@ const SPRITE_SHEETS = {
     run: { src: 'image/character/anim/warrior_02_run.png', frames: 14, w: 140, h: 160, body: [12, 156], cx: 68.5, icx: 481.5, dur: 1500 },
   },
   commander_01: {
-    attack: { src: 'image/character/anim/commander_01_attack.png', frames: 14, w: 191, h: 160, body: [45, 156], cx: 69.5, icx: 480.5, dur: 840, hit: 8 },
-    combat: { src: 'image/character/anim/commander_01_combat.png', frames: 12, w: 139, h: 160, body: [4, 156], cx: 72.5, icx: 480.5, dur: 1600 },
-    hit: { src: 'image/character/anim/commander_01_hit.png', frames: 9, w: 240, h: 160, body: [35, 154], cx: 85.0, icx: 480.5, dur: 520, hit: 3 },
-    idle: { src: 'image/character/anim/commander_01_idle.png', frames: 12, w: 136, h: 160, body: [4, 156], cx: 70.0, icx: 480.5, dur: 2400 },
-    run: { src: 'image/character/anim/commander_01_run.png', frames: 14, w: 174, h: 160, body: [8, 155], cx: 91.5, icx: 480.5, dur: 1500 },
+    attack: { src: 'image/character/anim/commander_01_attack.png', frames: 14, w: 196, h: 160, body: [32, 157], cx: 71.0, icx: 480.5, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/commander_01_combat.png', frames: 12, w: 128, h: 160, body: [4, 155], cx: 64.5, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/commander_01_hit.png', frames: 9, w: 171, h: 160, body: [72, 159], cx: 60.5, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/commander_01_idle.png', frames: 12, w: 128, h: 160, body: [3, 155], cx: 66.0, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/commander_01_run.png', frames: 14, w: 130, h: 160, body: [5, 155], cx: 64.0, icx: 480.5, dur: 1500 },
   },
   commander_02: {
-    attack: { src: 'image/character/anim/commander_02_attack.png', frames: 14, w: 220, h: 160, body: [31, 151], cx: 65.5, icx: 481.0, dur: 840, hit: 8 },
-    combat: { src: 'image/character/anim/commander_02_combat.png', frames: 12, w: 141, h: 160, body: [3, 156], cx: 73.0, icx: 481.0, dur: 1600 },
-    hit: { src: 'image/character/anim/commander_02_hit.png', frames: 9, w: 203, h: 160, body: [29, 135], cx: 74.5, icx: 481.0, dur: 520, hit: 3 },
-    idle: { src: 'image/character/anim/commander_02_idle.png', frames: 12, w: 130, h: 160, body: [6, 156], cx: 69.5, icx: 481.0, dur: 2400 },
-    run: { src: 'image/character/anim/commander_02_run.png', frames: 14, w: 181, h: 160, body: [7, 155], cx: 85.5, icx: 481.0, dur: 1500 },
+    attack: { src: 'image/character/anim/commander_02_attack.png', frames: 14, w: 166, h: 160, body: [33, 157], cx: 55.5, icx: 481.5, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/commander_02_combat.png', frames: 12, w: 121, h: 160, body: [4, 155], cx: 61.0, icx: 481.5, dur: 1600 },
+    hit: { src: 'image/character/anim/commander_02_hit.png', frames: 9, w: 159, h: 160, body: [76, 158], cx: 55.5, icx: 481.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/commander_02_idle.png', frames: 12, w: 121, h: 160, body: [4, 156], cx: 61.0, icx: 481.5, dur: 2400 },
+    run: { src: 'image/character/anim/commander_02_run.png', frames: 14, w: 122, h: 160, body: [5, 153], cx: 57.5, icx: 481.5, dur: 1500 },
   },
 };
 

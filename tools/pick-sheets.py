@@ -16,8 +16,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = os.path.join(ROOT, 'tools', '_work', 'anim', 'sheets')
 man = json.load(open(os.path.join(D, 'manifest.json')))
 only = sys.argv[sys.argv.index('--only') + 1].split(',') if '--only' in sys.argv else None
+mot_only = sys.argv[sys.argv.index('--motions') + 1].split(',') if '--motions' in sys.argv else None
 DUR = {'idle': 2400, 'combat': 1600, 'run': 1500, 'hit': 520}
-SKIP = {'knight_01'}  # 이미 직접 골라 적용함
+SKIP = set() if '--all' in sys.argv else {'knight_01'}  # 이미 직접 골라 적용함
 
 def frames(meta):
     im = Image.open(os.path.join(ROOT, 'tools', meta['src'])).convert('RGBA')
@@ -99,10 +100,63 @@ def strip_flash(meta, src):
     dst = src[:-4] + '_noflash.png'; out.save(dst); json.dump(meta, open(dst + '.json', 'w'))
     return dst
 
+# 피격: 캐릭터 말고는 아무것도 나오지 않게 — 몸통 덩어리 하나만 남기고, 서 있는 자세보다 튀어나온 프레임(몸에 붙은 칼·섬광)은
+# 앞의 깨끗한 프레임으로 바꾸고, 몸 바깥의 밝은 흰색 픽셀도 지움
+def strict_hit(meta, src):
+    fs = frames(meta)
+    # 기준 몸 영역: 영상 첫 장면(서 있는 자세)에서 잰 몸 세로 범위(meta body)와 중심(cx)
+    top, bot = meta['body']; cx = meta.get('cx', meta['w'] / 2); hh = bot - top
+    ref = (cx - hh * 0.5, top, cx + hh * 0.5, bot)
+    inref = lambda x, y: ref[0] <= x <= ref[2] and ref[1] <= y <= ref[3]
+    def body_only(f):
+        f = f.copy(); px = f.load(); W, H = f.size
+        seen = bytearray(W * H); blobs = []
+        for y0 in range(H):
+            for x0 in range(W):
+                if seen[y0 * W + x0] or not px[x0, y0][3]: continue
+                st = [(x0, y0)]; seen[y0 * W + x0] = 1; bl = []
+                while st:
+                    x, y = st.pop(); bl.append((x, y))
+                    for nx, ny in ((x+1,y),(x-1,y),(x,y+1),(x,y-1)):
+                        if 0 <= nx < W and 0 <= ny < H and not seen[ny*W+nx] and px[nx, ny][3]:
+                            seen[ny*W+nx] = 1; st.append((nx, ny))
+                blobs.append(bl)
+        if not blobs: return f, 0
+        # 몸 = 기준 영역 안 픽셀이 가장 많은 덩어리
+        keep = max(blobs, key=lambda bl: sum(1 for x, y in bl if inref(x, y)))
+        for bl in blobs:
+            if bl is not keep:
+                for x, y in bl: px[x, y] = (0, 0, 0, 0)
+        # 기준 영역 밖으로 나온 밝은 픽셀(몸에 붙은 칼날·섬광)도 제거
+        m = hh * 0.12; out_px = 0
+        for x, y in keep:
+            r, g, b, a = px[x, y]
+            if not (ref[0] - m <= x <= ref[2] + m and ref[1] - m <= y <= ref[3] + m):
+                out_px += 1
+                if min(r, g, b) > 150: px[x, y] = (0, 0, 0, 0)
+        return f, out_px / max(1, len(keep))
+    res = [body_only(f) for f in fs]
+    # 섬광 판정: 아주 밝은 흰색 픽셀이 평소(프레임 중앙값)보다 확 늘어난 프레임
+    whites = [sum(1 for p in f.getdata() if p[3] and min(p[:3]) > 228) for f, _ in res]
+    wmed = sorted(whites)[len(whites) // 2]
+    bads = []
+    for (f, outside), wc in zip(res, whites):
+        bb = f.getbbox()
+        bads.append(bb is None or outside > 0.04 or (bb[3] - bb[1]) > hh * 1.15 or (bb[2] - bb[0]) > hh * 1.1 or wc > wmed * 1.6 + 25)
+    goods = [i for i, b in enumerate(bads) if not b] or [len(res) - 1]
+    out = Image.new('RGBA', (meta['w'] * meta['frames'], meta['h']))
+    for i in range(len(res)):
+        # 나쁜 프레임은 가장 가까운 앞의 깨끗한 프레임, 앞에 없으면 첫 깨끗한 프레임으로
+        prev = [g for g in goods if g <= i]
+        out.paste(res[prev[-1] if prev else goods[0]][0], (i * meta['w'], 0))
+    dst = src[:-4] + '_strict.png'; out.save(dst); json.dump(meta, open(dst + '.json', 'w'))
+    return dst
+
 picked = {}
 for key in sorted(man):
     if key in SKIP or (only and key not in only): continue
     for motion, cands in man[key].items():
+        if mot_only and motion not in mot_only: continue
         best = None
         for c in cands:
             sc, hit = score(c, motion)
@@ -111,7 +165,7 @@ for key in sorted(man):
         picked[f'{key}.{motion}'] = {'seed': c['seed'], 'score': round(sc, 1), 'hit': hit}
         if '--dry' in sys.argv: continue
         src = os.path.join(ROOT, 'tools', c['src'])
-        src = clean_frames(c, src) if motion != 'attack' else strip_flash(c, src)
+        src = strip_flash(c, src) if motion == 'attack' else strict_hit(c, src) if motion == 'hit' else clean_frames(c, src)
         if motion == 'attack':
             dur = max(700, min(1100, c['frames'] * 60))
             args = [key, 'attack', src, str(dur), str(hit)]

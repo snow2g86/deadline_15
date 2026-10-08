@@ -123,14 +123,14 @@
       "action": "Wind-up: she pulls the dagger back at her side. Strike: she steps forward and makes one quick forward stab toward the right."
     },
     "commander_01": {
-      "who": "young clan commander in a navy cape and steel breastplate holding a longsword",
+      "who": "young male maestro commander in a navy tailcoat with gold epaulettes holding a silver conductor baton",
       "pron": "he",
-      "action": "Wind-up: he raises the longsword high with his cape swinging behind him. Strike: he steps forward and brings the longsword down in one decisive diagonal slash in front of him toward the right."
+      "action": "Wind-up: he raises the conductor baton high with a sweeping theatrical gesture, coat tails swinging. Strike: he slashes the baton down and forward toward the right in one sharp decisive conducting stroke, pointing at the enemy."
     },
     "commander_02": {
-      "who": "elegant female clan commander in a navy cape and ornate breastplate holding a slender longsword",
+      "who": "seductive female maestro commander in a cropped navy tailcoat, black corset and thigh-high stockings holding a silver conductor baton",
       "pron": "she",
-      "action": "Wind-up: she draws the slender longsword back gracefully with her cape swinging behind her. Strike: she steps forward and makes one swift elegant lunging slash toward the right."
+      "action": "Wind-up: she lifts the conductor baton gracefully above her head with a sultry confident pose. Strike: she snaps the baton forward toward the right in one sharp elegant conducting stroke, pointing at the enemy."
     }
   },
   "motions": {
