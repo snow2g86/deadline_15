@@ -450,8 +450,9 @@ const ActionManager = {
         return;
       }
       if (result === 'instant') {
-        FSM.transition(BattleState.UNIT_SELECTED); S._curSkill = null;
-        this.doSkill(u, u.x, u.y); Renderer.rUnits(); return;
+        // doSkill이 S._curSkill로 고른 스킬을 찾으므로 실행 뒤에 비움 (먼저 비우면 직업 첫 스킬이 대신 나감)
+        FSM.transition(BattleState.UNIT_SELECTED);
+        this.doSkill(u, u.x, u.y); S._curSkill = null; Renderer.rUnits(); return;
       }
       S.atkT = result; S.healT = [];
     } else {

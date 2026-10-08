@@ -28,7 +28,9 @@ registerSkill('novice_throw', {
 registerSkill('novice_firstaid', {
 	target(u, sk, G) {
 		const r = sk.aidRange || 1;
-		return G.units.filter(v => v.team === 'ally' && v.hp > 0 && !v.isSummon && mh(u.x, u.y, v.x, v.y) <= r).map(v => ({x: v.x, y: v.y}));
+		// HP가 가득 찬 클랜원은 제외 (기력만 쓰고 +0 되는 것 방지), 대상이 없으면 사용 불가
+		const cells = G.units.filter(v => v.team === 'ally' && v.hp > 0 && v.hp < v.mhp && !v.isSummon && mh(u.x, u.y, v.x, v.y) <= r).map(v => ({x: v.x, y: v.y}));
+		return cells.length ? cells : null;
 	},
 	exec(u, tx, ty, sk, G) {
 		const r = sk.aidRange || 1;
