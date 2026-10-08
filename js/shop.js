@@ -27,7 +27,7 @@ function genSiegeId() {
 }
 
 var SCROLL_CLASSES = ['warrior','knight','assassin','brawler','lancer','sapper','archer','mage','summoner','shaman','priest'];
-var SCROLL_COST = 400;
+var SCROLL_COST = ECON.scroll;
 
 // ── 골드 관리 ─────────────────────────────
 
@@ -86,21 +86,24 @@ function genRotatingItems() {
     });
     var avg = scores.reduce(function(a, b) { return a + b; }, 0) / 3;
     var grade = avg >= 0.85 ? 'S' : avg >= 0.65 ? 'A' : avg >= 0.35 ? 'B' : 'C';
-    var baseCost = { 'S': 900, 'A': 700, 'B': 550, 'C': 450 };
+    var baseCost = ECON.merc;
     var cost = Math.round(baseCost[grade] * (0.9 + avg * 0.2));
     items.push({ type: 'char', cls: cls, name: name, pot: pot, cost: cost, sold: false, gender: randomGender() });
   }
   // 스킬북 6개 (중복 없음)
   if (typeof LEARNABLE_SKILLS !== 'undefined') {
-    var lsKeys = Object.keys(LEARNABLE_SKILLS).sort(function() { return Math.random() - 0.5; });
+    var lsKeys = Object.keys(LEARNABLE_SKILLS).filter(function(k) { return LEARNABLE_SKILLS[k].cls !== 'commander'; }).sort(function() { return Math.random() - 0.5; });   // 지휘관은 전투 불참
     var sbCount = Math.min(6, lsKeys.length);
     for (var sb = 0; sb < sbCount; sb++) {
       var sk = LEARNABLE_SKILLS[lsKeys[sb]];
       items.push({
-        type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: sk.bookCost || (sk.cls === 'commander' ? 1500 : 800), sold: false // 지휘관 다 카포는 강력해서 비쌈 · 스킬 데이터의 bookCost가 있으면 우선 (노비스 300, 피아니시모 1000)
+        type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: Math.round((sk.bookCost || (sk.cls === 'commander' ? 1500 : 800)) * ECON.bookMul), sold: false // 지휘관 다 카포는 강력해서 비쌈 · 스킬 데이터의 bookCost가 있으면 우선 (노비스 300, 피아니시모 1000)
       });
     }
   }
+  // 영혼석 3개 (랜덤 직업, 비쌈) — 등급 승급 B→A·A→S에 필요. 요일 던전·보스 클리어로도 얻음
+  var soulCls = (typeof DAILY !== 'undefined' ? DAILY.CLASSES : classes).slice().sort(function() { return Math.random() - 0.5; }).slice(0, 3);
+  soulCls.forEach(function(c) { items.push({ type: 'soulstone', cls: c, cost: ECON.soulStone, sold: false }); });
   // 전직서 6개 (랜덤 직업)
   var shuffled = SCROLL_CLASSES.slice().sort(function() { return Math.random() - 0.5; });
   for (var si = 0; si < 6; si++) {
@@ -130,7 +133,7 @@ function genFixedItems() {
         items.push({
           type: 'battle_potion', potionId: BATTLE_POTION_LIST[bp].potionId,
           name: bpDef.name, icon: bpDef.icon,
-          cost: 150, sold: false, quantity: 1
+          cost: ECON.battlePotion, sold: false, quantity: 1
         });
       }
     }
@@ -251,8 +254,9 @@ function renderShop() {
   };
   var adCfg = tabAdMap[_currentTab];
   if (adCfg) list.appendChild(buildTabAdCard(adCfg.type, adCfg.descKey, adCfg.fn));
+  if (_currentTab === 'consumable' && typeof Rune !== 'undefined') renderRuneGacha(list);
 
-  var tabTypeMap = { 'mercenary': ['char'], 'consumable': ['potion', 'battle_potion', 'siege'], 'skill': ['skillbook'] };
+  var tabTypeMap = { 'mercenary': ['char'], 'consumable': ['potion', 'battle_potion', 'siege'], 'skill': ['soulstone', 'skillbook'] };
   var filterTypes = tabTypeMap[_currentTab] || [];
   var filteredItems = _shopData.items.filter(function(item) {
     var iType = item.type || 'char';
@@ -266,6 +270,7 @@ function renderShop() {
     else if (iType === 'battle_potion') renderBattlePotionCard(item, list);
     else if (iType === 'siege') renderSiegeCard(item, list);
     else if (iType === 'skillbook') renderSkillBookCard(item, list);
+    else if (iType === 'soulstone') renderSoulCard(item, list);
   });
 
   // 마지막에 spacer 추가
@@ -379,6 +384,51 @@ function renderSkillBookCard(item, list) {
         saveShop();
         renderShop();
         showAlert(t('academy.skillbook_drop', { skill: skillName }));
+      });
+    };
+  }
+  list.appendChild(el);
+}
+
+// 마법부여 룬 뽑기: 무작위 룬 1개 (성소 마법부여 재료)
+function renderRuneGacha(list) {
+  var canAfford = _gold >= RUNE_GACHA_COST;
+  var el = document.createElement('div');
+  el.className = 'shop-card rune-card';
+  el.innerHTML =
+    '<div class="shop-icon">🔮</div>' +
+    '<div class="shop-name">' + t('enchant.rune_gacha') + '</div>' +
+    '<div class="shop-stats">' + t('enchant.rune_gacha_desc') + '<br>' + Rune.kinds().map(function(k) { return ENCHANTS[k].icon + Rune.count(k); }).join(' ') + '</div>' +
+    '<button class="shop-btn' + (canAfford ? '' : ' disabled') + '"' + (canAfford ? '' : ' disabled') + '>' + t('shop.buy', { gold: RUNE_GACHA_COST }) + '</button>';
+  el.querySelector('.shop-btn').onclick = function() {
+    if (_gold < RUNE_GACHA_COST) return;
+    _gold -= RUNE_GACHA_COST; saveGold(_gold); updateGoldUI();
+    var k = Rune.add(Rune.random());
+    showAlert(ENCHANTS[k].icon + ' ' + t('enchant.rune_got', { rune: t('enchant.rune_name', { e: t('enchant.' + k) }) }));
+    renderShop();
+  };
+  list.appendChild(el);
+}
+
+// 영혼석 (직업별): 사면 바로 영혼석 보관함(game_soul)으로
+function renderSoulCard(item, list) {
+  var canAfford = _gold >= item.cost && !item.sold;
+  var clsName = t('classes.' + item.cls);
+  var el = document.createElement('div');
+  el.className = 'shop-card soul-card' + (item.sold ? ' sold' : '');
+  var buyBtn = item.sold ? t('shop.buy_complete') : t('shop.buy', { gold: item.cost });
+  el.innerHTML =
+    '<div class="shop-icon soul-ic">💠' + clsIcon(item.cls, 18) + '</div>' +
+    '<div class="shop-name">' + t('soul.stone_name', { cls: clsName }) + '</div>' +
+    '<div class="shop-stats">' + t('soul.shop_desc', { have: Soul.stones(item.cls) }) + '</div>' +
+    '<button class="shop-btn' + (item.sold ? ' sold-btn' : '') + (canAfford ? '' : ' disabled') + '" ' + (canAfford && !item.sold ? '' : 'disabled') + '>' + buyBtn + '</button>';
+  if (!item.sold) {
+    el.querySelector('.shop-btn').onclick = function() {
+      if (_gold < item.cost) return;
+      showConfirm(t('soul.buy_confirm', { cls: clsName, gold: item.cost }), function() {
+        _gold -= item.cost; saveGold(_gold); updateGoldUI();
+        Soul.add('stone', item.cls, 1);
+        item.sold = true; saveShop(); renderShop();
       });
     };
   }

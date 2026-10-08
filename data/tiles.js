@@ -102,7 +102,7 @@ const MAP_THEMES = {
       rock:   { tc:'#4a4850', lc:'#3a3840', rc:'#2a2830' },
       water:  { tc:'#2a3848', lc:'#1a2838', rc:'#0a1828' },
     },
-    dist: { rock:.25, hill:.15, forest:.05, water:.05, shallow:.03 }
+    dist: { rock:.20, hill:.15, forest:.05, water:.05, shallow:.03 }
   },
   abyss: {
     colors: {
@@ -112,7 +112,7 @@ const MAP_THEMES = {
       rock:   { tc:'#2a2030', lc:'#1a1020', rc:'#0a0010' },
       water:  { tc:'#3a0a20', lc:'#2a0010', rc:'#1a0000' },
     },
-    dist: { rock:.30, hill:.20, forest:.05, water:.15 }
+    dist: { rock:.20, hill:.20, forest:.05, water:.10, shallow:.05 }   // 예전 바위 .30·물 .15는 통로가 거의 막혀 대치만 이어짐
   }
 };
 

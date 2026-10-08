@@ -121,3 +121,23 @@
   .si-stage-name{font-size:16px}
   .si-header .si-rec-level{font-size:12px}
 }
+
+/* 요일 던전 */
+.daily-entry{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 10px;padding:10px 12px;border-radius:12px;cursor:pointer;
+  background:linear-gradient(90deg,rgba(56,189,248,.14),rgba(129,140,248,.10));border:1px solid rgba(56,189,248,.35);color:#e0f2fe;text-align:left;font:inherit}
+.daily-entry:hover{border-color:#38bdf8}
+.daily-entry .de-ic{font-size:22px}
+.daily-entry .de-tx{display:flex;flex-direction:column;flex:1;min-width:0}
+.daily-entry .de-tx b{font-size:14px}
+.daily-entry .de-tx small{font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daily-entry .de-left{font-size:11px;font-weight:700;color:#7dd3fc;white-space:nowrap}
+.daily-help{font-size:11px;color:var(--dim,#94a3b8);margin-bottom:6px;line-height:1.5}
+.daily-left{font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:8px}
+.daily-cls{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;margin-bottom:10px;max-height:180px;overflow:auto}
+.dc-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:rgba(15,23,42,.55);color:#e2e8f0;cursor:pointer;font:inherit;font-size:11px}
+.dc-btn small{font-size:9px;color:#94a3b8}
+.dc-btn.on{border-color:#38bdf8;background:rgba(56,189,248,.15)}
+.daily-tiers{display:flex;flex-direction:column;gap:6px}
+.dt-btn{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08);color:#e0f2fe;cursor:pointer;font:inherit;font-size:12px}
+.dt-btn span{font-size:11px;color:#94a3b8}
+.dt-btn.locked{opacity:.45;cursor:not-allowed;border-color:rgba(148,163,184,.25);background:rgba(15,23,42,.4)}

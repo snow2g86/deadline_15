@@ -31,6 +31,8 @@
 .si-wbar>span{display:block;height:100%;background:#f97316;border-radius:2px;transition:width .4s}
 .si-chip.wave.done .si-wbar>span{background:#22c55e}
 .si-chip.foe{color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.si-chip.hazard{color:#fdba74;border-color:rgba(249,115,22,.45);background:rgba(249,115,22,.10)}  /* 맵 환경 디버프 */
+.si-chip.syn{color:#c4b5fd;border-color:rgba(167,139,250,.4);background:rgba(139,92,246,.10)}  /* 클래스 조합 버프 */
 .si-chip.breach.hit{color:#fbbf24;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
 .si-chip.breach.danger{color:#fff;background:rgba(239,68,68,.35);border-color:#ef4444;animation:siDanger 1s ease-in-out infinite}
 @keyframes siDanger{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 10px rgba(239,68,68,.7)}}
@@ -541,3 +543,8 @@
   box-shadow:0 0 6px rgba(248,113,113,.55);animation:intentPulse 1.4s ease-in-out infinite}
 @keyframes intentPulse{50%{box-shadow:0 0 12px rgba(248,113,113,.9)}}
 .unit-sprite.enemy .u-intent{display:none}
+
+/* 보물상자 */
+.chest-marker{position:absolute;left:0;top:0;width:64px;text-align:center;font-size:22px;pointer-events:none;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.7)) drop-shadow(0 0 6px rgba(250,204,21,.55));animation:chestBob 1.6s ease-in-out infinite}
+@keyframes chestBob{0%,100%{margin-top:0}50%{margin-top:-4px}}

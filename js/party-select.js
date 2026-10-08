@@ -251,6 +251,25 @@ function renderPartySlots() {
 
   container.appendChild(slotRow);
 
+  // 클래스 조합 버프 (이 파티로 출전하면 전원에게 적용)
+  if (typeof Synergy !== 'undefined') {
+    var classes = activeParty.slots.map(function(u) { var c = u && roster.chars.find(function(x) { return x.uid === u; }); return c ? c.cls : null; });
+    var syn = Synergy.compute(classes);
+    var box = document.createElement('div'); box.className = 'party-synergy';
+    var head = document.createElement('div'); head.className = 'psy-head'; head.textContent = '✨ ' + t('synergy.title');
+    var help = document.createElement('span'); help.textContent = t('synergy.help'); head.appendChild(help);
+    box.appendChild(head);
+    if (!syn.length) { var none = document.createElement('div'); none.className = 'psy-none'; none.textContent = t('synergy.none'); box.appendChild(none); }
+    syn.forEach(function(s) {
+      var row = document.createElement('div'); row.className = 'psy-row' + (s.id.indexOf('mono_') === 0 ? ' mono' : '');
+      var ic = document.createElement('span'); ic.className = 'psy-ic'; ic.textContent = s.icon;
+      var nm = document.createElement('b'); nm.textContent = Synergy.name(s);
+      var ds = document.createElement('span'); ds.className = 'psy-desc'; ds.textContent = Synergy.describe(s);
+      row.appendChild(ic); row.appendChild(nm); row.appendChild(ds); box.appendChild(row);
+    });
+    container.appendChild(box);
+  }
+
   // 파티 카운터 업데이트
   var counter = document.getElementById('ps-counter');
   var count = activeParty.slots.filter(function(uid) { return uid !== null; }).length;
@@ -309,7 +328,6 @@ function removeFromSlot(slotIdx) {
   if (!_parties) return;
   var activeParty = _parties.parties.find(function(p) { return p.id === _currentPartyId; });
   if (activeParty) {
-    if (activeParty.slots[slotIdx] === commanderUid()) return; // 지휘관은 항상 출전
     activeParty.slots[slotIdx] = null;
     saveParties(_parties);
     renderPartySlots();
@@ -344,7 +362,7 @@ function renderUnitFilterTabs() {
   var existingGroups = new Set();
 
   roster.chars.forEach(function(ch) {
-    if (!ch.dead && !ch.cls.startsWith('summon_')) {
+    if (!ch.dead && !ch.cls.startsWith('summon_') && ch.cls !== COMMANDER_CLS) {
       var group = CLASS_GROUP_MAP[ch.cls];
       if (group) existingGroups.add(group);
     }
@@ -397,7 +415,7 @@ function renderUnitCards(filter) {
   if (!activeParty) return;
 
   var inv = loadInventory();  // 장비 목록 미리 로드
-  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
 
   // 필터링
   if (filter !== 'all') {
@@ -572,7 +590,7 @@ function renderEquipFilterTabs() {
   var existingGroups = new Set();
 
   roster.chars.forEach(function(ch) {
-    if (!ch.dead && !ch.cls.startsWith('summon_')) {
+    if (!ch.dead && !ch.cls.startsWith('summon_') && ch.cls !== COMMANDER_CLS) {
       var group = CLASS_GROUP_MAP[ch.cls];
       if (group) existingGroups.add(group);
     }
@@ -622,7 +640,7 @@ function renderChars() {
   el.innerHTML = '';
 
   var roster = getRoster();
-  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
   var names = t('character.names');
   var party = loadParty();
   var partySet = {};
@@ -1320,7 +1338,7 @@ function showPotionUseModal(potionId) {
   if (!potion) return;
 
   var roster = getRoster();
-  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.lv < MAX_LEVEL; });
+  var alive = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS && c.lv < maxLevelOf(c); });
 
   if (!alive.length) {
     showAlert(t('party.no_available_chars'));

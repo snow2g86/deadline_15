@@ -38,6 +38,15 @@ const VFX = {
       this.faceDir(unit.id, to.x - from.x, to.y - from.y);
       this.animU(unit.id, to.x, to.y);
       if (this._isVault(unit, from, to)) this.vaultHop(unit);
+      // 보물상자: 클랜원이 밟으면 열림
+      const S = GameStore, c = unit.team === 'ally' && !unit.isSummon && Chest.at(S, to.x, to.y);
+      if (c) {
+        const r = Chest.open(S, c, unit);
+        setTimeout(() => { Renderer.floatT(to.x, to.y, '🎁 ' + r.text, 'heal'); Audio.sfxHeal && Audio.sfxHeal();
+          this.spawn(Grid.uSX(to.x, to.y) + UCX, Grid.uSY(to.x, to.y) + UCY, { count: 14, colors: ['#fde68a', '#facc15', '#fff'], shape: 'star', speed: 2.5, spread: 10, decay: 0.03, size: 3 });
+          Renderer.rUnits(); }, 250);
+        S._chestLog = (S._chestLog || []).concat(r.kind);
+      }
     });
     EventBus.on('buff_applied', ({ unit }) => { this.vfxBuff(unit); });
     EventBus.on('buff_tick_damage', ({ unit, damage }) => { Renderer.floatT(unit.x, unit.y, `-${damage}`, 'damage'); });

@@ -49,6 +49,14 @@ const TurnManager = {
       Renderer.rUnits();
     }
 
+    // 맵 환경 지속 피해 (화상·독 등, 사망하지는 않음) — 마법부여 장비가 있으면 면역
+    if (u.team === 'ally' && u._hazardDot && u.hp > 1 && S._hazard) {
+      const dmg = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * Hazard.dotPct(S._hazard, S.cStage))));
+      u.hp -= dmg;
+      Renderer.floatT(u.x, u.y, S._hazard.icon + ' -' + dmg, 'damage');
+      Renderer.rUnits();
+    }
+
     // BuffSystem 틱
     BuffSystem.tick(u);
 
@@ -121,13 +129,19 @@ const TurnManager = {
     if (rem <= 0) return;
 
     const activeEnemies = S.units.filter(u => u.team === 'enemy' && u.hp > 0).length;
-    const maxConcurrent = 20;
+    const maxConcurrent = MAX_ENEMIES_ON_FIELD;   // 동시에 전장에 있는 적 상한 (data/stages.js)
     if (activeEnemies >= maxConcurrent) return;
 
     const cnt = Math.min(s.spw, rem, S.eQ.length, maxConcurrent - activeEnemies);
     if (S.eSpwn === 0 && s.boss) {
       const bu = UnitManager.addUnit('enemy', s.boss.cls, MID_C, 2);
-      if (bu) { bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: MID_C, y: 2 }; }
+      if (bu) {
+        bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: MID_C, y: 2 };
+        // 보스: 레벨 +ENEMY_BOSS_LV 만큼 더 성장한 능력치
+        const g = JAB[bu.cls].growth, m = ENEMY_BOSS_LV;
+        bu.lv += m; bu.mhp = bu.hp = Math.round(bu.mhp + (g.hp[0] + g.hp[1]) / 2 * m * s.sm.hp);
+        bu.atk = Math.round(bu.atk + (g.atk[0] + g.atk[1]) / 2 * m * s.sm.atk); bu.def = Math.round(bu.def + (g.def[0] + g.def[1]) / 2 * m);
+      }
       S.eSpwn++;
       const posL = [4, 3].flatMap(y => FORM_COLS.map(x => [x, y]));   // 보스 호위: 가운데부터 바깥으로
       let pidx = 0;
@@ -155,6 +169,8 @@ const TurnManager = {
   async nextAction() {
     const S = GameStore;
     if (FSM.is(BattleState.BATTLE_END)) return;
+    // 클랜원 전멸 확인 (마지막 클랜원이 반격·지원 공격·지속 피해 등 chkEnd를 거치지 않는 경로로 쓰러져도 여기서 패배 처리)
+    if (!S.units.some(u => u.team === 'ally' && u.hp > 0 && !u.isSummon)) { this.chkEnd(); return; }
 
     const stage = S.cStage;
     // 웨이브 스폰 체크
@@ -202,7 +218,7 @@ const TurnManager = {
       setTimeout(async () => {
         if (!FSM.is(BattleState.BATTLE_END)) await AI.eAI(nextU);
         this.endUnitTurn(nextU);
-      }, 450);
+      }, 450 * ENEMY_TURN_PACE);
     }
   },
 
@@ -227,7 +243,8 @@ const TurnManager = {
       S.units = S.units.filter(v => !(v.isSummon && v.summonerId === deadS.id));
     });
 
-    if (!al.length && !this.hasAllyWall()) {
+    // 클랜원(소환수 제외)이 모두 쓰러지면 패배. 예전엔 아군 성벽이 남아 있으면 계속돼, 행동할 클랜원 없이 적 차례만 끝없이 반복됐음
+    if (!al.some(u => !u.isSummon)) {
       FSM.transition(BattleState.BATTLE_END);
       EventBus.emit('battle_end', { win: false, message: t('messages.all_defeated') });
       return;

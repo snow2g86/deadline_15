@@ -89,6 +89,37 @@ const Grid = {
         }
       }
     }
+    this._ensurePath(isOffense ? 2 : 1);
+  },
+
+  // ── 길 보장: 우리 진영(11행)에서 적 진영(goalRow)까지 걸어서 갈 수 있는 길이 없으면 하나 뚫는다 ──
+  // 바위·물 등 못 지나는 칸만 평지로 바꾸며 위로 올라가고, 가끔 옆으로 한 칸씩 꺾어 자연스럽게.
+  // 한 칸짜리 통로는 원거리 적이 막으면 대치만 이어지므로 두 칸 폭으로 뚫는다
+  _pathOk(goalRow) {
+    const S = GameStore, seen = new Set(), q = [];
+    for (let c = 0; c < COLS; c++) if (TI[S.ter[11][c]].pass) { q.push([c, 11]); seen.add(c + ',11'); }
+    while (q.length) {
+      const [x, y] = q.shift();
+      if (y <= goalRow) return true;
+      for (const [dx, dy] of [[0, -1], [1, 0], [-1, 0], [0, 1]]) {
+        const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+        if (nx < 0 || nx >= COLS || ny < goalRow || ny > 11 || seen.has(k) || !TI[S.ter[ny][nx]].pass) continue;
+        seen.add(k); q.push([nx, ny]);
+      }
+    }
+    return false;
+  },
+  _ensurePath(goalRow) {
+    const S = GameStore;
+    if (this._pathOk(goalRow)) return;
+    const open1 = (x, y) => { if (x >= 0 && x < COLS && !TI[S.ter[y][x]].pass) S.ter[y][x] = 'plain'; };
+    const open = (x, y) => { open1(x, y); open1(x + (x < COLS - 1 ? 1 : -1), y); };
+    let x = 1 + Math.floor(Math.random() * (COLS - 2));
+    for (let y = 10; y > goalRow; y--) {
+      open(x, y);
+      if (Math.random() < .4) { const nx = Math.max(0, Math.min(COLS - 1, x + (Math.random() < .5 ? -1 : 1))); open(nx, y); x = nx; }
+    }
+    open(x, goalRow);
   },
 
   _initTColors() {

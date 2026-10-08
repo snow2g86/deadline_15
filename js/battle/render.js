@@ -148,7 +148,7 @@ const Renderer = {
     Math.random = () => 0.999; // 치명타 등 확률 요소는 제외한 기대값
     try {
       const tb = UnitManager.tacticBonus(a, tgt);
-      let dmg = Math.max(1, Math.round(calcDmg(a, tgt) * UnitManager.shieldMul(tgt)));
+      let dmg = Math.max(1, Math.round(EnchantFX.modDamage(a, tgt, calcDmg(a, tgt)) * UnitManager.shieldMul(tgt)));
       const kill = dmg >= tgt.hp;
       const tile = GameStore.ter[tgt.y] && GameStore.ter[tgt.y][tgt.x];
       let counter = 0;
@@ -304,6 +304,16 @@ const Renderer = {
     if (S._showThreat && !this._threatPending) { this._threatPending = true; requestAnimationFrame(() => { this._threatPending = false; this.rTer(); }); }
     if (!this._intentPending) { this._intentPending = true; requestAnimationFrame(() => { this._intentPending = false; this.rIntent(); }); }
     [...w.querySelectorAll('.unit-sprite')].forEach(el => { if (!ids.has(el.id)) el.remove(); });
+    // 보물상자 표시 (유닛과 같은 좌표계, 카메라 회전에도 따라감)
+    const keep = new Set();
+    (S.chests || []).forEach(c => {
+      const id = 'chest-' + c.x + '-' + c.y; keep.add(id);
+      let el = document.getElementById(id);
+      if (!el) { el = document.createElement('div'); el.id = id; el.className = 'chest-marker'; el.textContent = '🎁'; el.title = t('chest.tip'); w.appendChild(el); }
+      el.style.transform = 'translate(' + Grid.uSX(c.x, c.y) + 'px,' + (Grid.uSY(c.x, c.y) + 30) + 'px)';
+      const v = Grid.g2v(c.x, c.y); el.style.zIndex = 99 + v.vc + v.vr;
+    });
+    [...w.querySelectorAll('.chest-marker')].forEach(el => { if (!keep.has(el.id)) el.remove(); });
     S.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
       S.allyPos[u.id] = { x: 99, y: 99 };
     });
@@ -758,8 +768,13 @@ const Renderer = {
     infoEl.textContent = '';
     const el = (tag, cls, txt, parent) => { const e = document.createElement(tag); e.className = cls; if (txt !== undefined) e.textContent = txt; (parent || infoEl).appendChild(e); return e; };
     const title = el('div', 'si-title');
-    el('span', 'si-no', 'STAGE ' + (s ? s.id : 1), title);
-    if (s) el('span', 'si-name', t('stages.stage_' + s.id + '_name'), title);
+    if (s && s.daily) {   // 요일 던전: 난이도와 조각 직업
+      el('span', 'si-no', t('daily.title'), title);
+      el('span', 'si-name', t('daily.tier_' + s.daily.tier) + ' · ' + t('classes.' + s.daily.cls), title);
+    } else {
+      el('span', 'si-no', 'STAGE ' + (s ? s.id : 1), title);
+      if (s) el('span', 'si-name', t('stages.stage_' + s.id + '_name'), title);
+    }
     el('span', 'si-turnno', t('battle.turn_n', { n: S.turn || 1 }), title);
     const chips = el('div', 'si-chips');
     // 적 증원 진행도: 남은 증원이 0이 되면 완료 표시
@@ -781,6 +796,19 @@ const Renderer = {
       el('span', 'si-ic', '⚠', brc);
       el('span', 'si-v', t('battle.breach') + ' ' + br + '/' + blim, brc);
     }
+    // 맵 환경 디버프
+    if (S._hazard) {
+      const h = S._hazard, c = el('span', 'si-chip hazard', undefined, chips);
+      c.title = Hazard.name(h) + ' — ' + Hazard.describe(h, S.cStage);
+      el('span', 'si-ic', h.icon, c); el('span', 'si-v', Hazard.name(h), c);
+    }
+    // 클래스 조합 버프
+    (S._synergies || []).forEach(sy => {
+      const c = el('span', 'si-chip syn', undefined, chips);
+      c.title = Synergy.name(sy) + ' — ' + Synergy.describe(sy);
+      el('span', 'si-ic', sy.icon, c);
+      el('span', 'si-v', Synergy.name(sy), c);
+    });
   },
 
   showUI() { this.rInfoPanel(); },
@@ -978,7 +1006,7 @@ const Renderer = {
     el('div', 'res-msg', msg);
     if (S.practiceMode) {
       const pr = el('div', 'res-note');
-      [t('stage.practice_mode_active'), t('stage.reduced_gold') + ' (70%)', t('stage.full_exp') + ' (100%)',
+      [t('stage.practice_mode_active'), t('stage.reduced_gold') + ' (' + Math.round(ECON.practiceMul * 100) + '%)', t('stage.full_exp') + ' (100%)',
         autoRevived > 0 ? t('stage.auto_revived', { count: autoRevived }) : null, t('stage.no_clear_recorded')]
         .filter(Boolean).forEach(x => el('div', '', x, pr));
     }
@@ -1003,6 +1031,12 @@ const Renderer = {
     if (win && S._firstClearUnit) { rewards.push(['🎁', t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) }), '']); S._firstClearUnit = null; }
     if (win && S._storySkill) { rewards.push(['🔁', t('commander_msg.story_skill', { skill: t('skills.' + S._storySkill) }), '']); S._storySkill = null; }
     if (win && S._droppedBook) { rewards.push(['📕', t('academy.skillbook_drop', { skill: t('skills.' + S._droppedBook) }), '']); S._droppedBook = null; }
+    if (win && S._runeDrop) { rewards.push([ENCHANTS[S._runeDrop].icon, t('enchant.rune_name', { e: t('enchant.' + S._runeDrop) }), '+1']); S._runeDrop = null; }
+    if (win && S._soulReward) {   // 영혼석·조각 (요일 던전·보스 스테이지)
+      const sr = S._soulReward;
+      rewards.push(['💠', t(sr.kind === 'stone' ? 'soul.reward_stone' : 'soul.reward_frag', { cls: t('classes.' + sr.cls) }), '+' + sr.n]);
+      S._soulReward = null;
+    }
     if (rewards.length) {
       const rw = el('div', 'res-rewards');
       rewards.forEach(([ic, label, val]) => {
@@ -1023,7 +1057,7 @@ const Renderer = {
         const mid = el('div', 'rr-mid', undefined, row);
         el('div', 'rr-name', ch.customName || t('character.names')[ch.nameId] || t('classes.' + ch.cls), mid);
         // 다음 레벨까지 경험치 진행도 (최대 레벨이면 가득)
-        const need = ch.lv >= MAX_LEVEL ? 0 : expForLevel(ch.lv);
+        const need = ch.lv >= maxLevelOf(ch) ? 0 : expForLevel(ch.lv);
         const bar = el('div', 'rr-bar', undefined, mid);
         el('div', '', undefined, bar).style.width = (need ? Math.min(100, (ch.exp || 0) / need * 100) : 100) + '%';
         const right = el('div', 'rr-right', undefined, row);
@@ -1036,7 +1070,10 @@ const Renderer = {
     while (bt.firstChild) bt.removeChild(bt.firstChild);
     const lb = document.createElement('button'); lb.className = 'modal-btn'; lb.textContent = t('results.return_to_lobby');
     lb.onclick = () => { ov.classList.remove('show'); BattleEnd.returnToLobby(); }; bt.appendChild(lb);
-    if (win) {
+    if (S.cStage && S.cStage.daily) {   // 요일 던전: 스테이지 선택 화면(요일 던전 창)으로
+      lb.textContent = t('daily.back');
+      lb.onclick = () => { ov.classList.remove('show'); location.href = 'stage-select.html?daily=1'; };
+    } else if (win) {
       const s = S.cStage, ns = s && STAGES.find(v => v.id === s.id + 1);
       if (ns) {
         const b = document.createElement('button'); b.className = 'modal-btn secondary'; b.textContent = t('results.next_stage');

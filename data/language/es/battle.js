@@ -116,6 +116,7 @@ Object.assign(window._LANG_es, {
         "select_attack_target": "Selecciona un objetivo de ataque",
         "covered": "🛡️ Cubierto — ¡derrota primero al caballero!",
         "intercepted": "🛡️ Bloqueado",
+        "knock_resist": "🛡️ Resiste",
         "select_heal_target": "Selecciona un objetivo para sanar",
         "item_system_preparing": "Sistema de objetos en preparación",
         "heal": "💚 Curar",

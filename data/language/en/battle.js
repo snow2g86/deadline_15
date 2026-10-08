@@ -117,6 +117,7 @@ Object.assign(window._LANG_en, {
         "select_attack_target": "Select an attack target",
         "covered": "🛡️ Covered — defeat the knight first!",
         "intercepted": "🛡️ Blocked",
+        "knock_resist": "🛡️ Stood firm",
         "select_heal_target": "Select a target to heal",
         "item_system_preparing": "Item system under preparation",
         "heal": "\ud83d\udc9a Heal",

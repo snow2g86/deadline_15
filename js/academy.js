@@ -79,7 +79,7 @@ function getScrollsFromInventory() {
 function renderAcademy() {
   var list = document.getElementById('academy-list');
   var roster = getRoster();
-  var novices = roster.chars.filter(function(c) { return !c.dead && c.cls === 'novice' && !c.cls.startsWith('summon_'); });
+  var novices = roster.chars.filter(function(c) { return !c.dead && c.cls === 'novice' && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
   list.innerHTML = '';
 
   if (!novices.length) {
@@ -250,7 +250,7 @@ function renderSkillBooks() {
     // 사용 가능한 대상이 있는지 체크
     var roster = getRoster();
     var hasTarget = roster.chars.some(function(c) {
-      return !c.dead && c.cls === book.cls && !c.cls.startsWith('summon_') && getCharSkillLv(c, book.id) < MAX_SKILL_LV;
+      return !c.dead && c.cls === book.cls && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS && getCharSkillLv(c, book.id) < MAX_SKILL_LV;
     });
 
     var el = document.createElement('div');
@@ -287,7 +287,7 @@ function showSkillBookTargets(idx) {
 
   // 같은 클래스 + 살아있는 + 해당 스킬 Lv < MAX_SKILL_LV
   var targets = roster.chars.filter(function(c) {
-    return !c.dead && c.cls === book.cls && !c.cls.startsWith('summon_') && getCharSkillLv(c, book.id) < MAX_SKILL_LV;
+    return !c.dead && c.cls === book.cls && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS && getCharSkillLv(c, book.id) < MAX_SKILL_LV;
   });
 
   var ov = document.getElementById('modal-overlay');

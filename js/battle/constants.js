@@ -19,6 +19,9 @@ const CLAB = ['N', 'E', 'S', 'W'], CARR = ['▲', '▶', '▼', '◀'];
 function mh(a, b, c, d) { return Math.abs(a - c) + Math.abs(b - d) }
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } }
 function sl(ms) { return new Promise(r => setTimeout(r, ms * (GameStore._sett.speed || 1))) }
+// 적 차례 연출 대기 배율 — 적이 많은 후반에 적 턴이 늘어지지 않게 (명중 시점과 맞물린 대기에는 쓰지 않음)
+const ENEMY_TURN_PACE = 0.6;
+function slE(ms) { return sl(ms * ENEMY_TURN_PACE); }
 
 // ════════════════════════════════════════════
 //  Section 2: Storage & Battle-specific functions
@@ -26,13 +29,13 @@ function sl(ms) { return new Promise(r => setTimeout(r, ms * (GameStore._sett.sp
 // ════════════════════════════════════════════
 
 function killExp(stageId, enemyCls) {
-    const base = 10 + stageId * 5;
+    const base = KILL_EXP[0] + stageId * KILL_EXP[1];   // js/common/constants.js
     const bonus = { knight: 1.3, mage: 1.2, summoner: 1.2, shaman: 1.2, assassin: 1.1, priest: 1.1, brawler: 1.1, lancer: 1.1, sapper: 1.1, novice: 1, warrior: 1, archer: 1 };
     return Math.floor(base * (bonus[enemyCls] || 1));
 }
 function actExp(stageId, action) {
     const base = { move: 2, attack: 5, heal: 6 };
-    return Math.floor((base[action] || 0) * (1 + stageId * 0.2));
+    return Math.floor((base[action] || 0) * (1 + stageId * 0.1));
 }
 
 function loadGoldData() {
@@ -59,7 +62,8 @@ function toBattleStats(uid) {
     maxRes: d.maxRes, resType: d.res, resRec: d.resRec,
     actionRec: ch.actionRec || d.actionRec || 1.0,
     skillLv: ch.skillLv || {},
-    gender: ch.gender || 'm'
+    gender: ch.gender || 'm',
+    enchants: typeof Hazard !== 'undefined' ? Hazard.enchantsOf(ch) : [],   // 장비 마법부여 (환경 디버프 저항)
   };
 }
 
@@ -127,6 +131,9 @@ const TACTIC = {
 // 방어 태세: 다음 자기 차례까지 방어력 배율 + 후방·측면 보너스 무효
 // 경계: 다음 자기 차례까지, 사거리 안으로 처음 들어온 적을 선제 공격 (피해 배율)
 const TACTICS_ACT = { shoveCollide: 0.5, shoveUnit: 0.3, defendDef: 1.5, overwatchMul: 0.8, interceptMul: 0.5 };  // interceptMul: 투사체를 대신 맞은 기사가 받는 피해 배율
+
+// ── 넉백 저항: 밀치기·끌어오기 같은 강제 이동을 이 확률로 버팀 (버티면 이동·충돌 피해 없음) ──
+const KNOCK_RESIST = { knight: 0.70 };
 
 // ── 지원 공격(연계): 일반 공격 후 대상 바로 옆의 같은 편이 추가 타격 ──
 const SUPPORT = { chance: 0.40, mul: 0.50 };

@@ -6,8 +6,8 @@ var EQUIP_SLOTS = ['weapon','offhand','helmet','armor','boots','necklace','earri
 // 슬롯 종류 표시용 이모지 (이미지 아이콘 대신 — design policy)
 var EQUIP_SLOT_ICONS = { weapon:'🗡️', offhand:'🛡️', helmet:'🪖', armor:'🥋', boots:'👢', necklace:'📿', earring:'✨', ring:'💍' };
 
-var GACHA_COST_1 = 300;
-var GACHA_COST_10 = 2700;
+var GACHA_COST_1 = 400;   // 골드는 항상 부족하게 (예전 300)
+var GACHA_COST_10 = 3600;  // 11회 (예전 2700)
 var GACHA_MULTI_COUNT = 11;
 
 var RARITY = {

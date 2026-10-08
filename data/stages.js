@@ -194,6 +194,43 @@ function generateStrategyTips(stage) {
   return tips.slice(0, 2);
 }
 
+// ═══ 적 강화: 기하급수 ═══
+// 적 HP·공격력 배율 = ENEMY_SM_BASE × ENEMY_SM_GROWTH^(스테이지-1). 스테이지마다 같은 비율로 강해져
+// 후반으로 갈수록 격차가 급격히 벌어진다 → 레벨만으로는 못 따라가고 승급·스킬·장비·전술·조합이 필요
+var ENEMY_SM_BASE = 0.6, ENEMY_SM_GROWTH = 1.0127;   // 레벨 성장과 합친 적 강함: 1스테이지 ×0.6 → 25 ×1.25 → 50 ×2.3 → 100 ×7 (기본 능력치 대비)
+function stageSm(id) { return Math.round(ENEMY_SM_BASE * Math.pow(ENEMY_SM_GROWTH, id - 1) * 100) / 100; }
+// 적도 클랜원처럼 레벨이 오름: 레벨 = 1 + (스테이지-1)×ENEMY_LV_PER_STAGE (클랜원 상한 15를 넘어 계속), 보스는 +ENEMY_BOSS_LV
+// 능력치 = (기본 + 평균 성장치×(레벨-1)) × stageSm. 기본 스킬 레벨도 ENEMY_SKILL_EVERY 스테이지마다 +1 (최대 10)
+var ENEMY_LV_PER_STAGE = 0.22, ENEMY_BOSS_LV = 3, ENEMY_SKILL_EVERY = 11;
+function stageEnemyLv(id) { return 1 + Math.floor((id - 1) * ENEMY_LV_PER_STAGE); }
+function stageEnemySkillLv(id) { return Math.min(10, 1 + Math.floor(id / ENEMY_SKILL_EVERY)); }
+STAGES.forEach(function(s) {
+  var k = stageSm(s.id); s.sm = { hp: k, atk: k };
+  // 총원(tot)이 실제로 나올 수 있는 수(출현 목록 + 보스)보다 크면 마지막 적이 영원히 나오지 않아 클리어 불가 → 맞춤
+  // (39·49·74~79·81~89·91·96 스테이지 등이 이 상태였음)
+  var spawnable = s.en.length + (s.boss ? 1 : 0);
+  if (s.tot > spawnable) s.tot = spawnable;
+});
+
+// ═══ 전투 길이: 한 판이 사람 기준 약 10분을 넘지 않게 ═══
+// 후반 적 총원(최대 120명)이 그대로면 판당 80턴(약 1시간)까지 늘어남 → 총원 상한을 두고, 줄인 만큼 남은 적을 강하게 해 난이도 곡선은 유지
+// 상한 = STAGE_TOT_CAP_BASE + STAGE_TOT_CAP_PER × 스테이지 (100스테이지 30명)
+// 줄인 만큼 남은 적을 강화: 체력 ×(원래/상한)^STAGE_COMP_HP, 공격 ×(원래/상한)^STAGE_COMP_ATK — 체력보다 공격 쪽을 더 올려 판은 짧게, 긴장감은 유지
+// 증원은 최대 STAGE_MAX_WAVES번에 나눠 나오게 (멀리서 걸어오는 증원이 잦을수록 라운드가 늘어남)
+// 출현 목록은 직업 비율이 유지되도록 고르게 솎아냄 (목록 순서대로 나오므로 앞에서 자르면 특정 직업만 남음)
+var STAGE_TOT_CAP_BASE = 10, STAGE_TOT_CAP_PER = 0.2, STAGE_COMP_HP = 0.3, STAGE_COMP_ATK = 0.5, STAGE_MAX_WAVES = 3, MAX_ENEMIES_ON_FIELD = 14;
+STAGES.forEach(function(s) {
+  var cap = Math.round(STAGE_TOT_CAP_BASE + STAGE_TOT_CAP_PER * s.id);
+  if (s.tot > cap) {
+    var ratio = s.tot / cap;
+    s.sm = { hp: Math.round(s.sm.hp * Math.pow(ratio, STAGE_COMP_HP) * 100) / 100, atk: Math.round(s.sm.atk * Math.pow(ratio, STAGE_COMP_ATK) * 100) / 100 };
+    var need = cap - (s.boss ? 1 : 0), src = s.en, out = [];
+    for (var i = 0; i < need; i++) out.push(src[Math.floor(i * src.length / need)]);
+    s.en = out; s.tot = cap;
+  }
+  s.spw = Math.max(s.spw, Math.ceil(s.tot / STAGE_MAX_WAVES));
+});
+
 // STAGES 배열 데이터 확장
 STAGES = STAGES.map(function(stage) {
   var composition = getEnemyComposition(stage.en);

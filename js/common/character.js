@@ -13,13 +13,16 @@ function getChar(uid) {
 
 // ── 경험치 관련 ────────────────────────────
 function expForLevel(lv) {
-  return 80 + 20 * lv + 5 * lv * lv;
+  return LEVEL_EXP[0] + LEVEL_EXP[1] * lv + LEVEL_EXP[2] * lv * lv;   // js/common/constants.js
 }
+
+// 이 클랜원의 레벨 상한 (등급별 GRADE_LV_CAP)
+function maxLevelOf(ch) { return (ch && GRADE_LV_CAP[potGrade(ch)]) || MAX_LEVEL; }
 
 function gainExp(uid, amount) {
   const roster = getRoster();
   const ch = roster.chars.find(c => c.uid === uid);
-  if (!ch || ch.lv >= MAX_LEVEL) {
+  if (!ch || ch.lv >= maxLevelOf(ch)) {
     return { leveled: 0, prevLv: ch ? ch.lv : 0 };
   }
 
@@ -27,7 +30,7 @@ function gainExp(uid, amount) {
   ch.exp = (ch.exp || 0) + amount;
   let leveled = 0;
 
-  while (ch.lv < MAX_LEVEL) {
+  while (ch.lv < maxLevelOf(ch)) {
     const need = expForLevel(ch.lv);
     if (ch.exp < need) break;
     ch.exp -= need;
@@ -38,7 +41,7 @@ function gainExp(uid, amount) {
     leveled++;
   }
 
-  if (ch.lv >= MAX_LEVEL) ch.exp = 0;
+  if (ch.lv >= maxLevelOf(ch)) ch.exp = 0;
   saveRoster(roster);
   return { leveled, prevLv };
 }

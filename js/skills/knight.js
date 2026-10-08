@@ -85,6 +85,8 @@ registerSkill('knight_capture', {
 		if (!enemy) { _skillRefund(u, sk, G); return; }
 		const adj = G._findAdj(u.x, u.y, enemy);
 		if (!adj) { _skillRefund(u, sk, G); G.floatT(u.x,u.y,t('messages.no_empty_tile'),'damage'); return; }
+		// 넉백 저항 (기사 70%): 끌려오지 않음 — 기력은 소모
+		if (UnitManager.resistKnock(enemy)) { G.floatT(enemy.x, enemy.y, t('messages.knock_resist'), 'heal'); _skillDone(u, G, { delay: 400 }); return; }
 		enemy.x = adj.x; enemy.y = adj.y;
 		G.animU(enemy.id, adj.x, adj.y);
 		G.floatT(u.x, u.y, t('messages.knight_capture'), 'heal');

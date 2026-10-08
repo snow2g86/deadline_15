@@ -67,14 +67,16 @@ function switchTab(tab) {
     if (tab === 'resurrect') sub.textContent = t('sanctuary.subtitle');
     else if (tab === 'promote') sub.textContent = t('sanctuary.promote_subtitle');
     else if (tab === 'rename') sub.textContent = t('sanctuary.rename_subtitle');
+    else if (tab === 'enchant') sub.textContent = t('enchant.subtitle');
   }
+  if (tab === 'enchant') { renderEnchant(); return; }
   if (tab === 'resurrect') renderResurrect();
   else if (tab === 'promote') renderPromote();
   else if (tab === 'rename') renderRename();
 }
 
 // ── 부활 비용 ────────────────────────────
-function reviveCost(ch) { return 20 + ch.lv * 10; }
+function reviveCost(ch) { return ECON.revive[0] + ch.lv * ECON.revive[1]; }
 
 // ── 광고 부활 ────────────────────────────
 var SANC_AD_KEY = 'game_sanc_ad_cooldown';
@@ -92,7 +94,7 @@ function setSancAdCooldown() {
 function renderResurrect() {
   var list = document.getElementById('sanc-list');
   var roster = getRoster();
-  var dead = roster.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_'); });
+  var dead = roster.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
   dead.sort(function(a, b) { return (b.diedAt || 0) - (a.diedAt || 0); });
   list.innerHTML = '';
 
@@ -192,22 +194,93 @@ function showAdReviveModal(dead) {
   });
 }
 
+// ── 영혼석 보관함: 직업별 영혼석·조각, 조각이 모이면 합치기 ──
+function renderSoulBox(list) {
+  var owned = Soul.owned();
+  var box = document.createElement('div');
+  box.className = 'soul-box';
+  var h = '<div class="soul-box-title">💠 ' + t('soul.box_title') + ' <span>' + t('soul.box_help', { n: SOUL.fragsPerStone }) + '</span></div>';
+  if (!owned.length) h += '<div class="soul-empty">' + t('soul.box_empty') + '</div>';
+  else {
+    h += '<div class="soul-grid">';
+    owned.forEach(function(cls) {
+      var st = Soul.stones(cls), fr = Soul.frags(cls), can = fr >= SOUL.fragsPerStone;
+      h += '<div class="soul-cell">' + clsIcon(cls, 20) +
+        '<div class="soul-cnt"><b>' + st + '</b><span>' + fr + '/' + SOUL.fragsPerStone + '</span></div>' +
+        (can ? '<button class="soul-combine" data-cls="' + cls + '">' + t('soul.combine') + '</button>' : '') + '</div>';
+    });
+    h += '</div>';
+  }
+  box.innerHTML = h;
+  box.querySelectorAll('.soul-combine').forEach(function(b) {
+    b.onclick = function() { var n = Soul.combine(b.dataset.cls); if (n) showAlert(t('soul.combined', { cls: t('classes.' + b.dataset.cls), n: n })); renderPromote(); };
+  });
+  list.appendChild(box);
+}
+
+// ── 마법부여: 가진 장비에 마법부여 룬 1개 + ENCHANT_FEE(100G)로 환경 저항 하나 (data/hazards.js Rune.apply) ──
+// 장비 하나에 마법부여는 하나 — 다른 룬으로 부여하면 덮어씀(같은 종류는 불가), 쓴 룬은 사라짐. 장착하면 그 맵 디버프를 막음
+function renderEnchant() {
+  var list = document.getElementById('sanc-list'); list.innerHTML = '';
+  var inv = loadInventory(), roster = getRoster(), names = t('character.names');
+  var items = inv.filter(function(it) { return it.type === 'equip'; })
+    .sort(function(a, b) { return (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0) || RARITY[b.rarity].tier - RARITY[a.rarity].tier; });
+  // 보유 룬(방어·공격) + 맵별 디버프 안내
+  var runeRow = function(cat) { return '<div class="enc-runes"><em>' + t('enchant.cat_' + cat) + '</em>' + Rune.kinds(cat).map(function(k) { return '<span class="' + (Rune.count(k) ? '' : 'zero') + '" title="' + t('enchant.desc_' + k) + '">' + ENCHANTS[k].icon + ' ' + t('enchant.' + k) + ' <b>' + Rune.count(k) + '</b></span>'; }).join('') + '</div>'; };
+  var box = document.createElement('div'); box.className = 'soul-box';
+  box.innerHTML = '<div class="soul-box-title">🔮 ' + t('enchant.runes_title') + ' <span>' + t('enchant.runes_help', { gold: ENCHANT_FEE }) + '</span></div>' +
+    runeRow('def') + runeRow('atk') +
+    '<div class="enc-guide">' + Object.keys(HAZARDS).map(function(m) { var h = HAZARDS[m]; return '<span>' + h.icon + ' ' + t('hazard.' + h.id) + ' → ' + ENCHANTS[h.enchant].icon + '</span>'; }).join('') + '</div>' +
+    '<div class="enc-guide">' + Rune.kinds('atk').map(function(k) { return '<span>' + ENCHANTS[k].icon + ' ' + t('enchant.desc_' + k) + '</span>'; }).join('') + '</div>';
+  list.appendChild(box);
+  if (!items.length) { list.insertAdjacentHTML('beforeend', '<div class="empty-state"><span class="es-ic">🗡️</span>' + t('enchant.no_items') + '</div>'); return; }
+  items.forEach(function(it) {
+    var owner = it.equipped && roster.chars.find(function(c) { return c.uid === it.equipped; });
+    var el = document.createElement('div'); el.className = 'promote-card enc-card';
+    // 방어·공격 한 줄씩: 현재 마법부여는 표시만(같은 종류 불가), 다른 룬은 가진 것만 눌러 그 분류만 덮어쓰기
+    var row = function(cat) { var cur = it[ENCHANT_FIELD[cat]];
+      return '<div class="enc-opts"><em>' + t('enchant.cat_' + cat) + '</em>' + Rune.kinds(cat).map(function(k) { var n = Rune.count(k), on = cur === k;
+        return '<button class="enc-opt' + (on ? ' on' : '') + '" data-k="' + k + '"' + (n && !on ? '' : ' disabled') + ' title="' + t('enchant.' + k) + ' (' + n + ') — ' + t('enchant.desc_' + k) + '">' + ENCHANTS[k].icon + '</button>'; }).join('') + '</div>'; };
+    var curTxt = [it.enchant, it.enchantAtk].filter(Boolean).map(function(k) { return ENCHANTS[k].icon + ' ' + t('enchant.' + k); }).join(' · ') || t('enchant.none');
+    el.innerHTML = '<div class="game-card-icon enc-ic">' + getEquipEmoji(it.templateId) + '</div>' +
+      '<div class="game-card-info"><div class="game-card-name" style="color:' + RARITY[it.rarity].color + '">' + t('equip.item.' + it.templateId) + (it.enhanceLv ? ' +' + it.enhanceLv : '') + '</div>' +
+      '<div class="game-card-sub">' + (owner ? '👤 ' + (owner.customName || names[owner.nameId] || t('classes.' + owner.cls)) : t('enchant.unequipped')) + ' · ' + curTxt + ' · ' + ENCHANT_FEE + 'G</div>' +
+      row('def') + row('atk') + '</div>';
+    el.querySelectorAll('.enc-opt:not([disabled])').forEach(function(b) {
+      b.onclick = function() {
+        var k = b.dataset.k;
+        if (loadGold() < ENCHANT_FEE) { showAlert(t('enchant.no_gold', { gold: ENCHANT_FEE })); return; }
+        var cur = it[ENCHANT_FIELD[ENCHANTS[k].cat]];   // 같은 분류의 기존 마법부여만 바뀜
+        var msg = t('enchant.confirm', { item: t('equip.item.' + it.templateId), e: ENCHANTS[k].icon + ' ' + t('enchant.' + k), gold: ENCHANT_FEE }) +
+          (cur ? '\n' + t('enchant.overwrite', { cur: ENCHANTS[cur].icon + ' ' + t('enchant.' + cur) }) : '');
+        showConfirm(msg, function() {
+          var r = Rune.apply(it.eid, k);
+          if (r !== true) showAlert(t('enchant.fail_' + r, { gold: ENCHANT_FEE }));
+          updatePageGold('sanc-gold-val'); renderEnchant();
+        });
+      };
+    });
+    list.appendChild(el);
+  });
+}
+
 // ── 승급 렌더링 ─────────────────────────
 function renderPromote() {
   var list = document.getElementById('sanc-list');
   var roster = getRoster();
   var names = t('character.names');
   var candidates = roster.chars.filter(function(c) {
-    return !c.dead && !c.cls.startsWith('summon_');
+    return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS;
   });
   list.innerHTML = '';
+  renderSoulBox(list);
 
   var promotable = candidates.filter(function(c) {
     return potGrade(c) !== 'S';
   });
 
   if (!promotable.length) {
-    list.innerHTML = '<div class="empty-state"><span class="es-ic">⭐</span>' + t('sanctuary.no_promotable') + '</div>';
+    list.insertAdjacentHTML('beforeend', '<div class="empty-state"><span class="es-ic">⭐</span>' + t('sanctuary.no_promotable') + '</div>');
     return;
   }
 
@@ -224,6 +297,9 @@ function renderPromote() {
     });
 
     var hasSacrifice = sacrifices.length > 0;
+    // 영혼석: B→A, A→S 승급에 그 직업의 영혼석 필요
+    var soulNeed = Soul.need(grade), soulHave = Soul.stones(ch.cls), soulOk = soulHave >= soulNeed;
+    var canPromote = hasSacrifice && soulOk;
     var skillInfo = formatSkillLvs(ch);
     var potStr = (ch.pot && ch.pot.hp) ? '+' + ch.pot.hp + '/+' + ch.pot.atk + '/+' + ch.pot.def + (ch.pot.actionRec ? '/+' + ch.pot.actionRec.toFixed(2) : '') : '−';
 
@@ -239,12 +315,13 @@ function renderPromote() {
         '<div class="game-card-sub">HP ' + ch.hp + ' · ATK ' + ch.atk + ' · DEF ' + ch.def + ' · AR ' + ((ch.actionRec || JAB[ch.cls].actionRec || 1.0)).toFixed(2) + '</div>' +
         '<div class="game-card-pot" style="font-size:9px;color:#a78bfa;margin-top:3px">' + t('stats.potential') + ': <b>' + potStr + '</b> <span style="color:#64748b;font-size:8px">(HP/ATK/DEF/AR)</span></div>' +
         (skillInfo ? '<div class="sanc-skill-info">' + skillInfo + '</div>' : '') +
+        (soulNeed ? '<div class="soul-need' + (soulOk ? ' ok' : '') + '">💠 ' + t('soul.need', { have: soulHave, need: soulNeed }) + '</div>' : '') +
       '</div>' +
-      '<button class="promote-btn' + (hasSacrifice ? '' : ' disabled') + '" ' + (hasSacrifice ? '' : 'disabled') + '>' +
+      '<button class="promote-btn' + (canPromote ? '' : ' disabled') + '" ' + (canPromote ? '' : 'disabled') + '>' +
         t('sanctuary.promote_btn') +
       '</button>';
 
-    if (hasSacrifice) {
+    if (canPromote) {
       el.querySelector('.promote-btn').onclick = (function(uid) {
         return function() { showSacrificeModal(uid); };
       })(ch.uid);
@@ -268,7 +345,7 @@ function showSacrificeModal(targetUid) {
   var targetGrade = potGrade(target);
   var names = t('character.names');
   var candidates = roster.chars.filter(function(c) {
-    return !c.dead && !c.cls.startsWith('summon_');
+    return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS;
   });
   var sacrifices = candidates.filter(function(c) {
     return c.uid !== targetUid && c.cls === target.cls && !isInParty(c.uid) &&
@@ -453,8 +530,10 @@ function confirmPromote(targetUid, sacrificeUids) {
     if (hasOverflow) skillPreview += '\n' + t('sanctuary.skill_overflow');
   }
 
+  var soulNeed = Soul.need(curGrade);
   var msg = d.icon + ' ' + targetName + ' (Lv.' + target.lv + ')\n' +
-    curGrade + ' \u2192 ' + newGrade + '\n\n' +
+    curGrade + ' \u2192 ' + newGrade + '\n' +
+    (soulNeed ? '💠 ' + t('soul.consume', { cls: t('classes.' + target.cls), n: soulNeed }) + '\n' : '') + '\n' +
     'HP ' + target.hp + ' \u2192 ~' + previewHP + '\n' +
     'ATK ' + target.atk + ' \u2192 ~' + previewATK + '\n' +
     'DEF ' + target.def + ' \u2192 ~' + previewDEF +
@@ -476,6 +555,8 @@ function executePromote(targetUid, sacrificeUids) {
   var curGrade = potGrade(target);
   var newGrade = nextGrade(curGrade);
   if (!newGrade) return;
+  // 영혼석 소모 (B→A, A→S). 부족하면 승급하지 않음
+  if (!Soul.spend(target.cls, Soul.need(curGrade))) { showAlert(t('soul.not_enough')); return; }
 
   // 스킬 계승: 각 제물의 스킬 레벨 +1 (최대 레벨이면 스킬북 생성)
   var skills = getCharSkills(target.cls);
@@ -564,7 +645,7 @@ function renderRename() {
   var roster = getRoster();
   var names = t('character.names');
   var candidates = roster.chars.filter(function(c) {
-    return !c.dead && !c.cls.startsWith('summon_');
+    return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS;
   });
   list.innerHTML = '';
 

@@ -38,13 +38,21 @@ const UnitManager = {
       cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
       role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res;
       uid = bs.uid; lv = bs.lv; name = bs.name; gender = bs.gender || 'm'; actionRec = bs.actionRec;
-      skillLv = bs.skillLv;
+      skillLv = bs.skillLv; var enchants = bs.enchants;
     } else {
       cls = src;
       const d = JAB[cls], s = S.cStage;
       hp = d.base.hp; atk = d.base.atk; def = d.base.def; mv = d.base.move; rng = d.base.range;
       role = ROLE_MAP[cls]; resType = d.res; maxRes = d.maxRes; resRec = d.resRec;
-      if (team === 'enemy' && s) { hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk); }
+      if (team === 'enemy' && s) {
+        // 적 레벨 성장 (요일 던전은 같은 강함의 스테이지 기준) → 그 위에 스테이지 배율(기하급수)
+        const sl = stageLevel(s), g = d.growth, avg = k => (g[k][0] + g[k][1]) / 2;
+        lv = stageEnemyLv(sl);
+        hp = d.base.hp + avg('hp') * (lv - 1); atk = d.base.atk + avg('atk') * (lv - 1); def = Math.round(d.base.def + avg('def') * (lv - 1));
+        hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk);
+        const skl = stageEnemySkillLv(sl); skillLv = {};
+        if (skl > 1) getSkills(cls).forEach(sk => { skillLv[sk.id] = skl; });
+      }
       mhp = hp; initRes = d.res === 'mana' ? maxRes : 0; name = t('classes.' + cls);
       gender = randomGender(); actionRec = d.actionRec || 1.0;
     }
@@ -60,6 +68,7 @@ const UnitManager = {
       buffs: [],
       skillLv: skillLv || {},
     };
+    if (team === 'ally' && enchants) u.enchants = enchants;
 
     if (team === 'enemy') {
       u.origSpawn = { x, y };
@@ -98,7 +107,7 @@ const UnitManager = {
         if (u.team === 'enemy' && !u._counted) {
           u._counted = true;
           S._killCount++;
-          S._killExpPool += killExp(S.cStage ? S.cStage.id : 1, u.cls);
+          S._killExpPool += killExp(stageLevel(S.cStage), u.cls);
         }
         if (u.team === 'ally' && u.uid && !u._counted) {
           u._counted = true;
@@ -240,6 +249,8 @@ const UnitManager = {
     if (o && o.hp > 0) return { ok: true, to: null, hit: 'unit', other: o };
     return { ok: true, to: { x: nx, y: ny }, hit: null };
   },
+  // 넉백 저항 판정 (기사 70%): true면 이번 강제 이동을 버팀
+  resistKnock(t) { const r = KNOCK_RESIST[t.cls] || 0; return r > 0 && Math.random() < r; },
   // 밀칠 수 있는 인접 적 목록
   shoveTargets(a) {
     return GameStore.units.filter(v => v.hp > 0 && v.team !== a.team && !isStealthed(v) && mh(a.x, a.y, v.x, v.y) === 1 && this.shovePlan(a, v).ok);

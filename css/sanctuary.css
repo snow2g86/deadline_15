@@ -218,3 +218,32 @@
   .sanc-ad-card{max-width:460px;padding:12px 16px}
 
 }
+/* 영혼석 보관함 · 승급 조건 */
+.soul-box{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.25);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.soul-box-title{font-weight:900;font-size:13px;color:#7dd3fc;margin-bottom:6px}
+.soul-box-title span{font-weight:500;font-size:10px;color:var(--dim,#94a3b8);margin-left:4px}
+.soul-empty{font-size:11px;color:var(--dim,#94a3b8)}
+.soul-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.soul-cell{display:flex;align-items:center;gap:6px;background:rgba(15,23,42,.6);border-radius:8px;padding:5px 6px;flex-wrap:wrap}
+.soul-cnt{display:flex;flex-direction:column;line-height:1.1}
+.soul-cnt b{font-size:13px;color:#e0f2fe}
+.soul-cnt span{font-size:9px;color:var(--dim,#94a3b8)}
+.soul-combine{margin-left:auto;font-size:10px;padding:2px 6px;border-radius:6px;border:1px solid #38bdf8;background:rgba(56,189,248,.15);color:#bae6fd;cursor:pointer}
+.soul-need{font-size:10px;color:#fca5a5;margin-top:3px}
+.soul-need.ok{color:#7dd3fc}
+
+/* 마법부여 */
+.enc-guide{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:10px;color:#cbd5e1}
+.enc-ic{font-size:26px;display:flex;align-items:center;justify-content:center}
+.enc-opts{display:flex;gap:4px;align-items:center;margin-top:5px;flex-wrap:wrap}
+.enc-opt{width:28px;height:26px;border-radius:7px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.6);cursor:pointer;font-size:14px;line-height:1}
+.enc-opt:hover{border-color:#a78bfa}
+.enc-opt.on,.enc-opt.on[disabled]{border-color:#a78bfa;background:rgba(139,92,246,.25);opacity:1}
+.enc-cost{font-size:10px;color:#fbbf24;margin-left:4px}
+
+.enc-runes{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:#e0f2fe;margin-bottom:6px}
+.enc-runes span.zero{opacity:.45}
+.enc-opt[disabled]{opacity:.3;cursor:not-allowed}
+.enc-locked{font-size:11px;color:#c4b5fd}
+.enc-card.done{opacity:.85}
+.enc-runes em,.enc-opts em{font-style:normal;font-size:10px;color:#94a3b8;min-width:30px}

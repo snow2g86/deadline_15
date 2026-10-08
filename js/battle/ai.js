@@ -74,7 +74,7 @@ const AI = {
         BuffSystem.apply(tgt, { type: BuffType.DISARM, duration: 3, icon: '🤛', source: 'brawler_disarm' });
         EventBus.emit('skill_used', { caster: u, skill: 'brawler_disarm', target: tgt });
         u.ha = true;
-        await sl(200);
+        await slE(200);
         return true;
       }
     }
@@ -104,7 +104,7 @@ const AI = {
         }
         EventBus.emit('skill_used', { caster: u, skill: 'mage_fireball', targetCell });
         u.ha = true;
-        await sl(300);
+        await slE(300);
         UnitManager.rmDead();
         Renderer.rUnits();
         return true;
@@ -227,7 +227,7 @@ const AI = {
     // 이동 전 공격 시도
     if (await this._tryAttack(u, this._visibleAllies(u), profile)) return;
 
-    if (this.tryGateAtk(u)) { await sl(250); return; }
+    if (this.tryGateAtk(u)) { await slE(250); return; }
     if (await this.tryWallClimb(u)) return;
 
     await this.eMv(u, al);
@@ -235,7 +235,7 @@ const AI = {
     if (profile.avoidCombat && u.hp > u.mhp * 0.7) return;
 
     // 이동 후 공격 시도
-    await sl(200);
+    await slE(200);
     if (await this._tryAttack(u, this._visibleAllies(u), profile)) return;
 
     // 이동 후에도 공격 불가 시 공성아이템 시도
@@ -384,7 +384,7 @@ const AI = {
       const ox = u.x, oy = u.y;
       u.x = nx; u.y = ny;
       EventBus.emit('unit_moved', { unit: u, from: { x: ox, y: oy }, to: { x: nx, y: ny } });
-      await sl(340);
+      await slE(340);
       this.onBreach(u);
       return true;
     }
@@ -404,9 +404,9 @@ const AI = {
   // ── 적 공격 (비동기 래퍼) ──
   async eAtkAsync(a, tgt) {
     EventBus.emit('camera_focus', { unit: tgt });
-    await sl(250);
+    await slE(250);
     await this.eAtk(a, tgt);
-    await sl(tgt.hp <= 0 ? 500 : 300);
+    await slE(tgt.hp <= 0 ? 500 : 300);
   },
 
   // ── 적 공격 실행 ──
@@ -429,7 +429,7 @@ const AI = {
     const hd = VFX.atkHitDelay(a.cls, a), t0 = performance.now();
 
     if (bCounter) {
-      await sl(420);
+      await slE(420);
       const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def);
       a.hp = Math.max(0, a.hp - cdmg);
       EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
@@ -457,7 +457,7 @@ const AI = {
       if (BuffSystem.has(a, BuffType.FURY_BUFF)) {
         EventBus.emit('fury_triggered', { unit: a });
       }
-      procFury(a, tgt);
+      procFury(a, tgt, G);
 
       // 지원 공격 (대상 옆의 같은 편이 확률로 추가 타격)
       const sup = UnitManager.rollSupport(a, tgt);
@@ -466,10 +466,11 @@ const AI = {
       // 반격
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !UnitManager.isCC(tgt)) {
         await sl(Math.max(420, hd + 180 - (performance.now() - t0)));
-        const cdmg = calcDmg(tgt, a);
+        const cdmg = EnchantFX.modDamage(tgt, a, calcDmg(tgt, a));   // 클랜원 반격에도 공격용 마법부여
         a.hp = Math.max(0, a.hp - cdmg);
         EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
-        procFury(tgt, a);
+        EnchantFX.afterHit(tgt, a, cdmg);
+        procFury(tgt, a, G);
       }
     }
 
@@ -496,7 +497,7 @@ const AI = {
     const ox = u.x, oy = u.y;
     u.x = nx; u.y = ny;
     EventBus.emit('unit_moved', { unit: u, from: { x: ox, y: oy }, to: { x: nx, y: ny } });
-    await sl(340);
+    await slE(340);
     if (u._cursed && typeof curseMoveTick === 'function') curseMoveTick(u); // 쇠약의 저주: 적도 이동할 때마다 피해
     Grid.chkTrap(u);
     Grid.chkSpearwall(u);
@@ -519,9 +520,10 @@ const AI = {
     VFX.faceDir(w.id, e.x - w.x, e.y - w.y);
     const blk = UnitManager.interceptOf(w, e), hit = blk || e;   // 투사체 차단: 길목의 기사가 대신 맞음
     if (blk) Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic');
-    const dmg = Math.max(1, Math.round(calcDmg(w, hit) * TACTICS_ACT.overwatchMul * (blk ? TACTICS_ACT.interceptMul : 1) * UnitManager.shieldMul(hit)));
+    const dmg = Math.max(1, Math.round(EnchantFX.modDamage(w, hit, calcDmg(w, hit)) * TACTICS_ACT.overwatchMul * (blk ? TACTICS_ACT.interceptMul : 1) * UnitManager.shieldMul(hit)));
     hit.hp = Math.max(0, hit.hp - dmg);
     EventBus.emit('unit_attacked', { attacker: w, target: hit, damage: dmg });
+    EnchantFX.afterHit(w, hit, dmg);
     await sl(Math.max(550, VFX.atkHitDelay(w.cls, w) + 150));
     if (hit.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: hit }); UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); }
   },

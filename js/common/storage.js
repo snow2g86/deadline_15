@@ -180,7 +180,7 @@ function loadParties() {
       if (d && Array.isArray(d.parties) && d.parties.length) {
         // 활성 파티 id가 실제로 없으면(예: 예전 세이브의 id 0) 첫 파티로 맞춤
         if (!d.parties.some(p => p.id === d.activePartyId)) d.activePartyId = d.parties[0].id;
-        if (_pinCommander(d)) saveParties(d);
+        if (_dropCommander(d)) saveParties(d);
         if (typeof d.nextPartyId !== 'number') {
           // 예전 첫 실행 세이브(파티 1개, nextPartyId 없음) → 새 게임과 같은 5파티 구조로 채움
           let next = Math.max(...d.parties.map(p => +p.id || 0)) + 1;
@@ -200,25 +200,22 @@ function loadParties() {
   return newData;
 }
 
-// 모든 파티에 지휘관을 첫 칸으로 고정 (다른 칸에 있으면 옮기고, 빈 칸이 없으면 마지막 칸과 교체)
-function _pinCommander(data) {
+// 지휘관은 스토리에만 등장하고 전투에는 나가지 않음 → 모든 파티에서 빼고 빈 칸은 뒤로
+// (예전 세이브는 지휘관이 첫 칸에 고정돼 있었음)
+function _dropCommander(data) {
   const cu = commanderUid(); if (cu == null || !data || !data.parties) return false;
   let changed = false;
   data.parties.forEach(p => {
-    if (!p.slots) return;
-    if (p.slots[0] === cu) return;
-    const i = p.slots.indexOf(cu);
-    if (i > 0) p.slots[i] = null;
-    p.slots.unshift(cu);
-    // 5칸 유지: 비어 있는 칸부터 빼고, 없으면 마지막 칸을 뺌
-    while (p.slots.length > 5) { const e = p.slots.lastIndexOf(null); p.slots.splice(e > 0 ? e : p.slots.length - 1, 1); }
+    if (!p.slots || p.slots.indexOf(cu) === -1) return;
+    p.slots = p.slots.filter(s => s !== cu);
+    while (p.slots.length < 5) p.slots.push(null);
     changed = true;
   });
   return changed;
 }
 
 function saveParties(data) {
-  _pinCommander(data);
+  _dropCommander(data);
   try {
     localStorage.setItem(PARTIES_KEY, JSON.stringify(data));
   } catch (_) {}

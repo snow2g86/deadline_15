@@ -19,17 +19,28 @@ const BattleEnd = {
     S._totalExp = killPool;
     S._deadEnemyCount = S._killCount;
 
+    // 요일 던전: 영혼석 조각만 (골드·클리어 기록·별·신규 유닛·스킬북 없음)
+    if (S.cStage && S.cStage.daily) {
+      S._soulReward = null;
+      if (win) { Soul.add('frag', S.cStage.daily.cls, S.cStage.daily.frags); S._soulReward = { kind: 'frag', cls: S.cStage.daily.cls, n: S.cStage.daily.frags };
+        S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null; }
+      S._deadAllyUids.forEach(uid => markDead(uid));
+      clearBattle();
+      return;
+    }
+
     if (win) {
-      let reward = 50 + (S.cStage ? S.cStage.id * 30 : 0);
+      const sid = S.cStage ? S.cStage.id : 0;
+      let reward = ECON.win[0] + ECON.win[1] * sid;
       let firstClearBonus = 0;
 
       if (S.practiceMode) {
-        reward = Math.floor(reward * 0.7);
+        reward = Math.floor(reward * ECON.practiceMul);
         S._practiceMode = true;
         S._baseReward = reward;
       } else {
         const isFirstClear = S.cStage && !S.cleared.has(S.cStage.id);
-        if (isFirstClear) { firstClearBonus = 1000; S._firstClearBonus = firstClearBonus; }
+        if (isFirstClear) { firstClearBonus = ECON.firstClear[0] + ECON.firstClear[1] * sid; S._firstClearBonus = firstClearBonus; }
         if (S.cStage) S.cleared.add(S.cStage.id);
         S._baseReward = reward;
         S._bonusReward = firstClearBonus;
@@ -41,7 +52,7 @@ const BattleEnd = {
         const limit = starTurnLimit(S.cStage);
         const flags = [1, S._deadAllyUids.length === 0 ? 1 : 0, (S.turn || 1) <= limit ? 1 : 0];
         const r = saveStageStars(S.cStage.id, flags);
-        const each = 100 + S.cStage.id * 10;
+        const each = ECON.star[0] + ECON.star[1] * S.cStage.id;
         const bonus = r.newly.filter(i => i > 0).length * each;
         S._starResult = { flags, merged: r.merged, newly: r.newly, limit, turn: S.turn || 1, bonus };
         S.gold += bonus;
@@ -53,11 +64,9 @@ const BattleEnd = {
       if (!S.practiceMode) {
         const isFC = S.cStage && S._firstClearBonus;
         if (isFC) {
-          let shouldGiveUnit = false;
+          // 신규 클랜원: Ep1의 몇 스테이지와 보스 스테이지 첫 클리어만 (제물이 넘치면 성장이 너무 쉬움)
           const stageId = S.cStage.id;
-          const episode = Math.floor((stageId - 1) / 10) + 1;
-          if (episode === 1) shouldGiveUnit = true;
-          else shouldGiveUnit = (stageId % 5 === 0);
+          const shouldGiveUnit = ECON.freeUnitStages.indexOf(stageId) !== -1 || !!S.cStage.boss;
 
           if (shouldGiveUnit) {
             const NON_NOVICE = Object.keys(JAB).filter(k => k !== 'novice' && !k.startsWith('summon_') && !JAB[k].unique);
@@ -97,6 +106,18 @@ const BattleEnd = {
             }
           } catch (_) {}
         }
+
+        // 보스 스테이지: 첫 클리어 → 파티 직업 중 하나의 영혼석, 반복 → 그 직업 조각
+        S._soulReward = null;
+        if (S.cStage.boss) {
+          const pcls = S.units.filter(u => u.team === 'ally' && u.uid && !u.isSummon).map(u => u.cls);
+          const cls = pcls.length ? pcls[Math.floor(Math.random() * pcls.length)] : S.cStage.boss.cls;
+          if (isFC) { Soul.add('stone', cls, SOUL.bossFirstStone); S._soulReward = { kind: 'stone', cls, n: SOUL.bossFirstStone }; }
+          else { Soul.add('frag', cls, SOUL.bossRepeatFrags); S._soulReward = { kind: 'frag', cls, n: SOUL.bossRepeatFrags }; }
+        }
+
+        // 마법부여 룬 드랍
+        S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null;
 
         if (typeof LEARNABLE_SKILLS !== 'undefined' && Math.random() < 0.05) {
           const lsKeys = Object.keys(LEARNABLE_SKILLS);

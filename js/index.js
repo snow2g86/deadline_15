@@ -27,7 +27,7 @@ function renderHideout() {
 	try { roster = JSON.parse(localStorage.getItem('game_roster')); } catch(_) {}
 	if (roster && roster.chars) {
 		// 살아있는 모든 캐릭터를 레벨 높은 순으로 정렬해서 최대 10명 표시
-		chars = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); })
+		chars = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; })
 			.sort(function(a, b) { return b.lv - a.lv; })
 			.slice(0, 10);
 	}
@@ -224,8 +224,13 @@ function validateAndRepairGameData() {
 		var inv = raw ? JSON.parse(raw) : [];
 		if (!Array.isArray(inv)) throw new Error('Invalid inventory structure');
 
+		// 깨진 항목만 제거. 예전 조건(id가 있고 type이 skill·equip·potion)은 장비(eid)·스킬북(type 없음)·전직서·전투 물약·
+		// 공성 아이템·마법부여 룬을 모두 지워, 로비에 들어올 때마다 인벤토리가 사라지는 버그였음
+		var KNOWN = ['equip', 'potion', 'battle_potion', 'siege', 'scroll', 'rune'];
 		inv = inv.filter(function(item) {
-			return item && item.id && (item.type === 'skill' || item.type === 'equip' || item.type === 'potion');
+			if (!item || typeof item !== 'object') return false;
+			if (KNOWN.indexOf(item.type) !== -1) return true;
+			return !item.type && !!item.id && !!item.cls;   // 스킬북 { id, cls, lv }
 		});
 
 		localStorage.setItem('game_inventory', JSON.stringify(inv));
@@ -324,9 +329,9 @@ var init = async function() {
 	try {
 		var rr = JSON.parse(localStorage.getItem('game_roster'));
 		if (rr && rr.chars) {
-			var alive = rr.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_'); });
+			var alive = rr.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
 			if (alive.length < 5) {
-				var dead = rr.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_'); });
+				var dead = rr.chars.filter(function(c) { return c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
 				if (dead.length) {
 					dead.sort(function(a, b) { return (b.diedAt || 0) - (a.diedAt || 0); });
 					var need = Math.min(5 - alive.length, dead.length);

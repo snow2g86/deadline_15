@@ -13,8 +13,38 @@ const SHOP_KEY = 'game_shop';
 // ── 게임 설정 ────────────────────────────────
 const MIN_P = 5;
 const MAX_P = 5;
-const MAX_LEVEL = 15;
+const MAX_LEVEL = 15;   // C등급 상한 (기준값)
+// 등급별 레벨 상한: 승급할수록 더 성장할 수 있음 (character.js maxLevelOf)
+const GRADE_LV_CAP = { C: 15, B: 20, A: 25, S: 30 };
 const MAX_SKILL_LV = 10;
+
+// ── 경제: 골드는 항상 부족하게 (보상은 짜게, 성장 비용은 높게) ──
+// [a, b] = a + b × 스테이지(또는 레벨)
+const ECON = {
+  win: [20, 8],             // 승리 골드
+  firstClear: [100, 5],     // 첫 클리어 보너스
+  star: [30, 3],            // 새로 얻은 ★2·★3마다
+  practiceMul: 0.6,         // 연습 모드 골드 배율
+  revive: [30, 15],         // 성소 부활
+  merc: { S: 1500, A: 1150, B: 850, C: 650 }, // 상점 용병 기본가 (잠재력에 따라 ×0.9~1.1)
+  bookMul: 1.5,             // 상점 스킬북 가격 배율 (기본 800, 스킬별 bookCost 우선)
+  scroll: 700,              // 전직서
+  battlePotion: 200,        // 전투 물약
+  soulStone: 3000,          // 상점 영혼석 1개 (직업별, 회전 판매)
+  freeUnitStages: [2, 4, 6, 8],  // Ep1에서 첫 클리어 시 신규 클랜원 (이후는 보스 스테이지만)
+};
+// 다음 레벨까지 필요 경험치 = a + b×lv + c×lv²
+const LEVEL_EXP = [180, 70, 20];
+// 처치 경험치(생존자끼리 나눔) = a + b×스테이지 (예전 10 + 5×스테이지)
+const KILL_EXP = [5, 2];
+
+// ── 영혼석: 직업별 영혼석·조각. 등급 승급 B→A, A→S에 소모 (C→B는 제물만) ──
+const SOUL = {
+  fragsPerStone: 10,        // 조각 10개 → 영혼석 1개
+  promote: { B: 1, A: 2 },  // 현재 등급 → 다음 등급 승급에 필요한 영혼석 (A→S 3 → 2: 후반 성장 완화)
+  bossFirstStone: 1,        // 보스 스테이지 첫 클리어: 파티 직업 중 하나의 영혼석
+  bossRepeatFrags: 2,       // 보스 스테이지 반복 클리어: 조각
+};
 
 // ── 등급 관련 ────────────────────────────────
 const GRADE_ORDER = ['C', 'B', 'A', 'S'];

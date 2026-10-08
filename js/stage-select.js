@@ -32,6 +32,18 @@ function renderEpisodes() {
   var totalCleared = EPISODES.reduce(function(a, e) { return a + e.stages.filter(function(s) { return cleared.has(s); }).length; }, 0);
   if (sub) sub.textContent = t('stage.total_progress', { n: totalCleared, total: totalStages });
 
+  // 요일 던전 입구
+  if (typeof Daily !== 'undefined') {
+    var db = document.createElement('button');
+    db.type = 'button';
+    db.className = 'daily-entry';
+    db.innerHTML = '<span class="de-ic">💠</span><span class="de-tx"><b>' + t('daily.title') + '</b><small>' +
+      t('daily.today', { classes: Daily.classes().length > 6 ? t('daily.all_classes') : Daily.classes().map(function(c) { return t('classes.' + c); }).join('·') }) +
+      '</small></span><span class="de-left">' + t('daily.left', { n: Daily.left(), max: DAILY.perDay }) + '</span>';
+    db.onclick = function() { openDaily(); };
+    l.appendChild(db);
+  }
+
   // 스토리 다시 보기 (본 장면이 있을 때만)
   if (typeof Story !== 'undefined') {
     var seen = {};
@@ -165,7 +177,47 @@ var init = async function() {
   render();
   renderBottomNav();
   hideSplash();
+  if (/[?&]daily=1/.test(location.search)) openDaily();   // 요일 던전 전투를 마치고 돌아옴
 };
+
+// ── 요일 던전 창: 오늘의 직업 선택 → 난이도 선택 → 출전 (하루 DAILY.perDay회) ──
+var _dailyCls = null;
+function openDaily() {
+  var ov = document.getElementById('modal-overlay');
+  var classes = Daily.classes(), left = Daily.left();
+  if (!_dailyCls || classes.indexOf(_dailyCls) === -1) _dailyCls = classes[0];
+  document.getElementById('modal-title').textContent = '💠 ' + t('daily.title');
+  document.getElementById('modal-title').className = '';
+  var h = '<div class="daily-help">' + t('daily.help', { n: SOUL.fragsPerStone }) + '</div>' +
+    '<div class="daily-left">' + t('daily.left', { n: left, max: DAILY.perDay }) + '</div>' +
+    '<div class="daily-cls">';
+  classes.forEach(function(c) {
+    h += '<button class="dc-btn' + (c === _dailyCls ? ' on' : '') + '" data-cls="' + c + '">' + getClassIcon(c) +
+      '<span>' + t('classes.' + c) + '</span><small>💠' + Soul.stones(c) + ' · ' + Soul.frags(c) + '/' + SOUL.fragsPerStone + '</small></button>';
+  });
+  h += '</div><div class="daily-tiers">';
+  DAILY.tiers.forEach(function(T, i) {
+    var open = Daily.tierOpen(i), can = open && left > 0;
+    h += '<button class="dt-btn' + (can ? '' : ' locked') + '" data-tier="' + i + '"' + (can ? '' : ' disabled') + '>' +
+      '<b>' + t('daily.tier_' + T.key) + '</b>' +
+      '<span>' + (open ? t('daily.tier_info', { eq: T.eq, n: T.frags }) : t('daily.tier_lock', { n: T.unlock })) + '</span></button>';
+  });
+  h += '</div>';
+  document.getElementById('modal-sub').innerHTML = h;
+  var bt = document.getElementById('modal-buttons'); bt.innerHTML = '';
+  var cb = document.createElement('button'); cb.className = 'modal-btn secondary'; cb.textContent = t('common.close');
+  cb.onclick = function() { ov.classList.remove('show'); }; bt.appendChild(cb);
+  ov.classList.add('show');
+  document.querySelectorAll('.dc-btn').forEach(function(b) { b.onclick = function() { _dailyCls = b.dataset.cls; openDaily(); }; });
+  document.querySelectorAll('.dt-btn:not(.locked)').forEach(function(b) {
+    b.onclick = function() {
+      if (Daily.left() <= 0) return;
+      Daily.consume();   // 시도하면 입장 횟수 소모 (패배해도 돌려주지 않음)
+      ov.classList.remove('show');
+      _launchStage(Daily.buildStage(_dailyCls, +b.dataset.tier), false);
+    };
+  });
+}
 
 // ── 클래스 아이콘 반환 ──────────────────────
 function getClassIcon(cls) {
@@ -241,15 +293,21 @@ function showStageInfo(stageId) {
         '</div>' +
         '<div class="si-enemy-list">' + compHTML + '</div>' +
       '</div>' +
+      (Hazard.forStage(st) ? '<div class="si-section si-hazard">' +
+        '<div class="si-section-title">' + Hazard.forStage(st).icon + ' ' + Hazard.name(Hazard.forStage(st)) + '</div>' +
+        '<div class="si-meta">' + Hazard.describe(Hazard.forStage(st), st) + '</div></div>' : '') +
       '<div class="si-section">' +
         '<div class="si-section-title">' + t('stage.recommended_strategy') + '</div>' +
         '<ul class="si-tips">' + tipsHTML + '</ul>' +
       '</div>' +
     '</div>';
 
-  showModal('', modalContent, [
-    {text: t('common.close'), onClick: closeModal}
-  ]);
+  // 클리어한 스테이지는 연습 모드로 반복 가능 (전사자 없음 · 골드 ECON.practiceMul · 클리어·별 기록 없음)
+  var btns = [{text: t('common.close'), onClick: closeModal}];
+  if ((loadSave().cleared || []).indexOf(st.id) !== -1) {
+    btns.unshift({text: t('stage.practice_mode') + ' (' + Math.round(ECON.practiceMul * 100) + '% G)', onClick: function() { closeModal(); startStage(st.id, true); }});
+  }
+  showModal('', modalContent, btns);
 }
 
 

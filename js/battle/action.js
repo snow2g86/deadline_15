@@ -233,8 +233,11 @@ const ActionManager = {
       Renderer.floatT(actual.x, actual.y, '-' + dmg, 'damage'); VFX.shakeU(actual.id);
       if (actual.hp <= 0) EventBus.emit('unit_killed', { killer: a, target: actual });
     };
+    const resisted = UnitManager.resistKnock(tgt);   // 기사는 70% 확률로 밀리지 않음
     setTimeout(() => {
-      if (plan.to) {
+      if (resisted) {
+        Renderer.floatT(tgt.x, tgt.y, t('messages.knock_resist'), 'heal'); VFX.shakeU(tgt.id);
+      } else if (plan.to) {
         const gx = tgt._gdx, gy = tgt._gdy;
         tgt.x = plan.to.x; tgt.y = plan.to.y;
         VFX.animU(tgt.id, tgt.x, tgt.y); tgt._gdx = gx; tgt._gdy = gy;
@@ -294,7 +297,7 @@ const ActionManager = {
   _grantExp(u, action) {
     const S = GameStore;
     if (u.team === 'ally' && u.uid) {
-      const e = actExp(S.cStage ? S.cStage.id : 1, action);
+      const e = actExp(stageLevel(S.cStage), action);
       if (e > 0) { S.battleExp[u.uid] = (S.battleExp[u.uid] || 0) + e; Renderer.floatT(u.x, u.y, '+' + e + ' EXP', 'exp'); }
       return e;
     }
@@ -359,12 +362,13 @@ const ActionManager = {
         EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, isCounter: true });
       }, 420);
     } else {
-      let dmg = calcDmg(a, tgt);
+      let dmg = EnchantFX.modDamage(a, tgt, calcDmg(a, tgt));   // 공격용 마법부여 (번개·파쇄)
       if (blk) dmg = Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul));
       this._grantExp(a, 'attack');
       if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
       tgt.hp = Math.max(0, tgt.hp - dmg);
       EventBus.emit('unit_attacked', { attacker: a, target: tgt, damage: dmg });
+      EnchantFX.afterHit(a, tgt, dmg);   // 화상·독·빙결·흡혈
       if (a.cls === 'mage' && !blk) {   // 기사가 막으면 마탄이 터지지 않아 주변 피해 없음
         const splDmg = Math.max(1, Math.round(dmg * 0.5));
         for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
@@ -427,6 +431,7 @@ const ActionManager = {
   doHeal(h, tgt) {
     let amt = Math.round(h.atk * 1.5);
     if (h.skillLv && h.skillLv['priest_divinegrace'] >= 1) amt = Math.round(amt * 1.2);
+    if (h._healMul) amt = Math.round(amt * h._healMul);   // 조합 버프(성가대 등)
     this._grantExp(h, 'heal');
     tgt.hp = Math.min(tgt.mhp, tgt.hp + amt);
     EventBus.emit('unit_healed', { healer: h, target: tgt, amount: amt });

@@ -116,6 +116,7 @@ Object.assign(window._LANG_ko, {
         "select_attack_target": "공격할 대상을 선택하세요",
         "covered": "🛡️ 엄호됨 — 앞의 기사를 먼저!",
         "intercepted": "🛡️ 막아냄",
+        "knock_resist": "🛡️ 버팀",
         "select_heal_target": "치유할 대상을 선택하세요",
         "item_system_preparing": "아이템 시스템 준비 중",
         "heal": "💚 치유",

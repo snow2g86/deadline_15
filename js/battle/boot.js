@@ -113,12 +113,19 @@ const BattleInit = {
     const meleeCols = FORM_COLS, rangedCols = FORM_COLS;   // 가운데부터 바깥으로
     let meleeIdx = 0, rangedIdx = 0;
     for (let i = 0; i < S.party.length; i++) {
-      const uid = S.party[i], ch = getChar(uid); if (!ch) continue;
+      const uid = S.party[i], ch = getChar(uid); if (!ch || ch.cls === COMMANDER_CLS) continue;   // 지휘관은 스토리 전용 (전투 불참)
       const role = ROLE_MAP[ch.cls], isRanged = role === 'ranged' || role === 'healer';
       const cols = isRanged ? rangedCols : meleeCols;
       const idx = isRanged ? rangedIdx++ : meleeIdx++;
       if (idx < cols.length) { const x = cols[idx], y = isRanged ? 12 : 11; UnitManager.addUnit('ally', uid, x, y); }
     }
+
+    // 클래스 조합 버프 (파티 광역): 출전한 클랜원 직업 구성으로 정해져 전투 내내 유지
+    S._synergies = Synergy.compute(S.units.filter(u => u.team === 'ally').map(u => u.cls));
+    Synergy.apply(S.units, S._synergies);
+    // 맵 환경 디버프 (마법부여로 막은 클랜원 제외) + 보물상자
+    S._hazard = Hazard.apply(S.units, S.cStage);
+    Chest.place(S);
 
     // 첫 웨이브 스폰
     TurnManager.spawnWave();
@@ -141,7 +148,7 @@ const BattleInit = {
     S.battleExp = bs.battleExp || {};
     S.allyPos = bs.allyPos || {};
     S._killCount = bs._killCount || 0; S._killExpPool = bs._killExpPool || 0; S._deadAllyUids = bs._deadAllyUids || [];
-    S.units = bs.units;
+    S.units = bs.units; S._synergies = bs._synergies || []; S._hazard = Hazard.forStage(bs.stage); S.chests = bs.chests || [];   // 조합 버프는 저장된 유닛 스탯에 이미 반영됨
     S.units.forEach(u => {
       if (!u.actionRec) u.actionRec = JAB[u.cls]?.actionRec || 1.0;
       if (u.actionPow == null) u.actionPow = 0;
