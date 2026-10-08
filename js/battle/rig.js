@@ -303,6 +303,20 @@ const SPRITE_SHEETS = {
     idle: { src: 'image/character/anim/warrior_02_idle.png', frames: 12, w: 155, h: 160, body: [6, 156], cx: 78.5, icx: 481.5, dur: 2400 },
     run: { src: 'image/character/anim/warrior_02_run.png', frames: 14, w: 140, h: 160, body: [12, 156], cx: 68.5, icx: 481.5, dur: 1500 },
   },
+  commander_01: {
+    attack: { src: 'image/character/anim/commander_01_attack.png', frames: 14, w: 191, h: 160, body: [45, 156], cx: 69.5, icx: 480.5, dur: 840, hit: 8 },
+    combat: { src: 'image/character/anim/commander_01_combat.png', frames: 12, w: 139, h: 160, body: [4, 156], cx: 72.5, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/commander_01_hit.png', frames: 9, w: 240, h: 160, body: [35, 154], cx: 85.0, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/commander_01_idle.png', frames: 12, w: 136, h: 160, body: [4, 156], cx: 70.0, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/commander_01_run.png', frames: 14, w: 174, h: 160, body: [8, 155], cx: 91.5, icx: 480.5, dur: 1500 },
+  },
+  commander_02: {
+    attack: { src: 'image/character/anim/commander_02_attack.png', frames: 14, w: 220, h: 160, body: [31, 151], cx: 65.5, icx: 481.0, dur: 840, hit: 8 },
+    combat: { src: 'image/character/anim/commander_02_combat.png', frames: 12, w: 141, h: 160, body: [3, 156], cx: 73.0, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/commander_02_hit.png', frames: 9, w: 203, h: 160, body: [29, 135], cx: 74.5, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/commander_02_idle.png', frames: 12, w: 130, h: 160, body: [6, 156], cx: 69.5, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/commander_02_run.png', frames: 14, w: 181, h: 160, body: [7, 155], cx: 85.5, icx: 481.0, dur: 1500 },
+  },
 };
 
 // 구간별 이징 (준비 감속 → 내려치기 가속 → 마무리 → 복귀). 전체 이징을 걸면 키프레임 시점이 밀린다
