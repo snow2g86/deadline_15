@@ -226,12 +226,12 @@ function renderEnchant() {
   var items = inv.filter(function(it) { return it.type === 'equip'; })
     .sort(function(a, b) { return (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0) || RARITY[b.rarity].tier - RARITY[a.rarity].tier; });
   // 보유 룬(방어·공격) + 맵별 디버프 안내
-  var runeRow = function(cat) { return '<div class="enc-runes"><em>' + t('enchant.cat_' + cat) + '</em>' + Rune.kinds(cat).map(function(k) { return '<span class="' + (Rune.count(k) ? '' : 'zero') + '" title="' + t('enchant.desc_' + k) + '">' + ENCHANTS[k].icon + ' ' + t('enchant.' + k) + ' <b>' + Rune.count(k) + '</b></span>'; }).join('') + '</div>'; };
+  var runeRow = function(cat) { return '<div class="enc-runes"><em>' + t('enchant.cat_' + cat) + '</em>' + Rune.kinds(cat).map(function(k) { return '<span class="' + (Rune.count(k) ? '' : 'zero') + '" title="' + t('enchant.desc_' + k) + '">' + runeIcon(k, 18) + ' ' + t('enchant.' + k) + ' <b>' + Rune.count(k) + '</b></span>'; }).join('') + '</div>'; };
   var box = document.createElement('div'); box.className = 'soul-box';
   box.innerHTML = '<div class="soul-box-title">🔮 ' + t('enchant.runes_title') + ' <span>' + t('enchant.runes_help', { gold: ENCHANT_FEE }) + '</span></div>' +
     runeRow('def') + runeRow('atk') +
     '<div class="enc-guide">' + Object.keys(HAZARDS).map(function(m) { var h = HAZARDS[m]; return '<span>' + h.icon + ' ' + t('hazard.' + h.id) + ' → ' + ENCHANTS[h.enchant].icon + '</span>'; }).join('') + '</div>' +
-    '<div class="enc-guide">' + Rune.kinds('atk').map(function(k) { return '<span>' + ENCHANTS[k].icon + ' ' + t('enchant.desc_' + k) + '</span>'; }).join('') + '</div>';
+    '<div class="enc-guide">' + Rune.kinds('atk').map(function(k) { return '<span>' + runeIcon(k, 18) + ' ' + t('enchant.desc_' + k) + '</span>'; }).join('') + '</div>';
   list.appendChild(box);
   if (!items.length) { list.insertAdjacentHTML('beforeend', '<div class="empty-state"><span class="es-ic">🗡️</span>' + t('enchant.no_items') + '</div>'); return; }
   items.forEach(function(it) {
@@ -240,9 +240,9 @@ function renderEnchant() {
     // 방어·공격 한 줄씩: 현재 마법부여는 표시만(같은 종류 불가), 다른 룬은 가진 것만 눌러 그 분류만 덮어쓰기
     var row = function(cat) { var cur = it[ENCHANT_FIELD[cat]];
       return '<div class="enc-opts"><em>' + t('enchant.cat_' + cat) + '</em>' + Rune.kinds(cat).map(function(k) { var n = Rune.count(k), on = cur === k;
-        return '<button class="enc-opt' + (on ? ' on' : '') + '" data-k="' + k + '"' + (n && !on ? '' : ' disabled') + ' title="' + t('enchant.' + k) + ' (' + n + ') — ' + t('enchant.desc_' + k) + '">' + ENCHANTS[k].icon + '</button>'; }).join('') + '</div>'; };
+        return '<button class="enc-opt' + (on ? ' on' : '') + '" data-k="' + k + '"' + (n && !on ? '' : ' disabled') + ' title="' + t('enchant.' + k) + ' (' + n + ') — ' + t('enchant.desc_' + k) + '">' + runeIcon(k, 26) + '</button>'; }).join('') + '</div>'; };
     var curTxt = [it.enchant, it.enchantAtk].filter(Boolean).map(function(k) { return ENCHANTS[k].icon + ' ' + t('enchant.' + k); }).join(' · ') || t('enchant.none');
-    el.innerHTML = '<div class="game-card-icon enc-ic">' + getEquipEmoji(it.templateId) + '</div>' +
+    el.innerHTML = '<div class="game-card-icon enc-ic">' + equipIcon(it, 40) + '</div>' +
       '<div class="game-card-info"><div class="game-card-name" style="color:' + RARITY[it.rarity].color + '">' + Gear.name(it) + (it.enhanceLv ? ' +' + it.enhanceLv : '') + '</div>' +
       '<div class="game-card-sub">' + (owner ? '👤 ' + (owner.customName || names[owner.nameId] || t('classes.' + owner.cls)) : t('enchant.unequipped')) + ' · ' + curTxt + ' · ' + ENCHANT_FEE + 'G</div>' +
       row('def') + row('atk') + '</div>';

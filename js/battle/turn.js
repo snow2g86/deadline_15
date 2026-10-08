@@ -25,8 +25,6 @@ const TurnManager = {
   endUnitTurn(u) {
     const S = GameStore;
     u.actionPow = Math.max(0, (u.actionPow || 0) - 5);
-    // 다 카포 보너스 행동이 끝나면 원래 행동력으로 되돌림 (원래 차례를 소모하지 않음)
-    if (u._daCapoPow != null) { u.actionPow = u._daCapoPow; u._daCapoPow = null; }
     u.ha = false; u.hm = false; u.mo = false;
 
     // 자원 회복

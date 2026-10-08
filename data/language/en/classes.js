@@ -11,14 +11,6 @@ Object.assign(window._LANG_en, {
         "name_ph": "Enter a name (max 10)"
     },
     "commander_msg": {
-        "pianissimo": "🎵 Pianissimo!",
-        "pianissimo_buff": "🎵 Evade 30%",
-        "story_skill": "The commander learned \"{skill}\"!",
-        "dacapo": "🔁 Da Capo!",
-        "rally": "🎼 Fortissimo!",
-        "rally_buff": "Morale↑ ATK/DEF +{n}%",
-        "harmony": "🎶 Harmony!",
-        "harmony_cleanse": "✨ Cleansed",
         "fallen": "The commander has fallen... the clan retreats"
     },
     "classes": {
@@ -37,7 +29,7 @@ Object.assign(window._LANG_en, {
         "sapper": "Sapper"
     },
     "class_desc": {
-        "commander": "Battlefield maestro · area morale buff · 1% mega critical",
+        "commander": "Leads the clan from the rear · story only (does not fight)",
         "warrior": "Balanced melee dealer",
         "knight": "Defensive tank",
         "assassin": "Fast assassin",

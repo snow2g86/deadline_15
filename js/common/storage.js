@@ -67,6 +67,16 @@ function getRoster() {
       if (roster.chars && Array.isArray(roster.chars)) {
         for (const ch of roster.chars) {
           if (ch && typeof ch === 'object') {
+            // 지휘관 스킬 삭제(2026-10-09): 배운 스킬 기록 정리
+            if (ch.skillLv && Object.keys(ch.skillLv).some(k => k.indexOf('commander_') === 0)) {
+              Object.keys(ch.skillLv).forEach(k => { if (k.indexOf('commander_') === 0) delete ch.skillLv[k]; });
+              needsSave = true;
+              try {   // 가지고 있던 지휘관 스킬북도 정리
+                const inv = JSON.parse(localStorage.getItem('game_inventory')) || [];
+                const left = inv.filter(i => !(i && !i.type && typeof i.id === 'string' && i.id.indexOf('commander_') === 0));
+                if (left.length !== inv.length) localStorage.setItem('game_inventory', JSON.stringify(left));
+              } catch (_) {}
+            }
             // pot 필드 없으면 생성 (잠재력이 없는 구 캐릭터)
             if (!ch.pot) {
               const g = JAB[ch.cls] && JAB[ch.cls].growth;

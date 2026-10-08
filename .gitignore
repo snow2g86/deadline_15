@@ -10,3 +10,6 @@ docs/.pdca-snapshots/
 
 # 모션 시험 제작 산출물 (3D 모델 등, 용량 큼)
 tools/_work/
+
+# 아이콘 일러스트 원본 (tools/import-icons.py 가 image/icon/item 으로 변환)
+image/icon/src/

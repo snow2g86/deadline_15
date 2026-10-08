@@ -1,14 +1,10 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "skills": {
-        "commander_pianissimo": "피아니시모",
         "assassin_smoke": "연막",
         "novice_firstaid": "응급처치",
         "novice_tackle": "몸통 박치기",
         "novice_grit": "근성",
-        "commander_harmony": "하모니",
-        "commander_dacapo": "다 카포",
-        "commander_rally": "포르티시모",
         "warrior_powersmash": "강타",
         "knight_switch": "스위치",
         "archer_dash": "도약",
@@ -62,14 +58,10 @@ Object.assign(window._LANG_ko, {
         "priest_divinegrace": "신의 은총"
     },
     "skills_desc": {
-        "commander_pianissimo": "아주 여리게… 기척을 죽여 반경 3칸 클랜원이 2턴간 일반 공격을 30% 확률로 회피",
         "assassin_smoke": "연막을 터뜨려 숲이 아니어도 다음 차례가 끝날 때까지 은신 (적의 표적에서 빠지고 습격 사용 가능)",
         "novice_firstaid": "자신 또는 인접 클랜원 HP를 최대 HP의 15% 회복",
         "novice_tackle": "2칸 내 적에게 달려들어 ATK×0.9 피해",
         "novice_grit": "HP 30% 이하일 때 방어력 +30% (패시브)",
-        "commander_harmony": "화음으로 반경 3칸 클랜원의 HP 15% 회복 + 기절·빙결·무장해제 등 상태이상 해제",
-        "commander_dacapo": "처음부터 다시! 클랜원 한 명이 차례를 소모하지 않고 즉시 한 번 더 행동",
-        "commander_rally": "지휘봉을 크게 휘둘러 반경 4칸 클랜원의 사기를 올림 · 공격력·방어력 +20% (2턴)",
         "warrior_powersmash": "공격력 1.5배의 데미지로 공격",
         "knight_switch": "이동 범위 내 아군과 위치 교환",
         "archer_dash": "이동 범위의 1.5배를 즉각 이동",

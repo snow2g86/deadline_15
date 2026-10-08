@@ -1,14 +1,10 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "skills": {
-        "commander_pianissimo": "Pianissimo",
         "assassin_smoke": "Velo de Humo",
         "novice_firstaid": "Primeros Auxilios",
         "novice_tackle": "Placaje",
         "novice_grit": "Coraje",
-        "commander_harmony": "Armonía",
-        "commander_dacapo": "Da Capo",
-        "commander_rally": "Fortissimo",
         "warrior_powersmash": "Golpe Poderoso",
         "knight_switch": "Cambio",
         "archer_dash": "Carrera",
@@ -62,14 +58,10 @@ Object.assign(window._LANG_es, {
         "priest_divinegrace": "Gracia Divina"
     },
     "skills_desc": {
-        "commander_pianissimo": "Muy suave... aliados a 3 casillas ocultan su presencia y esquivan ataques normales con 30% de probabilidad (2 turnos)",
         "assassin_smoke": "Lanza una cortina de humo: sigilo hasta el final de tu próximo turno aunque no estés en un bosque (no seleccionable, permite Emboscada)",
         "novice_firstaid": "Restaura el 15% del HP máximo a ti o a un aliado adyacente",
         "novice_tackle": "Embiste a un enemigo a 2 celdas: daño ATK×0.9",
         "novice_grit": "+30% DEF con HP al 30% o menos (Pasiva)",
-        "commander_harmony": "Un acorde sanador: aliados a 3 casillas recuperan 15% de PV y se limpian de aturdimiento, congelación, desarme y más",
-        "commander_dacapo": "¡Desde el principio! Un aliado actúa otra vez al instante sin gastar su turno",
-        "commander_rally": "Gran gesto de batuta que eleva la moral: aliados a 4 casillas +20% ATQ y DEF (2 turnos)",
         "warrior_powersmash": "Atacar con daño 1.5x poder de ataque",
         "knight_switch": "Cambiar posiciones con aliado dentro del rango de movimiento",
         "archer_dash": "Mover instantáneamente 1.5x rango de movimiento",

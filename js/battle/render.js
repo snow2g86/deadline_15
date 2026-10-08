@@ -563,9 +563,9 @@ const Renderer = {
       return Object.values(seen);
     };
     group(S._battlePotions, id => BATTLE_POTIONS[id], 'potionId').forEach(({ def, count, firstIdx }) =>
-      addItem(def.icon || '🧪', t('battle_potions.' + def.id), count, () => ActionManager.actPotion(firstIdx)));
+      addItem(iconOr(def.id, 26, def.icon || '🧪'), t('battle_potions.' + def.id), count, () => ActionManager.actPotion(firstIdx)));
     group(S._siegeItems, id => SIEGE_ITEMS.find(d => d.id === id), 'siegeId').forEach(({ def, count, firstIdx }) =>
-      addItem(def.icon || '📦', t('shop.' + def.id), count, () => ActionManager.actSiege(firstIdx)));
+      addItem(itemIcon(def.id, 26, def.icon || '📦'), t('shop.' + def.id), count, () => ActionManager.actSiege(firstIdx)));
     const btnCancel = document.getElementById('btn-cancel');
     this._amBtn(btnCancel, { icon: '↩', label: t('battle.cancel'), ac: 'cancel', key: 'Esc' }); btnCancel.style.display = '';
     btnCancel.onclick = () => ActionManager.hideItemMenu();
@@ -1029,7 +1029,6 @@ const Renderer = {
     if (win && actualReward) rewards.push(['🪙', t('messages.reward'), '+' + actualReward + ' G']);
     if (win && S._firstClearBonus) { rewards.push(['🎉', t('messages.first_clear_bonus'), '+' + S._firstClearBonus + ' G']); S._firstClearBonus = 0; }
     if (win && S._firstClearUnit) { rewards.push(['🎁', t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) }), '']); S._firstClearUnit = null; }
-    if (win && S._storySkill) { rewards.push(['🔁', t('commander_msg.story_skill', { skill: t('skills.' + S._storySkill) }), '']); S._storySkill = null; }
     if (win && S._droppedBook) { rewards.push(['📕', t('academy.skillbook_drop', { skill: t('skills.' + S._droppedBook) }), '']); S._droppedBook = null; }
     if (win && S._runeDrop) { rewards.push([ENCHANTS[S._runeDrop].icon, t('enchant.rune_name', { e: t('enchant.' + S._runeDrop) }), '+1']); S._runeDrop = null; }
     if (win && S._soulReward) {   // 영혼석·조각 (요일 던전·보스 스테이지)

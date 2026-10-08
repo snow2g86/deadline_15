@@ -395,6 +395,52 @@ const Rig = {
   },
 
   sheet(u, kind) { const a = SPRITE_SHEETS[this.key(u)]; return a ? a[kind] || null : null; },
+
+  // ── 모션 시트 미리 불러오기: 불러오기 전에 그 동작이 나오면 캐릭터가 잠깐 사라지는 문제 방지 ──
+  // 불러온 Image는 캐시에 붙잡아 두어 브라우저가 해제하지 않게 함
+  _cache: {},
+  _load(src) {
+    let c = this._cache[src];
+    if (c) return c;
+    c = this._cache[src] = { ok: false, err: false, cbs: [] };
+    const img = new Image(); c.img = img;
+    const done = ok => { c.ok = ok; c.err = !ok; c.cbs.splice(0).forEach(f => { try { f(); } catch (_) {} }); };
+    img.onload = () => (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => done(true));
+    img.onerror = () => done(false);
+    img.src = this.base + src;
+    return c;
+  },
+  _ready(src) { const c = this._cache[src]; return !!(c && c.ok); },
+  whenReady(src, f) { const c = this._load(src); if (c.ok || c.err) f(); else c.cbs.push(f); },
+  // keys: ['knight_01', 'mage_02', ...] → 모든 동작 시트. onProgress(완료, 전체), timeout(ms) 뒤에는 기다리지 않음
+  preload(keys, onProgress, timeout) {
+    const srcs = [];
+    [...new Set(keys)].forEach(k => { const a = SPRITE_SHEETS[k]; if (a) Object.values(a).forEach(sh => { if (sh && sh.src && !srcs.includes(sh.src)) srcs.push(sh.src); }); });
+    if (!srcs.length) return Promise.resolve(0);
+    let n = 0;
+    const all = Promise.all(srcs.map(src => new Promise(res => this.whenReady(src, () => { n++; if (onProgress) onProgress(n, srcs.length); res(); }))));
+    return Promise.race([all, new Promise(res => setTimeout(res, timeout || 8000))]).then(() => n);
+  },
+  // 이 전투에 나올 수 있는 캐릭터 키: 클랜원은 자기 성별, 적은 성별이 무작위라 두 그림 모두
+  //  fieldOnly: 지금 전장에 있는 유닛만 (전투 시작 전에 꼭 필요한 것). 아니면 증원·보스까지 전부
+  battleKeys(S, fieldOnly) {
+    const keys = [], both = cls => keys.push(cls + '_01', cls + '_02');
+    (S.units || []).forEach(u => { if (u.hp > 0) keys.push(this.key(u)); });   // 이미 나온 적은 성별이 정해져 있음
+    if (!fieldOnly) {
+      (S.party || []).forEach(uid => { const ch = typeof getChar === 'function' && getChar(uid); if (ch) keys.push(this.key(ch)); });
+      (S.eQ || []).forEach(c => both(typeof c === 'string' ? c : c && c.cls));
+      const st = S.cStage || {};
+      (st.en || []).forEach(c => both(typeof c === 'string' ? c : c && c.cls));
+      if (st.boss) [].concat(st.boss).forEach(b => b && both(b.cls || b));
+    }
+    return [...new Set(keys)].filter(k => SPRITE_SHEETS[k]);
+  },
+  // 전장 유닛 먼저 기다리고(최대 timeout), 나머지(증원·보스)는 뒤에서 이어 받기
+  preloadBattle(S, onProgress, timeout) {
+    const first = this.preload(this.battleKeys(S, true), onProgress, timeout);
+    first.then(() => this.preload(this.battleKeys(S, false), null, 60000));
+    return first;
+  },
   sheetHitMs(sh) { return Math.round(sh.dur * sh.hit / sh.frames); },
   _base(icon) { return icon.querySelector(':scope > img, :scope > .rig'); },
   _flipped(icon) { const b = this._base(icon); return !!b && /scaleX\(-1\)/.test(b.style.transform); },
@@ -408,7 +454,8 @@ const Rig = {
     el.style.cssText = `position:absolute;left:${left}px;bottom:${(1087 - f[1]) * s - (sh.h - sh.body[1]) * z}px;width:${W}px;height:${H}px;` +
       `background:url(${this.base + sh.src}) 0 0/${W * sh.frames}px ${H}px no-repeat;pointer-events:none;transform-origin:${iconW / 2 - left}px 50%;` +
       (this._flipped(icon) ? 'transform:scaleX(-1);' : '');
-    el._W = W; if (getComputedStyle(icon).position === 'static') icon.style.position = 'relative';
+    el._W = W; el._src = sh.src; if (getComputedStyle(icon).position === 'static') icon.style.position = 'relative';
+    if (!this._ready(sh.src)) this.whenReady(sh.src, () => this._vis(icon));   // 다 불러오면 그때 보여 줌
     return el;
   },
   // 방향이 바뀌면(VFX._applyFace) 재생 중인 시트도 같이 뒤집음
@@ -417,10 +464,13 @@ const Rig = {
     [icon._loop, icon._sheetEl].forEach(el => { if (el) el.style.transform = t; });
   },
   // 보이는 것 정리: 1회 동작 > 반복 동작 > 정지 그림/리그
+  //  아직 불러오지 못한 시트는 보이지 않게 하고 정지 그림을 대신 보여 줌 (캐릭터가 사라지지 않게)
   _vis(icon) {
     const b = this._base(icon);
-    if (b) b.style.visibility = (icon._loop || icon._sheetEl) ? 'hidden' : '';
-    if (icon._loop) icon._loop.style.visibility = icon._sheetEl ? 'hidden' : '';
+    const loopOk = !!icon._loop && this._ready(icon._loop._src), oneOk = !!icon._sheetEl && this._ready(icon._sheetEl._src);
+    if (b) b.style.visibility = (loopOk || oneOk) ? 'hidden' : '';
+    if (icon._loop) icon._loop.style.visibility = loopOk && !oneOk ? '' : 'hidden';
+    if (icon._sheetEl) icon._sheetEl.style.visibility = oneOk ? '' : 'hidden';
   },
 
   // 반복 동작(idle 대기 / combat 전투대기 / run 달리기). 해당 시트가 없으면 idle, 그것도 없으면 정지 그림
@@ -432,7 +482,7 @@ const Rig = {
     if (sh) {
       const el = this._sheetEl(icon, u, sh, 'sheet-loop');
       if (el) {
-        el._src = sh.src; icon.appendChild(el); icon._loop = el;
+        icon.appendChild(el); icon._loop = el;
         // 유닛마다 시작 위치를 달리해 여럿이 똑같이 움직이지 않게
         el._anim = el.animate([{ backgroundPositionX: '0px' }, { backgroundPositionX: -(el._W * sh.frames) + 'px' }],
           { duration: sh.dur, easing: `steps(${sh.frames})`, iterations: Infinity, delay: -Math.random() * sh.dur });

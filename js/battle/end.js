@@ -99,16 +99,6 @@ const BattleEnd = {
           }
         }
 
-        // 스토리 보상: Ep5 최종(50스테이지) 첫 클리어 시 지휘관이 다 카포를 깨우침 (상점 스킬북으로도 습득 가능)
-        if (isFC && S.cStage.id === STORY_SKILL_STAGE) {
-          try {
-            const rd = getRoster(); const cm = rd.chars.find(c => c.cls === COMMANDER_CLS);
-            if (cm) {
-              cm.skillLv = cm.skillLv || {};
-              if (!cm.skillLv.commander_dacapo) { cm.skillLv.commander_dacapo = 1; saveRoster(rd); S._storySkill = 'commander_dacapo'; }
-            }
-          } catch (_) {}
-        }
 
         // 보스 스테이지: 첫 클리어 → 파티 직업 중 하나의 영혼석, 반복 → 그 직업 조각
         S._soulReward = null;

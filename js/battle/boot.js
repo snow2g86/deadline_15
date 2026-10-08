@@ -51,7 +51,10 @@ window.G = new Proxy({}, {
 
 // ── BattleInit singleton ──
 const BattleInit = {
+  // 로딩 화면: 막대는 모션 시트를 불러오는 진행률을 따라가고, 다 불러온 뒤(최대 8초)에 전투 시작
   _showLoading(stageName) {
+    const ready = Rig.preloadBattle(GameStore, (n, total) => { this._preN = n / total; }, 10000);
+    this._preN = 0;
     const el = document.getElementById('battle-loading');
     if (!el) return Promise.resolve();
     const nameEl = document.getElementById('bl-stage-name');
@@ -61,10 +64,12 @@ const BattleInit = {
     const tips = t('battle.loading_tips');
     if (tipEl && Array.isArray(tips) && tips.length) tipEl.textContent = tips[Math.floor(Math.random() * tips.length)];
     el.classList.remove('hide');
+    let loaded = false; ready.then(() => { loaded = true; });
     return new Promise(resolve => {
       let pct = 0;
       const iv = setInterval(() => {
-        pct += 5;
+        // 최소 연출 시간(약 1.8초)은 지키되, 모션을 다 불러오기 전에는 95%에서 멈춤
+        pct = loaded ? pct + 5 : Math.min(95, Math.max(pct + 0.3, Math.round((this._preN || 0) * 95)));
         if (fillEl) fillEl.style.width = Math.min(pct, 100) + '%';
         if (pct >= 100) { clearInterval(iv); setTimeout(() => { el.classList.add('hide'); setTimeout(resolve, 400); }, 200); }
       }, 90);
@@ -175,9 +180,11 @@ const BattleInit = {
 
     // 전투 시작 음악 재생 (설정에서 꺼져 있으면 bgmStart가 무시)
     Audio.bgmStart();
-    this._hideLoading();
-
-    setTimeout(() => { Renderer.scrollToAllies(); TurnManager.nextAction(); }, 50);
+    // 이어하기도 모션 시트를 먼저 불러온 뒤 진행 (최대 5초)
+    Rig.preloadBattle(S, null, 6000).then(() => {
+      this._hideLoading();
+      setTimeout(() => { Renderer.scrollToAllies(); TurnManager.nextAction(); }, 50);
+    });
   },
 
   // ── 배틀 페이지 진입 ──

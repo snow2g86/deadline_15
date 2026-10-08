@@ -327,7 +327,7 @@ function renderPotionCard(item, list) {
   var buyBtn = t('shop.buy', { gold: item.cost });
   var potionName = item.i18nNameKey ? t(item.i18nNameKey) : item.name;
   el.innerHTML =
-    '<div class="shop-icon">' + item.icon + '</div>' +
+    '<div class="shop-icon">' + iconOr(item.potionId, 44, item.icon) + '</div>' +
     '<div class="shop-name">' + potionName + '</div>' +
     (item.exp ? '<div class="shop-cls">' + t('common.exp') + ' +' + item.exp + '</div>' : '') +
     '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
@@ -398,7 +398,7 @@ function renderRuneGacha(list) {
   el.innerHTML =
     '<div class="shop-icon">🔮</div>' +
     '<div class="shop-name">' + t('enchant.rune_gacha') + '</div>' +
-    '<div class="shop-stats">' + t('enchant.rune_gacha_desc') + '<br>' + Rune.kinds().map(function(k) { return ENCHANTS[k].icon + Rune.count(k); }).join(' ') + '</div>' +
+    '<div class="shop-stats">' + t('enchant.rune_gacha_desc') + '<br>' + Rune.kinds().map(function(k) { return runeIcon(k, 16) + Rune.count(k); }).join(' ') + '</div>' +
     '<button class="shop-btn' + (canAfford ? '' : ' disabled') + '"' + (canAfford ? '' : ' disabled') + '>' + t('shop.buy', { gold: RUNE_GACHA_COST }) + '</button>';
   el.querySelector('.shop-btn').onclick = function() {
     if (_gold < RUNE_GACHA_COST) return;
@@ -443,7 +443,7 @@ function renderBattlePotionCard(item, list) {
   el.className = 'shop-card potion-card';
   var buyBtn = t('shop.buy', { gold: item.cost });
   el.innerHTML =
-    '<div class="shop-icon">' + potDef.icon + '</div>' +
+    '<div class="shop-icon">' + iconOr(item.potionId, 44, potDef.icon) + '</div>' +
     '<div class="shop-name">' + t('battle_potions.' + item.potionId) + '</div>' +
     '<div class="shop-cls">' + t('battle_potions.' + item.potionId + '_desc') + '</div>' +
     '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
@@ -477,7 +477,7 @@ function renderSiegeCard(item, list) {
   el.className = 'shop-card potion-card';
   var buyBtn = t('shop.buy', { gold: item.cost });
   el.innerHTML =
-    '<div class="shop-icon">' + item.icon + '</div>' +
+    '<div class="shop-icon">' + itemIcon(item.siegeId, 44, item.icon) + '</div>' +
     '<div class="shop-name">' + siegeName + '</div>' +
     '<div class="shop-cls">' + siegeDesc + '</div>' +
     '<button class="shop-btn potion-btn' + (canAfford ? '' : ' disabled') + '" ' + (canAfford ? '' : 'disabled') + '>' + buyBtn + '</button>';
@@ -780,7 +780,7 @@ function renderGacha(list) {
   [{ k: 'stone', icon: '🔩', desc: 'gear.shop_stone_desc' }, { k: 'protect', icon: '📜', desc: 'gear.shop_protect_desc' }].forEach(function(m) {
     var price = MATS_PRICE[m.k], ok = _gold >= price, c = document.createElement('div');
     c.className = 'gacha-card';
-    c.innerHTML = '<div class="gacha-icon">' + m.icon + '</div><div class="gacha-title">' + t('gear.' + m.k) + '</div>' +
+    c.innerHTML = '<div class="gacha-icon">' + iconOr('mat_' + m.k, 48, m.icon) + '</div><div class="gacha-title">' + t('gear.' + m.k) + '</div>' +
       '<div class="gacha-desc">' + t(m.desc) + '</div>' +
       '<button class="gacha-btn' + (ok ? '' : ' disabled') + '" ' + (ok ? '' : 'disabled') + '>' + t('shop.buy', { gold: price }) + '</button>';
     if (ok) c.querySelector('.gacha-btn').onclick = function() {
@@ -802,7 +802,7 @@ function renderGacha(list) {
       var tpl = LEGENDS[id].tpl;
       return '<button class="legend-btn' + (shards >= LEGEND_SHARD_COST ? '' : ' disabled') + '" data-id="' + id + '" title="' +
         Object.keys(LEGENDS[id].fx).map(function(k) { return Gear.fmt(k, LEGENDS[id].fx[k]); }).join(' · ') + '">' +
-        getEquipEmoji(tpl) + ' ' + t('gear.legend.' + id) + '</button>';
+        iconOr('legend_' + id, 18, getEquipEmoji(tpl)) + ' ' + t('gear.legend.' + id) + '</button>';
     }).join('') + '</div>';
   ex.querySelectorAll('.legend-btn').forEach(function(b) {
     b.onclick = function() {
@@ -868,6 +868,7 @@ function showGachaResults(results) {
     }
     h += '<div class="gacha-result-card" style="border-color:' + rc + '">' +
       '<div class="gr-rarity" style="color:' + rc + '">' + t('equip.rarity.' + item.rarity) + '</div>' +
+      '<div class="gr-icon">' + equipIcon(item, 44) + '</div>' +
       '<div class="gr-name">' + Gear.name(item) + '</div>' +
       '<div class="gr-slot">' + t('equip.slot.' + item.slot) + '</div>' +
       '<div class="gr-stats">' + statsArr.join(' ') + '</div>' +

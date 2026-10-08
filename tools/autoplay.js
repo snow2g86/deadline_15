@@ -184,7 +184,7 @@ const BOOK_PRI = {
   archer: ['archer_rapidfire', 'archer_weakspot', 'archer_steelrain', 'archer_snipe'], mage: ['mage_freeze', 'mage_manasurge'],
   priest: ['priest_divinegrace', 'priest_sanctuary'], assassin: ['assassin_ambush', 'assassin_smoke'], brawler: ['brawler_flurry', 'brawler_counter', 'brawler_crush'],
   lancer: ['lancer_charge', 'lancer_spearwall', 'lancer_phalanx'], shaman: ['shaman_spiritsurge', 'shaman_poisonmist'], summoner: ['summoner_empower', 'summoner_soulbond'],
-  sapper: ['sapper_enhancedtrap'], commander: ['commander_pianissimo', 'commander_dacapo'], novice: ['novice_grit', 'novice_tackle'],
+  sapper: ['sapper_enhancedtrap'], novice: ['novice_grit', 'novice_tackle'],
 };
 
 // ═════ 전투 사이 관리 ═════
@@ -322,7 +322,6 @@ const SK = {
   brawler_disarm: { t: 'debuff' }, brawler_flurry: { t: 'dmg', m: 1.8 }, brawler_crush: { t: 'dmg', m: 1, nodef: 1 },
   shaman_spiritsurge: { t: 'dmg', m: 1, cc: .5 }, shaman_poisonmist: { t: 'aoe', m: .9, r: 1 },
   summoner_summon_spirit: { t: 'summon' }, summoner_summon_golem: { t: 'summon' },
-  commander_rally: { t: 'rally' }, commander_harmony: { t: 'harmony' }, commander_pianissimo: { t: 'piano' }, commander_dacapo: { t: 'dacapo' },
 };
 const ROLE_W = { commander: 3, priest: 1.4, mage: 1.2, archer: 1.2, shaman: 1.1, summoner: 1.1, sapper: .9, assassin: .8, novice: .8, warrior: .6, brawler: .6, lancer: .5, knight: .25 };
 

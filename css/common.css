@@ -809,3 +809,6 @@ body[data-page="skill-balance-report"] main {
 .enh-bonus{color:#fbbf24}
 .enh-protect{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:6px;cursor:pointer}
 .enh-protect.disabled{opacity:.5;cursor:default}
+
+/* 이모지 → 일러스트 아이콘 (js/common/emoji-icons.js) */
+.emo-icon{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.22em;background-image:url('../image/icon/item-sprite.png');background-repeat:no-repeat;border-radius:.15em}

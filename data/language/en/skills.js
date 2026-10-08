@@ -1,14 +1,10 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
     "skills": {
-        "commander_pianissimo": "Pianissimo",
         "assassin_smoke": "Smoke Veil",
         "novice_firstaid": "First Aid",
         "novice_tackle": "Tackle",
         "novice_grit": "Grit",
-        "commander_harmony": "Harmony",
-        "commander_dacapo": "Da Capo",
-        "commander_rally": "Fortissimo",
         "warrior_powersmash": "Power Smash",
         "knight_switch": "Switch",
         "archer_dash": "Dash",
@@ -62,14 +58,10 @@ Object.assign(window._LANG_en, {
         "priest_divinegrace": "Divine Grace"
     },
     "skills_desc": {
-        "commander_pianissimo": "Very softly... allies within 3 tiles mask their presence and evade normal attacks 30% of the time (2 turns)",
         "assassin_smoke": "Burst a smoke screen to stay stealthed until the end of your next turn, even outside forests (untargetable, enables Ambush)",
         "novice_firstaid": "Restore 15% max HP to yourself or an adjacent ally",
         "novice_tackle": "Rush an enemy within 2 cells for ATK×0.9 damage",
         "novice_grit": "+30% DEF while HP is 30% or lower (Passive)",
-        "commander_harmony": "A soothing chord: allies within 3 tiles heal 15% HP and are cleansed of stun, freeze, disarm and more",
-        "commander_dacapo": "From the top! An ally immediately acts once more without spending a turn",
-        "commander_rally": "A sweeping baton stroke lifts morale: allies within 4 tiles gain +20% ATK and DEF (2 turns)",
         "warrior_powersmash": "Attack with 1.5x attack power damage",
         "knight_switch": "Swap positions with ally within movement range",
         "archer_dash": "Instantly move 1.5x movement range",

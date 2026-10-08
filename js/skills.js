@@ -6,13 +6,8 @@
 
 // ── 스킬 데이터 정의 ──────────────────────
 const SKILLS = {
-	// 지휘관(마에스트로): 지휘형 기본 스킬 2개 — 음악 용어 이름 (다 카포는 습득형, LEARNABLE_SKILLS)
-	commander: [
-		{ id: 'commander_rally', name: '포르티시모', icon: '🎼',
-		  desc: '반경 4칸 클랜원의 사기를 올려 공격력·방어력 +20% (2턴)', cost: 45, costType: 'energy', rallyRange: 4, rallyPct: 20, rallyTurns: 2 },
-		{ id: 'commander_harmony', name: '하모니', icon: '🎶',
-		  desc: '반경 3칸 클랜원 HP 15% 회복 + 상태이상 해제', cost: 50, costType: 'energy', harmonyRange: 3, harmonyPct: 15 },
-	],
+	// 지휘관: 전투에 나가지 않는 스토리 전용 인물이라 스킬 없음 (2026-10-09 삭제)
+	commander: [],
 	warrior: {
 		id: 'warrior_powersmash', name: '강타', icon: '⚡',
 		desc: '공격력 1.5배의 데미지로 공격', cost: 3, costType: 'fury'
@@ -69,18 +64,6 @@ const SKILLS = {
 
 // ── 습득형 스킬 (스킬북으로만 습득 가능) ────
 const LEARNABLE_SKILLS = {
-	// 지휘관 습득형: 상점 스킬북·아카데미로 배워야 사용 가능
-	commander_dacapo: {
-		id: 'commander_dacapo', name: '다 카포', icon: '🔁',
-		desc: '클랜원 한 명이 차례를 소모하지 않고 즉시 한 번 더 행동', cost: 80, costType: 'energy', dacapoRange: 4,
-		cls: 'commander'
-	},
-	// 피아니시모: 아주 여리게 — 기척을 죽여 일반 공격을 흘려보냄 (포르티시모=공·방%, 하모니=회복, 다 카포=추가 행동과 겹치지 않는 '회피' 축)
-	commander_pianissimo: {
-		id: 'commander_pianissimo', name: '피아니시모', icon: '🎵',
-		desc: '반경 3칸 클랜원이 2턴간 일반 공격을 30% 확률로 회피', cost: 40, costType: 'energy', pianoRange: 3, pianoTurns: 2,
-		cls: 'commander', bookCost: 1000
-	},
 	assassin_ambush: {
 		id: 'assassin_ambush', name: '습격', icon: '⚡',
 		desc: '2칸 범위 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy', ambushRange: 2,
@@ -332,7 +315,7 @@ const SKILL_SPRITE = {
 	shaman_exalt:[4,4],shaman_medium:[5,4],shaman_poisonmist:[6,4],shaman_spiritsurge:[7,4],
 	summoner_empower:[0,5],summoner_soulbond:[1,5],summoner_soulburst:[2,5],summoner_summon_golem:[3,5],
 	summoner_summon_spirit:[4,5],warrior_assault:[5,5],warrior_bloodthirst:[6,5],warrior_cleave:[7,5],
-	warrior_criticalstrike:[0,6],warrior_powersmash:[1,6]
+	warrior_criticalstrike:[0,6],warrior_powersmash:[1,6],assassin_smoke:[2,6]
 };
 
 // 스프라이트에 없는 스킬은 스킬 데이터의 이모지로 대신 표시 (새 이미지 생성 금지 정책)

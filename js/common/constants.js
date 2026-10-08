@@ -57,7 +57,6 @@ const GRADE_COLORS = {
 
 // ── 지휘관 (고유 주인공) ──────────────────────
 const COMMANDER_CLS = 'commander';
-const STORY_SKILL_STAGE = 50; // 이 스테이지를 처음 클리어하면 지휘관이 다 카포 습득 (Ep5 최종, 스승을 잃고 다시 일어서는 대목)
 const COMMANDER_DEFAULT_NAME = '리안'; // 스토리 기본 이름 (data/story 의 cast.commander.name 과 맞춤). 플레이어가 바꾸면 customName
 
 // ── 역할 매핑 ────────────────────────────────

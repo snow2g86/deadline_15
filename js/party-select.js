@@ -1073,7 +1073,7 @@ function renderInventoryInModal(ch) {
     }
 
     // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
-    var itemEmoji = getEquipEmoji(item.templateId);
+    var itemEmoji = equipIcon(item, 40);
     var card = document.createElement('div');
     card.className = 'eq-inv-card' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '') + (item.broken ? ' broken' : '') + (item.legend ? ' legend' : '');
     var setLabel = item.setCls ? t('gear.set_name', { set: t('gear.set.' + item.setCls) }) : (item.setId ? t('equip.set.' + item.setId) : '');
@@ -1342,7 +1342,7 @@ function renderItemTab() {
       var card = document.createElement('div');
       card.className = 'item-card';
       card.innerHTML =
-        '<div class="item-icon">' + sg.icon + '</div>' +
+        '<div class="item-icon">' + itemIcon(sg.siegeId, 36, sg.icon) + '</div>' +
         '<div class="item-info">' +
           '<div class="item-name">' + t('shop.' + sg.siegeId) + '</div>' +
         '</div>' +
@@ -1460,7 +1460,7 @@ function renderBattlePotionsList() {
       'background:' + (isSelected ? '#4ade80' : '#f3f4f6') + ';' +
       'cursor:pointer;';
     var qty = item.quantity || 1;
-    btn.innerHTML = pot.icon + ' ' + t('battle_potions.' + item.potionId) + ' ×' + qty;
+    btn.innerHTML = iconOr(item.potionId, 20, pot.icon) + ' ' + t('battle_potions.' + item.potionId) + ' ×' + qty;
     btn.title = t('battle_potions.' + item.potionId) + ' | ×' + qty;
 
     btn.onclick = (function(potionPid, selected) {
@@ -1512,7 +1512,7 @@ function renderSiegeItemsList() {
     div.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:6px 10px;' +
       'background:#f3f4f6;border-radius:4px;margin-right:8px;margin-bottom:6px;font-size:12px;';
     var qty = item.quantity || 1;
-    div.innerHTML = siege.icon + ' <span style="font-weight:600;">×' + qty + '</span>';
+    div.innerHTML = itemIcon(siege.id, 22, siege.icon) + ' <span style="font-weight:600;">×' + qty + '</span>';
     div.title = t('shop.' + item.siegeId) + ' | ×' + qty;
 
     list.appendChild(div);
@@ -1631,7 +1631,7 @@ function renderEnhanceList() {
     var rateClass = rate >= 0.80 ? 'rate-high' : rate >= 0.40 ? 'rate-mid' : 'rate-low';
     var who = _equippedName(item);
     html += '<div class="enhance-card' + (item.legend ? ' legend' : '') + '" onclick="showEnhanceConfirmModal(\'' + item.eid + '\')">' +
-      '<div class="enhance-icon">' + getEquipEmoji(item.templateId) + '</div>' +
+      '<div class="enhance-icon">' + equipIcon(item, 40) + '</div>' +
       '<div class="enhance-info">' +
         '<div class="enhance-header">' +
           '<div class="enhance-name" style="color:' + rc + '">' + Gear.name(item) + '</div>' +
@@ -1653,7 +1653,7 @@ function renderEnhanceList() {
     html += '<div class="enh-broken-title">💥 ' + t('gear.enh_broken_title') + '</div><div class="enh-hint">' + t('gear.broken_hint') + '</div>';
     broken.forEach(function(item) {
       html += '<div class="enhance-card broken">' +
-        '<div class="enhance-icon">' + getEquipEmoji(item.templateId) + '</div>' +
+        '<div class="enhance-icon">' + equipIcon(item, 40) + '</div>' +
         '<div class="enhance-info"><div class="enhance-header"><div class="enhance-name" style="color:' + RARITY[item.rarity].color + '">' + Gear.name(item) + '</div>' +
         '<div class="enhance-level">💥 ' + t('gear.broken') + '</div></div></div>' +
         '<button class="enhance-btn" onclick="repairEquipUI(\'' + item.eid + '\')">🔧 ' + t('gear.repair_btn', { gold: repairCost(item) }) + '</button>' +
@@ -1705,7 +1705,7 @@ function showEnhanceConfirmModal(targetEid) {
     '</div>' +
     '<div class="enhance-modal-body enhance-confirm-content">' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-value" style="color:' + RARITY[target.rarity].color + '">' + getEquipEmoji(target.templateId) + ' ' + Gear.name(target) + ' +' + lv + ' → +' + (lv + 1) + '</div>' +
+        '<div class="enhance-confirm-value" style="color:' + RARITY[target.rarity].color + '">' + equipIcon(target, 24) + ' ' + Gear.name(target) + ' +' + lv + ' → +' + (lv + 1) + '</div>' +
         '<div class="eq-inv-opts">' + Gear.linesHtml(target) + '</div>' +
       '</div>' +
       '<div class="enhance-confirm-section" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);">' +
