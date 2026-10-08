@@ -25,7 +25,7 @@ const ActionManager = {
 
   clrSel() {
     const S = GameStore;
-    S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.healT = []; S._shove = false;
+    S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.blockT = []; S.healT = []; S._shove = false;
     S._curSkill = null; S.preMv = null;
     if (FSM.isPlayerTurn()) FSM.transition(BattleState.PLAYER_IDLE);
     Renderer.hideAM(); Renderer.hideEnemyPopup();
@@ -35,11 +35,12 @@ const ActionManager = {
   // 공격 가능 칸(atkT)과 엄호로 막힌 칸(coverT)을 계산
   _enemyTargets(u, cells) {
     const S = GameStore;
-    S.atkT = []; S.coverT = [];
+    S.atkT = []; S.coverT = []; S.blockT = [];
     cells.forEach(c => {
       const v = UnitManager.uAt(c.x, c.y);
       if (!v || v.team !== 'enemy' || isStealthed(v)) return;
       (UnitManager.coverOf(u, v) ? S.coverT : S.atkT).push(c);
+      if (UnitManager.interceptOf(u, v)) S.blockT.push(c);   // 쏠 수는 있지만 기사가 막음
     });
     return S.atkT;
   },
@@ -337,6 +338,10 @@ const ActionManager = {
       }
     }
 
+    // 투사체 차단: 지나가는 길에 대상 편 기사가 있으면 그 기사가 대신 맞음 (피해 TACTICS_ACT.interceptMul)
+    const blk = UnitManager.interceptOf(a, tgt);
+    if (blk) { tgt = blk; Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
+
     if (UnitManager.rollEvade(tgt)) {
       VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
       Renderer.floatT(tgt.x, tgt.y, t('messages.evasion'), 'heal');
@@ -355,11 +360,12 @@ const ActionManager = {
       }, 420);
     } else {
       let dmg = calcDmg(a, tgt);
+      if (blk) dmg = Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul));
       this._grantExp(a, 'attack');
       if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
       tgt.hp = Math.max(0, tgt.hp - dmg);
       EventBus.emit('unit_attacked', { attacker: a, target: tgt, damage: dmg });
-      if (a.cls === 'mage') {
+      if (a.cls === 'mage' && !blk) {   // 기사가 막으면 마탄이 터지지 않아 주변 피해 없음
         const splDmg = Math.max(1, Math.round(dmg * 0.5));
         for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
           const su = UnitManager.uAt(tgt.x + dx, tgt.y + dy);

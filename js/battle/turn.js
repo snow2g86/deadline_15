@@ -126,10 +126,10 @@ const TurnManager = {
 
     const cnt = Math.min(s.spw, rem, S.eQ.length, maxConcurrent - activeEnemies);
     if (S.eSpwn === 0 && s.boss) {
-      const bu = UnitManager.addUnit('enemy', s.boss.cls, 5, 2);
-      if (bu) { bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: 5, y: 2 }; }
+      const bu = UnitManager.addUnit('enemy', s.boss.cls, MID_C, 2);
+      if (bu) { bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: MID_C, y: 2 }; }
       S.eSpwn++;
-      const posL = [[2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]];
+      const posL = [4, 3].flatMap(y => FORM_COLS.map(x => [x, y]));   // 보스 호위: 가운데부터 바깥으로
       let pidx = 0;
       while (S.eSpwn < cnt && pidx < posL.length && S.eQ.length) {
         const c = S.eQ.shift(); if (!c) break;

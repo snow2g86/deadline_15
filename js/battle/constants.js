@@ -6,10 +6,14 @@
 //  Section 1: Constants & Utilities
 // ════════════════════════════════════════════
 
-const COLS = 10, ROWS = 15, TW = 48, TH = 24;
+// 맵: 가로 8 × 세로 15. 세로 양 끝에 서로의 진형 (아래 11~12행 클랜원, 위 0~1행 적; 방어전은 13행 해자·14행 성벽)
+const COLS = 8, ROWS = 15, TW = 48, TH = 24;
+const MID_C = COLS / 2;   // 가운데 두 열은 MID_C-1, MID_C
 // 유닛: UI=캐릭터 아이콘 폭, UW/UH=유닛 컨테이너, UCX/UCY=이펙트 기준점(몸통 중심), UOY=타일 기준 컨테이너 상단 오프셋
 const ZH = 10, UI = 52, UW = 64, UH = 78, UCX = 32, UCY = 30, UOY = 40;
-const DEPLOY = [{ x: 4, y: 12 }, { x: 5, y: 12 }, { x: 3, y: 12 }, { x: 6, y: 12 }, { x: 4, y: 11 }, { x: 5, y: 11 }, { x: 3, y: 11 }, { x: 6, y: 11 }, { x: 7, y: 12 }, { x: 7, y: 11 }];
+const DEPLOY = [{ x: 3, y: 12 }, { x: 4, y: 12 }, { x: 2, y: 12 }, { x: 5, y: 12 }, { x: 3, y: 11 }, { x: 4, y: 11 }, { x: 2, y: 11 }, { x: 5, y: 11 }, { x: 1, y: 12 }, { x: 6, y: 12 }];
+// 진형 열 순서: 가운데부터 바깥으로 (가로 8칸 기준 3,4,2,5,1,6)
+const FORM_COLS = [MID_C - 1, MID_C, MID_C - 2, MID_C + 1, MID_C - 3, MID_C + 2];
 const CLAB = ['N', 'E', 'S', 'W'], CARR = ['▲', '▶', '▼', '◀'];
 
 function mh(a, b, c, d) { return Math.abs(a - c) + Math.abs(b - d) }
@@ -100,6 +104,10 @@ const AI_MISTAKE_CHANCE = 0.3;
 // ── 엄호(Cover): 탱커가 아군 앞을 막으면 뒤의 아군은 일반 공격 대상이 될 수 없다 ──
 const GUARD_CLASSES = ['knight'];          // 엄호를 제공하는 직업
 const COVER_IGNORE_CLASSES = ['assassin']; // 엄호·제압 구역을 무시하는 직업
+// ── 투사체 차단: 원거리(투사체) 공격은 엄호 대신, 지나가는 길에 선 대상 편 기사가 피해 일부로 대신 맞는다 ──
+const PROJECTILE_CLASSES = ['archer', 'mage', 'commander', 'priest', 'summoner', 'shaman', 'summon_spirit'];
+// ── 도움닫기: 궁수·도적(암살자)은 같은 편 바로 뒤에서 그 동료를 딛고 넘어 일직선으로 최대 VAULT_DIST칸 더 이동 (이동력과 별도) ──
+const VAULT_CLASSES = ['archer', 'assassin'], VAULT_DIST = 2;
 
 // ── 전술 보너스 (데미지 배율 가산) ──
 const TACTIC = {
@@ -118,7 +126,7 @@ const TACTIC = {
 // 밀치기: 인접한 적을 1칸 밀어냄. 막히면 충돌 피해(공격력 비율), 유닛과 부딪히면 둘 다 피해
 // 방어 태세: 다음 자기 차례까지 방어력 배율 + 후방·측면 보너스 무효
 // 경계: 다음 자기 차례까지, 사거리 안으로 처음 들어온 적을 선제 공격 (피해 배율)
-const TACTICS_ACT = { shoveCollide: 0.5, shoveUnit: 0.3, defendDef: 1.5, overwatchMul: 0.8 };
+const TACTICS_ACT = { shoveCollide: 0.5, shoveUnit: 0.3, defendDef: 1.5, overwatchMul: 0.8, interceptMul: 0.5 };  // interceptMul: 투사체를 대신 맞은 기사가 받는 피해 배율
 
 // ── 지원 공격(연계): 일반 공격 후 대상 바로 옆의 같은 편이 추가 타격 ──
 const SUPPORT = { chance: 0.40, mul: 0.50 };

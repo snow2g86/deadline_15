@@ -37,6 +37,7 @@ const VFX = {
     EventBus.on('unit_moved', ({ unit, from, to }) => {
       this.faceDir(unit.id, to.x - from.x, to.y - from.y);
       this.animU(unit.id, to.x, to.y);
+      if (this._isVault(unit, from, to)) this.vaultHop(unit);
     });
     EventBus.on('buff_applied', ({ unit }) => { this.vfxBuff(unit); });
     EventBus.on('buff_tick_damage', ({ unit, damage }) => { Renderer.floatT(unit.x, unit.y, `-${damage}`, 'damage'); });
@@ -317,6 +318,22 @@ const VFX = {
     const img = el.querySelector('.u-icon > img, .u-icon > .rig');
     if (img) img.style.transform = sdx < 0 ? 'scaleX(-1)' : '';
     const icon = el.querySelector('.u-icon'); if (icon) Rig.refreshFlip(icon);
+  },
+
+  // 도움닫기 판정(연출용): 궁수·도적이 일직선 2~3칸을 가는데 바로 앞 칸에 같은 편이 있음
+  _isVault(u, from, to) {
+    if (!VAULT_CLASSES.includes(u.cls)) return false;
+    const dx = Math.sign(to.x - from.x), dy = Math.sign(to.y - from.y), d = mh(from.x, from.y, to.x, to.y);
+    if ((dx && dy) || d < 2 || d > VAULT_DIST + 1) return false;
+    const m = UnitManager.uAt(from.x + dx, from.y + dy);
+    return !!(m && m.id !== u.id && m.team === u.team);
+  },
+  // 동료를 딛고 넘는 도약: 아이콘만 포물선으로 들어 올림 (캐릭터 주변 이펙트 없음)
+  vaultHop(u) {
+    const icon = document.querySelector('#u-' + u.id + ' .u-icon'); if (!icon || !icon.animate || _reduceMotion()) return;
+    icon.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-26px)', offset: .45 }, { transform: 'translateY(0)' }],
+      { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' });
+    Renderer.floatT(u.x, u.y, t('battle.vault'), 'tactic');
   },
 
   animU(id, x, y) {

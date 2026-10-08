@@ -110,7 +110,7 @@ const BattleInit = {
     Renderer._bgReady = false; Renderer._hlTiles = new Map();
 
     // 파티 유닛 배치 (역할 기반)
-    const meleeCols = [3, 4, 5, 6, 7], rangedCols = [3, 4, 5, 6, 7];
+    const meleeCols = FORM_COLS, rangedCols = FORM_COLS;   // 가운데부터 바깥으로
     let meleeIdx = 0, rangedIdx = 0;
     for (let i = 0; i < S.party.length; i++) {
       const uid = S.party[i], ch = getChar(uid); if (!ch) continue;
@@ -177,7 +177,12 @@ const BattleInit = {
     clearNav();
     if (nav?.resume) {
       const bs = loadBattle();
-      if (bs) this.resumeBattle(bs);
+      // 맵 크기가 바뀌기 전에 저장된 전투는 이어 할 수 없음 → 같은 스테이지·파티로 새로 시작
+      if (bs && bs.ter && bs.ter[0] && bs.ter[0].length !== COLS) {
+        clearBattle(); GameStore.cStage = bs.stage; GameStore.practiceMode = bs.practiceMode || false;
+        GameStore.party = bs.party || loadParty(); this.initBattle();
+        this._showLoading(GameStore.cStage.name).then(() => { Audio.bgmStart(); TurnManager.nextAction(); });
+      } else if (bs) this.resumeBattle(bs);
       else location.href = 'index.html';
     } else if (nav?.cStage) {
       GameStore.cStage = nav.cStage; GameStore.practiceMode = nav.practiceMode || false;

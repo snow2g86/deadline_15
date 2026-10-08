@@ -318,7 +318,7 @@ Object.assign(window._LANG_en, {
         "title": "Stage Selection",
         "subtitle": "Select a stage to enter",
         "select_episode": "Select an episode",
-        "tip_enemy_knight": "Enemies right behind an enemy knight are covered, and stepping next to it stops you — take the knight first or flank it",
+        "tip_enemy_knight": "Melee can't reach enemies right behind an enemy knight, and arrows or spells are caught by a knight in their path at half damage. Stepping next to it stops you — take the knight first or flank it",
         "tip_enemy_assassin": "Enemy assassins ignore cover to reach your back line — keep your healers and ranged units guarded",
         "total_progress": "Overall progress {n} / {total}",
         "unlock_after": "Clear EP.{ep} to unlock",

@@ -126,7 +126,7 @@ const AI = {
     let best = -1;
     for (const a of al) {
       if (a.hp <= 0 || isStealthed(a) || mh(m.x, m.y, a.x, a.y) > rng) continue;
-      if (UnitManager.coverOf(me, a)) continue;
+      if (UnitManager.coverOf(me, a) || UnitManager.interceptOf(me, a)) continue;
       const tb = UnitManager.tacticBonus(me, a);
       const killable = a.hp <= Math.max(1, Math.round((u.atk - a.def) * tb.mul));
       best = Math.max(best, (tb.mul - 1) * 100 + (killable ? 25 : 0));
@@ -142,7 +142,7 @@ const AI = {
     // 예고한 대상을 칠 수 있는 칸 우선
     if (u._intent) {
       const it = al.find(a => a.id === u._intent);
-      if (it && it.hp > 0 && mh(m.x, m.y, it.x, it.y) <= rng && !UnitManager.coverOf(me, it)) s += 30;
+      if (it && it.hp > 0 && mh(m.x, m.y, it.x, it.y) <= rng && !UnitManager.coverOf(me, it) && !UnitManager.interceptOf(me, it)) s += 30;
     }
     return Math.random() < AI_MISTAKE_CHANCE ? s * 0.3 : s;
   },
@@ -173,7 +173,7 @@ const AI = {
         const rng = e.range + (tile === 'hill' && e.range > 1 ? TACTIC.highRange : 0);
         const me = { id: e.id, team: e.team, cls: e.cls, x: p.x, y: p.y };
         for (const a of al) {
-          if (mh(p.x, p.y, a.x, a.y) > rng || UnitManager.coverOf(me, a)) continue;
+          if (mh(p.x, p.y, a.x, a.y) > rng || UnitManager.coverOf(me, a) || UnitManager.interceptOf(me, a)) continue;
           const tb = UnitManager.tacticBonus(me, a);
           const dmg = Math.max(1, Math.round((e.atk - a.def) * tb.mul));
           const sc = (a.hp <= dmg ? 1000 : 0) + (tb.mul - 1) * 100 - a.hp / a.mhp * 50 - (p.x === e.x && p.y === e.y ? 0 : 1);
@@ -186,10 +186,13 @@ const AI = {
 
   // ── 사거리 내 아군(적 입장) 탐색 ──
   _visibleAllies(u) {
-    return Grid.atkCells(u).filter(c => {
+    const all = Grid.atkCells(u).filter(c => {
       const v = UnitManager.uAt(c.x, c.y);
       return v && v.team === 'ally' && !isStealthed(v) && !UnitManager.coverOf(u, v); // 엄호된 아군은 노릴 수 없음
     }).map(c => UnitManager.uAt(c.x, c.y));
+    // 원거리: 기사에게 막히지 않는 대상이 있으면 그쪽만 (없으면 막히더라도 쏨 → 기사가 대신 맞음)
+    const clear = all.filter(v => !UnitManager.interceptOf(u, v));
+    return clear.length ? clear : all;
   },
 
   // ── 공격 시도 ──
@@ -408,6 +411,9 @@ const AI = {
 
   // ── 적 공격 실행 ──
   async eAtk(a, tgt) {
+    // 투사체 차단: 지나가는 길에 클랜원 기사가 있으면 기사가 대신 맞음
+    const blk = UnitManager.interceptOf(a, tgt);
+    if (blk) { tgt = blk; Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
     // 회피 체크 (공격받는 쪽 기준: 공성아이템 회피 / 숲 지형)
     if (UnitManager.rollEvade(tgt)) {
       VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
@@ -429,6 +435,7 @@ const AI = {
       EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
     } else {
       let dmg = calcDmg(a, tgt);
+      if (blk) dmg = Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul));
       // 방어막: 공격받는 쪽 피해 50%
       if (UnitManager.shieldMul(tgt) < 1) {
         dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt)));
@@ -436,7 +443,7 @@ const AI = {
       }
       const actual = tgt.team === 'ally' ? applyDmgToAlly(tgt, dmg, G) : (tgt.hp = Math.max(0, tgt.hp - dmg), tgt);
       EventBus.emit('unit_attacked', { attacker: a, target: actual, damage: dmg, counter: false });
-      if (a.cls === 'mage') {
+      if (a.cls === 'mage' && !blk) {
         const splDmg = Math.max(1, Math.round(dmg * 0.5));
         for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
           const su = UnitManager.uAt(tgt.x + dx, tgt.y + dy);
@@ -510,11 +517,13 @@ const AI = {
     w._overwatch = false;
     Renderer.floatT(w.x, w.y, t('messages.overwatch_fire'), 'tactic');
     VFX.faceDir(w.id, e.x - w.x, e.y - w.y);
-    const dmg = Math.max(1, Math.round(calcDmg(w, e) * TACTICS_ACT.overwatchMul * UnitManager.shieldMul(e)));
-    e.hp = Math.max(0, e.hp - dmg);
-    EventBus.emit('unit_attacked', { attacker: w, target: e, damage: dmg });
-    await sl(550);
-    if (e.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: e }); UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); }
+    const blk = UnitManager.interceptOf(w, e), hit = blk || e;   // 투사체 차단: 길목의 기사가 대신 맞음
+    if (blk) Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic');
+    const dmg = Math.max(1, Math.round(calcDmg(w, hit) * TACTICS_ACT.overwatchMul * (blk ? TACTICS_ACT.interceptMul : 1) * UnitManager.shieldMul(hit)));
+    hit.hp = Math.max(0, hit.hp - dmg);
+    EventBus.emit('unit_attacked', { attacker: w, target: hit, damage: dmg });
+    await sl(Math.max(550, VFX.atkHitDelay(w.cls, w) + 150));
+    if (hit.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: hit }); UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); }
   },
 
   // ── 돌파 체크 ──

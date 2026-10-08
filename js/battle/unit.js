@@ -123,17 +123,17 @@ const UnitManager = {
       if (cls === 'sapper') sappers.push(cls);
     });
     const frontLine = [];
-    for (let c = 2; c <= 7; c++) if (!this.uAt(c, 11) && frontLine.length < (knights.length + melee.length)) frontLine.push({ x: c, y: 11 });
+    for (const c of FORM_COLS) if (!this.uAt(c, 11) && frontLine.length < (knights.length + melee.length)) frontLine.push({ x: c, y: 11 });
     let idx = 0;
     knights.forEach(k => { if (idx < frontLine.length) form.push({ cls: k, pos: frontLine[idx++] }); });
     melee.forEach(m => { if (idx < frontLine.length) form.push({ cls: m, pos: frontLine[idx++] }); });
     const midLine = [];
-    for (let c = 2; c <= 7; c++) if (!this.uAt(c, 12) && midLine.length < ranged.length + heal.length + sappers.length) midLine.push({ x: c, y: 12 });
+    for (const c of FORM_COLS) if (!this.uAt(c, 12) && midLine.length < ranged.length + heal.length + sappers.length) midLine.push({ x: c, y: 12 });
     idx = 0;
     ranged.forEach(r => { if (idx < midLine.length) form.push({ cls: r, pos: midLine[idx++] }); });
     heal.forEach(h => { if (idx < midLine.length) form.push({ cls: h, pos: midLine[idx++] }); });
     sappers.forEach(s => { if (idx < midLine.length) form.push({ cls: s, pos: midLine[idx++] }); });
-    if (boss) form.push({ cls: boss.cls, pos: { x: 5, y: 2 }, isBoss: true });
+    if (boss) form.push({ cls: boss.cls, pos: { x: MID_C, y: 2 }, isBoss: true });
     return form;
   },
 
@@ -147,10 +147,40 @@ const UnitManager = {
   // 엄호해 주는 탱커를 반환. 일반 단일 공격만 막는다 (스킬·광역·반격은 적용 안 함)
   coverOf(attacker, target) {
     if (!attacker || !target || COVER_IGNORE_CLASSES.includes(attacker.cls)) return null;
+    if (PROJECTILE_CLASSES.includes(attacker.cls)) return null;   // 원거리는 엄호 대신 투사체 차단(interceptOf)
     const dT = mh(attacker.x, attacker.y, target.x, target.y);
     return GameStore.units.find(g => g.hp > 0 && g.id !== target.id && g.team === target.team &&
       GUARD_CLASSES.includes(g.cls) && !this.isCC(g) &&
       mh(g.x, g.y, target.x, target.y) === 1 && mh(attacker.x, attacker.y, g.x, g.y) < dT) || null;
+  },
+
+  // ── 투사체 차단 ──
+  // 원거리(투사체) 공격이 지나가는 칸(양 끝 제외)에 대상 편 기사가 서 있으면 공격자에게 가장 가까운 그 기사를 반환.
+  // 그 기사가 TACTICS_ACT.interceptMul 배율로 대신 맞는다 (기절·빙결이어도 몸으로 막음). 자기 편 유닛은 넘어 쏜다
+  interceptOf(attacker, target) {
+    if (!attacker || !target || !PROJECTILE_CLASSES.includes(attacker.cls)) return null;
+    for (const c of this.lineCells(attacker.x, attacker.y, target.x, target.y)) {
+      const g = this.uAt(c.x, c.y);
+      if (g && g.hp > 0 && g.id !== target.id && g.team === target.team && GUARD_CLASSES.includes(g.cls)) return g;
+    }
+    return null;
+  },
+  // 두 칸 사이 직선이 지나가는 칸들 (공격자 쪽부터, 양 끝 제외).
+  // 칸 경계선을 따라 지나면 양쪽 칸 모두 포함, 칸 꼭짓점만 스치는 칸(정대각선 옆)은 제외
+  lineCells(x0, y0, x1, y1) {
+    const out = [], seen = new Set([x0 + ',' + y0, x1 + ',' + y1]);
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) * 4;
+    const add = (x, y) => { const k = x + ',' + y; if (!seen.has(k)) { seen.add(k); out.push({ x, y }); } };
+    for (let i = 1; i < n; i++) {
+      const fx = x0 + (x1 - x0) * i / n, fy = y0 + (y1 - y0) * i / n;
+      const hx = Math.abs(fx - Math.floor(fx) - .5) < 1e-9, hy = Math.abs(fy - Math.floor(fy) - .5) < 1e-9;
+      if (hx && hy) continue;                                        // 꼭짓점: 스치기만 함
+      const rx = Math.round(fx), ry = Math.round(fy);
+      if (hx) { add(Math.floor(fx), ry); add(Math.ceil(fx), ry); }   // 세로 경계선 위: 양쪽 칸
+      else if (hy) { add(rx, Math.floor(fy)); add(rx, Math.ceil(fy)); }
+      else add(rx, ry);
+    }
+    return out;
   },
 
   // ── 전술 보너스 ──

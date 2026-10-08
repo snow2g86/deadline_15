@@ -103,9 +103,12 @@ const Renderer = {
         if (S.sel.x === c && S.sel.y === r) hl = 'selected';
       }
       hlTile.classList.toggle('hl-move', hl === 'move');
+      hlTile.classList.toggle('hl-vault', hl === 'move' && S.mvT.some(m => m.vault && m.x === c && m.y === r));   // 도움닫기로만 가는 칸
       hlTile.classList.toggle('hl-attack', hl === 'attack');
       hlTile.classList.toggle('hl-heal', hl === 'heal');
       hlTile.classList.toggle('hl-cover', hl === 'cover');
+      hlTile.classList.toggle('hl-block', hl === 'attack' && (FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE)) &&
+        (S.blockT || []).some(a => a.x === c && a.y === r));   // 쏠 수는 있지만 길목의 기사가 막음
       hlTile.classList.toggle('hl-selected', hl === 'selected');
       hlTile.classList.toggle('fow-dark', !S.fogVisible.has(pos));
     });
@@ -171,6 +174,15 @@ const Renderer = {
     if (!S.sel || S._shove || !(FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE))) return;
     S.atkT.forEach(c => {
       const v = UnitManager.uAt(c.x, c.y); if (!v || v.team === S.sel.team) return;
+      const blk = UnitManager.interceptOf(S.sel, v);
+      if (blk) {   // 투사체 차단: 대상 위에 "기사가 대신 맞음"과 기사에게 들어갈 피해
+        const pb = this.previewAttack(S.sel, blk), dmg = Math.max(1, Math.round(pb.dmg * TACTICS_ACT.interceptMul));
+        const el = document.createElement('div'); el.className = 'dmg-prev block';
+        el.innerHTML = '<div class="dp-main">\uD83D\uDEE1\uFE0F -' + dmg + '</div><div class="dp-sub"></div>';
+        el.querySelector('.dp-sub').textContent = t('battle.preview_intercept');
+        el.style.left = (Grid.uSX(v.x, v.y) + UW / 2) + 'px'; el.style.top = (Grid.uSY(v.x, v.y) - 6) + 'px';
+        w.appendChild(el); return;
+      }
       const p = this.previewAttack(S.sel, v);
       const el = document.createElement('div'); el.className = 'dmg-prev' + (p.kill ? ' kill' : '');
       const main = document.createElement('div'); main.className = 'dp-main';

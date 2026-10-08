@@ -130,6 +130,10 @@
   background:repeating-linear-gradient(-45deg,rgba(239,68,68,.22) 0 4px,rgba(239,68,68,.06) 4px 9px)}
 .cam-btn.on{background:rgba(239,68,68,.22);border-color:#ef4444;box-shadow:0 0 10px rgba(239,68,68,.35)}
 .cam-btn.on svg{stroke:#fca5a5}
+/* 쏠 수는 있지만 길목의 기사가 막는 칸: 파랑·빨강 줄무늬 */
+.iso-tile.hl-attack.hl-block{animation:none;background:repeating-linear-gradient(45deg,rgba(96,165,250,.36) 0 5px,rgba(239,68,68,.24) 5px 10px);box-shadow:inset 0 0 0 2px rgba(96,165,250,.85)}
+/* 도움닫기로만 가는 칸: 금색 줄무늬 (기본 이동 칸 깜빡임 애니메이션이 배경을 덮지 않게 끔) */
+.iso-tile.hl-move.hl-vault{animation:none;background:repeating-linear-gradient(-45deg,rgba(250,204,21,.38) 0 5px,rgba(59,130,246,.16) 5px 10px);box-shadow:inset 0 0 0 2px rgba(250,204,21,.8)}
 .iso-tile.hl-cover{background:repeating-linear-gradient(45deg,rgba(148,163,184,.18) 0 6px,rgba(148,163,184,.06) 6px 12px);
   box-shadow:inset 0 0 0 2px rgba(148,163,184,.6)}
 .iso-tile-hl.fow-dark{background:rgba(10,14,26,.55)!important;box-shadow:none!important;animation:none!important}
@@ -156,6 +160,9 @@
 .dmg-prev.kill{border-color:#facc15;box-shadow:0 0 10px rgba(250,204,21,.45)}
 .dmg-prev .dp-main{font-family:'Cinzel','Noto Sans KR',serif;font-weight:900;font-size:14px;color:#ff6b6b;line-height:1.1}
 .dmg-prev.kill .dp-main{color:#facc15}
+/* 투사체 차단: 길목의 기사가 대신 맞는 공격 */
+.dmg-prev.block{border-color:#60a5fa}
+.dmg-prev.block .dp-main{color:#93c5fd}
 .dmg-prev .dp-sub{font-size:9px;font-weight:700;color:#cbd5e1;margin-top:1px}
 @keyframes dpIn{from{opacity:0;transform:translate(-50%,-90%)}to{opacity:1;transform:translate(-50%,-100%)}}
 

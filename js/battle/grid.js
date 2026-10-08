@@ -56,8 +56,9 @@ const Grid = {
     const wallRow = (row) => {
       const r = [];
       for (let c = 0; c < COLS; c++) {
-        if (c >= 2 && c <= 3 || c >= 6 && c <= 7) { r.push('wall'); S.wallHP[c + ',' + row] = 200; }
-        else if (c >= 4 && c <= 5) { r.push('gate'); S.gateHP[c + ',' + row] = 2; }
+        // 가운데 두 칸 성문, 그 양옆 두 칸씩 성벽, 나머지 물 (가로 8: 물·벽벽·문문·벽벽·물)
+        if (c >= MID_C - 3 && c <= MID_C - 2 || c >= MID_C + 1 && c <= MID_C + 2) { r.push('wall'); S.wallHP[c + ',' + row] = 200; }
+        else if (c >= MID_C - 1 && c <= MID_C) { r.push('gate'); S.gateHP[c + ',' + row] = 2; }
         else r.push('water');
       }
       return r;
@@ -65,7 +66,7 @@ const Grid = {
     const moatRow = () => {
       const r = [];
       for (let c = 0; c < COLS; c++) {
-        if (c >= 4 && c <= 5) r.push('plain'); else r.push('water');
+        if (c >= MID_C - 1 && c <= MID_C) r.push('plain'); else r.push('water');
       }
       return r;
     };
@@ -149,7 +150,37 @@ const Grid = {
         if (!vis.has(k) || vis.get(k) > nc) { vis.set(k, nc); q.push({ x: nx, y: ny, c: nc }); }
       }
     }
+    this._addVault(u, vis, res);
     return res;
+  },
+
+  // ── 도움닫기 (궁수·도적) ──
+  // 갈 수 있는 칸(출발 칸 포함, 같은 편이 서 있어 지나가기만 하는 칸도 포함)에서 바로 앞 칸에 같은 편이 있으면
+  // 그 동료를 넘어 같은 방향으로 1~VAULT_DIST칸 더 갈 수 있다. 착지 칸은 비어 있어야 하고, 넘는 길의 적·동료는 뛰어넘을 수 있음
+  // (거리 안이면 적 뒤로 착지). 막힌 지형(바위·물·성벽)을 만나면 거기서 멈춤.
+  // 제압 구역(ZOC) 안에서는 도약 불가(출발 칸 제외). 추가된 칸은 vault: true 표시
+  _addVault(u, vis, res) {
+    if (!VAULT_CLASSES.includes(u.cls)) return;
+    const S = GameStore, has = new Set(res.map(m => m.x + ',' + m.y));
+    for (const [key] of vis) {
+      const [x, y] = key.split(',').map(Number);
+      const start = x === u.x && y === u.y;
+      if (!start && UnitManager.inZoc(u, x, y)) continue;
+      const here = UnitManager.uAt(x, y);
+      if (!start && here && here.team !== u.team) continue;
+      for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+        const mate = UnitManager.uAt(x + dx, y + dy);
+        if (!mate || mate.id === u.id || mate.team !== u.team || mate.hp <= 0) continue;
+        for (let i = 1; i <= VAULT_DIST; i++) {
+          const lx = x + dx * (1 + i), ly = y + dy * (1 + i);
+          if (lx < 0 || lx >= COLS || ly < 0 || ly >= ROWS || !TI[S.ter[ly][lx]].pass) break;
+          const o = UnitManager.uAt(lx, ly);
+          if (o && !(o.team !== u.team && isStealthed(o))) continue;   // 사람이 선 칸(같은 편·적 모두)에는 못 내리지만 넘어서 그 뒤에 착지 가능
+          const k = lx + ',' + ly;
+          if (!has.has(k) && !(lx === u.x && ly === u.y)) { has.add(k); res.push({ x: lx, y: ly, vault: true }); }
+        }
+      }
+    }
   },
 
   // ── 적 이동 범위 (지형 비용 적용) ──
@@ -177,6 +208,7 @@ const Grid = {
         if (!vis.has(k) || vis.get(k) > nc) { vis.set(k, nc); q.push({ x: nx, y: ny, c: nc }); }
       }
     }
+    this._addVault(u, vis, res);
     return res;
   },
 
