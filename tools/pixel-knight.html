@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel Knight</title>
+<!-- 개발용: 이미지 없이 코드로 그린 기사(키 약 256px) + 자세 값 애니메이션 (대기·전투대기·달리기·피격·공격) 시험판
+     부위마다 도형 + 3단 명암(빛은 왼쪽 위 고정) + 굵은 외곽선으로 그린 뒤, 프레임마다 팔레트 색으로 딱 떨어지게 정리(반투명·중간색 제거) -->
+<style>
+:root{--bg:#0e1018;--card:#171b27;--line:#2a3042;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 12px;font-size:13px;max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+.card h2{font-size:14px;margin:0 0 6px;display:flex;justify-content:space-between}
+.card h2 span{color:var(--sub);font-weight:400;font-size:12px}
+canvas{display:block;width:100%;image-rendering:pixelated;border-radius:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+button{background:transparent;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit;font-size:13px}
+button:hover,button.on{border-color:var(--acc);color:var(--acc)}
+.mini{display:flex;gap:18px;align-items:flex-end;background:#2b3a2a;border-radius:8px;padding:10px 14px;margin-top:6px;flex-wrap:wrap}
+.mini canvas{width:auto}
+#big{max-width:840px}
+</style>
+</head>
+<body>
+<h1>픽셀 기사 (256px) — 코드 애니메이션 시험판</h1>
+<p class="lead">그림 파일 없이 투구·흉갑·어깨갑·팔·다리·검·방패를 도형으로 조립하고, 관절 각도 값을 키프레임으로 움직입니다. 60fps로 계산하고 10fps 도트 애니메이션처럼 끊어 그립니다. 캐릭터 외 이펙트 없음.</p>
+<div class="row">
+  <button id="slow">느리게 보기</button>
+  <button id="px">픽셀 2배(굵게)</button>
+  <button id="bg">배경 바꾸기</button>
+  <button id="exp">시트 PNG 저장</button>
+</div>
+<div class="card" id="big"><h2>크게 보기 <span id="bigname"></span></h2><canvas id="bigcv"></canvas>
+  <div class="row" id="pick"></div></div>
+<div class="grid" id="grid" style="margin-top:12px"></div>
+<div class="card" style="margin-top:12px">
+  <h2>게임 크기 미리보기 <span>몸 높이 50px (실제 전투 화면 크기)</span></h2>
+  <div class="mini" id="mini"></div>
+</div>
+<script>
+// ───────── 팔레트 (원본 기사 그림 색) ─────────
+const C = {
+  out: '#15131d',
+  s0: '#3a3e51', s1: '#5b6178', s2: '#858ca4', s3: '#b2b9cd', s4: '#dfe5f2', s5: '#f7f9ff',   // 강철 어두움→밝음
+  l0: '#3a251d', l1: '#5a3a2c', l2: '#7d5239',                                                     // 가죽
+  p0: '#2f2640', p1: '#45385c', p2: '#64527e',                                                     // 튜닉
+  g0: '#6e5226', g1: '#a88444', g2: '#e2c47e',                                                     // 황동
+  k: '#07060b',
+  b0: '#8f9bb3', b1: '#c4ccdc', b2: '#eef2fa',                                                     // 칼날
+};
+const PAL = [...new Set(Object.values(C))].map(h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+const STEEL = { d: C.s1, m: C.s2, l: C.s3 }, STEEL_B = { d: C.s0, m: C.s1, l: C.s2 };  // 뒤쪽 팔다리는 한 단계 어둡게
+const W = 460, H = 350, GROUND = 330, ROOTX = 210, FPS = 10, OUTW = 4;
+const R = Math.PI / 180;
+
+// ───────── 그리기 도구 ─────────
+let LIGHT = 0;  // 현재 누적 회전(라디안) — 빛 방향을 화면 기준 왼쪽 위로 고정하려고 추적
+function rot(ctx, a) { ctx.rotate(a); LIGHT += a; }
+// 3단 명암: 전체 어두움 → (아래오른쪽 띠 남기고) 밝음 → (위왼쪽 띠 남기고) 중간
+function cel(ctx, p, c, k = 6) {
+  const cs = Math.cos(-LIGHT), sn = Math.sin(-LIGHT), lx = -1 * cs - -1 * sn, ly = -1 * sn + -1 * cs;  // 화면 (-1,-1)을 부위 좌표로
+  ctx.save(); ctx.clip(p);
+  ctx.fillStyle = c.d; ctx.fill(p);
+  ctx.save(); ctx.translate(lx * k * .8, ly * k * .8); ctx.clip(p); ctx.translate(-lx * k * .8, -ly * k * .8);
+  ctx.fillStyle = c.l; ctx.fill(p);
+  ctx.translate(-lx * k, -ly * k); ctx.fillStyle = c.m; ctx.fill(p);
+  ctx.restore(); ctx.restore();
+  ctx.lineJoin = 'round'; ctx.lineWidth = OUTW; ctx.strokeStyle = C.out; ctx.stroke(p);
+}
+function flat(ctx, p, col, stroke = true) { ctx.fillStyle = col; ctx.fill(p); if (stroke) { ctx.lineJoin = 'round'; ctx.lineWidth = OUTW; ctx.strokeStyle = C.out; ctx.stroke(p); } }
+const rr = (x, y, w, h, r) => { const p = new Path2D(); p.roundRect(x, y, w, h, r); return p; };
+const poly = pts => { const p = new Path2D(); pts.forEach(([x, y], i) => i ? p.lineTo(x, y) : p.moveTo(x, y)); p.closePath(); return p; };
+const circ = (x, y, r) => { const p = new Path2D(); p.arc(x, y, r, 0, Math.PI * 2); return p; };
+const ell = (x, y, rx, ry) => { const p = new Path2D(); p.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); return p; };
+function ln(ctx, x0, y0, x1, y1, w, col) { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineWidth = w; ctx.strokeStyle = col; ctx.lineCap = 'butt'; ctx.stroke(); }
+function rivet(ctx, x, y, r = 3.5) { flat(ctx, circ(x, y, r), C.s4, false); ctx.lineWidth = 2; ctx.strokeStyle = C.out; ctx.stroke(circ(x, y, r)); flat(ctx, circ(x - 1, y - 1, 1.2), C.s5, false); }
+const dir = a => [Math.sin(a * R), Math.cos(a * R)];   // 0=아래, 90=앞(오른쪽), 180=위
+
+// ───────── 부위 ─────────
+const THIGH = 42, SHIN = 40, FOOT = 12, UARM = 38, FARM = 36;
+
+function leg(ctx, P, side) {
+  const back = side === 'b', a = back ? P.legB : P.legF, k = back ? P.kneeB : P.kneeF, S = back ? STEEL_B : STEEL;
+  ctx.save(); ctx.translate(back ? -16 : 16, 6); rot(ctx, -a * R);
+  cel(ctx, rr(-15, -6, 30, THIGH + 4, 9), S);                                  // 허벅지 판금
+  ln(ctx, -6, 4, -6, THIGH - 6, 3, back ? C.s2 : C.s4);
+  ctx.translate(0, THIGH); rot(ctx, k * R);
+  cel(ctx, rr(-12, 0, 24, SHIN + 2, 7), S);                                     // 정강이
+  ln(ctx, -4, 8, -4, SHIN - 4, 3, back ? C.s2 : C.s4);
+  cel(ctx, circ(0, 0, 13), back ? STEEL_B : { d: C.s2, m: C.s3, l: C.s4 });     // 무릎 덮개
+  ctx.translate(0, SHIN); rot(ctx, (a - k) * R);                                // 발은 항상 땅과 수평
+  cel(ctx, poly([[-15, -4], [12, -4], [30, 4], [32, FOOT], [-15, FOOT]]), S, 4); // 철 신발
+  ln(ctx, 2, -3, 2, FOOT - 1, 2, C.out);
+  ctx.restore(); LIGHT += (a * R) - (k * R) - ((a - k) * R);
+}
+function legEnd(a, k, hx) {   // 발바닥 위치 (몸 높이 계산용)
+  const [tx, ty] = dir(a), [sx, sy] = dir(a - k);
+  return { x: hx + tx * THIGH + sx * SHIN, y: 6 + ty * THIGH + sy * SHIN + FOOT };
+}
+
+function torso(ctx) {
+  // 튜닉 치마
+  cel(ctx, poly([[-38, -8], [38, -8], [46, 34], [8, 30], [0, 38], [-8, 30], [-46, 34]]), { d: C.p0, m: C.p1, l: C.p2 }, 5);
+  ln(ctx, -20, 2, -24, 30, 2, C.p0); ln(ctx, 22, 2, 26, 30, 2, C.p0);
+  // 허리 판금 2단
+  cel(ctx, rr(-42, -34, 84, 14, 5), STEEL);
+  cel(ctx, rr(-40, -46, 80, 14, 5), STEEL);
+  // 벨트 + 버클
+  cel(ctx, rr(-44, -22, 88, 15, 3), { d: C.l0, m: C.l1, l: C.l2 }, 4);
+  cel(ctx, rr(6, -25, 20, 21, 3), { d: C.g0, m: C.g1, l: C.g2 }, 4);
+  flat(ctx, rr(12, -19, 8, 9, 1), C.l0, false);
+  // 흉갑
+  const chest = new Path2D(); chest.moveTo(-40, -44); chest.lineTo(-46, -80); chest.quadraticCurveTo(-30, -100, 0, -102);
+  chest.quadraticCurveTo(32, -100, 46, -80); chest.lineTo(40, -44); chest.quadraticCurveTo(0, -36, -40, -44); chest.closePath();
+  cel(ctx, chest, { d: C.s2, m: C.s3, l: C.s4 }, 8);
+  ln(ctx, 4, -98, 4, -46, 3, C.s1); ln(ctx, 1, -96, 1, -48, 2, C.s5);            // 가운데 능선
+  ctx.beginPath(); ctx.moveTo(-30, -60); ctx.quadraticCurveTo(0, -52, 32, -60); ctx.lineWidth = 2; ctx.strokeStyle = C.s1; ctx.stroke();
+  // 목가리개
+  cel(ctx, rr(-24, -112, 50, 14, 5), STEEL_B);
+}
+
+function helmet(ctx, P) {
+  ctx.save(); ctx.translate(8 + P.hx, -104 + P.hy); rot(ctx, P.hr * R);
+  const shell = new Path2D(); shell.moveTo(-38, 0); shell.lineTo(-40, -58); shell.quadraticCurveTo(-38, -92, 0, -94);
+  shell.quadraticCurveTo(38, -92, 42, -60); shell.lineTo(44, -6); shell.quadraticCurveTo(0, 6, -38, 0); shell.closePath();
+  cel(ctx, shell, STEEL, 8);
+  // 앞면 판(빛 받는 면)
+  const face = new Path2D(); face.moveTo(2, -84); face.quadraticCurveTo(34, -82, 40, -58); face.lineTo(42, -8); face.quadraticCurveTo(20, -2, 4, -4); face.closePath();
+  cel(ctx, face, { d: C.s2, m: C.s3, l: C.s4 }, 7);
+  ln(ctx, 6, -80, 6, -8, 3, C.s5);
+  // 십자 눈구멍
+  flat(ctx, rr(8, -56, 38, 9, 2), C.k);
+  flat(ctx, rr(20, -50, 9, 34, 2), C.k);
+  // 숨구멍
+  [[34, -34], [34, -24], [39, -29]].forEach(([x, y]) => flat(ctx, circ(x, y, 2.5), C.k, false));
+  // 옆면 리벳 띠
+  ln(ctx, -36, -62, 0, -64, 4, C.s1);
+  [-30, -20, -10].forEach(x => rivet(ctx, x, -63));
+  rivet(ctx, -24, -20); rivet(ctx, -10, -18);
+  ctx.restore(); LIGHT -= P.hr * R;
+}
+
+function pauldron(ctx) {
+  cel(ctx, ell(-36, -46, 28, 13), STEEL_B, 5);
+  cel(ctx, ell(-34, -70, 32, 27), { d: C.s2, m: C.s3, l: C.s4 }, 9);
+  flat(ctx, ell(-44, -80, 9, 6), C.s5, false);
+  rivet(ctx, -22, -56);
+}
+
+function swordArm(ctx, P, withSword = true) {
+  ctx.save(); ctx.translate(-32, -76); rot(ctx, -P.uA * R);
+  cel(ctx, rr(-11, -4, 22, UARM + 6, 8), STEEL);                                 // 위팔
+  ctx.translate(0, UARM); rot(ctx, -(P.fA - P.uA) * R);
+  cel(ctx, rr(-10, 0, 20, FARM - 4, 7), STEEL);                                  // 아래팔
+  cel(ctx, circ(0, 0, 11), { d: C.s2, m: C.s3, l: C.s4 });                        // 팔꿈치
+  ctx.translate(0, FARM);
+  if (withSword) {
+    ctx.save(); rot(ctx, -(P.sw - P.fA) * R);
+    // 손잡이·폼멜
+    cel(ctx, rr(-5, -32, 10, 34, 3), { d: C.l0, m: C.l1, l: C.l2 }, 3);
+    [-26, -18, -10].forEach(y => ln(ctx, -5, y, 5, y + 3, 2, C.l0));
+    cel(ctx, circ(0, -36, 7), { d: C.g0, m: C.g1, l: C.g2 }, 3);
+    // 칼날
+    cel(ctx, poly([[-8, 8], [8, 8], [8, 118], [0, 136], [-8, 118]]), { d: C.b0, m: C.b1, l: C.b2 }, 4);
+    ln(ctx, 0, 12, 0, 112, 3, C.b0);
+    ln(ctx, -6, 12, -6, 116, 2, C.s5);
+    // 가드
+    cel(ctx, rr(-26, -2, 52, 11, 4), { d: C.g0, m: C.g1, l: C.g2 }, 4);
+    ctx.restore(); LIGHT += (P.sw - P.fA) * R;
+  }
+  cel(ctx, rr(-12, -10, 24, 20, 6), { d: C.s2, m: C.s3, l: C.s4 }, 5);           // 건틀릿(칼자루를 감쌈)
+  ln(ctx, -8, -2, 8, -2, 2, C.s1);
+  ctx.restore(); LIGHT += (P.uA * R) + (P.fA - P.uA) * R;
+}
+
+function shield(ctx, P) {
+  ctx.save(); ctx.translate(26 + P.shX, -96 + P.shY);
+  const w = 106, h = 176;
+  const body = new Path2D(); body.moveTo(6, 10); body.quadraticCurveTo(w / 2, -8, w, 6); body.lineTo(w - 2, h - 26);
+  body.quadraticCurveTo(w / 2, h + 6, 4, h - 22); body.closePath();
+  // 옆 두께
+  const side = new Path2D(); side.moveTo(6, 10); side.lineTo(-6, 16); side.lineTo(-8, h - 28); side.lineTo(4, h - 22); side.closePath();
+  cel(ctx, side, STEEL_B, 4);
+  cel(ctx, body, { d: C.s1, m: C.s2, l: C.s3 }, 10);
+  // 테두리 안쪽 선 + 리벳
+  ctx.save(); ctx.clip(body); ctx.lineWidth = 3; ctx.strokeStyle = C.s4;
+  ctx.beginPath(); ctx.moveTo(16, 16); ctx.quadraticCurveTo(w / 2, 2, w - 10, 14); ctx.lineTo(w - 12, h - 32); ctx.quadraticCurveTo(w / 2, h - 8, 14, h - 30); ctx.closePath(); ctx.stroke();
+  ln(ctx, 12, 14, 10, h - 28, 4, C.s4);
+  ctx.restore();
+  [[18, 22], [w - 14, 20], [16, h / 2], [w - 16, h / 2], [20, h - 36], [w - 18, h - 38], [w / 2, 10], [w / 2, h - 18]].forEach(([x, y]) => rivet(ctx, x, y, 4));
+  // 가운데 세로 능선 + 방패 보스(황동)
+  ln(ctx, w / 2 + 4, 20, w / 2 + 4, h - 22, 4, C.s1);
+  cel(ctx, circ(w / 2 + 6, h / 2 - 4, 22), { d: C.l0, m: C.l1, l: C.l2 }, 5);
+  cel(ctx, circ(w / 2 + 6, h / 2 - 4, 13), { d: C.g0, m: C.g1, l: C.g2 }, 5);
+  flat(ctx, circ(w / 2 + 2, h / 2 - 9, 4), C.g2, false);
+  ctx.restore();
+}
+
+// ───────── 한 장면 그리기 ─────────
+function drawKnight(ctx, P) {
+  LIGHT = 0;
+  const lb = legEnd(P.legB, P.kneeB, -16), lf = legEnd(P.legF, P.kneeF, 16);
+  const oy = GROUND - Math.max(lb.y, lf.y), ox = ROOTX + P.dx;   // 땅에 닿는 발 기준 (점프 없음)
+  const up = P.dy;   // 숨쉬기·흔들림은 상체만 (발은 땅에 고정)
+  ctx.save(); ctx.translate(Math.round(ox), Math.round(oy));
+  // 순서(뒤→앞): 뒷다리, 몸통, 앞다리, 검 든 팔(원본처럼 칼날이 다리 앞을 지남), 어깨갑, 투구, 방패 / 내려벨 때는 검이 방패 앞
+  leg(ctx, P, 'b');
+  ctx.save(); ctx.translate(0, up); rot(ctx, P.lean * R); torso(ctx); ctx.restore(); LIGHT = 0;
+  leg(ctx, P, 'f');
+  ctx.save(); ctx.translate(0, up); rot(ctx, P.lean * R);
+  if (!P.front) swordArm(ctx, P);
+  pauldron(ctx);
+  helmet(ctx, P);
+  shield(ctx, P);
+  if (P.front) swordArm(ctx, P);
+  ctx.restore(); LIGHT = 0;
+  ctx.restore();
+}
+
+// 팔레트로 딱 떨어지게: 반투명 가장자리 제거 + 섞인 중간색을 가장 가까운 팔레트 색으로
+const cache = new Map();
+function nearest(r, g, b) {
+  const key = (r << 16) | (g << 8) | b; let v = cache.get(key); if (v) return v;
+  let best = 1e9; for (const p of PAL) { const d = (p[0] - r) ** 2 * 3 + (p[1] - g) ** 2 * 4 + (p[2] - b) ** 2 * 2; if (d < best) { best = d; v = p; } }
+  cache.set(key, v); return v;
+}
+function quantize(cv) {
+  const ctx = cv.getContext('2d'), id = ctx.getImageData(0, 0, cv.width, cv.height), d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 110) { d[i + 3] = 0; continue; }
+    const p = nearest(d[i], d[i + 1], d[i + 2]); d[i] = p[0]; d[i + 1] = p[1]; d[i + 2] = p[2]; d[i + 3] = 255;
+  }
+  ctx.putImageData(id, 0, 0); return cv;
+}
+// px=2면 절반 해상도로 그려 두 배로 보여줌 (도트가 굵어짐)
+function renderFrame(P, px) {
+  const cv = document.createElement('canvas'); cv.width = W / px; cv.height = H / px;
+  const ctx = cv.getContext('2d'); ctx.scale(1 / px, 1 / px); drawKnight(ctx, P);
+  return quantize(cv);
+}
+
+// ───────── 동작 (키프레임, 각도는 도) ─────────
+const BASE = { lean: 0, dx: 0, dy: 0, hx: 0, hy: 0, hr: 0, uA: -10, fA: 20, sw: 62, shX: 0, shY: 0,
+  legB: -6, kneeB: 4, legF: 8, kneeF: 4, front: 0 };
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const COMBAT = { lean: 4, uA: 30, fA: 95, sw: 150, shX: 6, shY: -10, legB: -16, kneeB: 10, legF: 20, kneeF: 16 };
+const STRIKE = { ...COMBAT, lean: 10, dx: 30, uA: 80, fA: 92, sw: 100, shX: -26, shY: 26, legB: -30, kneeB: 6, legF: 34, kneeF: 12, front: 1 };
+const MOTIONS = {
+  idle:   { name: '대기',     dur: 2400, loop: true, keys: [[0, {}], [.5, { dy: 3, hy: 1, sw: 64, shY: 3, fA: 22 }], [1, {}]] },
+  combat: { name: '전투대기', dur: 1600, loop: true, keys: [[0, COMBAT], [.5, { ...COMBAT, lean: 6, dy: 4, sw: 146, shY: -7 }], [1, COMBAT]] },
+  run:    { name: '달리기',   dur: 1000, loop: true, fn: t => {
+            const s = Math.sin(t * Math.PI * 2);
+            return { lean: 7, legB: -26 * s, legF: 26 * s, kneeB: 8 + 22 * Math.max(0, s), kneeF: 8 + 22 * Math.max(0, -s),
+                     uA: -8 + 14 * s, fA: 22 + 16 * s, sw: 60 + 8 * s, shY: 4 * Math.abs(s) - 4, hy: 2 * Math.abs(s) }; } },
+  hit:    { name: '피격',     dur: 560,  loop: false, keys: [[0, COMBAT],
+            [.18, { ...COMBAT, lean: -10, dx: -24, hx: -6, hy: 6, hr: -8, shX: -14, shY: 8, uA: -30, fA: 10, sw: 50, legF: 30, kneeF: 22, legB: -10 }],
+            [.5, { ...COMBAT, lean: -6, dx: -14, hr: -3, shX: -6, uA: -10, fA: 40, sw: 90 }], [1, COMBAT]] },
+  attack: { name: '공격',     dur: 840,  loop: false, hit: .5, keys: [[0, COMBAT],
+            [.32, { ...COMBAT, lean: -5, dx: -6, uA: 160, fA: 190, sw: 222, shX: 0, shY: -4, legF: 14 }],
+            [.5, STRIKE],
+            [.64, { ...STRIKE, lean: 8, uA: 66, fA: 78, sw: 90 }],
+            [1, COMBAT]] },
+};
+function poseAt(m, t) {
+  if (m.fn) return { ...BASE, ...m.fn(t) };
+  const k = m.keys; let i = 0; while (i < k.length - 2 && t > k[i + 1][0]) i++;
+  const [t0, a] = k[i], [t1, b] = k[i + 1], u = ease(Math.min(1, Math.max(0, (t - t0) / (t1 - t0))));
+  const A = { ...BASE, ...a }, B = { ...BASE, ...b }, P = {};
+  for (const key in BASE) P[key] = key === 'front' ? (u < .5 ? A.front : B.front) : A[key] + (B[key] - A[key]) * u;
+  return P;
+}
+const nFrames = m => Math.max(2, Math.round(m.dur / 1000 * FPS));
+const framesOf = (id, px) => { const m = MOTIONS[id], n = nFrames(m); return Array.from({ length: n }, (_, i) => renderFrame(poseAt(m, m.loop ? i / n : i / (n - 1)), px)); };
+
+// ───────── 화면 ─────────
+const BGS = [['#1d2233', '#3b3346', '#2a3044'], ['#3c5a3a', '#5b4a3a', '#4b6e45'], null];
+let bgi = 0, slow = 1, px = 1, bigId = 'attack', FR = {};
+const cards = [], minis = [];
+function paintBg(ctx, w, h, g) {
+  const bg = BGS[bgi]; if (!bg) return;
+  ctx.fillStyle = bg[0]; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = bg[1]; ctx.fillRect(0, g, w, h - g); ctx.fillStyle = bg[2]; ctx.fillRect(0, g, w, 3);
+}
+function build() { cache.clear(); for (const id in MOTIONS) FR[id] = framesOf(id, px); }
+const gridEl = document.getElementById('grid'), miniEl = document.getElementById('mini'), pick = document.getElementById('pick');
+const bigcv = document.getElementById('bigcv'); bigcv.width = W; bigcv.height = H; const bigctx = bigcv.getContext('2d');
+for (const id in MOTIONS) {
+  const m = MOTIONS[id], card = document.createElement('div'); card.className = 'card';
+  card.innerHTML = `<h2>${m.name} <span>${nFrames(m)}프레임 · ${m.dur}ms${m.loop ? ' · 반복' : ''}</span></h2>`;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; card.appendChild(cv); gridEl.appendChild(card);
+  cards.push({ id, ctx: cv.getContext('2d') });
+  card.onclick = () => setBig(id);
+  const b = document.createElement('button'); b.textContent = m.name; b.onclick = () => setBig(id); b.dataset.id = id; pick.appendChild(b);
+  const mc = document.createElement('canvas'); const s = 50 / 262; mc.width = Math.round(W * s); mc.height = Math.round(H * s); mc.title = m.name; miniEl.appendChild(mc);
+  minis.push({ id, ctx: mc.getContext('2d'), s });
+}
+function setBig(id) { bigId = id; document.getElementById('bigname').textContent = MOTIONS[id].name; pick.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.id === id)); }
+setBig('attack'); build();
+const t0 = performance.now();
+function frameIdx(id, now) {
+  const m = MOTIONS[id], f = FR[id], period = m.dur * slow + (m.loop ? 0 : 600 * slow);
+  return Math.min(f.length - 1, Math.floor(((now - t0) % period) / (m.dur * slow) * f.length));
+}
+function draw(ctx, id, now, w, h) {
+  ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, w, h); paintBg(ctx, w, h, GROUND * h / H);
+  ctx.drawImage(FR[id][frameIdx(id, now)], 0, 0, w, h);
+}
+function tick(now) {
+  draw(bigctx, bigId, now, W, H);
+  for (const c of cards) draw(c.ctx, c.id, now, W, H);
+  for (const m of minis) { m.ctx.imageSmoothingEnabled = true; m.ctx.clearRect(0, 0, 999, 999); m.ctx.drawImage(FR[m.id][frameIdx(m.id, now)], 0, 0, W * m.s, H * m.s); }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+document.getElementById('slow').onclick = e => { slow = slow === 1 ? 3 : 1; e.target.classList.toggle('on', slow === 3); };
+document.getElementById('px').onclick = e => { px = px === 1 ? 2 : 1; e.target.classList.toggle('on', px === 2); build(); };
+document.getElementById('bg').onclick = () => { bgi = (bgi + 1) % BGS.length; };
+// 시트 저장: 동작별 가로 띠 PNG (프레임 460×350, 투명 배경)
+document.getElementById('exp').onclick = () => {
+  for (const id in FR) {
+    const f = FR[id], cv = document.createElement('canvas'); cv.width = W * f.length; cv.height = H;
+    const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; f.forEach((fr, i) => ctx.drawImage(fr, i * W, 0, W, H));
+    const a = document.createElement('a'); a.download = `pixel_knight_${id}.png`; a.href = cv.toDataURL(); a.click();
+  }
+};
+window.__pk = { MOTIONS, FR, poseAt, renderFrame };
+</script>
+</body>
+</html>

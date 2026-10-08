@@ -54,8 +54,9 @@ Object.assign(VFX, {
   // 타격 프레임까지의 지연(ms) — 모션 없이 이펙트 타이밍만 맞출 때 사용
   // u를 넘기면 그 유닛의 스프라이트 시트 타격 시점을 우선 사용
   atkHitDelay(cls, u) {
-    const sh = u && Rig.sheet(u, 'attack'); if (sh) return Rig.sheetHitMs(sh);
-    const m = this.atkMotion(cls); return Math.round(m.dur * m.hit);
+    const fl = (typeof PixelFX !== 'undefined' && PixelFX.FLIGHT[cls]) || 0;   // 픽셀 투사체 비행 시간만큼 명중이 늦음
+    const sh = u && Rig.sheet(u, 'attack'); if (sh) return Rig.sheetHitMs(sh) + fl;
+    const m = this.atkMotion(cls); return Math.round(m.dur * m.hit) + fl;
   },
 
   // 공격자 화면 좌표 기준 방향 벡터 (정규화)
@@ -100,7 +101,8 @@ Object.assign(VFX, {
       icon._atkAnim = anim;
     }
     // 자체 무기 궤적(smear)이 있는 리그는 canvas 궤적 생략 — 투사체(마법·화살 등)는 그대로
-    if (!(icon && icon._rig && icon._rig.def.smear)) this._atkTrail(m, attacker, target, dir, face, hitMs);
+    // 픽셀 투사체 직업(궁수·마법사)은 vfxAtk에서 PixelFX가 쏨
+    if (!(icon && icon._rig && icon._rig.def.smear) && !PixelFX.handles(attacker.cls)) this._atkTrail(m, attacker, target, dir, face, hitMs);
     return hitMs;
   },
 

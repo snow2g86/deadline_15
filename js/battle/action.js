@@ -345,7 +345,7 @@ const ActionManager = {
     }
 
     const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
-    let sup = null;
+    let sup = null, hd = VFX.atkHitDelay(a.cls, a), supAt = 380, ctrAt = 420;
     if (bCounter) {
       setTimeout(() => {
         const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def);
@@ -373,14 +373,17 @@ const ActionManager = {
       if (a._lastCrit) { Renderer.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); VFX.screenShake(); }
       if (a.furyBuff > 0) Renderer.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
       procFury(a, tgt, G);
+      // 후속 연출 시점: 공격이 실제로 맞는 순간(시트 타격 프레임 + 투사체 비행) 뒤로 맞춤
+      supAt = Math.max(380, hd + 140); ctrAt = Math.max(420, hd + 180);
       // 지원 공격: 대상 옆의 클랜원이 확률로 추가 타격 (반격보다 먼저)
       sup = UnitManager.rollSupport(a, tgt);
+      if (sup) ctrAt += 400;
       if (sup) {
         this._grantExp(sup.sp, 'attack');
         setTimeout(() => {
           UnitManager.emitSupport(sup);
           if (tgt.hp <= 0) EventBus.emit('unit_killed', { killer: sup.sp, target: tgt });
-        }, 380);
+        }, supAt);
       }
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0)) {
         setTimeout(() => {
@@ -389,26 +392,27 @@ const ActionManager = {
           const da = applyDmgToAlly(a, cdmg, G);
           EventBus.emit('unit_attacked', { attacker: tgt, target: da, damage: cdmg, isCounter: true });
           procFury(tgt, a, G);
-        }, sup ? 820 : 420);
+        }, ctrAt);
       }
     }
 
     a.ha = true; a.hm = true;
     Renderer.hideAM();
     const extra = sup ? 450 : 0; // 지원 공격 연출 시간
+    const endHit = Math.max(650, hd + 350) + extra;   // 처치 연출이 끝난 뒤 정리
 
     if (tgt.hp <= 0) {
       if (!sup) EventBus.emit('unit_killed', { killer: a, target: tgt }); // 지원 공격 처치는 위에서 처리
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
+      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, endHit);
     } else if (a.hp <= 0) {
       EventBus.emit('unit_killed', { killer: tgt, target: a });
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
+      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + VFX.atkHitDelay(tgt.cls, tgt) + 250));
     } else {
       const canCounter = tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0);
       if (canCounter) {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 650 + extra);
+        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + VFX.atkHitDelay(tgt.cls, tgt) + 250));
       } else {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, 500 + extra);
+        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(500, hd + 300) + extra);
       }
     }
   },

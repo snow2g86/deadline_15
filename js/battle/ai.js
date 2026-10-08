@@ -419,6 +419,8 @@ const AI = {
     const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1
       && !UnitManager.isCC(tgt) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
     let supKiller = null;
+    // 후속 연출(지원·반격·사망 처리)은 공격이 실제로 맞는 순간(시트 타격 프레임 + 투사체 비행) 뒤로
+    const hd = VFX.atkHitDelay(a.cls, a), t0 = performance.now();
 
     if (bCounter) {
       await sl(420);
@@ -452,11 +454,11 @@ const AI = {
 
       // 지원 공격 (대상 옆의 같은 편이 확률로 추가 타격)
       const sup = UnitManager.rollSupport(a, tgt);
-      if (sup) { await sl(380); UnitManager.emitSupport(sup); if (tgt.hp <= 0) supKiller = sup.sp; }
+      if (sup) { await sl(Math.max(380, hd + 140)); UnitManager.emitSupport(sup); if (tgt.hp <= 0) supKiller = sup.sp; }
 
       // 반격
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !UnitManager.isCC(tgt)) {
-        await sl(420);
+        await sl(Math.max(420, hd + 180 - (performance.now() - t0)));
         const cdmg = calcDmg(tgt, a);
         a.hp = Math.max(0, a.hp - cdmg);
         EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
@@ -464,7 +466,9 @@ const AI = {
       }
     }
 
-    // 사망 처리
+    // 사망 처리 — 투사체가 아직 날아가는 중이면 맞을 때까지 기다렸다가 정리
+    const left = hd + 120 - (performance.now() - t0);
+    if (tgt.hp <= 0 && left > 0) await sl(left);
     if (tgt.hp <= 0) {
       EventBus.emit('unit_killed', { killer: supKiller || a, target: tgt });
       UnitManager.rmDead();

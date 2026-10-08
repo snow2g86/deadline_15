@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel VFX</title>
+<!-- 개발용: 코드로 그리는 픽셀 투사체·임팩트 샘플 (궁수 화살 / 마법사 마탄)
+     이펙트는 2px 도트 격자(논리 해상도 = 화면의 1/2)에 고정 팔레트로만 그림. 위치·이동은 60Hz로 계산, 임팩트 프레임은 15fps로 끊음.
+     캐릭터 몸에는 아무것도 붙이지 않고 투사체 경로·대상 칸에만 표시 -->
+<style>
+:root{--bg:#0e1018;--card:#171b27;--line:#2a3042;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:20px 16px}
+h1{font-size:18px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 12px;font-size:13px;max-width:900px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.row b{font-weight:500;color:var(--sub);font-size:12px;margin-right:2px}
+button{background:transparent;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit;font-size:13px}
+button:hover,button.on{border-color:var(--acc);color:var(--acc)}
+.stage{position:relative;width:100%;max-width:960px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;transform-origin:45% 72%;transition:transform .2s}
+.stage.zoom canvas{transform:scale(2)}
+#fx{image-rendering:pixelated}
+.note{color:var(--sub);font-size:12px;margin-top:8px;max-width:960px}
+</style>
+</head>
+<body>
+<h1>픽셀 투사체·임팩트 샘플 — 궁수 / 마법사</h1>
+<p class="lead">기존 점 스파크 대신 실제 모양의 도트 투사체(화살·마탄)가 날아가고, 대상 칸에서 4~7프레임 도트 임팩트가 터집니다. 화면 크기는 실제 전투 기준(칸 폭 64px)의 1.5배입니다.</p>
+<div class="row">
+  <b>공격</b><button data-shot="archer">🏹 궁수</button><button data-shot="mage">🔮 마법사</button><button id="auto" class="on">자동 반복</button>
+</div>
+<div class="row">
+  <b>거리</b><button data-d="2">2칸</button><button data-d="4" class="on">4칸</button><button data-d="6">6칸</button>
+  <b style="margin-left:10px">보기</b><button id="slow">느리게(×4)</button><button id="zoom">확대(×2)</button>
+</div>
+<div class="stage"><canvas id="bg" width="640" height="360"></canvas><canvas id="fx" width="320" height="180"></canvas></div>
+<p class="note">궁수: 활 앞에서 화살이 포물선으로 날아가며(화살촉이 진행 방향을 향함) 짧은 바람 꼬리를 남기고, 맞으면 섬광 → 방사형 불꽃 → 나무 조각이 튀며 사라집니다.<br>
+마법사: 지팡이 끝에 작은 구슬이 모였다가 마탄이 직선으로 날아가며 푸른 잔광을 흘리고, 맞으면 원형 충격파가 퍼지며 파편이 흩어집니다.</p>
+<script>
+// ───────── 기본 ─────────
+const P = 2, LW = 320, LH = 180, TILE = 32, GROUND = 128;   // 논리 좌표(1 = 화면 2px)
+const fx = document.getElementById('fx').getContext('2d'), bg = document.getElementById('bg').getContext('2d');
+const COL = {
+  w: '#ffffff', y0: '#fff6d5', y1: '#ffd75e', y2: '#f59e0b', y3: '#b45309', br: '#8a5a2b', bd: '#3b2a1a',
+  sh0: '#d9ad6c', sh1: '#8a5a30', hd0: '#eef2fa', hd1: '#9aa3b8', fl0: '#f1ece0', fl1: '#c0392b',
+  m0: '#ffffff', m1: '#c9f1ff', m2: '#6fd3ff', m3: '#3b82f6', m4: '#4338ca', m5: '#1e1b4b',
+};
+const px = (x, y, c) => { fx.fillStyle = c; fx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+
+// ───────── 파티클 풀 (미리 할당, 루프 안에서 객체 생성 없음) ─────────
+const N = 256, pX = new Float32Array(N), pY = new Float32Array(N), pVX = new Float32Array(N), pVY = new Float32Array(N),
+  pLife = new Float32Array(N), pMax = new Float32Array(N), pG = new Float32Array(N), pPal = new Uint8Array(N), pOn = new Uint8Array(N);
+const PALS = [
+  [COL.y0, COL.y1, COL.y2, COL.y3, COL.bd],          // 0 불꽃(궁수)
+  [COL.sh0, COL.br, COL.br, COL.bd],                  // 1 나무 조각
+  [COL.m0, COL.m1, COL.m2, COL.m3, COL.m4, COL.m5],   // 2 마력
+  [COL.y1, COL.y2, COL.y3],                            // 3 바람 꼬리
+];
+function emit(x, y, vx, vy, life, pal, g = 0) {
+  for (let i = 0; i < N; i++) if (!pOn[i]) { pOn[i] = 1; pX[i] = x; pY[i] = y; pVX[i] = vx; pVY[i] = vy; pLife[i] = pMax[i] = life; pPal[i] = pal; pG[i] = g; return; }
+}
+function stepParts() {
+  for (let i = 0; i < N; i++) if (pOn[i]) {
+    pX[i] += pVX[i]; pY[i] += pVY[i]; pVY[i] += pG[i]; pVX[i] *= .94; pVY[i] *= .94;
+    if (pY[i] > GROUND + 4 && pG[i]) { pY[i] = GROUND + 4; pVY[i] *= -.3; pVX[i] *= .5; }
+    if (--pLife[i] <= 0) pOn[i] = 0;
+  }
+}
+function drawParts() {
+  for (let i = 0; i < N; i++) if (pOn[i]) {
+    const pal = PALS[pPal[i]], k = Math.min(pal.length - 1, Math.floor((1 - pLife[i] / pMax[i]) * pal.length));
+    px(pX[i], pY[i], pal[k]);   // 수명에 따라 밝은색 → 어두운색으로 한 칸씩
+  }
+}
+
+// ───────── 장면 (실제 캐릭터 그림) ─────────
+const IMG = {}; ['archer_01', 'mage_01', 'warrior_02'].forEach(k => { IMG[k] = new Image(); IMG[k].src = '../image/character/' + k + '.png'; });
+let dist = 4, shooter = 'archer', slow = 1, auto = true;
+const AX = 40;                                   // 공격자 칸 중심 x(논리)
+const tgtX = () => AX + dist * TILE;
+let shakeT = 0;
+function drawScene() {
+  bg.imageSmoothingEnabled = true;
+  bg.fillStyle = '#1a2230'; bg.fillRect(0, 0, 640, 360);
+  for (let i = 0; i < 10; i++) {                  // 바닥 칸
+    bg.fillStyle = i % 2 ? '#3f5a35' : '#46633b'; bg.fillRect((AX - 16 + i * TILE) * P, GROUND * P, TILE * P, 70);
+    bg.fillStyle = '#2f4529'; bg.fillRect((AX - 16 + i * TILE) * P, GROUND * P + 70, TILE * P, 120);
+  }
+  const ch = (k, x, flip, dx = 0) => {
+    const im = IMG[k]; if (!im.complete || !im.naturalWidth) return;
+    const h = 60, w = im.naturalWidth / im.naturalHeight * h;
+    bg.save(); bg.translate(x * P + dx, GROUND * P + 6); if (flip) bg.scale(-1, 1); bg.drawImage(im, -w / 2, -h, w, h); bg.restore();
+  };
+  ch(shooter === 'archer' ? 'archer_01' : 'mage_01', AX, false);
+  ch('warrior_02', tgtX(), true, shakeT > 0 ? (shakeT % 4 < 2 ? 3 : -3) : 0);   // 맞으면 대상만 살짝 흔들림
+}
+
+// ───────── 화살 ─────────
+// 각도에 맞춰 픽셀을 찍어 그림 (회전 이미지 없음 → 항상 또렷한 도트)
+function drawArrow(x, y, ang) {
+  const c = Math.cos(ang), s = Math.sin(ang);
+  for (let i = 0; i < 10; i++) px(x - c * i, y - s * i, i % 3 ? COL.sh0 : COL.sh1);          // 화살대
+  px(x + c, y + s, COL.hd0); px(x + c * 2, y + s * 2, COL.hd0);                                // 화살촉
+  px(x - s, y + c, COL.hd1); px(x + s, y - c, COL.hd1);
+  for (let i = 8; i < 11; i++) { px(x - c * i - s, y - s * i + c, i === 9 ? COL.fl1 : COL.fl0); px(x - c * i + s, y - s * i - c, i === 9 ? COL.fl1 : COL.fl0); }  // 깃
+}
+// 궁수 임팩트 6프레임: 섬광 → 방사 불꽃 → 끝만 남음 → 사라짐 (+나무 조각 파티클)
+function archerImpact(cx, cy, f) {
+  const sp = [[1, 0], [-1, 0], [0, 1], [0, -1], [.7, .7], [-.7, .7], [.7, -.7], [-.7, -.7]];
+  if (f === 0) { for (let d = -2; d <= 2; d++) { px(cx + d, cy, COL.w); px(cx, cy + d, COL.w); } px(cx + 1, cy + 1, COL.y0); px(cx - 1, cy - 1, COL.y0); }
+  if (f === 1) { px(cx, cy, COL.w); sp.forEach(([a, b], j) => { const L = j < 4 ? 4 : 3; for (let r = 2; r <= L; r++) px(cx + a * r, cy + b * r, r === L ? COL.y1 : COL.y0); }); }
+  if (f === 2) sp.forEach(([a, b], j) => { const L = j < 4 ? 7 : 5; for (let r = 4; r <= L; r++) px(cx + a * r, cy + b * r, r === L ? COL.y2 : COL.y1); });
+  if (f === 3) sp.forEach(([a, b], j) => { const L = j < 4 ? 8 : 6; px(cx + a * L, cy + b * L, COL.y2); px(cx + a * (L - 1), cy + b * (L - 1), COL.y3); });
+  if (f === 4) sp.forEach(([a, b], j) => { if (j < 4) px(cx + a * 9, cy + b * 9, COL.y3); });
+}
+
+// ───────── 마탄 ─────────
+const ORB = ['..bbb..', '.bcccb.', 'bcwwwcb', 'bcwwwcb', 'bcwwwcb', '.bcccb.', '..bbb..'],
+      ORB2 = ['...b...', '.bbcbb.', '.ccwcc.', 'bcwwwcb', '.ccwcc.', '.bbcbb.', '...b...'];
+function drawOrb(x, y, t) {
+  const g = (t >> 2) % 2 ? ORB : ORB2;           // 반짝임: 두 모양 번갈아
+  const m = { w: COL.m0, c: COL.m1, b: COL.m3 };
+  for (let j = 0; j < 7; j++) for (let i = 0; i < 7; i++) { const ch = g[j][i]; if (ch !== '.') px(x - 3 + i, y - 3 + j, m[ch]); }
+}
+// 지팡이 끝 모으기 (작게, 4프레임): 바깥 점 4개가 돌며 안으로 → 구슬이 커짐
+function mageCharge(x, y, f, n) {
+  const r = 7 - f * 1.6;
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + f * .7; px(x + Math.cos(a) * r, y + Math.sin(a) * r, f < 2 ? COL.m2 : COL.m1); }
+  px(x, y, COL.m0); if (f >= 2) { px(x + 1, y, COL.m1); px(x - 1, y, COL.m1); px(x, y + 1, COL.m1); px(x, y - 1, COL.m1); }
+}
+// 미드포인트 원 (1px 테두리)
+function ring(cx, cy, r, c) {
+  let x = r, y = 0, e = 1 - r;
+  while (x >= y) {
+    [[x, y], [y, x], [-y, x], [-x, y], [-x, -y], [-y, -x], [y, -x], [x, -y]].forEach(([a, b]) => px(cx + a, cy + b, c));
+    y++; if (e < 0) e += 2 * y + 1; else { x--; e += 2 * (y - x) + 1; }
+  }
+}
+// 마법사 임팩트 7프레임: 흰 섬광 → 충격파 원이 커지며 색이 식음
+function mageImpact(cx, cy, f) {
+  const R = [2, 4, 7, 9, 11, 12, 13], C = [COL.m0, COL.m1, COL.m2, COL.m3, COL.m4, COL.m5, COL.m5];
+  if (f === 0) { for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) if (Math.abs(i) + Math.abs(j) <= 3) px(cx + i, cy + j, COL.m0); }
+  else if (f < 7) { ring(cx, cy, R[f], C[f]); if (f < 3) ring(cx, cy, R[f] - 2, COL.m0); if (f === 1) px(cx, cy, COL.m0); }
+}
+
+// ───────── 연출 진행 (60Hz 고정 간격) ─────────
+// 상태: 0 대기, 1 모으기(마법사), 2 비행, 3 임팩트
+let st = 0, tick = 0, wait = 30, fromX, fromY, toX, toY, flyT, flyDur, hx, hy, impF, trail = new Float32Array(12), tn = 0;
+function shoot(kind) {
+  shooter = kind; st = kind === 'mage' ? 1 : 2; tick = 0;
+  fromX = AX + 12; fromY = GROUND - (kind === 'mage' ? 26 : 16);   // 마법사는 지팡이 끝, 궁수는 활 앞
+  toX = tgtX() - 4; toY = GROUND - 15;                           // 대상 몸통 앞
+  flyDur = Math.max(10, Math.round((toX - fromX) / (kind === 'mage' ? 4.2 : 5.5))); flyT = 0; tn = 0;
+}
+function update() {
+  stepParts(); if (shakeT > 0) shakeT--;
+  tick++;
+  if (st === 0) { if (auto && --wait <= 0) { shoot(shooter === 'archer' ? 'mage' : 'archer'); } return; }
+  if (st === 1 && tick >= 16) { st = 2; tick = 0; }
+  if (st === 2) {
+    flyT++;
+    const k = flyT / flyDur, arc = shooter === 'archer' ? (toX - fromX) * .14 : 0;
+    hx = fromX + (toX - fromX) * k; hy = fromY + (toY - fromY) * k - arc * 4 * k * (1 - k);
+    if (shooter === 'mage') {   // 잔광: 진행하는 자리에 흩어지는 마력 입자
+      emit(hx - 3, hy + (Math.random() - .5) * 3, -.4 - Math.random() * .4, (Math.random() - .5) * .4, 14 + Math.random() * 8, 2);
+    } else { trail[(tn % 6) * 2] = hx; trail[(tn % 6) * 2 + 1] = hy; tn++; }
+    if (flyT >= flyDur) {
+      st = 3; tick = 0; impF = 0; shakeT = 12;
+      if (shooter === 'archer') for (let i = 0; i < 7; i++) emit(toX, toY, (Math.random() - .3) * 2.2, -Math.random() * 2.2 - .4, 26 + Math.random() * 12, i < 4 ? 1 : 0, .14);
+      else for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; emit(toX, toY, Math.cos(a) * 1.8, Math.sin(a) * 1.8, 18 + Math.random() * 10, 2); }
+    }
+  }
+  if (st === 3) { impF = Math.floor(tick / 4); if (impF > 8 && !anyParts()) { st = 0; wait = 40; } }  // 15fps = 4틱마다 한 프레임
+}
+const anyParts = () => { for (let i = 0; i < N; i++) if (pOn[i]) return true; return false; };
+function render() {
+  drawScene();
+  fx.clearRect(0, 0, LW, LH);
+  if (st === 1) mageCharge(fromX, fromY, Math.min(3, Math.floor(tick / 4)));
+  if (st === 2) {
+    if (shooter === 'archer') {
+      const k = flyT / flyDur, dk = 1 / flyDur, arc = (toX - fromX) * .14;
+      const vy = (toY - fromY) * dk - arc * 4 * (1 - 2 * k) * dk, vx = (toX - fromX) * dk, ang = Math.atan2(vy, vx);
+      // 바람 꼬리: 지난 6틱 위치를 화살 깃 뒤에 이어 찍음 (가까울수록 밝게)
+      const tc = Math.cos(ang) * 11, ts = Math.sin(ang) * 11;
+      for (let i = 1; i < Math.min(tn, 6); i++) {
+        const a = ((tn - 1 - i) % 6) * 2, b = ((tn - i) % 6) * 2, c = PALS[3][Math.min(2, i >> 1)];
+        for (let q = 0; q <= 4; q++) px(trail[a] + (trail[b] - trail[a]) * q / 4 - tc, trail[a + 1] + (trail[b + 1] - trail[a + 1]) * q / 4 - ts, c);
+      }
+      drawArrow(hx, hy, ang);
+    } else drawOrb(hx, hy, flyT);
+  }
+  if (st === 3) (shooter === 'archer' ? archerImpact : mageImpact)(toX, toY, impF);
+  drawParts();
+}
+let acc = 0, last = performance.now();
+function loop(now) {
+  acc += Math.min(100, now - last) / slow; last = now;
+  while (acc >= 1000 / 60) { update(); acc -= 1000 / 60; }
+  render(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+document.querySelectorAll('[data-shot]').forEach(b => b.onclick = () => { auto = false; document.getElementById('auto').classList.remove('on'); shoot(b.dataset.shot); });
+document.getElementById('auto').onclick = e => { auto = !auto; e.target.classList.toggle('on', auto); wait = 10; };
+document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { dist = +b.dataset.d; document.querySelectorAll('[data-d]').forEach(o => o.classList.toggle('on', o === b)); });
+document.getElementById('zoom').onclick = e => { e.target.classList.toggle('on', document.querySelector('.stage').classList.toggle('zoom')); };
+document.getElementById('slow').onclick = e => { slow = slow === 1 ? 4 : 1; e.target.classList.toggle('on', slow === 4); };
+window.__vfx = { shoot, get st() { return st; } };
+</script>
+</body>
+</html>

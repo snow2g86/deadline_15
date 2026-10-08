@@ -169,9 +169,24 @@ const VFX = {
   // 공격 모션 재생 + 타격 프레임에 직업별 타격 이펙트 → 타격 지연(ms) 반환
   vfxAtk(attacker, target) {
     this.faceDir(attacker.id, target.x - attacker.x, target.y - attacker.y);
-    const hitMs = this.playAtkMotion(attacker, target);
+    let hitMs = this.playAtkMotion(attacker, target);
+    // 픽셀 투사체(궁수·마법사): 공격 모션의 발사 프레임에 쏘고, 비행 시간 뒤 명중 → 그때 임팩트·피해 숫자
+    if (PixelFX.handles(attacker.cls)) {
+      const fl = PixelFX.FLIGHT[attacker.cls], rel = hitMs;
+      setTimeout(() => this._pfxShoot(attacker, target, fl), rel);
+      hitMs = rel + fl;
+    }
     setTimeout(() => this._vfxHit(attacker, target), hitMs);
     return hitMs;
+  },
+
+  // 발사 위치: 공격자 몸통에서 대상 쪽으로 조금 앞(활·지팡이 끝), 도착: 대상 몸통 앞
+  _pfxShoot(attacker, target, fl) {
+    const ax = Grid.uSX(attacker.x, attacker.y) + UCX, ay = Grid.uSY(attacker.x, attacker.y) + UCY;
+    const tx = Grid.uSX(target.x, target.y) + UCX, ty = Grid.uSY(target.x, target.y) + UCY;
+    const d = Math.hypot(tx - ax, ty - ay) || 1, nx = (tx - ax) / d, ny = (ty - ay) / d;
+    const up = attacker.cls === 'mage' ? 10 : 4;
+    PixelFX.shoot(attacker.cls, ax + nx * 18, ay + ny * 18 - up, tx - nx * 8, ty - ny * 8, fl);
   },
 
   _vfxHit(attacker, target) {
@@ -189,17 +204,10 @@ const VFX = {
         this.spawn(tx + (Math.random() - .5) * 10, ty + (Math.random() - .5) * 10, { count: 5, colors: ['#cc44ff', '#ff44cc', '#ffffff'], shape: 'slash', speed: 4, spread: 8, decay: 0.045, size: 3.5 });
       }, i * 50);
       this.spawn(tx, ty, { count: 6, colors: ['#cc44ff66', '#8844ff66'], shape: 'diamond', speed: 2, spread: 12, decay: 0.03, size: 4 });
-    } else if (cls === 'mage') {
-      this.spawn(tx, ty, { count: 15, colors: ['#4488ff', '#88aaff', '#aaccff', '#ffffff'], shape: 'star', speed: 3, spread: 10, decay: 0.025, size: 3.5 });
-      this.spawn(tx, ty, { count: 8, colors: ['#4488ff', '#ffffff'], shape: 'spark', speed: 5, spread: 6, decay: 0.025, size: 2.5 });
-    } else if (cls === 'archer') {
-      const dx = tx - ax, dy = ty - ay, dist = Math.sqrt(dx * dx + dy * dy);
-      const steps = Math.max(4, Math.floor(dist / 14));
-      for (let i = 0; i < steps; i++) {
-        const tt = i / steps;
-        setTimeout(() => this.spawn(ax + dx * tt, ay + dy * tt, { count: 2, colors: ['#ffdd88', '#ffffff'], shape: 'spark', speed: 1.5, spread: 3, decay: 0.06, size: 2 }), i * 20);
-      }
-      setTimeout(() => this.spawn(tx, ty, { count: 8, colors: ['#ffdd44', '#ff8844', '#ffffff'], shape: 'spark', speed: 3, spread: 6, decay: 0.03, size: 2.5 }), steps * 20);
+    } else if (cls === 'mage' || cls === 'archer') {
+      // 픽셀 임팩트 (투사체는 vfxAtk에서 이미 날아옴) — 대상 몸통 앞
+      const d = Math.hypot(tx - ax, ty - ay) || 1;
+      PixelFX.impact(cls, tx - (tx - ax) / d * 8, ty - (ty - ay) / d * 8);
     } else if (cls === 'priest') {
       this.spawn(tx, ty, { count: 10, colors: ['#ffffff', '#ffffaa', '#ffe066'], shape: 'star', speed: 2, spread: 10, decay: 0.025, size: 3.5 });
     } else if (cls === 'novice') {
