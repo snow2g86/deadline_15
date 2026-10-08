@@ -164,7 +164,7 @@ const AI = {
       let lim = S.cStage && S.cStage.style === 'defense' ? 15 : 5;
       if (profile.style === 'defensive') lim = S.cStage && S.cStage.style === 'defense' ? 12 : 3;
       if (profile.style === 'support') lim = S.cStage && S.cStage.style === 'defense' ? 10 : 2;
-      const canMove = !BuffSystem.has(e, BuffType.ROOT) && (e.isBoss || mh(e.x, e.y, o.x, o.y) < lim);
+      const canMove = !BuffSystem.has(e, BuffType.ROOT) && !(e._rootedTurns > 0) && (e.isBoss || mh(e.x, e.y, o.x, o.y) < lim);
       const spots = [{ x: e.x, y: e.y }].concat(canMove
         ? Grid.eMvCells(e).filter(m => e.isBoss || mh(m.x, m.y, o.x, o.y) <= lim) : []);
       let best = null, bs = -Infinity;
@@ -486,6 +486,7 @@ const AI = {
     u.x = nx; u.y = ny;
     EventBus.emit('unit_moved', { unit: u, from: { x: ox, y: oy }, to: { x: nx, y: ny } });
     await sl(340);
+    if (u._cursed && typeof curseMoveTick === 'function') curseMoveTick(u); // 쇠약의 저주: 적도 이동할 때마다 피해
     Grid.chkTrap(u);
     Grid.chkSpearwall(u);
     await this._overwatch(u);
@@ -521,7 +522,7 @@ const AI = {
   // ── 적 이동 ──
   async eMv(u, al) {
     const S = GameStore;
-    if (BuffSystem.has(u, BuffType.ROOT)) {
+    if (BuffSystem.has(u, BuffType.ROOT) || u._rootedTurns > 0) { // 영혼 쇄도는 _rootedTurns 필드로 속박
       EventBus.emit('root_blocked', { unit: u });
       return;
     }

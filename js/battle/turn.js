@@ -25,6 +25,8 @@ const TurnManager = {
   endUnitTurn(u) {
     const S = GameStore;
     u.actionPow = Math.max(0, (u.actionPow || 0) - 5);
+    // 다 카포 보너스 행동이 끝나면 원래 행동력으로 되돌림 (원래 차례를 소모하지 않음)
+    if (u._daCapoPow != null) { u.actionPow = u._daCapoPow; u._daCapoPow = null; }
     u.ha = false; u.hm = false; u.mo = false;
 
     // 자원 회복
@@ -73,15 +75,7 @@ const TurnManager = {
       u._sanctuaryTurns--;
       if (u._sanctuaryTurns <= 0) u._sanctuaryHeal = 0;
     }
-    // 구 buffs[] 틱 (포션 등)
-    if (u.buffs) {
-      for (let i = u.buffs.length - 1; i >= 0; i--) {
-        if (u.buffs[i].duration > 0) {
-          u.buffs[i].duration--;
-          if (u.buffs[i].duration <= 0) u.buffs.splice(i, 1);
-        }
-      }
-    }
+    // (예전에는 여기서 buffs[]를 한 번 더 깎아 모든 버프 지속이 절반이 되었음 — BuffSystem.tick 한 번으로 통일)
 
     // 소환수 턴 감소
     if (u.isSummon && u.summonTurns !== undefined) {
@@ -113,6 +107,7 @@ const TurnManager = {
     if (allies.length && allies.every(v => S._turnActed[v.id])) {
       S.turn = (S.turn || 1) + 1;
       S._turnActed = {};
+      if (typeof tickPoisonMists === 'function') tickPoisonMists(); // 주술사 독안개 (라운드마다 1회)
       EventBus.emit('round_end', { turn: S.turn });
       Renderer.uUI();
     }
@@ -198,6 +193,12 @@ const TurnManager = {
       FSM.transition(BattleState.AI_TURN);
       EventBus.emit('turn_start', { unit: nextU, phase: 'enemy' });
       Renderer.uUI();
+      // 기절·빙결된 적은 행동하지 못하고 차례를 넘김 (아군과 같은 규칙)
+      if (UnitManager.isCC(nextU)) {
+        Renderer.floatT(nextU.x, nextU.y, t('messages.cc_skip'), 'debuff');
+        setTimeout(() => this.endUnitTurn(nextU), 500);
+        return;
+      }
       setTimeout(async () => {
         if (!FSM.is(BattleState.BATTLE_END)) await AI.eAI(nextU);
         this.endUnitTurn(nextU);

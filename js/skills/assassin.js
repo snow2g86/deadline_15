@@ -64,3 +64,19 @@ registerSkill('assassin_ambush', {
 		}, 360);
 	}
 });
+
+// ── 연막 (습득형): 숲 밖에서도 은신 — 다음 자기 차례가 끝날 때까지 (BuffSystem STEALTH, isStealthed가 확인) ──
+// 직접 피해 없음. 은신 중에는 적 AI의 표적에서 빠지고 습격을 쓸 수 있다
+registerSkill('assassin_smoke', {
+	target(u, sk, G) { return 'instant'; },
+	exec(u, tx, ty, sk, G) {
+		// 지속 2: 이번 차례 종료 틱 1회 + 다음 자기 차례 종료 틱 1회 → 적 차례 동안과 다음 자기 차례에 은신
+		BuffSystem.apply(u, { type: BuffType.STEALTH, duration: sk.smokeTurns || 2, icon: '🌫️', source: 'assassin_smoke' });
+		u.stealthBroken = false;
+		G.floatT(u.x, u.y, t('messages.assassin_smoke'), 'heal');
+		G.vfxSpawn(G.uSX(u.x, u.y) + UCX, G.uSY(u.x, u.y) + UCY,
+			{count: 22, colors: ['#9ca3af', '#d1d5db', '#6b7280'], shape: 'circle', speed: 2, spread: 18, decay: 0.012, size: 6, gravity: -0.02});
+		G.sfxMove();
+		_skillDone(u, G, {delay: 400});
+	}
+});

@@ -989,6 +989,7 @@ const Renderer = {
     if (win && actualReward) rewards.push(['🪙', t('messages.reward'), '+' + actualReward + ' G']);
     if (win && S._firstClearBonus) { rewards.push(['🎉', t('messages.first_clear_bonus'), '+' + S._firstClearBonus + ' G']); S._firstClearBonus = 0; }
     if (win && S._firstClearUnit) { rewards.push(['🎁', t('messages.first_clear_unit', { cls: t('classes.' + S._firstClearUnit.cls) }), '']); S._firstClearUnit = null; }
+    if (win && S._storySkill) { rewards.push(['🔁', t('commander_msg.story_skill', { skill: t('skills.' + S._storySkill) }), '']); S._storySkill = null; }
     if (win && S._droppedBook) { rewards.push(['📕', t('academy.skillbook_drop', { skill: t('skills.' + S._droppedBook) }), '']); S._droppedBook = null; }
     if (rewards.length) {
       const rw = el('div', 'res-rewards');

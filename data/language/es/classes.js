@@ -11,9 +11,14 @@ Object.assign(window._LANG_es, {
         "name_ph": "Escribe un nombre (máx. 10)"
     },
     "commander_msg": {
-        "rally": "📯 ¡Arenga!",
-        "rally_buff": "ATQ +{n}%",
-        "order": "🚩 ¡Mando!",
+        "pianissimo": "🎵 ¡Pianissimo!",
+        "pianissimo_buff": "🎵 Evasión 30%",
+        "story_skill": "¡El comandante aprendió «{skill}»!",
+        "dacapo": "🔁 ¡Da Capo!",
+        "rally": "🎼 ¡Fortissimo!",
+        "rally_buff": "Moral↑ ATQ/DEF +{n}%",
+        "harmony": "🎶 ¡Armonía!",
+        "harmony_cleanse": "✨ Purificado",
         "fallen": "El comandante ha caído... el clan se retira"
     },
     "classes": {
@@ -32,7 +37,7 @@ Object.assign(window._LANG_es, {
         "sapper": "Zapador"
     },
     "class_desc": {
-        "commander": "Héroe del clan · órdenes y mejoras",
+        "commander": "Maestro del campo · moral en área · crítico 1%",
         "warrior": "Atacante cuerpo a cuerpo equilibrado",
         "knight": "Tanque defensivo",
         "assassin": "Asesino rápido",

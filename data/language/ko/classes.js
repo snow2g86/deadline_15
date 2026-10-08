@@ -11,9 +11,14 @@ Object.assign(window._LANG_ko, {
         "name_ph": "이름 입력 (최대 10자)"
     },
     "commander_msg": {
-        "rally": "📯 돌격 명령!",
-        "rally_buff": "공격 +{n}%",
-        "order": "🚩 지휘!",
+        "pianissimo": "🎵 피아니시모!",
+        "pianissimo_buff": "🎵 회피 30%",
+        "story_skill": "지휘관이 새 스킬 「{skill}」 습득!",
+        "dacapo": "🔁 다 카포!",
+        "rally": "🎼 포르티시모!",
+        "rally_buff": "사기↑ 공·방 +{n}%",
+        "harmony": "🎶 하모니!",
+        "harmony_cleanse": "✨ 정화",
         "fallen": "지휘관이 쓰러졌다… 클랜은 퇴각한다"
     },
     "classes": {
@@ -32,7 +37,7 @@ Object.assign(window._LANG_ko, {
         "sapper": "공병"
     },
     "class_desc": {
-        "commander": "클랜의 주인공 · 명령과 버프",
+        "commander": "전장의 마에스트로 · 광역 사기 버프 · 1% 대박 크리티컬",
         "warrior": "균형 근접 딜러",
         "knight": "방어 탱커",
         "assassin": "고속 암살자",

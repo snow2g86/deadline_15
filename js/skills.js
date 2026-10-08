@@ -6,12 +6,12 @@
 
 // ── 스킬 데이터 정의 ──────────────────────
 const SKILLS = {
-	// 지휘관: 명령형 스킬 2개 (기본)
+	// 지휘관(마에스트로): 지휘형 기본 스킬 2개 — 음악 용어 이름 (다 카포는 습득형, LEARNABLE_SKILLS)
 	commander: [
-		{ id: 'commander_rally', name: '돌격 명령', icon: '📯',
-		  desc: '반경 3칸 클랜원의 공격력 +20% (2턴)', cost: 40, costType: 'energy', rallyRange: 3, rallyPct: 20, rallyTurns: 2 },
-		{ id: 'commander_order', name: '지휘', icon: '🚩',
-		  desc: '클랜원 한 명의 다음 차례를 즉시 앞당김', cost: 60, costType: 'energy', orderRange: 4 },
+		{ id: 'commander_rally', name: '포르티시모', icon: '🎼',
+		  desc: '반경 4칸 클랜원의 사기를 올려 공격력·방어력 +20% (2턴)', cost: 45, costType: 'energy', rallyRange: 4, rallyPct: 20, rallyTurns: 2 },
+		{ id: 'commander_harmony', name: '하모니', icon: '🎶',
+		  desc: '반경 3칸 클랜원 HP 15% 회복 + 상태이상 해제', cost: 50, costType: 'energy', harmonyRange: 3, harmonyPct: 15 },
 	],
 	warrior: {
 		id: 'warrior_powersmash', name: '강타', icon: '⚡',
@@ -47,7 +47,7 @@ const SKILLS = {
 	},
 	novice: {
 		id: 'novice_throw', name: '돌던지기', icon: '🪨',
-		desc: '4칸 내 적에게 ATK×0.5 데미지', cost: 15, costType: 'energy', throwRange: 4
+		desc: '4칸 내 적에게 ATK×0.8 데미지', cost: 15, costType: 'energy', throwRange: 4
 	},
 	brawler: {
 		id: 'brawler_disarm', name: '무장해제', icon: '🤛',
@@ -69,6 +69,18 @@ const SKILLS = {
 
 // ── 습득형 스킬 (스킬북으로만 습득 가능) ────
 const LEARNABLE_SKILLS = {
+	// 지휘관 습득형: 상점 스킬북·아카데미로 배워야 사용 가능
+	commander_dacapo: {
+		id: 'commander_dacapo', name: '다 카포', icon: '🔁',
+		desc: '클랜원 한 명이 차례를 소모하지 않고 즉시 한 번 더 행동', cost: 80, costType: 'energy', dacapoRange: 4,
+		cls: 'commander'
+	},
+	// 피아니시모: 아주 여리게 — 기척을 죽여 일반 공격을 흘려보냄 (포르티시모=공·방%, 하모니=회복, 다 카포=추가 행동과 겹치지 않는 '회피' 축)
+	commander_pianissimo: {
+		id: 'commander_pianissimo', name: '피아니시모', icon: '🎵',
+		desc: '반경 3칸 클랜원이 2턴간 일반 공격을 30% 확률로 회피', cost: 40, costType: 'energy', pianoRange: 3, pianoTurns: 2,
+		cls: 'commander', bookCost: 1000
+	},
 	assassin_ambush: {
 		id: 'assassin_ambush', name: '습격', icon: '⚡',
 		desc: '2칸 범위 적 대상, 인접 이동 후 ATK×2 공격', cost: 40, costType: 'energy', ambushRange: 2,
@@ -106,7 +118,7 @@ const LEARNABLE_SKILLS = {
 	},
 	warrior_assault: {
 		id: 'warrior_assault', name: '강습', icon: '🦅',
-		desc: '5칸 내 적에게 돌진, 인근 적에게 ATK×0.8 데미지', cost: 2, costType: 'fury', assaultRange: 5,
+		desc: '5칸 내 적에게 돌진, 인근 적에게 ATK×0.8 데미지', cost: 3, costType: 'fury', assaultRange: 5,
 		cls: 'warrior'
 	},
 	warrior_bloodthirst: {
@@ -123,6 +135,28 @@ const LEARNABLE_SKILLS = {
 		id: 'assassin_trapdetect', name: '함정감지', icon: '👁️',
 		desc: '2칸 내 함정 발견 및 해체', passive: true,
 		cls: 'assassin'
+	},
+	// 연막: 숲이 없어도 은신 → 습격으로 이어가는 셋업기 (직접 피해 없음)
+	assassin_smoke: {
+		id: 'assassin_smoke', name: '연막', icon: '🌫️',
+		desc: '숲이 아니어도 다음 차례가 끝날 때까지 은신 (적의 표적에서 빠지고 습격 사용 가능)', cost: 40, costType: 'energy', smokeTurns: 2,
+		cls: 'assassin'
+	},
+	// ── Novice 습득형 (입문 기본기 · 다른 직업보다 약하게, 스킬북도 저렴) ──
+	novice_firstaid: {
+		id: 'novice_firstaid', name: '응급처치', icon: '🩹',
+		desc: '자신 또는 인접 클랜원 HP를 최대 HP의 15% 회복', cost: 30, costType: 'energy', aidRange: 1, aidPct: 15,
+		cls: 'novice', bookCost: 300
+	},
+	novice_tackle: {
+		id: 'novice_tackle', name: '몸통 박치기', icon: '🏃',
+		desc: '2칸 내 적에게 달려들어 ATK×0.9 피해', cost: 25, costType: 'energy', tackleRange: 2,
+		cls: 'novice', bookCost: 300
+	},
+	novice_grit: {
+		id: 'novice_grit', name: '근성', icon: '✊',
+		desc: 'HP 30% 이하일 때 방어력 +30%', passive: true,
+		cls: 'novice', bookCost: 300
 	},
 	sapper_excavate: {
 		id: 'sapper_excavate', name: '굴착', icon: '⛏️',
@@ -141,7 +175,7 @@ const LEARNABLE_SKILLS = {
 	},
 	archer_snipe: {
 		id: 'archer_snipe', name: '저격', icon: '🎯',
-		desc: '5~10칸 적 1인, ATK×1.5', cost: 100, costType: 'energy', snipeMin: 5, snipeMax: 10,
+		desc: '5~10칸 적 1인, ATK×1.5', cost: 60, costType: 'energy', snipeMin: 5, snipeMax: 10,
 		cls: 'archer'
 	},
 	archer_rapidfire: {
@@ -279,7 +313,9 @@ function getUnitSkills(u) {
 // ── 은신 판정 ──────────────────────────────
 function isStealthed(u) {
 	if (u.stealthBroken) return false;
-	return u.cls === 'assassin' && G.ter[u.y] && G.ter[u.y][u.x] === 'forest';
+	if (u.cls !== 'assassin') return false;
+	if (typeof BuffSystem !== 'undefined' && BuffSystem.has(u, 'stealth')) return true; // 연막
+	return !!(G.ter[u.y] && G.ter[u.y][u.x] === 'forest');
 }
 
 // ── 스킬 스프라이트 매핑 (알파벳순, 8열×7행) ──
@@ -299,9 +335,19 @@ const SKILL_SPRITE = {
 	warrior_criticalstrike:[0,6],warrior_powersmash:[1,6]
 };
 
-function skillIcon(id, size) {
+// 스프라이트에 없는 스킬은 스킬 데이터의 이모지로 대신 표시 (새 이미지 생성 금지 정책)
+function _skillEmoji(id) {
+	if (LEARNABLE_SKILLS[id]) return LEARNABLE_SKILLS[id].icon || '';
+	for (var c in SKILLS) { var f = getSkills(c).find(function(s) { return s.id === id; }); if (f) return f.icon || ''; }
+	return '';
+}
+
+function skillIcon(id, size, fallback) {
 	var p = SKILL_SPRITE[id];
-	if (!p) return '';
+	if (!p) {
+		var em = fallback || _skillEmoji(id);
+		return em ? '<span class="skill-emoji" style="display:inline-block;font-size:' + Math.round(size * 0.85) + 'px;line-height:1;width:' + size + 'px;text-align:center">' + em + '</span>' : '';
+	}
 	var s = size / 64;
 	return '<span class="skill-icon" style="width:' + size + 'px;height:' + size + 'px;' +
 		'background-size:' + (512*s) + 'px ' + (448*s) + 'px;' +

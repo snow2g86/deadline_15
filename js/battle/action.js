@@ -311,17 +311,7 @@ const ActionManager = {
     FSM.transition(BattleState.UNIT_SELECTED);
     Audio.sfxMove();
 
-    if (u._cursed && u.mhp > 0) {
-      const curseDmg = Math.max(1, Math.round(u.mhp * 0.05));
-      u.hp = Math.max(1, u.hp - curseDmg);
-      u._curseDmgCount = (u._curseDmgCount || 0) + 1;
-      Renderer.floatT(u.x, u.y, '-' + curseDmg, 'damage');
-      Renderer.floatT(u.x, u.y, '\u2620\uFE0F \uC800\uC8FC (' + u._curseDmgCount + '/5)', 'debuff');
-      if (u._curseDmgCount >= 5) {
-        u._cursed = false; u._curseAtk = 0; u._curseDmgCount = 0;
-        Renderer.floatT(u.x, u.y, t('messages.curse_end') || '\u2620\uFE0F \uC800\uC8FC \uD574\uC81C', 'heal');
-      }
-    }
+    if (u._cursed) curseMoveTick(u); // 쇠약의 저주 (js/skills/shaman.js)
 
     Grid.chkTrap(u); chkTrapDetect(u);
 

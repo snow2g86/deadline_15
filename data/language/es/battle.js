@@ -84,6 +84,12 @@ Object.assign(window._LANG_es, {
         "camera_rotate_right": "Girar cámara derecha (E)"
     },
     "messages": {
+        "cc_skip": "💫 No puede actuar",
+        "curse_tick": "☠️ Maldición ({n}/5)",
+        "curse_end": "☠️ Maldición disipada",
+        "assassin_smoke": "🌫️ ¡Humo!",
+        "novice_firstaid": "🩹 ¡Primeros auxilios!",
+        "novice_tackle": "¡Placaje!",
         "data_ok": "Datos correctos",
         "data_repaired": "Datos reparados",
         "victory": "🏆 VICTORIA",

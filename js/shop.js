@@ -97,7 +97,7 @@ function genRotatingItems() {
     for (var sb = 0; sb < sbCount; sb++) {
       var sk = LEARNABLE_SKILLS[lsKeys[sb]];
       items.push({
-        type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: 800, sold: false
+        type: 'skillbook', skillId: sk.id, cls: sk.cls, cost: sk.bookCost || (sk.cls === 'commander' ? 1500 : 800), sold: false // 지휘관 다 카포는 강력해서 비쌈 · 스킬 데이터의 bookCost가 있으면 우선 (노비스 300, 피아니시모 1000)
       });
     }
   }

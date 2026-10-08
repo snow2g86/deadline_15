@@ -1,9 +1,10 @@
 const JAB = {
-  // 지휘관: 플레이어 클랜의 고유 주인공 (1명만 존재, 항상 출전, 쓰러지면 패배, 고용·전직 불가)
+  // 지휘관(마에스트로): 플레이어 클랜의 고유 주인공 · 버퍼 (1명만 존재, 항상 출전, 쓰러지면 패배, 고용·전직 불가)
+  // 이동 2·공격·방어 낮음, 사거리 2로 뒤에서 지휘. 광역 사기 버프로 클랜원을 강화하고, 공격 시 1% 확률로 1000% 크리티컬
   "commander": {
-    "icon":"🎖️", "res":"energy", "maxRes": 100, "resRec": 12, "unique": true,
-    "base": { "hp": 110, "atk": 22, "def": 10, "move": 3, "range": 1 },
-    "growth": { "hp": [8,12], "atk": [2,3], "def": [1,2] },
+    "icon":"🎼", "res":"energy", "maxRes": 100, "resRec": 15, "unique": true,
+    "base": { "hp": 95, "atk": 12, "def": 6, "move": 2, "range": 2 },
+    "growth": { "hp": [6,10], "atk": [1,2], "def": [0,1] },
     "actionRec": 1.1
   },
   "warrior": {

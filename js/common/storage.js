@@ -94,6 +94,16 @@ function getRoster() {
           }
         }
       }
+      // 지휘관이 버퍼(마에스트로)로 바뀌기 전 세이브: 능력치를 새 기준(기본값 + 레벨별 잠재력 성장)으로 다시 계산
+      if (roster.chars && typeof JAB !== 'undefined' && JAB[COMMANDER_CLS]) {
+        roster.chars.forEach(c => {
+          if (!c || c.cls !== COMMANDER_CLS || c.buffer === 2) return;
+          const d = JAB[COMMANDER_CLS], lv = (c.lv || 1) - 1, p = c.pot || {};
+          c.hp = Math.round(d.base.hp + lv * (p.hp || 8)); c.atk = Math.round(d.base.atk + lv * (p.atk || 1.5));
+          c.def = Math.round(d.base.def + lv * (p.def || 0.6)); c.move = d.base.move; c.range = d.base.range;
+          c.buffer = 2; needsSave = true;
+        });
+      }
       // 지휘관(고유 주인공)이 없으면 추가 — 기존 세이브 포함 1명만
       if (roster.chars && roster.chars.length && typeof JAB !== 'undefined' && JAB[COMMANDER_CLS] &&
           !roster.chars.some(c => c && c.cls === COMMANDER_CLS)) {
@@ -115,7 +125,7 @@ function _newCommander(uid) {
   const pot = { hp: mid(g.hp), atk: mid(g.atk), def: mid(g.def), actionRec: 0.12 };
   return { uid, cls: COMMANDER_CLS, nameId: null, customName: COMMANDER_DEFAULT_NAME, lv: 1, exp: 0, dead: false,
     hp: d.base.hp, atk: d.base.atk, def: d.base.def, move: d.base.move, range: d.base.range,
-    pot, actionRec: d.actionRec + pot.actionRec, gender: 'm' };
+    pot, actionRec: d.actionRec + pot.actionRec, gender: 'm', buffer: 2 };
 }
 // 지휘관 uid (없으면 null)
 function commanderUid() {

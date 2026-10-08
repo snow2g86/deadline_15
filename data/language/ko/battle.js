@@ -84,6 +84,12 @@ Object.assign(window._LANG_ko, {
         "camera_rotate_right": "카메라 우회전 (E)"
     },
     "messages": {
+        "cc_skip": "💫 행동 불가",
+        "curse_tick": "☠️ 저주 ({n}/5)",
+        "curse_end": "☠️ 저주 해제",
+        "assassin_smoke": "🌫️ 연막!",
+        "novice_firstaid": "🩹 응급처치!",
+        "novice_tackle": "몸통 박치기!",
         "data_ok": "데이터 정상",
         "data_repaired": "데이터를 복구했습니다",
         "victory": "🏆 VICTORY",

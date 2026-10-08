@@ -12,7 +12,7 @@ registerSkill('novice_throw', {
 		const rng = sk.throwRange || 4;
 		const tgt = G.units.find(v => v.x===tx && v.y===ty && v.team==='enemy' && v.hp>0 && mh(u.x,u.y,v.x,v.y)<=rng);
 		if (!tgt) { _skillRefund(u, sk, G); return; }
-		const dmg = Math.max(1, Math.round(u.atk*0.5*G.skMul(u,'novice_throw')) - tgt.def);
+		const dmg = Math.max(1, Math.round(u.atk*0.8*G.skMul(u,'novice_throw')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
 		G.sfxAtk(u.cls); G.shakeU(tgt.id);
 		G.floatT(tgt.x, tgt.y, '-' + dmg, 'damage');
@@ -21,5 +21,56 @@ registerSkill('novice_throw', {
 		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:400, chkEnd:true});
+	}
+});
+
+// ── 응급처치 (습득형): 자신 또는 인접 클랜원 최대 HP 15% 회복 ──
+registerSkill('novice_firstaid', {
+	target(u, sk, G) {
+		const r = sk.aidRange || 1;
+		return G.units.filter(v => v.team === 'ally' && v.hp > 0 && !v.isSummon && mh(u.x, u.y, v.x, v.y) <= r).map(v => ({x: v.x, y: v.y}));
+	},
+	exec(u, tx, ty, sk, G) {
+		const r = sk.aidRange || 1;
+		const v = G.units.find(w => w.x === tx && w.y === ty && w.team === 'ally' && w.hp > 0 && mh(u.x, u.y, w.x, w.y) <= r);
+		if (!v) { _skillRefund(u, sk, G); return; }
+		const heal = Math.min(v.mhp - v.hp, Math.max(1, Math.round(v.mhp * (sk.aidPct || 15) / 100 * G.skMul(u, 'novice_firstaid'))));
+		v.hp += heal;
+		G.sfxHeal();
+		G.floatT(v.x, v.y, '+' + heal, 'heal');
+		G.floatT(u.x, u.y, t('messages.novice_firstaid'), 'heal');
+		G.vfxSpawn(G.uSX(v.x, v.y) + UCX, G.uSY(v.x, v.y) + UCY, {count: 10, colors: ['#4ade80', '#fff', '#fca5a5'], shape: 'cross', speed: 2, spread: 8, decay: 0.03, size: 4});
+		G._grantExp(u, 'heal');
+		_skillDone(u, G, {delay: 400});
+	}
+});
+
+// ── 몸통 박치기 (습득형): 2칸 내 적 옆으로 달려들어 ATK×0.9 (습격·강습의 입문판 — 배율·사거리 모두 낮음) ──
+registerSkill('novice_tackle', {
+	target(u, sk, G) {
+		const r = sk.tackleRange || 2;
+		return G.units.filter(v => v.team === 'enemy' && v.hp > 0 && mh(u.x, u.y, v.x, v.y) <= r).map(v => ({x: v.x, y: v.y}));
+	},
+	exec(u, tx, ty, sk, G) {
+		const r = sk.tackleRange || 2;
+		const tgt = G.units.find(v => v.x === tx && v.y === ty && v.team === 'enemy' && v.hp > 0 && mh(u.x, u.y, v.x, v.y) <= r);
+		if (!tgt) { _skillRefund(u, sk, G); return; }
+		// 이미 붙어 있으면 제자리, 아니면 대상 옆 빈 칸으로 이동
+		if (mh(u.x, u.y, tgt.x, tgt.y) > 1) {
+			const adj = G._findAdj(tgt.x, tgt.y, u);
+			if (!adj) { _skillRefund(u, sk, G); G.floatT(u.x, u.y, t('messages.no_empty_tile'), 'damage'); return; }
+			G._mvU(u, adj.x, adj.y); u.mo = true;
+		}
+		setTimeout(() => {
+			const dmg = Math.max(1, Math.round(u.atk * 0.9 * G.skMul(u, 'novice_tackle')) - tgt.def);
+			tgt.hp = Math.max(0, tgt.hp - dmg);
+			G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
+			G.floatT(tgt.x, tgt.y, '-' + dmg, 'damage');
+			G.floatT(u.x, u.y, t('messages.novice_tackle'), 'heal');
+			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY, {count: 12, colors: ['#fbbf24', '#fff', '#a3a3a3'], shape: 'spark', speed: 4, spread: 10, decay: 0.025, size: 4});
+			if (tgt.hp <= 0) { G.screenShake(); G.sfxKill(); G.sfxDeath(); G.vfxDeath(tgt); G.deathA(tgt.id); G._rmDead(); }
+			G._grantExp(u, 'attack');
+			_skillDone(u, G, {delay: 450, chkEnd: true});
+		}, 340);
 	}
 });

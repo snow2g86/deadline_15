@@ -122,6 +122,8 @@ function calcDmg(attacker, target) {
 	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_up') def = Math.round(def * (1 + b.value / 100)) });
 	if (target.buffs) target.buffs.forEach(b => { if (b.type === 'def_down') def = Math.round(def * (1 - b.value / 100)) });
 	if (target._phalanxDef > 0) def += target._phalanxDef;
+	// 노비스 근성(패시브): HP 30% 이하일 때 방어력 +30%
+	if (target.cls === 'novice' && target.skillLv && target.skillLv['novice_grit'] >= 1 && target.mhp > 0 && target.hp <= target.mhp * 0.3) def = Math.round(def * 1.3);
 	if (target._defend) def = Math.round(def * TACTICS_ACT.defendDef); // 방어 태세
 	let dmg = Math.max(1, atk - def);
 	if (attacker.furyBuff > 0) dmg = Math.max(1, Math.round(dmg * 1.5));
@@ -142,6 +144,8 @@ function calcDmg(attacker, target) {
 		dmg = Math.max(1, Math.round(dmg * (1 + TACTIC.shallowVuln)));
 	}
 	attacker._lastCrit = false;
+	// 지휘관(마에스트로): 1% 확률로 1000% 크리티컬
+	if (attacker.cls === 'commander' && Math.random() < 0.01) { dmg = Math.max(1, Math.round(dmg * 10)); attacker._lastCrit = true; }
 	if (attacker.cls === 'archer' && attacker.skillLv && attacker.skillLv['archer_weakspot'] >= 1) {
 		if (Math.random() < 0.3) { dmg = Math.max(1, Math.round(dmg * 1.5)); attacker._lastCrit = true; }
 	}
@@ -232,9 +236,10 @@ function getSkillBuffs(unit) {
 	if (unit.cls === 'sapper' && unit.skillLv && unit.skillLv['sapper_enhancedtrap'] >= 1) buffs.push({ icon: '⚙️', type: 'buff', turns: 0 });
 	if (unit.cls === 'mage' && unit.skillLv && unit.skillLv['mage_manasurge'] >= 1 && unit.res >= unit.maxRes * 0.8) buffs.push({ icon: '🌊', type: 'buff', turns: 0 });
 	if (unit.cls === 'priest' && unit.skillLv && unit.skillLv['priest_divinegrace'] >= 1) buffs.push({ icon: '🕊️', type: 'buff', turns: 0 });
+	if (unit.cls === 'novice' && unit.skillLv && unit.skillLv['novice_grit'] >= 1 && unit.mhp > 0 && unit.hp <= unit.mhp * 0.3) buffs.push({ icon: '✊', type: 'buff', turns: 0 });
 	if (unit.buffs) unit.buffs.forEach(b => {
-		const icon = b.type === 'atk_up' ? '🔥' : b.type === 'def_up' ? '🛡️' : b.type === 'atk_down' ? '💢' : '❄️';
-		buffs.push({ icon, type: b.type.includes('down') ? 'debuff' : 'buff', turns: b.duration });
+		const icon = b.icon || (b.type === 'atk_up' ? '🔥' : b.type === 'def_up' ? '🛡️' : b.type === 'atk_down' ? '💢' : '❄️');
+		buffs.push({ icon, type: (b.type.includes('down') || (typeof _isDebuff === 'function' && _isDebuff(b.type))) ? 'debuff' : 'buff', turns: b.duration });
 	});
 	return buffs;
 }

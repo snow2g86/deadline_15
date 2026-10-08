@@ -104,3 +104,39 @@ registerSkill('shaman_spiritsurge', {
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
 });
+
+// ── 쇠약의 저주 틱: 저주받은 유닛이 이동할 때마다 최대 HP 5% (사망하지 않음, 5회 후 해제) ──
+// 아군 이동은 ActionManager.doMv, 적 이동은 AI._moveUnit 에서 호출 (예전엔 적 이동에서 빠져 있어 적에게 효과가 없었음)
+function curseMoveTick(u) {
+	if (!u._cursed || !(u.mhp > 0) || u.hp <= 0) return;
+	const dmg = Math.max(1, Math.round(u.mhp * 0.05));
+	u.hp = Math.max(1, u.hp - dmg);
+	u._curseDmgCount = (u._curseDmgCount || 0) + 1;
+	G.floatT(u.x, u.y, '-' + dmg, 'damage');
+	G.floatT(u.x, u.y, t('messages.curse_tick', { n: u._curseDmgCount }), 'debuff');
+	if (u._curseDmgCount >= 5) {
+		u._cursed = false; u._curseAtk = 0; u._curseDmgCount = 0;
+		G.floatT(u.x, u.y, t('messages.curse_end'), 'heal');
+	}
+}
+
+// ── 독안개 틱: 라운드가 끝날 때마다 안개(3×3) 안의 상대에게 시전자 ATK×0.3 (방어 무시, 사망하지 않음) ──
+// turn.js _countTurn(라운드 종료)에서 호출. 예전엔 안개를 만들기만 하고 처리하는 곳이 없었음
+function tickPoisonMists() {
+	const S = GameStore;
+	if (!S.poisonMists || !S.poisonMists.length) return;
+	S.poisonMists.forEach(m => {
+		const foe = m.team === 'ally' ? 'enemy' : 'ally';
+		const dmg = Math.max(1, Math.round(m.atk * 0.3));
+		S.units.filter(v => v.team === foe && v.hp > 0 && Math.abs(v.x - m.cx) <= 1 && Math.abs(v.y - m.cy) <= 1).forEach(v => {
+			const d = Math.min(dmg, v.hp - 1);
+			if (d <= 0) return;
+			v.hp -= d;
+			G.floatT(v.x, v.y, '☁️ -' + d, 'damage');
+		});
+		G.vfxSpawn(G.uSX(m.cx, m.cy) + UCX, G.uSY(m.cx, m.cy) + UCY, {count: 10, colors: ['#22c55e44', '#4ade8044'], shape: 'circle', speed: 1, spread: 16, decay: 0.012, size: 5, gravity: -0.02});
+		m.turns--;
+	});
+	S.poisonMists = S.poisonMists.filter(m => m.turns > 0);
+	G.rUnits();
+}

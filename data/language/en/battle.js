@@ -85,6 +85,12 @@ Object.assign(window._LANG_en, {
         "camera_rotate_right": "Rotate camera right (E)"
     },
     "messages": {
+        "cc_skip": "💫 Can't act",
+        "curse_tick": "☠️ Curse ({n}/5)",
+        "curse_end": "☠️ Curse lifted",
+        "assassin_smoke": "🌫️ Smoke!",
+        "novice_firstaid": "🩹 First Aid!",
+        "novice_tackle": "Tackle!",
         "data_ok": "Save data OK",
         "data_repaired": "Save data repaired",
         "victory": "\ud83c\udfc6 VICTORY",

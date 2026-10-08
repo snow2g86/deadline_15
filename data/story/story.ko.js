@@ -28,6 +28,9 @@ window.STORY_KO = {
         { who: 'sera', text: '{commander}, 나도 같이 갈게. 다치면 내가 고쳐 줄게.' },
         { who: 'commander', text: '……알겠습니다. 한 사람도 잃지 않겠습니다.' },
         { who: 'bram', text: '좋은 각오다, 꼬맹이. 그 말, 끝까지 지켜 봐라.' },
+        { who: 'bram', text: '이걸 받아라. 내가 왕국 전장에서 쓰던 은 지휘봉이다.' },
+        { who: 'commander', text: '칼이 아니라 지휘봉이요?' },
+        { who: 'bram', text: '지휘관의 무기는 클랜원들이다. 넌 박자만 맞춰 주면 돼.' },
       ],
       epilogue: [
         { who: 'narrator', text: '산적단이 무너지고, 솔빛 마을에 종소리가 울렸다.' },
@@ -130,6 +133,10 @@ window.STORY_KO = {
         { who: 'kasha', text: '슬퍼할 시간이 없어. 왕도에서 오르딘이 사라졌대.' },
         { who: 'kasha', text: '그리고 왕도 북쪽 하늘에… 문이 생기고 있어.' },
         { who: 'commander', text: '……갑니다. 브람이 지키려던 걸 대신 지키러.' },
+      { who: 'narrator', text: '부러진 검 곁에서, 지휘봉이 다시 들렸다.' },
+      { who: 'narrator', text: '악보의 첫 마디로 돌아가듯. 처음부터, 다시.' },
+      { who: 'commander', text: '다 카포. 쓰러진 박자는 처음부터 다시 세면 돼.' },
+      { who: 'narrator', text: '[새 스킬] 다 카포 — 클랜원 한 명이 즉시 한 번 더 행동한다.' },
       ] },
 
     6: { title: '지옥문',
@@ -141,6 +148,7 @@ window.STORY_KO = {
         { who: 'commander', text: '괜찮지 않아. 그래도 멈추면 더 많이 잃어.' },
         { who: 'commander', text: '브람이 말했지. 지휘관은 모두를 살릴 순 없다고.' },
         { who: 'commander', text: '하지만 아무도 버리지 않을 수는 있어.' },
+        { who: 'narrator', text: '부러진 검을 품에 넣고, 은빛 지휘봉이 다시 들렸다.' },
         { who: 'bark', text: '그 말 기다렸소, 대장. 다시 가 봅시다.' },
       ],
       epilogue: [
@@ -232,7 +240,7 @@ window.STORY_KO = {
         { who: 'sera', text: '{commander}, 손 줘. …흉터가 빛나고 있어.' },
         { who: 'commander', text: '부모님이 남긴 열쇠야. 이번엔 우리가 함께 돌린다.' },
         { who: 'bark', text: '대장 손 위에 내 손. 자, 다들 얹어!' },
-        { who: 'commander', text: '솔빛 클랜, 마지막 출정이다!' },
+        { who: 'commander', text: '마지막 악장이다. 솔빛 클랜, 출정!' },
       ],
       epilogue: [
         { who: 'narrator', text: '열쇠가 돌아가고, 하늘의 모든 균열이 동시에 닫혔다.' },
@@ -255,13 +263,13 @@ window.STORY_KO = {
       pre: [
         { who: 'narrator', text: '솔빛 마을 동쪽 목책. 들판 너머로 횃불이 흔들렸다.' },
         { who: 'bram', text: '산적 졸개들이다. 목책만 지키면 마을은 안전해.' },
-        { who: 'commander', text: '첫 명령이다. 목책 앞에 서서, 넘어오는 놈만 막는다.' },
+        { who: 'commander', text: '첫 명령이다. 목책 앞을 지켜. 난 뒤에서 판을 읽을게.' },
         { who: 'sera', text: '다치면 바로 뒤로 빠져. 내가 있잖아.' },
       ],
       post: [
         { who: 'bram', text: '나쁘지 않았다. 아무도 쓰러지지 않았군.' },
-        { who: 'commander', text: '손이 아직도 떨려요.' },
-        { who: 'bram', text: '떨리는 손으로도 명령은 내릴 수 있다. 그거면 됐다.' },
+        { who: 'commander', text: '지휘봉 끝이 아직도 떨려요.' },
+        { who: 'bram', text: '떨리는 손으로도 박자는 맞출 수 있다. 그거면 됐다.' },
       ],
       battle: {
         start: [ { who: 'commander', text: '목책이 무너지면 끝이야. 자리를 지켜!' } ],
@@ -283,7 +291,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '도끼부터 노린다. 협공으로 끝내!' } ],
         wave: [ { who: 'bram', text: '두 번째 무리다. 서두르지 마라, 목책은 버틴다.' } ],
-        danger: [ { who: 'sera', text: '{commander}! 너무 앞에 나왔어, 물러나!' } ],
+        danger: [ { who: 'sera', text: '{commander}! 지휘관이 노출됐어, 뒤로 빠져!' } ],
       },
     },
     3: {
@@ -414,7 +422,7 @@ window.STORY_KO = {
     10: {
       pre: [
         { who: 'narrator', text: '화산 기슭의 산적 요새. 깃발이 열풍에 펄럭였다.' },
-        { who: 'boss', text: '마을 꼬마들이 여기까지 기어 올라왔다고?' },
+        { who: 'boss', text: '막대기 하나 든 꼬마가 대장이라고? 웃기는군.' },
         { who: 'commander', text: '마을을 괴롭히는 건 오늘로 끝이다.' },
         { who: 'boss', text: '바크, 이 배신자 놈! 너부터 용암에 처넣어 주마!' },
         { who: 'bark', text: '두목, 이젠 내 대장이 따로 있소.' },
@@ -430,7 +438,7 @@ window.STORY_KO = {
         start: [ { who: 'commander', text: '두목만 쓰러뜨리면 산적단은 흩어진다!' } ],
         boss: [ { who: 'boss', text: '하찮은 자경단 따위가! 내 도끼 맛을 봐라!' } ],
         wave: [ { who: 'bark', text: '요새 안쪽 정예들이오! 두목 호위대!' } ],
-        danger: [ { who: 'sera', text: '{commander}, 두목 도끼가 너무 세! 거리 벌려!' } ],
+        danger: [ { who: 'sera', text: '두목이 지휘관을 노려! 거리 벌려, {commander}!' } ],
         last: [ { who: 'bark', text: '이제 하나 남았소! 산적단은 오늘로 끝이오!' } ],
       },
     },
@@ -737,7 +745,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '피난 행렬 뒤를 막는다! 한 명도 놓치지 마!' } ],
         wave: [ { who: 'bark', text: '늪에서 또 기어 나오오! 행렬 옆구리요!' } ],
-        danger: [ { who: 'sera', text: '{commander}, 무리하지 마! 너도 사람이야!' } ],
+        danger: [ { who: 'sera', text: '{commander}, 지휘관이 무너지면 행렬도 무너져!' } ],
         last: [ { who: 'bram', text: '하나 남았다. 행렬은 무사하다.' } ],
       },
     },
@@ -822,7 +830,7 @@ window.STORY_KO = {
         { who: 'narrator', text: '국경의 돌 요새. 반란군이 마지막으로 지키는 관문.' },
         { who: 'narrator', text: '지평선 너머로 제국 정규군의 창끝이 번뜩였다.' },
         { who: 'bram', text: '수가 많다. 하지만 성벽은 두껍다. 버틸 수 있어.' },
-        { who: 'commander', text: '성벽에 붙는 순서대로 끊는다. 서두르지 마.' },
+        { who: 'commander', text: '성벽에 붙는 순서대로 끊는다. 템포를 서두르지 마.' },
       ],
       post: [
         { who: 'narrator', text: '반란군 병사들이 클랜을 향해 환호를 보냈다.' },
@@ -850,7 +858,7 @@ window.STORY_KO = {
         { who: 'bram', text: '계약에 묶인 칼은 언젠가 스스로 끊는다.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '협곡 위 고지대를 먼저 잡는다! 올라가!' } ],
+        start: [ { who: 'commander', text: '고지대 먼저! 첫 박자를 놓치면 협곡에 갇힌다!' } ],
         wave: [ { who: 'bark', text: '협곡 양쪽에서 암살자들이 쏟아지오!' } ],
         last: [ { who: 'commander', text: '하나 남았다. 협곡을 빠져나간다!' } ],
       },
@@ -909,7 +917,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '성채를 지키면서 문을 연다! 둘 다 해낸다!' } ],
         wave: [ { who: 'kasha', text: '성벽 위 궁수들은 검은 깃이 맡을게!' } ],
-        danger: [ { who: 'kasha', text: '{commander}, 앞에 너무 나왔어! 엄호할게!' } ],
+        danger: [ { who: 'kasha', text: '지휘관이 노출됐어! 후방을 지켜, 내가 엄호할게!' } ],
         last: [ { who: 'bark', text: '하나 남았소! 성문 열어젖힙시다!' } ],
       },
     },
@@ -945,7 +953,7 @@ window.STORY_KO = {
         { who: 'bram', text: '훌륭했다, 지휘관. 이제 꼬맹이라고 못 부르겠군.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '본진 방벽을 지킨다! 불덩이를 피하며 싸워!' } ],
+        start: [ { who: 'commander', text: '포르티시모! 방벽 앞에 선 사람부터 버텨 낸다!' } ],
         wave: [ { who: 'bram', text: '암살자들이 방벽 틈으로 들어온다! 후방을 봐라!' } ],
         danger: [ { who: 'sera', text: '{commander}! 불길 속에 있으면 안 돼!' } ],
         last: [ { who: 'bark', text: '마지막 놈! 본진은 무사하오!' } ],
@@ -1197,9 +1205,9 @@ window.STORY_KO = {
       ],
       battle: {
         start: [ { who: 'commander', text: '전원 공격! 브람이 지킨 길을 헛되게 하지 마!' } ],
-        boss: [ { who: 'boss', text: '분노로 휘두르는 칼은 무디다. 와 봐라!' } ],
+        boss: [ { who: 'boss', text: '분노로 흐트러진 지휘엔 박자가 없다. 와 봐라!' } ],
         wave: [ { who: 'kasha', text: '바닥에서 정예가 깨어나! 정신 차려!' } ],
-        danger: [ { who: 'sera', text: '{commander}, 혼자 싸우지 마! 우리가 있잖아!' } ],
+        danger: [ { who: 'sera', text: '{commander}, 앞으로 나가지 마! 지휘가 끊기면 끝이야!' } ],
         last: [ { who: 'bark', text: '하나 남았소, 대장! 영감님 몫까지!' } ],
       },
     },
@@ -1545,7 +1553,7 @@ window.STORY_KO = {
       post: [
         { who: 'narrator', text: '성벽이 무너지고, 탑의 문이 저절로 열렸다.' },
         { who: 'sera', text: '초대하는 거야. 기분 나빠.' },
-        { who: 'commander', text: '초대받았으면 가 줘야지. 정중하게, 칼을 들고.' },
+        { who: 'commander', text: '초대받았으면 가 줘야지. 정중하게, 지휘봉을 들고.' },
       ],
       battle: {
         start: [ { who: 'commander', text: '적 표적 표시를 봐! 노린 자리는 비운다!' } ],
@@ -1667,7 +1675,7 @@ window.STORY_KO = {
         { who: 'bark', text: '이 몸 무게도 견디네. 신 물건은 튼튼하구먼.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '양쪽에서 끼고 친다! 협공으로 빨리 끝내!' } ],
+        start: [ { who: 'commander', text: '하모니! 다들 숨 고르고, 협공으로 끝내!' } ],
         wave: [ { who: 'kasha', text: '위에서 내려와! 사다리 쪽을 막아!' } ],
         last: [ { who: 'commander', text: '하나 남았다. 올라간다!' } ],
       },
@@ -1722,7 +1730,7 @@ window.STORY_KO = {
         { who: 'narrator', text: '오르딘의 환영이 흩어지고, 하늘 꼭대기의 빛이 짙어졌다.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '대답은 칼로 한다! 길을 막는 건 전부 쳐!' } ],
+        start: [ { who: 'commander', text: '대답은 우리 연주로 한다! 클랜원들, 길을 열어!' } ],
         wave: [ { who: 'kasha', text: '오르딘이 화신들을 더 불러냈어!' } ],
         last: [ { who: 'commander', text: '하나 남았다. 꼭대기로 간다!' } ],
       },
@@ -1773,7 +1781,7 @@ window.STORY_KO = {
       pre: [
         { who: 'narrator', text: '왕도 앞 잿빛 평원. 연합군의 깃발이 처음으로 한데 섰다.' },
         { who: 'kasha', text: '왕국 잔존군, 제국군, 검은 깃. 전부 네 명령을 기다려.' },
-        { who: 'commander', text: '첫 명령이다. 아무도 혼자 싸우지 않는다.' },
+        { who: 'commander', text: '연합군의 첫 악장이다. 아무도 혼자 싸우지 않는다.' },
         { who: 'commander', text: '균열에서 나오는 놈들을 여기서 막는다!' },
       ],
       post: [
@@ -1820,7 +1828,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '성벽을 지키며 포위를 깬다! 둘 다 해낸다!' } ],
         wave: [ { who: 'bark', text: '눈보라 속에서 마계군이 또 오오!' } ],
-        danger: [ { who: 'kasha', text: '{commander}, 성벽 안쪽으로! 엄호할게!' } ],
+        danger: [ { who: 'kasha', text: '적이 후방으로 돌았어! 지휘관을 지켜!' } ],
         last: [ { who: 'sera', text: '하나 남았어. 서리문은 무사해!' } ],
       },
     },
@@ -1855,7 +1863,7 @@ window.STORY_KO = {
         { who: 'commander', text: '혼자 하려니까 못 한 거야.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '전원 돌격! 균열 앞 마계군을 쓸어 낸다!' } ],
+        start: [ { who: 'commander', text: '포르티시모! 전원 돌격, 균열 앞 마계군을 쓸어 내!' } ],
         wave: [ { who: 'kasha', text: '균열에서 정예 기사단이야! 대열 정비!' } ],
         last: [ { who: 'commander', text: '하나 남았다. 균열을 꺾는다!' } ],
       },
@@ -1894,7 +1902,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '유적을 지켜라! 돌기둥을 등지고 싸워!' } ],
         wave: [ { who: 'kasha', text: '유적 뒤쪽이 뚫렸어! 누가 막아!' } ],
-        danger: [ { who: 'bark', text: '대장! 뒤로! 여긴 내가 막소!' } ],
+        danger: [ { who: 'bark', text: '대장 쪽이 비었소! 후방 막아, 여긴 내가 막소!' } ],
         last: [ { who: 'bark', text: '하나… 남았소… 대장, 끝내쇼!' } ],
       },
     },
@@ -1932,7 +1940,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '고향 성벽이다! 한 발도 물러서지 마!' } ],
         wave: [ { who: 'kasha', text: '대군이야! 성벽 동쪽으로 몰려와!' } ],
-        danger: [ { who: 'sera', text: '{commander}! 여기서 쓰러지면 안 돼!' } ],
+        danger: [ { who: 'sera', text: '지휘가 끊기면 성벽도 끝이야! 후방을 지켜!' } ],
         last: [ { who: 'bark', text: '하나 남았소! 우리 마을이오!' } ],
       },
     },
@@ -1991,9 +1999,9 @@ window.STORY_KO = {
       ],
       battle: {
         start: [ { who: 'commander', text: '호위 기사부터 떼어 내! 엄호를 무너뜨려!' } ],
-        boss: [ { who: 'boss', text: '검을 들어라, 열쇠의 아이여. 예를 갖춰 상대하마.' } ],
+        boss: [ { who: 'boss', text: '그 은빛 지휘봉… 왕국 전장 지휘관이군. 지휘해 봐라.' } ],
         wave: [ { who: 'kasha', text: '기사단 증원이야! 측면을 지켜!' } ],
-        danger: [ { who: 'sera', text: '{commander}! 정면으로 받지 마, 돌아가!' } ],
+        danger: [ { who: 'sera', text: '지휘관이 노출됐어! 기사들 뒤로 물려!' } ],
         last: [ { who: 'bark', text: '하나 남았소! 첫 번째 신하 끝!' } ],
       },
     },
@@ -2002,7 +2010,7 @@ window.STORY_KO = {
         { who: 'narrator', text: '두 번째 불빛. 허공에 수천 개의 마법진이 떠 있었다.' },
         { who: 'boss', text: '모든 마법은 계산이다. 네 승률은 영에 가깝다.' },
         { who: 'ordin', text: '나도 저렇게 계산하며 살았소. 그러다 틀렸지.' },
-        { who: 'commander', text: '계산에 없는 걸 보여 주지. 클랜원들 손을.' },
+        { who: 'commander', text: '계산에 없는 걸 보여 주지. 우리 화음을.' },
       ],
       post: [
         { who: 'boss', text: '계산이… 맞지 않는다… 왜 서로를 감싸지…?' },
@@ -2029,10 +2037,10 @@ window.STORY_KO = {
         { who: 'narrator', text: '세 번째 불빛이 꺼졌다. 남은 빛은 둘.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '성벽 사수! 소환수 물결을 받아 낸다!' } ],
+        start: [ { who: 'commander', text: '성벽 사수! 다 카포, 처음부터 다시 물결을 받아 내!' } ],
         boss: [ { who: 'boss', text: '셀 수 없는 것들 앞에서 무릎 꿇어라.' } ],
         wave: [ { who: 'bark', text: '또 쏟아지오! 이놈의 소환은 끝이 없나!' } ],
-        danger: [ { who: 'sera', text: '{commander}, 방어 태세로 한 번 버텨!' } ],
+        danger: [ { who: 'sera', text: '{commander} 쪽으로 소환수가 몰려! 후방을 지켜!' } ],
         last: [ { who: 'kasha', text: '하나 남았어! 군세가 끊겼다!' } ],
       },
     },
@@ -2112,7 +2120,7 @@ window.STORY_KO = {
       battle: {
         start: [ { who: 'commander', text: '오르딘이 봉인을 푸는 동안 길을 연다!' } ],
         wave: [ { who: 'kasha', text: '근위대가 오르딘을 노려! 막아!' } ],
-        danger: [ { who: 'sera', text: '{commander}! 너무 앞이야!' } ],
+        danger: [ { who: 'sera', text: '후방이 뚫렸어! 다들 지휘관 쪽으로!' } ],
         last: [ { who: 'commander', text: '하나 남았다. 오르딘, 조금만 더!' } ],
       },
     },
@@ -2148,12 +2156,12 @@ window.STORY_KO = {
       ],
       post: [
         { who: 'boss', text: '어째서… 하나를 꺾으면… 다른 손이 붙잡는가….' },
-        { who: 'narrator', text: '지휘관이 흉터 위에 손을 펼치자 모두가 손을 포갰다.' },
+        { who: 'narrator', text: '지휘관이 지휘봉을 내리고 흉터를 펼치자 모두가 손을 포갰다.' },
         { who: 'commander', text: '이게 열쇠야. 우리 모두가.' },
         { who: 'narrator', text: '열쇠가 돌아가고, 마계 군주의 옥좌가 빛 속에 잠겼다.' },
       ],
       battle: {
-        start: [ { who: 'commander', text: '솔빛 클랜, 마지막 싸움이다! 전원 함께!' } ],
+        start: [ { who: 'commander', text: '피날레다! 솔빛 클랜, 전원 함께!' } ],
         boss: [ { who: 'boss', text: '와라, 열쇠여. 너의 모든 것을 꺾어 주마.' } ],
         wave: [ { who: 'kasha', text: '옥좌의 그림자가 일어나! 마지막 군세야!' } ],
         danger: [ { who: 'sera', text: '{commander}! 쓰러지지 마! 우리가 있어!' } ],
