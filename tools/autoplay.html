@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autoplay Lab</title>
+<!-- 개발용: 자동 플레이 연구소. 반드시 http://127.0.0.1:8765/tools/autoplay.html 로 열 것
+     (localhost와 저장소가 분리돼 실제 플레이 저장을 건드리지 않음). 전투는 battle.html을 iframe으로 띄워 시간을 빨리 감고,
+     클랜원 행동은 봇이, 전투 사이 육성(상점·성소·아카데미·장비)은 선택한 전략 프로필이 처리한다 -->
+<style>
+:root{--bg:#0e1018;--card:#171b27;--line:#2a3042;--tx:#e2e8f0;--sub:#94a3b8;--acc:#f59e0b;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.5 'Noto Sans KR',system-ui,sans-serif;padding:16px}
+h1{font-size:17px;margin:0 0 4px}.lead{color:var(--sub);margin:0 0 10px;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+label{color:var(--sub);font-size:12px}
+input,select{background:#0b0e15;color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font:inherit;width:72px}
+select{width:auto}
+button{background:transparent;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer;font:inherit}
+button:hover{border-color:var(--acc);color:var(--acc)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:12px;margin-top:10px}
+iframe{width:100%;aspect-ratio:4/3;border:1px solid var(--line);border-radius:10px;background:#000}
+#log{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;height:520px;overflow:auto;font:11px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+#stat{color:var(--acc);font-weight:700}
+.w{color:var(--ok)}.l{color:var(--bad)}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>자동 플레이 연구소</h1>
+<p class="lead">127.0.0.1 전용 저장소에서 새 게임을 시작해 스테이지를 자동으로 진행합니다. 기록은 <code>ap_log</code>에 저장됩니다.</p>
+<div class="row">
+  <label>전략 <select id="profile"><option value="managed">육성 전략(상점·성소·장비)</option><option value="naive">무육성(기본 파티만)</option></select></label>
+  <label>조합 <select id="combo">
+    <option value="knight,priest,mage,archer,warrior">균형: 기사·사제·마법사·궁수·전사</option>
+    <option value="warrior,warrior,warrior,warrior,warrior">광전사: 전사×5</option>
+    <option value="knight,priest,archer,archer,archer">포격진: 기사·사제·궁수×3</option>
+    <option value="knight,priest,mage,mage,mage">마법 화력: 기사·사제·마법사×3</option>
+    <option value="knight,lancer,priest,mage,archer">철옹성: 기사·창기사·사제·마법사·궁수</option>
+    <option value="knight,knight,knight,knight,knight">철벽 기사단: 기사×5</option>
+    <option value="archer,archer,archer,archer,archer">명사수대: 궁수×5</option>
+    <option value="mage,mage,mage,mage,mage">마도 연합: 마법사×5</option>
+    <option value="assassin,assassin,assassin,assassin,assassin">그림자단: 암살자×5</option>
+    <option value="knight,priest,shaman,mage,archer">주술 혼합: 기사·사제·주술사·마법사·궁수</option>
+  </select></label>
+  <label>시작 <input id="from" type="number" value="1" min="1" max="100"></label>
+  <label>끝 <input id="to" type="number" value="100" min="1" max="100"></label>
+  <label>재도전 <input id="retries" type="number" value="2" min="0" max="9"></label>
+  <label>파밍 <input id="grind" type="number" value="4" min="0" max="20"></label>
+  <label>배속 <input id="warp" type="number" value="25" min="1" max="200"></label>
+  <label>상점 갱신(스테이지마다) <input id="shopEvery" type="number" value="3" min="1" max="20"></label>
+  <label>하루(스테이지마다) <input id="dayEvery" type="number" value="4" min="1" max="30"></label>
+</div>
+<div class="row">
+  <button id="new">새 게임으로 시작</button>
+  <button id="cont">이어서</button>
+  <button id="stop">정지</button>
+  <button id="export">기록 내보내기</button>
+  <span id="stat"></span>
+</div>
+<div class="wrap">
+  <iframe id="game"></iframe>
+  <div id="log"></div>
+</div>
+<script src="../data/jab.js"></script>
+<script src="../js/common/i18n.js"></script>
+<script src="../js/common/constants.js"></script>
+<script src="../js/common/storage.js"></script>
+<script src="../js/common/character.js"></script>
+<script src="../js/common/soul.js"></script>
+<script src="../js/common/daily.js"></script>
+<script src="../data/stages.js"></script>
+<script src="../data/equip.js"></script>
+<script src="../js/skills.js"></script>
+<script src="../data/synergy.js"></script>
+<script src="../data/hazards.js"></script>
+<script src="autoplay.js"></script>
+</body>
+</html>
