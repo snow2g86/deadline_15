@@ -48,7 +48,7 @@ const UnitManager = {
         // 적 레벨 성장 (요일 던전은 같은 강함의 스테이지 기준) → 그 위에 스테이지 배율(기하급수)
         const sl = stageLevel(s), g = d.growth, avg = k => (g[k][0] + g[k][1]) / 2;
         lv = stageEnemyLv(sl);
-        hp = d.base.hp + avg('hp') * (lv - 1); atk = d.base.atk + avg('atk') * (lv - 1); def = Math.round(d.base.def + avg('def') * (lv - 1));
+        hp = d.base.hp + avg('hp') * ENEMY_HP_GROWTH_MUL * (lv - 1); atk = d.base.atk + avg('atk') * (lv - 1); def = Math.round(d.base.def + avg('def') * ENEMY_DEF_GROWTH_MUL * (lv - 1));
         hp = Math.round(hp * s.sm.hp); atk = Math.round(atk * s.sm.atk);
         const skl = stageEnemySkillLv(sl); skillLv = {};
         if (skl > 1) getSkills(cls).forEach(sk => { skillLv[sk.id] = skl; });

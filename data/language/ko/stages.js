@@ -1,6 +1,22 @@
 window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "stages": {
+        "boss_10": "도적 우두머리",
+        "boss_20": "냉기 기사",
+        "boss_30": "습지의 제왕",
+        "boss_40": "화염 황제",
+        "boss_45": "심연의 기사",
+        "boss_50": "심연의 전사",
+        "boss_60": "옥문의 수호자",
+        "boss_70": "악마의 법사",
+        "boss_80": "신의 소환사",
+        "boss_90": "전쟁의 전사",
+        "boss_92": "최후의 기사",
+        "boss_93": "최후의 마술사",
+        "boss_94": "최후의 소환사",
+        "boss_95": "금지된 기사",
+        "boss_99": "마계의 전사",
+        "boss_100": "마계 군주",
         "stage_1_name": "솔빛 목책",
         "stage_1_theme": "마을 방어",
         "stage_1_story": "솔빛 마을 목책을 넘보는 산적을 막아라",

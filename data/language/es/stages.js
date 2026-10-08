@@ -1,6 +1,22 @@
 window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "stages": {
+        "boss_10": "Jefe de los bandidos",
+        "boss_20": "Caballero de escarcha",
+        "boss_30": "Señor del pantano",
+        "boss_40": "Emperador de las llamas",
+        "boss_45": "Caballero del abismo",
+        "boss_50": "Guerrero del abismo",
+        "boss_60": "Guardián de la puerta infernal",
+        "boss_70": "Hechicero demoníaco",
+        "boss_80": "Invocador del dios",
+        "boss_90": "Guerrero de la guerra",
+        "boss_92": "El último caballero",
+        "boss_93": "El último mago",
+        "boss_94": "El último invocador",
+        "boss_95": "El caballero prohibido",
+        "boss_99": "Guerrero del reino demoníaco",
+        "boss_100": "Señor del reino demoníaco",
         "stage_1_name": "Empalizada de Solbit",
         "stage_1_theme": "Defensa del pueblo",
         "stage_1_story": "Defiende la empalizada de Solbit de los bandidos",

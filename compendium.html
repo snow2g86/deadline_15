@@ -960,7 +960,7 @@ function renderStageCards() {
 
         ${stage.boss ? `
         <div style="background:rgba(167,139,250,0.15);border-left:2px solid #a78bfa;padding:6px;border-radius:4px;font-size:9px">
-          <div style="color:#a78bfa;font-weight:700">💀 ${stage.boss.name}</div>
+          <div style="color:#a78bfa;font-weight:700">💀 ${typeof bossName === "function" ? bossName(stage) : stage.boss.name}</div>
           <div style="color:var(--dim);margin-top:2px">${cd[stage.boss.cls]?.icon} ${t('classes.' + stage.boss.cls) || stage.boss.cls}</div>
         </div>
         ` : ''}

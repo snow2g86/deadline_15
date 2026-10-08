@@ -1,6 +1,22 @@
 window._LANG_en = window._LANG_en || {};
 Object.assign(window._LANG_en, {
     "stages": {
+        "boss_10": "Bandit Chief",
+        "boss_20": "Frost Knight",
+        "boss_30": "Lord of the Marsh",
+        "boss_40": "Flame Emperor",
+        "boss_45": "Abyssal Knight",
+        "boss_50": "Abyssal Warrior",
+        "boss_60": "Warden of the Hell Gate",
+        "boss_70": "Demonic Sorcerer",
+        "boss_80": "Summoner of the God",
+        "boss_90": "Warrior of War",
+        "boss_92": "The Last Knight",
+        "boss_93": "The Last Magician",
+        "boss_94": "The Last Summoner",
+        "boss_95": "The Forbidden Knight",
+        "boss_99": "Warrior of the Demon Realm",
+        "boss_100": "Overlord of the Demon Realm",
         "stage_1_name": "Solbit Palisade",
         "stage_1_theme": "Village Defense",
         "stage_1_story": "Hold the Solbit palisade against the bandits",

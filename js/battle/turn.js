@@ -134,7 +134,7 @@ const TurnManager = {
     if (S.eSpwn === 0 && s.boss) {
       const bu = UnitManager.addUnit('enemy', s.boss.cls, MID_C, 2);
       if (bu) {
-        bu.isBoss = true; bu.name = s.boss.name; bu.origSpawn = { x: MID_C, y: 2 };
+        bu.isBoss = true; bu.name = bossName(s); bu.origSpawn = { x: MID_C, y: 2 };
         // 보스: 레벨 +ENEMY_BOSS_LV 만큼 더 성장한 능력치
         const g = JAB[bu.cls].growth, m = ENEMY_BOSS_LV;
         bu.lv += m; bu.mhp = bu.hp = Math.round(bu.mhp + (g.hp[0] + g.hp[1]) / 2 * m * s.sm.hp);

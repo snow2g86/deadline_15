@@ -137,7 +137,7 @@ function renderStages() {
     var badge = cl ? '<span class="sb-badge clear">\u2713 CLEAR</span>'
       : isNext ? '<span class="sb-badge next">NEXT</span>'
       : !unlocked ? '<span class="sb-badge lock">\uD83D\uDD12</span>' : '';
-    var bossTag = st.boss && st.boss.name ? '<div class="sb-boss">\uD83D\uDC80 ' + st.boss.name + '</div>' : '';
+    var bossTag = st.boss && st.boss.name ? '<div class="sb-boss">\uD83D\uDC80 ' + bossName(st) + '</div>' : '';
     var starArr = loadStars()[st.id] || [0, 0, 0];
     var starHtml = cl ? '<span class="sb-stars">' + starArr.map(function(v) { return '<i class="' + (v ? 'on' : '') + '">\u2605</i>'; }).join('') + '</span>' : '';
     b.innerHTML =
@@ -260,7 +260,7 @@ function showStageInfo(stageId) {
   var bossHTML = st.boss ?
     '<div class="si-boss">' +
       '<div class="si-boss-label">💀 ' + t('stage.boss') + '</div>' +
-      '<div class="si-boss-name">' + st.boss.name + '</div>' +
+      '<div class="si-boss-name">' + bossName(st) + '</div>' +
       '<div class="si-boss-class">' +
         getClassIcon(st.boss.cls) + ' ' +
         t('classes.' + st.boss.cls) +
