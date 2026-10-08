@@ -61,9 +61,10 @@ var Synergy = {
     return out;
   },
   name: function(s) {
-    if (s.id.indexOf('mono_') === 0) return t('synergy.mono_' + s.cls);
-    if (s.id.indexOf('trio_') === 0) return t('synergy.trio', { cls: t('classes.' + s.cls) });
-    return t('synergy.' + s.id);
+    var res = s.resonance ? ' ✦' + t('gear.resonance') : '';   // 직업 세트 공명 (data/gear.js)
+    if (s.id.indexOf('mono_') === 0) return t('synergy.mono_' + s.cls) + res;
+    if (s.id.indexOf('trio_') === 0) return t('synergy.trio', { cls: t('classes.' + s.cls) }) + res;
+    return t('synergy.' + s.id) + res;
   },
   // 효과를 '공격 ×2 · 방어 ×0.5' 같은 문구로
   describe: function(s) {

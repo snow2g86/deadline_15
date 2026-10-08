@@ -435,7 +435,7 @@ const AI = {
       EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
     } else {
       let dmg = calcDmg(a, tgt);
-      if (blk) dmg = Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul));
+      if (blk) dmg = GearFX.intercept(blk, Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul)));
       // 방어막: 공격받는 쪽 피해 50%
       if (UnitManager.shieldMul(tgt) < 1) {
         dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt)));
@@ -466,7 +466,7 @@ const AI = {
       // 반격
       if (tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !UnitManager.isCC(tgt)) {
         await sl(Math.max(420, hd + 180 - (performance.now() - t0)));
-        const cdmg = EnchantFX.modDamage(tgt, a, calcDmg(tgt, a));   // 클랜원 반격에도 공격용 마법부여
+        const cdmg = Math.max(1, Math.round(EnchantFX.modDamage(tgt, a, calcDmg(tgt, a)) * GearFX.counterMul(tgt)));   // 클랜원 반격에도 공격용 마법부여·장비 반격 강화
         a.hp = Math.max(0, a.hp - cdmg);
         EventBus.emit('unit_attacked', { attacker: tgt, target: a, damage: cdmg, counter: true });
         EnchantFX.afterHit(tgt, a, cdmg);

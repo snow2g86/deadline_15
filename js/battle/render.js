@@ -1037,6 +1037,7 @@ const Renderer = {
       rewards.push(['💠', t(sr.kind === 'stone' ? 'soul.reward_stone' : 'soul.reward_frag', { cls: t('classes.' + sr.cls) }), '+' + sr.n]);
       S._soulReward = null;
     }
+    if (win && S._gearDrops) { S._gearDrops.forEach(g => rewards.push([g.icon, (g.legend ? '★ ' : '') + g.text, ''])); S._gearDrops = null; }   // 장비·강화석
     if (rewards.length) {
       const rw = el('div', 'res-rewards');
       rewards.forEach(([ic, label, val]) => {

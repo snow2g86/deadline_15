@@ -243,7 +243,7 @@ function renderEnchant() {
         return '<button class="enc-opt' + (on ? ' on' : '') + '" data-k="' + k + '"' + (n && !on ? '' : ' disabled') + ' title="' + t('enchant.' + k) + ' (' + n + ') — ' + t('enchant.desc_' + k) + '">' + ENCHANTS[k].icon + '</button>'; }).join('') + '</div>'; };
     var curTxt = [it.enchant, it.enchantAtk].filter(Boolean).map(function(k) { return ENCHANTS[k].icon + ' ' + t('enchant.' + k); }).join(' · ') || t('enchant.none');
     el.innerHTML = '<div class="game-card-icon enc-ic">' + getEquipEmoji(it.templateId) + '</div>' +
-      '<div class="game-card-info"><div class="game-card-name" style="color:' + RARITY[it.rarity].color + '">' + t('equip.item.' + it.templateId) + (it.enhanceLv ? ' +' + it.enhanceLv : '') + '</div>' +
+      '<div class="game-card-info"><div class="game-card-name" style="color:' + RARITY[it.rarity].color + '">' + Gear.name(it) + (it.enhanceLv ? ' +' + it.enhanceLv : '') + '</div>' +
       '<div class="game-card-sub">' + (owner ? '👤 ' + (owner.customName || names[owner.nameId] || t('classes.' + owner.cls)) : t('enchant.unequipped')) + ' · ' + curTxt + ' · ' + ENCHANT_FEE + 'G</div>' +
       row('def') + row('atk') + '</div>';
     el.querySelectorAll('.enc-opt:not([disabled])').forEach(function(b) {
@@ -251,7 +251,7 @@ function renderEnchant() {
         var k = b.dataset.k;
         if (loadGold() < ENCHANT_FEE) { showAlert(t('enchant.no_gold', { gold: ENCHANT_FEE })); return; }
         var cur = it[ENCHANT_FIELD[ENCHANTS[k].cat]];   // 같은 분류의 기존 마법부여만 바뀜
-        var msg = t('enchant.confirm', { item: t('equip.item.' + it.templateId), e: ENCHANTS[k].icon + ' ' + t('enchant.' + k), gold: ENCHANT_FEE }) +
+        var msg = t('enchant.confirm', { item: Gear.name(it), e: ENCHANTS[k].icon + ' ' + t('enchant.' + k), gold: ENCHANT_FEE }) +
           (cur ? '\n' + t('enchant.overwrite', { cur: ENCHANTS[cur].icon + ' ' + t('enchant.' + cur) }) : '');
         showConfirm(msg, function() {
           var r = Rune.apply(it.eid, k);

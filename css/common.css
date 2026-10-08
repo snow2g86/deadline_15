@@ -783,3 +783,29 @@ body[data-page="skill-balance-report"] main {
 .lobby-cmd-btn{position:absolute;left:16px;top:70px;z-index:5;display:flex;align-items:center;gap:6px;background:rgba(15,21,32,.85);border:1px solid #2c3648;
   border-radius:999px;padding:5px 12px 5px 5px;color:#e2e8f0;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .lobby-cmd-btn img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#1e2a3a}
+
+/* ── 장비 옵션 줄 (data/gear.js Gear.linesHtml) ── */
+.eq-inv-opts{display:flex;flex-direction:column;gap:1px;margin-top:3px}
+.gear-line{font-size:10px;line-height:1.35;color:var(--dim,#9ca3af)}
+.gear-line.gl-sub{color:#cbd5e1}
+.gear-line.gl-copt{color:#60a5fa}
+.gear-line.gl-off{color:#6b7280;text-decoration:line-through;opacity:.7}
+.gear-line.gl-fx{color:#c4b5fd}
+.gear-line.gl-legend{color:#f0c040;font-weight:700}
+.gear-line.gl-eopt{color:#fbbf24}
+.gear-line.gl-set{color:#34d399}
+.gear-total{display:flex;flex-direction:column;gap:2px;padding:4px 2px}
+.eq-inv-card.broken{opacity:.75;filter:grayscale(.6)}
+.eq-inv-card.legend{box-shadow:0 0 0 1px rgba(240,192,64,.55),0 0 10px rgba(240,192,64,.18)}
+.eq-inv-broken{font-size:10px;color:#ef4444;font-weight:700}
+.enh-mats{font-size:12px;font-weight:700;color:var(--gold,#f0c040);padding:6px 4px 2px}
+.enh-hint{font-size:10px;color:var(--dim,#9ca3af);padding:0 4px 6px}
+.enh-broken-title{font-size:12px;font-weight:700;color:#ef4444;padding:10px 4px 2px}
+.enhance-card.broken{opacity:.85}
+.enhance-card.legend{box-shadow:0 0 0 1px rgba(240,192,64,.5)}
+.enhance-btn.sub{margin-left:4px;min-width:34px}
+.enh-sub{font-size:10px;color:var(--dim,#9ca3af);margin-top:3px}
+.enh-ms{font-size:10px;color:#f0c040;font-weight:700;margin-top:3px}
+.enh-bonus{color:#fbbf24}
+.enh-protect{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:6px;cursor:pointer}
+.enh-protect.disabled{opacity:.5;cursor:default}

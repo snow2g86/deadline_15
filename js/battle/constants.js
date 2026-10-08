@@ -51,19 +51,28 @@ function toBattleStats(uid) {
   const d = JAB[ch.cls];
   const names = t('character.names');
   if(!ch.equip) ch.equip={weapon:null,offhand:null,helmet:null,armor:null,boots:null,necklace:null,earring:null,ring:null};
-  const eq = typeof calcEquipBonus==='function' ? calcEquipBonus(ch) : {hp:0,atk:0,def:0,move:0,range:0};
+  const eq = typeof calcEquipBonus==='function' ? calcEquipBonus(ch) : {hp:0,atk:0,def:0,move:0,range:0,gear:{}};
+  const gear = eq.gear || {};
+  // 장비 효과 중 전투 전 능력치로 바로 반영되는 것: 행동 속도·자원 회복 (사거리 보너스는 원거리 직업만)
+  const rangeAdd = ch.range > 1 ? eq.range : 0;
+  let resRec = d.resRec;
+  if (d.res === 'mana' || d.res === 'energy') resRec = Math.round((resRec + (gear.res_rec || 0)) * (1 + (gear.res_rec_pct || 0) / 100));
+  const enchants = typeof Hazard !== 'undefined' ? Hazard.enchantsOf(ch) : [];   // 장비 마법부여 (환경 디버프 저항)
+  if (gear.immune_fire) enchants.push('fire');   // 전설: 용비늘 갑주
+  if (gear.immune_heat) enchants.push('heat');   // 전설: 바람걸음 장화
   return {
     uid: ch.uid, cls: ch.cls, lv: ch.lv,
     name: ch.customName || (names && names[ch.nameId]) || d.icon,
     hp: ch.hp+eq.hp, mhp: ch.hp+eq.hp, atk: ch.atk+eq.atk, def: ch.def+eq.def,
-    move: Math.min(ch.move+eq.move,6), range: Math.min(ch.range+eq.range,5),
+    move: Math.min(ch.move+eq.move,6), range: Math.min(ch.range+rangeAdd,5),
     role: ROLE_MAP[ch.cls],
     res: d.res === 'mana' ? d.maxRes : 0,
-    maxRes: d.maxRes, resType: d.res, resRec: d.resRec,
-    actionRec: ch.actionRec || d.actionRec || 1.0,
+    maxRes: d.maxRes, resType: d.res, resRec,
+    actionRec: Math.round(((ch.actionRec || d.actionRec || 1.0) + (gear.speed || 0)) * 100) / 100,
     skillLv: ch.skillLv || {},
     gender: ch.gender || 'm',
-    enchants: typeof Hazard !== 'undefined' ? Hazard.enchantsOf(ch) : [],   // 장비 마법부여 (환경 디버프 저항)
+    enchants,
+    gear, fullSet: eq.fullSet || null,   // 장비 효과(data/gear.js GearFX)·직업 세트 완성 여부
   };
 }
 

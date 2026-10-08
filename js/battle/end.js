@@ -11,7 +11,8 @@ const BattleEnd = {
     S._expResults = [];
     survivors.forEach(u => {
       const actE = (S.battleExp && S.battleExp[u.uid]) || 0;
-      const total = actE + killEach;
+      const expMul = 1 + ((u.gear && u.gear.exp_pct) || 0) / 100;   // 장비: 받는 경험치 증가
+      const total = Math.round((actE + killEach) * expMul);
       if (!total) return;
       const r = gainExp(u.uid, total);
       S._expResults.push({ uid: u.uid, exp: total, actExp: actE, killExp: killEach, leveled: r.leveled, prevLv: r.prevLv });
@@ -19,11 +20,13 @@ const BattleEnd = {
     S._totalExp = killPool;
     S._deadEnemyCount = S._killCount;
 
-    // 요일 던전: 영혼석 조각만 (골드·클리어 기록·별·신규 유닛·스킬북 없음)
+    S._gearDrops = [];
+    // 요일 던전: 영혼석 조각 + 강화석 + 그 직업 세트 장비(확률) (골드·클리어 기록·별·신규 유닛·스킬북 없음)
     if (S.cStage && S.cStage.daily) {
       S._soulReward = null;
       if (win) { Soul.add('frag', S.cStage.daily.cls, S.cStage.daily.frags); S._soulReward = { kind: 'frag', cls: S.cStage.daily.cls, n: S.cStage.daily.frags };
-        S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null; }
+        S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null;
+        this._dailyGear(S); }
       S._deadAllyUids.forEach(uid => markDead(uid));
       clearBattle();
       return;
@@ -116,6 +119,12 @@ const BattleEnd = {
           else { Soul.add('frag', cls, SOUL.bossRepeatFrags); S._soulReward = { kind: 'frag', cls, n: SOUL.bossRepeatFrags }; }
         }
 
+        // 보스 스테이지: 확률로 전설 장비 (첫 클리어 15% · 반복 5%)
+        if (S.cStage.boss && Math.random() < (isFC ? GEAR_DROP.bossLegend.first : GEAR_DROP.bossLegend.repeat)) {
+          const it = Gear.give(Gear.makeLegend());
+          S._gearDrops.push({ icon: getEquipEmoji(it.templateId), text: Gear.name(it), legend: true });
+        }
+
         // 마법부여 룬 드랍
         S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null;
 
@@ -142,6 +151,21 @@ const BattleEnd = {
     }
 
     clearBattle();
+  },
+
+  // 요일 던전 장비 보상: 강화석(난이도별) · 그 직업 세트 한 부위(확률) · 지옥은 전설(3%)
+  _dailyGear(S) {
+    const dl = S.cStage.daily, tier = dl.tier;
+    const st = GEAR_DROP.dailyStones[tier] || 2;
+    Mats.add('stone', st); S._gearDrops.push({ icon: '🔩', text: t('gear.stone') + ' +' + st });
+    if (Math.random() < (GEAR_DROP.dailySet[tier] || 0)) {
+      const it = Gear.give(Gear.makeSetPiece(dl.cls, null, GEAR_DROP.setRarity[tier] || 'rare'));
+      S._gearDrops.push({ icon: getEquipEmoji(it.templateId), text: Gear.name(it) });
+    }
+    if (tier === 'hell' && Math.random() < GEAR_DROP.dailyLegendHell) {
+      const it = Gear.give(Gear.makeLegend());
+      S._gearDrops.push({ icon: getEquipEmoji(it.templateId), text: Gear.name(it), legend: true });
+    }
   },
 
   returnToLobby() { location.href = 'index.html'; },

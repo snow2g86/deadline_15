@@ -363,7 +363,7 @@ const ActionManager = {
       }, 420);
     } else {
       let dmg = EnchantFX.modDamage(a, tgt, calcDmg(a, tgt));   // 공격용 마법부여 (번개·파쇄)
-      if (blk) dmg = Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul));
+      if (blk) dmg = GearFX.intercept(blk, Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul)));
       this._grantExp(a, 'attack');
       if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
       tgt.hp = Math.max(0, tgt.hp - dmg);

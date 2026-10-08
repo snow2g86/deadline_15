@@ -134,3 +134,10 @@
   .gold-iap-grid{grid-template-columns:repeat(2,1fr)}
   .shop-tab-ad{padding:14px 16px}
 }
+
+/* 전설 교환 */
+.legend-exchange{grid-column:1/-1}
+.legend-grid{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.legend-btn{font-size:10px;padding:4px 6px;border-radius:4px;border:1px solid rgba(240,192,64,.5);background:rgba(240,192,64,.08);color:#f0c040;cursor:pointer}
+.legend-btn.disabled{opacity:.45}
+.gacha-result-card .eq-inv-opts{text-align:left}

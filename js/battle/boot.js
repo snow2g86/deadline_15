@@ -122,9 +122,11 @@ const BattleInit = {
 
     // 클래스 조합 버프 (파티 광역): 출전한 클랜원 직업 구성으로 정해져 전투 내내 유지
     S._synergies = Synergy.compute(S.units.filter(u => u.team === 'ally').map(u => u.cls));
+    GearFX.resonance(S);   // 직업 세트 공명 → 그 직업 조합 버프 강화
     Synergy.apply(S.units, S._synergies);
     // 맵 환경 디버프 (마법부여로 막은 클랜원 제외) + 보물상자
     S._hazard = Hazard.apply(S.units, S.cStage);
+    GearFX.init(S);   // 장비 효과: 보호막·회복량·선공·파티 공격 + 전투 이벤트 연결
     Chest.place(S);
 
     // 첫 웨이브 스폰
@@ -148,7 +150,7 @@ const BattleInit = {
     S.battleExp = bs.battleExp || {};
     S.allyPos = bs.allyPos || {};
     S._killCount = bs._killCount || 0; S._killExpPool = bs._killExpPool || 0; S._deadAllyUids = bs._deadAllyUids || [];
-    S.units = bs.units; S._synergies = bs._synergies || []; S._hazard = Hazard.forStage(bs.stage); S.chests = bs.chests || [];   // 조합 버프는 저장된 유닛 스탯에 이미 반영됨
+    S.units = bs.units; S._synergies = bs._synergies || []; S._hazard = Hazard.forStage(bs.stage); S.chests = bs.chests || []; GearFX.bind();   // 조합 버프는 저장된 유닛 스탯에 이미 반영됨
     S.units.forEach(u => {
       if (!u.actionRec) u.actionRec = JAB[u.cls]?.actionRec || 1.0;
       if (u.actionPow == null) u.actionPow = 0;

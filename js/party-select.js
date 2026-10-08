@@ -892,7 +892,7 @@ function renderModalBody() {
     } else if (item) {
       html += '<div class="eq-slot-item" style="border-color:' + RARITY[item.rarity].color + '">';
       html += '<span class="eq-slot-rarity" style="color:' + RARITY[item.rarity].color + '">' + t('equip.rarity.' + item.rarity).charAt(0).toUpperCase() + '</span>';
-      html += '<span class="eq-slot-name">' + t('equip.item.' + item.templateId) + '</span>';
+      html += '<span class="eq-slot-name">' + Gear.name(item) + '</span>';
       html += '</div>';
     } else {
       html += '<div class="eq-slot-empty">-</div>';
@@ -935,6 +935,16 @@ function renderModalBody() {
     html += '<div class="eq-set-info">';
     for (var setId in setCounts) {
       var cnt = setCounts[setId];
+      if (setId.indexOf('cls_') === 0) {   // 직업 세트 (data/gear.js CLASS_SETS)
+        var sc = setId.slice(4), cdef = CLASS_SETS[sc];
+        html += '<div class="eq-set-row"><span class="eq-set-name">' + t('gear.set_progress', { set: t('gear.set.' + sc), n: cnt }) + '</span>';
+        [2, 3].forEach(function(n) {
+          html += '<span class="eq-set-bonus' + (cnt >= n ? ' active' : '') + '">(' + n + ') ' +
+            Object.keys(cdef[n]).map(function(k) { return Gear.fmt(k, cdef[n][k]); }).join(' · ') + '</span>';
+        });
+        html += '</div>';
+        continue;
+      }
       var setDef = EQUIP_SETS[setId];
       html += '<div class="eq-set-row">';
       html += '<span class="eq-set-name">' + t('equip.set.' + setId) + '</span>';
@@ -948,6 +958,14 @@ function renderModalBody() {
     }
     html += '</div>';
     html += '</div>'; // .eq-section
+  }
+
+  // 장비 효과 합계 (추가 능력치·전용 옵션·고유/전설 효과·세트, 퍼센트 능력치는 위 스탯에 이미 반영)
+  var gearKeys = Object.keys(bonus.gear || {});
+  if (gearKeys.length) {
+    html += '<div class="eq-section"><div class="eq-section-title">✦ ' + t('gear.fx_total') + '</div><div class="gear-total">';
+    gearKeys.forEach(function(k) { html += '<div class="gear-line gl-fx">' + Gear.fmt(k, bonus.gear[k]) + '</div>'; });
+    html += '</div></div>';
   }
 
   html += '</div>'; // .eq-left
@@ -1057,7 +1075,19 @@ function renderInventoryInModal(ch) {
     // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
     var itemEmoji = getEquipEmoji(item.templateId);
     var card = document.createElement('div');
-    card.className = 'eq-inv-card' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '');
+    card.className = 'eq-inv-card' + (isEquippedHere ? ' equipped-here' : isEquippedOther ? ' equipped-other' : '') + (item.broken ? ' broken' : '') + (item.legend ? ' legend' : '');
+    var setLabel = item.setCls ? t('gear.set_name', { set: t('gear.set.' + item.setCls) }) : (item.setId ? t('equip.set.' + item.setId) : '');
+    var actHtml;
+    if (item.broken) {   // 파손: 수리(+0 초기화) 또는 분해만
+      actHtml = '<button class="eq-inv-btn eq-repair-btn">🔧 ' + t('gear.repair_btn', { gold: repairCost(item) }) + '</button>' +
+        '<button class="eq-inv-btn eq-dismantle-btn">🔩 ' + t('gear.dismantle_btn') + '</button>';
+    } else if (isEquippedHere) {
+      actHtml = '<button class="eq-inv-btn eq-unequip-btn">' + t('equip.unequip_btn') + '</button>';
+    } else {
+      actHtml = (canEquipThis && !isEquippedOther ? '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' : '') +
+        (!isEquipped ? '<button class="eq-inv-btn eq-sell-btn">' + t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>' +
+          '<button class="eq-inv-btn eq-dismantle-btn">🔩 ' + t('gear.dismantle_btn') + '</button>' : '');
+    }
 
     // 새로운 카드 HTML 구조
     card.innerHTML =
@@ -1070,28 +1100,15 @@ function renderInventoryInModal(ch) {
       '<div class="eq-inv-info">' +
         '<span class="eq-inv-emoji">' + itemEmoji + '</span>' +
         '<span class="eq-inv-name">' +
-          t('equip.item.' + item.templateId) +
+          Gear.name(item) +
           enhanceLvHtml +
         '</span>' +
+        (item.broken ? '<span class="eq-inv-broken">💥 ' + t('gear.broken') + '</span>' : '') +
         (statsArr.length ? '<span class="eq-inv-stats">' + statsArr.join(' ') + '</span>' : '') +
-        (item.setId ? '<span class="eq-inv-set">' + t('equip.set.' + item.setId) + '</span>' : '') +
+        (setLabel ? '<span class="eq-inv-set">' + setLabel + '</span>' : '') +
+        '<div class="eq-inv-opts">' + Gear.linesHtml(item, ch.cls) + '</div>' +
       '</div>' +
-      '<div class="eq-inv-actions">' +
-        (isEquippedHere ?
-          '<button class="eq-inv-btn eq-unequip-btn">' + t('equip.unequip_btn') + '</button>'
-        :
-          (canEquipThis && !isEquippedOther ?
-            '<button class="eq-inv-btn eq-equip-btn">' + t('equip.equip_btn') + '</button>' +
-            '<button class="eq-inv-btn eq-sell-btn">' +
-              t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>'
-          :
-            (!isEquipped ?
-              '<button class="eq-inv-btn eq-sell-btn">' +
-                t('equip.sell_btn', { gold: SELL_PRICE[item.rarity] }) + '</button>'
-            : '')
-          )
-        ) +
-      '</div>';
+      '<div class="eq-inv-actions">' + actHtml + '</div>';
 
     // 이벤트 리스너
     var equipBtn = card.querySelector('.eq-equip-btn');
@@ -1108,6 +1125,11 @@ function renderInventoryInModal(ch) {
     if (unequipBtn) {
       unequipBtn.onclick = function() { unequipItemInModal(_selUid, item.slot); };
     }
+
+    var repairBtn = card.querySelector('.eq-repair-btn');
+    if (repairBtn) repairBtn.onclick = function() { repairEquipUI(item.eid); };
+    var disBtn = card.querySelector('.eq-dismantle-btn');
+    if (disBtn) disBtn.onclick = function() { dismantleEquipUI(item.eid); };
 
     list.appendChild(card);
   });
@@ -1135,7 +1157,7 @@ function unequipItemInModal(uid, slot) {
 
 // ── Core equip functions ──
 function canEquip(ch, item) {
-  if (!ch || !item) return false;
+  if (!ch || !item || item.broken) return false;
   if (item.clsRestrict && item.clsRestrict.indexOf(ch.cls) === -1) return false;
   if (item.slot === 'offhand') {
     ensureEquipSlots(ch);
@@ -1215,7 +1237,7 @@ function sellEquip(eid) {
   if (!item || !!item.equipped) return;
   var price = SELL_PRICE[item.rarity] || 30;
   showConfirm(
-    t('equip.sell_confirm', { name: t('equip.item.' + item.templateId), gold: price }),
+    t('equip.sell_confirm', { name: Gear.name(item), gold: price }),
     function() {
       var inv2 = loadInventory();
       inv2 = inv2.filter(function(x) { return x.eid !== eid; });
@@ -1576,86 +1598,73 @@ var init = async function() {
 };
 
 // ═══════════════════════════════════════════
-// 강화 시스템 (Enhancement System)
+// 강화 시스템 (Enhancement System) — 규칙은 data/equip.js enhanceItem
+//  비용: 골드 + 강화석, 실패 = 단계 하락(+0~+2 시도는 유지), 실패마다 0.5% 파손 → 수리(+0 초기화)
 // ═══════════════════════════════════════════
 
-// 강화 목록 렌더링
+var _enhProtect = false;   // 보호 주문서 사용 여부 (확인 창에서 켜고 끔)
+
+function _enhMatsHtml() {
+  return '<div class="enh-mats">🔩 ' + t('gear.mats', { stone: Mats.get('stone'), protect: Mats.get('protect'), shard: Mats.get('shard') }) + '</div>' +
+    '<div class="enh-hint">' + t('gear.enh_list_hint') + '</div>';
+}
+
+function _equippedName(item) {
+  if (!item.equipped) return '';
+  var c = getChar(item.equipped);
+  if (!c) return '';
+  var names = t('character.names');
+  return c.customName || (names && names[c.nameId]) || t('classes.' + c.cls);
+}
+
+// 강화 목록 렌더링 (장착 중인 장비도 강화 가능, 파손 장비는 아래에 따로)
 function renderEnhanceList() {
   var inv = loadInventory();
-  var enhanceable = inv.filter(function(x) {
-    return x.type === 'equip' && !x.equipped && canEnhance(x);
-  });
+  var equips = inv.filter(function(x) { return x.type === 'equip'; });
+  equips.sort(function(a, b) { return (RARITY[b.rarity].tier - RARITY[a.rarity].tier) || ((b.enhanceLv || 0) - (a.enhanceLv || 0)) || (!!b.equipped - !!a.equipped); });
+  var ok = equips.filter(function(x) { return !x.broken; }), broken = equips.filter(function(x) { return x.broken; });
 
-  var html = '';
-  for (var i = 0; i < enhanceable.length; i++) {
-    var item = enhanceable[i];
-    var enhancedStats = getEnhancedStats(item);
-    var currentStats = enhancedStats;
-    var rate = calcEnhanceRate(item);
-    var ratePercent = Math.round(rate * 100);
-    var costGold = calcEnhanceCost(item);
-
+  var html = _enhMatsHtml();
+  ok.forEach(function(item) {
+    var lv = item.enhanceLv || 0, rc = RARITY[item.rarity].color, max = lv >= ENHANCE_MAX_LV;
+    var rate = calcEnhanceRate(item), rp = Math.round(rate * 100);
     var rateClass = rate >= 0.80 ? 'rate-high' : rate >= 0.40 ? 'rate-mid' : 'rate-low';
-
-    // 성공 시 예상 스탯 (다음 레벨)
-    var nextLvl = item.enhanceLv + 1;
-    var nextMult = 1 + getEnhanceMultiplier(nextLvl);
-    var nextStats = {};
-    for (var stat in item.stats) {
-      nextStats[stat] = Math.round(item.stats[stat] * nextMult);
-    }
-
-    var gainText = '';
-    var gainHp = nextStats.hp - currentStats.hp;
-    var gainAtk = nextStats.atk - currentStats.atk;
-    var gainDef = nextStats.def - currentStats.def;
-    if (gainHp > 0) gainText += ' HP+' + gainHp;
-    if (gainAtk > 0) gainText += ' ATK+' + gainAtk;
-    if (gainDef > 0) gainText += ' DEF+' + gainDef;
-
-    // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
-    var itemEmoji = getEquipEmoji(item.templateId);
-    html += '<div class="enhance-card" onclick="showEnhanceModal(\'' + item.eid + '\')">' +
-      '<div class="enhance-icon">' + itemEmoji + '</div>' +
+    var who = _equippedName(item);
+    html += '<div class="enhance-card' + (item.legend ? ' legend' : '') + '" onclick="showEnhanceConfirmModal(\'' + item.eid + '\')">' +
+      '<div class="enhance-icon">' + getEquipEmoji(item.templateId) + '</div>' +
       '<div class="enhance-info">' +
         '<div class="enhance-header">' +
-          '<div class="enhance-name" title="' + t('equip.item.' + item.templateId) + '">' + t('equip.item.' + item.templateId) + '</div>' +
-          '<div class="enhance-level">' +
-            (item.enhanceLv > 0 ? '+' + item.enhanceLv : 'Lv.0') + ' → +' + nextLvl +
-          '</div>' +
+          '<div class="enhance-name" style="color:' + rc + '">' + Gear.name(item) + '</div>' +
+          '<div class="enhance-level">' + (max ? '+' + lv + ' MAX' : '+' + lv + ' → +' + (lv + 1)) + '</div>' +
         '</div>' +
         '<div class="enhance-details">' +
-          '<div class="enhance-stats-current">' + gainText + '</div>' +
-          '<div class="enhance-rate-cost">' + ratePercent + '% • ' + costGold + 'G</div>' +
+          '<div class="enhance-stats-current">' + (who ? '👤 ' + t('gear.equipped_by', { name: who }) : '') + '</div>' +
+          (max ? '' : '<div class="enhance-rate-cost ' + rateClass + '">' + rp + '% • ' + calcEnhanceCost(item) + 'G • 🔩' + calcEnhanceStones(item) + '</div>') +
         '</div>' +
       '</div>' +
-      '<button class="enhance-btn" onclick="event.stopPropagation(); showEnhanceModal(\'' + item.eid + '\');">' + t('enhance.button_enhance') + '</button>' +
+      (max ? '' : '<button class="enhance-btn" onclick="event.stopPropagation(); showEnhanceConfirmModal(\'' + item.eid + '\');">' + t('enhance.button_enhance') + '</button>') +
     '</div>';
-  }
-
-  if (enhanceable.length === 0) {
-    html = '<div class="empty-state"><span class="es-ic">🔨</span>' + t('enhance.no_items') +
+  });
+  if (!ok.length && !broken.length) {
+    html += '<div class="empty-state"><span class="es-ic">🔨</span>' + t('enhance.no_items') +
            '<button class="es-btn" onclick="location.href=\'shop.html\'">🛒 ' + t('nav.shop') + '</button></div>';
   }
-
+  if (broken.length) {
+    html += '<div class="enh-broken-title">💥 ' + t('gear.enh_broken_title') + '</div><div class="enh-hint">' + t('gear.broken_hint') + '</div>';
+    broken.forEach(function(item) {
+      html += '<div class="enhance-card broken">' +
+        '<div class="enhance-icon">' + getEquipEmoji(item.templateId) + '</div>' +
+        '<div class="enhance-info"><div class="enhance-header"><div class="enhance-name" style="color:' + RARITY[item.rarity].color + '">' + Gear.name(item) + '</div>' +
+        '<div class="enhance-level">💥 ' + t('gear.broken') + '</div></div></div>' +
+        '<button class="enhance-btn" onclick="repairEquipUI(\'' + item.eid + '\')">🔧 ' + t('gear.repair_btn', { gold: repairCost(item) }) + '</button>' +
+        '<button class="enhance-btn sub" onclick="dismantleEquipUI(\'' + item.eid + '\')">🔩</button>' +
+      '</div>';
+    });
+  }
   document.getElementById('enhance-list').innerHTML = html;
 }
 
-// 강화 모달 표시 (단계 2: 재료 선택)
-function showEnhanceModal(targetEid) {
-  var inv = loadInventory();
-  var target = inv.find(function(x) { return x.eid === targetEid; });
-  if (!target) return;
-
-  var materials = inv.filter(function(x) {
-    return x.type === 'equip' && x.slot === target.slot && x.eid !== targetEid && !x.equipped;
-  });
-
-  if (materials.length === 0) {
-    showAlert(t('enhance.no_materials'));
-    return;
-  }
-
+function _enhOverlay() {
   var overlay = document.getElementById('enhance-modal-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -1664,117 +1673,66 @@ function showEnhanceModal(targetEid) {
     overlay.onclick = function(e) { if (e.target === overlay) hideEnhanceModal(); };
     document.body.appendChild(overlay);
   }
-
-  var html = '<div class="enhance-modal" onclick="event.stopPropagation();">' +
-    '<div class="enhance-modal-header">' +
-      '<div class="enhance-modal-title" data-i18n="enhance.select_material">' + t('enhance.select_material') + '</div>' +
-      '<div class="enhance-modal-close" onclick="hideEnhanceModal();">✕</div>' +
-    '</div>' +
-    '<div class="enhance-modal-body">' +
-      '<div style="font-size:11px;color:var(--dim);">' + t('enhance.material_hint') + '</div>' +
-      '<div class="enhance-material-list">';
-
-  for (var i = 0; i < materials.length; i++) {
-    var mat = materials[i];
-    // TODO: 나중에 image/icon/64x64/*.png 아이콘으로 변경
-    var matEmoji = getEquipEmoji(mat.templateId);
-    html += '<div class="enhance-material-item" onclick="showEnhanceConfirmModal(\'' + targetEid + '\', \'' + mat.eid + '\')">' +
-      '<div class="enhance-material-icon">' + matEmoji + '</div>' +
-      '<div class="enhance-material-info">' +
-        '<div class="enhance-material-name">' + t('equip.item.' + mat.templateId) + '</div>' +
-        '<div class="enhance-material-rarity">' + t('equip.rarity.' + mat.rarity) + (mat.enhanceLv > 0 ? ' +' + mat.enhanceLv : '') + '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  html += '</div></div></div>';
-  overlay.innerHTML = html;
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  return overlay;
 }
 
-// 강화 최종 확인 모달 (단계 3)
-function showEnhanceConfirmModal(targetEid, materialEid) {
+// 예전 이름 유지 (다른 곳에서 호출)
+function showEnhanceModal(eid) { showEnhanceConfirmModal(eid); }
+
+// 강화 확인 창: 성공률·비용·실패 결과·보호 주문서·현재 옵션
+function showEnhanceConfirmModal(targetEid) {
   var inv = loadInventory();
   var target = inv.find(function(x) { return x.eid === targetEid; });
-  var material = inv.find(function(x) { return x.eid === materialEid; });
-  if (!target || !material) return;
-
-  var cost = calcEnhanceCost(target);
-  var rate = calcEnhanceRate(target);
-  var ratePercent = Math.round(rate * 100);
-
-  // 현재 스탯과 성공 시 예상 스탯
-  var currentStats = getEnhancedStats(target);
-  var nextLvl = target.enhanceLv + 1;
-  var nextMult = 1 + getEnhanceMultiplier(nextLvl);
-  var nextStats = {};
-  for (var stat in target.stats) {
-    nextStats[stat] = Math.round(target.stats[stat] * nextMult);
-  }
-
-  var overlay = document.getElementById('enhance-modal-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'enhance-modal-overlay';
-    overlay.className = 'enhance-modal-overlay';
-    overlay.onclick = function(e) { if (e.target === overlay) hideEnhanceModal(); };
-    document.body.appendChild(overlay);
-  }
-
-  var pityHtml = '';
-  if (target.enhanceAttempts > 0) {
-    pityHtml = '<div class="enhance-pity-counter">⚠️ ' +
-      t('enhance.pity_counter', { current: target.enhanceAttempts, total: ENHANCE_PITY_THRESHOLD }) +
-      '</div>';
-  }
-
+  if (!target || target.broken) return;
+  var lv = target.enhanceLv || 0;
+  if (lv >= ENHANCE_MAX_LV) { showAlert(t('gear.enh_max')); return; }
+  var rate = calcEnhanceRate(target), rp = Math.round(rate * 100);
   var rateColor = rate >= 0.80 ? '#4ade80' : rate >= 0.40 ? '#fbbf24' : '#ef4444';
+  var cost = calcEnhanceCost(target), stones = calcEnhanceStones(target), haveSt = Mats.get('stone'), haveP = Mats.get('protect');
+  if (!haveP) _enhProtect = false;
 
-  // 성공 시 스탯 증가량
-  var gainHtml = '';
-  for (var stat in nextStats) {
-    if (currentStats[stat]) {
-      var gain = nextStats[stat] - currentStats[stat];
-      if (gain > 0) {
-        gainHtml += (gainHtml ? ' ' : '') + stat.toUpperCase() + '+' + gain;
-      }
-    }
-  }
+  // 성공 시 기본 능력치 변화
+  var cur = getEnhancedStats(target), nm = 1 + getEnhanceMultiplier(lv + 1), gain = [];
+  for (var st in target.stats) { var nx = Math.round(target.stats[st] * nm); if (nx > (cur[st] || 0)) gain.push(t('common.' + st) + ' ' + cur[st] + '→' + nx); }
+  var band = ENHANCE_OPT.find(function(b) { return lv + 1 <= b.upTo; });
+  var milestone = (lv + 1 === 5 || lv + 1 === 10) ? '<div class="enh-ms">★ ' + t('gear.enh_milestone_' + (lv + 1)) + '</div>' : '';
+  var failTxt = lv < ENHANCE_SAFE_BELOW ? t('gear.enh_fail_keep') : t('gear.enh_fail_drop', { lv: lv - 1 });
 
   var html = '<div class="enhance-modal enhance-confirm-modal" onclick="event.stopPropagation();">' +
     '<div class="enhance-modal-header">' +
-      '<div class="enhance-modal-title" data-i18n="enhance.confirm_title">' + t('enhance.confirm_title') + '</div>' +
+      '<div class="enhance-modal-title">' + t('enhance.confirm_title') + '</div>' +
       '<div class="enhance-modal-close" onclick="hideEnhanceModal();">✕</div>' +
     '</div>' +
     '<div class="enhance-modal-body enhance-confirm-content">' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">📊 ' + t('enhance.target_item') + '</div>' +
-        '<div class="enhance-confirm-value">' + t('equip.item.' + target.templateId) + (target.enhanceLv > 0 ? ' +' + target.enhanceLv : '') + '</div>' +
+        '<div class="enhance-confirm-value" style="color:' + RARITY[target.rarity].color + '">' + getEquipEmoji(target.templateId) + ' ' + Gear.name(target) + ' +' + lv + ' → +' + (lv + 1) + '</div>' +
+        '<div class="eq-inv-opts">' + Gear.linesHtml(target) + '</div>' +
       '</div>' +
       '<div class="enhance-confirm-section" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);">' +
-        '<div class="enhance-confirm-label" style="color:#4ade80;">✨ ' + t('enhance.success_reward', { lv: nextLvl }) + '</div>' +
-        '<div class="enhance-confirm-value" style="color:#4ade80;font-size:14px;font-weight:700;">' + gainHtml + '</div>' +
-        '<div style="font-size:10px;color:#4ade80;margin-top:4px;">' + t('enhance.rate') + ': <span style="font-size:12px;font-weight:700;">' + ratePercent + '%</span></div>' +
-        pityHtml +
+        '<div class="enhance-confirm-label" style="color:#4ade80;">✨ ' + t('enhance.success_reward', { lv: lv + 1 }) + '</div>' +
+        '<div class="enhance-confirm-value" style="color:#4ade80;font-weight:700;">' + gain.join(' · ') + '</div>' +
+        (band ? '<div class="enh-sub">' + t('gear.enh_opt_chance', { p: Math.round(band.chance * 100) }) + '</div>' : '') + milestone +
+        '<div class="enh-sub">' + t('gear.enh_rate') + ': <b style="color:' + rateColor + ';font-size:13px">' + rp + '%</b>' +
+          (target.enhanceBonus ? ' <span class="enh-bonus">(' + t('gear.enh_bonus', { n: target.enhanceBonus }) + ')</span>' : '') + '</div>' +
+      '</div>' +
+      '<div class="enhance-confirm-section" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);">' +
+        '<div class="enhance-confirm-label" style="color:#ef4444;">⚠️ ' + t('gear.enh_on_fail') + ': ' + failTxt + '</div>' +
+        '<div class="enh-sub">💥 ' + t('gear.enh_break') + '</div>' +
+        '<label class="enh-protect' + (haveP ? '' : ' disabled') + '"><input type="checkbox" id="enh-protect-cb"' + (_enhProtect ? ' checked' : '') + (haveP ? '' : ' disabled') +
+          ' onchange="_enhProtect=this.checked"> 📜 ' + t('gear.enh_protect_use', { n: haveP }) + '</label>' +
       '</div>' +
       '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">⚙️ ' + t('enhance.material_item') + '</div>' +
-        '<div class="enhance-confirm-value">' + t('equip.item.' + material.templateId) + (material.enhanceLv > 0 ? ' +' + material.enhanceLv : '') + '</div>' +
-        '<div style="font-size:9px;color:#ef4444;margin-top:4px;">⚠️ ' + t('enhance.material_consumed') + '</div>' +
-      '</div>' +
-      '<div class="enhance-confirm-section">' +
-        '<div class="enhance-confirm-label">💰 ' + t('common.gold') + '</div>' +
-        '<div class="enhance-confirm-value">' + cost + ' G</div>' +
+        '<div class="enhance-confirm-label">💰 ' + t('gear.enh_cost') + '</div>' +
+        '<div class="enhance-confirm-value">' + cost + ' G · 🔩 ' + t('gear.enh_stones', { need: stones, have: haveSt }) + '</div>' +
       '</div>' +
     '</div>' +
     '<div class="enhance-modal-buttons">' +
       '<button class="enhance-modal-btn" onclick="hideEnhanceModal();">' + t('common.cancel') + '</button>' +
-      '<button class="enhance-modal-btn primary" onclick="executeEnhance(\'' + targetEid + '\', \'' + materialEid + '\');">' +
-        t('enhance.button_enhance') + '</button>' +
+      '<button class="enhance-modal-btn primary" onclick="executeEnhance(\'' + targetEid + '\');">' + t('enhance.button_enhance') + '</button>' +
     '</div>' +
   '</div>';
 
+  var overlay = _enhOverlay();
   overlay.innerHTML = html;
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -1788,83 +1746,57 @@ function hideEnhanceModal() {
 }
 
 // 강화 실행
-function executeEnhance(targetEid, materialEid) {
-  var inv = loadInventory();
-  var target = inv.find(function(x) { return x.eid === targetEid; });
-  var material = inv.find(function(x) { return x.eid === materialEid; });
-
-  // 유효성 검사
-  if (!target || !material) {
-    showAlert(t('enhance.error_invalid'));
+function executeEnhance(targetEid) {
+  var before = loadInventory().find(function(x) { return x.eid === targetEid; });
+  var r = enhanceItem(targetEid, _enhProtect);
+  if (r.err) {
+    var em = { gold: 'gear.err_gold', stone: 'gear.err_stone', max: 'gear.enh_max', broken: 'gear.broken_hint' }[r.err] || 'enhance.error_invalid';
+    showAlert(t(em));
     return;
   }
-  if (target.equipped) {
-    showAlert(t('enhance.error_equipped'));
-    return;
-  }
-  if (material.equipped) {
-    showAlert(t('enhance.error_material_equipped'));
-    return;
-  }
-  if (target.slot !== material.slot) {
-    showAlert(t('enhance.error_slot_mismatch'));
-    return;
-  }
-
-  var cost = calcEnhanceCost(target);
-  var gold = loadGold();
-  if (gold < cost) {
-    showAlert(t('messages.not_enough_gold'));
-    return;
-  }
-
-  // 재료 소비
-  inv = inv.filter(function(x) { return x.eid !== materialEid; });
-
-  // 강화 시도
-  var rate = calcEnhanceRate(target);
-  var roll = Math.random();
-  var succeeded = roll < rate;
-
-  if (succeeded) {
-    // 성공
-    target.enhanceLv = (target.enhanceLv || 0) + 1;
-    target.enhanceAttempts = 0; // Pity 초기화
-    saveGold(gold - cost);
-    saveInventory(inv);
-
-    var newStats = getEnhancedStats(target);
-    var statStr = '';
-    if (newStats.hp) statStr += ' HP+' + newStats.hp;
-    if (newStats.atk) statStr += ' ATK+' + newStats.atk;
-    if (newStats.def) statStr += ' DEF+' + newStats.def;
-
-    hideEnhanceModal();
-    showAlert(
-      t('enhance.success_title') + '\n\n' +
-      '✨ ' + t('equip.item.' + target.templateId) + ' → +' + target.enhanceLv + '\n' +
-      statStr
-    );
+  var item = loadInventory().find(function(x) { return x.eid === targetEid; }) || before;
+  var name = Gear.name(item);
+  hideEnhanceModal();
+  if (r.ok) {
+    showAlert(t('gear.enh_success', { lv: r.lv }) + '\n' + name +
+      (r.opt ? '\n\n' + t('gear.enh_opt_gained', { opt: Gear.fmt(r.opt.id, r.opt.v) }) : ''));
+  } else if (r.broken) {
+    showAlert(t('gear.enh_fail') + '\n\n' + t('gear.enh_broken'));
   } else {
-    // 실패
-    target.enhanceAttempts = (target.enhanceAttempts || 0) + 1;
-    saveGold(gold - cost);
-    saveInventory(inv);
-
-    var attempts = target.enhanceAttempts;
-    var pityMsg = '';
-    if (attempts >= ENHANCE_PITY_THRESHOLD) {
-      pityMsg = '\n\n✅ ' + t('enhance.pity_ready');
-    } else {
-      pityMsg = '\n📊 ' + t('enhance.fail_pity', { count: attempts });
-    }
-
-    hideEnhanceModal();
-    showAlert(t('enhance.fail_title') + '\n' + t('enhance.fail_msg') + pityMsg);
+    showAlert(t('gear.enh_fail') + '\n' + name + '\n\n' +
+      (r.dropped ? t('gear.enh_fail_dropped', { lv: r.lv }) : t('gear.enh_fail_kept', { lv: r.lv })) +
+      (r.protected ? '\n' + t('gear.enh_fail_protected') : ''));
   }
-
   _gold = loadGold();
   renderEnhanceList();
+  renderChars();
   updatePageGold();
 }
 
+// 파손 장비 수리 (강화 +0 초기화)
+function repairEquipUI(eid) {
+  var it = loadInventory().find(function(x) { return x.eid === eid; });
+  if (!it) return;
+  showConfirm(t('gear.repair_confirm', { name: Gear.name(it), gold: repairCost(it) }), function() {
+    var r = repairItem(eid);
+    if (r.err) { showAlert(t(r.err === 'gold' ? 'gear.err_gold' : 'enhance.error_invalid')); return; }
+    showAlert(t('gear.repair_done', { name: Gear.name(it) }));
+    _gold = loadGold(); updatePageGold();
+    eqRenderAll(); renderEnhanceList(); _refreshEqModal();
+  });
+}
+
+// 분해 → 강화석 (+전설 조각)
+function dismantleEquipUI(eid) {
+  var it = loadInventory().find(function(x) { return x.eid === eid; });
+  if (!it) return;
+  var sh = it.legend ? t('gear.dismantle_shard') : '';
+  showConfirm(t('gear.dismantle_confirm', { name: Gear.name(it), n: dismantleYield(it), shard: sh }), function() {
+    var r = dismantleItem(eid);
+    if (r.err) return;
+    showAlert(t('gear.dismantle_done', { n: r.stones, shard: r.shard ? t('gear.dismantle_shard') : '' }));
+    renderChars(); eqRenderAll(); renderEnhanceList(); _refreshEqModal();
+  });
+}
+
+function _refreshEqModal() { try { if (_selUid != null && typeof renderModalBody === 'function') renderModalBody(); } catch (_) {} }

@@ -38,7 +38,7 @@ const UnitManager = {
       cls = bs.cls; hp = bs.hp; mhp = bs.mhp; atk = bs.atk; def = bs.def; mv = bs.move; rng = bs.range;
       role = bs.role; resType = bs.resType; maxRes = bs.maxRes; resRec = bs.resRec; initRes = bs.res;
       uid = bs.uid; lv = bs.lv; name = bs.name; gender = bs.gender || 'm'; actionRec = bs.actionRec;
-      skillLv = bs.skillLv; var enchants = bs.enchants;
+      skillLv = bs.skillLv; var enchants = bs.enchants, gear = bs.gear, fullSet = bs.fullSet;
     } else {
       cls = src;
       const d = JAB[cls], s = S.cStage;
@@ -69,6 +69,8 @@ const UnitManager = {
       skillLv: skillLv || {},
     };
     if (team === 'ally' && enchants) u.enchants = enchants;
+    if (team === 'ally' && gear && Object.keys(gear).length) u.gear = gear;
+    if (team === 'ally' && fullSet) u._fullSet = fullSet;
 
     if (team === 'enemy') {
       u.origSpawn = { x, y };
@@ -250,7 +252,7 @@ const UnitManager = {
     return { ok: true, to: { x: nx, y: ny }, hit: null };
   },
   // 넉백 저항 판정 (기사 70%): true면 이번 강제 이동을 버팀
-  resistKnock(t) { const r = KNOCK_RESIST[t.cls] || 0; return r > 0 && Math.random() < r; },
+  resistKnock(t) { const r = Math.min(1, (KNOCK_RESIST[t.cls] || 0) + (typeof GearFX !== 'undefined' ? GearFX.knockResist(t) : 0)); return r > 0 && Math.random() < r; },
   // 밀칠 수 있는 인접 적 목록
   shoveTargets(a) {
     return GameStore.units.filter(v => v.hp > 0 && v.team !== a.team && !isStealthed(v) && mh(a.x, a.y, v.x, v.y) === 1 && this.shovePlan(a, v).ok);

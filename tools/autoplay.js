@@ -106,16 +106,19 @@ function changeClassTo(uid, newCls) {
   saveRoster(roster); return true;
 }
 // 장비: 슬롯마다 가장 좋은 것을 핵심 클랜원에게 (공격 6, 방어 4, 체력 1 가중)
-const eqScore = it => { const s = getEnhancedStats(it); return (s.hp || 0) + (s.atk || 0) * 6 + (s.def || 0) * 4; };
+// 장비 점수: 기본·강화 능력치 + 등급(옵션 개수) + 전설·강화 단계 + 그 직업 전용 옵션이면 가산, 파손은 제외
+const eqScore = (it, cls) => { if (it.broken) return -1e9; const s = getEnhancedStats(it);
+  return (s.hp || 0) + (s.atk || 0) * 6 + (s.def || 0) * 4 + RARITY[it.rarity].tier * 15 + (it.legend ? 120 : 0) + (it.enhanceLv || 0) * 8
+    + (cls && it.cOpt && it.cOpt.cls === cls ? 20 : 0) + (cls && it.setCls === cls ? 25 : 0); };
 function autoEquip(uids) {
   const roster = getRoster(), inv = loadInventory();
   inv.forEach(it => { if (it.type === 'equip') it.equipped = null; });
   roster.chars.forEach(c => { if (c.equip) for (const k in c.equip) c.equip[k] = null; });
-  const free = inv.filter(it => it.type === 'equip').sort((a, b) => eqScore(b) - eqScore(a));
+  const free = inv.filter(it => it.type === 'equip' && !it.broken);
   for (const uid of uids) {
     const ch = roster.chars.find(c => c.uid === uid); if (!ch) continue;
     ch.equip = ch.equip || {}; EQUIP_SLOTS.forEach(s => { if (!(s in ch.equip)) ch.equip[s] = null; });
-    for (const it of free) {
+    for (const it of free.slice().sort((a, b) => eqScore(b, ch.cls) - eqScore(a, ch.cls))) {
       if (it.equipped !== null || ch.equip[it.slot]) continue;
       if (it.clsRestrict && it.clsRestrict.length && it.clsRestrict.indexOf(ch.cls) === -1) continue;
       if (it.slot === 'offhand') { const w = inv.find(x => x.eid === ch.equip.weapon); if (w && w.hand === '2h') continue; }
@@ -125,13 +128,34 @@ function autoEquip(uids) {
   }
   saveRoster(roster); saveInventory(inv);
 }
-function sellJunk(keep) {   // 장착 안 한 장비 중 각 슬롯 상위 keep개만 남기고 판매
-  const inv = loadInventory(); let gold = loadGold(), sold = 0;
-  const bySlot = {}; inv.forEach(it => { if (it.type === 'equip' && it.equipped === null) (bySlot[it.slot] = bySlot[it.slot] || []).push(it); });
-  const drop = new Set();
-  for (const k in bySlot) bySlot[k].sort((a, b) => eqScore(b) - eqScore(a)).slice(keep).forEach(it => drop.add(it.eid));
-  const rest = inv.filter(it => { if (it.type === 'equip' && drop.has(it.eid)) { gold += SELL_PRICE[it.rarity] || 30; sold++; return false; } return true; });
-  saveInventory(rest); saveGold(gold); return sold;
+function sellJunk(keep) {   // 장착 안 한 장비 중 각 슬롯 상위 keep개만 남기고 분해 (강화석이 판매 골드보다 가치 있음)
+  const inv = loadInventory(); let n = 0, stones = 0;
+  const bySlot = {}; inv.forEach(it => { if (it.type === 'equip' && it.equipped === null && !it.broken) (bySlot[it.slot] = bySlot[it.slot] || []).push(it); });
+  const drop = [];
+  for (const k in bySlot) bySlot[k].sort((a, b) => eqScore(b) - eqScore(a)).slice(keep).forEach(it => { if (!it.legend) drop.push(it.eid); });
+  drop.forEach(eid => { const r = dismantleItem(eid); if (r.ok) { n++; stones += r.stones; } });
+  return n ? n + '개 → 강화석 ' + stones : 0;
+}
+// 강화: 장착 장비(무기 → 갑옷 → 나머지) 를 목표 단계까지. 골드는 reserve만큼 남김, +6 이상 시도는 보호 주문서 있으면 사용
+//  파손 장비는 골드 여유가 있으면 수리, 아니면 분해
+const ENH = { target: 7, reserve: 600 };
+function autoEnhance(p, notes) {
+  let tries = 0, ups = 0, downs = 0, breaks = 0;
+  const order = ['weapon', 'armor', 'helmet', 'boots', 'offhand', 'necklace', 'ring', 'earring'];
+  for (let guard = 0; guard < 60; guard++) {
+    const inv = loadInventory();
+    const cand = inv.filter(x => x.type === 'equip' && !x.broken && p.includes(x.equipped) && (x.enhanceLv || 0) < ENH.target)
+      .sort((a, b) => (a.enhanceLv || 0) - (b.enhanceLv || 0) || order.indexOf(a.slot) - order.indexOf(b.slot));
+    const it = cand[0]; if (!it) break;
+    if (loadGold() < calcEnhanceCost(it) + ENH.reserve || Mats.get('stone') < calcEnhanceStones(it)) break;
+    const r = enhanceItem(it.eid, (it.enhanceLv || 0) >= 6); tries++;
+    if (r.ok) ups++; else if (r.broken) breaks++; else if (r.dropped) downs++;
+  }
+  loadInventory().filter(x => x.type === 'equip' && x.broken).forEach(x => {
+    if (loadGold() > repairCost(x) + ENH.reserve) { repairItem(x.eid); notes.push('수리 ' + x.rarity); } else dismantleItem(x.eid);
+  });
+  if (tries) notes.push('강화 ' + tries + '회 (성공 ' + ups + ', 하락 ' + downs + (breaks ? ', 파손 ' + breaks : '') + ') 강화석 ' + Mats.get('stone') +
+    ' 평균 +' + (p.length ? (loadInventory().filter(x => x.type === 'equip' && p.includes(x.equipped)).reduce((a, x) => a + (x.enhanceLv || 0), 0) / Math.max(1, loadInventory().filter(x => x.type === 'equip' && p.includes(x.equipped)).length)).toFixed(1) : 0));
 }
 
 // ── 상점 (shop.js genRotatingItems와 같은 규칙, 갱신 주기는 cfg.shopEvery 스테이지로 모사) ──
@@ -271,7 +295,8 @@ function manage(stageId, C) {
     const it = mine.find(x => x.slot === 'weapon') || mine[0];
     if (it && Rune.apply(it.eid, k) === true) notes.push('공격 마법부여 ' + k);
   }
-  const sold = sellJunk(1); if (sold) notes.push('장비 판매 ' + sold);
+  const sold = sellJunk(1); if (sold) notes.push('장비 분해 ' + sold);
+  autoEnhance(p, notes); autoEquip(p);
   return notes;
 }
 // 파티 5명: 조합 핵심 → 나머지는 전투력 순 (지휘관은 스토리 전용이라 제외)

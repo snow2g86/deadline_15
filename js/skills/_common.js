@@ -68,7 +68,7 @@ function applyDmgToAlly(tgt, dmg, ctx) {
 			ctx.floatT(psKnight.x, psKnight.y, t('messages.knight_painshare'), 'heal');
 			ctx.vfxSpawn(ctx.uSX(psKnight.x, psKnight.y) + UCX, ctx.uSY(psKnight.x, psKnight.y) + UCY,
 				{ count: 8, colors: ['#60a5fa', '#93c5fd', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.03, size: 4 });
-			tgt.hp = Math.max(0, tgt.hp - remain);
+			tgt.hp = Math.max(0, tgt.hp - (typeof GearFX !== 'undefined' ? GearFX.absorb(tgt, remain) : remain));
 			if (tgt.hp <= 0 && tgt.cls === 'knight' && tgt.skillLv && tgt.skillLv['knight_tenacity'] >= 1 && !tgt._tenacityUsed) {
 				tgt.hp = 1; tgt._tenacityUsed = true; tgt._tenacityDef = true;
 				ctx.floatT(tgt.x, tgt.y, t('messages.knight_tenacity'), 'heal');
@@ -78,6 +78,7 @@ function applyDmgToAlly(tgt, dmg, ctx) {
 			return tgt;
 		}
 	}
+	if (typeof GearFX !== 'undefined') dmg = GearFX.absorb(actual, dmg);   // 장비 보호막·성자의 눈물
 	actual.hp = Math.max(0, actual.hp - dmg);
 	if (actual.hp <= 0 && actual.cls === 'knight' && actual.skillLv && actual.skillLv['knight_tenacity'] >= 1 && !actual._tenacityUsed) {
 		actual.hp = 1; actual._tenacityUsed = true; actual._tenacityDef = true;
@@ -149,6 +150,8 @@ function calcDmg(attacker, target) {
 	if (attacker.cls === 'archer' && attacker.skillLv && attacker.skillLv['archer_weakspot'] >= 1) {
 		if (Math.random() < 0.3) { dmg = Math.max(1, Math.round(dmg * 1.5)); attacker._lastCrit = true; }
 	}
+	// 장비 효과 (치명타·결사·돌격·연타·수호 오라 등 — data/gear.js)
+	if (typeof GearFX !== 'undefined') dmg = GearFX.mod(attacker, target, dmg);
 	return dmg;
 }
 

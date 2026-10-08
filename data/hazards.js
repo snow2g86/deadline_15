@@ -121,13 +121,14 @@ var EnchantFX = {
       if (t.hp > 0 && e.freeze && Math.random() < e.freeze) { BuffSystem.apply(t, { type: BuffType.FREEZE, duration: 1, icon: e.icon, source: 'enchant_frost' }); Renderer.floatT(t.x, t.y, e.icon + ' ' + t_('enchant.frozen'), 'debuff'); }
       if (e.drain && a.hp > 0) { var h = Math.min(a.mhp - a.hp, Math.max(1, Math.round(dmg * e.drain))); if (h > 0) { a.hp += h; Renderer.floatT(a.x, a.y, e.icon + ' +' + h, 'heal'); } }
     });
+    if (typeof GearFX !== 'undefined') GearFX.afterHit(a, t, dmg);   // 장비 효과 (연타·누적·폭발·관통)
   },
 };
 function t_(k) { return typeof t === 'function' ? t(k) : k; }
 
 // ── 보물상자 ──
-// 전투당 1~2개, 3~9행의 빈 평지·숲·언덕에 놓임. 보상 확률: 골드 38% · 전투 물약 20% · 마법부여 룬 17% · 장비 15% · 영혼석 조각 10%
-var CHEST = { min: 1, max: 2, rows: [3, 9], odds: { gold: 0.38, potion: 0.20, rune: 0.17, equip: 0.15, soul: 0.10 } };
+// 전투당 1~2개, 3~9행의 빈 평지·숲·언덕에 놓임. 보상 확률: 골드 32% · 전투 물약 17% · 마법부여 룬 15% · 장비 13% · 강화석 11% · 보호 주문서 2% · 영혼석 조각 10%
+var CHEST = { min: 1, max: 2, rows: [3, 9], odds: { gold: 0.32, potion: 0.17, rune: 0.15, equip: 0.13, stone: 0.11, protect: 0.02, soul: 0.10 } };
 var Chest = {
   place: function(S) {
     var n = CHEST.min + Math.floor(Math.random() * (CHEST.max - CHEST.min + 1)), cells = [];
@@ -160,7 +161,15 @@ var Chest = {
     }
     if (r < o.gold + o.potion + o.rune + o.equip) {
       var it = gachaPull(null, true); var inv2 = loadInventory(); inv2.push(it); saveInventory(inv2);
-      return { kind: 'equip', text: getEquipEmoji(it.templateId) + ' ' + t('equip.item.' + it.templateId) };
+      return { kind: 'equip', text: getEquipEmoji(it.templateId) + ' ' + Gear.name(it) };
+    }
+    if (r < o.gold + o.potion + o.rune + o.equip + o.stone) {
+      var ns = 1 + Math.floor(Math.random() * 3); Mats.add('stone', ns);
+      return { kind: 'stone', text: '🔩 ' + t('gear.stone') + ' +' + ns };
+    }
+    if (r < o.gold + o.potion + o.rune + o.equip + o.stone + o.protect) {
+      Mats.add('protect', 1);
+      return { kind: 'protect', text: '📜 ' + t('gear.protect') + ' +1' };
     }
     var cls = opener && opener.cls !== 'commander' ? opener.cls : 'novice';
     if (typeof Soul !== 'undefined') Soul.add('frag', cls, 2);

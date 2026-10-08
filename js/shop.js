@@ -772,6 +772,51 @@ function renderGacha(list) {
   if (canAfford10) c10.querySelector('.gacha-btn').onclick = function() { doGacha(10); };
   list.appendChild(c10);
 
+  // 강화 재료 (강화석·보호 주문서) — 골드 소모처
+  var matsEl = document.createElement('div');
+  matsEl.className = 'gacha-pity';
+  matsEl.innerHTML = '<div class="gacha-pity-label">🔩 ' + t('gear.shop_title') + ' — ' + t('gear.mats', { stone: Mats.get('stone'), protect: Mats.get('protect'), shard: Mats.get('shard') }) + '</div>';
+  list.appendChild(matsEl);
+  [{ k: 'stone', icon: '🔩', desc: 'gear.shop_stone_desc' }, { k: 'protect', icon: '📜', desc: 'gear.shop_protect_desc' }].forEach(function(m) {
+    var price = MATS_PRICE[m.k], ok = _gold >= price, c = document.createElement('div');
+    c.className = 'gacha-card';
+    c.innerHTML = '<div class="gacha-icon">' + m.icon + '</div><div class="gacha-title">' + t('gear.' + m.k) + '</div>' +
+      '<div class="gacha-desc">' + t(m.desc) + '</div>' +
+      '<button class="gacha-btn' + (ok ? '' : ' disabled') + '" ' + (ok ? '' : 'disabled') + '>' + t('shop.buy', { gold: price }) + '</button>';
+    if (ok) c.querySelector('.gacha-btn').onclick = function() {
+      if (_gold < price) return;
+      _gold -= price; saveGold(_gold); updateGoldUI();
+      Mats.add(m.k, 1);
+      showAlert(m.icon + ' ' + t('gear.shop_bought', { name: t('gear.' + m.k) }));
+      renderShop();
+    };
+    list.appendChild(c);
+  });
+
+  // 전설 교환 (전설 조각 5개 → 원하는 전설 1개)
+  var ex = document.createElement('div');
+  ex.className = 'gacha-rates-full legend-exchange';
+  var shards = Mats.get('shard');
+  ex.innerHTML = '<div class="gacha-pity-label">★ ' + t('gear.exchange_title') + ' — ' + t('gear.exchange_desc', { n: LEGEND_SHARD_COST }) + ' (' + shards + '/' + LEGEND_SHARD_COST + ')</div>' +
+    '<div class="legend-grid">' + Object.keys(LEGENDS).map(function(id) {
+      var tpl = LEGENDS[id].tpl;
+      return '<button class="legend-btn' + (shards >= LEGEND_SHARD_COST ? '' : ' disabled') + '" data-id="' + id + '" title="' +
+        Object.keys(LEGENDS[id].fx).map(function(k) { return Gear.fmt(k, LEGENDS[id].fx[k]); }).join(' · ') + '">' +
+        getEquipEmoji(tpl) + ' ' + t('gear.legend.' + id) + '</button>';
+    }).join('') + '</div>';
+  ex.querySelectorAll('.legend-btn').forEach(function(b) {
+    b.onclick = function() {
+      var id = b.dataset.id, have = Mats.get('shard');
+      if (have < LEGEND_SHARD_COST) { showAlert(t('gear.exchange_need', { have: have, n: LEGEND_SHARD_COST })); return; }
+      showConfirm(t('gear.exchange_confirm', { n: LEGEND_SHARD_COST, name: t('gear.legend.' + id) }) + '\n\n' +
+        Object.keys(LEGENDS[id].fx).map(function(k) { return Gear.fmt(k, LEGENDS[id].fx[k]); }).join('\n'), function() {
+        var it = Gear.exchangeLegend(id);
+        if (it) { showAlert(t('gear.exchange_done', { name: Gear.name(it) })); renderShop(); }
+      });
+    };
+  });
+  list.appendChild(ex);
+
   // 마지막에 spacer 추가
   var spacer = document.createElement('div');
   spacer.className = 'shop-list-spacer';
@@ -823,10 +868,11 @@ function showGachaResults(results) {
     }
     h += '<div class="gacha-result-card" style="border-color:' + rc + '">' +
       '<div class="gr-rarity" style="color:' + rc + '">' + t('equip.rarity.' + item.rarity) + '</div>' +
-      '<div class="gr-name">' + t('equip.item.' + item.templateId) + '</div>' +
+      '<div class="gr-name">' + Gear.name(item) + '</div>' +
       '<div class="gr-slot">' + t('equip.slot.' + item.slot) + '</div>' +
       '<div class="gr-stats">' + statsArr.join(' ') + '</div>' +
-      (item.setId ? '<div class="gr-set" style="color:#f0c040">' + t('equip.set.' + item.setId) + '</div>' : '') +
+      (item.setId && !item.setCls ? '<div class="gr-set" style="color:#f0c040">' + t('equip.set.' + item.setId) + '</div>' : '') +
+      '<div class="eq-inv-opts">' + Gear.linesHtml(item) + '</div>' +
       '</div>';
   }
   h += '</div>';

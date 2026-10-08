@@ -51,7 +51,7 @@ const TurnManager = {
 
     // 맵 환경 지속 피해 (화상·독 등, 사망하지는 않음) — 마법부여 장비가 있으면 면역
     if (u.team === 'ally' && u._hazardDot && u.hp > 1 && S._hazard) {
-      const dmg = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * Hazard.dotPct(S._hazard, S.cStage))));
+      const dmg = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * Hazard.dotPct(S._hazard, S.cStage) * GearFX.hazardMul(u))));
       u.hp -= dmg;
       Renderer.floatT(u.x, u.y, S._hazard.icon + ' -' + dmg, 'damage');
       Renderer.rUnits();
