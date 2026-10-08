@@ -185,7 +185,7 @@ const VFX = {
     const ax = Grid.uSX(attacker.x, attacker.y) + UCX, ay = Grid.uSY(attacker.x, attacker.y) + UCY;
     const tx = Grid.uSX(target.x, target.y) + UCX, ty = Grid.uSY(target.x, target.y) + UCY;
     const d = Math.hypot(tx - ax, ty - ay) || 1, nx = (tx - ax) / d, ny = (ty - ay) / d;
-    const up = attacker.cls === 'mage' ? 10 : 4;
+    const up = PixelFX.up(attacker.cls);
     PixelFX.shoot(attacker.cls, ax + nx * 18, ay + ny * 18 - up, tx - nx * 8, ty - ny * 8, fl);
   },
 
@@ -193,6 +193,12 @@ const VFX = {
     const ax = Grid.uSX(attacker.x, attacker.y) + UCX, ay = Grid.uSY(attacker.x, attacker.y) + UCY;
     const tx = Grid.uSX(target.x, target.y) + UCX, ty = Grid.uSY(target.x, target.y) + UCY;
     const cls = attacker.cls;
+    // 원거리 직업: 픽셀 임팩트 (투사체는 vfxAtk에서 이미 날아옴) — 대상 몸통 앞
+    if (PixelFX.handles(cls)) {
+      const d = Math.hypot(tx - ax, ty - ay) || 1;
+      PixelFX.impact(cls, tx - (tx - ax) / d * 8, ty - (ty - ay) / d * 8);
+      return;
+    }
     if (cls === 'warrior') {
       this.spawn(tx, ty, { count: 10, colors: ['#fff', '#aaddff', '#88bbff'], shape: 'slash', speed: 3, spread: 10, decay: 0.04, size: 4 });
       this.spawn(tx, ty, { count: 6, colors: ['#ffffff', '#aaddff'], shape: 'spark', speed: 4, spread: 8, decay: 0.03, size: 2.5 });
@@ -204,12 +210,6 @@ const VFX = {
         this.spawn(tx + (Math.random() - .5) * 10, ty + (Math.random() - .5) * 10, { count: 5, colors: ['#cc44ff', '#ff44cc', '#ffffff'], shape: 'slash', speed: 4, spread: 8, decay: 0.045, size: 3.5 });
       }, i * 50);
       this.spawn(tx, ty, { count: 6, colors: ['#cc44ff66', '#8844ff66'], shape: 'diamond', speed: 2, spread: 12, decay: 0.03, size: 4 });
-    } else if (cls === 'mage' || cls === 'archer') {
-      // 픽셀 임팩트 (투사체는 vfxAtk에서 이미 날아옴) — 대상 몸통 앞
-      const d = Math.hypot(tx - ax, ty - ay) || 1;
-      PixelFX.impact(cls, tx - (tx - ax) / d * 8, ty - (ty - ay) / d * 8);
-    } else if (cls === 'priest') {
-      this.spawn(tx, ty, { count: 10, colors: ['#ffffff', '#ffffaa', '#ffe066'], shape: 'star', speed: 2, spread: 10, decay: 0.025, size: 3.5 });
     } else if (cls === 'novice') {
       this.spawn(tx, ty, { count: 6, colors: ['#cccccc', '#ffffff', '#aaaaaa'], shape: 'spark', speed: 2.5, spread: 8, decay: 0.04, size: 2.5 });
     } else if (cls === 'brawler') {
@@ -228,12 +228,6 @@ const VFX = {
     } else if (cls === 'sapper') {
       this.spawn(tx, ty, { count: 10, colors: ['#f97316', '#ff6600', '#ffcc00'], shape: 'spark', speed: 3, spread: 10, decay: 0.035, size: 3 });
       this.spawn(tx, ty, { count: 4, colors: ['#aaaaaa', '#888888'], shape: 'circle', speed: 1.5, spread: 6, decay: 0.025, size: 2.5, gravity: 0.08 });
-    } else if (cls === 'summoner') {
-      this.spawn(tx, ty, { count: 12, colors: ['#8b5cf6', '#c084fc', '#e9d5ff', '#ffffff'], shape: 'star', speed: 2.5, spread: 10, decay: 0.022, size: 3.5 });
-      setTimeout(() => this.spawn(tx, ty, { count: 5, colors: ['#c084fc', '#fff'], shape: 'diamond', speed: 1.5, spread: 8, decay: 0.03, size: 2.5, vy: -1 }), 60);
-    } else if (cls === 'shaman') {
-      this.spawn(tx, ty, { count: 10, colors: ['#22c55e', '#4ade80', '#9333ea'], shape: 'diamond', speed: 2.5, spread: 10, decay: 0.025, size: 3.5 });
-      this.spawn(tx, ty, { count: 6, colors: ['#22c55e', '#9333ea', '#fff'], shape: 'spark', speed: 3, spread: 8, decay: 0.03, size: 2.5 });
     }
   },
 
