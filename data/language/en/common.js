@@ -82,6 +82,7 @@ Object.assign(window._LANG_en, {
         "part_pre": "Before Battle",
         "part_post": "After Victory",
         "part_battle": "In Battle",
+        "ally": "clan member",
         "commander": "Commander"
     }
 });

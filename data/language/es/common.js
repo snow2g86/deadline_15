@@ -82,6 +82,7 @@ Object.assign(window._LANG_es, {
         "part_pre": "Antes del combate",
         "part_post": "Tras la victoria",
         "part_battle": "En combate",
+        "ally": "miembro del clan",
         "commander": "Comandante"
     }
 });

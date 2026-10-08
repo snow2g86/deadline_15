@@ -83,6 +83,7 @@ Object.assign(window._LANG_ko, {
         "part_pre": "전투 전",
         "part_post": "승리 후",
         "part_battle": "전투 중",
+        "ally": "클랜원",
         "commander": "지휘관"
     }
 });

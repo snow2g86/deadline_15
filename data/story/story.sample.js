@@ -35,7 +35,7 @@ window.STORY_KO = {
       battle: {
         start:  [{ who: 'commander', text: '[샘플] 전원, 전투 준비!' }],
         wave:   [{ who: 'mira', text: '[샘플] 증원이에요! 숲 쪽에서 더 와요!', mood: 'worried' }],
-        danger: [{ who: 'mira', text: '[샘플] {commander}, 물러나세요!', mood: 'shout' }],
+        danger: [{ who: 'mira', text: '[샘플] {ally}, 물러나세요!', mood: 'shout' }],
         last:   [{ who: 'commander', text: '[샘플] 하나 남았다. 끝내자!' }],
       },
     },

@@ -201,8 +201,10 @@
       return { src: 'image/character/commander_' + suf + '.png', fallback: nov };
     },
 
-    _fmt: function(text) {
-      return String(text == null ? '' : text).replace(/\{commander\}/g, this.commanderName());
+    // {commander}: 지휘관 이름, {ally}: 전투 중 위기에 빠진 클랜원 이름 (없으면 '클랜원' — 다시 보기 등)
+    _fmt: function(text, vars) {
+      var ally = (vars && vars.ally) || tr('story.ally', '클랜원');
+      return String(text == null ? '' : text).replace(/\{commander\}/g, this.commanderName()).replace(/\{ally\}/g, ally);
     },
 
     // ── DOM ──────────────────────────────
@@ -261,7 +263,7 @@
     },
 
     // ── 재생 ─────────────────────────────
-    // lines: 대사 배열, opts: { stage, title, battle(짧은 전투 대사 모드), onEnd }
+    // lines: 대사 배열, opts: { stage, title, battle(짧은 전투 대사 모드), vars({ally}), onEnd }
     play: function(lines, opts) {
       opts = opts || {};
       var self = this;
@@ -318,7 +320,7 @@
       if (mood === 'angry' || mood === 'shout') box.classList.add('shake');
 
       // 한 글자씩 출력
-      var full = this._fmt(line.text);
+      var full = this._fmt(line.text, st.opts.vars);
       var chars = Array.from(full);
       var i = 0;
       textEl.textContent = '';
@@ -408,10 +410,10 @@
       } catch (e) { console.error('[Story] afterStage', e); }
     },
 
-    // 전투 중 짧은 대사 (kind: start|wave|boss|danger|last)
-    battle: function(stage, kind) {
+    // 전투 중 짧은 대사 (kind: start|wave|boss|danger|last), vars: { ally } 치환값
+    battle: function(stage, kind, vars) {
       if (!stage || BATTLE_KINDS.indexOf(kind) === -1) return Promise.resolve(false);
-      return this.scene('s' + stage.id + '_' + kind, null, { stage: stage, battle: true });
+      return this.scene('s' + stage.id + '_' + kind, null, { stage: stage, battle: true, vars: vars || null });
     },
 
     // ── 다시 보기 ────────────────────────

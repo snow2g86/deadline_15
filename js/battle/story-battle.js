@@ -13,6 +13,8 @@ const StoryBattle = {
   _playing: null,    // 재생 중 Promise
   _introDone: false, // 출전 전 대사(프롤로그·pre) 확인 여부
   _startDone: false,
+  _healthy: {},      // HP 30% 이상인 것을 확인한 클랜원 id (위기 대사 조건)
+  _vars: {},         // 대사 치환값 ({ally}: 위기에 빠진 클랜원 이름)
   PRIORITY: { start: 0, boss: 1, wave: 2, danger: 3, last: 4 },
 
   get stage() { return GameStore.cStage; },
@@ -81,10 +83,23 @@ const StoryBattle = {
     if (!st || FSM.is(BattleState.BATTLE_END)) return;
     // 보스 등장
     if (S.units.some(u => u.isBoss && u.team === 'enemy' && u.hp > 0)) this.enqueue('boss');
-    // 지휘관 위기 (HP 30% 미만)
-    if (S.units.some(u => u.team === 'ally' && u.cls === 'commander' && u.hp > 0 && u.hp < u.mhp * 0.3)) this.enqueue('danger');
+    // 클랜원 위기: 클랜원(소환수 제외) 누군가가 이 전투에서 처음으로 HP 30% 아래로 떨어질 때 1회
+    //   한 번이라도 30% 이상이던 클랜원만 센다 (이어하기로 들어왔을 때 이미 낮은 HP는 '떨어진 것'이 아님)
+    if (!this._queued.danger) {
+      for (const u of S.units) {
+        if (u.team !== 'ally' || u.isSummon || String(u.cls).startsWith('summon_') || u.hp <= 0) continue;
+        if (u.hp >= u.mhp * 0.3) { this._healthy[u.id] = true; continue; }
+        if (this._healthy[u.id]) { this._vars.ally = this.allyName(u); this.enqueue('danger'); break; }
+      }
+    }
     // 남은 적 1명 (더 나올 증원 없음)
     if (S.eSpwn >= st.tot && S.units.filter(u => u.team === 'enemy' && u.hp > 0 && !u.isSummon).length === 1) this.enqueue('last');
+  },
+
+  // 대사에 넣을 클랜원 이름 (이름이 없거나 아이콘뿐이면 비워 두어 Story 쪽 기본값 '클랜원'을 쓴다)
+  allyName(u) {
+    const n = String(u.name || '');
+    return /[A-Za-z0-9\u3131-\uD79D\u00C0-\u024F]/.test(n) ? n : '';
   },
 
   enqueue(kind) {
@@ -107,7 +122,7 @@ const StoryBattle = {
       this.scan();
       while (this._queue.length && !FSM.is(BattleState.BATTLE_END)) {
         const kind = this._queue.shift();
-        await Story.battle(this.stage, kind);
+        await Story.battle(this.stage, kind, this._vars);
       }
       this._queue = FSM.is(BattleState.BATTLE_END) ? [] : this._queue;
     })().catch(e => console.error('[StoryBattle]', e)).finally(() => { this._playing = null; });
