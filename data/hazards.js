@@ -9,7 +9,7 @@
 // dot: 클랜원 차례가 끝날 때 최대 HP 비율 피해 (사망하지는 않음, 후반일수록 커짐) · move/range: 더하기 · def/heal: 배율
 var HAZARDS = {
   volcano: { id: 'burn',     icon: '🔥', enchant: 'fire',   dot: 0.05 },
-  abyss:   { id: 'hellfire', icon: '☄️', enchant: 'fire',   dot: 0.07 },
+  abyss:   { id: 'hellfire', icon: '☄️', enchant: 'fire',   dot: 0.04 },   // 7% → 4% (후반 지옥 맵 소모전·판 길이 완화)
   desert:  { id: 'heat',     icon: '☀️', enchant: 'heat',   move: -1 },
   canyon:  { id: 'gale',     icon: '🌪️', enchant: 'wind',   range: -1 },
   jungle:  { id: 'venom',    icon: '🦟', enchant: 'poison', dot: 0.03 },

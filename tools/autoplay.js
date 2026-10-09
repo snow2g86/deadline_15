@@ -15,6 +15,7 @@ const cfg = () => ({
   profile: $('profile').value, combo: $('combo').value.split(','),
   from: +$('from').value, to: +$('to').value, retries: +$('retries').value, grind: +$('grind').value,
   warp: Math.max(1, +$('warp').value), shopEvery: Math.max(1, +$('shopEvery').value), dayEvery: Math.max(1, +$('dayEvery').value),
+  gear: new URLSearchParams(location.search).get('gear') || '',   // 'max' = 출전 클랜원에게 최강 장비 (실험용)
 });
 function out(msg, cls) {
   const el = $('log'), line = document.createElement('div');
@@ -47,7 +48,7 @@ function report(final) {
   if (!final && Date.now() - _repAt < 5000) return; _repAt = Date.now();
   try {
     const C = cfg();
-    fetch('/ap_report', { method: 'POST', body: JSON.stringify({ port: location.port, profile: C.profile, combo: C.combo.join(','), running: AP.running, final: !!final,
+    fetch('/ap_report', { method: 'POST', body: JSON.stringify({ port: location.port, profile: C.profile + (C.gear ? '+gear:' + C.gear : ''), combo: C.combo.join(','), running: AP.running, final: !!final,
       summary: summarize(AP.log), tail: [...$('log').children].slice(-12).map(d => d.textContent), at: new Date().toISOString() }) }).catch(() => {});
   } catch (e) {}
 }
@@ -109,7 +110,7 @@ function changeClassTo(uid, newCls) {
 // 장비 점수: 기본·강화 능력치 + 등급(옵션 개수) + 전설·강화 단계 + 그 직업 전용 옵션이면 가산, 파손은 제외
 const eqScore = (it, cls) => { if (it.broken) return -1e9; const s = getEnhancedStats(it);
   return (s.hp || 0) + (s.atk || 0) * 6 + (s.def || 0) * 4 + RARITY[it.rarity].tier * 15 + (it.legend ? 120 : 0) + (it.enhanceLv || 0) * 8
-    + (cls && it.cOpt && it.cOpt.cls === cls ? 20 : 0) + (cls && it.setCls === cls ? 25 : 0); };
+    + (cls && it.cOpt && it.cOpt.cls === cls ? 20 : 0) + (cls && it.setCls === cls ? 25 : 0) + (it.maxCls && it.maxCls === cls ? 1000 : 0); };
 function autoEquip(uids) {
   const roster = getRoster(), inv = loadInventory();
   inv.forEach(it => { if (it.type === 'equip') it.equipped = null; });
@@ -136,6 +137,32 @@ function sellJunk(keep) {   // 장착 안 한 장비 중 각 슬롯 상위 keep�
   drop.forEach(eid => { const r = dismantleItem(eid); if (r.ok) { n++; stones += r.stones; } });
   return n ? n + '개 → 강화석 ' + stones : 0;
 }
+// 실험용 최강 장비 (?gear=max): 출전 클랜원마다 자기 직업의 전설 무기, 직업 세트 S 3부위, 보조(한손 무기일 때 S),
+//  전설 장신구 3종(왕의 인장·성자의 눈물·시간의 귀걸이)을 +10(단계마다 강화 옵션)으로 지급. 직업이 바뀌면 새로 지급
+function maxOut(it) {
+  it.enhanceLv = 10; it.eOpts = {};
+  for (let lv = 1; lv <= 10; lv++) { const o = Gear.rollEnhanceOpt(it, lv); if (o) it.eOpts[lv] = o; }
+  return it;
+}
+function ensureMaxGear(p, notes) {
+  const inv = loadInventory(); let made = 0;
+  for (const uid of p) {
+    const ch = getChar(uid); if (!ch) continue;
+    const have = slot => inv.some(x => x.type === 'equip' && x.maxUid === uid && x.maxCls === ch.cls && x.slot === slot);
+    const add = it => { it.maxUid = uid; it.maxCls = ch.cls; inv.push(maxOut(it)); made++; };
+    const wl = Object.keys(LEGENDS).find(k => LEGENDS[k].tpl === 'wpn_' + ch.cls);
+    if (!have('weapon') && wl) add(Gear.makeLegend(wl));
+    const wpn = equipTemplate('wpn_' + ch.cls);
+    if (!have('offhand') && wpn && wpn.hand !== '2h') {
+      const oh = EQUIP_DB.find(d => d.slot === 'offhand' && d.clsRestrict.includes(ch.cls));
+      if (oh) add(generateEquip(oh, 'legendary'));
+    }
+    SET_SLOTS.forEach(sl => { if (!have(sl)) add(Gear.makeSetPiece(ch.cls, sl, 'legendary')); });
+    [['ring', 'king_seal'], ['necklace', 'saint_tear'], ['earring', 'time_earring']].forEach(([sl, id]) => { if (!have(sl)) add(Gear.makeLegend(id)); });
+  }
+  if (made) { saveInventory(inv); notes.push('최강 장비 지급 ' + made); }
+}
+
 // 강화: 장착 장비(무기 → 갑옷 → 나머지) 를 목표 단계까지. 골드는 reserve만큼 남김, +6 이상 시도는 보호 주문서 있으면 사용
 //  파손 장비는 골드 여유가 있으면 수리, 아니면 분해
 const ENH = { target: 7, reserve: 600 };
@@ -271,6 +298,7 @@ function manage(stageId, C) {
     saveInventory(inv); notes.push('장비 뽑기 11회');
   }
   setParty(C, notes, core);
+  if (C.gear === 'max') ensureMaxGear(getActiveParty(), notes);
   const p = getActiveParty(); autoEquip(p);
   // 6) 마법부여: 이번 스테이지 맵 디버프를 막도록, 장착 장비에 맞는 룬을 씀 (룬 1개 + 100G, 다른 마법부여는 덮어씀)
   //    맞는 룬이 없으면 여유 있을 때 룬 뽑기 1회, 장비가 없으면 장비 뽑기 1회

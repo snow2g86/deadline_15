@@ -223,10 +223,11 @@ STAGES.forEach(function(s) {
 // 줄인 만큼 남은 적을 강화: 체력 ×(원래/상한)^STAGE_COMP_HP, 공격 ×(원래/상한)^STAGE_COMP_ATK — 체력보다 공격 쪽을 더 올려 판은 짧게, 긴장감은 유지
 // 증원은 최대 STAGE_MAX_WAVES번에 나눠 나오게 (멀리서 걸어오는 증원이 잦을수록 라운드가 늘어남)
 // 출현 목록은 직업 비율이 유지되도록 고르게 솎아냄 (목록 순서대로 나오므로 앞에서 자르면 특정 직업만 남음)
-var STAGE_TOT_CAP_MAX = 16;   // 후반(대략 50스테이지~)은 정예 소수: 총원 최대 16명, 줄인 만큼은 공격 보정으로
+var STAGE_TOT_CAP_MAX = 16, STAGE_TOT_CAP_BOSS = 12;   // 보스 스테이지는 보스 포함 최대 12명   // 후반(대략 50스테이지~)은 정예 소수: 총원 최대 16명, 줄인 만큼은 공격 보정으로
 var STAGE_TOT_CAP_BASE = 10, STAGE_TOT_CAP_PER = 0.12, STAGE_COMP_HP = 0.15, STAGE_COMP_ATK = 0.55, STAGE_MAX_WAVES = 3, MAX_ENEMIES_ON_FIELD = 14;
 STAGES.forEach(function(s) {
   var cap = Math.min(STAGE_TOT_CAP_MAX, Math.round(STAGE_TOT_CAP_BASE + STAGE_TOT_CAP_PER * s.id));
+  if (s.boss) cap = Math.min(cap, STAGE_TOT_CAP_BOSS);
   if (s.tot > cap) {
     var ratio = s.tot / cap;
     s.sm = { hp: Math.round(s.sm.hp * Math.pow(ratio, STAGE_COMP_HP) * 100) / 100, atk: Math.round(s.sm.atk * Math.pow(ratio, STAGE_COMP_ATK) * 100) / 100 };
