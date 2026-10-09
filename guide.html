@@ -29,240 +29,87 @@
 <main>
   <section class="cx-hero">
     <div class="cx-emblem">📚</div>
-    <h1>공략 가이드</h1>
-    <p>솔빛 클랜을 100스테이지 끝까지 이끄는 법</p>
+    <h1 data-k="g.title"></h1>
+    <p data-k="g.sub"></p>
     <div class="cx-stats">
-      <div class="cx-stat"><b>100</b><span>스테이지</span></div>
-      <div class="cx-stat"><b>5</b><span>출전 클랜원</span></div>
-      <div class="cx-stat"><b>12</b><span>직업</span></div>
+      <div class="cx-stat"><b>100</b><span data-k="c.st_stages"></span></div>
+      <div class="cx-stat"><b>5</b><span data-k="c.st_party"></span></div>
+      <div class="cx-stat"><b>12</b><span data-k="c.st_classes"></span></div>
     </div>
   </section>
-
   <nav class="cx-tabs" id="tabs">
-    <button class="cx-tab on" data-tab="start">🎯 시작</button>
-    <button class="cx-tab" data-tab="grow">📈 성장</button>
-    <button class="cx-tab" data-tab="gear">⚔️ 장비</button>
-    <button class="cx-tab" data-tab="battle">🛡️ 전투</button>
-    <button class="cx-tab" data-tab="map">🗺️ 맵 환경</button>
-    <button class="cx-tab" data-tab="route">🏁 구간 공략</button>
+    <button class="cx-tab on" data-tab="start" data-k="g.tab_start"></button>
+    <button class="cx-tab" data-tab="grow" data-k="g.tab_grow"></button>
+    <button class="cx-tab" data-tab="gear" data-k="g.tab_gear"></button>
+    <button class="cx-tab" data-tab="battle" data-k="g.tab_battle"></button>
+    <button class="cx-tab" data-tab="map" data-k="g.tab_map"></button>
+    <button class="cx-tab" data-tab="route" data-k="g.tab_route"></button>
   </nav>
-
-  <div class="cx-wrap">
-
-    <!-- 시작 -->
-    <div class="cx-panel on" id="p-start">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>게임의 큰 그림</h2><small>overview</small></div>
-        <p class="cx-lead">클랜원 <b>5명</b>을 데리고 10개 에피소드, <b>100스테이지</b>를 돌파합니다. 10스테이지마다 보스가 나오고, 마지막 에피소드는 보스가 연달아 나옵니다. 지휘관(주인공)은 후방에서 클랜을 이끄는 인물이라 전투에는 나가지 않습니다.</p>
-        <div class="cx-note warn"><i>📈</i><div><b>적은 기하급수적으로 강해집니다.</b> 레벨만으로는 못 따라갑니다. 승급·스킬·장비·조합 버프·전술을 모두 써야 끝까지 갈 수 있습니다.</div></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>첫 파티 만들기</h2><small>first steps</small></div>
-        <div class="cx-card"><h3><span class="cx-ic">1</span>탱커·치유부터</h3><p>노비스 둘을 아카데미에서 <b>기사</b>와 <b>사제</b>로 전직합니다. 기사가 버티고 사제가 회복하는 조합이 가장 오래 살아남습니다.</p></div>
-        <div class="cx-card"><h3><span class="cx-ic">2</span>범위 공격 딜러</h3><p>후반으로 갈수록 <b>마법사</b>처럼 여러 적을 한 번에 치는 직업이 판을 짧게 만듭니다. 연구 봇이 가장 멀리 간 조합은 기사·사제·마법사×3입니다.</p></div>
-        <div class="cx-card"><h3><span class="cx-ic">3</span>새 클랜원</h3><p>2·4·6·8스테이지와 보스 스테이지를 처음 깰 때 새 클랜원이 들어옵니다. 상점 용병과 전직서로도 늘릴 수 있습니다.</p></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>매일 할 일</h2><small>daily</small></div>
-        <div class="cx-grid2">
-          <div class="cx-card"><h3><span class="cx-ic">🗓️</span>요일 던전 3회</h3><p>영혼석 조각·강화석·직업 세트 장비가 나옵니다. 열린 난이도 중 가장 높은 단계를 고르세요.</p></div>
-          <div class="cx-card"><h3><span class="cx-ic">🛒</span>상점 확인</h3><p>1시간마다 바뀝니다. 주력 직업의 핵심 스킬북과 전직서가 보이면 우선 삽니다.</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 성장 -->
-    <div class="cx-panel" id="p-grow">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>레벨과 등급</h2><small>level · grade</small></div>
-        <div class="cx-table-w"><table class="cx-table" id="grade-table"></table></div>
-        <div class="cx-note tip"><i>💡</i><div>레벨 상한에 닿으면 경험치를 더 받지 않습니다. 후반에는 <b>승급이 곧 성장</b>입니다. 처치 경험치는 살아남은 클랜원끼리 나누므로 사망자가 적을수록 빨리 큽니다.</div></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>성소 승급</h2><small>sanctuary</small></div>
-        <div class="cx-card"><ul>
-          <li>같은 직업 클랜원을 제물로 바쳐 <b>4점</b>을 채웁니다. 제물은 높은 등급 4점 · 같은 등급 2점 · 한 단계 낮음 1점.</li>
-          <li id="soul-line"></li>
-          <li>제물 1명마다 대상의 기본 스킬이 +1 오릅니다.</li>
-        </ul></div>
-        <div class="cx-note"><i>💠</i><div>영혼석은 <b>요일 던전</b>(직업별 조각 10개 = 1개), 보스 스테이지 첫 클리어, 상점에서 얻습니다. 탱커 → 주력 딜러 순서로 몰아주세요.</div></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>골드는 늘 부족합니다</h2><small>gold</small></div>
-        <div class="cx-card"><h3><span class="cx-ic">🪙</span>쓰는 순서</h3><ul>
-          <li><b>부활</b> — 주력이 쓰러지면 무엇보다 먼저</li>
-          <li><b>주력 확보</b> — 전직서·용병, 승급용 같은 직업 제물</li>
-          <li><b>핵심 스킬북</b></li>
-          <li><b>회복 물약</b> 2~4개 비축</li>
-          <li><b>장비 강화</b> — 강화석은 안 쓰는 장비를 분해해서</li>
-          <li>남는 골드로 장비 뽑기</li>
-        </ul></div>
-        <div class="cx-note warn"><i>⚠️</i><div><b>전멸 → 바로 재도전</b>은 가장 흔한 패배 패턴입니다. 먼저 <b>연습 모드</b>(클리어한 스테이지 정보 창)로 골드를 벌어 주력을 부활시킨 뒤 다시 도전하세요.</div></div>
-      </div>
-    </div>
-
-    <!-- 장비 -->
-    <div class="cx-panel" id="p-gear">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>장비 구조</h2><small>equipment</small></div>
-        <div class="cx-grid2">
-          <div class="cx-card"><h3><span class="cx-ic">🗡️</span>무기는 직업 전용</h3><p>전사 대검, 기사 기사검, 마법사 지팡이… 직업마다 한 계열입니다.</p></div>
-          <div class="cx-card"><h3><span class="cx-ic">🥋</span>방어구는 4종 공용</h3><p>천 · 가죽 · 사슬 · 판금. 종류별로 입을 수 있는 직업이 정해져 있습니다.</p></div>
-        </div>
-        <div class="cx-table-w" style="margin-top:10px"><table class="cx-table" id="rarity-table"></table></div>
-        <div class="cx-note tip"><i>🎯</i><div><b>직업 전용 옵션</b>(파란 줄)은 그 직업이 입을 때만 켜집니다. 다른 직업이 입으면 회색으로 꺼지니, 옵션 직업에 맞게 입히세요.</div></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>강화 +1~+10</h2><small>enhance</small></div>
-        <div class="cx-table-w"><table class="cx-table" id="enh-table"></table></div>
-        <div class="cx-grid2" style="margin-top:10px">
-          <div class="cx-card"><h3><span class="cx-ic">💥</span>파손과 수리</h3><p>실패할 때마다 <b>0.5%</b> 확률로 파손됩니다. 골드로 수리하면 +0으로 돌아가고 강화 옵션이 사라집니다. 보호 주문서를 쓰면 그 시도에서는 파손되지 않습니다.</p></div>
-          <div class="cx-card"><h3><span class="cx-ic">✨</span>강화 옵션</h3><p>성공하면 확률로 금색 옵션이 붙습니다(+10은 확정). 단계가 떨어지면 그 단계 옵션도 사라집니다.</p></div>
-        </div>
-        <div class="cx-card" style="margin-top:10px"><h3><span class="cx-ic">💡</span>강화 요령</h3><ul>
-          <li><b>팔지 말고 분해</b>합니다. 일반 장비 판매가는 30G, 분해하면 강화석(상점가 200G)이 나옵니다.</li>
-          <li><b>+3까지는 실패해도 떨어지지 않으니</b> 주력 장비는 모두 +3부터 맞춥니다.</li>
-          <li><b>무기와 갑옷</b>을 먼저 올립니다.</li>
-          <li>+8 이상 장비는 보호 주문서를 쓸 만합니다.</li>
-        </ul></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>전설과 직업 세트</h2><small>legend · set</small></div>
-        <div class="cx-grid2">
-          <div class="cx-card"><h3><span class="cx-ic">★</span>전설 장비</h3><p>보스 스테이지와 지옥 요일 던전에서 나옵니다. 아직 없는 전설이 먼저 나오고, 분해하면 전설 조각이 됩니다. 조각 5개로 원하는 전설을 고를 수 있습니다.</p><div class="cx-pills" id="legend-picks"></div></div>
-          <div class="cx-card"><h3><span class="cx-ic">🔗</span>직업 세트</h3><p>그 직업의 요일 던전에서 투구·갑옷·장화가 나옵니다. 3세트를 갖춘 클랜원이 2명 이상이면 조합 버프가 <b>공명</b>으로 한 단계 강해집니다.</p></div>
-        </div>
-        <p class="cx-lead" style="margin-top:10px">전체 목록은 <a href="compendium.html?tab=gear" style="color:var(--gold)">도감 → 장비</a>에서 볼 수 있습니다.</p>
-      </div>
-    </div>
-
-    <!-- 전투 -->
-    <div class="cx-panel" id="p-battle">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>클래스 조합 버프</h2><small>synergy</small></div>
-        <p class="cx-lead">출전한 클랜원 구성에 따라 파티 전체 버프가 걸립니다. 같은 직업 <b>5명</b>이면 강력한 특화, <b>3명</b>이면 작은 특화, 역할 조합에 따라 균형 버프가 붙습니다.</p>
-        <div class="cx-table-w"><table class="cx-table nw" id="syn-table"></table></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>전술</h2><small>tactics</small></div>
-        <div class="cx-table-w"><table class="cx-table">
-          <tr><th>요소</th><th>효과</th><th>활용</th></tr>
-          <tr><td>후방 공격</td><td>피해 +30%</td><td>적 등 뒤로 돌아가서 친다</td></tr>
-          <tr><td>측면 · 협공</td><td>+15% · +20%</td><td>대상 반대편에 우리 편이 붙어 있으면 협공</td></tr>
-          <tr><td>고지대</td><td>+15%, 원거리 사거리 +1</td><td>언덕 위 원거리 딜러</td></tr>
-          <tr><td>숲</td><td>일반 공격 15% 회피</td><td>원거리 딜러를 숲에 세운다</td></tr>
-          <tr><td>여울</td><td>받는 피해 +20%</td><td>적을 여울로 밀어 넣는다</td></tr>
-          <tr><td>엄호 · 투사체 차단</td><td>기사 뒤 유닛은 근접 대상에서 빠지고, 원거리 공격은 기사가 50%로 대신 맞음</td><td>기사로 후열을 가린다 (암살자는 엄호 무시)</td></tr>
-          <tr><td>도움닫기</td><td>궁수·암살자는 앞 동료를 딛고 2칸 더</td><td>적 뒤로 넘어가 후방 공격</td></tr>
-          <tr><td>밀치기</td><td>적을 1칸 밀어냄, 막히면 충돌 피해</td><td>기사는 70% 확률로 버틴다</td></tr>
-          <tr><td>방어 태세 · 경계</td><td>방어 ×1.5 · 다가오는 적 선제 사격</td><td>갈 곳 없는 탱커 · 기다리는 원거리</td></tr>
-        </table></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>승리와 별</h2><small>stars</small></div>
-        <div class="cx-grid2">
-          <div class="cx-card"><h3><span class="cx-ic">🏰</span>방어전</h3><p>적이 성벽을 넘으면 '돌파'가 쌓이고 총원의 1/4이 돌파하면 패배. 성문 앞을 기사로 막습니다.</p></div>
-          <div class="cx-card"><h3><span class="cx-ic">⚔️</span>공격전</h3><p>맵에는 우리 진영에서 적 진영까지 두 칸 폭 길이 반드시 하나 있습니다. 공성 도구는 지름길용.</p></div>
-          <div class="cx-card"><h3><span class="cx-ic">⭐</span>별 보너스</h3><p>★2 전사자 없음, ★3 제한 턴 이내. 새 별마다 보너스 골드가 나옵니다.</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 맵 환경 -->
-    <div class="cx-panel" id="p-map">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>맵 환경 디버프</h2><small>hazards</small></div>
-        <p class="cx-lead">맵 종류마다 클랜원에게 제약이 걸립니다. 그 디버프에 맞는 <b>방어 마법부여</b>가 새겨진 장비를 하나라도 낀 클랜원은 영향을 받지 않습니다.</p>
-        <div class="cx-grid2" id="hz-cards"></div>
-        <div class="cx-note tip"><i>☄️</i><div>후반 상당수가 <b>지옥 맵</b>이라 화염 저항이 가장 많이 쓰입니다. 연구 봇의 사망도 지옥 맵에서 가장 많았습니다.</div></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>마법부여</h2><small>enchant</small></div>
-        <div class="cx-card"><ul>
-          <li>성소 → 마법부여에서 장비에 <b>룬 1개 + 100G</b>로 새깁니다. 쓴 룬은 사라집니다.</li>
-          <li>장비 하나에 <b>방어 1개 + 공격 1개</b>를 함께 새길 수 있고, 같은 분류의 다른 룬을 쓰면 덮어씁니다.</li>
-          <li>다음 몇 스테이지의 맵을 보고 탱커 → 후열 순서로 방어 룬을 새깁니다. 공격 룬은 흡혈·번개가 무난합니다.</li>
-        </ul></div>
-        <div class="cx-grid2" id="atk-runes" style="margin-top:10px"></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>보물상자</h2><small>chest</small></div>
-        <div class="cx-card"><p>전투마다 1~2개가 맵 가운데에 놓이고 밟으면 열립니다. 져도 얻은 것은 남습니다. 길목에 있으면 열고 가되, 상자 때문에 진형을 무너뜨리지는 마세요.</p><div class="cx-pills" id="chest-odds"></div></div>
-      </div>
-    </div>
-
-    <!-- 구간 공략 -->
-    <div class="cx-panel" id="p-route">
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>에피소드별 공략</h2><small>route</small></div>
-        <div id="route-acc"></div>
-      </div>
-      <div class="cx-sec">
-        <div class="cx-sec-h"><h2>연구 봇 결과</h2><small>autoplay</small></div>
-        <div class="cx-table-w"><table class="cx-table">
-          <tr><th>조합</th><th>최고 도달</th><th>성격</th></tr>
-          <tr><td>기사·사제·마법사×3</td><td class="n">S100 완주</td><td>범위 마법으로 판이 가장 짧고 멀리 감</td></tr>
-          <tr><td>기사·사제·궁수×3</td><td class="n">S80</td><td>원거리 화력, 적이 많을수록 판이 길어짐</td></tr>
-          <tr><td>기사·사제·마법사·궁수·전사</td><td class="n">S80</td><td>무난한 균형형</td></tr>
-          <tr><td>기사·사제·전사·창기사·마법사</td><td class="n">S90</td><td>근접 전열이 두터워 오래 버팀</td></tr>
-        </table></div>
-        <div class="cx-note"><i>🤖</i><div>연구 봇은 사람보다 전술이 단순합니다. 판이 10분을 넘게 늘어지기 시작하면 <b>전력이 모자라다는 신호</b>입니다. 무리하게 다음 스테이지로 가기보다 요일 던전·승급·강화로 먼저 강해지세요.</div></div>
-      </div>
-    </div>
-
-    <div class="cx-foot">수치는 게임 데이터에서 바로 읽어 옵니다 · 자세한 목록은 도감에서</div>
-  </div>
+  <div class="cx-wrap" id="cx-body"></div>
 </main>
 
 <script>
+// ═══ 가이드: 문장은 번역 키(codex.g.* / codex.c.*, data/language/*/codex.js), 표는 게임 데이터 ═══
 const $ = id => document.getElementById(id);
+const T = (k, p) => t('codex.' + k, p);
 const tt = (k, fb, p) => { const v = t(k, p); return v && v !== k ? v : (fb != null ? fb : k); };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const ico = (key, size, emo) => typeof iconOr === 'function' ? iconOr(key, size, emo) : (emo || '');
+const sec = (h, sm, inner) => `<div class="cx-sec"><div class="cx-sec-h"><h2>${T(h)}</h2><small>${sm}</small></div>${inner}</div>`;
+const card = (ic, h, p) => `<div class="cx-card"><h3><span class="cx-ic">${ic}</span>${T(h)}</h3><p>${T(p)}</p></div>`;
+const note = (cls, ic, k, p) => `<div class="cx-note ${cls}"><i>${ic}</i><div>${T(k, p)}</div></div>`;
+const table = (cls, head, rows) => `<div class="cx-table-w"><table class="cx-table ${cls}"><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>${rows.join('')}</table></div>`;
+const ODDS = k => T('c.odd_' + k);
 
-function renderData() {
-  // 등급·레벨
-  $('grade-table').innerHTML = '<tr><th>등급</th><th>레벨 상한</th><th>능력치 배율</th><th>승급 영혼석</th></tr>' +
-    [['C', 0.8, '−'], ['B', 0.9, '−'], ['A', 1.0, SOUL.promote.B + '개 (B→A)'], ['S', 1.1, SOUL.promote.A + '개 (A→S)']]
-      .map(([g, m, s]) => `<tr><td>${g}</td><td class="n">${GRADE_LV_CAP[g]}</td><td class="n">×${m}</td><td>${s}</td></tr>`).join('');
-  $('soul-line').innerHTML = `C→B는 영혼석이 필요 없고, B→A는 그 직업 영혼석 <b>${SOUL.promote.B}개</b>, A→S는 <b>${SOUL.promote.A}개</b>가 듭니다.`;
-  // 장비 등급·강화
-  $('rarity-table').innerHTML = '<tr><th>등급</th><th>추가 능력치</th><th>직업 옵션</th><th>고유 효과</th></tr>' +
-    RARITY_ORDER.map(r => `<tr><td style="color:${RARITY[r].color}">${RARITY[r].grade} ${esc(tt('equip.rarity.' + r, r).replace(/^[A-Z] - /, ''))}</td><td class="n">${SUB_COUNT[r]}</td><td>${RARITY[r].tier >= 2 ? '○' : '−'}</td><td>${r === 'legendary' ? '전설 효과 (19종)' : r === 'epic' ? '무작위 1개' : '−'}</td></tr>`).join('');
-  $('enh-table').innerHTML = '<tr><th>단계</th><th>성공</th><th>실패 시</th><th>강화석</th><th>능력치</th></tr>' +
-    ENHANCE_RATES.map((p, lv) => `<tr><td>+${lv}→+${lv + 1}</td><td class="n">${Math.round(p * 100)}%</td><td>${lv < ENHANCE_SAFE_BELOW ? '유지' : '−1단계'}</td><td class="n">${ENHANCE_STONES[lv]}</td><td class="n">+${ENHANCE_STAT_PCT[lv + 1]}%</td></tr>`).join('');
-  $('legend-picks').innerHTML = ['unyielding', 'saint_tear', 'king_seal', 'dragon_scale'].filter(k => LEGENDS[k])
-    .map(k => `<span class="cx-pill g">${ico('legend_' + k, 14, '★')} ${esc(tt('gear.legend.' + k))}</span>`).join('');
-  // 조합 버프
+function build() {
+  const g = {};
+  // 시작
+  g.start = sec('g.s_overview', 'overview', `<p class="cx-lead">${T('g.overview_p')}</p>${note('warn', '📈', 'g.overview_warn')}`) +
+    sec('g.s_first', 'first steps', card('1', 'g.first1_h', 'g.first1_p') + card('2', 'g.first2_h', 'g.first2_p') + card('3', 'g.first3_h', 'g.first3_p')) +
+    sec('g.s_daily', 'daily', `<div class="cx-grid2">${card('🗓️', 'g.daily1_h', 'g.daily1_p')}${card('🛒', 'g.daily2_h', 'g.daily2_p')}</div>`);
+  // 성장
+  const grades = [['C', 0.8, '−'], ['B', 0.9, '−'], ['A', 1.0, T('c.soul_ba', { n: SOUL.promote.B })], ['S', 1.1, T('c.soul_as', { n: SOUL.promote.A })]]
+    .map(([gr, m, so]) => `<tr><td>${gr}</td><td class="n">${GRADE_LV_CAP[gr]}</td><td class="n">×${m}</td><td>${so}</td></tr>`);
+  g.grow = sec('g.s_level', 'level · grade', table('', [T('c.th_grade'), T('c.th_lvcap'), T('c.th_mult'), T('c.th_soul')], grades) + note('tip', '💡', 'g.level_tip')) +
+    sec('g.s_promote', 'sanctuary', `<div class="cx-card"><ul><li>${T('g.promote_li1')}</li><li>${T('g.promote_soul', { a: SOUL.promote.B, b: SOUL.promote.A })}</li><li>${T('g.promote_li3')}</li></ul></div>${note('', '💠', 'g.promote_note')}`) +
+    sec('g.s_gold', 'gold', `<div class="cx-card"><h3><span class="cx-ic">🪙</span>${T('g.gold_h')}</h3><ul>${[1, 2, 3, 4, 5, 6].map(i => `<li>${T('g.gold_' + i)}</li>`).join('')}</ul></div>${note('warn', '⚠️', 'g.gold_warn')}`);
+  // 장비
+  const rar = RARITY_ORDER.map(r => `<tr><td style="color:${RARITY[r].color}">${RARITY[r].grade} ${esc(tt('equip.rarity.' + r, r).replace(/^[A-Z] - /, ''))}</td><td class="n">${SUB_COUNT[r]}</td><td>${RARITY[r].tier >= 2 ? '○' : '−'}</td><td>${r === 'legendary' ? T('c.legend_fx19') : r === 'epic' ? T('c.random1') : '−'}</td></tr>`);
+  const enh = ENHANCE_RATES.map((p, lv) => `<tr><td>+${lv}→+${lv + 1}</td><td class="n">${Math.round(p * 100)}%</td><td>${lv < ENHANCE_SAFE_BELOW ? T('c.keep') : T('c.drop1')}</td><td class="n">${ENHANCE_STONES[lv]}</td><td class="n">+${ENHANCE_STAT_PCT[lv + 1]}%</td></tr>`);
+  const picks = ['unyielding', 'saint_tear', 'king_seal', 'dragon_scale'].filter(k => LEGENDS[k]).map(k => `<span class="cx-pill g">${ico('legend_' + k, 14, '★')} ${esc(tt('gear.legend.' + k))}</span>`).join('');
+  g.gear = sec('g.s_gearstruct', 'equipment', `<div class="cx-grid2">${card('🗡️', 'g.wpn_h', 'g.wpn_p')}${card('🥋', 'g.arm_h', 'g.arm_p')}</div><div style="margin-top:10px">${table('', [T('c.th_grade'), T('c.th_sub'), T('c.th_copt'), T('c.th_unique')], rar)}</div>${note('tip', '🎯', 'g.copt_tip')}`) +
+    sec('g.s_enh', 'enhance', table('', [T('c.th_step'), T('c.th_success'), T('c.th_onfail'), T('c.th_stones'), T('c.th_stat')], enh) +
+      `<div class="cx-grid2" style="margin-top:10px">${card('💥', 'g.break_h', 'g.break_p')}${card('✨', 'g.eopt_h', 'g.eopt_p')}</div>
+       <div class="cx-card" style="margin-top:10px"><h3><span class="cx-ic">💡</span>${T('g.tips_h')}</h3><ul>${[1, 2, 3, 4].map(i => `<li>${T('g.tip' + i)}</li>`).join('')}</ul></div>`) +
+    sec('g.s_legset', 'legend · set', `<div class="cx-grid2"><div class="cx-card"><h3><span class="cx-ic">★</span>${T('g.leg_h')}</h3><p>${T('g.leg_p')}</p><div class="cx-pills">${picks}</div></div>${card('🔗', 'g.set_h', 'g.set_p')}</div><p class="cx-lead" style="margin-top:10px">${T('g.more_gear')}</p>`);
+  // 전투
   const PC = ['warrior','knight','lancer','brawler','assassin','archer','mage','summoner','shaman','priest','sapper','novice'];
-  $('syn-table').innerHTML = '<tr><th>직업</th><th>5명</th><th>3명</th></tr>' + PC.filter(c => SYNERGY_MONO[c]).map(c =>
-    `<tr><td>${clsIcon(c, 18)} ${esc(tt('classes.' + c))}</td><td><b style="color:var(--cx-gold2)">${esc(Synergy.name({ id: 'mono_' + c, cls: c }))}</b><br>${esc(Synergy.describe({ eff: SYNERGY_MONO[c].eff }))}</td><td>${SYNERGY_TRIO[c] ? esc(Synergy.describe({ eff: SYNERGY_TRIO[c] })) : '−'}</td></tr>`).join('');
+  const syn = PC.filter(c => SYNERGY_MONO[c]).map(c => `<tr><td>${clsIcon(c, 18)} ${esc(tt('classes.' + c))}</td><td><b style="color:var(--cx-gold2)">${esc(Synergy.name({ id: 'mono_' + c, cls: c }))}</b><br>${esc(Synergy.describe({ eff: SYNERGY_MONO[c].eff }))}</td><td>${SYNERGY_TRIO[c] ? esc(Synergy.describe({ eff: SYNERGY_TRIO[c] })) : '−'}</td></tr>`);
+  const tac = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => '<tr>' + T('g.t' + i).split('|').map(x => `<td>${esc(x)}</td>`).join('') + '</tr>');
+  g.battle = sec('g.s_syn', 'synergy', `<p class="cx-lead">${T('g.syn_p')}</p>` + table('nw', [T('c.th_cls'), T('c.n5'), T('c.n3')], syn)) +
+    sec('g.s_tactics', 'tactics', table('', [T('g.th_elem'), T('g.th_effect'), T('g.th_use')], tac)) +
+    sec('g.s_win', 'stars', `<div class="cx-grid2">${card('🏰', 'g.def_h', 'g.def_p')}${card('⚔️', 'g.off_h', 'g.off_p')}${card('⭐', 'g.star_h', 'g.star_p')}</div>`);
   // 맵 환경
-  $('hz-cards').innerHTML = Object.keys(HAZARDS).map(m => { const h = HAZARDS[m];
-    return `<div class="cx-card"><h3><span class="cx-ic">${h.icon}</span>${esc(tt('hazard.' + h.id, h.id))}</h3><p>${esc(Hazard.describe(h, STAGES[0]))}</p></div>`; }).join('');
-  $('atk-runes').innerHTML = Rune.kinds('atk').map(k => `<div class="cx-card"><h3><span class="cx-ic">${ico('rune_' + k, 22, ENCHANTS[k].icon)}</span>${esc(tt('enchant.' + k, k))}</h3><p>${esc(tt('enchant.desc_' + k, ''))}</p></div>`).join('');
-  $('chest-odds').innerHTML = Object.keys(CHEST.odds).map(k => `<span class="cx-pill">${{ gold: '골드', potion: '전투 물약', rune: '룬', equip: '장비', stone: '강화석', protect: '보호 주문서', soul: '영혼석 조각' }[k] || k} ${Math.round(CHEST.odds[k] * 100)}%</span>`).join('');
+  const hz = Object.keys(HAZARDS).map(m => { const h = HAZARDS[m]; return `<div class="cx-card"><h3><span class="cx-ic">${h.icon}</span>${esc(tt('hazard.' + h.id, h.id))}</h3><p>${esc(Hazard.describe(h, STAGES[0]))}</p></div>`; }).join('');
+  const runes = Rune.kinds('atk').map(k => `<div class="cx-card"><h3><span class="cx-ic">${ico('rune_' + k, 22, ENCHANTS[k].icon)}</span>${esc(tt('enchant.' + k, k))}</h3><p>${esc(tt('enchant.desc_' + k, ''))}</p></div>`).join('');
+  const odds = Object.keys(CHEST.odds).map(k => `<span class="cx-pill">${ODDS(k)} ${Math.round(CHEST.odds[k] * 100)}%</span>`).join('');
+  g.map = sec('g.s_hz', 'hazards', `<p class="cx-lead">${T('g.hz_p')}</p><div class="cx-grid2">${hz}</div>${note('tip', '☄️', 'g.hz_tip')}`) +
+    sec('g.s_enchant', 'enchant', `<div class="cx-card"><ul><li>${T('g.ench1')}</li><li>${T('g.ench2')}</li><li>${T('g.ench3')}</li></ul></div><div class="cx-grid2" style="margin-top:10px">${runes}</div>`) +
+    sec('g.s_chest', 'chest', `<div class="cx-card"><p>${T('g.chest_p')}</p><div class="cx-pills">${odds}</div></div>`);
   // 구간 공략
-  const ROUTE = {
-    1: '노비스 둘을 기사·사제로 전직해 탱커·치유를 먼저 갖춥니다. 새 클랜원이 2·4·6·8스테이지와 10스테이지 첫 클리어 때 들어옵니다.',
-    2: '20스테이지를 깨면 요일 던전 중급이 열립니다. 첫 영혼석을 모으기 시작하고, 설원·유적 맵에 대비합니다.',
-    3: '전사자가 본격적으로 생깁니다. 암살자는 엄호를 무시하고 후열을 노리니 사제 옆을 비우지 마세요. 늪·정글은 독 저항 룬.',
-    4: '적 마법사가 많아집니다. 숲에 서고 흩어져 범위 피해를 줄입니다. 주력 장비를 +3까지 맞춥니다.',
-    5: '지옥 맵이 많아지고 적 공격이 크게 오릅니다. 45를 깨면 요일 던전 상급이 열립니다. A→S 승급과 화염 저항을 서두르세요.',
-    6: '적 수는 더 늘지 않지만 한 대가 아픕니다. 판이 10분을 넘기 시작하면 전력이 모자라다는 신호입니다.',
-    7: '여러 맵이 섞이니 맵마다 방어 룬을 바꿔 새깁니다. 범위 공격 조합이 가장 빠릅니다.',
-    8: 'S등급·핵심 스킬 Lv10·강화 장비·조합 버프를 모두 갖춰야 하는 구간. 보스 판은 적이 적지만 정예입니다.',
-    9: '마지막 에피소드를 앞두고 전설 장비와 직업 세트 공명을 노립니다.',
-    10: '92~95·99·100 연속 보스. 탱커가 먼저 무너지지 않게 치유와 방어 태세를 아끼지 마세요.'
-  };
   const eps = {}; STAGES.forEach(s => { const e = Math.ceil(s.id / 10); (eps[e] = eps[e] || []).push(s); });
-  $('route-acc').innerHTML = Object.keys(eps).map(e => {
+  const acc = Object.keys(eps).map(e => {
     const ss = eps[e], bosses = ss.filter(s => s.boss).map(s => `${s.id} ${bossName(s)}`);
     const maps = [...new Set(ss.map(s => Hazard.forStage(s)).filter(Boolean).map(h => h.icon + ' ' + tt('hazard.' + h.id, h.id)))];
-    return `<details class="cx-acc"><summary><span class="cx-ic">${e}</span><span>${esc(tt('episode.' + e + '.name', 'Ep' + e))}<br><small>${(e - 1) * 10 + 1}~${e * 10} · 적 ${Math.min(...ss.map(s => s.tot))}~${Math.max(...ss.map(s => s.tot))}명 · 레벨 ${stageEnemyLv(ss[0].id)}~${stageEnemyLv(ss[ss.length - 1].id)}</small></span></summary>
-      <div class="cx-acc-b"><p class="cx-lead" style="margin:0 0 8px">${esc(ROUTE[e] || '')}</p>
+    const meta = T('g.route_meta', { a: (e - 1) * 10 + 1, b: e * 10, c: Math.min(...ss.map(s => s.tot)), d: Math.max(...ss.map(s => s.tot)), e: stageEnemyLv(ss[0].id), f: stageEnemyLv(ss[ss.length - 1].id) });
+    return `<details class="cx-acc"><summary><span class="cx-ic">${e}</span><span>${esc(tt('episode.' + e + '.name', 'Ep' + e))}<br><small>${meta}</small></span></summary>
+      <div class="cx-acc-b"><p class="cx-lead" style="margin:0 0 8px">${T('g.r' + e)}</p>
       <div class="cx-pills">${bosses.map(b => `<span class="cx-pill r">💀 ${esc(b)}</span>`).join('')}${maps.map(m => `<span class="cx-pill p">${esc(m)}</span>`).join('')}</div></div></details>`;
   }).join('');
+  const bot = [1, 2, 3, 4].map(i => { const [a, b, c] = T('g.b' + i).split('|'); return `<tr><td>${esc(a)}</td><td class="n">${esc(b)}</td><td>${esc(c)}</td></tr>`; });
+  g.route = sec('g.s_route', 'route', acc) + sec('g.s_bot', 'autoplay', table('', [T('g.th_combo'), T('g.th_reach'), T('g.th_trait')], bot) + note('', '🤖', 'g.bot_note'));
+
+  $('cx-body').innerHTML = Object.keys(g).map((k, i) => `<div class="cx-panel ${i ? '' : 'on'}" id="p-${k}">${g[k]}</div>`).join('') + `<div class="cx-foot">${T('g.foot')}</div>`;
 }
 
 document.querySelectorAll('#tabs .cx-tab').forEach(btn => btn.onclick = () => {
@@ -273,8 +120,10 @@ document.querySelectorAll('#tabs .cx-tab').forEach(btn => btn.onclick = () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof loadI18n === 'function') await loadI18n();
-  $('nav-title').textContent = tt('nav.guide', '가이드');
-  renderData();
+  $('nav-title').textContent = tt('nav.guide', T('g.title'));
+  document.title = T('g.title');
+  document.querySelectorAll('[data-k]').forEach(el => { el.innerHTML = T(el.dataset.k); });
+  build();
   const tab = new URLSearchParams(location.search).get('tab');
   if (tab) { const b = document.querySelector(`#tabs [data-tab="${tab}"]`); if (b) b.click(); }
 });

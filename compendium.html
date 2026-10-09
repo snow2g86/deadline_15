@@ -30,30 +30,30 @@
 <main>
   <section class="cx-hero">
     <div class="cx-emblem">📖</div>
-    <h1>도감</h1>
-    <p>직업 · 장비 · 소모품 · 스테이지를 한곳에서</p>
+    <h1 data-k="c.title"></h1>
+    <p data-k="c.sub"></p>
     <div class="cx-stats" id="hero-stats"></div>
   </section>
 
   <nav class="cx-tabs" id="tabs">
-    <button class="cx-tab on" data-tab="cls">🛡️ 직업</button>
-    <button class="cx-tab" data-tab="gear">⚔️ 장비</button>
-    <button class="cx-tab" data-tab="cons">🧪 소모품·재료</button>
-    <button class="cx-tab" data-tab="stage">🗺️ 스테이지</button>
+    <button class="cx-tab on" data-tab="cls" data-k="c.tab_cls"></button>
+    <button class="cx-tab" data-tab="gear" data-k="c.tab_gear"></button>
+    <button class="cx-tab" data-tab="cons" data-k="c.tab_cons"></button>
+    <button class="cx-tab" data-tab="stage" data-k="c.tab_stage"></button>
   </nav>
 
   <div class="cx-wrap">
-    <div class="cx-search"><input id="q" type="search" placeholder="이름·효과로 찾기" autocomplete="off"></div>
+    <div class="cx-search"><input id="q" type="search" placeholder="" autocomplete="off"></div>
 
     <!-- 직업 -->
     <div class="cx-panel on" id="p-cls">
       <div class="cx-sec">
-        <div class="cx-sec-h"><h2>직업</h2><small>12 classes</small></div>
-        <p class="cx-lead">직업을 누르면 능력치·스킬·조합 버프·직업 세트·전설 무기를 볼 수 있습니다.</p>
+        <div class="cx-sec-h"><h2 data-k="c.s_cls"></h2><small>12 classes</small></div>
+        <p class="cx-lead" data-k="c.cls_p"></p>
         <div class="cx-grid" id="cls-grid"></div>
       </div>
       <div class="cx-sec">
-        <div class="cx-sec-h"><h2>자원</h2><small>resources</small></div>
+        <div class="cx-sec-h"><h2 data-k="c.s_res"></h2><small>resources</small></div>
         <div class="cx-grid2" id="res-cards"></div>
       </div>
     </div>
@@ -70,7 +70,7 @@
     <!-- 스테이지 -->
     <div class="cx-panel" id="p-stage"><div id="stage-body"></div></div>
 
-    <div class="cx-foot">수치는 게임 데이터에서 바로 읽어 옵니다</div>
+    <div class="cx-foot" data-k="c.foot"></div>
   </div>
 </main>
 
@@ -91,9 +91,10 @@ const $ = id => document.getElementById(id);
 const tt = (k, fb, p) => { const v = t(k, p); return v && v !== k ? v : (fb != null ? fb : k); };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const roleOf = cls => (typeof ROLE_MAP !== 'undefined' && ROLE_MAP[cls]) || 'melee';
-const roleName = r => tt('roles.' + r, { melee: '근접', ranged: '원거리', healer: '힐러', support: '지원' }[r] || r);
+const roleName = r => r === 'support' ? T('c.role_support') : tt('roles.' + r, r);
 const ico = (key, size, emo) => typeof iconOr === 'function' ? iconOr(key, size, emo) : (emo || '');
-const STAT_NAMES = { hp: '체력', atk: '공격', def: '방어', move: '이동', range: '사거리' };
+const T = (k, p) => t('codex.' + k, p);
+const STAT_NAMES = new Proxy({}, { get: (_, k) => T('c.stat_' + String(k)) });
 
 // ── 직업 ──
 function skillsOf(cls) {
@@ -111,7 +112,7 @@ function renderClasses() {
   }).join('');
   $('cls-grid').querySelectorAll('[data-cls]').forEach(b => b.onclick = () => openClass(b.dataset.cls));
 
-  const res = { fury: ['💢', '분노', '공격하거나 맞을 때 쌓임 (최대 10). 다 차면 직업 고유 효과가 터짐'], energy: ['⚡', '에너지', '차례마다 자동으로 회복'], mana: ['🔮', '마나', '차례마다 자동으로 회복, 마법·회복 스킬에 사용'] };
+  const res = { fury: ['💢', 'fury', T('c.res_fury')], energy: ['⚡', 'energy', T('c.res_energy')], mana: ['🔮', 'mana', T('c.res_mana')] };
   $('res-cards').innerHTML = Object.keys(res).map(k => {
     const who = PLAYER_CLASSES.filter(c => JAB[c] && JAB[c].res === k).map(c => tt('classes.' + c)).join(' · ');
     return `<div class="cx-card"><h3><span class="cx-ic">${res[k][0]}</span>${esc(tt('resources.' + k, res[k][1]))}</h3><p>${res[k][2]}</p><div class="cx-pills"><span class="cx-pill">${esc(who)}</span></div></div>`;
@@ -126,13 +127,13 @@ function openClass(cls) {
   const grow = ['hp', 'atk', 'def'].map(k => `<span class="cx-pill">${STAT_NAMES[k]} +${g[k][0]}~${g[k][1]}</span>`).join('');
   const { base, learn } = skillsOf(cls);
   const sk = s => `<div class="cx-skill"><span class="s-ic">${skillIcon(s.id, 34)}</span><div>
-      <div class="s-nm">${esc(tt('skills.' + s.id, s.name))}<small>${s.passive ? '패시브' : (s.cost ? s.cost + ' ' + tt('resources.' + s.costType, s.costType) : '')}</small></div>
+      <div class="s-nm">${esc(tt('skills.' + s.id, s.name))}<small>${s.passive ? T('c.passive') : (s.cost ? s.cost + ' ' + tt('resources.' + s.costType, s.costType) : '')}</small></div>
       <div class="s-ds">${esc(tt('skills_desc.' + s.id, s.desc))}</div></div></div>`;
   const syn = [];
-  if (SYNERGY_MONO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill g">5인</span><span class="cx-pill">${esc(Synergy.name({ id: 'mono_' + cls, cls }))}</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_MONO[cls].eff }))}</span></div>`);
-  if (SYNERGY_TRIO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill b">3인</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_TRIO[cls] }))}</span></div>`);
+  if (SYNERGY_MONO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill g">${T('c.sh_5')}</span><span class="cx-pill">${esc(Synergy.name({ id: 'mono_' + cls, cls }))}</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_MONO[cls].eff }))}</span></div>`);
+  if (SYNERGY_TRIO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill b">${T('c.sh_3')}</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_TRIO[cls] }))}</span></div>`);
   const set = CLASS_SETS[cls];
-  const setHtml = set ? [2, 3].map(n => `<div class="cx-pills"><span class="cx-pill ${n === 3 ? 'g' : ''}">${n}세트</span>${Object.keys(set[n]).map(k => `<span class="cx-pill">${esc(Gear.fmt(k, set[n][k]))}</span>`).join('')}</div>`).join('') : '';
+  const setHtml = set ? [2, 3].map(n => `<div class="cx-pills"><span class="cx-pill ${n === 3 ? 'g' : ''}">${T('c.n_set', { n })}</span>${Object.keys(set[n]).map(k => `<span class="cx-pill">${esc(Gear.fmt(k, set[n][k]))}</span>`).join('')}</div>`).join('') : '';
   const wl = Object.keys(LEGENDS).find(k => LEGENDS[k].tpl === 'wpn_' + cls);
   const wpn = equipTemplate('wpn_' + cls);
   const armors = Object.keys(ARMOR_TYPE).filter(a => ARMOR_TYPE[a].includes(cls)).map(a => tt('gear.armor.' + a, a));
@@ -140,20 +141,20 @@ function openClass(cls) {
     <div class="cx-sheet-head"><div class="h-ic">${clsIcon(cls, 64)}</div><div>
       <h3>${esc(tt('classes.' + cls))}</h3><span class="cx-role ${r}">${roleName(r)}</span>
       <p style="font-size:12.5px;color:var(--cx-text2);margin-top:6px">${esc(tt('class_desc.' + cls, ''))}</p></div></div>
-    <div class="cx-sub-h">기본 능력치</div><div class="cx-bars">${bars}</div>
-    <div class="cx-pills" style="margin-top:10px"><span class="cx-pill p">레벨당</span>${grow}<span class="cx-pill">${esc(tt('resources.' + d.res, d.res))} ${d.maxRes}</span><span class="cx-pill">행동 속도 ${d.actionRec || 1}</span></div>
-    <div class="cx-sub-h">스킬</div>${base.map(sk).join('')}
-    ${learn.length ? `<div class="cx-sub-h">습득 스킬 (스킬북)</div>${learn.map(sk).join('')}` : ''}
-    ${syn.length ? `<div class="cx-sub-h">클래스 조합 버프</div>${syn.join('')}` : ''}
-    <div class="cx-sub-h">장비</div>
-    <div class="cx-pills"><span class="cx-pill">${ico('wpn_' + cls, 16, getEquipEmoji('wpn_' + cls))} ${esc(Gear.name({ templateId: 'wpn_' + cls }))} · ${wpn && wpn.hand === '2h' ? '양손' : '한손'}</span><span class="cx-pill">방어구: ${esc(armors.join(' · '))}</span></div>
+    <div class="cx-sub-h">${T('c.sh_base')}</div><div class="cx-bars">${bars}</div>
+    <div class="cx-pills" style="margin-top:10px"><span class="cx-pill p">${T('c.sh_perlv')}</span>${grow}<span class="cx-pill">${esc(tt('resources.' + d.res, d.res))} ${d.maxRes}</span><span class="cx-pill">${T('c.sh_speed', { n: d.actionRec || 1 })}</span></div>
+    <div class="cx-sub-h">${T('c.sh_skills')}</div>${base.map(sk).join('')}
+    ${learn.length ? `<div class="cx-sub-h">${T('c.sh_learn')}</div>${learn.map(sk).join('')}` : ''}
+    ${syn.length ? `<div class="cx-sub-h">${T('c.sh_syn')}</div>${syn.join('')}` : ''}
+    <div class="cx-sub-h">${T('c.sh_gear')}</div>
+    <div class="cx-pills"><span class="cx-pill">${ico('wpn_' + cls, 16, getEquipEmoji('wpn_' + cls))} ${esc(Gear.name({ templateId: 'wpn_' + cls }))} · ${wpn && wpn.hand === '2h' ? T('c.two_h') : T('c.one_h')}</span><span class="cx-pill">${esc(T('c.armors', { list: armors.join(' · ') }))}</span></div>
     ${wl ? `<div class="cx-card cx-item rar-legendary" style="margin-top:8px"><h3>${ico('legend_' + wl, 26, '★')} ${esc(tt('gear.legend.' + wl))}</h3>${Object.keys(LEGENDS[wl].fx).map(k => `<div class="gear-line gl-legend">★ ${esc(Gear.fmt(k, LEGENDS[wl].fx[k]))}</div>`).join('')}</div>` : ''}
-    ${set ? `<div class="cx-sub-h">직업 세트 · ${esc(tt('gear.set.' + cls))}</div>${setHtml}<p style="font-size:11.5px;color:var(--cx-text2);margin-top:6px">${esc(tt('classes.' + cls))} 요일 던전에서 투구·갑옷·장화가 나옵니다. 3세트를 갖춘 클랜원이 2명 이상이면 조합 버프가 공명으로 강해집니다.</p>` : ''}`;
+    ${set ? `<div class="cx-sub-h">${esc(T('c.sh_set', { set: tt('gear.set.' + cls) }))}</div>${setHtml}<p style="font-size:11.5px;color:var(--cx-text2);margin-top:6px">${esc(T('c.set_note', { cls: tt('classes.' + cls) }))}</p>` : ''}`;
   openSheet();
 }
 
 // ── 장비 ──
-const GEAR_FILTERS = [['all', '전체'], ['weapon', '무기'], ['offhand', '보조'], ['armor', '방어구'], ['acc', '장신구'], ['legend', '전설'], ['set', '직업 세트'], ['rule', '등급·강화']];
+const GEAR_FILTERS = ['all', 'weapon', 'offhand', 'armor', 'acc', 'legend', 'set', 'rule'];
 let gearFilter = 'all';
 function slotGroup(slot) { return slot === 'weapon' ? 'weapon' : slot === 'offhand' ? 'offhand' : ['helmet', 'armor', 'boots'].includes(slot) ? 'armor' : 'acc'; }
 function statRange(tpl, rar) {
@@ -162,20 +163,20 @@ function statRange(tpl, rar) {
 }
 function wearers(tpl) {
   const list = tpl.clsRestrict || (tpl.armorType ? ARMOR_TYPE[tpl.armorType] : null);
-  if (!list || list.length >= 12) return '<span class="cx-pill">모든 직업</span>';
+  if (!list || list.length >= 12) return `<span class="cx-pill">${T('c.all_cls')}</span>`;
   return list.map(c => `<span title="${esc(tt('classes.' + c))}">${clsIcon(c, 20)}</span>`).join('');
 }
 function renderGear() {
-  $('gear-filter').innerHTML = GEAR_FILTERS.map(([k, l]) => `<button class="cx-tab ${k === gearFilter ? 'on' : ''}" data-f="${k}">${l}</button>`).join('');
+  $('gear-filter').innerHTML = GEAR_FILTERS.map(k => `<button class="cx-tab ${k === gearFilter ? 'on' : ''}" data-f="${k}">${T('c.f_' + k)}</button>`).join('');
   $('gear-filter').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { gearFilter = b.dataset.f; renderGear(); applySearch(); });
   const out = [];
   const show = f => gearFilter === 'all' || gearFilter === f;
   ['weapon', 'offhand', 'armor', 'acc'].forEach(grp => {
     if (!show(grp)) return;
-    const title = { weapon: '직업 전용 무기', offhand: '보조 장비', armor: '방어구 (천·가죽·사슬·판금)', acc: '장신구' }[grp];
+    const title = T('c.g_' + grp);
     const cards = EQUIP_DB.filter(t => slotGroup(t.slot) === grp).map(tpl => {
       const nm = Gear.name({ templateId: tpl.baseId });
-      const tag = tpl.armorType ? tt('gear.armor.' + tpl.armorType, tpl.armorType) : tpl.hand ? (tpl.hand === '2h' ? '양손' : '한손') : (tpl.setId ? tt('equip.set.' + tpl.setId, tpl.setId) : '');
+      const tag = tpl.armorType ? tt('gear.armor.' + tpl.armorType, tpl.armorType) : tpl.hand ? (tpl.hand === '2h' ? T('c.two_h') : T('c.one_h')) : (tpl.setId ? tt('equip.set.' + tpl.setId, tpl.setId) : '');
       return `<div class="cx-card cx-item rar-rare" data-q="${esc(nm + ' ' + tag + ' ' + tt('equip.slot.' + tpl.slot))}">
         <h3><span class="cx-ic">${ico(tpl.baseId, 26, getEquipEmoji(tpl.baseId))}</span>${esc(nm)}</h3>
         <div class="cx-pills"><span class="cx-pill">${esc(tt('equip.slot.' + tpl.slot))}</span>${tag ? `<span class="cx-pill b">${esc(tag)}</span>` : ''}</div>
@@ -193,65 +194,65 @@ function renderGear() {
         <div style="margin-top:8px">${fx.map(f => `<div class="gear-line gl-legend">★ ${esc(f)}</div>`).join('')}</div>
         <div class="cx-wear">${wearers(tpl)}</div></div>`;
     });
-    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>전설 장비</h2><small>${cards.length} legends</small></div>
-      <div class="cx-note tip"><i>★</i><div>보스 스테이지 첫 클리어 ${Math.round(GEAR_DROP.bossLegend.first * 100)}% · 반복 ${Math.round(GEAR_DROP.bossLegend.repeat * 100)}%, 지옥 요일 던전 ${Math.round(GEAR_DROP.dailyLegendHell * 100)}%, 장비 뽑기 천장(${GACHA_PITY_MAX}회). 이미 가진 전설은 분해하면 <b>전설 조각</b>이 되고, 조각 ${LEGEND_SHARD_COST}개로 원하는 전설과 바꿀 수 있습니다.</div></div>
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_legend')}</h2><small>${cards.length} legends</small></div>
+      <div class="cx-note tip"><i>★</i><div>${T('c.legend_note', { a: Math.round(GEAR_DROP.bossLegend.first * 100), b: Math.round(GEAR_DROP.bossLegend.repeat * 100), c: Math.round(GEAR_DROP.dailyLegendHell * 100), d: GACHA_PITY_MAX, e: LEGEND_SHARD_COST })}</div></div>
       <div class="cx-grid2">${cards.join('')}</div></div>`);
   }
   if (show('set')) {
     const cards = Object.keys(CLASS_SETS).map(cls => {
       const s = CLASS_SETS[cls], nm = tt('gear.set.' + cls);
-      const lines = [2, 3].map(n => `<div class="gear-line gl-set">${n}세트: ${esc(Object.keys(s[n]).map(k => Gear.fmt(k, s[n][k])).join(' · '))}</div>`).join('');
+      const lines = [2, 3].map(n => `<div class="gear-line gl-set">${T('c.n_set', { n })}: ${esc(Object.keys(s[n]).map(k => Gear.fmt(k, s[n][k])).join(' · '))}</div>`).join('');
       return `<div class="cx-card" data-q="${esc(nm + ' ' + tt('classes.' + cls))}"><h3><span class="t-ic" style="width:30px;height:30px">${clsIcon(cls, 30)}</span>${esc(tt('gear.set_name', nm, { set: nm }))}</h3>
-        <div class="cx-pills"><span class="cx-pill">${esc(tt('classes.' + cls))} 전용</span><span class="cx-pill b">${esc(tt('gear.armor.' + CLASS_ARMOR[cls], CLASS_ARMOR[cls]))}</span></div><div style="margin-top:8px">${lines}</div></div>`;
+        <div class="cx-pills"><span class="cx-pill">${esc(T('c.set_only', { cls: tt('classes.' + cls) }))}</span><span class="cx-pill b">${esc(tt('gear.armor.' + CLASS_ARMOR[cls], CLASS_ARMOR[cls]))}</span></div><div style="margin-top:8px">${lines}</div></div>`;
     });
-    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>직업 세트</h2><small>투구 · 갑옷 · 장화</small></div>
-      <div class="cx-note"><i>🗓️</i><div>그 직업의 <b>요일 던전</b>에서 승리하면 중급 ${Math.round(GEAR_DROP.dailySet.normal * 100)}% · 상급 ${Math.round(GEAR_DROP.dailySet.hard * 100)}% · 지옥 ${Math.round(GEAR_DROP.dailySet.hell * 100)}% 확률로 한 부위가 나옵니다. 같은 직업 3세트를 갖춘 클랜원이 2명 이상이면 조합 버프가 <b>공명</b>합니다.</div></div>
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.f_set')}</h2><small>${T('c.set_sub')}</small></div>
+      <div class="cx-note"><i>🗓️</i><div>${T('c.set_drop', { a: Math.round(GEAR_DROP.dailySet.normal * 100), b: Math.round(GEAR_DROP.dailySet.hard * 100), c: Math.round(GEAR_DROP.dailySet.hell * 100) })}</div></div>
       <div class="cx-grid2">${cards.join('')}</div></div>`);
   }
   if (show('rule')) {
-    const rows = RARITY_ORDER.map(r => `<tr><td style="color:${RARITY[r].color}">${RARITY[r].grade} · ${esc(tt('equip.rarity.' + r, r))}</td><td class="n">×${RARITY_MULT[r]}</td><td class="n">${SUB_COUNT[r]}</td><td>${RARITY[r].tier >= 2 ? '○' : '−'}</td><td>${r === 'legendary' ? '전설 효과' : r === 'epic' ? '무작위 1개' : '−'}</td><td class="n">${(GACHA_RATE[r] * 100).toFixed(GACHA_RATE[r] < .01 ? 2 : 0)}%</td></tr>`).join('');
-    const enh = ENHANCE_RATES.map((p, lv) => `<tr><td>+${lv} → +${lv + 1}</td><td class="n">${Math.round(p * 100)}%</td><td>${lv < ENHANCE_SAFE_BELOW ? '유지' : '−1단계'}</td><td class="n">${ENHANCE_STONES[lv]}</td><td class="n">+${ENHANCE_STAT_PCT[lv + 1]}%</td></tr>`).join('');
-    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>등급</h2><small>rarity</small></div>
-      <div class="cx-table-w"><table class="cx-table"><tr><th>등급</th><th>능력치</th><th>추가 능력치</th><th>직업 옵션</th><th>고유 효과</th><th>뽑기</th></tr>${rows}</table></div></div>
-      <div class="cx-sec"><div class="cx-sec-h"><h2>강화</h2><small>+1 ~ +10</small></div>
-      <div class="cx-table-w"><table class="cx-table"><tr><th>단계</th><th>성공</th><th>실패 시</th><th>강화석</th><th>능력치</th></tr>${enh}</table></div>
-      <div class="cx-note warn"><i>💥</i><div>실패할 때마다 <b>${ENHANCE_BREAK_CHANCE * 100}%</b> 확률로 파손됩니다. 파손 장비는 골드로 수리하면 +0으로 돌아갑니다. 보호 주문서를 쓰면 파손되지 않습니다. 실패할 때마다 다음 성공률 +${ENHANCE_FAIL_BONUS}%p(최대 ${ENHANCE_FAIL_BONUS_MAX}).</div></div>
-      <div class="cx-note tip"><i>✨</i><div>강화에 성공하면 확률로 <b>강화 옵션</b>이 붙습니다: +1~3 25% · +4~6 40% · +7~9 60% · +10 100%(고유 효과). 단계가 떨어지면 그 단계의 옵션은 사라집니다. +5에서 고유·전설 효과 ×1.25, +10에서 ×1.5.</div></div></div>`);
+    const rows = RARITY_ORDER.map(r => `<tr><td style="color:${RARITY[r].color}">${RARITY[r].grade} ${esc(tt('equip.rarity.' + r, r).replace(/^[A-Z] - /, ''))}</td><td class="n">×${RARITY_MULT[r]}</td><td class="n">${SUB_COUNT[r]}</td><td>${RARITY[r].tier >= 2 ? '○' : '−'}</td><td>${r === 'legendary' ? T('c.legend_fx') : r === 'epic' ? T('c.random1') : '−'}</td><td class="n">${(GACHA_RATE[r] * 100).toFixed(GACHA_RATE[r] < .01 ? 2 : 0)}%</td></tr>`).join('');
+    const enh = ENHANCE_RATES.map((p, lv) => `<tr><td>+${lv} → +${lv + 1}</td><td class="n">${Math.round(p * 100)}%</td><td>${lv < ENHANCE_SAFE_BELOW ? T('c.keep') : T('c.drop1')}</td><td class="n">${ENHANCE_STONES[lv]}</td><td class="n">+${ENHANCE_STAT_PCT[lv + 1]}%</td></tr>`).join('');
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_rarity')}</h2><small>rarity</small></div>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>${T('c.th_grade')}</th><th>${T('c.th_stats')}</th><th>${T('c.th_sub')}</th><th>${T('c.th_copt')}</th><th>${T('c.th_unique')}</th><th>${T('c.th_gacha')}</th></tr>${rows}</table></div></div>
+      <div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_enh')}</h2><small>+1 ~ +10</small></div>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>${T('c.th_step')}</th><th>${T('c.th_success')}</th><th>${T('c.th_onfail')}</th><th>${T('c.th_stones')}</th><th>${T('c.th_stat')}</th></tr>${enh}</table></div>
+      <div class="cx-note warn"><i>💥</i><div>${T('c.break_note', { p: ENHANCE_BREAK_CHANCE * 100, b: ENHANCE_FAIL_BONUS, m: ENHANCE_FAIL_BONUS_MAX })}</div></div>
+      <div class="cx-note tip"><i>✨</i><div>${T('c.eopt_note')}</div></div></div>`);
   }
-  $('gear-body').innerHTML = out.join('') || '<div class="cx-empty">항목이 없습니다</div>';
+  $('gear-body').innerHTML = out.join('') || `<div class="cx-empty">${T('c.empty')}</div>`;
 }
 
 // ── 소모품·재료 ──
 function renderCons() {
   const card = (key, emo, name, desc, pills, q) => `<div class="cx-card" data-q="${esc(name + ' ' + desc)}"><h3><span class="cx-ic">${ico(key, 26, emo)}</span>${esc(name)}</h3><p>${esc(desc)}</p>${pills ? `<div class="cx-pills">${pills}</div>` : ''}</div>`;
   const potions = Object.values(BATTLE_POTIONS).map(p => card(p.id, p.icon, tt('battle_potions.' + p.id), tt('battle_potions.' + p.id + '_desc', ''),
-    `<span class="cx-pill">행동 1회</span><span class="cx-pill">사거리 ${p.range}</span>${p.duration ? `<span class="cx-pill">${p.duration}턴</span>` : ''}<span class="cx-pill g">${ECON.battlePotion}G</span>`));
-  const exps = EXP_POTIONS.map(p => card(p.id, p.icon, tt('shop.potion_' + { exp_s: 'small', exp_m: 'medium', exp_l: 'large' }[p.id], p.id), '클랜원 한 명에게 경험치를 줍니다',
+    `<span class="cx-pill">${T('c.action1')}</span><span class="cx-pill">${T('c.range_n', { n: p.range })}</span>${p.duration ? `<span class="cx-pill">${T('c.turns_n', { n: p.duration })}</span>` : ''}<span class="cx-pill g">${ECON.battlePotion}G</span>`));
+  const exps = EXP_POTIONS.map(p => card(p.id, p.icon, tt('shop.potion_' + { exp_s: 'small', exp_m: 'medium', exp_l: 'large' }[p.id], p.id), T('c.exp_desc'),
     `<span class="cx-pill b">EXP +${p.exp}</span><span class="cx-pill g">${p.cost}G</span>`));
-  const sieges = SIEGE_ITEMS.map(s => card(s.id, s.icon, tt('shop.' + s.id), tt('shop.' + s.id + '_desc', ''), `<span class="cx-pill">사거리 ${s.range}</span><span class="cx-pill g">${s.cost}G</span>`));
+  const sieges = SIEGE_ITEMS.map(s => card(s.id, s.icon, tt('shop.' + s.id), tt('shop.' + s.id + '_desc', ''), `<span class="cx-pill">${T('c.range_n', { n: s.range })}</span><span class="cx-pill g">${s.cost}G</span>`));
   const runes = Object.keys(ENCHANTS).map(k => card('rune_' + k, ENCHANTS[k].icon, tt('enchant.rune_name', k, { e: tt('enchant.' + k, k) }), tt('enchant.desc_' + k, ''),
-    `<span class="cx-pill ${ENCHANTS[k].cat === 'atk' ? 'r' : 'b'}">${ENCHANTS[k].cat === 'atk' ? '공격' : '방어(환경 저항)'}</span>`));
+    `<span class="cx-pill ${ENCHANTS[k].cat === 'atk' ? 'r' : 'b'}">${ENCHANTS[k].cat === 'atk' ? T('c.rune_atk') : T('c.rune_def')}</span>`));
   const mats = [
-    card('mat_stone', '🔩', tt('gear.stone', '강화석'), '장비 강화 재료. 분해·요일 던전·보물상자·상점에서 얻습니다', `<span class="cx-pill g">${MATS_PRICE.stone}G</span>`),
-    card('mat_protect', '📜', tt('gear.protect', '보호 주문서'), '강화 실패 시 파손을 한 번 막습니다', `<span class="cx-pill g">${MATS_PRICE.protect}G</span>`),
-    card('mat_shard', '✦', tt('gear.shard', '전설 조각'), `전설 장비를 분해하면 1개. ${LEGEND_SHARD_COST}개로 원하는 전설과 교환`, ''),
-    card('soul_stone', '💠', '영혼석', `직업별 승급 재료 (B→A ${SOUL.promote.B}개, A→S ${SOUL.promote.A}개). 조각 ${SOUL.fragsPerStone}개 = 1개`, `<span class="cx-pill g">${ECON.soulStone}G</span>`)
+    card('mat_stone', '🔩', tt('gear.stone', 'stone'), T('c.stone_desc'), `<span class="cx-pill g">${MATS_PRICE.stone}G</span>`),
+    card('mat_protect', '📜', tt('gear.protect', 'protect'), T('c.protect_desc'), `<span class="cx-pill g">${MATS_PRICE.protect}G</span>`),
+    card('mat_shard', '✦', tt('gear.shard', 'shard'), T('c.shard_desc', { n: LEGEND_SHARD_COST }), ''),
+    card('soul_stone', '💠', T('c.soul'), T('c.soul_desc', { a: SOUL.promote.B, b: SOUL.promote.A, f: SOUL.fragsPerStone }), `<span class="cx-pill g">${ECON.soulStone}G</span>`)
   ];
-  const odds = Object.keys(CHEST.odds).map(k => `<span class="cx-pill">${{ gold: '골드', potion: '전투 물약', rune: '룬', equip: '장비', stone: '강화석', protect: '보호 주문서', soul: '영혼석 조각' }[k] || k} ${Math.round(CHEST.odds[k] * 100)}%</span>`).join('');
-  const sec = (h, sm, cards, note) => `<div class="cx-sec"><div class="cx-sec-h"><h2>${h}</h2><small>${sm}</small></div>${note || ''}<div class="cx-grid2">${cards.join('')}</div></div>`;
+  const odds = Object.keys(CHEST.odds).map(k => `<span class="cx-pill">${T('c.odd_' + k)} ${Math.round(CHEST.odds[k] * 100)}%</span>`).join('');
+  const sec = (h, sm, cards, note) => `<div class="cx-sec"><div class="cx-sec-h"><h2>${T(h)}</h2><small>${sm}</small></div>${note || ''}<div class="cx-grid2">${cards.join('')}</div></div>`;
   $('cons-body').innerHTML =
-    sec('전투 물약', 'battle potions', potions, '<p class="cx-lead">파티 편성의 소모품 탭에서 챙기면 전투 중 아이템 메뉴로 씁니다.</p>') +
-    sec('경험치 물약', 'exp', exps) +
-    sec('공성 도구', 'siege', sieges) +
-    sec('마법부여 룬', 'runes', runes, `<div class="cx-note"><i>🔮</i><div>성소 → 마법부여에서 장비에 룬 1개 + ${ENCHANT_FEE}G로 새깁니다. 장비 하나에 방어 1개 + 공격 1개를 함께 새길 수 있고, 같은 분류는 덮어씁니다. 룬은 전투 승리 ${Math.round(RUNE_DROP_CHANCE * 100)}%, 상점 룬 뽑기 ${RUNE_GACHA_COST}G, 보물상자에서 얻습니다.</div></div>`) +
-    sec('재료', 'materials', mats) +
-    `<div class="cx-sec"><div class="cx-sec-h"><h2>보물상자</h2><small>chest</small></div><div class="cx-card"><p>전투마다 ${CHEST.min}~${CHEST.max}개가 맵 가운데에 놓이고, 클랜원이 밟으면 열립니다. 전투에서 져도 얻은 것은 남습니다.</p><div class="cx-pills">${odds}</div></div></div>`;
+    sec('c.s_potion', 'battle potions', potions, `<p class="cx-lead">${T('c.potion_p')}</p>`) +
+    sec('c.s_exp', 'exp', exps) +
+    sec('c.s_siege', 'siege', sieges) +
+    sec('c.s_rune', 'runes', runes, `<div class="cx-note"><i>🔮</i><div>${T('c.rune_note', { fee: ENCHANT_FEE, p: Math.round(RUNE_DROP_CHANCE * 100), g: RUNE_GACHA_COST })}</div></div>`) +
+    sec('c.s_mats', 'materials', mats) +
+    `<div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_chest')}</h2><small>chest</small></div><div class="cx-card"><p>${T('c.chest_p', { a: CHEST.min, b: CHEST.max })}</p><div class="cx-pills">${odds}</div></div></div>`;
 }
 
 // ── 스테이지 ──
 function renderStages() {
   const hzOf = st => (typeof Hazard !== 'undefined' ? Hazard.forStage(st) : null);
-  const styleName = s => ({ defense: '방어전', offense: '공격전', mixed: '혼합' })[s] || s;
+  const styleName = s => T('c.style_' + s);
   const eps = {};
   STAGES.forEach(s => { const e = Math.ceil(s.id / 10); (eps[e] = eps[e] || []).push(s); });
   const scale = Object.keys(eps).map(e => {
@@ -262,8 +263,8 @@ function renderStages() {
     return `<div class="cx-card" data-q="${esc(tt('hazard.' + h.id, h.id) + ' ' + tt('maps.' + m, m))}"><h3><span class="cx-ic">${h.icon}</span>${esc(tt('hazard.' + h.id, h.id))}</h3><p>${esc(Hazard.describe(h, STAGES[0]))}</p></div>`; }).join('');
   const acc = Object.keys(eps).map(e => {
     const rows = eps[e].map(s => {
-      const h = hzOf(s), nm = tt('stages.stage_' + s.id + '_name', s.name || ('스테이지 ' + s.id));
-      const tags = [`<span class="cx-pill">${styleName(s.style)}</span>`, `<span class="cx-pill">적 ${s.tot}</span>`];
+      const h = hzOf(s), nm = tt('stages.stage_' + s.id + '_name', s.name || ('Stage ' + s.id));
+      const tags = [`<span class="cx-pill">${styleName(s.style)}</span>`, `<span class="cx-pill">${T('c.enemies', { n: s.tot })}</span>`];
       if (h) tags.push(`<span class="cx-pill p" title="${esc(Hazard.describe(h, s))}">${h.icon} ${esc(tt('hazard.' + h.id, h.id))}</span>`);
       if (s.boss) tags.push(`<span class="cx-pill r">💀 ${esc(bossName(s))}</span>`);
       return `<div class="cx-stage ${s.boss ? 'boss' : ''}" data-q="${esc(s.id + ' ' + nm + ' ' + (s.boss ? bossName(s) : '') + ' ' + (h ? tt('hazard.' + h.id, '') : ''))}">
@@ -273,11 +274,11 @@ function renderStages() {
     return `<details class="cx-acc" ${e === '1' ? 'open' : ''}><summary><span class="cx-ic">${e}</span><span>${esc(epNm)}<br><small>${esc(tt('episode.' + e + '.desc', ''))}</small></span></summary><div class="cx-acc-b">${rows}</div></details>`;
   }).join('');
   $('stage-body').innerHTML = `
-    <div class="cx-sec"><div class="cx-sec-h"><h2>에피소드</h2><small>100 stages</small></div>${acc}</div>
-    <div class="cx-sec"><div class="cx-sec-h"><h2>적 강함</h2><small>scaling</small></div>
-      <p class="cx-lead">적은 기하급수적으로 강해지고, 후반에는 <b>수는 적지만 한 대가 아프게</b> 바뀝니다. 일반 스테이지 최대 ${STAGE_TOT_CAP_MAX}명, 보스 스테이지 최대 ${STAGE_TOT_CAP_BOSS}명.</p>
-      <div class="cx-table-w"><table class="cx-table"><tr><th>구간</th><th>적 수</th><th>적 레벨</th><th>체력 배율</th><th>공격 배율</th></tr>${scale}</table></div></div>
-    <div class="cx-sec"><div class="cx-sec-h"><h2>맵 환경</h2><small>hazards</small></div><div class="cx-grid2">${hzCards}</div></div>`;
+    <div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_ep')}</h2><small>100 stages</small></div>${acc}</div>
+    <div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_scale')}</h2><small>scaling</small></div>
+      <p class="cx-lead">${T('c.scale_p', { a: STAGE_TOT_CAP_MAX, b: STAGE_TOT_CAP_BOSS })}</p>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>${T('c.th_range')}</th><th>${T('c.th_enemies')}</th><th>${T('c.th_elv')}</th><th>${T('c.th_hp')}</th><th>${T('c.th_atk')}</th></tr>${scale}</table></div></div>
+    <div class="cx-sec"><div class="cx-sec-h"><h2>${T('c.s_hz')}</h2><small>hazards</small></div><div class="cx-grid2">${hzCards}</div></div>`;
 }
 
 // ── 탭·검색·상세 창 ──
@@ -300,8 +301,11 @@ document.querySelectorAll('#tabs .cx-tab').forEach(btn => btn.onclick = () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof loadI18n === 'function') await loadI18n();
-  $('nav-title').textContent = tt('nav.compendium', '도감');
-  $('hero-stats').innerHTML = [[PLAYER_CLASSES.length, '직업'], [EQUIP_DB.length, '장비'], [Object.keys(LEGENDS).length, '전설'], [STAGES.length, '스테이지']]
+  $('nav-title').textContent = tt('nav.compendium', T('c.title'));
+  document.title = T('c.title');
+  document.querySelectorAll('[data-k]').forEach(el => { el.innerHTML = T(el.dataset.k); });
+  $('q').placeholder = T('c.search');
+  $('hero-stats').innerHTML = [[PLAYER_CLASSES.length, T('c.st_classes')], [EQUIP_DB.length, T('c.st_gear')], [Object.keys(LEGENDS).length, T('c.st_legend')], [STAGES.length, T('c.st_stages')]]
     .map(([n, l]) => `<div class="cx-stat"><b>${n}</b><span>${l}</span></div>`).join('');
   renderClasses(); renderGear(); renderCons(); renderStages();
   const tab = new URLSearchParams(location.search).get('tab');
