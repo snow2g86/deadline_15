@@ -208,3 +208,11 @@
 }
 .cx-table.nw td:first-child { white-space: nowrap; }
 .cx-table td .cls-icon { vertical-align: -4px; border-radius: 4px; }
+
+/* 가이드 스토리 탭: 인물 초상화 (image/character/story, 962×1087 전신) */
+.cx-person { display: flex; gap: 12px; align-items: flex-start; }
+.cx-person + .cx-person { margin-top: 0; }
+.cx-pp { flex-shrink: 0; width: 64px; height: 72px; border-radius: 12px; background-color: rgba(255, 255, 255, .05); border: 1px solid var(--cx-line);
+  background-repeat: no-repeat; background-size: contain; background-position: 50% 100%; image-rendering: pixelated; }   /* 전신이 다 보이게 (확대해서 자르면 인물마다 얼굴만 보이는 등 들쑥날쑥) */
+.cx-person h3 { margin-bottom: 2px; }
+.cx-role { font-size: 11.5px; font-weight: 700; color: var(--cx-gold2); margin-bottom: 4px; }

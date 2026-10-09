@@ -44,6 +44,7 @@
     <button class="cx-tab" data-tab="battle" data-k="g.tab_battle"></button>
     <button class="cx-tab" data-tab="map" data-k="g.tab_map"></button>
     <button class="cx-tab" data-tab="route" data-k="g.tab_route"></button>
+    <button class="cx-tab" data-tab="story" data-k="g.tab_story"></button>
   </nav>
   <div class="cx-wrap" id="cx-body"></div>
 </main>
@@ -108,6 +109,16 @@ function build() {
   }).join('');
   const bot = [1, 2, 3, 4].map(i => { const [a, b, c] = T('g.b' + i).split('|'); return `<tr><td>${esc(a)}</td><td class="n">${esc(b)}</td><td>${esc(c)}</td></tr>`; });
   g.route = sec('g.s_route', 'route', acc) + sec('g.s_bot', 'autoplay', table('', [T('g.th_combo'), T('g.th_reach'), T('g.th_trait')], bot) + note('', '🤖', 'g.bot_note'));
+  // 스토리: 등장인물 (docs/CAST.md, 초상화 image/character/story)
+  const pp = key => `<span class="cx-pp" style="background-image:url(image/character/story/${key}.png)"></span>`;
+  const person = (key, h, r, p) => `<div class="cx-card cx-person">${pp(key)}<div><h3>${h}</h3>${r ? `<div class="cx-role">${r}</div>` : ''}<p>${p}</p></div></div>`;
+  const cast = ['bram', 'sera', 'bark', 'kasha', 'ordin'].map(k => person(k, T('g.cast_' + k + '_n'), T('g.cast_' + k + '_r'), T('g.cast_' + k + '_p'))).join('');
+  const bosses = STAGES.filter(s => s.boss).map(s => person('boss_' + s.id, `<span class="cx-pill r">${s.id}</span> ${esc(bossName(s))}`, '', T('g.boss_' + s.id))).join('');
+  g.story = sec('g.s_story', 'story', `<p class="cx-lead">${T('g.story_p')}</p>`) +
+    sec('g.s_hero', 'commander', `<div class="cx-card cx-person">${pp('commander_m')}${pp('commander_f')}<div><h3>${T('g.hero_h')}</h3><p>${T('g.hero_p')}</p></div></div>`) +
+    sec('g.s_cast', 'cast', `<div class="cx-grid2">${cast}</div>`) +
+    sec('g.s_boss', 'bosses', `<p class="cx-lead">${T('g.boss_p')}</p><div class="cx-grid2">${bosses}</div>`) +
+    sec('g.s_spoil', 'spoiler', `<details class="cx-acc"><summary><span class="cx-ic">!</span><span>${T('g.spoil_sum')}</span></summary><div class="cx-acc-b"><div class="cx-card"><ul>${[1, 2, 3, 4, 5].map(i => `<li>${T('g.spoil_' + i)}</li>`).join('')}</ul></div></div></details>`);
 
   $('cx-body').innerHTML = Object.keys(g).map((k, i) => `<div class="cx-panel ${i ? '' : 'on'}" id="p-${k}">${g[k]}</div>`).join('') + `<div class="cx-foot">${T('g.foot')}</div>`;
 }
