@@ -7,12 +7,12 @@ window.STORY_KO = {
   cast: {
     commander: { name: '리안', portrait: 'commander', role: '주인공 · 클랜 지휘관' },
     narrator:  { name: '', portrait: null },
-    bram:  { name: '브람',   portrait: 'knight_01',   role: '노기사 · 자경단 교관, 지휘관의 스승' },
-    sera:  { name: '세라',   portrait: 'priest_02',   role: '클랜 치유사 · 지휘관의 소꿉친구' },
-    bark:  { name: '바크',   portrait: 'brawler_01',  role: '전직 산적 · 클랜 돌격대장' },
-    kasha: { name: '카샤',   portrait: 'assassin_02', role: '용병단 「검은 깃」 단장 · 라이벌' },
-    ordin: { name: '오르딘', portrait: 'summoner_01', role: '왕실 대마도사 · 클랜의 후원자' },
-    fake_bram: { name: '브람?', portrait: 'knight_01', role: '브람의 모습을 흉내 낸 환영 (s70)' },
+    bram:  { name: '브람',   portrait: 'story/bram',  fallback: 'knight_01',   role: '노기사 · 자경단 교관, 지휘관의 스승' },
+    sera:  { name: '세라',   portrait: 'story/sera',  fallback: 'priest_02',   role: '클랜 치유사 · 지휘관의 소꿉친구' },
+    bark:  { name: '바크',   portrait: 'story/bark',  fallback: 'brawler_01',  role: '전직 산적 · 클랜 돌격대장' },
+    kasha: { name: '카샤',   portrait: 'story/kasha', fallback: 'assassin_02', role: '용병단 「검은 깃」 단장 · 라이벌' },
+    ordin: { name: '오르딘', portrait: 'story/ordin', fallback: 'summoner_01', role: '왕실 대마도사 · 클랜의 후원자' },
+    fake_bram: { name: '브람?', portrait: 'story/bram', fallback: 'knight_01', ghost: true, role: '브람의 모습을 흉내 낸 환영 (s70)' },
   },
 
   episodes: {

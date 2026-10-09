@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """개발용: 일러스트 → 게임 아이콘 PNG
 
-사용: python3 tools/make-icon.py <원본 이미지> <출력 png> [크기=256]
+사용: python3 tools/make-icon.py <원본 이미지> <출력 png> [크기=256] [판정 해상도=512]
 - 초록(또는 아이템이 초록이면 자홍) 단색 바탕이면: 가장자리와 이어진 바탕색만 지워 투명하게(안쪽은 남김), 바탕색 번짐 줄임,
   아이템이 칸을 꽉 채우도록 여백을 잘라 정사각형으로 맞춤
 - 그 밖(테두리 그림·직업·스킬 효과 아이콘)이면: 바깥 여백을 조금 자르고, webp(Gemini)면 오른쪽 아래 생성 표시(✦)를 왼쪽 아래 모서리를 뒤집어 덮어 지움
@@ -40,7 +40,8 @@ greenish = lambda p: _keyed(p, KEY)
 
 
 if is_item:
-    sm = im.resize((512, 512), Image.LANCZOS) if w > 512 else im.copy()
+    WORK = int(sys.argv[4]) if len(sys.argv) > 4 else 512   # 배경 판정 해상도 (초상화는 1024)
+    sm = im.resize((WORK, WORK), Image.LANCZOS) if w > WORK else im.copy()
     W, H = sm.size
     px = sm.load()
     bg = [[False] * W for _ in range(H)]

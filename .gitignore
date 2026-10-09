@@ -13,3 +13,4 @@ tools/_work/
 
 # 아이콘 일러스트 원본 (tools/import-icons.py 가 image/icon/item 으로 변환)
 image/icon/src/
+image/character/story/src/

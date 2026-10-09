@@ -14,6 +14,8 @@
   var STORY_LANGS = ['ko'];
   var TYPE_MS = 28; // 한 글자 출력 간격(ms)
   var BATTLE_KINDS = ['start', 'wave', 'boss', 'danger', 'last'];
+  // 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.png, docs/CAST.md)
+  var BOSS_ART = [10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 92, 93, 94, 95, 99, 100];
 
   // ── 유틸 ────────────────────────────────
   function tr(key, fallback, params) {
@@ -161,7 +163,8 @@
       var who = line.who || 'narrator';
       if (who === 'boss') {
         var b = ctx.stage && ctx.stage.boss;
-        return { key: 'boss', name: b ? b.name : '???', img: b ? 'image/character/' + b.cls + '_01.png' : null, side: 'right', boss: true };
+        var bi = this._bossImg(ctx.stage);
+        return { key: 'boss', name: b ? b.name : '???', img: bi.src, fallback: bi.fallback, art: bi.art, side: 'right', boss: true };
       }
       var c = cast[who];
       if (who === 'narrator' || (c && !c.name && !c.portrait && who !== 'commander')) return { narr: true };
@@ -171,12 +174,23 @@
       if (c.portrait === 'commander' || (who === 'commander' && c.portrait !== null)) {
         var cm = this._commanderImg(); sp.img = cm.src; sp.fallback = cm.fallback;
       } else if (c.portrait === 'boss') {
-        var bb = ctx.stage && ctx.stage.boss;
-        if (bb) { sp.img = 'image/character/' + bb.cls + '_01.png'; sp.boss = true; }
+        var bb = this._bossImg(ctx.stage);
+        if (bb.src) { sp.img = bb.src; sp.fallback = bb.fallback; sp.art = bb.art; sp.boss = true; }
       } else if (c.portrait) {
         sp.img = 'image/character/' + c.portrait + '.png';
+        if (c.fallback) sp.fallback = 'image/character/' + c.fallback + '.png';   // 전용 초상화가 없을 때 직업 그림
+        if (c.ghost) sp.ghost = true;   // 환영(fake_bram 등): 보랏빛 유령 효과
       }
       return sp;
+    },
+
+    // 보스 그림: 전용 초상화 image/character/story/boss_<스테이지>.png (docs/CAST.md), 없으면 직업 그림을 붉게
+    _bossImg: function(stage) {
+      var b = stage && stage.boss;
+      if (!b) return { src: null };
+      var cls = 'image/character/' + b.cls + '_01.png';
+      if (BOSS_ART.indexOf(stage.id) >= 0) return { src: 'image/character/story/boss_' + stage.id + '.png', fallback: cls, art: true };
+      return { src: cls, fallback: null, art: false };
     },
 
     // 지휘관 이름: 로스터 지휘관(customName → name → 이름표) → 대본 기본값
@@ -192,13 +206,13 @@
       return (d && d.cast && d.cast.commander && d.cast.commander.name) || tr('story.commander', '지휘관');
     },
 
-    // 지휘관 그림: commander_01(남)/02(여). 지휘관이 없거나 그림이 없으면 노비스 그림
+    // 지휘관 그림: 스토리 전용 초상화 story/commander_m·f (docs/CAST.md), 없으면 commander_01(남)/02(여)
     _commanderImg: function() {
       var ch = commanderChar();
-      var suf = ch && ch.gender === 'f' ? '02' : '01';
-      var nov = 'image/character/novice_' + suf + '.png';
-      if (!ch) return { src: nov, fallback: null };
-      return { src: 'image/character/commander_' + suf + '.png', fallback: nov };
+      var f = ch && ch.gender === 'f';
+      var suf = f ? '02' : '01';
+      if (!ch) return { src: 'image/character/novice_' + suf + '.png', fallback: null };
+      return { src: 'image/character/story/commander_' + (f ? 'f' : 'm') + '.png', fallback: 'image/character/commander_' + suf + '.png' };
     },
 
     // {commander}: 지휘관 이름, {ally}: 전투 중 위기에 빠진 클랜원 이름 (없으면 '클랜원' — 다시 보기 등)
@@ -250,7 +264,7 @@
     _setPortrait: function(side, sp) {
       var el = this._el.querySelector('.st-pt.' + side);
       var img = el.querySelector('img');
-      if (!sp || !sp.img) { el.classList.remove('show', 'boss'); el.dataset.key = ''; return; }
+      if (!sp || !sp.img) { el.classList.remove('show', 'boss', 'art', 'ghost'); el.dataset.key = ''; return; }
       if (el.dataset.key !== sp.key || img.dataset.src !== sp.img) {
         img.onerror = sp.fallback ? function() { img.onerror = null; img.src = sp.fallback; } : null;
         img.dataset.src = sp.img;
@@ -259,6 +273,8 @@
         el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter');
       }
       el.classList.toggle('boss', !!sp.boss);
+      el.classList.toggle('art', !!sp.art);
+      el.classList.toggle('ghost', !!sp.ghost);
       el.classList.add('show');
     },
 
@@ -283,7 +299,7 @@
       title.textContent = opts.title || '';
       title.style.display = opts.title ? '' : 'none';
       el.classList.toggle('battle', !!opts.battle);
-      el.querySelectorAll('.st-pt').forEach(function(p) { p.classList.remove('show', 'speaking', 'boss'); p.dataset.key = ''; });
+      el.querySelectorAll('.st-pt').forEach(function(p) { p.classList.remove('show', 'speaking', 'boss', 'art', 'ghost'); p.dataset.key = ''; });
       el.classList.remove('closing');
       el.classList.add('open');
       this._next();

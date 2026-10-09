@@ -117,6 +117,9 @@
 @keyframes stPtInR { from { transform: translateX(24px); opacity: 0 } }
 /* 보스: 붉은 기운 */
 .st-pt.boss img { filter: sepia(.5) saturate(2.4) hue-rotate(-30deg) drop-shadow(0 0 10px rgba(239, 68, 68, .85)) }
+.st-pt.boss.art img { filter: drop-shadow(0 0 10px rgba(239, 68, 68, .7)) } /* 전용 보스 그림은 색을 바꾸지 않고 붉은 기운만 */
+/* 환영(브람?): 보랏빛 유령 */
+.st-pt.ghost img { filter: grayscale(.4) sepia(.3) hue-rotate(220deg) saturate(1.8) brightness(1.15) drop-shadow(0 0 12px rgba(168, 85, 247, .9)); opacity: .78 }
 .st-pt.boss.speaking { animation: stBossAura 1.6s ease-in-out infinite }
 @keyframes stBossAura { 0%, 100% { filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0)) } 50% { filter: drop-shadow(0 0 14px rgba(239, 68, 68, .6)) } }
 .story-layer.narration .st-pt { opacity: .18; filter: brightness(.3) saturate(.4); transform: none }

@@ -8,7 +8,9 @@ window.STORY_KO = {
   cast: {
     commander: { name: '리안', portrait: 'commander', role: '주인공 · 클랜 지휘관' },  // 지휘관(플레이어). name은 기본값(COMMANDER_DEFAULT_NAME)이며 플레이어가 바꾼 이름이 우선. 전투에는 나가지 않는다
     narrator:  { name: '', portrait: null },                                          // 내레이션 (초상화 없음, 가운데 정렬)
-    // 그 밖의 인물: portrait는 아래 '초상화 키' 중 하나
+    // 그 밖의 인물: portrait는 아래 '초상화 키' 중 하나, 또는 전용 초상화 'story/<키>' (image/character/story, docs/CAST.md)
+    //   fallback: 전용 초상화가 없을 때 쓸 직업 그림 키, ghost: true 면 보랏빛 환영 효과
+    // bram: { name: '브람', portrait: 'story/bram', fallback: 'knight_01', role: '노기사' },
     // mira: { name: '미라', portrait: 'priest_02', role: '클랜 치유사' },
   },
 
