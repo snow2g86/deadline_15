@@ -3,137 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>📖 도감</title>
+<title>도감</title>
 <link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/codex.css">
 <script src="data/jab.js"></script>
+<script src="js/common/constants.js"></script>
+<script src="js/common/render.js"></script>
 <script src="js/skills.js"></script>
-<script>
-var EXP_POTIONS = [
-  { id: 'exp_s', name: '소형 경험치 물약', icon: '🧪', exp: 50, cost: 400, weight: 50 },
-  { id: 'exp_m', name: '중형 경험치 물약', icon: '⚗️', exp: 150, cost: 1000, weight: 35 },
-  { id: 'exp_l', name: '대형 경험치 물약', icon: '🏺', exp: 400, cost: 2400, weight: 15 }
-];
-</script>
-<script defer src="js/common/i18n.js"></script>
-<script defer src="js/common/nav.js"></script>
-<style>
-
-/* Header */
-.header{text-align:center;padding:32px 16px 0;position:relative}
-.header h1{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:2px;
-  text-shadow:0 0 40px rgba(240,192,64,.25)}
-.header .sub{color:var(--dim);font-size:13px;margin-top:4px}
-
-/* Tabs */
-.tabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:20px 16px 0;
-  background:linear-gradient(var(--bg) 60%,transparent)}
-.tab-btn{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);
-  color:var(--dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s}
-.tab-btn:hover{border-color:var(--gold);color:var(--text)}
-.tab-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);
-  box-shadow:0 0 20px rgba(240,192,64,.3)}
-
-/* Content */
-.content{max-width:900px;margin:0 auto;padding:20px 16px 20px}
-.panel{display:none;animation:fadeIn .3s}
-.panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* Section Header */
-.sec-head{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;
-  padding-bottom:8px;margin-bottom:16px;border-bottom:1px solid var(--border)}
-
-/* Card Grid */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px}
-
-/* Class Card */
-.class-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
-  display:flex;flex-direction:column;gap:12px;transition:all .2s;cursor:pointer}
-.class-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
-
-.class-card-header{display:flex;gap:12px;align-items:flex-start}
-.class-icon{font-size:48px;line-height:1;flex-shrink:0}
-.class-meta{flex:1;min-width:0}
-.class-name{font-size:18px;font-weight:900;color:var(--gold);margin:0}
-.class-desc{font-size:12px;color:var(--dim);margin-top:4px}
-
-.role-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-top:4px}
-
-/* Stat Box */
-.stat-box{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:8px;
-  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:12px}
-
-.stat-item{text-align:center}
-.stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.stat-value{font-weight:900;color:var(--gold);font-size:16px}
-
-/* Resource Info */
-.res-info{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:8px;
-  display:flex;justify-content:space-between;align-items:center;font-size:11px}
-
-/* Growth Info */
-.growth-info{border-top:1px solid var(--border);padding-top:8px}
-.growth-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px}
-
-/* Resource System */
-.res-block{border-left:3px solid;padding:12px 16px;background:var(--card);border-radius:0 12px 12px 0;margin-bottom:12px}
-.res-meter{display:flex;align-items:center;gap:8px;margin:8px 0}
-.res-meter-label{width:80px;font-size:12px;font-weight:700;flex-shrink:0;color:var(--text)}
-.res-meter-track{flex:1;background:rgba(255,255,255,.04);border-radius:4px;height:16px;overflow:hidden}
-.res-meter-fill{height:100%;border-radius:4px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
-.res-meter-info{font-size:11px;color:var(--dim);width:120px;text-align:right;flex-shrink:0}
-
-/* Table */
-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
-thead th{color:var(--dim);font-size:10px;font-weight:700;padding:8px 4px;text-align:center;
-  border-bottom:2px solid var(--border);background:var(--bg);letter-spacing:.5px}
-tbody td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
-tbody tr:hover{background:rgba(240,192,64,.04)}
-th:first-child,td:first-child{text-align:center;width:50px}
-th:nth-child(2),td:nth-child(2){text-align:left}
-
-/* Item Card */
-.item-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
-  margin-bottom:12px;transition:all .2s}
-.item-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
-
-.item-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
-.item-icon{font-size:48px;line-height:1;flex-shrink:0}
-.item-meta{flex:1}
-.item-name{font-size:16px;font-weight:900;color:var(--gold)}
-.item-info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;
-  background:rgba(0,0,0,.2);padding:12px;border-radius:8px}
-.info-box{text-align:center}
-.info-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
-.info-value{font-weight:900;color:var(--gold);font-size:16px;margin-top:4px}
-
-/* Scroll Card */
-.scroll-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
-  display:flex;flex-direction:column;gap:10px;transition:all .2s}
-.scroll-card:hover{border-color:rgba(167,139,250,.3);box-shadow:0 0 20px rgba(167,139,250,.08)}
-
-/* Stage Card */
-.stage-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
-  display:flex;flex-direction:column;gap:8px;transition:all .2s;cursor:pointer}
-.stage-card:hover{border-color:rgba(240,192,64,.2);box-shadow:0 0 20px rgba(240,192,64,.08)}
-
-.stage-name{font-size:16px;font-weight:900;color:var(--gold)}
-.stage-info{display:flex;flex-direction:column;gap:6px}
-
-/* Responsive */
-@media(max-width:768px){
-  .header h1{font-size:22px}
-  .content{padding:20px 12px 20px}
-  .card-grid{grid-template-columns:1fr}
-  table{font-size:11px}
-  thead th{font-size:9px;padding:6px 2px}
-  tbody td{padding:6px 2px}
-  .item-info{grid-template-columns:1fr}
-}
-</style>
+<script src="data/stages.js"></script>
+<script src="js/common/daily.js"></script>
+<script src="data/synergy.js"></script>
+<script src="data/equip.js"></script>
+<script src="data/gear.js"></script>
+<script src="data/hazards.js"></script>
+<script src="js/common/i18n.js"></script>
+<script src="js/common/nav.js"></script>
 </head>
-<body data-page="compendium">
+<body data-page="compendium" class="codex">
 
 <header id="top-nav">
   <button id="nav-back" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -142,895 +28,284 @@ th:nth-child(2),td:nth-child(2){text-align:left}
 </header>
 
 <main>
-  <div class="header">
-    <h1>📖 도감</h1>
-    <div class="sub">게임의 모든 정보를 한곳에서 확인하세요</div>
-  </div>
+  <section class="cx-hero">
+    <div class="cx-emblem">📖</div>
+    <h1>도감</h1>
+    <p>직업 · 장비 · 소모품 · 스테이지를 한곳에서</p>
+    <div class="cx-stats" id="hero-stats"></div>
+  </section>
 
-  <div class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="characters">🛡️ 캐릭터</button>
-    <button class="tab-btn" data-tab="items">🧪 아이템</button>
-    <button class="tab-btn" data-tab="systems">⚙️ 시스템</button>
-    <button class="tab-btn" data-tab="stages">🗺️ 스테이지</button>
-  </div>
+  <nav class="cx-tabs" id="tabs">
+    <button class="cx-tab on" data-tab="cls">🛡️ 직업</button>
+    <button class="cx-tab" data-tab="gear">⚔️ 장비</button>
+    <button class="cx-tab" data-tab="cons">🧪 소모품·재료</button>
+    <button class="cx-tab" data-tab="stage">🗺️ 스테이지</button>
+  </nav>
 
-  <div class="content">
+  <div class="cx-wrap">
+    <div class="cx-search"><input id="q" type="search" placeholder="이름·효과로 찾기" autocomplete="off"></div>
 
-    <!-- 캐릭터 탭 -->
-    <div class="panel active" id="p-characters">
-      <div class="sec-head">CLASSES OVERVIEW</div>
-      <div id="class-cards" class="card-grid"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">RESOURCE SYSTEM</div>
-      <div id="res-blocks"></div>
-    </div>
-
-    <!-- 아이템 탭 -->
-    <div class="panel" id="p-items">
-      <div class="sec-head">EXPERIENCE POTIONS (경험치 물약)</div>
-      <div style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th style="text-align:left">이름</th>
-            <th>경험치</th>
-            <th>가격</th>
-            <th>효율</th>
-            <th>등장 확률</th>
-          </tr>
-        </thead>
-        <tbody id="item-table-body"></tbody>
-      </table>
+    <!-- 직업 -->
+    <div class="cx-panel on" id="p-cls">
+      <div class="cx-sec">
+        <div class="cx-sec-h"><h2>직업</h2><small>12 classes</small></div>
+        <p class="cx-lead">직업을 누르면 능력치·스킬·조합 버프·직업 세트·전설 무기를 볼 수 있습니다.</p>
+        <div class="cx-grid" id="cls-grid"></div>
       </div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">BATTLE POTIONS (전투 포션)</div>
-      <div id="battle-potions-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">SIEGE ITEMS (공성 아이템)</div>
-      <div id="siege-items-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">CLASS CHANGE SCROLLS (전직서)</div>
-      <div id="scroll-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px"></div>
-    </div>
-
-    <!-- 시스템 탭 -->
-    <div class="panel" id="p-systems">
-      <div class="sec-head">RESOURCE SYSTEM (자원 시스템)</div>
-      <div id="resource-info" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">TURN SYSTEM (턴 시스템)</div>
-      <div id="turn-info" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">SPECIAL ABILITIES (특수 능력)</div>
-      <div id="special-abilities" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">ENEMY AI SYSTEM (적 AI 시스템)</div>
-      <div id="ai-info" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px"></div>
-    </div>
-
-    <!-- 스테이지 탭 -->
-    <div class="panel" id="p-stages">
-      <div class="sec-head">STAGE LIST</div>
-      <div id="stage-cards" class="card-grid"></div>
-
-      <div style="margin-top:40px"></div>
-      <div class="sec-head">DIFFICULTY PROGRESSION</div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
-        <div id="difficulty-chart"></div>
+      <div class="cx-sec">
+        <div class="cx-sec-h"><h2>자원</h2><small>resources</small></div>
+        <div class="cx-grid2" id="res-cards"></div>
       </div>
     </div>
 
-  </div><!-- end content -->
+    <!-- 장비 -->
+    <div class="cx-panel" id="p-gear">
+      <div class="cx-tabs" id="gear-filter" style="position:static;padding:4px 0 0;background:none;border:0"></div>
+      <div id="gear-body"></div>
+    </div>
+
+    <!-- 소모품·재료 -->
+    <div class="cx-panel" id="p-cons"><div id="cons-body"></div></div>
+
+    <!-- 스테이지 -->
+    <div class="cx-panel" id="p-stage"><div id="stage-body"></div></div>
+
+    <div class="cx-foot">수치는 게임 데이터에서 바로 읽어 옵니다</div>
+  </div>
 </main>
 
+<div class="cx-sheet-bg" id="sheet-bg"></div>
+<div class="cx-sheet" id="sheet"><div class="grip"></div><button class="x" id="sheet-x">✕</button><div id="sheet-body"></div></div>
+
 <script>
-const PLAYER_CLASSES = ['warrior','knight','assassin','mage','archer','priest','novice','summoner','shaman','brawler','lancer','sapper'];
+// ═══════════════════════════════════════════
+//  도감 — 모든 표와 카드는 게임 데이터(JAB·SKILLS·EQUIP_DB·LEGENDS·CLASS_SETS·HAZARDS·STAGES …)에서 생성
+// ═══════════════════════════════════════════
+const PLAYER_CLASSES = ['warrior','knight','lancer','brawler','assassin','archer','mage','summoner','shaman','priest','sapper','novice'];
+const EXP_POTIONS = [
+  { id: 'exp_s', icon: '🧪', exp: 50, cost: 400 },
+  { id: 'exp_m', icon: '⚗️', exp: 150, cost: 1000 },
+  { id: 'exp_l', icon: '🏺', exp: 400, cost: 2400 }
+];
+const $ = id => document.getElementById(id);
+const tt = (k, fb, p) => { const v = t(k, p); return v && v !== k ? v : (fb != null ? fb : k); };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const roleOf = cls => (typeof ROLE_MAP !== 'undefined' && ROLE_MAP[cls]) || 'melee';
+const roleName = r => tt('roles.' + r, { melee: '근접', ranged: '원거리', healer: '힐러', support: '지원' }[r] || r);
+const ico = (key, size, emo) => typeof iconOr === 'function' ? iconOr(key, size, emo) : (emo || '');
+const STAT_NAMES = { hp: '체력', atk: '공격', def: '방어', move: '이동', range: '사거리' };
 
-function getRole(cls) {
-  if (cls === 'priest') return 'healer';
-  return (JAB[cls]?.base.range || 1) > 1 ? 'ranged' : 'melee';
+// ── 직업 ──
+function skillsOf(cls) {
+  const base = [].concat(SKILLS[cls] || []);
+  const learn = Object.values(LEARNABLE_SKILLS).filter(s => s.cls === cls);
+  return { base, learn };
+}
+function renderClasses() {
+  $('cls-grid').innerHTML = PLAYER_CLASSES.map(cls => {
+    const r = roleOf(cls), nm = tt('classes.' + cls);
+    return `<button class="cx-tile" data-cls="${cls}" data-q="${esc(nm + ' ' + cls + ' ' + roleName(r))}">
+      <span class="t-ic">${clsIcon(cls, 44)}</span>
+      <span class="t-tx"><div class="t-nm">${esc(nm)}</div><div class="t-sub"><span class="cx-role ${r}">${roleName(r)}</span></div></span>
+    </button>`;
+  }).join('');
+  $('cls-grid').querySelectorAll('[data-cls]').forEach(b => b.onclick = () => openClass(b.dataset.cls));
+
+  const res = { fury: ['💢', '분노', '공격하거나 맞을 때 쌓임 (최대 10). 다 차면 직업 고유 효과가 터짐'], energy: ['⚡', '에너지', '차례마다 자동으로 회복'], mana: ['🔮', '마나', '차례마다 자동으로 회복, 마법·회복 스킬에 사용'] };
+  $('res-cards').innerHTML = Object.keys(res).map(k => {
+    const who = PLAYER_CLASSES.filter(c => JAB[c] && JAB[c].res === k).map(c => tt('classes.' + c)).join(' · ');
+    return `<div class="cx-card"><h3><span class="cx-ic">${res[k][0]}</span>${esc(tt('resources.' + k, res[k][1]))}</h3><p>${res[k][2]}</p><div class="cx-pills"><span class="cx-pill">${esc(who)}</span></div></div>`;
+  }).join('');
+}
+function openClass(cls) {
+  const d = JAB[cls], b = d.base, g = d.growth, r = roleOf(cls);
+  const maxOf = k => Math.max(...PLAYER_CLASSES.map(c => JAB[c].base[k]));
+  const colors = { hp: '#22c55e', atk: '#ef4444', def: '#3b82f6', move: '#f0c040', range: '#a78bfa' };
+  const bars = ['hp', 'atk', 'def', 'move', 'range'].map(k =>
+    `<span>${STAT_NAMES[k]}</span><i><u style="width:${Math.round(b[k] / maxOf(k) * 100)}%;--bc:${colors[k]}"></u></i><em>${b[k]}</em>`).join('');
+  const grow = ['hp', 'atk', 'def'].map(k => `<span class="cx-pill">${STAT_NAMES[k]} +${g[k][0]}~${g[k][1]}</span>`).join('');
+  const { base, learn } = skillsOf(cls);
+  const sk = s => `<div class="cx-skill"><span class="s-ic">${skillIcon(s.id, 34)}</span><div>
+      <div class="s-nm">${esc(tt('skills.' + s.id, s.name))}<small>${s.passive ? '패시브' : (s.cost ? s.cost + ' ' + tt('resources.' + s.costType, s.costType) : '')}</small></div>
+      <div class="s-ds">${esc(tt('skills_desc.' + s.id, s.desc))}</div></div></div>`;
+  const syn = [];
+  if (SYNERGY_MONO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill g">5인</span><span class="cx-pill">${esc(Synergy.name({ id: 'mono_' + cls, cls }))}</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_MONO[cls].eff }))}</span></div>`);
+  if (SYNERGY_TRIO[cls]) syn.push(`<div class="cx-pills"><span class="cx-pill b">3인</span><span class="cx-pill">${esc(Synergy.describe({ eff: SYNERGY_TRIO[cls] }))}</span></div>`);
+  const set = CLASS_SETS[cls];
+  const setHtml = set ? [2, 3].map(n => `<div class="cx-pills"><span class="cx-pill ${n === 3 ? 'g' : ''}">${n}세트</span>${Object.keys(set[n]).map(k => `<span class="cx-pill">${esc(Gear.fmt(k, set[n][k]))}</span>`).join('')}</div>`).join('') : '';
+  const wl = Object.keys(LEGENDS).find(k => LEGENDS[k].tpl === 'wpn_' + cls);
+  const wpn = equipTemplate('wpn_' + cls);
+  const armors = Object.keys(ARMOR_TYPE).filter(a => ARMOR_TYPE[a].includes(cls)).map(a => tt('gear.armor.' + a, a));
+  $('sheet-body').innerHTML = `
+    <div class="cx-sheet-head"><div class="h-ic">${clsIcon(cls, 64)}</div><div>
+      <h3>${esc(tt('classes.' + cls))}</h3><span class="cx-role ${r}">${roleName(r)}</span>
+      <p style="font-size:12.5px;color:var(--cx-text2);margin-top:6px">${esc(tt('class_desc.' + cls, ''))}</p></div></div>
+    <div class="cx-sub-h">기본 능력치</div><div class="cx-bars">${bars}</div>
+    <div class="cx-pills" style="margin-top:10px"><span class="cx-pill p">레벨당</span>${grow}<span class="cx-pill">${esc(tt('resources.' + d.res, d.res))} ${d.maxRes}</span><span class="cx-pill">행동 속도 ${d.actionRec || 1}</span></div>
+    <div class="cx-sub-h">스킬</div>${base.map(sk).join('')}
+    ${learn.length ? `<div class="cx-sub-h">습득 스킬 (스킬북)</div>${learn.map(sk).join('')}` : ''}
+    ${syn.length ? `<div class="cx-sub-h">클래스 조합 버프</div>${syn.join('')}` : ''}
+    <div class="cx-sub-h">장비</div>
+    <div class="cx-pills"><span class="cx-pill">${ico('wpn_' + cls, 16, getEquipEmoji('wpn_' + cls))} ${esc(Gear.name({ templateId: 'wpn_' + cls }))} · ${wpn && wpn.hand === '2h' ? '양손' : '한손'}</span><span class="cx-pill">방어구: ${esc(armors.join(' · '))}</span></div>
+    ${wl ? `<div class="cx-card cx-item rar-legendary" style="margin-top:8px"><h3>${ico('legend_' + wl, 26, '★')} ${esc(tt('gear.legend.' + wl))}</h3>${Object.keys(LEGENDS[wl].fx).map(k => `<div class="gear-line gl-legend">★ ${esc(Gear.fmt(k, LEGENDS[wl].fx[k]))}</div>`).join('')}</div>` : ''}
+    ${set ? `<div class="cx-sub-h">직업 세트 · ${esc(tt('gear.set.' + cls))}</div>${setHtml}<p style="font-size:11.5px;color:var(--cx-text2);margin-top:6px">${esc(tt('classes.' + cls))} 요일 던전에서 투구·갑옷·장화가 나옵니다. 3세트를 갖춘 클랜원이 2명 이상이면 조합 버프가 공명으로 강해집니다.</p>` : ''}`;
+  openSheet();
 }
 
-function roleStyle(role) {
-  const m = { melee:'background:rgba(248,113,113,.15);color:#f87171', ranged:'background:rgba(96,165,250,.15);color:#60a5fa', healer:'background:rgba(74,222,128,.15);color:#4ade80' };
-  return m[role] || '';
+// ── 장비 ──
+const GEAR_FILTERS = [['all', '전체'], ['weapon', '무기'], ['offhand', '보조'], ['armor', '방어구'], ['acc', '장신구'], ['legend', '전설'], ['set', '직업 세트'], ['rule', '등급·강화']];
+let gearFilter = 'all';
+function slotGroup(slot) { return slot === 'weapon' ? 'weapon' : slot === 'offhand' ? 'offhand' : ['helmet', 'armor', 'boots'].includes(slot) ? 'armor' : 'acc'; }
+function statRange(tpl, rar) {
+  const m = RARITY_MULT[rar];
+  return Object.keys(tpl.stats).map(k => `${STAT_NAMES[k] || k} ${Math.max(1, Math.round(tpl.stats[k][0] * m))}~${Math.round(tpl.stats[k][1] * m)}`).join(' · ');
 }
-
-function resColor(res) {
-  return res === 'fury' ? 'var(--fury)' : res === 'energy' ? 'var(--energy)' : res === 'mana' ? 'var(--mana)' : 'var(--dim)';
+function wearers(tpl) {
+  const list = tpl.clsRestrict || (tpl.armorType ? ARMOR_TYPE[tpl.armorType] : null);
+  if (!list || list.length >= 12) return '<span class="cx-pill">모든 직업</span>';
+  return list.map(c => `<span title="${esc(tt('classes.' + c))}">${clsIcon(c, 20)}</span>`).join('');
 }
-
-// 클래스 카드 렌더링
-function renderClassCards() {
-  const container = document.getElementById('class-cards');
-  container.innerHTML = '';
-
-  PLAYER_CLASSES.forEach(cls => {
-    const d = JAB[cls]; if (!d) return;
-    const b = d.base;
-    const role = getRole(cls);
-
-    // 기본 스킬 가져오기
-    const baseSkill = SKILLS[cls];
-    const baseSkills = baseSkill ? (Array.isArray(baseSkill) ? baseSkill : [baseSkill]) : [];
-
-    // 습득형 스킬 가져오기
-    const learnableSkills = Object.values(LEARNABLE_SKILLS).filter(sk => sk.cls === cls && !sk.passive);
-    const passiveSkills = Object.values(LEARNABLE_SKILLS).filter(sk => sk.cls === cls && sk.passive);
-
-    // 기본 스킬 HTML
-    let skillHtml = baseSkills.map(sk =>
-      `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-        ${skillIcon(sk.id, 16)}
-        <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
-        <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
-        <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost} ${t('resources.' + sk.costType)}</span>
-      </div>`
-    ).join('');
-
-    // 습득형 스킬 HTML
-    let learnableHtml = '';
-    if (learnableSkills.length) {
-      learnableHtml = `<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">
-        <div style="font-size:9px;color:var(--dim);font-weight:700;margin-bottom:4px;letter-spacing:.5px">📚 습득형 스킬</div>
-        ${learnableSkills.map(sk =>
-          `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-            ${skillIcon(sk.id, 16)}
-            <span style="color:var(--gold);font-weight:700;min-width:60px">${sk.name}</span>
-            <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
-            <span style="color:${resColor(sk.costType)};font-weight:700;font-size:9px;white-space:nowrap">${sk.cost || '—'} ${sk.costType ? t('resources.' + sk.costType) : ''}</span>
-          </div>`
-        ).join('')}
-      </div>`;
-    }
-
-    // 패시브 스킬 HTML
-    let passiveHtml = '';
-    if (passiveSkills.length) {
-      passiveHtml = `<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">
-        <div style="font-size:9px;color:var(--purple);font-weight:700;margin-bottom:4px;letter-spacing:.5px">⭐ 패시브</div>
-        ${passiveSkills.map(sk =>
-          `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-            ${skillIcon(sk.id, 16)}
-            <span style="color:var(--purple);font-weight:700;min-width:60px">${sk.name}</span>
-            <span style="color:var(--dim);flex:1;font-size:9px">${sk.desc}</span>
-          </div>`
-        ).join('')}
-      </div>`;
-    }
-
-    // 특수 패시브 (암살자 은신 등)
-    let specialPassiveHtml = '';
-    if (cls === 'assassin') {
-      specialPassiveHtml = `<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">
-        <div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:4px 0">
-          <span>🌿</span>
-          <span style="color:var(--purple);font-weight:700">은신 (고정)</span>
-          <span style="color:var(--dim);font-size:9px">숲 지형에서 적에게 보이지 않음</span>
-        </div>
-      </div>`;
-    }
-
-    const card = document.createElement('div');
-    card.className = 'class-card';
-    card.innerHTML = `
-      <div class="class-card-header">
-        <div class="class-icon"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:100%;height:100%;image-rendering:pixelated;border-radius:4px"></div>
-        <div class="class-meta">
-          <div class="class-name">${t('classes.' + cls)}</div>
-          <span class="role-tag" style="${roleStyle(role)}">${t('roles.' + role)}</span>
-        </div>
-      </div>
-
-      <div class="stat-box">
-        <div class="stat-item"><div class="stat-label">HP</div><div class="stat-value">${b.hp}</div></div>
-        <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-value">${b.atk}</div></div>
-        <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-value">${b.def}</div></div>
-        <div class="stat-item"><div class="stat-label">MOV</div><div class="stat-value">${b.move}</div></div>
-        <div class="stat-item"><div class="stat-label">RNG</div><div class="stat-value">${b.range}</div></div>
-      </div>
-
-      <div class="res-info">
-        <span style="color:${resColor(d.res)};font-weight:700">${t('resources.' + d.res)} ${d.maxRes}</span>
-        <span style="color:var(--dim);font-size:10px">${d.resRec > 0 ? '턴당 +'+d.resRec : d.res === 'fury' ? '전투 시 충전' : d.resRec === 0 ? '매턴 회복' : ''}</span>
-      </div>
-
-      <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:10px">
-        <div style="font-size:9px;color:var(--dim);font-weight:700;margin-bottom:4px;letter-spacing:.5px">🎯 스킬</div>
-        ${skillHtml || '<div style="color:var(--dim)">없음</div>'}
-        ${learnableHtml}
-        ${passiveHtml}
-        ${specialPassiveHtml}
-      </div>
-
-      <div class="growth-info">
-        <div style="font-size:10px;font-weight:700;color:var(--gold);margin-bottom:6px;letter-spacing:.5px">성장률</div>
-        <div class="growth-row">
-          <span style="color:var(--dim);width:32px">HP</span>
-          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
-            <div style="width:${(d.growth.hp[1]/18*100).toFixed(0)}%;height:100%;background:var(--green);border-radius:3px"></div>
-          </div>
-          <span style="color:var(--dim);width:48px;text-align:right;font-size:9px">+${d.growth.hp[0]}~${d.growth.hp[1]}</span>
-        </div>
-        <div class="growth-row">
-          <span style="color:var(--dim);width:32px">ATK</span>
-          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
-            <div style="width:${(d.growth.atk[1]/5*100).toFixed(0)}%;height:100%;background:var(--red);border-radius:3px"></div>
-          </div>
-          <span style="color:var(--dim);width:48px;text-align:right;font-size:9px">+${d.growth.atk[0]}~${d.growth.atk[1]}</span>
-        </div>
-        <div class="growth-row">
-          <span style="color:var(--dim);width:32px">DEF</span>
-          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
-            <div style="width:${(d.growth.def[1]/4*100).toFixed(0)}%;height:100%;background:var(--blue);border-radius:3px"></div>
-          </div>
-          <span style="color:var(--dim);width:48px;text-align:right;font-size:9px">+${d.growth.def[0]}~${d.growth.def[1]}</span>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
+function renderGear() {
+  $('gear-filter').innerHTML = GEAR_FILTERS.map(([k, l]) => `<button class="cx-tab ${k === gearFilter ? 'on' : ''}" data-f="${k}">${l}</button>`).join('');
+  $('gear-filter').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { gearFilter = b.dataset.f; renderGear(); applySearch(); });
+  const out = [];
+  const show = f => gearFilter === 'all' || gearFilter === f;
+  ['weapon', 'offhand', 'armor', 'acc'].forEach(grp => {
+    if (!show(grp)) return;
+    const title = { weapon: '직업 전용 무기', offhand: '보조 장비', armor: '방어구 (천·가죽·사슬·판금)', acc: '장신구' }[grp];
+    const cards = EQUIP_DB.filter(t => slotGroup(t.slot) === grp).map(tpl => {
+      const nm = Gear.name({ templateId: tpl.baseId });
+      const tag = tpl.armorType ? tt('gear.armor.' + tpl.armorType, tpl.armorType) : tpl.hand ? (tpl.hand === '2h' ? '양손' : '한손') : (tpl.setId ? tt('equip.set.' + tpl.setId, tpl.setId) : '');
+      return `<div class="cx-card cx-item rar-rare" data-q="${esc(nm + ' ' + tag + ' ' + tt('equip.slot.' + tpl.slot))}">
+        <h3><span class="cx-ic">${ico(tpl.baseId, 26, getEquipEmoji(tpl.baseId))}</span>${esc(nm)}</h3>
+        <div class="cx-pills"><span class="cx-pill">${esc(tt('equip.slot.' + tpl.slot))}</span>${tag ? `<span class="cx-pill b">${esc(tag)}</span>` : ''}</div>
+        <p style="margin-top:6px">D ${statRange(tpl, 'common')}<br><b>S ${statRange(tpl, 'legendary')}</b></p>
+        <div class="cx-wear">${wearers(tpl)}</div></div>`;
+    });
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>${title}</h2><small>${cards.length}</small></div><div class="cx-grid-gear">${cards.join('')}</div></div>`);
   });
+  if (show('legend')) {
+    const cards = Object.keys(LEGENDS).map(id => {
+      const L = LEGENDS[id], tpl = equipTemplate(L.tpl), nm = tt('gear.legend.' + id), fx = Object.keys(L.fx).map(k => Gear.fmt(k, L.fx[k]));
+      return `<div class="cx-card cx-item rar-legendary" data-q="${esc(nm + ' ' + fx.join(' ') + ' ' + Gear.name({ templateId: L.tpl }))}">
+        <h3><span class="cx-ic">${ico('legend_' + id, 26, getEquipEmoji(L.tpl))}</span>${esc(nm)}</h3>
+        <div class="cx-pills"><span class="cx-pill g">S</span><span class="cx-pill">${esc(Gear.name({ templateId: L.tpl }))}</span></div>
+        <div style="margin-top:8px">${fx.map(f => `<div class="gear-line gl-legend">★ ${esc(f)}</div>`).join('')}</div>
+        <div class="cx-wear">${wearers(tpl)}</div></div>`;
+    });
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>전설 장비</h2><small>${cards.length} legends</small></div>
+      <div class="cx-note tip"><i>★</i><div>보스 스테이지 첫 클리어 ${Math.round(GEAR_DROP.bossLegend.first * 100)}% · 반복 ${Math.round(GEAR_DROP.bossLegend.repeat * 100)}%, 지옥 요일 던전 ${Math.round(GEAR_DROP.dailyLegendHell * 100)}%, 장비 뽑기 천장(${GACHA_PITY_MAX}회). 이미 가진 전설은 분해하면 <b>전설 조각</b>이 되고, 조각 ${LEGEND_SHARD_COST}개로 원하는 전설과 바꿀 수 있습니다.</div></div>
+      <div class="cx-grid2">${cards.join('')}</div></div>`);
+  }
+  if (show('set')) {
+    const cards = Object.keys(CLASS_SETS).map(cls => {
+      const s = CLASS_SETS[cls], nm = tt('gear.set.' + cls);
+      const lines = [2, 3].map(n => `<div class="gear-line gl-set">${n}세트: ${esc(Object.keys(s[n]).map(k => Gear.fmt(k, s[n][k])).join(' · '))}</div>`).join('');
+      return `<div class="cx-card" data-q="${esc(nm + ' ' + tt('classes.' + cls))}"><h3><span class="t-ic" style="width:30px;height:30px">${clsIcon(cls, 30)}</span>${esc(tt('gear.set_name', nm, { set: nm }))}</h3>
+        <div class="cx-pills"><span class="cx-pill">${esc(tt('classes.' + cls))} 전용</span><span class="cx-pill b">${esc(tt('gear.armor.' + CLASS_ARMOR[cls], CLASS_ARMOR[cls]))}</span></div><div style="margin-top:8px">${lines}</div></div>`;
+    });
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>직업 세트</h2><small>투구 · 갑옷 · 장화</small></div>
+      <div class="cx-note"><i>🗓️</i><div>그 직업의 <b>요일 던전</b>에서 승리하면 중급 ${Math.round(GEAR_DROP.dailySet.normal * 100)}% · 상급 ${Math.round(GEAR_DROP.dailySet.hard * 100)}% · 지옥 ${Math.round(GEAR_DROP.dailySet.hell * 100)}% 확률로 한 부위가 나옵니다. 같은 직업 3세트를 갖춘 클랜원이 2명 이상이면 조합 버프가 <b>공명</b>합니다.</div></div>
+      <div class="cx-grid2">${cards.join('')}</div></div>`);
+  }
+  if (show('rule')) {
+    const rows = RARITY_ORDER.map(r => `<tr><td style="color:${RARITY[r].color}">${RARITY[r].grade} · ${esc(tt('equip.rarity.' + r, r))}</td><td class="n">×${RARITY_MULT[r]}</td><td class="n">${SUB_COUNT[r]}</td><td>${RARITY[r].tier >= 2 ? '○' : '−'}</td><td>${r === 'legendary' ? '전설 효과' : r === 'epic' ? '무작위 1개' : '−'}</td><td class="n">${(GACHA_RATE[r] * 100).toFixed(GACHA_RATE[r] < .01 ? 2 : 0)}%</td></tr>`).join('');
+    const enh = ENHANCE_RATES.map((p, lv) => `<tr><td>+${lv} → +${lv + 1}</td><td class="n">${Math.round(p * 100)}%</td><td>${lv < ENHANCE_SAFE_BELOW ? '유지' : '−1단계'}</td><td class="n">${ENHANCE_STONES[lv]}</td><td class="n">+${ENHANCE_STAT_PCT[lv + 1]}%</td></tr>`).join('');
+    out.push(`<div class="cx-sec"><div class="cx-sec-h"><h2>등급</h2><small>rarity</small></div>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>등급</th><th>능력치</th><th>추가 능력치</th><th>직업 옵션</th><th>고유 효과</th><th>뽑기</th></tr>${rows}</table></div></div>
+      <div class="cx-sec"><div class="cx-sec-h"><h2>강화</h2><small>+1 ~ +10</small></div>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>단계</th><th>성공</th><th>실패 시</th><th>강화석</th><th>능력치</th></tr>${enh}</table></div>
+      <div class="cx-note warn"><i>💥</i><div>실패할 때마다 <b>${ENHANCE_BREAK_CHANCE * 100}%</b> 확률로 파손됩니다. 파손 장비는 골드로 수리하면 +0으로 돌아갑니다. 보호 주문서를 쓰면 파손되지 않습니다. 실패할 때마다 다음 성공률 +${ENHANCE_FAIL_BONUS}%p(최대 ${ENHANCE_FAIL_BONUS_MAX}).</div></div>
+      <div class="cx-note tip"><i>✨</i><div>강화에 성공하면 확률로 <b>강화 옵션</b>이 붙습니다: +1~3 25% · +4~6 40% · +7~9 60% · +10 100%(고유 효과). 단계가 떨어지면 그 단계의 옵션은 사라집니다. +5에서 고유·전설 효과 ×1.25, +10에서 ×1.5.</div></div></div>`);
+  }
+  $('gear-body').innerHTML = out.join('') || '<div class="cx-empty">항목이 없습니다</div>';
 }
 
-// 자원 시스템 렌더링
-function renderResBlocks() {
-  const container = document.getElementById('res-blocks');
-  container.innerHTML = '';
-
-  const groups = [
-    { res:'fury', color:'var(--fury)', label:'분노 (Fury)', desc:'공격 시 +1, 피격 시 +2 충전. MAX 도달 시 패시브 자동 발동 후 0으로 리셋.',
-      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'fury') },
-    { res:'energy', color:'var(--energy)', label:'에너지 (Energy)', desc:'매 턴 자동 회복. 액티브 스킬 사용 시 소모.',
-      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'energy') },
-    { res:'mana', color:'var(--mana)', label:'마나 (Mana)', desc:'매 턴 자동 회복. 마법/힐 스킬 사용 시 소모. 전투 시작 시 MAX.',
-      classes: PLAYER_CLASSES.filter(c => JAB[c]?.res === 'mana') }
+// ── 소모품·재료 ──
+function renderCons() {
+  const card = (key, emo, name, desc, pills, q) => `<div class="cx-card" data-q="${esc(name + ' ' + desc)}"><h3><span class="cx-ic">${ico(key, 26, emo)}</span>${esc(name)}</h3><p>${esc(desc)}</p>${pills ? `<div class="cx-pills">${pills}</div>` : ''}</div>`;
+  const potions = Object.values(BATTLE_POTIONS).map(p => card(p.id, p.icon, tt('battle_potions.' + p.id), tt('battle_potions.' + p.id + '_desc', ''),
+    `<span class="cx-pill">행동 1회</span><span class="cx-pill">사거리 ${p.range}</span>${p.duration ? `<span class="cx-pill">${p.duration}턴</span>` : ''}<span class="cx-pill g">${ECON.battlePotion}G</span>`));
+  const exps = EXP_POTIONS.map(p => card(p.id, p.icon, tt('shop.potion_' + { exp_s: 'small', exp_m: 'medium', exp_l: 'large' }[p.id], p.id), '클랜원 한 명에게 경험치를 줍니다',
+    `<span class="cx-pill b">EXP +${p.exp}</span><span class="cx-pill g">${p.cost}G</span>`));
+  const sieges = SIEGE_ITEMS.map(s => card(s.id, s.icon, tt('shop.' + s.id), tt('shop.' + s.id + '_desc', ''), `<span class="cx-pill">사거리 ${s.range}</span><span class="cx-pill g">${s.cost}G</span>`));
+  const runes = Object.keys(ENCHANTS).map(k => card('rune_' + k, ENCHANTS[k].icon, tt('enchant.rune_name', k, { e: tt('enchant.' + k, k) }), tt('enchant.desc_' + k, ''),
+    `<span class="cx-pill ${ENCHANTS[k].cat === 'atk' ? 'r' : 'b'}">${ENCHANTS[k].cat === 'atk' ? '공격' : '방어(환경 저항)'}</span>`));
+  const mats = [
+    card('mat_stone', '🔩', tt('gear.stone', '강화석'), '장비 강화 재료. 분해·요일 던전·보물상자·상점에서 얻습니다', `<span class="cx-pill g">${MATS_PRICE.stone}G</span>`),
+    card('mat_protect', '📜', tt('gear.protect', '보호 주문서'), '강화 실패 시 파손을 한 번 막습니다', `<span class="cx-pill g">${MATS_PRICE.protect}G</span>`),
+    card('mat_shard', '✦', tt('gear.shard', '전설 조각'), `전설 장비를 분해하면 1개. ${LEGEND_SHARD_COST}개로 원하는 전설과 교환`, ''),
+    card('soul_stone', '💠', '영혼석', `직업별 승급 재료 (B→A ${SOUL.promote.B}개, A→S ${SOUL.promote.A}개). 조각 ${SOUL.fragsPerStone}개 = 1개`, `<span class="cx-pill g">${ECON.soulStone}G</span>`)
   ];
+  const odds = Object.keys(CHEST.odds).map(k => `<span class="cx-pill">${{ gold: '골드', potion: '전투 물약', rune: '룬', equip: '장비', stone: '강화석', protect: '보호 주문서', soul: '영혼석 조각' }[k] || k} ${Math.round(CHEST.odds[k] * 100)}%</span>`).join('');
+  const sec = (h, sm, cards, note) => `<div class="cx-sec"><div class="cx-sec-h"><h2>${h}</h2><small>${sm}</small></div>${note || ''}<div class="cx-grid2">${cards.join('')}</div></div>`;
+  $('cons-body').innerHTML =
+    sec('전투 물약', 'battle potions', potions, '<p class="cx-lead">파티 편성의 소모품 탭에서 챙기면 전투 중 아이템 메뉴로 씁니다.</p>') +
+    sec('경험치 물약', 'exp', exps) +
+    sec('공성 도구', 'siege', sieges) +
+    sec('마법부여 룬', 'runes', runes, `<div class="cx-note"><i>🔮</i><div>성소 → 마법부여에서 장비에 룬 1개 + ${ENCHANT_FEE}G로 새깁니다. 장비 하나에 방어 1개 + 공격 1개를 함께 새길 수 있고, 같은 분류는 덮어씁니다. 룬은 전투 승리 ${Math.round(RUNE_DROP_CHANCE * 100)}%, 상점 룬 뽑기 ${RUNE_GACHA_COST}G, 보물상자에서 얻습니다.</div></div>`) +
+    sec('재료', 'materials', mats) +
+    `<div class="cx-sec"><div class="cx-sec-h"><h2>보물상자</h2><small>chest</small></div><div class="cx-card"><p>전투마다 ${CHEST.min}~${CHEST.max}개가 맵 가운데에 놓이고, 클랜원이 밟으면 열립니다. 전투에서 져도 얻은 것은 남습니다.</p><div class="cx-pills">${odds}</div></div></div>`;
+}
 
-  groups.forEach(g => {
-    const block = document.createElement('div');
-    block.className = 'res-block';
-    block.style.borderColor = g.color;
-
-    let metersHtml = g.classes.map(cls => {
-      const d = JAB[cls];
-      const pct = 100;
-      return `<div class="res-meter">
-        <div class="res-meter-label"><img src="image/icon/jab/${cls}.png" alt="${cls}" style="width:16px;height:16px;vertical-align:middle;image-rendering:pixelated;border-radius:2px"> ${t('classes.'+cls) || cls}</div>
-        <div class="res-meter-track">
-          <div class="res-meter-fill" style="width:${pct}%;background:${g.color};color:var(--bg)">${d.maxRes}</div>
-        </div>
-        <div class="res-meter-info">${d.resRec > 0 ? '턴당 +'+d.resRec : 'MAX '+d.maxRes}</div>
-      </div>`;
+// ── 스테이지 ──
+function renderStages() {
+  const hzOf = st => (typeof Hazard !== 'undefined' ? Hazard.forStage(st) : null);
+  const styleName = s => ({ defense: '방어전', offense: '공격전', mixed: '혼합' })[s] || s;
+  const eps = {};
+  STAGES.forEach(s => { const e = Math.ceil(s.id / 10); (eps[e] = eps[e] || []).push(s); });
+  const scale = Object.keys(eps).map(e => {
+    const ss = eps[e], a = ss[0], z = ss[ss.length - 1];
+    return `<tr><td>Ep${e}</td><td class="n">${Math.min(...ss.map(s => s.tot))}~${Math.max(...ss.map(s => s.tot))}</td><td class="n">${stageEnemyLv(a.id)}~${stageEnemyLv(z.id)}</td><td class="n">×${a.sm.hp}~${z.sm.hp}</td><td class="n">×${a.sm.atk}~${z.sm.atk}</td></tr>`;
+  }).join('');
+  const hzCards = Object.keys(HAZARDS).map(m => { const h = HAZARDS[m];
+    return `<div class="cx-card" data-q="${esc(tt('hazard.' + h.id, h.id) + ' ' + tt('maps.' + m, m))}"><h3><span class="cx-ic">${h.icon}</span>${esc(tt('hazard.' + h.id, h.id))}</h3><p>${esc(Hazard.describe(h, STAGES[0]))}</p></div>`; }).join('');
+  const acc = Object.keys(eps).map(e => {
+    const rows = eps[e].map(s => {
+      const h = hzOf(s), nm = tt('stages.stage_' + s.id + '_name', s.name || ('스테이지 ' + s.id));
+      const tags = [`<span class="cx-pill">${styleName(s.style)}</span>`, `<span class="cx-pill">적 ${s.tot}</span>`];
+      if (h) tags.push(`<span class="cx-pill p" title="${esc(Hazard.describe(h, s))}">${h.icon} ${esc(tt('hazard.' + h.id, h.id))}</span>`);
+      if (s.boss) tags.push(`<span class="cx-pill r">💀 ${esc(bossName(s))}</span>`);
+      return `<div class="cx-stage ${s.boss ? 'boss' : ''}" data-q="${esc(s.id + ' ' + nm + ' ' + (s.boss ? bossName(s) : '') + ' ' + (h ? tt('hazard.' + h.id, '') : ''))}">
+        <span class="no">${s.id}</span><div class="nm">${esc(nm)}<small>${esc(tt('stages.stage_' + s.id + '_story', ''))}</small><div class="tags">${tags.join('')}</div></div></div>`;
     }).join('');
-
-    block.innerHTML = `
-      <div style="font-weight:900;font-size:15px;margin-bottom:4px;color:${g.color}">${g.label}</div>
-      <div style="font-size:12px;color:var(--dim);margin-bottom:8px">${g.desc}</div>
-      ${metersHtml}
-    `;
-    container.appendChild(block);
-  });
+    const epNm = tt('episode.' + e + '.name', 'Episode ' + e);
+    return `<details class="cx-acc" ${e === '1' ? 'open' : ''}><summary><span class="cx-ic">${e}</span><span>${esc(epNm)}<br><small>${esc(tt('episode.' + e + '.desc', ''))}</small></span></summary><div class="cx-acc-b">${rows}</div></details>`;
+  }).join('');
+  $('stage-body').innerHTML = `
+    <div class="cx-sec"><div class="cx-sec-h"><h2>에피소드</h2><small>100 stages</small></div>${acc}</div>
+    <div class="cx-sec"><div class="cx-sec-h"><h2>적 강함</h2><small>scaling</small></div>
+      <p class="cx-lead">적은 기하급수적으로 강해지고, 후반에는 <b>수는 적지만 한 대가 아프게</b> 바뀝니다. 일반 스테이지 최대 ${STAGE_TOT_CAP_MAX}명, 보스 스테이지 최대 ${STAGE_TOT_CAP_BOSS}명.</p>
+      <div class="cx-table-w"><table class="cx-table"><tr><th>구간</th><th>적 수</th><th>적 레벨</th><th>체력 배율</th><th>공격 배율</th></tr>${scale}</table></div></div>
+    <div class="cx-sec"><div class="cx-sec-h"><h2>맵 환경</h2><small>hazards</small></div><div class="cx-grid2">${hzCards}</div></div>`;
 }
 
-// 경험치 물약 테이블
-function renderItemTable() {
-  const potions = window.EXP_POTIONS || [];
-  const totalWeight = potions.reduce((sum, p) => sum + p.weight, 0);
-  const tbody = document.getElementById('item-table-body');
-  tbody.innerHTML = '';
-
-  potions.forEach(p => {
-    const efficiency = (p.exp / p.cost).toFixed(2);
-    const probability = ((p.weight / totalWeight) * 100).toFixed(0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="font-size:24px">${p.icon}</td>
-      <td style="text-align:left;font-weight:700;color:var(--gold)">${t('items.potion_'+{s:'small',m:'medium',l:'large'}[p.id.split('_')[1]]) || p.name}</td>
-      <td style="color:var(--green);font-weight:700">+${p.exp}</td>
-      <td style="color:var(--blue);font-weight:700">${p.cost}G</td>
-      <td style="font-weight:700;color:var(--gold)">${efficiency}</td>
-      <td style="color:var(--dim)">${probability}%</td>
-    `;
-    tbody.appendChild(tr);
-  });
+// ── 탭·검색·상세 창 ──
+function openSheet() { $('sheet-bg').classList.add('on'); $('sheet').classList.add('on'); $('sheet').scrollTop = 0; }
+function closeSheet() { $('sheet-bg').classList.remove('on'); $('sheet').classList.remove('on'); }
+$('sheet-bg').onclick = closeSheet; $('sheet-x').onclick = closeSheet;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+function applySearch() {
+  const q = $('q').value.trim().toLowerCase(), panel = document.querySelector('.cx-panel.on');
+  panel.querySelectorAll('[data-q]').forEach(el => { el.style.display = !q || el.dataset.q.toLowerCase().includes(q) ? '' : 'none'; });
+  panel.querySelectorAll('.cx-acc').forEach(a => { if (q) a.open = [...a.querySelectorAll('[data-q]')].some(el => el.style.display !== 'none'); });
 }
-
-// 전직서 카드 렌더링
-function renderScrollCards() {
-  const cd = window.JAB || {};
-  const container = document.getElementById('scroll-cards');
-  container.innerHTML = '';
-
-  const SCROLL_CLASSES = ['warrior','knight','assassin','brawler','lancer','sapper','archer','mage','summoner','shaman','priest'];
-  const SCROLL_COST = 400;
-
-  // 1개 카드: 전직서 (모든 직업 대상)
-  const classIcons = SCROLL_CLASSES.map(cls =>
-    `<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:4px;font-size:10px">
-      ${cd[cls]?.icon || ''} ${t('classes.'+cls) || cls}
-    </span>`
-  ).join(' ');
-
-  const card = document.createElement('div');
-  card.className = 'scroll-card';
-  card.innerHTML = `
-    <div style="display:flex;gap:12px;align-items:flex-start">
-      <div style="font-size:40px;line-height:1">📜</div>
-      <div style="flex:1">
-        <div style="font-size:16px;font-weight:900;color:var(--purple)">전직서</div>
-        <div style="font-size:11px;color:var(--dim);margin-top:2px">
-          노비스를 다른 직업으로 전직시킬 수 있습니다.<br/>
-          상점에서 6개의 <span style="color:var(--gold);font-weight:700">랜덤 직업</span> 전직서만 판매됩니다.
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-          <span style="color:var(--gold);font-weight:700;font-size:13px">${SCROLL_COST}G</span>
-          <span style="color:var(--dim);font-size:10px">| 노비스 전용</span>
-        </div>
-      </div>
-    </div>
-    <div style="background:rgba(0,0,0,.2);padding:8px;border-radius:6px">
-      <div style="color:var(--dim);font-size:10px;margin-bottom:6px">전직 가능 직업 (11개)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${classIcons}</div>
-    </div>
-  `;
-  container.appendChild(card);
-}
-
-// 전투 포션 카드 렌더링
-function renderBattlePotionCards() {
-  const container = document.getElementById('battle-potions-cards');
-  container.innerHTML = '';
-
-  const potions = [
-    { icon:'💊', name:'회복 포션', type:'heal', effect:'HP 50% 회복', range:'범위 1', color:'#4ade80' },
-    { icon:'⚡', name:'자원 회복', type:'resource', effect:'자원 30 회복', range:'범위 1', color:'#fbbf24' },
-    { icon:'🔥', name:'공격력 버프', type:'buff', effect:'ATK +30% (3턴)', range:'범위 1', color:'#f87171' },
-    { icon:'🛡️', name:'방어력 버프', type:'buff', effect:'DEF +30% (3턴)', range:'범위 1', color:'#60a5fa' },
-    { icon:'💢', name:'공격력 디버프', type:'debuff', effect:'ATK -25% (3턴)', range:'범위 2', color:'#a78bfa' },
-    { icon:'❄️', name:'방어력 디버프', type:'debuff', effect:'DEF -25% (3턴)', range:'범위 2', color:'#06b6d4' }
-  ];
-
-  potions.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'scroll-card';
-    card.style.borderLeftColor = p.color;
-    card.style.borderLeft = '3px solid ' + p.color;
-    card.innerHTML = `
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div style="font-size:40px;line-height:1">${p.icon}</div>
-        <div style="flex:1">
-          <div style="font-size:16px;font-weight:900;color:${p.color}">${p.name}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px">
-            <div>효과: <span style="color:${p.color};font-weight:700">${p.effect}</span></div>
-            <div style="margin-top:3px">${p.range}</div>
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// 공성 아이템 카드 렌더링
-function renderSiegeItemsCards() {
-  const container = document.getElementById('siege-items-cards');
-  container.innerHTML = '';
-
-  const items = [
-    { icon:'🪜', name:'사다리', desc:'벽이나 바위에 올라갈 수 있음', cost:100, range:'범위 1', color:'#8b5a3c' },
-    { icon:'💣', name:'폭탄', desc:'벽과 바위를 파괴할 수 있음', cost:200, range:'범위 3', color:'#f87171' },
-    { icon:'🌉', name:'다리', desc:'물을 건널 수 있는 다리를 설치', cost:150, range:'범위 3', color:'#60a5fa' }
-  ];
-
-  items.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'scroll-card';
-    card.style.borderLeftColor = item.color;
-    card.style.borderLeft = '3px solid ' + item.color;
-    card.innerHTML = `
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div style="font-size:40px;line-height:1">${item.icon}</div>
-        <div style="flex:1">
-          <div style="font-size:16px;font-weight:900;color:${item.color}">${item.name}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px">${item.desc}</div>
-          <div style="display:flex;gap:12px;margin-top:8px;font-size:10px">
-            <span style="color:var(--gold);font-weight:700">${item.cost}G</span>
-            <span style="color:var(--dim)">${item.range}</span>
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// 자원 시스템 정보 렌더링
-function renderResourceInfo() {
-  const container = document.getElementById('resource-info');
-  container.innerHTML = '';
-
-  // JAB에서 자원 유형별 클래스 분류
-  const resourceMap = {
-    fury: [],
-    energy: [],
-    mana: []
-  };
-
-  Object.entries(JAB || {}).forEach(([cls, data]) => {
-    if (data.res && resourceMap[data.res]) {
-      resourceMap[data.res].push(cls);
-    }
-  });
-
-  const resources = [
-    {
-      icon: '🔥',
-      name: 'Fury (분노)',
-      desc: resourceMap.fury.length > 0 ? `${resourceMap.fury.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
-      details: [
-        '• 최대 10',
-        '• 공격 시 +1, 피격 시 +2 충전',
-        '• MAX 도달 시 패시브 자동 발동 후 0으로 리셋',
-        '• 스킬 사용 시 소비 가능'
-      ],
-      color: '#f87171'
-    },
-    {
-      icon: '⚡',
-      name: 'Energy (에너지)',
-      desc: resourceMap.energy.length > 0 ? `${resourceMap.energy.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
-      details: [
-        '• 최대 100',
-        '• 턴마다 자동 회복',
-        '• 액티브 스킬 사용 시 소비',
-        '• Sapper: 함정 설치에 에너지 20 소비'
-      ],
-      color: '#fbbf24'
-    },
-    {
-      icon: '💜',
-      name: 'Mana (마나)',
-      desc: resourceMap.mana.length > 0 ? `${resourceMap.mana.map(c => t('classes.'+c) || c).join(', ')} 사용` : '(클래스 없음)',
-      details: [
-        '• 최대 100-120',
-        '• 턴마다 자동 회복',
-        '• 마법/힐 스킬 사용 시 소비',
-        '• 전투 시작 시 MAX로 시작'
-      ],
-      color: '#a78bfa'
-    }
-  ];
-
-  resources.forEach(r => {
-    const card = document.createElement('div');
-    card.style.background = 'var(--card)';
-    card.style.border = '1px solid var(--border)';
-    card.style.borderLeft = '3px solid ' + r.color;
-    card.style.borderRadius = '12px';
-    card.style.padding = '16px';
-    card.innerHTML = `
-      <div style="display:flex;gap:12px;margin-bottom:12px">
-        <div style="font-size:32px;line-height:1">${r.icon}</div>
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:900;color:${r.color}">${r.name}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">${r.desc}</div>
-        </div>
-      </div>
-      <div style="font-size:10px;color:#cbd5a1;line-height:1.8">
-        ${r.details.map(d => `<div>${d}</div>`).join('')}
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// 턴 시스템 정보 렌더링
-function renderTurnInfo() {
-  const container = document.getElementById('turn-info');
-  container.innerHTML = `
-    <div style="margin-bottom:20px">
-      <div style="font-size:13px;font-weight:900;color:var(--gold);margin-bottom:8px">📋 턴 진행 순서</div>
-      <div style="font-size:11px;color:#cbd5e1;line-height:2">
-        <div><span style="color:var(--green);font-weight:700">1️⃣ 플레이어 턴</span></div>
-        <div style="padding-left:16px;color:var(--dim)">
-          • 캐릭터 선택 (클릭)<br/>
-          • 이동 (3-4칸 범위)<br/>
-          • 공격 또는 스킬 사용<br/>
-          • 행동 완료 버튼
-        </div>
-        <div style="margin-top:12px;color:var(--red);font-weight:700">2️⃣ 적 턴</div>
-        <div style="padding-left:16px;color:var(--dim)">
-          • 적 AI 이동 및 공격<br/>
-          • 공성아이템 전략적 사용<br/>
-          • 함정 트리거 체크
-        </div>
-      </div>
-    </div>
-
-    <div style="border-top:1px solid var(--border);padding-top:20px">
-      <div style="font-size:13px;font-weight:900;color:var(--purple);margin-bottom:8px">⏰ 특수 조건</div>
-      <div style="font-size:11px;color:#cbd5e1;line-height:1.8">
-        <div>🎯 <span style="color:var(--gold);font-weight:700">전투 클리어</span>: 모든 적 처치</div>
-        <div>💀 <span style="color:var(--red);font-weight:700">전투 패배</span>: 아군 전멸</div>
-        <div style="margin-top:8px;color:var(--dim);font-size:10px">
-          • 웨이브 진행: 모든 적 처치 후 다음 물량 스폰<br/>
-          • 보스 전: 마지막 웨이브에 강력한 보스 출현
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// 특수 능력 정보 렌더링
-function renderSpecialAbilities() {
-  const container = document.getElementById('special-abilities');
-  container.innerHTML = '';
-
-  const abilities = [
-    {
-      icon: '🌲',
-      name: '은신 (Stealth)',
-      classes: 'Assassin',
-      effect: '숲 타일에서 자동 발동',
-      desc: '적에게 보이지 않음 → 겹쳐서 이동 가능',
-      color: '#4ade80'
-    },
-    {
-      icon: '💣',
-      name: '함정 (Trap)',
-      classes: 'Sapper',
-      effect: 'Energy 20 소비',
-      desc: '현재 타일에 함정 설치 (ATK×2 데미지 + 2턴 기절)',
-      color: '#f87171'
-    },
-    {
-      icon: '🛡️',
-      name: '몸부림 (Parry)',
-      classes: 'Knight',
-      effect: '패시브 능력',
-      desc: '맞은 공격의 50% 반격',
-      color: '#60a5fa'
-    },
-    {
-      icon: '⚔️',
-      name: '광폭 (Fury)',
-      classes: 'Warrior',
-      effect: '패시브 능력',
-      desc: '공격 시 ATK × 1.5배 증가',
-      color: '#f87171'
-    },
-    {
-      icon: '🏰',
-      name: '철벽 (Iron Phalanx)',
-      classes: 'Lancer',
-      effect: '분노 MAX 도달 시',
-      desc: '2턴간 방어력 2배 증가',
-      color: '#60a5fa'
-    }
-  ];
-
-  abilities.forEach(a => {
-    const card = document.createElement('div');
-    card.style.background = 'var(--card)';
-    card.style.border = '1px solid var(--border)';
-    card.style.borderLeft = '3px solid ' + a.color;
-    card.style.borderRadius = '12px';
-    card.style.padding = '16px';
-    card.innerHTML = `
-      <div style="display:flex;gap:12px;margin-bottom:12px">
-        <div style="font-size:32px;line-height:1">${a.icon}</div>
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:900;color:${a.color}">${a.name}</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:2px">${a.classes}</div>
-        </div>
-      </div>
-      <div style="font-size:10px;color:#cbd5e1;margin-bottom:8px;padding:8px;background:rgba(0,0,0,.2);border-radius:6px">
-        조건: <span style="color:${a.color};font-weight:700">${a.effect}</span>
-      </div>
-      <div style="font-size:10px;color:var(--dim)">${a.desc}</div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// AI 시스템 정보 렌더링
-function renderAIInfo() {
-  const container = document.getElementById('ai-info');
-  container.innerHTML = `
-    <div style="margin-bottom:20px">
-      <div style="font-size:13px;font-weight:900;color:var(--gold);margin-bottom:8px">🧠 AI 분석 시스템</div>
-      <div style="font-size:11px;color:#cbd5e1;line-height:1.8">
-        적 AI가 각 턴마다 전투 상황을 <span style="color:var(--gold);font-weight:700">실시간 분석</span>하여 최적의 행동을 선택합니다:
-        <ul style="margin:8px 0;padding-left:20px">
-          <li>현재 체력과 적 위치 분석</li>
-          <li>아군의 기술 및 리소스 상태 추적</li>
-          <li>위험도(Severity) 계산</li>
-          <li>공성아이템 효율성 평가</li>
-        </ul>
-      </div>
-    </div>
-
-    <div style="border-top:1px solid var(--border);padding-top:20px">
-      <div style="font-size:13px;font-weight:900;color:var(--purple);margin-bottom:8px">📊 공성아이템 활용</div>
-      <div style="font-size:11px;color:#cbd5e1;line-height:1.8">
-        <div style="margin-bottom:12px">
-          <span style="color:var(--gold);font-weight:700">차단(Blocked) 상황</span><br/>
-          이동 불가 상황에서는 <span style="background:rgba(167,139,250,.2);padding:2px 6px;border-radius:3px">공성아이템 무조건 사용</span>
-        </div>
-        <div style="margin-bottom:12px">
-          <span style="color:var(--gold);font-weight:700">일반 상황</span><br/>
-          위험도(Severity) ≥ 0.15일 때 적절한 공성아이템 선택
-        </div>
-        <div>
-          <span style="color:var(--gold);font-weight:700">분포 확률</span><br/>
-          <div style="display:flex;gap:2px;margin-top:4px">
-            <div style="flex:2;background:#f87171;padding:4px 2px;border-radius:2px;font-size:9px;text-align:center;color:#000">폭탄<br/>40%</div>
-            <div style="flex:1.5;background:#60a5fa;padding:4px 2px;border-radius:2px;font-size:9px;text-align:center;color:#000">방어막<br/>30%</div>
-            <div style="flex:1;background:#fbbf24;padding:4px 2px;border-radius:2px;font-size:9px;text-align:center;color:#000">회피<br/>20%</div>
-            <div style="flex:0.5;background:#a78bfa;padding:4px 2px;border-radius:2px;font-size:9px;text-align:center;color:#fff">우회<br/>10%</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:20px">
-      <div style="font-size:13px;font-weight:900;color:var(--red);margin-bottom:8px">⚠️ 난이도 영향</div>
-      <div style="font-size:11px;color:#cbd5e1;line-height:1.8">
-        공성아이템 시스템으로 인해 <span style="background:rgba(248,113,113,.2);padding:2px 6px;border-radius:3px">적의 강함이 +15~20% 증가</span>합니다.
-        <div style="margin-top:8px;padding:8px;background:rgba(248,113,113,.1);border-left:3px solid #f87171;border-radius:4px">
-          전략적으로 아이템을 사용하는 적에 대비하여 강력한 팀 구성이 필요합니다.
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// 효율 분석 렌더링
-function renderEfficiencyAnalysis() {
-  const potions = window.EXP_POTIONS || [];
-  const totalWeight = potions.reduce((sum, p) => sum + p.weight, 0);
-  const container = document.getElementById('efficiency-cards');
-
-  const sorted = [...potions]
-    .map(p => ({
-      ...p,
-      efficiency: p.exp / p.cost,
-      probability: ((p.weight / totalWeight) * 100).toFixed(0)
-    }))
-    .sort((a, b) => b.efficiency - a.efficiency);
-
-  container.innerHTML = '';
-  sorted.forEach((item, idx) => {
-    const grades = ['S', 'A', 'B'];
-    const gradeColors = ['#f87171', '#f0c040', '#60a5fa'];
-    const card = document.createElement('div');
-    card.className = 'item-card';
-    card.innerHTML = `
-      <div class="item-header">
-        <div class="item-icon">${item.icon}</div>
-        <div class="item-meta">
-          <div class="item-name">
-            ${t('items.potion_'+{s:'small',m:'medium',l:'large'}[item.id.split('_')[1]]) || item.name}
-            <span style="margin-left:8px;background:${gradeColors[idx] || 'var(--dim)'};color:var(--bg);padding:2px 8px;border-radius:4px;
-              font-size:11px;font-weight:700">${grades[idx] || 'C'}</span>
-          </div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px">#${idx + 1} 효율 순위</div>
-        </div>
-      </div>
-
-      <div class="item-info">
-        <div class="info-box">
-          <div class="info-label">EXP</div>
-          <div class="info-value" style="color:var(--green)">+${item.exp}</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">COST</div>
-          <div class="info-value" style="color:var(--blue)">${item.cost}G</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">EXP/G</div>
-          <div class="info-value" style="color:var(--gold)">${item.efficiency.toFixed(2)}</div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px;padding:8px;background:rgba(0,0,0,.2);border-radius:6px;font-size:11px">
-        <div style="color:var(--dim);margin-bottom:2px">상점 등장 확률</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
-            <div style="width:${item.probability}%;height:100%;background:var(--gold);border-radius:4px"></div>
-          </div>
-          <span style="color:var(--text);font-weight:700">${item.probability}%</span>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// 스테이지 카드 렌더링
-function renderStageCards() {
-  const stages = window.STAGES || [];
-  const cd = window.JAB || {};
-  const container = document.getElementById('stage-cards');
-  container.innerHTML = '';
-
-  const episodeNames = [
-    '영웅의 시작',
-    '얼어붙은 음모',
-    '늪지의 저주',
-    '불타는 제국',
-    '심연의 종말',
-    '지옥문',
-    '악마의 영역',
-    '신의 심판',
-    '최후의 전쟁',
-    '운명의 종극'
-  ];
-
-  function styleLabel(style) {
-    if (style === 'defense') return {icon:'🛡', label:'방어전', color:'#60a5fa', bg:'rgba(96,165,250,0.15)'};
-    if (style === 'offense') return {icon:'⚔', label:'공격전', color:'#f87171', bg:'rgba(248,113,113,0.15)'};
-    return {icon:'🔀', label:'혼합', color:'#a78bfa', bg:'rgba(167,139,250,0.15)'};
-  }
-
-  function getDifficultyLabel(diff) {
-    if (diff < 20) return '매우 쉬움';
-    if (diff < 40) return '쉬움';
-    if (diff < 60) return '보통';
-    if (diff < 80) return '어려움';
-    return '매우 어려움';
-  }
-
-  function getRecommendLevel(phase) {
-    const levelMap = {
-      1: '1-3', 2: '5-7', 3: '8-10', 4: '11-13', 5: '14-15',
-      6: '14-15', 7: '14-15', 8: '14-15', 9: '14-15', 10: '14-15'
-    };
-    return levelMap[phase] || '?';
-  }
-
-  let currentEpisode = 0;
-
-  stages.forEach(stage => {
-    // 에피소드 헤더 추가
-    if (stage.phase !== currentEpisode) {
-      currentEpisode = stage.phase;
-      const episodeHeader = document.createElement('div');
-      episodeHeader.style.marginTop = '32px';
-      episodeHeader.style.marginBottom = '16px';
-      episodeHeader.innerHTML = `
-        <div style="font-size:13px;font-weight:900;color:var(--gold);letter-spacing:1px">
-          📖 EPISODE ${currentEpisode} — ${episodeNames[currentEpisode-1] || ''}
-        </div>
-        <div style="font-size:10px;color:var(--dim);margin-top:4px">Stage ${currentEpisode*10-9} ~ ${currentEpisode*10}</div>
-      `;
-      container.appendChild(episodeHeader);
-    }
-
-    const diff = ((stage.sm.hp + stage.sm.atk) / 2 * 100).toFixed(0);
-    const enemyCount = {};
-    stage.en.forEach(cls => { enemyCount[cls] = (enemyCount[cls] || 0) + 1 });
-
-    const enemyDisplay = Object.entries(enemyCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([cls, cnt]) => `${cd[cls]?.icon || '?'} ×${cnt}`)
-      .join(' ');
-
-    const sl = styleLabel(stage.style);
-    const stageName = t('stage.'+stage.id+'.name') || stage.name;
-    const stageStory = t('stage.'+stage.id+'.story') || stage.story;
-    const recommendLevel = getRecommendLevel(stage.phase);
-
-    const card = document.createElement('div');
-    card.className = 'stage-card';
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="flex:1">
-          <div class="stage-name">Stage ${stage.id}</div>
-          <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px">${stageName}</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:2px">${stage.mapType}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="background:${sl.bg};color:${sl.color};padding:4px 8px;border-radius:4px;font-size:9px;font-weight:700">${sl.icon} ${sl.label}</div>
-          <div style="color:var(--dim);font-size:9px;margin-top:4px">권장 Lv. ${recommendLevel}</div>
-        </div>
-      </div>
-
-      <div class="stage-info">
-        ${stageStory ? `<div style="font-size:10px;color:#cbd5e1;margin:8px 0;padding:6px;background:rgba(0,0,0,.2);border-radius:4px">📖 ${stageStory}</div>` : ''}
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:9px;color:var(--dim);margin:8px 0">
-          <div>적 수: <span style="color:var(--gold);font-weight:700">${stage.en.length}체</span></div>
-          <div>웨이브: <span style="color:var(--gold);font-weight:700">${stage.spw}</span></div>
-        </div>
-
-        <div style="background:rgba(0,0,0,.3);padding:6px;border-radius:4px;font-size:9px">
-          <div style="color:var(--dim);margin-bottom:3px">👹 주요 적</div>
-          <div style="color:var(--text)">${enemyDisplay}</div>
-        </div>
-
-        ${stage.boss ? `
-        <div style="background:rgba(167,139,250,0.15);border-left:2px solid #a78bfa;padding:6px;border-radius:4px;font-size:9px">
-          <div style="color:#a78bfa;font-weight:700">💀 ${typeof bossName === "function" ? bossName(stage) : stage.boss.name}</div>
-          <div style="color:var(--dim);margin-top:2px">${cd[stage.boss.cls]?.icon} ${t('classes.' + stage.boss.cls) || stage.boss.cls}</div>
-        </div>
-        ` : ''}
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9px">
-          <span style="color:var(--dim)">난이도</span>
-          <div style="flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden">
-            <div style="width:${Math.min(100,diff)}%;height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:3px"></div>
-          </div>
-          <span style="color:var(--gold);font-weight:700;min-width:36px">${getDifficultyLabel(diff)}</span>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// 난이도 차트 렌더링
-function renderDifficultyChart() {
-  const stages = window.STAGES || [];
-  const diffChart = document.getElementById('difficulty-chart');
-  diffChart.innerHTML = '';
-
-  stages.forEach(s => {
-    const score = ((s.sm.hp + s.sm.atk) / 2 * 100).toFixed(0);
-    const percent = Math.min(100, score);
-    const stageName = t('stage.'+s.id+'.name') || s.name;
-
-    const row = document.createElement('div');
-    row.style.marginBottom = '12px';
-    row.innerHTML = `
-      <div style="display:flex;justify-content:space-between;margin-bottom:2px;font-size:12px">
-        <span style="color:var(--gold);font-weight:700">Stage ${s.id} — ${stageName}</span>
-        <span style="color:var(--dim)">${score}%</span>
-      </div>
-      <div style="width:100%;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden">
-        <div style="width:${percent}%;height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:4px;transition:width 0.6s ease"></div>
-      </div>
-    `;
-    diffChart.appendChild(row);
-  });
-}
-
-// 탭 전환
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('p-' + btn.dataset.tab).classList.add('active');
-  };
+$('q').oninput = applySearch;
+document.querySelectorAll('#tabs .cx-tab').forEach(btn => btn.onclick = () => {
+  document.querySelectorAll('#tabs .cx-tab').forEach(b => b.classList.toggle('on', b === btn));
+  document.querySelectorAll('.cx-panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + btn.dataset.tab));
+  applySearch();
+  document.querySelector('main').scrollTo({ top: document.querySelector('.cx-hero').offsetHeight, behavior: 'smooth' });
 });
 
-// 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof loadI18n === 'function') await loadI18n();
-  const navTitle = document.getElementById('nav-title');
-  if (navTitle) navTitle.textContent = t('nav.compendium');
-  renderClassCards();
-  renderResBlocks();
-  renderItemTable();
-  renderBattlePotionCards();
-  renderSiegeItemsCards();
-  renderScrollCards();
-  renderResourceInfo();
-  renderTurnInfo();
-  renderSpecialAbilities();
-  renderAIInfo();
-  renderStageCards();
-  renderDifficultyChart();
+  $('nav-title').textContent = tt('nav.compendium', '도감');
+  $('hero-stats').innerHTML = [[PLAYER_CLASSES.length, '직업'], [EQUIP_DB.length, '장비'], [Object.keys(LEGENDS).length, '전설'], [STAGES.length, '스테이지']]
+    .map(([n, l]) => `<div class="cx-stat"><b>${n}</b><span>${l}</span></div>`).join('');
+  renderClasses(); renderGear(); renderCons(); renderStages();
+  const tab = new URLSearchParams(location.search).get('tab');
+  if (tab) { const b = document.querySelector(`#tabs [data-tab="${tab}"]`); if (b) b.click(); }
 });
 </script>
 <script src="js/common/item-icons.js"></script>
