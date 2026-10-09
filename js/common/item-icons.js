@@ -1,14 +1,25 @@
 // ═══════════════════════════════════════════
 //  common/item-icons.js — 아이템 일러스트 아이콘 (tools/build-icon-sheet.py 가 생성, 직접 고치지 말 것)
-//  itemIcon(key, size, 대체이모지): 시트에 있으면 그림, 없으면 이모지
+//  itemIcon(key, size, 대체이모지, 등급): 시트에 있으면 그림, 없으면 이모지
+//  아이템은 두 겹: 바깥 = 등급 테두리(frame_uncommon 은장 · rare 금장 · epic 에메랄드 · legendary 루비, common은 평범한 바탕), 안쪽 = 아이템 그림
+//  스킬·효과 아이콘(e_*)은 꾸밈 없이 그림만
+//  등급을 안 주면 ICON_RARITY[key](js/common/emoji-icons.js) → 없으면 common
 // ═══════════════════════════════════════════
-var ITEM_SPRITE_COLS = 8, ITEM_SPRITE_ROWS = 1;
-var ITEM_SPRITE = {e_smoke:[0,0],e_stealth:[1,0],siege_ladder:[2,0]};
-function itemIcon(key, size, fallback) {
+var ITEM_SPRITE_COLS = 8, ITEM_SPRITE_ROWS = 25;
+var ITEM_SPRITE = {buckler:[0,0],chain_armor:[1,0],chain_boots:[2,0],chain_helm:[3,0],chest:[4,0],class_scroll:[5,0],cloth_hood:[6,0],cloth_robe:[7,0],cloth_shoes:[0,1],e_academy:[1,1],e_ai:[2,1],e_alarm:[3,1],e_assault:[4,1],e_backpack:[5,1],e_balance:[6,1],e_bandage:[7,1],e_barrier:[0,2],e_beginner:[1,2],e_blood:[2,2],e_books:[3,2],e_boss:[4,2],e_box:[5,2],e_boxing:[6,2],e_briefcase:[7,2],e_candle:[0,3],e_capture:[1,3],e_cards:[2,3],e_celebrate:[3,3],e_charge:[4,3],e_chart:[5,3],e_cleave:[6,3],e_clipboard:[7,3],e_commander:[0,4],e_crystal_ball:[1,4],e_dagger:[2,4],e_dash:[3,4],e_detour:[4,4],e_disarm:[5,4],e_dove:[6,4],e_dynamite:[7,4],e_empower:[0,5],e_exalt:[1,5],e_explosion:[2,5],e_eye:[3,5],e_fire:[4,5],e_flask:[5,5],e_footsteps:[6,5],e_forest:[7,5],e_forge:[0,6],e_fortress:[1,6],e_frost:[2,6],e_galaxy:[3,6],e_game:[4,6],e_gear:[5,6],e_golem:[6,6],e_graduate:[7,6],e_grit:[0,7],e_heart:[1,7],e_hill:[2,7],e_holy:[3,7],e_hourglass:[4,7],e_idea:[5,7],e_level_up:[6,7],e_lightning:[7,7],e_mana:[0,8],e_map:[1,8],e_mask:[2,8],e_medal:[3,8],e_medal_bronze:[4,8],e_medal_silver:[5,8],e_meteor:[6,8],e_mosquito:[7,8],e_new_moon:[0,9],e_painshare:[1,9],e_party:[2,9],e_pencil:[3,9],e_person:[4,9],e_pickaxe:[5,9],e_pin:[6,9],e_poison:[7,9],e_poison_cloud:[0,10],e_rage:[1,10],e_rainbow:[2,10],e_regen:[3,10],e_repair:[4,10],e_repeat:[5,10],e_rock:[6,10],e_root:[7,10],e_sanctuary:[0,11],e_shop:[1,11],e_shout:[2,11],e_shove:[3,11],e_shuffle:[4,11],e_skull:[5,11],e_smoke:[6,11],e_soul_burst:[7,11],e_sparkle:[0,12],e_spirit:[1,12],e_sprout:[2,12],e_star_burst:[3,12],e_stealth:[4,12],e_steelrain:[5,12],e_sun_heat:[6,12],e_support:[7,12],e_switch:[0,13],e_swords:[1,13],e_tackle:[2,13],e_target:[3,13],e_tenacity:[4,13],e_tornado:[5,13],e_trap:[6,13],e_trophy:[7,13],e_unlock:[0,14],e_wall:[1,14],e_water:[2,14],e_wave:[3,14],earring_guard:[4,14],earring_power:[5,14],earring_swift:[6,14],exp_l:[7,14],exp_m:[0,15],exp_s:[1,15],frame_epic:[2,15],frame_legendary:[3,15],frame_rare:[4,15],frame_uncommon:[5,15],gold:[6,15],leather_armor:[7,15],leather_boots:[0,16],leather_cap:[1,16],legend_blood_oath:[2,16],legend_dawn:[3,16],legend_dead_totem:[4,16],legend_demolisher:[5,16],legend_dragon_scale:[6,16],legend_first_blade:[7,16],legend_iron_fist:[0,17],legend_king_seal:[1,17],legend_pact_orb:[2,17],legend_piercing_lance:[3,17],legend_sage_robe:[4,17],legend_saint_tear:[5,17],legend_shadow_fang:[6,17],legend_starfall:[7,17],legend_time_earring:[0,18],legend_unyielding:[1,18],legend_warden_chain:[2,18],legend_whisper:[3,18],legend_windwalk:[4,18],mat_protect:[5,18],mat_shard:[6,18],mat_stone:[7,18],necklace_guard:[0,19],necklace_power:[1,19],necklace_swift:[2,19],plate_armor:[3,19],plate_boots:[4,19],plate_helm:[5,19],potion_atk_buff:[6,19],potion_atk_debuff:[7,19],potion_def_buff:[0,20],potion_def_debuff:[1,20],potion_heal:[2,20],potion_resource:[3,20],ring_guard:[4,20],ring_power:[5,20],ring_swift:[6,20],rune_cold:[7,20],rune_curse:[0,21],rune_fire:[1,21],rune_flame:[2,21],rune_frost:[3,21],rune_heat:[4,21],rune_poison:[5,21],rune_sunder:[6,21],rune_thunder:[7,21],rune_vamp:[0,22],rune_venom:[1,22],rune_wind:[2,22],shield:[3,22],siege_bomb:[4,22],siege_bridge:[5,22],siege_ladder:[6,22],skillbook:[7,22],soul_stone:[0,23],tome:[1,23],wpn_archer:[2,23],wpn_assassin:[3,23],wpn_brawler:[4,23],wpn_knight:[5,23],wpn_lancer:[6,23],wpn_mage:[7,23],wpn_novice:[0,24],wpn_priest:[1,24],wpn_sapper:[2,24],wpn_shaman:[3,24],wpn_summoner:[4,24],wpn_warrior:[5,24]};
+function _iconTile(p, size) {
+  return 'background:url(image/icon/item-sprite.webp) no-repeat;background-size:' + (ITEM_SPRITE_COLS * size) + 'px ' + (ITEM_SPRITE_ROWS * size) + 'px;' +
+    'background-position:-' + (p[0] * size) + 'px -' + (p[1] * size) + 'px';
+}
+function itemIcon(key, size, fallback, rarity) {
   var p = ITEM_SPRITE[key];
   if (!p) return fallback || '';
-  var s = size / 64;
-  return '<span class="item-icon" style="display:inline-block;vertical-align:middle;width:' + size + 'px;height:' + size + 'px;border-radius:' + Math.round(size * 0.12) + 'px;' +
-    'background:url(image/icon/item-sprite.png) no-repeat;background-size:' + (ITEM_SPRITE_COLS * 64 * s) + 'px ' + (ITEM_SPRITE_ROWS * 64 * s) + 'px;' +
-    'background-position:-' + (p[0] * 64 * s) + 'px -' + (p[1] * 64 * s) + 'px"></span>';
+  // 등급 테두리 그림, 스킬·효과 아이콘(e_*)은 테두리·바탕 없이 그림만
+  if (/^(frame|e)_/.test(key)) return '<span class="item-icon" style="display:inline-block;vertical-align:middle;width:' + size + 'px;height:' + size + 'px;' + _iconTile(p, size) + '"></span>';
+  rarity = rarity || (typeof ICON_RARITY !== 'undefined' && ICON_RARITY[key]) || 'common';
+  var f = ITEM_SPRITE['frame_' + rarity], r = Math.round(size * 0.14);
+  var outer = 'display:inline-block;vertical-align:middle;position:relative;width:' + size + 'px;height:' + size + 'px;border-radius:' + r + 'px;overflow:hidden;' +
+    (f ? _iconTile(f, size) : 'background:radial-gradient(circle at 50% 40%,#3a3f4b,#1c2029);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)');
+  var inner = Math.round(size * (f ? 0.78 : 0.88)), off = Math.round((size - inner) / 2);
+  return '<span class="item-icon rar-' + rarity + '" style="' + outer + '"><span style="position:absolute;left:' + off + 'px;top:' + off + 'px;width:' + inner + 'px;height:' + inner + 'px;' + _iconTile(p, inner) + '"></span></span>';
 }
