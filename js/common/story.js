@@ -10,8 +10,8 @@
   'use strict';
 
   var SEEN_KEY = 'game_story_seen';
-  // 대본 파일(data/story/story.<lang>.js)이 실제로 있는 언어. en/es 파일이 생기면 여기에 추가 (없는 파일 요청으로 404가 나지 않게)
-  var STORY_LANGS = ['ko'];
+  // 대본 파일(data/story/story.<lang>.js)이 실제로 있는 언어. 새 언어 파일을 만들면 여기에 추가 (없는 파일 요청으로 404가 나지 않게)
+  var STORY_LANGS = ['ko', 'en', 'es'];
   var TYPE_MS = 28; // 한 글자 출력 간격(ms)
   var BATTLE_KINDS = ['start', 'wave', 'boss', 'danger', 'last'];
   // 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.png, docs/CAST.md)
@@ -164,7 +164,7 @@
       if (who === 'boss') {
         var b = ctx.stage && ctx.stage.boss;
         var bi = this._bossImg(ctx.stage);
-        return { key: 'boss', name: b ? b.name : '???', img: bi.src, fallback: bi.fallback, art: bi.art, side: 'right', boss: true };
+        return { key: 'boss', name: b ? (typeof bossName === 'function' ? bossName(ctx.stage) : b.name) : '???', img: bi.src, fallback: bi.fallback, art: bi.art, side: 'right', boss: true };
       }
       var c = cast[who];
       if (who === 'narrator' || (c && !c.name && !c.portrait && who !== 'commander')) return { narr: true };
