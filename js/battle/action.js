@@ -19,8 +19,8 @@ const ActionManager = {
     } else {
       S.mvT = []; S.atkT = []; S.healT = [];
     }
-    Renderer.rTer(); Renderer.rUnits(); Renderer.showAM(u); Renderer.showUI(u);
-    Renderer.rTurnOrder(); Renderer.scrollToUnit(u); Audio.sfxSelect();
+    Fx.redrawTerrain(); Fx.redrawUnits(); Fx.showActionMenu(u); Fx.showUI(u);
+    Fx.turnOrder(); Fx.scrollToUnit(u); Fx.sfx('Select');
   },
 
   clrSel() {
@@ -28,8 +28,8 @@ const ActionManager = {
     S.sel = null; S.mvT = []; S.atkT = []; S.coverT = []; S.blockT = []; S.healT = []; S._shove = false;
     S._curSkill = null; S.preMv = null;
     if (FSM.isPlayerTurn()) FSM.transition(BattleState.PLAYER_IDLE);
-    Renderer.hideAM(); Renderer.hideEnemyPopup();
-    Renderer.rTer(); Renderer.rUnits(); Renderer.defI(); Renderer.rTurnOrder();
+    Fx.hideActionMenu(); Fx.hideEnemyPopup();
+    Fx.redrawTerrain(); Fx.redrawUnits(); Fx.defIcon(); Fx.turnOrder();
   },
 
   // 공격 가능 칸(atkT)과 엄호로 막힌 칸(coverT)을 계산
@@ -65,7 +65,7 @@ const ActionManager = {
       if (cl && S.atkT.some(c => c.x === x && c.y === y)) { this.doShove(s, cl); return; }
       S._shove = false; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // 스킬 타겟 모드
@@ -73,7 +73,7 @@ const ActionManager = {
       if (S.atkT.some(c => c.x === x && c.y === y)) { this.doSkill(s, x, y); return; }
       S.atkT = []; S.healT = []; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // 아이템 타겟 모드
@@ -83,13 +83,13 @@ const ActionManager = {
         if (pt) { this.doPotion(pt); return; }
         S._curPotion = null; S.potionTargets = [];
         FSM.transition(BattleState.UNIT_SELECTED);
-        Renderer.rTer(); Renderer.showAM(s); return;
+        Fx.redrawTerrain(); Fx.showActionMenu(s); return;
       }
       if (S._curSiege) {
         if (S.atkT.some(c => c.x === x && c.y === y)) { this.doSiege(s, x, y); return; }
         S._curSiege = null; S.atkT = [];
         FSM.transition(BattleState.UNIT_SELECTED);
-        Renderer.rTer(); Renderer.showAM(s); return;
+        Fx.redrawTerrain(); Fx.showActionMenu(s); return;
       }
       return;
     }
@@ -103,15 +103,15 @@ const ActionManager = {
       // 범위 밖 → 메뉴 복원
       S.mvT = []; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // ATTACK_MODE: 공격 범위만 처리
     if ((FSM.is(BattleState.ATTACK_MODE) || FSM.is(BattleState.ATTACK_HEAL_MODE)) && s && cl && cl.team === 'enemy' &&
         (S.coverT || []).some(c => c.x === x && c.y === y)) {
       const g = UnitManager.coverOf(s, cl);
-      Renderer.floatT(cl.x, cl.y, t('messages.covered'), 'debuff');
-      if (g) VFX.vfxBuff(g);
+      Fx.float(cl.x, cl.y, t('messages.covered'), 'debuff');
+      if (g) Fx.buff(g);
       return;
     }
     if (FSM.is(BattleState.ATTACK_MODE) && s) {
@@ -119,7 +119,7 @@ const ActionManager = {
       // 범위 밖 → 메뉴 복원
       S.atkT = []; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // HEAL_MODE: 힐 범위만 처리
@@ -128,7 +128,7 @@ const ActionManager = {
       // 범위 밖 → 메뉴 복원
       S.healT = []; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // ATTACK_HEAL_MODE: 힐러 전용 — atkT(적) + healT(아군) 동시
@@ -138,12 +138,12 @@ const ActionManager = {
       // 범위 밖 → 메뉴 복원
       S.atkT = []; S.healT = []; this._setTargets(s);
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(s); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(s); return;
     }
 
     // UNIT_SELECTED: 메뉴 표시 상태 (범위 미표시) → 적 클릭=팝업만
     if (FSM.is(BattleState.UNIT_SELECTED)) {
-      if (cl && cl.team === 'enemy') { Renderer.showEnemyPopup(cl); return; }
+      if (cl && cl.team === 'enemy') { Fx.showEnemyPopup(cl); return; }
       if (cl && cl.team === 'ally' && (!S.curUnit || cl.id === S.curUnit.id)) { this.selU(cl); return; }
       return;
     }
@@ -151,7 +151,7 @@ const ActionManager = {
     // PLAYER_IDLE
     if (FSM.is(BattleState.PLAYER_IDLE)) {
       if (cl && cl.team === 'ally' && (!S.curUnit || cl.id === S.curUnit.id)) { this.selU(cl); return; }
-      if (cl && cl.team === 'enemy') { Renderer.showEnemyPopup(cl); return; }
+      if (cl && cl.team === 'enemy') { Fx.showEnemyPopup(cl); return; }
     }
 
     if (s && cl && cl.team === 'ally') {
@@ -166,18 +166,18 @@ const ActionManager = {
   actMove() {
     const S = GameStore;
     if (!S.sel) return;
-    Renderer.hideAM();
+    Fx.hideActionMenu();
     const u = S.sel;
     S.mvT = (u.hm || u.mo) ? [] : Grid.mvCells(u);
     FSM.transition(BattleState.MOVE_MODE);
-    Renderer.rTer();
-    Renderer.floatT(u.x, u.y, t('messages.select_move_target'), 'heal');
+    Fx.redrawTerrain();
+    Fx.float(u.x, u.y, t('messages.select_move_target'), 'heal');
   },
 
   actAttack() {
     const S = GameStore;
     if (!S.sel) return;
-    Renderer.hideAM();
+    Fx.hideActionMenu();
     if (S.sel.role === 'healer') {
       // 힐러: atkT(빨강) + healT(초록) 동시 표시
       FSM.transition(BattleState.ATTACK_HEAL_MODE);
@@ -186,15 +186,15 @@ const ActionManager = {
       S.healT = [];
       FSM.transition(BattleState.ATTACK_MODE);
     }
-    Renderer.rTer(); // 대상마다 예상 피해가 표시되므로 별도 안내 문구는 띄우지 않음
+    Fx.redrawTerrain(); // 대상마다 예상 피해가 표시되므로 별도 안내 문구는 띄우지 않음
   },
 
   actHeal() {
     if (!GameStore.sel) return;
-    Renderer.hideAM(); GameStore.atkT = [];
+    Fx.hideActionMenu(); GameStore.atkT = [];
     FSM.transition(BattleState.HEAL_MODE);
-    Renderer.rTer();
-    Renderer.floatT(GameStore.sel.x, GameStore.sel.y, t('messages.select_heal_target'), 'heal');
+    Fx.redrawTerrain();
+    Fx.float(GameStore.sel.x, GameStore.sel.y, t('messages.select_heal_target'), 'heal');
   },
 
   actWait() {
@@ -203,19 +203,19 @@ const ActionManager = {
     const u = S.sel;
     u.ha = true;
     if (u.team === 'ally') S.allyPos[u.id] = { x: u.x, y: u.y };
-    Renderer.hideAM(); Audio.sfxWait();
-    Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
+    Fx.hideActionMenu(); Fx.sfx('Wait');
+    Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
   },
 
   // ── 전술 행동 ──
   actShove() {
     const S = GameStore, u = S.sel; if (!u) return;
     const ts = UnitManager.shoveTargets(u); if (!ts.length) return;
-    Renderer.hideAM();
+    Fx.hideActionMenu();
     S._shove = true; S.atkT = ts.map(v => ({ x: v.x, y: v.y })); S.coverT = []; S.healT = [];
     FSM.transition(BattleState.ATTACK_MODE);
-    Renderer.rTer();
-    Renderer.floatT(u.x, u.y, t('messages.select_shove_target'), 'heal');
+    Fx.redrawTerrain();
+    Fx.float(u.x, u.y, t('messages.select_shove_target'), 'heal');
   },
 
   // 밀치기: 1칸 밀어냄. 막히면 충돌 피해, 유닛과 부딪히면 둘 다 피해. 밀려난 쪽은 바라보는 방향 유지(등이 드러나지 않음)
@@ -224,33 +224,33 @@ const ActionManager = {
     S._shove = false; S.atkT = [];
     if (!plan.ok) return;
     this._grantExp(a, 'attack');
-    VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y);
-    const hitMs = VFX.playAtkMotion(a, tgt);
+    Fx.faceDir(a.id, tgt.x - a.x, tgt.y - a.y);
+    const hitMs = Fx.playAtkMotion(a, tgt);
     a.ha = true; a.hm = true;
-    Renderer.hideAM(); FSM.transition(BattleState.ANIMATING);
+    Fx.hideActionMenu(); FSM.transition(BattleState.ANIMATING);
     const hurt = (v, dmg) => {
       const actual = v.team === 'ally' ? applyDmgToAlly(v, dmg, G) : (v.hp = Math.max(0, v.hp - dmg), v);
-      Renderer.floatT(actual.x, actual.y, '-' + dmg, 'damage'); VFX.shakeU(actual.id);
+      Fx.float(actual.x, actual.y, '-' + dmg, 'damage'); Fx.shake(actual.id);
       if (actual.hp <= 0) EventBus.emit('unit_killed', { killer: a, target: actual });
     };
     const resisted = UnitManager.resistKnock(tgt);   // 기사는 70% 확률로 밀리지 않음
     setTimeout(() => {
       if (resisted) {
-        Renderer.floatT(tgt.x, tgt.y, t('messages.knock_resist'), 'heal'); VFX.shakeU(tgt.id);
+        Fx.float(tgt.x, tgt.y, t('messages.knock_resist'), 'heal'); Fx.shake(tgt.id);
       } else if (plan.to) {
         const gx = tgt._gdx, gy = tgt._gdy;
         tgt.x = plan.to.x; tgt.y = plan.to.y;
-        VFX.animU(tgt.id, tgt.x, tgt.y); tgt._gdx = gx; tgt._gdy = gy;
-        Renderer.floatT(tgt.x, tgt.y, t('messages.shoved'), 'debuff');
+        Fx.animU(tgt.id, tgt.x, tgt.y); tgt._gdx = gx; tgt._gdy = gy;
+        Fx.float(tgt.x, tgt.y, t('messages.shoved'), 'debuff');
         Grid.chkTrap(tgt);
         if (tgt.hp <= 0) EventBus.emit('unit_killed', { killer: a, target: tgt });
       } else {
-        Renderer.floatT(tgt.x, tgt.y, t('messages.shove_crash'), 'tactic'); VFX.screenShake();
+        Fx.float(tgt.x, tgt.y, t('messages.shove_crash'), 'tactic'); Fx.screenShake();
         const mul = plan.hit === 'unit' ? TACTICS_ACT.shoveUnit : TACTICS_ACT.shoveCollide;
         hurt(tgt, Math.max(1, Math.round(a.atk * mul)));
         if (plan.other) hurt(plan.other, Math.max(1, Math.round(a.atk * mul)));
       }
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 450);
+      setTimeout(() => { UnitManager.rmDead(); Fx.redrawUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, 450);
     }, hitMs);
   },
 
@@ -258,27 +258,27 @@ const ActionManager = {
   actStance(kind) {
     const S = GameStore, u = S.sel; if (!u || u.ha) return;
     if (kind === 'defend') u._defend = true; else u._overwatch = true;
-    Renderer.floatT(u.x, u.y, t(kind === 'defend' ? 'messages.defend_on' : 'messages.overwatch_on'), 'heal');
-    VFX.vfxBuff(u);
+    Fx.float(u.x, u.y, t(kind === 'defend' ? 'messages.defend_on' : 'messages.overwatch_on'), 'heal');
+    Fx.buff(u);
     this.actWait();
   },
 
   actCancel() {
     const S = GameStore;
     if (!S.sel) return;
-    if (S._shove) { S._shove = false; this._setTargets(S.sel); FSM.transition(BattleState.UNIT_SELECTED); Renderer.rTer(); Renderer.showAM(S.sel); return; }
+    if (S._shove) { S._shove = false; this._setTargets(S.sel); FSM.transition(BattleState.UNIT_SELECTED); Fx.redrawTerrain(); Fx.showActionMenu(S.sel); return; }
 
     if (S._skillMenuOpen) { this.hideSkillMenu(); return; }
     if (S._itemMenuOpen) { this.hideItemMenu(); return; }
     if (S._curPotion) {
       S._curPotion = null; S.potionTargets = [];
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rUnits(); Renderer.showAM(S.sel); return;
+      Fx.redrawUnits(); Fx.showActionMenu(S.sel); return;
     }
     if (S._curSiege) {
       S._curSiege = null; S.atkT = [];
       FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.rTer(); Renderer.showAM(S.sel); return;
+      Fx.redrawTerrain(); Fx.showActionMenu(S.sel); return;
     }
 
     if (!S.preMv) return;
@@ -286,11 +286,11 @@ const ActionManager = {
     const _gdx = u._gdx, _gdy = u._gdy;
     if (S.preMv.exp && u.uid) { S.battleExp[u.uid] = (S.battleExp[u.uid] || 0) - S.preMv.exp; }
     u.x = S.preMv.x; u.y = S.preMv.y; u.hm = false; u.mo = false;
-    VFX.animU(u.id, u.x, u.y); u._gdx = _gdx; u._gdy = _gdy; VFX._applyFace(u.id);
+    Fx.animU(u.id, u.x, u.y); u._gdx = _gdx; u._gdy = _gdy; Fx.applyFace(u.id);
     S.preMv = null; S._curSkill = null;
-    Renderer.hideAM(); Audio.sfxUIClick();
+    Fx.hideActionMenu(); Fx.sfx('UIClick');
     FSM.transition(BattleState.PLAYER_IDLE);
-    setTimeout(() => { Renderer.rTer(); this.clrSel(); }, 340);
+    setTimeout(() => { Fx.redrawTerrain(); this.clrSel(); }, 340);
   },
 
   // ── 경험치 부여 ──
@@ -298,7 +298,7 @@ const ActionManager = {
     const S = GameStore;
     if (u.team === 'ally' && u.uid) {
       const e = actExp(stageLevel(S.cStage), action);
-      if (e > 0) { S.battleExp[u.uid] = (S.battleExp[u.uid] || 0) + e; Renderer.floatT(u.x, u.y, '+' + e + ' EXP', 'exp'); }
+      if (e > 0) { S.battleExp[u.uid] = (S.battleExp[u.uid] || 0) + e; Fx.float(u.x, u.y, '+' + e + ' EXP', 'exp'); }
       return e;
     }
     return 0;
@@ -311,9 +311,9 @@ const ActionManager = {
     const S = GameStore;
     const _mxp = this._grantExp(u, 'move');
     S.preMv = { x: u.x, y: u.y, exp: _mxp };
-    VFX._mvU(u, tx, ty); u.hm = true; u.mo = true;
+    Fx.moveUnit(u, tx, ty); u.hm = true; u.mo = true;
     FSM.transition(BattleState.UNIT_SELECTED);
-    Audio.sfxMove();
+    Fx.sfx('Move');
 
     if (u._cursed) curseMoveTick(u); // 쇠약의 저주 (js/skills/shaman.js)
 
@@ -324,7 +324,7 @@ const ActionManager = {
     S.healT = u.role === 'healer' ? a.filter(c => { const v = UnitManager.uAt(c.x, c.y); return v && v.team === 'ally' && v.hp < v.mhp && v.id !== u.id; }) : [];
     S.mvT = [];
     setTimeout(() => {
-      Renderer.scrollToUnit(u); Renderer.rTer(); Renderer.showAM(u); Renderer.showUI(u);
+      Fx.scrollToUnit(u); Fx.redrawTerrain(); Fx.showActionMenu(u); Fx.showUI(u);
     }, 340);
   },
 
@@ -336,24 +336,24 @@ const ActionManager = {
         const b = a.buffs[i];
         if (b.source === 'shaman_exalt' && b._attackCount > 0) {
           b._attackCount--;
-          if (b._attackCount <= 0) { a.buffs.splice(i, 1); Renderer.floatT(a.x, a.y, t('messages.buff_end') || '\uBC84\uD504 \uD574\uC81C', 'debuff'); }
+          if (b._attackCount <= 0) { a.buffs.splice(i, 1); Fx.float(a.x, a.y, t('messages.buff_end') || '\uBC84\uD504 \uD574\uC81C', 'debuff'); }
         }
       }
     }
 
     // 투사체 차단: 지나가는 길에 대상 편 기사가 있으면 그 기사가 대신 맞음 (피해 TACTICS_ACT.interceptMul)
     const blk = UnitManager.interceptOf(a, tgt);
-    if (blk) { tgt = blk; Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
+    if (blk) { tgt = blk; Fx.float(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
 
     if (UnitManager.rollEvade(tgt)) {
-      VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
-      Renderer.floatT(tgt.x, tgt.y, t('messages.evasion'), 'heal');
+      Fx.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); Fx.playAtkMotion(a, tgt); // 휘두르지만 빗나감
+      Fx.float(tgt.x, tgt.y, t('messages.evasion'), 'heal');
       a.ha = true; a.hm = true;
-      Renderer.hideAM(); Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); return;
+      Fx.hideActionMenu(); Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(a); return;
     }
 
     const bCounter = tgt.skillLv && tgt.skillLv['brawler_counter'] >= 1 && !(tgt.stunned > 0) && !(tgt.frozen > 0) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
-    let sup = null, hd = VFX.atkHitDelay(a.cls, a), supAt = 380, ctrAt = 420;
+    let sup = null, hd = Fx.atkHitDelay(a.cls, a), supAt = 380, ctrAt = 420;
     if (bCounter) {
       setTimeout(() => {
         const cdmg = Math.max(1, Math.round(tgt.atk * 0.5) - a.def);
@@ -365,7 +365,7 @@ const ActionManager = {
       let dmg = EnchantFX.modDamage(a, tgt, calcDmg(a, tgt));   // 공격용 마법부여 (번개·파쇄)
       if (blk) dmg = GearFX.intercept(blk, Math.max(1, Math.round(dmg * TACTICS_ACT.interceptMul)));
       this._grantExp(a, 'attack');
-      if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Renderer.floatT(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
+      if (UnitManager.shieldMul(tgt) < 1) { dmg = Math.max(1, Math.round(dmg * UnitManager.shieldMul(tgt))); Fx.float(tgt.x, tgt.y, '\uD83D\uDEE1\uFE0F', 'heal'); }
       tgt.hp = Math.max(0, tgt.hp - dmg);
       EventBus.emit('unit_attacked', { attacker: a, target: tgt, damage: dmg });
       EnchantFX.afterHit(a, tgt, dmg);   // 화상·독·빙결·흡혈
@@ -380,8 +380,8 @@ const ActionManager = {
           }
         }
       }
-      if (a._lastCrit) { Renderer.floatT(a.x, a.y, t('messages.critical_hit'), 'heal'); VFX.screenShake(); }
-      if (a.furyBuff > 0) Renderer.floatT(a.x, a.y, t('messages.fury_buff'), 'heal');
+      if (a._lastCrit) { Fx.float(a.x, a.y, t('messages.critical_hit'), 'heal'); Fx.screenShake(); }
+      if (a.furyBuff > 0) Fx.float(a.x, a.y, t('messages.fury_buff'), 'heal');
       procFury(a, tgt, G);
       // 후속 연출 시점: 공격이 실제로 맞는 순간(시트 타격 프레임 + 투사체 비행) 뒤로 맞춤
       supAt = Math.max(380, hd + 140); ctrAt = Math.max(420, hd + 180);
@@ -407,22 +407,22 @@ const ActionManager = {
     }
 
     a.ha = true; a.hm = true;
-    Renderer.hideAM();
+    Fx.hideActionMenu();
     const extra = sup ? 450 : 0; // 지원 공격 연출 시간
     const endHit = Math.max(650, hd + 350) + extra;   // 처치 연출이 끝난 뒤 정리
 
     if (tgt.hp <= 0) {
       if (!sup) EventBus.emit('unit_killed', { killer: a, target: tgt }); // 지원 공격 처치는 위에서 처리
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, endHit);
+      setTimeout(() => { UnitManager.rmDead(); Fx.redrawUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, endHit);
     } else if (a.hp <= 0) {
       EventBus.emit('unit_killed', { killer: tgt, target: a });
-      setTimeout(() => { UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + VFX.atkHitDelay(tgt.cls, tgt) + 250));
+      setTimeout(() => { UnitManager.rmDead(); Fx.redrawUnits(); TurnManager.chkEnd(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + Fx.atkHitDelay(tgt.cls, tgt) + 250));
     } else {
       const canCounter = tgt.hp > 0 && a.hp > 0 && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && !(tgt.stunned > 0) && !(tgt.frozen > 0);
       if (canCounter) {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + VFX.atkHitDelay(tgt.cls, tgt) + 250));
+        setTimeout(() => { Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(650 + extra, ctrAt + Fx.atkHitDelay(tgt.cls, tgt) + 250));
       } else {
-        setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(500, hd + 300) + extra);
+        setTimeout(() => { Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(a); }, Math.max(500, hd + 300) + extra);
       }
     }
   },
@@ -436,13 +436,13 @@ const ActionManager = {
     tgt.hp = Math.min(tgt.mhp, tgt.hp + amt);
     EventBus.emit('unit_healed', { healer: h, target: tgt, amount: amt });
     h.ha = true; h.hm = true;
-    Renderer.hideAM();
-    setTimeout(() => { Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(h); }, 300);
+    Fx.hideActionMenu();
+    setTimeout(() => { Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(h); }, 300);
   },
 
   // ── 스킬 ──
-  showSkillMenu() { const S = GameStore; if (!S.sel) return; S._skillMenuOpen = true; Renderer.showAM(S.sel); },
-  hideSkillMenu() { const S = GameStore; if (!S.sel) return; S._skillMenuOpen = false; Renderer.showAM(S.sel); },
+  showSkillMenu() { const S = GameStore; if (!S.sel) return; S._skillMenuOpen = true; Fx.showActionMenu(S.sel); },
+  hideSkillMenu() { const S = GameStore; if (!S.sel) return; S._skillMenuOpen = false; Fx.showActionMenu(S.sel); },
 
   actSkill(idx) {
     const S = GameStore;
@@ -460,14 +460,14 @@ const ActionManager = {
       const result = handler.target(u, sk, G);
       if (result === null) {
         FSM.transition(BattleState.UNIT_SELECTED); S._curSkill = null;
-        S._skillFailedMsg = true; Renderer.showAM(u); Renderer.rTer();
+        S._skillFailedMsg = true; Fx.showActionMenu(u); Fx.redrawTerrain();
         setTimeout(() => { S._skillFailedMsg = false; }, 100);
         return;
       }
       if (result === 'instant') {
         // doSkill이 S._curSkill로 고른 스킬을 찾으므로 실행 뒤에 비움 (먼저 비우면 직업 첫 스킬이 대신 나감)
         FSM.transition(BattleState.UNIT_SELECTED);
-        this.doSkill(u, u.x, u.y); S._curSkill = null; Renderer.rUnits(); return;
+        this.doSkill(u, u.x, u.y); S._curSkill = null; Fx.redrawUnits(); return;
       }
       S.atkT = result; S.healT = [];
     } else {
@@ -475,7 +475,7 @@ const ActionManager = {
       S.atkT = dirs.map(d => ({ x: u.x + d.x, y: u.y + d.y })).filter(p => p.x >= 0 && p.x < COLS && p.y >= 0 && p.y < ROWS);
       S.healT = [];
     }
-    Renderer.hideAM(); Renderer.rTer();
+    Fx.hideActionMenu(); Fx.redrawTerrain();
   },
 
   doSkill(u, tx, ty) {
@@ -511,10 +511,10 @@ const ActionManager = {
     const S = GameStore;
     if (!S.sel || !S.sel.channeling) return;
     const u = S.sel;
-    Renderer.floatT(u.x, u.y, t('messages.channel_cancel'), 'damage');
+    Fx.float(u.x, u.y, t('messages.channel_cancel'), 'damage');
     u.channeling = null;
     u.ha = true; u.hm = true; S._curSkill = null;
-    Renderer.hideAM(); Audio.sfxUIClick(); Renderer.rUnits();
+    Fx.hideActionMenu(); Fx.sfx('UIClick'); Fx.redrawUnits();
     this.clrSel(); TurnManager.endUnitTurn(u);
   },
 
@@ -525,9 +525,9 @@ const ActionManager = {
     const hasPotion = S._battlePotions && S._battlePotions.length > 0;
     const hasSiege = S._siegeItems && S._siegeItems.length > 0;
     if (!hasPotion && !hasSiege) return;
-    S._itemMenuOpen = true; Renderer.showAM(S.sel);
+    S._itemMenuOpen = true; Fx.showActionMenu(S.sel);
   },
-  hideItemMenu() { const S = GameStore; if (!S.sel) return; S._itemMenuOpen = false; Renderer.showAM(S.sel); },
+  hideItemMenu() { const S = GameStore; if (!S.sel) return; S._itemMenuOpen = false; Fx.showActionMenu(S.sel); },
 
   actPotion(idx) {
     const S = GameStore;
@@ -548,11 +548,11 @@ const ActionManager = {
     }
     if (targets.length === 0) {
       S._curPotion = null; FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.floatT(u.x, u.y, t('messages.potion_no_target'), 'damage');
-      Renderer.showAM(u); return;
+      Fx.float(u.x, u.y, t('messages.potion_no_target'), 'damage');
+      Fx.showActionMenu(u); return;
     }
     S.potionTargets = targets;
-    Renderer.hideAM(); Renderer.floatT(u.x, u.y, t('messages.select_potion_target'), 'heal'); Renderer.rUnits();
+    Fx.hideActionMenu(); Fx.float(u.x, u.y, t('messages.select_potion_target'), 'heal'); Fx.redrawUnits();
   },
 
   doPotion(targetU) {
@@ -596,7 +596,7 @@ const ActionManager = {
 
     S._curPotion = null; S.potionTargets = [];
     u.ha = true;
-    Renderer.hideAM(); Renderer.rUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
+    Fx.hideActionMenu(); Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
   },
 
   actSiege(idx) {
@@ -618,12 +618,12 @@ const ActionManager = {
     }
     if (targets.length === 0) {
       S._curSiege = null; FSM.transition(BattleState.UNIT_SELECTED);
-      Renderer.floatT(u.x, u.y, t('messages.siege_no_target'), 'damage');
-      Renderer.showAM(u); return;
+      Fx.float(u.x, u.y, t('messages.siege_no_target'), 'damage');
+      Fx.showActionMenu(u); return;
     }
     S.atkT = targets; S.healT = []; S.mvT = [];
-    Renderer.hideAM(); Renderer.rTer();
-    Renderer.floatT(u.x, u.y, t('messages.select_siege_target'), 'heal');
+    Fx.hideActionMenu(); Fx.redrawTerrain();
+    Fx.float(u.x, u.y, t('messages.select_siege_target'), 'heal');
   },
 
   doSiege(u, tx, ty) {
@@ -641,11 +641,11 @@ const ActionManager = {
         if (TI[lt] && TI[lt].pass && !UnitManager.uAt(lx, ly)) { landX = lx; landY = ly; found = true; break; }
       }
       if (!found) {
-        Renderer.floatT(u.x, u.y, t('messages.siege_no_target'), 'damage');
+        Fx.float(u.x, u.y, t('messages.siege_no_target'), 'damage');
         S._curSiege = null; FSM.transition(BattleState.UNIT_SELECTED);
-        Renderer.showAM(u); return;
+        Fx.showActionMenu(u); return;
       }
-      VFX._mvU(u, landX, landY); u.hm = true; u.mo = true;
+      Fx.moveUnit(u, landX, landY); u.hm = true; u.mo = true;
       EventBus.emit('siege_used', { unit: u, type: 'climb', tx, ty });
     } else if (def.effect === 'destroy') {
       S.ter[ty][tx] = 'plain';
@@ -670,10 +670,10 @@ const ActionManager = {
 
     if (def.effect !== 'climb') u.ha = true;
     S._curSiege = null;
-    Renderer.rTer(); Renderer.rUnits();
+    Fx.redrawTerrain(); Fx.redrawUnits();
     if (def.effect === 'climb') {
       FSM.transition(BattleState.UNIT_SELECTED);
-      setTimeout(() => { Renderer.scrollToUnit(u); Renderer.showAM(u); Renderer.showUI(u); }, 340);
+      setTimeout(() => { Fx.scrollToUnit(u); Fx.showActionMenu(u); Fx.showUI(u); }, 340);
     } else {
       this.clrSel(); TurnManager.endUnitTurn(u);
     }

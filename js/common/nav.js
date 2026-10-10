@@ -34,7 +34,7 @@ function renderBottomNav() {
       if (tab && tab.href) {
         // party-select로 이동할 때 출격 버튼 비활성화
         if (tab.href === 'party-select.html') {
-          localStorage.setItem('ps_can_start', 'false');
+          Store.set('ps_can_start', 'false');
         }
         location.href = tab.href;
       }

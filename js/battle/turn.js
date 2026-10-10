@@ -43,16 +43,16 @@ const TurnManager = {
     if (u.hp > 1 && UnitManager.nearLava(u.x, u.y)) {
       const burn = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * TACTIC.lavaBurn)));
       u.hp -= burn;
-      Renderer.floatT(u.x, u.y, '\uD83D\uDD25 -' + burn, 'damage');
-      Renderer.rUnits();
+      Fx.float(u.x, u.y, '\uD83D\uDD25 -' + burn, 'damage');
+      Fx.redrawUnits();
     }
 
     // 맵 환경 지속 피해 (화상·독 등, 사망하지는 않음) — 마법부여 장비가 있으면 면역
     if (u.team === 'ally' && u._hazardDot && u.hp > 1 && S._hazard) {
       const dmg = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * Hazard.dotPct(S._hazard, S.cStage) * GearFX.hazardMul(u))));
       u.hp -= dmg;
-      Renderer.floatT(u.x, u.y, S._hazard.icon + ' -' + dmg, 'damage');
-      Renderer.rUnits();
+      Fx.float(u.x, u.y, S._hazard.icon + ' -' + dmg, 'damage');
+      Fx.redrawUnits();
     }
 
     // BuffSystem 틱
@@ -115,7 +115,7 @@ const TurnManager = {
       S._turnActed = {};
       if (typeof tickPoisonMists === 'function') tickPoisonMists(); // 주술사 독안개 (라운드마다 1회)
       EventBus.emit('round_end', { turn: S.turn });
-      Renderer.uUI();
+      Fx.updateUI();
     }
   },
 
@@ -178,7 +178,7 @@ const TurnManager = {
         FSM.transition(BattleState.WAVE_TRANSITION);
         EventBus.emit('wave_announce', { remaining: stage.tot - S.eSpwn });
         this.spawnWave();
-        Renderer.rUnits();
+        Fx.redrawUnits();
         await sl(600);
         EventBus.emit('wave_announce_end');
       }
@@ -191,12 +191,12 @@ const TurnManager = {
     S.curUnit = nextU;
     nextU._defend = false; nextU._overwatch = false; // 방어 태세·경계는 다음 자기 차례에 풀림
     ActionManager.clrSel();
-    Renderer.rTurnOrder();
+    Fx.turnOrder();
 
     if (nextU.team === 'ally') {
       FSM.transition(BattleState.PLAYER_IDLE);
       EventBus.emit('turn_start', { unit: nextU, phase: 'player' });
-      Renderer.uUI();
+      Fx.updateUI();
 
       if (nextU.stunned > 0 || BuffSystem.has(nextU, BuffType.STUN)) {
         setTimeout(() => this.endUnitTurn(nextU), 500);
@@ -206,10 +206,10 @@ const TurnManager = {
     } else {
       FSM.transition(BattleState.AI_TURN);
       EventBus.emit('turn_start', { unit: nextU, phase: 'enemy' });
-      Renderer.uUI();
+      Fx.updateUI();
       // 기절·빙결된 적은 행동하지 못하고 차례를 넘김 (아군과 같은 규칙)
       if (UnitManager.isCC(nextU)) {
-        Renderer.floatT(nextU.x, nextU.y, t('messages.cc_skip'), 'debuff');
+        Fx.float(nextU.x, nextU.y, t('messages.cc_skip'), 'debuff');
         setTimeout(() => this.endUnitTurn(nextU), 500);
         return;
       }
@@ -262,7 +262,7 @@ const TurnManager = {
     [en, al].forEach(team => {
       if (team.length > 0 && team.every(u => isStealthed(u))) {
         team.forEach(u => { u.stealthBroken = true; });
-        Renderer.rUnits();
+        Fx.redrawUnits();
       }
     });
 

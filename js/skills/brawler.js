@@ -12,13 +12,11 @@ registerSkill('brawler_disarm', {
 		const tgt = G.units.find(v => v.x === tx && v.y === ty && v.team === 'enemy' && v.hp > 0);
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		tgt.disarmed = 3;
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
-		G.floatT(tgt.x, tgt.y, t('messages.brawler_disarm'), 'debuff');
-		G.floatT(tgt.x, tgt.y, t('messages.atk_reduced'), 'damage');
-		G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
-			{count: 14, colors: ['#f97316', '#fbbf24', '#fff'], shape: 'spark', speed: 4, spread: 12, decay: 0.025, size: 4});
-		G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
-			{count: 4, colors: ['#f9731644'], shape: 'ring', speed: 0, spread: 3, decay: 0.015, size: 10});
+		G.sfxAtk(u.cls); Fx.shake(tgt.id);
+		Fx.float(tgt.x, tgt.y, t('messages.brawler_disarm'), 'debuff');
+		Fx.float(tgt.x, tgt.y, t('messages.atk_reduced'), 'damage');
+		Fx.burst(tgt.x, tgt.y, {count: 14, colors: ['#f97316', '#fbbf24', '#fff'], shape: 'spark', speed: 4, spread: 12, decay: 0.025, size: 4});
+		Fx.burst(tgt.x, tgt.y, {count: 4, colors: ['#f9731644'], shape: 'ring', speed: 0, spread: 3, decay: 0.015, size: 10});
 		G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}
@@ -38,13 +36,13 @@ registerSkill('brawler_flurry', {
 			const dmg = Math.max(1, Math.round(u.atk * 0.6 * G.skMul(u, 'brawler_flurry')) - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
 			totalDmg += dmg;
-			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:8,decay:0.025,size:3});
+			Fx.burst(tgt.x, tgt.y, {count:8,colors:['#f97316','#fbbf24','#fff'],shape:'spark',speed:4,spread:8,decay:0.025,size:3});
 		}
-		G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
-		G.floatT(tgt.x, tgt.y, `-${totalDmg}`, 'damage');
-		G.floatT(u.x, u.y, t('messages.brawler_flurry'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:5,colors:['#f9731644'],shape:'ring',speed:0,spread:3,decay:0.015,size:10});
-		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
+		G.sfxAtk(u.cls); Fx.shake(tgt.id); Fx.screenShake();
+		Fx.float(tgt.x, tgt.y, `-${totalDmg}`, 'damage');
+		Fx.float(u.x, u.y, t('messages.brawler_flurry'), 'heal');
+		Fx.burst(tgt.x, tgt.y, {count:5,colors:['#f9731644'],shape:'ring',speed:0,spread:3,decay:0.015,size:10});
+		if (tgt.hp<=0) {Fx.screenShake();G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id)}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
@@ -60,13 +58,13 @@ registerSkill('brawler_crush', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		const dmg = Math.max(1, Math.round(u.atk * 1.0 * G.skMul(u, 'brawler_crush')));
 		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.sfxAtk(u.cls); G.screenShake(true); G.shakeU(tgt.id); G.vfxFlash('rgba(239,68,68,.2)');
-		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		G.floatT(u.x, u.y, t('messages.brawler_crush'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:24,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:6,spread:18,decay:0.018,size:6});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:5,colors:['#ef444444'],shape:'ring',speed:0,spread:4,decay:0.012,size:16});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#ef4444','#f97316'],shape:'cross',speed:3,spread:10,decay:0.025,size:4}),70);
-		if (tgt.hp<=0) {G.screenShake(true);G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
+		G.sfxAtk(u.cls); Fx.screenShake(true); Fx.shake(tgt.id); Fx.flash('rgba(239,68,68,.2)');
+		Fx.float(tgt.x, tgt.y, `-${dmg}`, 'damage');
+		Fx.float(u.x, u.y, t('messages.brawler_crush'), 'heal');
+		Fx.burst(tgt.x, tgt.y, {count:24,colors:['#ef4444','#f97316','#fff'],shape:'spark',speed:6,spread:18,decay:0.018,size:6});
+		Fx.burst(tgt.x, tgt.y, {count:5,colors:['#ef444444'],shape:'ring',speed:0,spread:4,decay:0.012,size:16});
+		Fx.later(()=>Fx.burst(tgt.x, tgt.y, {count:8,colors:['#ef4444','#f97316'],shape:'cross',speed:3,spread:10,decay:0.025,size:4}),70);
+		if (tgt.hp<=0) {Fx.screenShake(true);G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id)}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}

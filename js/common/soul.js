@@ -7,10 +7,10 @@
 const SOUL_KEY = 'game_soul';
 const Soul = {
   _get() {
-    try { const d = JSON.parse(localStorage.getItem(SOUL_KEY)); if (d && d.stones && d.frags) return d; } catch (_) {}
+    try { const d = JSON.parse(Store.get(SOUL_KEY)); if (d && d.stones && d.frags) return d; } catch (_) {}
     return { stones: {}, frags: {} };
   },
-  _set(d) { try { localStorage.setItem(SOUL_KEY, JSON.stringify(d)); } catch (_) {} },
+  _set(d) { try { Store.set(SOUL_KEY, JSON.stringify(d)); } catch (_) {} },
   stones(cls) { return this._get().stones[cls] || 0; },
   frags(cls) { return this._get().frags[cls] || 0; },
   add(kind, cls, n) {

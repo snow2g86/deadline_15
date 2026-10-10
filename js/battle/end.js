@@ -77,7 +77,7 @@ const BattleEnd = {
             const d = JAB[rCls];
             if (d) {
               try {
-                const rd = JSON.parse(localStorage.getItem('game_roster'));
+                const rd = JSON.parse(Store.get('game_roster'));
                 if (rd) {
                   const g = d.growth;
                   const roll = mm => +(mm[0] + Math.random() * (mm[1] - mm[0])).toFixed(1);
@@ -91,7 +91,7 @@ const BattleEnd = {
                     gender: randomGender()
                   };
                   rd.chars.push(ch);
-                  localStorage.setItem('game_roster', JSON.stringify(rd));
+                  Store.set('game_roster', JSON.stringify(rd));
                   S._firstClearUnit = ch;
                 }
               } catch (_) {}
@@ -123,9 +123,9 @@ const BattleEnd = {
           if (lsKeys.length) {
             const sk = LEARNABLE_SKILLS[lsKeys[Math.floor(Math.random() * lsKeys.length)]];
             try {
-              const inv = JSON.parse(localStorage.getItem('game_inventory')) || [];
+              const inv = JSON.parse(Store.get('game_inventory')) || [];
               inv.push({ id: sk.id, cls: sk.cls, lv: 1 });
-              localStorage.setItem('game_inventory', JSON.stringify(inv));
+              Store.set('game_inventory', JSON.stringify(inv));
               S._droppedBook = sk.id;
             } catch (_) {}
           }
@@ -164,10 +164,10 @@ const BattleEnd = {
     const party = loadParty();
     const filteredParty = party.filter(uid => { const ch = getChar(uid); return ch && !ch.dead; });
     if (filteredParty.length >= MIN_P) {
-      localStorage.setItem('game_nav', JSON.stringify({ cStage: stage, party: filteredParty }));
+      Store.set('game_nav', JSON.stringify({ cStage: stage, party: filteredParty }));
       location.href = 'battle.html';
     } else {
-      localStorage.setItem('game_nav', JSON.stringify({ cStage: stage }));
+      Store.set('game_nav', JSON.stringify({ cStage: stage }));
       location.href = 'party-select.html';
     }
   },

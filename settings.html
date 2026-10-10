@@ -7,6 +7,7 @@
 	<title>DEADLINE 15</title>
 	<link rel="stylesheet" href="css/common.css">
 	<link rel="stylesheet" href="css/lobby.css">
+	<script src="js/common/store.js"></script>
 	<script type="text/javascript" src="js/common/i18n.js"></script>
 	<script type="text/javascript" src="js/common/modal.js"></script>
 
@@ -22,14 +23,14 @@
 		function loadSettings() {
 			var def = { bgmOn:true, bgmVol:0.5, sfxOn:true, sfxVol:0.7, speed:1, language:'ko' };
 			try {
-				var s = JSON.parse(localStorage.getItem('game_settings'));
+				var s = JSON.parse(Store.get('game_settings'));
 				if (s) return Object.assign(def, s);
 			} catch(_) {}
 			return def;
 		}
 
 		function saveSettings(s) {
-			localStorage.setItem('game_settings', JSON.stringify(s));
+			Store.set('game_settings', JSON.stringify(s));
 		}
 
 		function renderSettings() {
@@ -89,7 +90,7 @@
 			};
 			c.querySelector('#ls-reset').onclick = function() {
 				showConfirm(t('messages.confirm_reset_all'), function() {
-					localStorage.clear(); location.href = 'index.html';
+					Store.clear(); location.href = 'index.html';
 				});
 			};
 		}

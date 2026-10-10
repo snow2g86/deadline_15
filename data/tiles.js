@@ -115,5 +115,3 @@ const MAP_THEMES = {
     dist: { rock:.20, hill:.20, forest:.05, water:.10, shallow:.05 }   // 예전 바위 .30·물 .15는 통로가 거의 막혀 대치만 이어짐
   }
 };
-
-function loadTilesets() { return Promise.resolve(); }

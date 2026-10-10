@@ -1089,7 +1089,7 @@ const Renderer = {
   loadSett() {
     try {
       // 설정 페이지(settings.html)와 같은 키 사용. 예전 전투 전용 키(game_setting)는 없을 때만 읽음
-      const d = JSON.parse(localStorage.getItem('game_settings')) || JSON.parse(localStorage.getItem('game_setting'));
+      const d = JSON.parse(Store.get('game_settings')) || JSON.parse(Store.get('game_setting'));
       if (d) {
         if (typeof d.bgmVol === 'number') GameStore._sett.bgmVol = d.bgmVol;
         if (typeof d.sfxVol === 'number') GameStore._sett.sfxVol = d.sfxVol;
@@ -1103,9 +1103,9 @@ const Renderer = {
   saveSett() {
     try {
       // 언어 등 다른 페이지가 쓴 값은 유지하고 전투에서 바꾸는 값만 덮어씀
-      const cur = JSON.parse(localStorage.getItem('game_settings')) || {};
+      const cur = JSON.parse(Store.get('game_settings')) || {};
       const { bgmVol, sfxVol, bgmOn, sfxOn, speed } = GameStore._sett;
-      localStorage.setItem('game_settings', JSON.stringify(Object.assign(cur, { bgmVol, sfxVol, bgmOn, sfxOn, speed })));
+      Store.set('game_settings', JSON.stringify(Object.assign(cur, { bgmVol, sfxVol, bgmOn, sfxOn, speed })));
     } catch (e) {}
   },
 

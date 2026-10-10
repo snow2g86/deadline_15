@@ -13,7 +13,7 @@ function updateGoldUI() {
 // ── 파티 체크 ────────────────────────────
 function getParty() {
   try {
-    var raw = localStorage.getItem(PARTY_KEY);
+    var raw = Store.get(PARTY_KEY);
     if (raw) return JSON.parse(raw);
   } catch (_) {}
   return [];
@@ -83,11 +83,11 @@ var SANC_AD_KEY = 'game_sanc_ad_cooldown';
 var SANC_AD_COOLDOWN_MS = 30 * 60 * 1000;
 
 function getSancAdCooldown() {
-  try { var v = +localStorage.getItem(SANC_AD_KEY); return v || 0; } catch(_) { return 0; }
+  try { var v = +Store.get(SANC_AD_KEY); return v || 0; } catch(_) { return 0; }
 }
 
 function setSancAdCooldown() {
-  try { localStorage.setItem(SANC_AD_KEY, Date.now()); } catch(_) {}
+  try { Store.set(SANC_AD_KEY, Date.now()); } catch(_) {}
 }
 
 // ── 부활 렌더링 ─────────────────────────

@@ -6,7 +6,7 @@ function _summonerTarget(u, sk, G) {
 	const maxSummons = 1;
 	const currentSummons = G.units.filter(s => s.isSummon && s.summonerId === u.id);
 	if (currentSummons.length >= maxSummons) {
-		G.floatT(u.x, u.y, t('messages.summoner_limit'), 'damage');
+		Fx.float(u.x, u.y, t('messages.summoner_limit'), 'damage');
 		return null;
 	}
 	const summonRange = sk.summonRange || 3;
@@ -24,7 +24,7 @@ function _summonerTarget(u, sk, G) {
 function _summonerExec(u, tx, ty, sk, G) {
 	const target = G.units.find(v => v.x===tx && v.y===ty);
 	if (target || !TI[G.ter[ty][tx]].pass) {
-		_skillRefund(u, sk, G); G.floatT(u.x,u.y,t('messages.summoner_no_spawn'),'damage'); return;
+		_skillRefund(u, sk, G); Fx.float(u.x,u.y,t('messages.summoner_no_spawn'),'damage'); return;
 	}
 	const isSpirit = sk.id === 'summoner_summon_spirit';
 	const summonCls = sk.summonType;
@@ -49,9 +49,9 @@ function _summonerExec(u, tx, ty, sk, G) {
 		skillLv: {}, buffs: []
 	};
 	G.units.push(summon);
-	G.floatT(tx, ty, t('messages.sapper_summon', {name:summonName}), 'heal');
+	Fx.float(tx, ty, t('messages.sapper_summon', {name:summonName}), 'heal');
 	const colors = isSpirit ? ['#8b5cf6','#c084fc','#fff'] : ['#78716c','#a8a29e','#fff'];
-	G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:25,colors,shape:'ring',speed:5,spread:20,decay:0.02,size:8});
+	Fx.burst(tx, ty, {count:25,colors,shape:'ring',speed:5,spread:20,decay:0.02,size:8});
 	G.sfxHeal(); G._grantExp(u, 'attack');
 	_skillDone(u, G);
 }
@@ -72,7 +72,7 @@ registerSkill('summoner_summon_golem', {
 registerSkill('summoner_empower', {
 	target(u, sk, G) {
 		const summons = G.units.filter(s => s.isSummon && s.summonerId === u.id && s.hp > 0);
-		if (!summons.length) { G.floatT(u.x, u.y, t('messages.summoner_no_summon'), 'damage'); return null; }
+		if (!summons.length) { Fx.float(u.x, u.y, t('messages.summoner_no_summon'), 'damage'); return null; }
 		return summons.map(s => ({x:s.x, y:s.y}));
 	},
 	exec(u, tx, ty, sk, G) {
@@ -80,9 +80,9 @@ registerSkill('summoner_empower', {
 		if (!summon) { _skillRefund(u, sk, G); return; }
 		summon._empowerTurns = 3; summon._empowerMul = 1.5;
 		G.sfxHeal();
-		G.floatT(summon.x, summon.y, t('messages.summoner_empower'), 'heal');
-		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:20,colors:['#fbbf24','#f59e0b','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:6,colors:['#fbbf24','#f59e0b'],shape:'star',speed:2,spread:10,decay:0.025,size:3,vy:-1});
+		Fx.float(summon.x, summon.y, t('messages.summoner_empower'), 'heal');
+		Fx.burst(summon.x, summon.y, {count:20,colors:['#fbbf24','#f59e0b','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		Fx.burst(summon.x, summon.y, {count:6,colors:['#fbbf24','#f59e0b'],shape:'star',speed:2,spread:10,decay:0.025,size:3,vy:-1});
 		G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}
@@ -92,7 +92,7 @@ registerSkill('summoner_empower', {
 registerSkill('summoner_soulburst', {
 	target(u, sk, G) {
 		const summons = G.units.filter(s => s.isSummon && s.summonerId === u.id && s.hp > 0);
-		if (!summons.length) { G.floatT(u.x, u.y, t('messages.summoner_no_summon'), 'damage'); return null; }
+		if (!summons.length) { Fx.float(u.x, u.y, t('messages.summoner_no_summon'), 'damage'); return null; }
 		return summons.map(s => ({x:s.x, y:s.y}));
 	},
 	exec(u, tx, ty, sk, G) {
@@ -106,19 +106,19 @@ registerSkill('summoner_soulburst', {
 			if (tgt) {
 				const dmg = Math.max(1, burstAtk - tgt.def);
 				tgt.hp = Math.max(0, tgt.hp - dmg);
-				G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-				G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:10,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
-				if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
+				Fx.float(tgt.x, tgt.y, `-${dmg}`, 'damage'); Fx.shake(tgt.id);
+				Fx.burst(tgt.x, tgt.y, {count:10,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:4,spread:10,decay:0.025,size:4});
+				if (tgt.hp<=0) {Fx.screenShake();G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id)}
 			}
 		}
-		G.floatT(summon.x, summon.y, t('messages.summoner_soulburst'), 'damage');
-		G.vfxDeath(summon);
-		G.vfxFlash('rgba(139,92,246,.25)');
-		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:28,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:7,spread:22,decay:0.015,size:6});
-		G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:6,colors:['#8b5cf644'],shape:'ring',speed:0,spread:5,decay:0.01,size:18});
-		setTimeout(()=>G.vfxSpawn(G.uSX(summon.x,summon.y)+UCX, G.uSY(summon.x,summon.y)+UCY, {count:10,colors:['#8b5cf6','#c084fc'],shape:'star',speed:3,spread:14,decay:0.025,size:4}),80);
+		Fx.float(summon.x, summon.y, t('messages.summoner_soulburst'), 'damage');
+		Fx.death(summon);
+		Fx.flash('rgba(139,92,246,.25)');
+		Fx.burst(summon.x, summon.y, {count:28,colors:['#8b5cf6','#c084fc','#fff'],shape:'spark',speed:7,spread:22,decay:0.015,size:6});
+		Fx.burst(summon.x, summon.y, {count:6,colors:['#8b5cf644'],shape:'ring',speed:0,spread:5,decay:0.01,size:18});
+		Fx.later(()=>Fx.burst(summon.x, summon.y, {count:10,colors:['#8b5cf6','#c084fc'],shape:'star',speed:3,spread:14,decay:0.025,size:4}),80);
 		G.units = G.units.filter(v => v.id !== summon.id);
-		G.sfxAtk(u.cls); G.sfxExplosion(); G.screenShake(true); G._grantExp(u, 'attack');
+		G.sfxAtk(u.cls); G.sfxExplosion(); Fx.screenShake(true); G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
 });

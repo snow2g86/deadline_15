@@ -49,7 +49,7 @@ async function loadI18n() {
   // 1. 언어 감지
   let lang = null;
   try {
-    const settings = JSON.parse(localStorage.getItem('game_settings'));
+    const settings = JSON.parse(Store.get('game_settings'));
     if (settings && settings.language) lang = settings.language;
   } catch (_) {}
   if (!lang) {
@@ -60,11 +60,11 @@ async function loadI18n() {
   }
 
   // 2. localStorage 캐시 확인 (버전 일치 시만)
-  const cachedLang = localStorage.getItem(_I18N_LANG_KEY);
-  const cachedVer = parseInt(localStorage.getItem(_I18N_VER_KEY), 10);
+  const cachedLang = Store.get(_I18N_LANG_KEY);
+  const cachedVer = parseInt(Store.get(_I18N_VER_KEY), 10);
   if (cachedLang === lang && cachedVer === _I18N_VERSION) {
     try {
-      _i18nData = JSON.parse(localStorage.getItem(_I18N_CACHE_KEY));
+      _i18nData = JSON.parse(Store.get(_I18N_CACHE_KEY));
     } catch (_) {}
   }
 
@@ -72,16 +72,16 @@ async function loadI18n() {
   if (!_i18nData) {
     try {
       _i18nData = await _loadLang(lang);
-      localStorage.setItem(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
-      localStorage.setItem(_I18N_LANG_KEY, lang);
-      localStorage.setItem(_I18N_VER_KEY, _I18N_VERSION);
+      Store.set(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
+      Store.set(_I18N_LANG_KEY, lang);
+      Store.set(_I18N_VER_KEY, _I18N_VERSION);
     } catch (e) {
       console.warn('[i18n] load failed, fallback ko', e);
       try {
         _i18nData = await _loadLang('ko');
-        localStorage.setItem(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
-        localStorage.setItem(_I18N_LANG_KEY, 'ko');
-        localStorage.setItem(_I18N_VER_KEY, _I18N_VERSION);
+        Store.set(_I18N_CACHE_KEY, JSON.stringify(_i18nData));
+        Store.set(_I18N_LANG_KEY, 'ko');
+        Store.set(_I18N_VER_KEY, _I18N_VERSION);
       } catch (_) {}
     }
   }

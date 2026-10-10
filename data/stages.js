@@ -123,99 +123,23 @@ var STAGES = [
   { id:100, phase:10, style:'offense', mapType:'abyss', tot:120, spw:15, si:2, name:'마계 군주', story:'모두의 손으로 마계 군주의 문을 잠가라', boss:{cls:"warrior",name:"마계 군주"}, en:["knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","knight","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","warrior","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","mage","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","summoner","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","lancer","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","assassin","priest","priest","priest","priest","priest","priest","sapper","sapper","sapper","sapper","sapper","brawler","brawler","brawler","brawler","brawler","brawler","shaman","shaman","shaman","shaman","shaman","archer","archer","archer"], sm:{hp:9.0,atk:9.0} }
 ];
 
-// ═══ 난이도 계산 및 데이터 확장 로직 ═══
-function calculateDifficulty(stage) {
-  return Math.min(100, Math.round(
-    stage.id * 0.8 +
-    stage.tot * 0.1 +
-    (stage.sm.hp * 5) +
-    (stage.sm.atk * 5) +
-    stage.spw * 2 +
-    (stage.boss ? 15 : 0)
-  ));
-}
 
-function getEnemyComposition(enemies) {
-  return enemies.reduce(function(acc, cls) {
-    acc[cls] = (acc[cls] || 0) + 1;
-    return acc;
-  }, {});
-}
-
-function recommendCounters(composition) {
-  var sorted = Object.entries(composition).sort(function(a, b) { return b[1] - a[1]; });
-  var dominant = sorted.slice(0, 2).map(function(e) { return e[0]; });
-
-  var counters = {
-    warrior: ['mage', 'archer'],
-    knight: ['mage', 'brawler'],
-    mage: ['assassin', 'archer'],
-    summoner: ['assassin', 'warrior'],
-    assassin: ['knight', 'brawler'],
-    archer: ['knight', 'warrior'],
-    priest: ['assassin', 'warrior'],
-    brawler: ['mage', 'archer'],
-    lancer: ['mage', 'assassin'],
-    sapper: ['archer', 'mage'],
-    shaman: ['warrior', 'knight'],
-    novice: []
-  };
-
-  var recommended = new Set();
-  dominant.forEach(function(cls) {
-    (counters[cls] || []).forEach(function(c) { recommended.add(c); });
-  });
-
-  return Array.from(recommended).slice(0, 3);
-}
-
-function generateStrategyTips(stage) {
-  var tips = [];
-
-  if (stage.style === 'defense') {
-    tips.push('strategy_tips.defend_gate');
-    tips.push('strategy_tips.use_terrain');
-  } else if (stage.style === 'offense') {
-    tips.push('strategy_tips.offense_quick');
-    tips.push('strategy_tips.use_range');
-  } else {
-    tips.push('strategy_tips.mixed_balance');
-  }
-
-  if (stage.boss) {
-    tips.push('strategy_tips.focus_boss');
-  }
-
-  var comp = getEnemyComposition(stage.en);
-  if (comp.mage && comp.mage > 3) tips.push('strategy_tips.use_assassin');
-  if (comp.warrior && comp.warrior > 5) tips.push('strategy_tips.use_tank');
-  if (comp.knight && comp.knight > 3) tips.push('strategy_tips.use_aoe');
-
-  return tips.slice(0, 2);
-}
 
 // ═══ 적 강화: 기하급수 ═══
 // 적 HP·공격력 배율 = ENEMY_SM_BASE × ENEMY_SM_GROWTH^(스테이지-1). 스테이지마다 같은 비율로 강해져
 // 후반으로 갈수록 격차가 급격히 벌어진다 → 레벨만으로는 못 따라가고 승급·스킬·장비·전술·조합이 필요
 var ENEMY_SM_BASE = 0.6, ENEMY_SM_GROWTH = 1.0127;   // 레벨 성장과 합친 적 강함: 1스테이지 ×0.6 → 25 ×1.25 → 50 ×2.3 → 100 ×7 (기본 능력치 대비)
-function stageSm(id) { return Math.round(ENEMY_SM_BASE * Math.pow(ENEMY_SM_GROWTH, id - 1) * 100) / 100; }
+
 // 적도 클랜원처럼 레벨이 오름: 레벨 = 1 + (스테이지-1)×ENEMY_LV_PER_STAGE (클랜원 상한 15를 넘어 계속), 보스는 +ENEMY_BOSS_LV
 // 능력치 = (기본 + 평균 성장치×(레벨-1)) × stageSm. 기본 스킬 레벨도 ENEMY_SKILL_EVERY 스테이지마다 +1 (최대 10)
 var ENEMY_LV_PER_STAGE = 0.22, ENEMY_BOSS_LV = 3, ENEMY_SKILL_EVERY = 11;
-function stageEnemyLv(id) { return 1 + Math.floor((id - 1) * ENEMY_LV_PER_STAGE); }
-function stageEnemySkillLv(id) { return Math.min(10, 1 + Math.floor(id / ENEMY_SKILL_EVERY)); }
+
 // 전투 길이(2026-10-09): 기하급수 강함을 체력보다 공격력에 실음 → 한 명 쓰러뜨리는 타격 수는 후반에도 4~6번 수준,
 // 대신 맞을 때 더 아픔. 배율 1 미만인 초반은 그대로 (k<1 구간 곡선 유지)
 var ENEMY_HP_EXP = 0.6, ENEMY_ATK_EXP = 1.15;          // 체력 = k^0.6, 공격 = k^1.15
+
 var ENEMY_HP_GROWTH_MUL = 0.65, ENEMY_DEF_GROWTH_MUL = 0.6;   // 적 레벨업 때 체력·방어 성장치 배율 (js/battle/unit.js)
-STAGES.forEach(function(s) {
-  var k = stageSm(s.id);
-  s.sm = k < 1 ? { hp: k, atk: k } : { hp: Math.round(Math.pow(k, ENEMY_HP_EXP) * 100) / 100, atk: Math.round(Math.pow(k, ENEMY_ATK_EXP) * 100) / 100 };
-  // 총원(tot)이 실제로 나올 수 있는 수(출현 목록 + 보스)보다 크면 마지막 적이 영원히 나오지 않아 클리어 불가 → 맞춤
-  // (39·49·74~79·81~89·91·96 스테이지 등이 이 상태였음)
-  var spawnable = s.en.length + (s.boss ? 1 : 0);
-  if (s.tot > spawnable) s.tot = spawnable;
-});
+
 
 // ═══ 전투 길이: 한 판이 사람 기준 약 10분을 넘지 않게 ═══
 // 후반 적 총원(최대 120명)이 그대로면 판당 80턴(약 1시간)까지 늘어남 → 총원 상한을 두고, 줄인 만큼 남은 적을 강하게 해 난이도 곡선은 유지
@@ -224,35 +148,5 @@ STAGES.forEach(function(s) {
 // 증원은 최대 STAGE_MAX_WAVES번에 나눠 나오게 (멀리서 걸어오는 증원이 잦을수록 라운드가 늘어남)
 // 출현 목록은 직업 비율이 유지되도록 고르게 솎아냄 (목록 순서대로 나오므로 앞에서 자르면 특정 직업만 남음)
 var STAGE_TOT_CAP_MAX = 16, STAGE_TOT_CAP_BOSS = 12;   // 보스 스테이지는 보스 포함 최대 12명   // 후반(대략 50스테이지~)은 정예 소수: 총원 최대 16명, 줄인 만큼은 공격 보정으로
+
 var STAGE_TOT_CAP_BASE = 10, STAGE_TOT_CAP_PER = 0.12, STAGE_COMP_HP = 0.15, STAGE_COMP_ATK = 0.55, STAGE_MAX_WAVES = 3, MAX_ENEMIES_ON_FIELD = 14;
-STAGES.forEach(function(s) {
-  var cap = Math.min(STAGE_TOT_CAP_MAX, Math.round(STAGE_TOT_CAP_BASE + STAGE_TOT_CAP_PER * s.id));
-  if (s.boss) cap = Math.min(cap, STAGE_TOT_CAP_BOSS);
-  if (s.tot > cap) {
-    var ratio = s.tot / cap;
-    s.sm = { hp: Math.round(s.sm.hp * Math.pow(ratio, STAGE_COMP_HP) * 100) / 100, atk: Math.round(s.sm.atk * Math.pow(ratio, STAGE_COMP_ATK) * 100) / 100 };
-    var need = cap - (s.boss ? 1 : 0), src = s.en, out = [];
-    for (var i = 0; i < need; i++) out.push(src[Math.floor(i * src.length / need)]);
-    s.en = out; s.tot = cap;
-  }
-  s.spw = Math.max(s.spw, Math.ceil(s.tot / STAGE_MAX_WAVES));
-});
-
-// 보스 이름: 언어 파일 stages.boss_<스테이지>, 없으면 데이터의 한국어 이름
-function bossName(st) {
-  if (!st || !st.boss) return '';
-  var k = 'stages.boss_' + st.id, v = typeof t === 'function' ? t(k) : null;
-  return v && v !== k ? v : st.boss.name;
-}
-
-// STAGES 배열 데이터 확장
-STAGES = STAGES.map(function(stage) {
-  var composition = getEnemyComposition(stage.en);
-  return Object.assign({}, stage, {
-    difficulty: calculateDifficulty(stage),
-    recommendedLevel: Math.ceil(stage.id * 0.15),
-    enemyComposition: composition,
-    recommendedClasses: recommendCounters(composition),
-    strategyTips: generateStrategyTips(stage)
-  });
-});

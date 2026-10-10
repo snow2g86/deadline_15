@@ -26,9 +26,9 @@
 
   function curLang() {
     var lang = null;
-    try { lang = localStorage.getItem('game_i18n_lang'); } catch (_) {}
+    try { lang = Store.get('game_i18n_lang'); } catch (_) {}
     if (!lang) {
-      try { var s = JSON.parse(localStorage.getItem('game_settings')); if (s && s.language) lang = s.language; } catch (_) {}
+      try { var s = JSON.parse(Store.get('game_settings')); if (s && s.language) lang = s.language; } catch (_) {}
     }
     return lang || 'ko';
   }
@@ -44,7 +44,7 @@
   }
 
   function readJSON(key) {
-    try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; }
+    try { return JSON.parse(Store.get(key)); } catch (_) { return null; }
   }
 
   // 스테이지 → 에피소드 번호 / 에피소드 안 순번
@@ -89,7 +89,7 @@
       var self = this;
       this._loadP = (async function() {
         var dev = null;
-        try { dev = localStorage.getItem('game_story_dev'); } catch (_) {}
+        try { dev = Store.get('game_story_dev'); } catch (_) {}
         if (dev === 'sample') {
           // 개발용: localStorage.game_story_dev = 'sample' 이면 샘플 대본 사용
           if (!window.STORY_KO) await loadScript('data/story/story.sample.js');
@@ -115,7 +115,7 @@
     seen: function(key) { return !!this._seenAll()[key]; },
     markSeen: function(key) {
       var s = this._seenAll(); s[key] = true;
-      try { localStorage.setItem(SEEN_KEY, JSON.stringify(s)); } catch (_) {}
+      try { Store.set(SEEN_KEY, JSON.stringify(s)); } catch (_) {}
     },
 
     // ── 장면 조회 (키 → 대사 배열) ───────

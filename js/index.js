@@ -24,7 +24,7 @@ function renderHideout() {
 	ct.appendChild(table);
 	// 캐릭터 결정 (최대 10명, 레벨 높은 순)
 	var roster, chars = [];
-	try { roster = JSON.parse(localStorage.getItem('game_roster')); } catch(_) {}
+	try { roster = JSON.parse(Store.get('game_roster')); } catch(_) {}
 	if (roster && roster.chars) {
 		// 살아있는 모든 캐릭터를 레벨 높은 순으로 정렬해서 최대 10명 표시
 		chars = roster.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; })
@@ -67,7 +67,7 @@ function renderHideout() {
 }
 
 function ensureRoster() {
-	var raw = localStorage.getItem('game_roster');
+	var raw = Store.get('game_roster');
 	if (raw) try { var d = JSON.parse(raw); if (d && d.chars && d.chars.length) return; } catch(_) {}
 	// 첫 실행: 노비스 5명 생성
 	var nov = JAB.novice;
@@ -92,15 +92,15 @@ function ensureRoster() {
 			gender: randomGender()
 		});
 	}
-	localStorage.setItem('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
+	Store.set('game_roster', JSON.stringify({ chars: chars, nextId: nextId }));
 	getRoster(); // 지휘관 자동 추가 (storage.js)
 	saveParties(createDefaultParties(chars.map(function(c) { return c.uid; }))); // 저장 시 지휘관이 첫 칸으로 고정됨
-	localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
+	Store.set('game_save', JSON.stringify({ gold: 2000 }));
 }
 
 function renderGold() {
 	try {
-		var d = JSON.parse(localStorage.getItem('game_save'));
+		var d = JSON.parse(Store.get('game_save'));
 		if (d) document.getElementById('lobby-gold').textContent = d.gold || 0;
 	} catch(_) {}
 }
@@ -114,7 +114,7 @@ function validateAndRepairGameData() {
 
 	// 1. ROSTER 검증
 	try {
-		var raw = localStorage.getItem('game_roster');
+		var raw = Store.get('game_roster');
 		if (!raw || raw === '{}' || raw === '[]') {
 			errors.push('roster_empty');
 			throw new Error('Invalid roster');
@@ -160,7 +160,7 @@ function validateAndRepairGameData() {
 		}
 
 		if (repaired || errors.length > 0) {
-			localStorage.setItem('game_roster', JSON.stringify(roster));
+			Store.set('game_roster', JSON.stringify(roster));
 			if (errors.length > 0) console.warn('[GameData] Roster repaired:', errors);
 		}
 	} catch(e) {
@@ -171,12 +171,12 @@ function validateAndRepairGameData() {
 
 	// 2. PARTIES 검증
 	try {
-		var raw = localStorage.getItem('game_parties');
+		var raw = Store.get('game_parties');
 		if (!raw || raw === '{}' || raw === '[]') throw new Error('Invalid parties');
 		var parties = JSON.parse(raw);
 		if (!parties.parties || !Array.isArray(parties.parties)) throw new Error('Invalid parties structure');
 
-		var roster = JSON.parse(localStorage.getItem('game_roster')) || { chars: [] };
+		var roster = JSON.parse(Store.get('game_roster')) || { chars: [] };
 		var validUids = new Set(roster.chars.map(c => c.uid));
 
 		// 각 파티의 슬롯 검증 및 정규화 (5슬롯 유지)
@@ -206,7 +206,7 @@ function validateAndRepairGameData() {
 	} catch(e) {
 		console.error('[GameData] Parties validation failed:', e.message);
 		// 파티 초기화 (5슬롯 고정)
-		var roster = JSON.parse(localStorage.getItem('game_roster')) || { chars: [] };
+		var roster = JSON.parse(Store.get('game_roster')) || { chars: [] };
 		var initialSlots = [
 			roster.chars[0]?.uid || null,
 			roster.chars[1]?.uid || null,
@@ -220,7 +220,7 @@ function validateAndRepairGameData() {
 
 	// 3. INVENTORY 검증
 	try {
-		var raw = localStorage.getItem('game_inventory');
+		var raw = Store.get('game_inventory');
 		var inv = raw ? JSON.parse(raw) : [];
 		if (!Array.isArray(inv)) throw new Error('Invalid inventory structure');
 
@@ -233,48 +233,48 @@ function validateAndRepairGameData() {
 			return !item.type && !!item.id && !!item.cls;   // 스킬북 { id, cls, lv }
 		});
 
-		localStorage.setItem('game_inventory', JSON.stringify(inv));
+		Store.set('game_inventory', JSON.stringify(inv));
 	} catch(e) {
 		console.error('[GameData] Inventory validation failed:', e.message);
-		localStorage.setItem('game_inventory', JSON.stringify([]));
+		Store.set('game_inventory', JSON.stringify([]));
 		repaired = true;
 	}
 
 	// 4. GOLD 검증
 	try {
-		var raw = localStorage.getItem('game_save');
+		var raw = Store.get('game_save');
 		var save = raw ? JSON.parse(raw) : {};
 		if (typeof save.gold !== 'number' || save.gold < 0) save.gold = 2000;
-		localStorage.setItem('game_save', JSON.stringify(save));
+		Store.set('game_save', JSON.stringify(save));
 	} catch(e) {
 		console.error('[GameData] Gold validation failed:', e.message);
-		localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
+		Store.set('game_save', JSON.stringify({ gold: 2000 }));
 		repaired = true;
 	}
 
 	// 5. CLEARED 검증
 	try {
-		var raw = localStorage.getItem('game_cleared');
+		var raw = Store.get('game_cleared');
 		var cleared = raw ? JSON.parse(raw) : [];
 		if (!Array.isArray(cleared)) cleared = [];
 		cleared = cleared.filter(id => typeof id === 'number' && id > 0 && id <= 100);
-		localStorage.setItem('game_cleared', JSON.stringify(cleared));
+		Store.set('game_cleared', JSON.stringify(cleared));
 	} catch(e) {
 		console.error('[GameData] Cleared validation failed:', e.message);
-		localStorage.setItem('game_cleared', JSON.stringify([]));
+		Store.set('game_cleared', JSON.stringify([]));
 		repaired = true;
 	}
 
 	// 6. BATTLE_ITEMS 검증
 	try {
-		var raw = localStorage.getItem('game_battle_items');
+		var raw = Store.get('game_battle_items');
 		var items = raw ? JSON.parse(raw) : [];
 		if (!Array.isArray(items)) items = [];
 		items = items.filter(item => item && item.id && typeof item.count === 'number' && item.count >= 0);
-		localStorage.setItem('game_battle_items', JSON.stringify(items));
+		Store.set('game_battle_items', JSON.stringify(items));
 	} catch(e) {
 		console.error('[GameData] Battle items validation failed:', e.message);
-		localStorage.setItem('game_battle_items', JSON.stringify([]));
+		Store.set('game_battle_items', JSON.stringify([]));
 		repaired = true;
 	}
 
@@ -308,7 +308,7 @@ var init = async function() {
 
 	// 파티 슬롯 검증
 	try {
-		var parties = JSON.parse(localStorage.getItem('game_parties'));
+		var parties = JSON.parse(Store.get('game_parties'));
 		var partySlots = parties?.parties?.[0]?.slots?.length || 0;
 		// 슬롯 수 검증 (5개 아니면 에러)
 	} catch(e) {
@@ -316,18 +316,18 @@ var init = async function() {
 	}
 	// Migrate: add gender to existing characters without one
 	try {
-		var raw = localStorage.getItem('game_roster');
+		var raw = Store.get('game_roster');
 		if (raw) {
 			var rd = JSON.parse(raw), changed = false;
 			rd.chars.forEach(function(c) {
 				if (!c.gender) { c.gender = randomGender(); changed = true; }
 			});
-			if (changed) localStorage.setItem('game_roster', JSON.stringify(rd));
+			if (changed) Store.set('game_roster', JSON.stringify(rd));
 		}
 	} catch(_) {}
 	// Auto-revive: 생존 클랜원이 5명 미만이면 5명이 될 때까지 자동 부활
 	try {
-		var rr = JSON.parse(localStorage.getItem('game_roster'));
+		var rr = JSON.parse(Store.get('game_roster'));
 		if (rr && rr.chars) {
 			var alive = rr.chars.filter(function(c) { return !c.dead && !c.cls.startsWith('summon_') && c.cls !== COMMANDER_CLS; });
 			if (alive.length < 5) {
@@ -343,7 +343,7 @@ var init = async function() {
 						dead[ri].hp = JAB[dead[ri].cls] ? JAB[dead[ri].cls].base.hp : 1;
 						revivedNames.push(dead[ri].customName || names[dead[ri].nameId] || '???');
 					}
-					localStorage.setItem('game_roster', JSON.stringify(rr));
+					Store.set('game_roster', JSON.stringify(rr));
 					setTimeout(function() {
 						showAlert(t('messages.auto_revive', {name: revivedNames.join(', ')}));
 					}, 1200);
@@ -356,7 +356,7 @@ var init = async function() {
 	renderHideout();
 	// 저장된 전투가 있으면 재개 버튼 표시
 	try {
-		var bs = localStorage.getItem('game_battle');
+		var bs = Store.get('game_battle');
 		if (bs) {
 			var bd = JSON.parse(bs);
 			if (bd && bd.stage) {
@@ -365,7 +365,7 @@ var init = async function() {
 				resumeBtn.title = t('messages.resume_battle') || '전투 재개';
 				resumeBtn.innerHTML = '<span class="popup-icon">⚔️</span><span class="popup-label">' + (t('messages.resume_battle') || '전투 재개') + '</span>';
 				resumeBtn.onclick = function() {
-					localStorage.setItem('game_nav', JSON.stringify({ resume: true }));
+					Store.set('game_nav', JSON.stringify({ resume: true }));
 					location.href = 'battle.html';
 				};
 				var popups = document.querySelector('.lobby-popups');

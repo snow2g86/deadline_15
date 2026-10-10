@@ -14,15 +14,13 @@ registerSkill('priest_massheal', {
 		targets.forEach(tgt => {
 			const heal = Math.min(tgt.mhp - tgt.hp, healAmt);
 			tgt.hp += heal;
-			G.floatT(tgt.x, tgt.y, `+${heal}`, 'heal');
-			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
-				{count: 8, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.025, size: 4});
+			Fx.float(tgt.x, tgt.y, `+${heal}`, 'heal');
+			Fx.burst(tgt.x, tgt.y, {count: 8, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.025, size: 4});
 		});
 		G.sfxHeal();
-		G.floatT(u.x, u.y, t('messages.priest_mass_heal'), 'heal');
-		G.vfxFlash('rgba(74,222,128,.15)');
-		G.vfxSpawn(G.uSX(u.x, u.y) + UCX, G.uSY(u.x, u.y) + UCY,
-			{count: 22, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 4, spread: 18, decay: 0.018, size: 8});
+		Fx.float(u.x, u.y, t('messages.priest_mass_heal'), 'heal');
+		Fx.flash('rgba(74,222,128,.15)');
+		Fx.burst(u.x, u.y, {count: 22, colors: ['#4ade80', '#22c55e', '#fff'], shape: 'ring', speed: 4, spread: 18, decay: 0.018, size: 8});
 		G._grantExp(u, 'heal');
 		_skillDone(u, G);
 	}
@@ -41,10 +39,10 @@ registerSkill('priest_purify', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		tgt.stunned = 0; tgt.frozen = 0; tgt.disarmed = 0; tgt._bleedTurns = 0; tgt._bleedDmg = 0; tgt._rootedTurns = 0;
 		G.sfxHeal();
-		G.floatT(tgt.x, tgt.y, t('messages.priest_purify'), 'heal');
-		G.floatT(u.x, u.y, t('messages.priest_purify_cast'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:20,colors:['#88f','#aaf','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#88f','#fff'],shape:'diamond',speed:2,spread:10,decay:0.025,size:3,vy:-2});
+		Fx.float(tgt.x, tgt.y, t('messages.priest_purify'), 'heal');
+		Fx.float(u.x, u.y, t('messages.priest_purify_cast'), 'heal');
+		Fx.burst(tgt.x, tgt.y, {count:20,colors:['#88f','#aaf','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		Fx.burst(tgt.x, tgt.y, {count:6,colors:['#88f','#fff'],shape:'diamond',speed:2,spread:10,decay:0.025,size:3,vy:-2});
 		G._grantExp(u, 'heal');
 		_skillDone(u, G);
 	}
@@ -61,13 +59,13 @@ registerSkill('priest_sanctuary', {
 		if (u.skillLv && u.skillLv['priest_divinegrace'] >= 1) healAmt = Math.round(healAmt * 1.2);
 		targets.forEach(tgt => {
 			tgt._sanctuaryTurns = 4; tgt._sanctuaryHeal = healAmt;
-			G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#fbbf24','#fff','#4f4'],shape:'ring',speed:2,spread:8,decay:0.025,size:5});
+			Fx.burst(tgt.x, tgt.y, {count:8,colors:['#fbbf24','#fff','#4f4'],shape:'ring',speed:2,spread:8,decay:0.025,size:5});
 		});
 		G.sfxHeal();
-		G.floatT(u.x, u.y, t('messages.priest_sanctuary'), 'heal');
-		G.vfxFlash('rgba(251,191,36,.15)');
-		G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:28,colors:['#fbbf24','#ff8','#fff'],shape:'ring',speed:5,spread:20,decay:0.015,size:10});
-		setTimeout(()=>G.vfxSpawn(G.uSX(u.x,u.y)+UCX, G.uSY(u.x,u.y)+UCY, {count:10,colors:['#fbbf24','#ff8'],shape:'star',speed:2,spread:14,decay:0.02,size:4,vy:-1}),80);
+		Fx.float(u.x, u.y, t('messages.priest_sanctuary'), 'heal');
+		Fx.flash('rgba(251,191,36,.15)');
+		Fx.burst(u.x, u.y, {count:28,colors:['#fbbf24','#ff8','#fff'],shape:'ring',speed:5,spread:20,decay:0.015,size:10});
+		Fx.later(()=>Fx.burst(u.x, u.y, {count:10,colors:['#fbbf24','#ff8'],shape:'star',speed:2,spread:14,decay:0.02,size:4,vy:-1}),80);
 		G._grantExp(u, 'heal');
 		_skillDone(u, G);
 	}

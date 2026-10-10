@@ -49,7 +49,7 @@ var _currentTab = 'mercenary';
 
 function loadShop() {
   try {
-    var raw = localStorage.getItem(SHOP_KEY);
+    var raw = Store.get(SHOP_KEY);
     if (raw) {
       var data = JSON.parse(raw);
       // 1시간 이상 지났으면 갱신 아이템만 새로 생성
@@ -176,7 +176,7 @@ function genShop() {
 }
 
 function saveShop() {
-  try { localStorage.setItem(SHOP_KEY, JSON.stringify(_shopData)); } catch (_) {}
+  try { Store.set(SHOP_KEY, JSON.stringify(_shopData)); } catch (_) {}
 }
 
 // ── 상점 갱신 시간 ───────────────────────
@@ -518,11 +518,11 @@ var GACHA_AD_KEYS = {
 var GACHA_AD_COOLDOWN_MS = 30 * 60 * 1000;
 
 function getGachaAdCooldown(type) {
-  try { var v = +localStorage.getItem(GACHA_AD_KEYS[type]); return v || 0; } catch(_) { return 0; }
+  try { var v = +Store.get(GACHA_AD_KEYS[type]); return v || 0; } catch(_) { return 0; }
 }
 
 function setGachaAdCooldown(type) {
-  try { localStorage.setItem(GACHA_AD_KEYS[type], Date.now()); } catch(_) {}
+  try { Store.set(GACHA_AD_KEYS[type], Date.now()); } catch(_) {}
 }
 
 function doGachaAdEquip() {
@@ -608,11 +608,11 @@ function buildTabAdCard(type, descKey, fn) {
 
 
 function getAdCooldown() {
-  try { var v = +localStorage.getItem(AD_COOLDOWN_KEY); return v || 0; } catch(_) { return 0; }
+  try { var v = +Store.get(AD_COOLDOWN_KEY); return v || 0; } catch(_) { return 0; }
 }
 
 function setAdCooldown() {
-  try { localStorage.setItem(AD_COOLDOWN_KEY, Date.now()); } catch(_) {}
+  try { Store.set(AD_COOLDOWN_KEY, Date.now()); } catch(_) {}
 }
 
 function renderGoldShop(list) {

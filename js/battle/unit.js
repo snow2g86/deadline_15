@@ -281,7 +281,7 @@ const UnitManager = {
   },
 
   emitSupport(r) {
-    VFX.faceDir(r.sp.id, r.actual.x - r.sp.x, r.actual.y - r.sp.y);
+    Fx.faceDir(r.sp.id, r.actual.x - r.sp.x, r.actual.y - r.sp.y);
     EventBus.emit('unit_attacked', { attacker: r.sp, target: r.actual, damage: r.dmg, isSupport: true });
     procFury(r.sp, r.actual, G);
   },

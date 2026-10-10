@@ -9,27 +9,24 @@ const FURY_PASSIVES = {
 		name: '광폭', icon: '💢', desc: '2턴간 공격 데미지 1.5배',
 		trigger(defender, attacker, G) {
 			defender.furyBuff = 2; defender.res = 0;
-			G.floatT(defender.x, defender.y, t('passives.fury_activated'), 'heal');
-			G.vfxSpawn(G.uSX(defender.x, defender.y) + UCX, G.uSY(defender.x, defender.y) + UCY,
-				{ count: 15, colors: ['#ff4400','#ff8800','#ffcc00'], shape: 'spark', speed: 4, spread: 14, decay: 0.025, size: 4 });
+			Fx.float(defender.x, defender.y, t('passives.fury_activated'), 'heal');
+			Fx.burst(defender.x, defender.y, { count: 15, colors: ['#ff4400','#ff8800','#ffcc00'], shape: 'spark', speed: 4, spread: 14, decay: 0.025, size: 4 });
 		}
 	},
 	knight: {
 		name: '철의 의지', icon: '🛡️', desc: '2턴간 방어력 1.5배',
 		trigger(defender, attacker, G) {
 			defender.defBuff = 2; defender.res = 0;
-			G.floatT(defender.x, defender.y, t('passives.iron_will_activated'), 'heal');
-			G.vfxSpawn(G.uSX(defender.x, defender.y) + UCX, G.uSY(defender.x, defender.y) + UCY,
-				{ count: 15, colors: ['#4488ff','#88bbff','#ffffff'], shape: 'spark', speed: 3, spread: 12, decay: 0.025, size: 4 });
+			Fx.float(defender.x, defender.y, t('passives.iron_will_activated'), 'heal');
+			Fx.burst(defender.x, defender.y, { count: 15, colors: ['#4488ff','#88bbff','#ffffff'], shape: 'spark', speed: 3, spread: 12, decay: 0.025, size: 4 });
 		}
 	},
 	lancer: {
 		name: '철벽', icon: '🏰', desc: '2턴간 방어력 2배',
 		trigger(defender, attacker, G) {
 			defender.defBuff = 2; defender.res = 0;
-			G.floatT(defender.x, defender.y, t('passives.iron_phalanx_activated'), 'heal');
-			G.vfxSpawn(G.uSX(defender.x, defender.y) + UCX, G.uSY(defender.x, defender.y) + UCY,
-				{ count: 15, colors: ['#60a5fa','#3b82f6','#fff'], shape: 'ring', speed: 3, spread: 14, decay: 0.02, size: 6 });
+			Fx.float(defender.x, defender.y, t('passives.iron_phalanx_activated'), 'heal');
+			Fx.burst(defender.x, defender.y, { count: 15, colors: ['#60a5fa','#3b82f6','#fff'], shape: 'ring', speed: 3, spread: 14, decay: 0.02, size: 6 });
 		}
 	}
 };
@@ -88,7 +85,7 @@ function applyDmgToAlly(tgt, dmg, ctx) {
 	}
 	if (actual !== tgt && actual.hp <= 0) {
 		ctx.screenShake(); ctx.sfxDeath(); ctx.vfxDeath(actual); ctx.deathA(actual.id); ctx._rmDead();
-		setTimeout(() => { ctx.rUnits() }, 500);
+		Fx.later(() => { ctx.rUnits() }, 500);
 	}
 	return actual;
 }
@@ -100,9 +97,8 @@ function chkTrapDetect(u) {
 	const detected = G.traps.filter(tr => tr.team === enemy && mh(u.x, u.y, tr.x, tr.y) <= 2);
 	detected.forEach(tr => {
 		G.traps = G.traps.filter(t => t !== tr);
-		G.floatT(tr.x, tr.y, t('messages.trap_detected'), 'heal');
-		G.vfxSpawn(G.uSX(tr.x, tr.y) + UCX, G.uSY(tr.x, tr.y) + UCY,
-			{ count: 8, colors: ['#4f4', '#ff8', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.03, size: 3 });
+		Fx.float(tr.x, tr.y, t('messages.trap_detected'), 'heal');
+		Fx.burst(tr.x, tr.y, { count: 8, colors: ['#4f4', '#ff8', '#fff'], shape: 'ring', speed: 2, spread: 8, decay: 0.03, size: 3 });
 	});
 }
 
@@ -177,14 +173,14 @@ function tickBuffs(unit) {
 	if (unit._tenacityDef) unit._tenacityDef = false;
 	if (unit._bleedTurns > 0 && unit._bleedDmg > 0) {
 		unit.hp = Math.max(1, unit.hp - unit._bleedDmg);
-		G.floatT(unit.x, unit.y, `-${unit._bleedDmg}`, 'damage');
-		G.floatT(unit.x, unit.y, t('messages.warrior_bleed_tick'), 'debuff');
+		Fx.float(unit.x, unit.y, `-${unit._bleedDmg}`, 'damage');
+		Fx.float(unit.x, unit.y, t('messages.warrior_bleed_tick'), 'debuff');
 		unit._bleedTurns--;
 		if (unit._bleedTurns <= 0) { unit._bleedDmg = 0; }
 	}
 	if (unit.frozen > 0) {
 		unit.frozen--;
-		if (unit.frozen <= 0) { G.floatT(unit.x, unit.y, t('messages.frozen_end'), 'heal'); }
+		if (unit.frozen <= 0) { Fx.float(unit.x, unit.y, t('messages.frozen_end'), 'heal'); }
 	}
 	if (unit._phalanxTurns > 0) { unit._phalanxTurns--; if (unit._phalanxTurns <= 0) unit._phalanxDef = 0; }
 	if (unit._empowerTurns > 0) { unit._empowerTurns--; if (unit._empowerTurns <= 0) unit._empowerMul = 0; }
@@ -192,9 +188,8 @@ function tickBuffs(unit) {
 	if (unit._sanctuaryTurns > 0 && unit._sanctuaryHeal > 0) {
 		const heal = unit._sanctuaryHeal;
 		unit.hp = Math.min(unit.mhp, unit.hp + heal);
-		G.floatT(unit.x, unit.y, `+${heal}`, 'heal');
-		G.vfxSpawn(G.uSX(unit.x, unit.y) + UCX, G.uSY(unit.x, unit.y) + UCY,
-			{ count: 6, colors: ['#fbbf24', '#fff', '#4f4'], shape: 'ring', speed: 2, spread: 6, decay: 0.03, size: 4 });
+		Fx.float(unit.x, unit.y, `+${heal}`, 'heal');
+		Fx.burst(unit.x, unit.y, { count: 6, colors: ['#fbbf24', '#fff', '#4f4'], shape: 'ring', speed: 2, spread: 6, decay: 0.03, size: 4 });
 		unit._sanctuaryTurns--;
 		if (unit._sanctuaryTurns <= 0) { unit._sanctuaryHeal = 0; }
 	}

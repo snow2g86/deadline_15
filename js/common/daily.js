@@ -25,11 +25,11 @@ const DAILY = {
 const Daily = {
   today(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); },
   _get() {
-    try { const s = JSON.parse(localStorage.getItem(DAILY_KEY)); if (s && s.date === this.today()) return s; } catch (_) {}
+    try { const s = JSON.parse(Store.get(DAILY_KEY)); if (s && s.date === this.today()) return s; } catch (_) {}
     return { date: this.today(), used: 0 };
   },
   left() { return Math.max(0, DAILY.perDay - this._get().used); },
-  consume() { const s = this._get(); s.used++; try { localStorage.setItem(DAILY_KEY, JSON.stringify(s)); } catch (_) {} },
+  consume() { const s = this._get(); s.used++; try { Store.set(DAILY_KEY, JSON.stringify(s)); } catch (_) {} },
   // 오늘 열린 직업
   classes(d) { const s = DAILY.schedule[(d || new Date()).getDay()]; return s === 'all' ? DAILY.CLASSES.slice() : s.slice(); },
   bestCleared() { try { const c = loadSave().cleared || []; return c.length ? Math.max.apply(null, c) : 0; } catch (_) { return 0; } },

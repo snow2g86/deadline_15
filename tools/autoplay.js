@@ -22,7 +22,7 @@ function out(msg, cls) {
   if (cls) line.className = cls;
   line.textContent = msg; el.appendChild(line); el.scrollTop = el.scrollHeight;
 }
-function saveLog() { try { localStorage.setItem('ap_log', JSON.stringify(AP.log)); } catch (e) {} report(false); }
+function saveLog() { try { Store.set('ap_log', JSON.stringify(AP.log)); } catch (e) {} report(false); }
 
 // ── 결과 요약 + 연구 서버로 보고 (tools/autoplay-server.py가 받아 파일로 저장 → 헤드리스 실행 중에도 진행 확인) ──
 function summarize(log) {
@@ -52,7 +52,7 @@ function report(final) {
       summary: summarize(AP.log), tail: [...$('log').children].slice(-12).map(d => d.textContent), at: new Date().toISOString() }) }).catch(() => {});
   } catch (e) {}
 }
-try { AP.log = JSON.parse(localStorage.getItem('ap_log')) || []; } catch (e) {}
+try { AP.log = JSON.parse(Store.get('ap_log')) || []; } catch (e) {}
 
 // ═════ 육성: 등급·합성·스킬북·장비 (sanctuary.js / academy.js / party-select.js 로직과 동일) ═════
 const GR = ['C', 'B', 'A', 'S'];
@@ -535,12 +535,12 @@ async function runBattle(stageId, C, practice) {
   const stage = typeof stageId === 'object' ? stageId : STAGES.find(s => s.id === stageId);
   if (typeof stageId === 'object') stageId = stage.id;
   const party = getActiveParty();
-  localStorage.setItem('game_nav', JSON.stringify({ cStage: stage, party, practiceMode: !!practice }));
+  Store.set('game_nav', JSON.stringify({ cStage: stage, party, practiceMode: !!practice }));
   const gold0 = loadGold(), t0 = Date.now();
   // 전투 화면 로드 (서버가 바빠 스크립트가 빠지면 다시 시도)
   let W = null, g = null;
   for (let tries = 0; tries < 4 && !g; tries++) {
-    localStorage.setItem('game_nav', JSON.stringify({ cStage: stage, party, practiceMode: !!practice }));
+    Store.set('game_nav', JSON.stringify({ cStage: stage, party, practiceMode: !!practice }));
     W = await loadFrame('../battle.html?ap=' + Date.now());
     await sleep(80);
     // 스크립트가 하나라도 빠지면 초기화가 중간에 멈춤 → 모듈과 배치된 클랜원까지 확인
@@ -682,7 +682,7 @@ async function campaign(fresh) {
   AP.running = false; AP.lastReached = stageId; report(true);
 }
 function newGame() {
-  Object.keys(localStorage).filter(k => k.startsWith('game_') || k === 'ps_can_start').forEach(k => localStorage.removeItem(k));
+  Store.keys().filter(k => k.startsWith('game_') || k === 'ps_can_start').forEach(k => Store.remove(k));
   AP.log = []; saveLog(); AP.shop = null; AP.shopAt = -99;
   const nov = JAB.novice, chars = [];
   for (let i = 0; i < 5; i++) {
@@ -690,14 +690,14 @@ function newGame() {
     chars.push({ uid: i + 1, cls: 'novice', nameId: i * 7, lv: 1, exp: 0, dead: false, hp: nov.base.hp, atk: nov.base.atk, def: nov.base.def,
       move: nov.base.move, range: nov.base.range, pot: p, actionRec: nov.actionRec + p.actionRec, gender: randomGender() });
   }
-  localStorage.setItem('game_roster', JSON.stringify({ chars, nextId: 6 }));
+  Store.set('game_roster', JSON.stringify({ chars, nextId: 6 }));
   const r = getRoster(); const c = r.chars.find(x => x.cls === COMMANDER_CLS); c.setup = true; c.gender = 'f'; saveRoster(r);
   saveParties(createDefaultParties(chars.map(c => c.uid)));
-  localStorage.setItem('game_save', JSON.stringify({ gold: 2000 }));
+  Store.set('game_save', JSON.stringify({ gold: 2000 }));
   // 스토리 장면은 모두 본 것으로 (전투 흐름만 연구)
   const seen = {}; for (let i = 1; i <= 100; i++) ['pre', 'post', 'start', 'wave', 'boss', 'danger', 'last'].forEach(k => { seen['s' + i + '_' + k] = true; });
   for (let e = 1; e <= 10; e++) { seen['ep' + e + '_pro'] = seen['ep' + e + '_epi'] = true; }
-  localStorage.setItem('game_story_seen', JSON.stringify(seen));
+  Store.set('game_story_seen', JSON.stringify(seen));
 }
 
 $('new').onclick = () => campaign(true);

@@ -16,7 +16,7 @@ function formatPartyCharSkills(ch) {
 // ── 전역 포션/공성 아이템 로드/저장 ──────────────
 function loadGlobalBattleItems() {
   try {
-    var data = JSON.parse(localStorage.getItem('game_battle_items')) || {};
+    var data = JSON.parse(Store.get('game_battle_items')) || {};
     _globalBattlePotions = data.potions || [];
     _globalSiegeItems = data.sieges || [];
   } catch (_) {}
@@ -25,7 +25,7 @@ function loadGlobalBattleItems() {
 function saveGlobalBattleItems() {
   try {
     var data = { potions: _globalBattlePotions, sieges: _globalSiegeItems };
-    localStorage.setItem('game_battle_items', JSON.stringify(data));
+    Store.set('game_battle_items', JSON.stringify(data));
   } catch (_) {}
 }
 
@@ -33,7 +33,7 @@ function saveGlobalBattleItems() {
 var _cStage = null;
 var _practiceMode = false;
 var _pFilter = 'all';
-var _activePageTab = localStorage.getItem('ps_active_tab') || 'party';
+var _activePageTab = Store.get('ps_active_tab') || 'party';
 
 // ── 장비 상태 ──────────────────────────
 var _selUid = null;
@@ -57,7 +57,7 @@ function updateStartButtonVisibility() {
   var psStartBtn = document.getElementById('ps-start');
   if (psStartBtn) {
     // localStorage에서 출격 가능 여부 확인
-    var canEnable = localStorage.getItem('ps_can_start') === 'true';
+    var canEnable = Store.get('ps_can_start') === 'true';
     psStartBtn.disabled = !canEnable;
     // 비활성화되면 숨김, 활성화되면 표시
     psStartBtn.style.display = canEnable ? '' : 'none';
@@ -68,7 +68,7 @@ function updateStartButtonVisibility() {
 function switchPageTab(tab) {
   _activePageTab = tab;
   // localStorage에 현재 탭 저장
-  localStorage.setItem('ps_active_tab', tab);
+  Store.set('ps_active_tab', tab);
 
   var tabs = document.querySelectorAll('.game-tabs .game-tab');
   tabs.forEach(function(btn) {
@@ -103,7 +103,7 @@ function switchPageTab(tab) {
 // ── 뒤로가기 ────────────────────────────
 function partyBack() {
   // 출격 버튼 비활성화
-  localStorage.setItem('ps_can_start', 'false');
+  Store.set('ps_can_start', 'false');
   location.href = 'index.html';
 }
 
@@ -282,10 +282,10 @@ function renderPartySlots() {
   // 출격 버튼 활성/비활성화 업데이트
   var psStartBtn = document.getElementById('ps-start');
   if (psStartBtn) {
-    var canStart = count >= MIN_P && localStorage.getItem('ps_can_start') === 'true';
+    var canStart = count >= MIN_P && Store.get('ps_can_start') === 'true';
     psStartBtn.disabled = !canStart;
     // 조건을 만족하지 않으면 숨김
-    psStartBtn.style.display = (count >= MIN_P && localStorage.getItem('ps_can_start') === 'true') ? '' : 'none';
+    psStartBtn.style.display = (count >= MIN_P && Store.get('ps_can_start') === 'true') ? '' : 'none';
   }
 }
 
@@ -1560,7 +1560,7 @@ var init = async function() {
   });
 
   // localStorage에서 저장된 탭 상태 복원
-  var savedTab = localStorage.getItem('ps_active_tab') || 'party';
+  var savedTab = Store.get('ps_active_tab') || 'party';
   switchPageTab(savedTab);
 
   // 모달 닫기 버튼 바인딩

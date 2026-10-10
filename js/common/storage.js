@@ -4,7 +4,7 @@
 // ── Save 데이터 ────────────────────────────
 function loadSave() {
   try {
-    const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+    const d = JSON.parse(Store.get(SAVE_KEY));
     if (d) return d;
   } catch (_) {}
   return {};
@@ -12,13 +12,13 @@ function loadSave() {
 
 function saveSave(data) {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    Store.set(SAVE_KEY, JSON.stringify(data));
   } catch (_) {}
 }
 
 function loadGold() {
   try {
-    const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+    const d = JSON.parse(Store.get(SAVE_KEY));
     if (d) return d.gold || 0;
   } catch (_) {}
   return 0;
@@ -26,10 +26,10 @@ function loadGold() {
 
 function saveGold(gold, cleared) {
   try {
-    const d = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
+    const d = JSON.parse(Store.get(SAVE_KEY)) || {};
     d.gold = gold;
     if (cleared) d.cleared = cleared;
-    localStorage.setItem(SAVE_KEY, JSON.stringify(d));
+    Store.set(SAVE_KEY, JSON.stringify(d));
   } catch (_) {}
 }
 
@@ -59,7 +59,7 @@ function saveStageStars(stageId, flags) {
 // ── Roster 데이터 ────────────────────────────
 function getRoster() {
   try {
-    const raw = localStorage.getItem(ROSTER_KEY);
+    const raw = Store.get(ROSTER_KEY);
     if (raw) {
       const roster = JSON.parse(raw);
       // 마이그레이션: pot 및 actionRec 필드 추가
@@ -72,9 +72,9 @@ function getRoster() {
               Object.keys(ch.skillLv).forEach(k => { if (k.indexOf('commander_') === 0) delete ch.skillLv[k]; });
               needsSave = true;
               try {   // 가지고 있던 지휘관 스킬북도 정리
-                const inv = JSON.parse(localStorage.getItem('game_inventory')) || [];
+                const inv = JSON.parse(Store.get('game_inventory')) || [];
                 const left = inv.filter(i => !(i && !i.type && typeof i.id === 'string' && i.id.indexOf('commander_') === 0));
-                if (left.length !== inv.length) localStorage.setItem('game_inventory', JSON.stringify(left));
+                if (left.length !== inv.length) Store.set('game_inventory', JSON.stringify(left));
               } catch (_) {}
             }
             // pot 필드 없으면 생성 (잠재력이 없는 구 캐릭터)
@@ -121,7 +121,7 @@ function getRoster() {
         needsSave = true;
       }
       if (needsSave) {
-        try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (_) {}
+        try { Store.set(ROSTER_KEY, JSON.stringify(roster)); } catch (_) {}
       }
       return roster;
     }
@@ -145,7 +145,7 @@ function commanderUid() {
 
 function saveRoster(data) {
   try {
-    localStorage.setItem(ROSTER_KEY, JSON.stringify(data));
+    Store.set(ROSTER_KEY, JSON.stringify(data));
   } catch (_) {}
 }
 
@@ -162,7 +162,7 @@ function createDefaultParties(firstSlots) {
 
 function _loadLegacyParty() {
   try {
-    const r = localStorage.getItem(PARTY_KEY);
+    const r = Store.get(PARTY_KEY);
     if (r) { const p = JSON.parse(r); if (Array.isArray(p)) return p; }
   } catch (_) {}
   return [];
@@ -184,7 +184,7 @@ function saveParty(party) {
 // ── Multi-Party 데이터 ────────────────────────────
 function loadParties() {
   try {
-    const raw = localStorage.getItem(PARTIES_KEY);
+    const raw = Store.get(PARTIES_KEY);
     if (raw) {
       const d = JSON.parse(raw);
       if (d && Array.isArray(d.parties) && d.parties.length) {
@@ -206,7 +206,7 @@ function loadParties() {
   // 첫 로드: 예전 단일 파티(game_party) 마이그레이션 후 레거시 키 삭제
   const newData = createDefaultParties(_loadLegacyParty());
   saveParties(newData);
-  try { localStorage.removeItem(PARTY_KEY); } catch (_) {}
+  try { Store.remove(PARTY_KEY); } catch (_) {}
   return newData;
 }
 
@@ -227,7 +227,7 @@ function _dropCommander(data) {
 function saveParties(data) {
   _dropCommander(data);
   try {
-    localStorage.setItem(PARTIES_KEY, JSON.stringify(data));
+    Store.set(PARTIES_KEY, JSON.stringify(data));
   } catch (_) {}
 }
 
@@ -242,7 +242,7 @@ function getActiveParty() {
 // ── Nav 데이터 ────────────────────────────
 function loadNav() {
   try {
-    return JSON.parse(localStorage.getItem(NAV_KEY));
+    return JSON.parse(Store.get(NAV_KEY));
   } catch (_) {
     return null;
   }
@@ -250,20 +250,20 @@ function loadNav() {
 
 function saveNav(data) {
   try {
-    localStorage.setItem(NAV_KEY, JSON.stringify(data));
+    Store.set(NAV_KEY, JSON.stringify(data));
   } catch (_) {}
 }
 
 function clearNav() {
   try {
-    localStorage.removeItem(NAV_KEY);
+    Store.remove(NAV_KEY);
   } catch (_) {}
 }
 
 // ── Inventory 데이터 ────────────────────────────
 function loadInventory() {
   try {
-    const raw = localStorage.getItem(INVENTORY_KEY);
+    const raw = Store.get(INVENTORY_KEY);
     if (raw) return JSON.parse(raw);
   } catch (_) {}
   return [];
@@ -271,6 +271,6 @@ function loadInventory() {
 
 function saveInventory(inv) {
   try {
-    localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv));
+    Store.set(INVENTORY_KEY, JSON.stringify(inv));
   } catch (_) {}
 }

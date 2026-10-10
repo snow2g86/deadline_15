@@ -47,7 +47,7 @@ function renderEpisodes() {
   // 스토리 다시 보기 (본 장면이 있을 때만)
   if (typeof Story !== 'undefined') {
     var seen = {};
-    try { seen = JSON.parse(localStorage.getItem('game_story_seen')) || {}; } catch (_) {}
+    try { seen = JSON.parse(Store.get('game_story_seen')) || {}; } catch (_) {}
     if (Object.keys(seen).length) {
       var rb = document.createElement('button');
       rb.type = 'button';
@@ -341,7 +341,7 @@ function _launchStage(stage, practiceMode) {
   } else {
     saveNav({ cStage: stage, practiceMode: practiceMode });
     // 출격 버튼 활성화
-    localStorage.setItem('ps_can_start', 'true');
+    Store.set('ps_can_start', 'true');
     location.href = 'party-select.html';
   }
 

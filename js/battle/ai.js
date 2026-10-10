@@ -58,7 +58,7 @@ const AI = {
           EventBus.emit('unit_killed', { killer: u, target: tgt });
           UnitManager.rmDead();
           u.ha = true;
-          Renderer.rUnits();
+          Fx.redrawUnits();
           return true;
         }
       }
@@ -106,7 +106,7 @@ const AI = {
         u.ha = true;
         await slE(300);
         UnitManager.rmDead();
-        Renderer.rUnits();
+        Fx.redrawUnits();
         return true;
       }
     }
@@ -242,7 +242,7 @@ const AI = {
     if (await this.trySiegeItemUse(u)) return;
     if (this.tryGateAtk(u)) return;
     // 방어형(기사·창병)은 칠 대상이 없으면 방어 태세
-    if (profile.style === 'defensive') { u._defend = true; Renderer.floatT(u.x, u.y, t('messages.defend_on'), 'heal'); }
+    if (profile.style === 'defensive') { u._defend = true; Fx.float(u.x, u.y, t('messages.defend_on'), 'heal'); }
   },
 
   // ── 상황 분석 ──
@@ -307,7 +307,7 @@ const AI = {
     if (S.wallHP[wk]) S.wallHP[wk] = 0;
     if (S.gateHP[wk]) S.gateHP[wk] = 0;
     EventBus.emit('siege_used', { unit: u, type: 'bomb', target: best });
-    Renderer.rTer();
+    Fx.redrawTerrain();
     return true;
   },
 
@@ -367,7 +367,7 @@ const AI = {
         S.ter[ny][nx] = 'plain';
         EventBus.emit('gate_destroyed', { unit: u, x: nx, y: ny });
       }
-      Renderer.rTer();
+      Fx.redrawTerrain();
       return true;
     }
     return false;
@@ -413,10 +413,10 @@ const AI = {
   async eAtk(a, tgt) {
     // 투사체 차단: 지나가는 길에 클랜원 기사가 있으면 기사가 대신 맞음
     const blk = UnitManager.interceptOf(a, tgt);
-    if (blk) { tgt = blk; Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
+    if (blk) { tgt = blk; Fx.float(blk.x, blk.y, t('messages.intercepted'), 'tactic'); }
     // 회피 체크 (공격받는 쪽 기준: 공성아이템 회피 / 숲 지형)
     if (UnitManager.rollEvade(tgt)) {
-      VFX.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); VFX.playAtkMotion(a, tgt); // 휘두르지만 빗나감
+      Fx.faceDir(a.id, tgt.x - a.x, tgt.y - a.y); Fx.playAtkMotion(a, tgt); // 휘두르지만 빗나감
       EventBus.emit('evasion', { unit: tgt });
       return;
     }
@@ -426,7 +426,7 @@ const AI = {
       && !UnitManager.isCC(tgt) && mh(tgt.x, tgt.y, a.x, a.y) <= tgt.range && Math.random() < 0.3;
     let supKiller = null;
     // 후속 연출(지원·반격·사망 처리)은 공격이 실제로 맞는 순간(시트 타격 프레임 + 투사체 비행) 뒤로
-    const hd = VFX.atkHitDelay(a.cls, a), t0 = performance.now();
+    const hd = Fx.atkHitDelay(a.cls, a), t0 = performance.now();
 
     if (bCounter) {
       await slE(420);
@@ -480,15 +480,15 @@ const AI = {
     if (tgt.hp <= 0) {
       EventBus.emit('unit_killed', { killer: supKiller || a, target: tgt });
       UnitManager.rmDead();
-      Renderer.rUnits();
+      Fx.redrawUnits();
       TurnManager.chkEnd();
     } else if (a.hp <= 0) {
       EventBus.emit('unit_killed', { killer: tgt, target: a });
       UnitManager.rmDead();
-      Renderer.rUnits();
+      Fx.redrawUnits();
       TurnManager.chkEnd();
     } else {
-      Renderer.rUnits();
+      Fx.redrawUnits();
     }
   },
 
@@ -505,7 +505,7 @@ const AI = {
     if (u.hp <= 0) {
       EventBus.emit('unit_killed', { killer: null, target: u, reason: 'trap_or_spearwall' });
       UnitManager.rmDead();
-      Renderer.rUnits();
+      Fx.redrawUnits();
     }
   },
 
@@ -516,16 +516,16 @@ const AI = {
       Grid.atkCells(a).some(c => c.x === e.x && c.y === e.y) && !UnitManager.coverOf(a, e));
     if (!w) return;
     w._overwatch = false;
-    Renderer.floatT(w.x, w.y, t('messages.overwatch_fire'), 'tactic');
-    VFX.faceDir(w.id, e.x - w.x, e.y - w.y);
+    Fx.float(w.x, w.y, t('messages.overwatch_fire'), 'tactic');
+    Fx.faceDir(w.id, e.x - w.x, e.y - w.y);
     const blk = UnitManager.interceptOf(w, e), hit = blk || e;   // 투사체 차단: 길목의 기사가 대신 맞음
-    if (blk) Renderer.floatT(blk.x, blk.y, t('messages.intercepted'), 'tactic');
+    if (blk) Fx.float(blk.x, blk.y, t('messages.intercepted'), 'tactic');
     const dmg = Math.max(1, Math.round(EnchantFX.modDamage(w, hit, calcDmg(w, hit)) * TACTICS_ACT.overwatchMul * (blk ? TACTICS_ACT.interceptMul : 1) * UnitManager.shieldMul(hit)));
     hit.hp = Math.max(0, hit.hp - dmg);
     EventBus.emit('unit_attacked', { attacker: w, target: hit, damage: dmg });
     EnchantFX.afterHit(w, hit, dmg);
-    await sl(Math.max(550, VFX.atkHitDelay(w.cls, w) + 150));
-    if (hit.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: hit }); UnitManager.rmDead(); Renderer.rUnits(); TurnManager.chkEnd(); }
+    await sl(Math.max(550, Fx.atkHitDelay(w.cls, w) + 150));
+    if (hit.hp <= 0) { EventBus.emit('unit_killed', { killer: w, target: hit }); UnitManager.rmDead(); Fx.redrawUnits(); TurnManager.chkEnd(); }
   },
 
   // ── 돌파 체크 ──

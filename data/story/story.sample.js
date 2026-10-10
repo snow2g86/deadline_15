@@ -1,5 +1,5 @@
 // data/story/story.sample.js — 연출 개발·검증용 작은 샘플 대본 (실제 대본은 story.ko.js)
-// 사용: localStorage.setItem('game_story_dev', 'sample') 후 새로고침. 해제: localStorage.removeItem('game_story_dev')
+// 사용: Store.set('game_story_dev', 'sample') 후 새로고침. 해제: Store.remove('game_story_dev')
 window.STORY_KO = {
   cast: {
     commander: { name: '레온', portrait: 'commander', role: '클랜 지휘관' },

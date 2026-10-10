@@ -14,11 +14,11 @@ registerSkill('novice_throw', {
 		if (!tgt) { _skillRefund(u, sk, G); return; }
 		const dmg = Math.max(1, Math.round(u.atk*0.8*G.skMul(u,'novice_throw')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
-		G.floatT(tgt.x, tgt.y, '-' + dmg, 'damage');
-		G.floatT(u.x, u.y, t('skills.novice_throw'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#aaa','#888','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
-		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
+		G.sfxAtk(u.cls); Fx.shake(tgt.id);
+		Fx.float(tgt.x, tgt.y, '-' + dmg, 'damage');
+		Fx.float(u.x, u.y, t('skills.novice_throw'), 'heal');
+		Fx.burst(tgt.x, tgt.y, {count:8,colors:['#aaa','#888','#fff'],shape:'spark',speed:3,spread:8,decay:0.03,size:3});
+		if (tgt.hp<=0) {Fx.screenShake();G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:400, chkEnd:true});
 	}
@@ -39,9 +39,9 @@ registerSkill('novice_firstaid', {
 		const heal = Math.min(v.mhp - v.hp, Math.max(1, Math.round(v.mhp * (sk.aidPct || 15) / 100 * G.skMul(u, 'novice_firstaid'))));
 		v.hp += heal;
 		G.sfxHeal();
-		G.floatT(v.x, v.y, '+' + heal, 'heal');
-		G.floatT(u.x, u.y, t('messages.novice_firstaid'), 'heal');
-		G.vfxSpawn(G.uSX(v.x, v.y) + UCX, G.uSY(v.x, v.y) + UCY, {count: 10, colors: ['#4ade80', '#fff', '#fca5a5'], shape: 'cross', speed: 2, spread: 8, decay: 0.03, size: 4});
+		Fx.float(v.x, v.y, '+' + heal, 'heal');
+		Fx.float(u.x, u.y, t('messages.novice_firstaid'), 'heal');
+		Fx.burst(v.x, v.y, {count: 10, colors: ['#4ade80', '#fff', '#fca5a5'], shape: 'cross', speed: 2, spread: 8, decay: 0.03, size: 4});
 		G._grantExp(u, 'heal');
 		_skillDone(u, G, {delay: 400});
 	}
@@ -60,17 +60,17 @@ registerSkill('novice_tackle', {
 		// 이미 붙어 있으면 제자리, 아니면 대상 옆 빈 칸으로 이동
 		if (mh(u.x, u.y, tgt.x, tgt.y) > 1) {
 			const adj = G._findAdj(tgt.x, tgt.y, u);
-			if (!adj) { _skillRefund(u, sk, G); G.floatT(u.x, u.y, t('messages.no_empty_tile'), 'damage'); return; }
+			if (!adj) { _skillRefund(u, sk, G); Fx.float(u.x, u.y, t('messages.no_empty_tile'), 'damage'); return; }
 			G._mvU(u, adj.x, adj.y); u.mo = true;
 		}
-		setTimeout(() => {
+		Fx.later(() => {
 			const dmg = Math.max(1, Math.round(u.atk * 0.9 * G.skMul(u, 'novice_tackle')) - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
-			G.sfxAtk(u.cls); G.shakeU(tgt.id); G.screenShake();
-			G.floatT(tgt.x, tgt.y, '-' + dmg, 'damage');
-			G.floatT(u.x, u.y, t('messages.novice_tackle'), 'heal');
-			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY, {count: 12, colors: ['#fbbf24', '#fff', '#a3a3a3'], shape: 'spark', speed: 4, spread: 10, decay: 0.025, size: 4});
-			if (tgt.hp <= 0) { G.screenShake(); G.sfxKill(); G.sfxDeath(); G.vfxDeath(tgt); G.deathA(tgt.id); G._rmDead(); }
+			G.sfxAtk(u.cls); Fx.shake(tgt.id); Fx.screenShake();
+			Fx.float(tgt.x, tgt.y, '-' + dmg, 'damage');
+			Fx.float(u.x, u.y, t('messages.novice_tackle'), 'heal');
+			Fx.burst(tgt.x, tgt.y, {count: 12, colors: ['#fbbf24', '#fff', '#a3a3a3'], shape: 'spark', speed: 4, spread: 10, decay: 0.025, size: 4});
+			if (tgt.hp <= 0) { Fx.screenShake(); G.sfxKill(); G.sfxDeath(); Fx.death(tgt); G.deathA(tgt.id); G._rmDead(); }
 			G._grantExp(u, 'attack');
 			_skillDone(u, G, {delay: 450, chkEnd: true});
 		}, 340);

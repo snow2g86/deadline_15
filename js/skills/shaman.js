@@ -18,11 +18,11 @@ registerSkill('shaman_curse', {
 		tgt._curseDmgCount = 0; // 0/5
 
 		G.sfxAtk(u.cls);
-		G.floatT(tgt.x, tgt.y, t('messages.shaman_curse'), 'debuff');
-		G.floatT(u.x, u.y, t('messages.shaman_curse'), 'heal');
-		G.vfxFlash('rgba(147,51,234,.15)');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:22,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#9333ea','#a855f7'],shape:'star',speed:2,spread:10,decay:0.025,size:4,vy:-1}),80);
+		Fx.float(tgt.x, tgt.y, t('messages.shaman_curse'), 'debuff');
+		Fx.float(u.x, u.y, t('messages.shaman_curse'), 'heal');
+		Fx.flash('rgba(147,51,234,.15)');
+		Fx.burst(tgt.x, tgt.y, {count:22,colors:['#9333ea','#581c87','#a855f7'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		Fx.later(()=>Fx.burst(tgt.x, tgt.y, {count:8,colors:['#9333ea','#a855f7'],shape:'star',speed:2,spread:10,decay:0.025,size:4,vy:-1}),80);
 
 		G._grantExp(u, 'attack');
 		_skillDone(u, G);
@@ -44,11 +44,11 @@ registerSkill('shaman_exalt', {
 		tgt.buffs.push({ type: 'atk_up', duration: 999, value: 10, source: 'shaman_exalt', _attackCount: 2 });
 
 		G.sfxHeal();
-		G.floatT(tgt.x, tgt.y, t('messages.shaman_exalt'), 'buff');
-		G.floatT(u.x, u.y, t('messages.shaman_exalt'), 'heal');
-		G.vfxFlash('rgba(245,158,11,.15)');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:22,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#f59e0b','#fbbf24'],shape:'diamond',speed:1.5,spread:10,decay:0.025,size:3,vy:-1.5}),80);
+		Fx.float(tgt.x, tgt.y, t('messages.shaman_exalt'), 'buff');
+		Fx.float(u.x, u.y, t('messages.shaman_exalt'), 'heal');
+		Fx.flash('rgba(245,158,11,.15)');
+		Fx.burst(tgt.x, tgt.y, {count:22,colors:['#f59e0b','#fbbf24','#fff'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		Fx.later(()=>Fx.burst(tgt.x, tgt.y, {count:8,colors:['#f59e0b','#fbbf24'],shape:'diamond',speed:1.5,spread:10,decay:0.025,size:3,vy:-1.5}),80);
 
 		G._grantExp(u, 'heal');
 		_skillDone(u, G);
@@ -68,12 +68,12 @@ registerSkill('shaman_poisonmist', {
 	exec(u, tx, ty, sk, G) {
 		if (!G.poisonMists) G.poisonMists = [];
 		G.poisonMists.push({ cx:tx, cy:ty, atk:u.atk, turns:3, team:'ally' });
-		G.sfxAtk(u.cls); G.screenShake();
-		G.floatT(tx, ty, t('messages.shaman_poisonmist'), 'heal');
-		G.vfxFlash('rgba(34,197,94,.15)');
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:30,colors:['#22c55e','#4ade80','#86efac'],shape:'ring',speed:5,spread:22,decay:0.012,size:12});
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:12,colors:['#22c55e44','#4ade8044'],shape:'circle',speed:1.5,spread:18,decay:0.01,size:5,gravity:-0.02});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:8,colors:['#22c55e','#4ade80'],shape:'star',speed:2,spread:14,decay:0.02,size:4,vy:-1}),100);
+		G.sfxAtk(u.cls); Fx.screenShake();
+		Fx.float(tx, ty, t('messages.shaman_poisonmist'), 'heal');
+		Fx.flash('rgba(34,197,94,.15)');
+		Fx.burst(tx, ty, {count:30,colors:['#22c55e','#4ade80','#86efac'],shape:'ring',speed:5,spread:22,decay:0.012,size:12});
+		Fx.burst(tx, ty, {count:12,colors:['#22c55e44','#4ade8044'],shape:'circle',speed:1.5,spread:18,decay:0.01,size:5,gravity:-0.02});
+		Fx.later(()=>Fx.burst(tx, ty, {count:8,colors:['#22c55e','#4ade80'],shape:'star',speed:2,spread:14,decay:0.02,size:4,vy:-1}),100);
 		G._grantExp(u, 'attack');
 		_skillDone(u, G);
 	}
@@ -91,15 +91,15 @@ registerSkill('shaman_spiritsurge', {
 		const dmg = Math.max(1, Math.round(u.atk * 1.0 * G.skMul(u, 'shaman_spiritsurge')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
 		tgt._rootedTurns = 1;
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
-		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		G.floatT(tgt.x, tgt.y, t('messages.rooted'), 'debuff');
-		G.floatT(u.x, u.y, t('messages.shaman_spiritsurge'), 'heal');
-		G.vfxFlash('rgba(147,51,234,.18)');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:20,colors:['#9333ea','#a855f7','#fff'],shape:'spark',speed:5,spread:16,decay:0.02,size:6});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:4,colors:['#9333ea44'],shape:'ring',speed:0,spread:4,decay:0.015,size:14});
-		setTimeout(()=>G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:6,colors:['#9333ea','#a855f7'],shape:'cross',speed:2,spread:8,decay:0.03,size:4}),60);
-		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id)}
+		G.sfxAtk(u.cls); Fx.shake(tgt.id);
+		Fx.float(tgt.x, tgt.y, `-${dmg}`, 'damage');
+		Fx.float(tgt.x, tgt.y, t('messages.rooted'), 'debuff');
+		Fx.float(u.x, u.y, t('messages.shaman_spiritsurge'), 'heal');
+		Fx.flash('rgba(147,51,234,.18)');
+		Fx.burst(tgt.x, tgt.y, {count:20,colors:['#9333ea','#a855f7','#fff'],shape:'spark',speed:5,spread:16,decay:0.02,size:6});
+		Fx.burst(tgt.x, tgt.y, {count:4,colors:['#9333ea44'],shape:'ring',speed:0,spread:4,decay:0.015,size:14});
+		Fx.later(()=>Fx.burst(tgt.x, tgt.y, {count:6,colors:['#9333ea','#a855f7'],shape:'cross',speed:2,spread:8,decay:0.03,size:4}),60);
+		if (tgt.hp<=0) {Fx.screenShake();G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id)}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, rmDead:true, chkEnd:true});
 	}
@@ -112,11 +112,11 @@ function curseMoveTick(u) {
 	const dmg = Math.max(1, Math.round(u.mhp * 0.05));
 	u.hp = Math.max(1, u.hp - dmg);
 	u._curseDmgCount = (u._curseDmgCount || 0) + 1;
-	G.floatT(u.x, u.y, '-' + dmg, 'damage');
-	G.floatT(u.x, u.y, t('messages.curse_tick', { n: u._curseDmgCount }), 'debuff');
+	Fx.float(u.x, u.y, '-' + dmg, 'damage');
+	Fx.float(u.x, u.y, t('messages.curse_tick', { n: u._curseDmgCount }), 'debuff');
 	if (u._curseDmgCount >= 5) {
 		u._cursed = false; u._curseAtk = 0; u._curseDmgCount = 0;
-		G.floatT(u.x, u.y, t('messages.curse_end'), 'heal');
+		Fx.float(u.x, u.y, t('messages.curse_end'), 'heal');
 	}
 }
 
@@ -132,11 +132,11 @@ function tickPoisonMists() {
 			const d = Math.min(dmg, v.hp - 1);
 			if (d <= 0) return;
 			v.hp -= d;
-			G.floatT(v.x, v.y, '☁️ -' + d, 'damage');
+			Fx.float(v.x, v.y, '☁️ -' + d, 'damage');
 		});
-		G.vfxSpawn(G.uSX(m.cx, m.cy) + UCX, G.uSY(m.cx, m.cy) + UCY, {count: 10, colors: ['#22c55e44', '#4ade8044'], shape: 'circle', speed: 1, spread: 16, decay: 0.012, size: 5, gravity: -0.02});
+		Fx.burst(m.cx, m.cy, {count: 10, colors: ['#22c55e44', '#4ade8044'], shape: 'circle', speed: 1, spread: 16, decay: 0.012, size: 5, gravity: -0.02});
 		m.turns--;
 	});
 	S.poisonMists = S.poisonMists.filter(m => m.turns > 0);
-	G.rUnits();
+	Fx.redrawUnits();
 }

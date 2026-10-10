@@ -20,18 +20,15 @@ registerSkill('mage_fireburst', {
 		hit.forEach(tgt => {
 			const dmg = Math.max(1, Math.round(u.atk * 1.2 * G.skMul(u, 'mage_fireburst')) - tgt.def);
 			tgt.hp = Math.max(0, tgt.hp - dmg);
-			G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage'); G.shakeU(tgt.id);
-			G.vfxSpawn(G.uSX(tgt.x, tgt.y) + UCX, G.uSY(tgt.x, tgt.y) + UCY,
-				{count: 14, colors: ['#ef4444', '#f97316', '#fbbf24'], shape: 'spark', speed: 5, spread: 14, decay: 0.02, size: 5});
-			if (tgt.hp <= 0) { G.screenShake(); G.sfxKill(); G.sfxDeath(); G.vfxDeath(tgt); G.deathA(tgt.id); }
+			Fx.float(tgt.x, tgt.y, `-${dmg}`, 'damage'); Fx.shake(tgt.id);
+			Fx.burst(tgt.x, tgt.y, {count: 14, colors: ['#ef4444', '#f97316', '#fbbf24'], shape: 'spark', speed: 5, spread: 14, decay: 0.02, size: 5});
+			if (tgt.hp <= 0) { Fx.screenShake(); G.sfxKill(); G.sfxDeath(); Fx.death(tgt); G.deathA(tgt.id); }
 		});
-		G.sfxAtk(u.cls); G.screenShake(true);
-		G.floatT(u.x, u.y, t('messages.mage_fireball'), 'heal');
-		G.vfxFlash('rgba(239,68,68,.2)');
-		G.vfxSpawn(G.uSX(tx, ty) + UCX, G.uSY(tx, ty) + UCY,
-			{count: 30, colors: ['#ef4444', '#f97316', '#fbbf24', '#fff'], shape: 'spark', speed: 7, spread: 22, decay: 0.015, size: 7});
-		G.vfxSpawn(G.uSX(tx, ty) + UCX, G.uSY(tx, ty) + UCY,
-			{count: 6, colors: ['#ef444444'], shape: 'ring', speed: 0, spread: 5, decay: 0.012, size: 18});
+		G.sfxAtk(u.cls); Fx.screenShake(true);
+		Fx.float(u.x, u.y, t('messages.mage_fireball'), 'heal');
+		Fx.flash('rgba(239,68,68,.2)');
+		Fx.burst(tx, ty, {count: 30, colors: ['#ef4444', '#f97316', '#fbbf24', '#fff'], shape: 'spark', speed: 7, spread: 22, decay: 0.015, size: 7});
+		Fx.burst(tx, ty, {count: 6, colors: ['#ef444444'], shape: 'ring', speed: 0, spread: 5, decay: 0.012, size: 18});
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay: 500, rmDead: true, chkEnd: true});
 	}
@@ -49,14 +46,14 @@ registerSkill('mage_freeze', {
 		const dmg = Math.max(1, Math.round(u.atk*1.2*G.skMul(u,'mage_freeze')) - tgt.def);
 		tgt.hp = Math.max(0, tgt.hp - dmg);
 		tgt.frozen = Math.max(tgt.frozen || 0, 2);
-		G.sfxAtk(u.cls); G.shakeU(tgt.id);
-		G.floatT(tgt.x, tgt.y, `-${dmg}`, 'damage');
-		G.floatT(tgt.x, tgt.y, t('messages.frozen'), 'debuff');
-		G.floatT(u.x, u.y, t('messages.mage_freeze'), 'heal');
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:20,colors:['#88ccff','#aaddff','#fff'],shape:'star',speed:4,spread:16,decay:0.02,size:5});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:5,colors:['#88ccff44'],shape:'ring',speed:0,spread:4,decay:0.015,size:16});
-		G.vfxSpawn(G.uSX(tgt.x,tgt.y)+UCX, G.uSY(tgt.x,tgt.y)+UCY, {count:8,colors:['#aaddff','#fff'],shape:'diamond',speed:1.5,spread:12,decay:0.018,size:3,vy:-1.5});
-		if (tgt.hp<=0) {G.screenShake();G.sfxKill();G.sfxDeath();G.vfxDeath(tgt);G.deathA(tgt.id);G._rmDead()}
+		G.sfxAtk(u.cls); Fx.shake(tgt.id);
+		Fx.float(tgt.x, tgt.y, `-${dmg}`, 'damage');
+		Fx.float(tgt.x, tgt.y, t('messages.frozen'), 'debuff');
+		Fx.float(u.x, u.y, t('messages.mage_freeze'), 'heal');
+		Fx.burst(tgt.x, tgt.y, {count:20,colors:['#88ccff','#aaddff','#fff'],shape:'star',speed:4,spread:16,decay:0.02,size:5});
+		Fx.burst(tgt.x, tgt.y, {count:5,colors:['#88ccff44'],shape:'ring',speed:0,spread:4,decay:0.015,size:16});
+		Fx.burst(tgt.x, tgt.y, {count:8,colors:['#aaddff','#fff'],shape:'diamond',speed:1.5,spread:12,decay:0.018,size:3,vy:-1.5});
+		if (tgt.hp<=0) {Fx.screenShake();G.sfxKill();G.sfxDeath();Fx.death(tgt);G.deathA(tgt.id);G._rmDead()}
 		G._grantExp(u, 'attack');
 		_skillDone(u, G, {delay:500, chkEnd:true});
 	}
@@ -85,9 +82,9 @@ registerSkill('mage_grandwall', {
 		G.ter[ty][tx] = 'wall';
 		if (!G.magicWalls) G.magicWalls = [];
 		G.magicWalls.push({x:tx,y:ty});
-		G.floatT(tx, ty, t('messages.mage_grandwall'), 'heal');
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:20,colors:['#88f','#aaf','#66f'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
-		G.vfxSpawn(G.uSX(tx,ty)+UCX, G.uSY(tx,ty)+UCY, {count:6,colors:['#88f','#66f'],shape:'diamond',speed:1.5,spread:8,decay:0.025,size:3,vy:-1.5});
+		Fx.float(tx, ty, t('messages.mage_grandwall'), 'heal');
+		Fx.burst(tx, ty, {count:20,colors:['#88f','#aaf','#66f'],shape:'ring',speed:4,spread:16,decay:0.018,size:7});
+		Fx.burst(tx, ty, {count:6,colors:['#88f','#66f'],shape:'diamond',speed:1.5,spread:8,decay:0.025,size:3,vy:-1.5});
 		G.sfxUIClick(); G._grantExp(u, 'attack');
 		_skillDone(u, G, {rTer:true});
 	}

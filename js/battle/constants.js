@@ -40,7 +40,7 @@ function actExp(stageId, action) {
 
 function loadGoldData() {
   try {
-    const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+    const d = JSON.parse(Store.get(SAVE_KEY));
     if(d) return { gold: d.gold||0, cleared: new Set(d.cleared||[]) };
     return { gold: 2000, cleared: new Set() };
   } catch(e) { return { gold: 2000, cleared: new Set() } }
@@ -89,9 +89,9 @@ function markDead(uid) {
     }
   } catch(e) {}
 }
-function saveBattle(data) { try { localStorage.setItem('game_battle', JSON.stringify(data)) } catch(e) {} }
-function loadBattle() { try { const r = localStorage.getItem('game_battle'); return r ? JSON.parse(r) : null } catch(e) { return null } }
-function clearBattle() { try { localStorage.removeItem('game_battle') } catch(e) {} }
+function saveBattle(data) { try { Store.set('game_battle', JSON.stringify(data)) } catch(e) {} }
+function loadBattle() { try { const r = Store.get('game_battle'); return r ? JSON.parse(r) : null } catch(e) { return null } }
+function clearBattle() { try { Store.remove('game_battle') } catch(e) {} }
 
 // ════════════════════════════════════════════
 //  Section 4: AI Profiles
