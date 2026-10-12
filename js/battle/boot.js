@@ -219,6 +219,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'e' || e.key === 'E') Renderer.rotCam(1);
   if (e.key === 'Escape') Renderer.closeSettings();
   if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !(e.target.closest && e.target.closest('input,textarea,select'))) Renderer.toggleThreat();
+  // 방향 고르는 중: Esc/Backspace 취소, Enter·Space·W·D·O 는 지금 방향 그대로
+  if (GameStore._facePick && !e.repeat) {
+    if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); ActionManager.cancelFace(); return; }
+    if (['Enter', ' ', 'w', 'W', 'd', 'D', 'o', 'O'].includes(e.key)) { e.preventDefault(); ActionManager.faceDone(0, 0); return; }
+  }
   // 행동 메뉴 단축키: 메뉴에 표시된 data-key 버튼을 그대로 클릭 (M/A/S/I/W, 서브메뉴 1~9, Esc/Backspace 취소)
   const m = document.getElementById('action-menu');
   if (!m || !m.classList.contains('show') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;

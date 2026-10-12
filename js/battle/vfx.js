@@ -327,18 +327,16 @@ const VFX = {
     return { x: (vc - vr) * TW, y: (vc + vr) * TH };
   },
 
-  // 발밑 방향 표시: 바라보는 쪽을 가리키는 화살표를 땅 위에 눕혀 그림 (어디가 앞·뒤·옆인지 — 후방·측면 공격 판정 기준)
-  //  격자 방향 → 화면 격자(카메라 회전 반영) 각도 α, 바닥 평면 = scaleY(.5) rotate(45deg) (타일 마름모와 같은 원근)
+  // 발밑 방향 표시: 바라보는 쪽(타일 모서리 방향)을 가리키는 화살표 — 후방·측면 공격 판정 기준
+  //  바닥에 눕혀 그리면(납작하게 기울이면) 모양이 찌그러져 반대로 보여서, 모양은 그대로 두고 각도만 타일 방향으로
+  faceAngle(gdx, gdy) { const v = this._g2screen(gdx, gdy); return Math.atan2(v.y, v.x) * 180 / Math.PI; },
   _faceMark(el, u) {
     const sh = el.querySelector('.u-shadow'); if (!sh) return;
     let m = sh.querySelector('.u-face');
     if (!m) { m = document.createElement('div'); m.className = 'u-face'; sh.appendChild(m); }
-    const x = u._gdx || 0, y = u._gdy || 0;
-    if (!x && !y) { m.style.display = 'none'; return; }
-    let vc, vr;
-    switch (GameStore.camDir) { case 0: vc = x; vr = y; break; case 1: vc = -y; vr = x; break; case 2: vc = -x; vr = -y; break; default: vc = y; vr = -x; }
+    if (!u._gdx && !u._gdy) { m.style.display = 'none'; return; }
     m.style.display = '';
-    m.style.transform = 'scaleY(.5) rotate(45deg) rotate(' + (Math.atan2(vr, vc) * 180 / Math.PI).toFixed(1) + 'deg) translateX(30px)';
+    m.style.transform = 'rotate(' + this.faceAngle(u._gdx, u._gdy).toFixed(1) + 'deg) translateX(24px)';
   },
 
   _applyFace(id) {

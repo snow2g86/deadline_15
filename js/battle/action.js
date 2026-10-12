@@ -54,6 +54,7 @@ const ActionManager = {
 
   // ── FSM 기반 cellCk (Tactics Ogre 스타일: 모드별 독립 처리) ──
   cellCk(x, y) {
+    if (GameStore._facePick) return;   // 방향 고르는 중에는 맵 클릭 무시
     const S = GameStore;
     if (FSM.is(BattleState.BATTLE_END, BattleState.AI_TURN, BattleState.ANIMATING)) return;
     if (!FSM.acceptsCellClick()) return;
@@ -254,6 +255,43 @@ const ActionManager = {
     }, hitMs);
   },
 
+  // 대기·방어 태세·경계 전에 바라볼 방향 고르기 (후방·측면 공격 보너스가 방향으로 정해짐)
+  //  kind: 'wait' | 'defend' | 'overwatch'. 같은 방향을 고르거나 Enter/Space 면 지금 방향 그대로
+  askFace(kind) {
+    const S = GameStore, u = S.sel; if (!u) return;
+    if (kind !== 'wait' && u.ha) return;
+    Fx.hideActionMenu();
+    S._facePick = { kind };
+    Fx.showFacePicker(u, this.faceOptions(u));
+  },
+  // 네 방향마다 그 방향을 볼 때 등(후방)·옆구리(측면)에 놓이는 적 수 → 가장 안전한 방향 추천
+  faceOptions(u) {
+    const foes = GameStore.units.filter(v => v.hp > 0 && v.team !== u.team);
+    const opts = [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([fx, fy]) => {
+      let back = 0, side = 0;
+      foes.forEach(v => {
+        const dx = v.x - u.x, dy = v.y - u.y, d = Math.hypot(dx, dy); if (!d) return;
+        const cos = (dx * fx + dy * fy) / d;
+        if (cos < -0.5) back++; else if (cos <= 0.5) side++;
+      });
+      return { dx: fx, dy: fy, back, side, cur: (u._gdx || 0) === fx && (u._gdy || 0) === fy };
+    });
+    const best = opts.reduce((a, o) => (o.back * 3 + o.side < a.back * 3 + a.side ? o : a), opts[0]);
+    best.best = true;
+    return opts;
+  },
+  faceDone(dx, dy) {
+    const S = GameStore, u = S.sel, p = S._facePick; if (!u || !p) return;
+    S._facePick = null; Fx.hideFacePicker();
+    if (dx || dy) { u._gdx = dx; u._gdy = dy; Fx.applyFace(u.id); }
+    if (p.kind === 'wait') this.actWait(); else this.actStance(p.kind);
+  },
+  cancelFace() {
+    const S = GameStore; if (!S._facePick) return;
+    S._facePick = null; Fx.hideFacePicker();
+    if (S.sel) Fx.showActionMenu(S.sel);
+  },
+
   // 방어 태세 / 경계: 이번 차례를 끝내고 다음 자기 차례까지 유지
   actStance(kind) {
     const S = GameStore, u = S.sel; if (!u || u.ha) return;
@@ -266,6 +304,7 @@ const ActionManager = {
   actCancel() {
     const S = GameStore;
     if (!S.sel) return;
+    if (S._facePick) { this.cancelFace(); return; }
     if (S._shove) { S._shove = false; this._setTargets(S.sel); FSM.transition(BattleState.UNIT_SELECTED); Fx.redrawTerrain(); Fx.showActionMenu(S.sel); return; }
 
     if (S._skillMenuOpen) { this.hideSkillMenu(); return; }

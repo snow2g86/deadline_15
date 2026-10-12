@@ -324,6 +324,167 @@ const SPRITE_SHEETS = {
     idle: { src: 'image/character/anim/knight_01_b_idle.png', frames: 12, w: 151, h: 160, body: [39, 157], cx: 75.5, icx: 480.5, dur: 2400 },
     run: { src: 'image/character/anim/knight_01_b_run.png', frames: 14, w: 159, h: 160, body: [32, 154], cx: 79.0, icx: 480.5, dur: 1500 },
   },
+  archer_01_b: {
+    attack: { src: 'image/character/anim/archer_01_b_attack.png', frames: 14, w: 116, h: 160, body: [25, 157], cx: 59.5, icx: 479.0, dur: 840, hit: 5 },
+    combat: { src: 'image/character/anim/archer_01_b_combat.png', frames: 12, w: 111, h: 160, body: [14, 157], cx: 59.0, icx: 479.0, dur: 1600 },
+    hit: { src: 'image/character/anim/archer_01_b_hit.png', frames: 9, w: 139, h: 160, body: [92, 160], cx: 45.5, icx: 479.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/archer_01_b_idle.png', frames: 12, w: 110, h: 160, body: [14, 157], cx: 52.0, icx: 479.0, dur: 2400 },
+    run: { src: 'image/character/anim/archer_01_b_run.png', frames: 14, w: 103, h: 160, body: [9, 156], cx: 47.0, icx: 479.0, dur: 1500 },
+  },
+  archer_02_b: {
+    attack: { src: 'image/character/anim/archer_02_b_attack.png', frames: 14, w: 117, h: 160, body: [46, 157], cx: 63.0, icx: 483.5, dur: 840, hit: 3 },
+    combat: { src: 'image/character/anim/archer_02_b_combat.png', frames: 12, w: 136, h: 160, body: [16, 156], cx: 71.0, icx: 483.5, dur: 1600 },
+    hit: { src: 'image/character/anim/archer_02_b_hit.png', frames: 9, w: 318, h: 160, body: [14, 157], cx: 117.0, icx: 483.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/archer_02_b_idle.png', frames: 12, w: 132, h: 160, body: [14, 156], cx: 66.5, icx: 483.5, dur: 2400 },
+    run: { src: 'image/character/anim/archer_02_b_run.png', frames: 14, w: 115, h: 160, body: [26, 156], cx: 58.0, icx: 483.5, dur: 1500 },
+  },
+  assassin_01_b: {
+    attack: { src: 'image/character/anim/assassin_01_b_attack.png', frames: 14, w: 261, h: 160, body: [18, 155], cx: 99.0, icx: 481.5, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/assassin_01_b_combat.png', frames: 12, w: 175, h: 160, body: [19, 157], cx: 87.0, icx: 481.5, dur: 1600 },
+    hit: { src: 'image/character/anim/assassin_01_b_hit.png', frames: 9, w: 143, h: 160, body: [62, 154], cx: 79.0, icx: 481.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/assassin_01_b_idle.png', frames: 12, w: 157, h: 160, body: [27, 157], cx: 80.5, icx: 481.5, dur: 2400 },
+    run: { src: 'image/character/anim/assassin_01_b_run.png', frames: 14, w: 171, h: 160, body: [22, 157], cx: 79.0, icx: 481.5, dur: 1500 },
+  },
+  assassin_02_b: {
+    attack: { src: 'image/character/anim/assassin_02_b_attack.png', frames: 14, w: 245, h: 160, body: [9, 154], cx: 119.0, icx: 483.5, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/assassin_02_b_combat.png', frames: 12, w: 137, h: 160, body: [9, 156], cx: 65.5, icx: 483.5, dur: 1600 },
+    hit: { src: 'image/character/anim/assassin_02_b_hit.png', frames: 9, w: 223, h: 160, body: [55, 158], cx: 84.5, icx: 483.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/assassin_02_b_idle.png', frames: 12, w: 137, h: 160, body: [10, 156], cx: 64.5, icx: 483.5, dur: 2400 },
+    run: { src: 'image/character/anim/assassin_02_b_run.png', frames: 14, w: 147, h: 160, body: [14, 157], cx: 74.5, icx: 483.5, dur: 1500 },
+  },
+  brawler_01_b: {
+    attack: { src: 'image/character/anim/brawler_01_b_attack.png', frames: 14, w: 142, h: 160, body: [51, 157], cx: 33.5, icx: 480.5, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/brawler_01_b_combat.png', frames: 12, w: 95, h: 160, body: [6, 157], cx: 49.0, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/brawler_01_b_hit.png', frames: 9, w: 186, h: 160, body: [38, 158], cx: 92.5, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/brawler_01_b_idle.png', frames: 12, w: 102, h: 160, body: [6, 157], cx: 49.0, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/brawler_01_b_run.png', frames: 14, w: 118, h: 160, body: [12, 156], cx: 63.5, icx: 480.5, dur: 1500 },
+  },
+  brawler_02_b: {
+    attack: { src: 'image/character/anim/brawler_02_b_attack.png', frames: 14, w: 197, h: 160, body: [7, 156], cx: 50.5, icx: 480.5, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/brawler_02_b_combat.png', frames: 12, w: 108, h: 160, body: [7, 156], cx: 56.0, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/brawler_02_b_hit.png', frames: 9, w: 152, h: 160, body: [16, 155], cx: 106.0, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/brawler_02_b_idle.png', frames: 12, w: 118, h: 160, body: [7, 156], cx: 61.5, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/brawler_02_b_run.png', frames: 14, w: 105, h: 160, body: [6, 156], cx: 54.0, icx: 480.5, dur: 1500 },
+  },
+  knight_02_b: {
+    attack: { src: 'image/character/anim/knight_02_b_attack.png', frames: 14, w: 256, h: 160, body: [38, 152], cx: 106.5, icx: 480.5, dur: 840, hit: 7 },
+    combat: { src: 'image/character/anim/knight_02_b_combat.png', frames: 12, w: 144, h: 160, body: [11, 157], cx: 72.5, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/knight_02_b_hit.png', frames: 9, w: 263, h: 160, body: [38, 158], cx: 98.0, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/knight_02_b_idle.png', frames: 12, w: 137, h: 160, body: [11, 157], cx: 67.5, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/knight_02_b_run.png', frames: 14, w: 131, h: 160, body: [12, 157], cx: 65.0, icx: 480.5, dur: 1500 },
+  },
+  lancer_01_b: {
+    attack: { src: 'image/character/anim/lancer_01_b_attack.png', frames: 14, w: 227, h: 160, body: [18, 156], cx: 118.5, icx: 470.0, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/lancer_01_b_combat.png', frames: 12, w: 137, h: 160, body: [9, 156], cx: 69.0, icx: 470.0, dur: 1600 },
+    hit: { src: 'image/character/anim/lancer_01_b_hit.png', frames: 9, w: 138, h: 160, body: [94, 160], cx: 42.0, icx: 470.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/lancer_01_b_idle.png', frames: 12, w: 119, h: 160, body: [11, 156], cx: 60.0, icx: 470.0, dur: 2400 },
+    run: { src: 'image/character/anim/lancer_01_b_run.png', frames: 14, w: 120, h: 160, body: [6, 156], cx: 56.5, icx: 470.0, dur: 1500 },
+  },
+  lancer_02_b: {
+    attack: { src: 'image/character/anim/lancer_02_b_attack.png', frames: 14, w: 280, h: 160, body: [11, 157], cx: 131.5, icx: 480.0, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/lancer_02_b_combat.png', frames: 12, w: 165, h: 160, body: [9, 157], cx: 83.0, icx: 480.0, dur: 1600 },
+    hit: { src: 'image/character/anim/lancer_02_b_hit.png', frames: 9, w: 159, h: 160, body: [62, 159], cx: 99.0, icx: 480.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/lancer_02_b_idle.png', frames: 12, w: 140, h: 160, body: [15, 157], cx: 72.5, icx: 480.0, dur: 2400 },
+    run: { src: 'image/character/anim/lancer_02_b_run.png', frames: 14, w: 140, h: 160, body: [21, 158], cx: 52.0, icx: 480.0, dur: 1500 },
+  },
+  mage_01_b: {
+    attack: { src: 'image/character/anim/mage_01_b_attack.png', frames: 14, w: 167, h: 160, body: [70, 159], cx: 54.0, icx: 483.5, dur: 840, hit: 11 },
+    combat: { src: 'image/character/anim/mage_01_b_combat.png', frames: 12, w: 143, h: 160, body: [15, 157], cx: 74.5, icx: 483.5, dur: 1600 },
+    hit: { src: 'image/character/anim/mage_01_b_hit.png', frames: 9, w: 155, h: 160, body: [42, 147], cx: 75.5, icx: 483.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/mage_01_b_idle.png', frames: 12, w: 140, h: 160, body: [14, 157], cx: 73.0, icx: 483.5, dur: 2400 },
+    run: { src: 'image/character/anim/mage_01_b_run.png', frames: 14, w: 136, h: 160, body: [6, 156], cx: 71.0, icx: 483.5, dur: 1500 },
+  },
+  mage_02_b: {
+    attack: { src: 'image/character/anim/mage_02_b_attack.png', frames: 14, w: 169, h: 160, body: [75, 159], cx: 51.5, icx: 481.5, dur: 840, hit: 11 },
+    combat: { src: 'image/character/anim/mage_02_b_combat.png', frames: 12, w: 154, h: 160, body: [13, 157], cx: 79.0, icx: 481.5, dur: 1600 },
+    hit: { src: 'image/character/anim/mage_02_b_hit.png', frames: 9, w: 157, h: 160, body: [78, 159], cx: 69.0, icx: 481.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/mage_02_b_idle.png', frames: 12, w: 149, h: 160, body: [13, 157], cx: 78.0, icx: 481.5, dur: 2400 },
+    run: { src: 'image/character/anim/mage_02_b_run.png', frames: 14, w: 137, h: 160, body: [20, 154], cx: 70.5, icx: 481.5, dur: 1500 },
+  },
+  novice_01_b: {
+    attack: { src: 'image/character/anim/novice_01_b_attack.png', frames: 14, w: 162, h: 160, body: [71, 159], cx: 66.0, icx: 481.0, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/novice_01_b_combat.png', frames: 12, w: 149, h: 160, body: [14, 157], cx: 74.0, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/novice_01_b_hit.png', frames: 9, w: 236, h: 160, body: [45, 136], cx: 112.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/novice_01_b_idle.png', frames: 12, w: 163, h: 160, body: [11, 157], cx: 81.0, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/novice_01_b_run.png', frames: 14, w: 140, h: 160, body: [8, 156], cx: 78.5, icx: 481.0, dur: 1500 },
+  },
+  novice_02_b: {
+    attack: { src: 'image/character/anim/novice_02_b_attack.png', frames: 14, w: 178, h: 160, body: [9, 155], cx: 89.5, icx: 481.0, dur: 840, hit: 5 },
+    combat: { src: 'image/character/anim/novice_02_b_combat.png', frames: 12, w: 136, h: 160, body: [11, 157], cx: 64.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/novice_02_b_hit.png', frames: 9, w: 170, h: 160, body: [24, 156], cx: 103.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/novice_02_b_idle.png', frames: 12, w: 132, h: 160, body: [12, 157], cx: 68.5, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/novice_02_b_run.png', frames: 14, w: 132, h: 160, body: [7, 149], cx: 67.0, icx: 481.0, dur: 1500 },
+  },
+  priest_01_b: {
+    attack: { src: 'image/character/anim/priest_01_b_attack.png', frames: 14, w: 164, h: 160, body: [77, 159], cx: 55.0, icx: 481.0, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/priest_01_b_combat.png', frames: 12, w: 146, h: 160, body: [19, 157], cx: 67.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/priest_01_b_hit.png', frames: 9, w: 158, h: 160, body: [77, 152], cx: 64.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/priest_01_b_idle.png', frames: 12, w: 133, h: 160, body: [21, 157], cx: 66.5, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/priest_01_b_run.png', frames: 14, w: 128, h: 160, body: [20, 156], cx: 61.0, icx: 481.0, dur: 1500 },
+  },
+  priest_02_b: {
+    attack: { src: 'image/character/anim/priest_02_b_attack.png', frames: 14, w: 169, h: 160, body: [58, 151], cx: 64.5, icx: 482.0, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/priest_02_b_combat.png', frames: 12, w: 144, h: 160, body: [14, 157], cx: 74.0, icx: 482.0, dur: 1600 },
+    hit: { src: 'image/character/anim/priest_02_b_hit.png', frames: 9, w: 141, h: 160, body: [91, 157], cx: 52.5, icx: 482.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/priest_02_b_idle.png', frames: 12, w: 137, h: 160, body: [17, 157], cx: 71.0, icx: 482.0, dur: 2400 },
+    run: { src: 'image/character/anim/priest_02_b_run.png', frames: 14, w: 133, h: 160, body: [8, 155], cx: 60.5, icx: 482.0, dur: 1500 },
+  },
+  sapper_01_b: {
+    attack: { src: 'image/character/anim/sapper_01_b_attack.png', frames: 14, w: 206, h: 160, body: [34, 157], cx: 82.0, icx: 484.0, dur: 840, hit: 8 },
+    combat: { src: 'image/character/anim/sapper_01_b_combat.png', frames: 12, w: 131, h: 160, body: [8, 156], cx: 62.0, icx: 484.0, dur: 1600 },
+    hit: { src: 'image/character/anim/sapper_01_b_hit.png', frames: 9, w: 154, h: 160, body: [82, 149], cx: 65.0, icx: 484.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/sapper_01_b_idle.png', frames: 12, w: 129, h: 160, body: [8, 156], cx: 62.5, icx: 484.0, dur: 2400 },
+    run: { src: 'image/character/anim/sapper_01_b_run.png', frames: 14, w: 128, h: 160, body: [9, 156], cx: 69.0, icx: 484.0, dur: 1500 },
+  },
+  sapper_02_b: {
+    attack: { src: 'image/character/anim/sapper_02_b_attack.png', frames: 14, w: 174, h: 160, body: [15, 156], cx: 80.5, icx: 479.5, dur: 840, hit: 7 },
+    combat: { src: 'image/character/anim/sapper_02_b_combat.png', frames: 12, w: 129, h: 160, body: [6, 156], cx: 60.0, icx: 479.5, dur: 1600 },
+    hit: { src: 'image/character/anim/sapper_02_b_hit.png', frames: 9, w: 141, h: 160, body: [85, 154], cx: 49.5, icx: 479.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/sapper_02_b_idle.png', frames: 12, w: 121, h: 160, body: [6, 156], cx: 60.5, icx: 479.5, dur: 2400 },
+    run: { src: 'image/character/anim/sapper_02_b_run.png', frames: 14, w: 124, h: 160, body: [9, 154], cx: 65.0, icx: 479.5, dur: 1500 },
+  },
+  shaman_01_b: {
+    attack: { src: 'image/character/anim/shaman_01_b_attack.png', frames: 14, w: 163, h: 160, body: [66, 159], cx: 47.5, icx: 481.5, dur: 840, hit: 11 },
+    combat: { src: 'image/character/anim/shaman_01_b_combat.png', frames: 12, w: 145, h: 160, body: [12, 157], cx: 73.5, icx: 481.5, dur: 1600 },
+    hit: { src: 'image/character/anim/shaman_01_b_hit.png', frames: 9, w: 169, h: 160, body: [55, 151], cx: 86.5, icx: 481.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/shaman_01_b_idle.png', frames: 12, w: 142, h: 160, body: [12, 157], cx: 70.0, icx: 481.5, dur: 2400 },
+    run: { src: 'image/character/anim/shaman_01_b_run.png', frames: 14, w: 127, h: 160, body: [9, 156], cx: 65.5, icx: 481.5, dur: 1500 },
+  },
+  shaman_02_b: {
+    attack: { src: 'image/character/anim/shaman_02_b_attack.png', frames: 14, w: 160, h: 160, body: [21, 157], cx: 66.0, icx: 481.0, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/shaman_02_b_combat.png', frames: 12, w: 157, h: 160, body: [9, 157], cx: 76.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/shaman_02_b_hit.png', frames: 9, w: 166, h: 160, body: [80, 158], cx: 63.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/shaman_02_b_idle.png', frames: 12, w: 157, h: 160, body: [8, 157], cx: 72.0, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/shaman_02_b_run.png', frames: 14, w: 149, h: 160, body: [18, 156], cx: 77.0, icx: 481.0, dur: 1500 },
+  },
+  summoner_01_b: {
+    attack: { src: 'image/character/anim/summoner_01_b_attack.png', frames: 14, w: 155, h: 160, body: [77, 159], cx: 52.0, icx: 478.5, dur: 840, hit: 11 },
+    combat: { src: 'image/character/anim/summoner_01_b_combat.png', frames: 12, w: 134, h: 160, body: [10, 156], cx: 66.5, icx: 478.5, dur: 1600 },
+    hit: { src: 'image/character/anim/summoner_01_b_hit.png', frames: 9, w: 166, h: 160, body: [82, 158], cx: 63.0, icx: 478.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/summoner_01_b_idle.png', frames: 12, w: 128, h: 160, body: [10, 156], cx: 63.0, icx: 478.5, dur: 2400 },
+    run: { src: 'image/character/anim/summoner_01_b_run.png', frames: 14, w: 118, h: 160, body: [11, 157], cx: 60.0, icx: 478.5, dur: 1500 },
+  },
+  summoner_02_b: {
+    attack: { src: 'image/character/anim/summoner_02_b_attack.png', frames: 14, w: 173, h: 160, body: [28, 156], cx: 84.0, icx: 481.0, dur: 840, hit: 5 },
+    combat: { src: 'image/character/anim/summoner_02_b_combat.png', frames: 12, w: 142, h: 160, body: [16, 156], cx: 73.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/summoner_02_b_hit.png', frames: 9, w: 224, h: 160, body: [45, 151], cx: 83.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/summoner_02_b_idle.png', frames: 12, w: 136, h: 160, body: [18, 157], cx: 68.0, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/summoner_02_b_run.png', frames: 14, w: 140, h: 160, body: [6, 147], cx: 69.0, icx: 481.0, dur: 1500 },
+  },
+  warrior_01_b: {
+    attack: { src: 'image/character/anim/warrior_01_b_attack.png', frames: 14, w: 194, h: 160, body: [44, 155], cx: 87.5, icx: 481.0, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/warrior_01_b_combat.png', frames: 12, w: 166, h: 160, body: [8, 157], cx: 78.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/warrior_01_b_hit.png', frames: 9, w: 271, h: 160, body: [25, 156], cx: 91.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/warrior_01_b_idle.png', frames: 12, w: 162, h: 160, body: [8, 157], cx: 77.5, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/warrior_01_b_run.png', frames: 14, w: 146, h: 160, body: [10, 153], cx: 73.0, icx: 481.0, dur: 1500 },
+  },
+  warrior_02_b: {
+    attack: { src: 'image/character/anim/warrior_02_b_attack.png', frames: 14, w: 179, h: 160, body: [55, 146], cx: 82.0, icx: 481.0, dur: 840, hit: 10 },
+    combat: { src: 'image/character/anim/warrior_02_b_combat.png', frames: 12, w: 152, h: 160, body: [11, 157], cx: 78.5, icx: 481.0, dur: 1600 },
+    hit: { src: 'image/character/anim/warrior_02_b_hit.png', frames: 9, w: 148, h: 160, body: [60, 159], cx: 57.0, icx: 481.0, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/warrior_02_b_idle.png', frames: 12, w: 141, h: 160, body: [15, 157], cx: 78.0, icx: 481.0, dur: 2400 },
+    run: { src: 'image/character/anim/warrior_02_b_run.png', frames: 14, w: 125, h: 160, body: [9, 154], cx: 62.5, icx: 481.0, dur: 1500 },
+  },
 };
 
 // 구간별 이징 (준비 감속 → 내려치기 가속 → 마무리 → 복귀). 전체 이징을 걸면 키프레임 시점이 밀린다
@@ -403,8 +564,10 @@ const Rig = {
 
   // 동작 시트. 바라보는 방향이 화면 안쪽(뒤)이면 뒷모습 시트(SPRITE_SHEETS['<키>_b'])가 있을 때 그것을 씀
   //  (VFX._applyFace 가 u._back 을 정함. 뒷모습 그림은 image/character/<키>_b.png, tools/local-turn.py 로 만듦)
+  // 뒷모습은 품질을 다듬은 뒤 켬 (2026-10-12 사용자: "나중에 수정해서 사용") — 시트·파이프라인은 그대로 둠
+  BACK_VIEW: false,
   sheet(u, kind) {
-    const k = this.key(u), b = u && u._back && SPRITE_SHEETS[k + '_b'];
+    const k = this.key(u), b = this.BACK_VIEW && u && u._back && SPRITE_SHEETS[k + '_b'];
     if (b && b[kind]) return b[kind];
     const a = SPRITE_SHEETS[k]; return a ? a[kind] || null : null;
   },
@@ -448,7 +611,7 @@ const Rig = {
       (st.en || []).forEach(c => both(typeof c === 'string' ? c : c && c.cls));
       if (st.boss) [].concat(st.boss).forEach(b => b && both(b.cls || b));
     }
-    return [...new Set(keys)].flatMap(k => [k, k + '_b']).filter(k => SPRITE_SHEETS[k]);   // 뒷모습 시트도 함께
+    return [...new Set(keys)].flatMap(k => this.BACK_VIEW ? [k, k + '_b'] : [k]).filter(k => SPRITE_SHEETS[k]);   // 뒷모습을 켜면 그 시트도 함께
   },
   // 전장 유닛 먼저 기다리고(최대 timeout), 나머지(증원·보스)는 뒤에서 이어 받기
   preloadBattle(S, onProgress, timeout) {

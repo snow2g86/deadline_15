@@ -76,7 +76,6 @@
 .unit-sprite .u-face{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;transform-origin:0 0;--fc:rgba(96,165,250,.95)}
 .unit-sprite.enemy .u-face{--fc:rgba(248,113,113,.95)}
 /* 오른쪽을 가리키는 삼각형을 땅 평면에 눕혀 돌림 (VFX._faceMark: scaleY(.5) rotate(45°) = 쿼터뷰 바닥) */
-.unit-sprite .u-face::after{content:'';position:absolute;left:-6px;top:-8px;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid var(--fc);filter:drop-shadow(0 0 2px rgba(0,0,0,.9))}
 .hp-bg{width:48px;height:4px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
 .hp-fill{height:100%;border-radius:2px;transition:width .3s}
 .mp-bg{width:48px;height:3px;background:#181818;border-radius:2px;margin-top:2px;overflow:hidden}
@@ -554,3 +553,19 @@
 .chest-marker{position:absolute;left:0;top:0;width:64px;text-align:center;font-size:22px;pointer-events:none;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.7)) drop-shadow(0 0 6px rgba(250,204,21,.55));animation:chestBob 1.6s ease-in-out infinite}
 @keyframes chestBob{0%,100%{margin-top:0}50%{margin-top:-4px}}
+
+/* 방향 고르기 (대기·방어 태세·경계): 유닛 둘레 네 칸 */
+#face-picker{position:absolute;left:0;top:0;width:0;height:0;z-index:600}
+#face-picker .fp-btn{position:absolute;transform:translate(-50%,-50%);width:64px;height:40px;border:0;background:rgba(15,23,42,.55);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;outline:2px solid rgba(148,163,184,.5);outline-offset:-2px;transition:transform .12s, background .12s}
+#face-picker .fp-btn:hover{background:rgba(59,130,246,.45);transform:translate(-50%,-50%) scale(1.08)}
+#face-picker .fp-btn.best{outline-color:rgba(250,204,21,.95)}
+#face-picker .fp-btn.cur{background:rgba(59,130,246,.35)}
+#face-picker .fp-arrow{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+/* 화살표 모양: 오른쪽(+x)을 가리키는 꼬리 홈 있는 화살촉 (SVG 배경) — 돌리는 각도 = 타일 방향 */
+#face-picker .fp-arrow::after,.unit-sprite .u-face::after{content:'';position:absolute;left:-12px;top:-8px;width:34px;height:16px;
+  background:var(--fc,#93c5fd);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 0 L34 8 L0 16 L8 8 Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 0 L34 8 L0 16 L8 8 Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;filter:drop-shadow(0 0 2px #000)}
+#face-picker .fp-btn.best .fp-arrow{--fc:#facc15}
+.unit-sprite .u-face::after{left:-8px;top:-5px;width:22px;height:10px}
+#face-picker .fp-lab{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:800;color:#fff;background:rgba(0,0,0,.7);padding:1px 5px;border-radius:6px;margin-top:2px;pointer-events:none}
+#face-picker .fp-tip{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:800;color:#fde68a;background:rgba(0,0,0,.75);padding:3px 8px;border-radius:8px;pointer-events:none}

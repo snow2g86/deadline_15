@@ -503,8 +503,8 @@ const Renderer = {
       };
       const ns = UnitManager.shoveTargets(u).length;
       if (ns) tac('🫸', t('battle.shove'), 'P', t('battle.am_shove_sub', { n: ns }), () => ActionManager.actShove());
-      tac('🛡️', t('battle.defend'), 'D', t('battle.am_defend_sub'), () => ActionManager.actStance('defend'));
-      tac('👁', t('battle.overwatch'), 'O', t('battle.am_overwatch_sub'), () => ActionManager.actStance('overwatch'));
+      tac('🛡️', t('battle.defend'), 'D', t('battle.am_defend_sub'), () => ActionManager.askFace('defend'));
+      tac('👁', t('battle.overwatch'), 'O', t('battle.am_overwatch_sub'), () => ActionManager.askFace('overwatch'));
     }
 
     // 대기 버튼
@@ -516,6 +516,34 @@ const Renderer = {
     btnCancel.style.display = S.preMv ? '' : 'none';
     btnCancel.onclick = () => ActionManager.actCancel();
   },
+
+  // 방향 고르기: 유닛 둘레 네 칸에 바닥에 눕힌 화살표 + 그 방향일 때 등 뒤·옆에 놓이는 적 수
+  showFacePicker(u, opts) {
+    this.hideFacePicker();
+    const w = document.getElementById('iso-world'); if (!w) return;
+    const box = document.createElement('div'); box.id = 'face-picker';
+    const z = TI[GameStore.ter[u.y][u.x]].z, cx = Grid.tSX(u.x, u.y) + TW, cy = Grid.tSY(u.x, u.y, z) + TH;
+    opts.forEach(o => {
+      const v = VFX._g2screen(o.dx, o.dy);
+      const b = document.createElement('button');
+      b.className = 'fp-btn' + (o.best ? ' best' : '') + (o.cur ? ' cur' : '');
+      b.style.left = (cx + v.x) + 'px'; b.style.top = (cy + v.y) + 'px';
+      const ar = document.createElement('i'); ar.className = 'fp-arrow';
+      ar.style.transform = 'rotate(' + VFX.faceAngle(o.dx, o.dy).toFixed(1) + 'deg)';
+      const lab = document.createElement('span'); lab.className = 'fp-lab';
+      lab.textContent = o.back ? t('battle.face_back', { n: o.back }) : o.side ? t('battle.face_side', { n: o.side }) : t('battle.face_safe');
+      b.append(ar, lab);
+      b.title = t('battle.face_pick');
+      b.onclick = e => { e.stopPropagation(); ActionManager.faceDone(o.dx, o.dy); };
+      box.appendChild(b);
+    });
+    const tip = document.createElement('div'); tip.className = 'fp-tip';
+    tip.style.left = cx + 'px'; tip.style.top = (cy - UH - 18) + 'px';
+    tip.textContent = t('battle.face_tip');
+    box.appendChild(tip);
+    w.appendChild(box);
+  },
+  hideFacePicker() { const b = document.getElementById('face-picker'); if (b) b.remove(); },
 
   showSkillSubMenu(u) {
     const m = document.getElementById('action-menu');

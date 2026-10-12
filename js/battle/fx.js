@@ -58,6 +58,8 @@ const Fx = (function() {
     showEnemyPopup: pass('Renderer', 'showEnemyPopup'),
     hideEnemyPopup: pass('Renderer', 'hideEnemyPopup'),
     defIcon: pass('Renderer', 'defI'),
+    showFacePicker: pass('Renderer', 'showFacePicker'),
+    hideFacePicker: pass('Renderer', 'hideFacePicker'),
 
     // ── 소리 ──
     sfx(name) { const a = on() && MODS.Audio(); if (a && typeof a['sfx' + name] === 'function') return a['sfx' + name](); },
