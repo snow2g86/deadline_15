@@ -63,6 +63,10 @@
 @media (prefers-reduced-motion:reduce){.iso-tile-bg.t-water::after{animation:none}}
 .iso-tile-hl{pointer-events:auto}
 .iso-tile-obj{position:absolute;pointer-events:none}
+.map-prop{position:absolute;pointer-events:none;image-rendering:pixelated;transition:opacity .2s,filter .2s;user-select:none;filter:var(--tf,)}
+.map-prop.fow{filter:var(--tf,) brightness(.4)}   /* 시야 밖(안개) — 타일 fow-dark 와 같은 어두움 */
+.map-prop.fade{opacity:.4}
+.unit-sprite.in-forest .u-icon{opacity:.55;transition:opacity .25s}   /* 숲 안에 들어간 캐릭터 */
 
 /* ═══ Unit Sprites ═══ */
 .unit-sprite{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
@@ -73,8 +77,9 @@
 .unit-sprite .u-shadow{width:40px;height:6px;background:rgba(0,0,0,.35);border-radius:50%;margin-top:-2px}
 /* 발밑 방향 표시: 바라보는 쪽을 가리키는 작은 화살표 (VFX._faceMark) */
 .unit-sprite .u-shadow{position:relative}
-.unit-sprite .u-face{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;transform-origin:0 0;--fc:rgba(96,165,250,.95)}
+.unit-sprite .u-face{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;--fc:rgba(96,165,250,.95)}
 .unit-sprite.enemy .u-face{--fc:rgba(248,113,113,.95)}
+.unit-sprite.moving .u-face,.unit-sprite.face-picking .u-face{visibility:hidden}   /* 이동 중·방향 고르는 중엔 방향 표시 숨김 */
 /* 오른쪽을 가리키는 삼각형을 땅 평면에 눕혀 돌림 (VFX._faceMark: scaleY(.5) rotate(45°) = 쿼터뷰 바닥) */
 .hp-bg{width:48px;height:4px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
 .hp-fill{height:100%;border-radius:2px;transition:width .3s}
@@ -119,10 +124,11 @@
 #turn-flash.skill-flash{animation:skillFlash .4s ease-out}
 
 /* ═══ Tile Highlights ═══ */
-.iso-tile.hl-move{background:rgba(59,130,246,.15);box-shadow:inset 0 0 0 2px rgba(59,130,246,.6);
+.iso-tile.hl-move{background:color-mix(in srgb,var(--mv,#3b82f6) 15%,transparent);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--mv,#3b82f6) 60%,transparent);
   animation:movePulse 1.4s ease-in-out infinite}
-@keyframes movePulse{0%,100%{background:rgba(59,130,246,.1);box-shadow:inset 0 0 0 2px rgba(59,130,246,.4)}
-  50%{background:rgba(59,130,246,.25);box-shadow:inset 0 0 0 2px rgba(59,130,246,.8)}}
+/* --mv: 맵 테마별 이동 표시 색 (data/tiles.js MAP_THEMES.move, render.js rTerBg 에서 #iso-world 에 지정) */
+@keyframes movePulse{0%,100%{background:color-mix(in srgb,var(--mv,#3b82f6) 10%,transparent);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--mv,#3b82f6) 40%,transparent)}
+  50%{background:color-mix(in srgb,var(--mv,#3b82f6) 25%,transparent);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--mv,#3b82f6) 80%,transparent)}}
 .iso-tile.hl-attack{background:rgba(239,68,68,.28);box-shadow:inset 0 0 0 2px rgba(239,68,68,.85);
   animation:atkPulse 1.2s ease-in-out infinite}
 @keyframes atkPulse{0%,100%{background:rgba(239,68,68,.18);box-shadow:inset 0 0 0 2px rgba(239,68,68,.6)}
@@ -140,7 +146,7 @@
 /* 쏠 수는 있지만 길목의 기사가 막는 칸: 파랑·빨강 줄무늬 */
 .iso-tile.hl-attack.hl-block{animation:none;background:repeating-linear-gradient(45deg,rgba(96,165,250,.36) 0 5px,rgba(239,68,68,.24) 5px 10px);box-shadow:inset 0 0 0 2px rgba(96,165,250,.85)}
 /* 도움닫기로만 가는 칸: 금색 줄무늬 (기본 이동 칸 깜빡임 애니메이션이 배경을 덮지 않게 끔) */
-.iso-tile.hl-move.hl-vault{animation:none;background:repeating-linear-gradient(-45deg,rgba(250,204,21,.38) 0 5px,rgba(59,130,246,.16) 5px 10px);box-shadow:inset 0 0 0 2px rgba(250,204,21,.8)}
+.iso-tile.hl-move.hl-vault{animation:none;background:repeating-linear-gradient(-45deg,rgba(250,204,21,.38) 0 5px,color-mix(in srgb,var(--mv,#3b82f6) 16%,transparent) 5px 10px);box-shadow:inset 0 0 0 2px rgba(250,204,21,.8)}
 .iso-tile.hl-cover{background:repeating-linear-gradient(45deg,rgba(148,163,184,.18) 0 6px,rgba(148,163,184,.06) 6px 12px);
   box-shadow:inset 0 0 0 2px rgba(148,163,184,.6)}
 .iso-tile-hl.fow-dark{background:rgba(10,14,26,.55)!important;box-shadow:none!important;animation:none!important}
@@ -560,12 +566,11 @@
 #face-picker .fp-btn:hover{background:rgba(59,130,246,.45);transform:translate(-50%,-50%) scale(1.08)}
 #face-picker .fp-btn.best{outline-color:rgba(250,204,21,.95)}
 #face-picker .fp-btn.cur{background:rgba(59,130,246,.35)}
-#face-picker .fp-arrow{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
-/* 화살표 모양: 오른쪽(+x)을 가리키는 꼬리 홈 있는 화살촉 (SVG 배경) — 돌리는 각도 = 타일 방향 */
-#face-picker .fp-arrow::after,.unit-sprite .u-face::after{content:'';position:absolute;left:-12px;top:-8px;width:34px;height:16px;
-  background:var(--fc,#93c5fd);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 0 L34 8 L0 16 L8 8 Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
-  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 0 L34 8 L0 16 L8 8 Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;filter:drop-shadow(0 0 2px #000)}
+#face-picker .fp-arrow{position:absolute;left:50%;top:50%;width:0;height:0}
+/* 방향 삼각형: VFX.faceTri 가 그리는 SVG (바닥에 놓인 삼각형 — 밑변은 가리키는 타일 변과 평행) */
+#face-picker .fp-arrow svg,.unit-sprite .u-face svg{position:absolute;left:0;top:0;overflow:visible;filter:drop-shadow(0 0 2px rgba(0,0,0,.9))}
+#face-picker .fp-arrow polygon{fill:var(--fc,#93c5fd)}
+.unit-sprite .u-face polygon{fill:var(--fc)}
 #face-picker .fp-btn.best .fp-arrow{--fc:#facc15}
-.unit-sprite .u-face::after{left:-8px;top:-5px;width:22px;height:10px}
 #face-picker .fp-lab{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:800;color:#fff;background:rgba(0,0,0,.7);padding:1px 5px;border-radius:6px;margin-top:2px;pointer-events:none}
 #face-picker .fp-tip{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:800;color:#fde68a;background:rgba(0,0,0,.75);padding:3px 8px;border-radius:8px;pointer-events:none}

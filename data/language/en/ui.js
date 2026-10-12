@@ -145,6 +145,7 @@ Object.assign(window._LANG_en, {
             "artillery": "Artillery",
             "vanguard": "Vanguard",
             "bulwark": "Bulwark",
+            "legion": "Foreign Legion",
             "stat_atk": "ATK",
             "stat_def": "DEF",
             "stat_hp": "HP",

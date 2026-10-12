@@ -34,6 +34,9 @@ var Synergy = {
       else if (c[k] >= 3 && SYNERGY_TRIO[k]) out.push({ id: 'trio_' + k, cls: k, icon: '✦', eff: SYNERGY_TRIO[k] });
     });
     SYNERGY_ROLE.forEach(function(r) { if (r.test(c, n)) out.push({ id: r.id, icon: r.icon, eff: r.eff, to: r.to || null }); });
+    // 외인부대: 이색 직업 3명 이상 (5명이면 강화)
+    var lg = SYNERGY_LEGION.classes.reduce(function(sum, k) { return sum + (c[k] || 0); }, 0);
+    if (lg >= 3) out.push({ id: 'legion', icon: SYNERGY_LEGION.icon, eff: lg >= 5 ? SYNERGY_LEGION.full : SYNERGY_LEGION.part });
     return out;
   },
   name: function(s) {

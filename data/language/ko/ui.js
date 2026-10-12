@@ -135,6 +135,7 @@ Object.assign(window._LANG_ko, {
             "artillery": "포격진",
             "vanguard": "돌격대",
             "bulwark": "철옹성",
+            "legion": "외인부대",
             "stat_atk": "공격",
             "stat_def": "방어",
             "stat_hp": "체력",

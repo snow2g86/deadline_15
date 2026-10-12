@@ -21,6 +21,13 @@ var SYNERGY_MONO = {
   summoner: { icon: '📜', eff: { atk: 1.45, hp: 0.8 } },                   // 소환 군단
   novice:   { icon: '🌱', eff: { hp: 1.15, atk: 1.15, def: 1.15 } },       // 견습 동기
 };
+// 외인부대: 주력(기사·사제·마법사·궁수·전사)이 아닌 직업이 3명 이상 (2026-10-13 사용자 결정 — 이 조합이 22스테이지에서 첫 전멸해 보정)
+var SYNERGY_LEGION = {
+  classes: ['lancer', 'shaman', 'summoner', 'sapper', 'brawler'],
+  icon: '🗡️',
+  part: { atk: 1.1, hp: 1.15 },            // 3~4명
+  full: { atk: 1.2, hp: 1.25 },            // 5명 전원 (5명이면 만능 부대도 함께 켜져 이동 +1 은 거기서 받음)
+};
 var SYNERGY_TRIO = {   // 같은 직업 3~4인
   warrior:  { atk: 1.2, def: 0.9 },  knight:  { def: 1.25 },             archer:  { atk: 1.15 },
   mage:     { atk: 1.2, hp: 0.9 },   priest:  { heal: 1.3 },             assassin: { atk: 1.2, hp: 0.9 },

@@ -28,6 +28,8 @@ const Renderer = {
     const tilesNeeded = new Set();
     const W = TW * 2;
     const _tc = Grid._tColors || {};
+    const theme = MAP_THEMES[(S.cStage && S.cStage.mapType) || 'plains'] || MAP_THEMES.plains;
+    w.style.setProperty('--mv', theme.move || '#3b82f6');   // 이동 가능 칸 표시 색 (맵마다 다름)
 
     if (!this._hlDelegated) {
       w.addEventListener('click', e => {
@@ -61,10 +63,21 @@ const Renderer = {
       if (!bgTile) { bgTile = document.createElement('div'); bgTile.className = 'iso-tile iso-tile-bg'; bgTile.dataset.pos = pos; w.appendChild(bgTile); }
       while (bgTile.firstChild) bgTile.removeChild(bgTile.firstChild);
       // 절차적 텍스처 (terrain-tex.js) — 종류·테마 색·위치별 변형으로 캐시
-      bgTile.style.background = `url(${TerrainTex.get(tp, clr, TerrainTex.variantOf(c, r), h)}) 0 0 / ${W}px ${H}px no-repeat`;
+      // 성벽: 이웃이 성벽이 아닌 화면 가장자리에만 성가퀴 (화면 기준이라 카메라 회전 반영)
+      let open = 0;
+      if (tp === 'wall') {
+        const v0 = Grid.g2v(c, r), dm = Grid.vDim();
+        [[1, -1, 0], [2, 0, -1], [4, 0, 1], [8, 1, 0]].forEach(([bit, dc, dr]) => {
+          const vc = v0.vc + dc, vr = v0.vr + dr;
+          const g = (vc >= 0 && vr >= 0 && vc < dm.c && vr < dm.r) ? Grid.v2g(vc, vr) : null;
+          if (!g || (S.ter[g.r] || [])[g.c] !== 'wall') open |= bit;
+        });
+      }
+      const cap = (TerrainTex.CAP[tp] || 0);
+      bgTile.style.background = `url(${TerrainTex.get(tp, clr, TerrainTex.variantOf(c, r), h, open)}) 0 0 / ${W}px ${H + cap}px no-repeat`;
       bgTile.classList.toggle('t-water', tp === 'water');
       bgTile.classList.toggle('t-lava', tp === 'water' && !!S.cStage && S.cStage.mapType === 'volcano');
-      bgTile.style.clipPath = clip;
+      bgTile.style.clipPath = cap ? 'none' : clip;   // 성가퀴는 윗면 위로 솟아서 자르지 않음
 
       let hlTile = existingHlTiles.get(pos);
       if (!hlTile) {
@@ -75,11 +88,12 @@ const Renderer = {
       hlTile.style.clipPath = clip;
 
       const sx = Grid.tSX(c, r), sy = Grid.tSY(c, r, ti.z), zix = Grid.g2v(c, r);
-      bgTile.style.left = sx + 'px'; bgTile.style.top = sy + 'px'; bgTile.style.width = W + 'px'; bgTile.style.height = H + 'px'; bgTile.style.zIndex = zix.vc + zix.vr;
+      bgTile.style.left = sx + 'px'; bgTile.style.top = (sy - cap) + 'px'; bgTile.style.width = W + 'px'; bgTile.style.height = (H + cap) + 'px'; bgTile.style.zIndex = zix.vc + zix.vr;
       hlTile.style.left = sx + 'px'; hlTile.style.top = sy + 'px'; hlTile.style.width = W + 'px'; hlTile.style.height = H + 'px'; hlTile.style.zIndex = zix.vc + zix.vr + 1;
       this._hlTiles.set(pos, hlTile);
     }
 
+    Props.render();   // 숲 나무·평지 장식 (js/battle/props.js)
     existingBgTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove(); });
     existingHlTiles.forEach((el, pos) => { if (!tilesNeeded.has(pos)) el.remove(); });
     this._bgReady = true;
@@ -112,7 +126,15 @@ const Renderer = {
       hlTile.classList.toggle('hl-selected', hl === 'selected');
       hlTile.classList.toggle('fow-dark', !S.fogVisible.has(pos));
     });
+    Props.fog();   // 시야 밖 나무·장식도 어둡게
+    this.fogChests();
     this.rPreview();
+  },
+
+  // 시야 밖(안개) 보물상자는 숨김
+  fogChests() {
+    const vis = GameStore.fogVisible; if (!vis) return;
+    document.querySelectorAll('#iso-world .chest-marker').forEach(el => { el.style.display = vis.has(el.dataset.pos) ? '' : 'none'; });
   },
 
   // ── 적 위협 범위: 보이는 적들이 이동 후 공격할 수 있는 칸 ──
@@ -244,7 +266,8 @@ const Renderer = {
       el.style.display = inFog ? 'none' : '';
       el.style.width = UW + 'px'; el.style.height = UH + 'px';
       el.style.transform = 'translate(' + Grid.uSX(u.x, u.y) + 'px,' + Grid.uSY(u.x, u.y) + 'px)';
-      const v = Grid.g2v(u.x, u.y); el.style.zIndex = 100 + v.vc + v.vr;
+      el.style.zIndex = Grid.depth(u.x, u.y, 2);
+      el.classList.toggle('in-forest', (S.ter[u.y] || [])[u.x] === 'forest');   // 숲 안: 캐릭터 반투명
       const hpFill = el._hpFill || (el._hpFill = el.querySelector('.hp-fill'));
       if (hpFill) hpFill.style.width = (u.hp / u.mhp * 100) + '%';
       const mpFill = el._mpFill || (el._mpFill = el.querySelector('.mp-fill'));
@@ -311,9 +334,12 @@ const Renderer = {
       let el = document.getElementById(id);
       if (!el) { el = document.createElement('div'); el.id = id; el.className = 'chest-marker'; el.textContent = '🎁'; el.title = t('chest.tip'); w.appendChild(el); }
       el.style.transform = 'translate(' + Grid.uSX(c.x, c.y) + 'px,' + (Grid.uSY(c.x, c.y) + 30) + 'px)';
-      const v = Grid.g2v(c.x, c.y); el.style.zIndex = 99 + v.vc + v.vr;
+      el.style.zIndex = Grid.depth(c.x, c.y, 0);
+      el.dataset.pos = c.x + ',' + c.y;
     });
+    this.fogChests();
     [...w.querySelectorAll('.chest-marker')].forEach(el => { if (!keep.has(el.id)) el.remove(); });
+    Props.fade();   // 유닛이 오브젝트 뒤에 가려지면 오브젝트를 반투명으로
     S.units.filter(u => u.team === 'ally' && u.hp <= 0).forEach(u => {
       S.allyPos[u.id] = { x: 99, y: 99 };
     });
@@ -522,6 +548,7 @@ const Renderer = {
     this.hideFacePicker();
     const w = document.getElementById('iso-world'); if (!w) return;
     const box = document.createElement('div'); box.id = 'face-picker';
+    const ue = document.getElementById('u-' + u.id); if (ue) ue.classList.add('face-picking');   // 고르는 동안 발밑 방향 표시 숨김
     const z = TI[GameStore.ter[u.y][u.x]].z, cx = Grid.tSX(u.x, u.y) + TW, cy = Grid.tSY(u.x, u.y, z) + TH;
     opts.forEach(o => {
       const v = VFX._g2screen(o.dx, o.dy);
@@ -529,7 +556,7 @@ const Renderer = {
       b.className = 'fp-btn' + (o.best ? ' best' : '') + (o.cur ? ' cur' : '');
       b.style.left = (cx + v.x) + 'px'; b.style.top = (cy + v.y) + 'px';
       const ar = document.createElement('i'); ar.className = 'fp-arrow';
-      ar.style.transform = 'rotate(' + VFX.faceAngle(o.dx, o.dy).toFixed(1) + 'deg)';
+      ar.innerHTML = VFX.faceTri(o.dx, o.dy, 0, 0, 0.19, 0.38, 0.15);   // 버튼 가운데, 발밑과 같은 바닥 삼각형 (≈20px)
       const lab = document.createElement('span'); lab.className = 'fp-lab';
       lab.textContent = o.back ? t('battle.face_back', { n: o.back }) : o.side ? t('battle.face_side', { n: o.side }) : t('battle.face_safe');
       b.append(ar, lab);
@@ -543,7 +570,10 @@ const Renderer = {
     box.appendChild(tip);
     w.appendChild(box);
   },
-  hideFacePicker() { const b = document.getElementById('face-picker'); if (b) b.remove(); },
+  hideFacePicker() {
+    const b = document.getElementById('face-picker'); if (b) b.remove();
+    document.querySelectorAll('.unit-sprite.face-picking').forEach(el => el.classList.remove('face-picking'));
+  },
 
   showSkillSubMenu(u) {
     const m = document.getElementById('action-menu');

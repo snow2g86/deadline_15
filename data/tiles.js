@@ -13,8 +13,10 @@ const TI = {
   gate:   { cost:1,       z:0, label:'',  pass:true,  tc:'#3a3048', lc:'#2e2840', rc:'#262035', buff:null }
 };
 
+// move: 이동 가능 칸 표시 색 — 그 맵 타일에 없는 색, 공격(빨강)·회복(초록)·선택(금색)·도움닫기(노랑)와도 구별 (2026-10-13 사용자 요청)
 const MAP_THEMES = {
   plains: {
+    move: '#c084fc',   // 이동 가능 칸 표시 색: 보라 — 초록 들판·파란 물과 겹치지 않게
     colors: {
       plain:  { tc:'#2e4a30', lc:'#223a24', rc:'#1a2e1c' },
       forest: { tc:'#1a4430', lc:'#0e3020', rc:'#082414' },
@@ -25,6 +27,7 @@ const MAP_THEMES = {
     dist: { rock:.05, hill:.10, forest:.15, water:0, shallow:.04 }
   },
   canyon: {
+    move: '#60a5fa',   // 이동 가능 칸 표시 색: 파랑 — 갈색 협곡
     colors: {
       plain:  { tc:'#5a4838', lc:'#3e3028', rc:'#2e2018' },
       forest: { tc:'#3a4828', lc:'#283818', rc:'#1e2a10' },
@@ -35,6 +38,7 @@ const MAP_THEMES = {
     dist: { rock:.20, hill:.20, forest:.08, water:0, shallow:.03 }
   },
   jungle: {
+    move: '#f472b6',   // 이동 가능 칸 표시 색: 분홍 — 짙은 초록 밀림
     colors: {
       plain:  { tc:'#1e3e28', lc:'#142e1c', rc:'#0e2414' },
       forest: { tc:'#0e4420', lc:'#083416', rc:'#04280e' },
@@ -45,6 +49,7 @@ const MAP_THEMES = {
     dist: { rock:.05, hill:.05, forest:.40, water:.08, shallow:.08 }
   },
   desert: {
+    move: '#818cf8',   // 이동 가능 칸 표시 색: 남보라 — 모래색 사막
     colors: {
       plain:  { tc:'#6e5c38', lc:'#584828', rc:'#48381c' },
       forest: { tc:'#5a5030', lc:'#443c20', rc:'#362e14' },
@@ -55,6 +60,7 @@ const MAP_THEMES = {
     dist: { rock:.08, hill:.30, forest:0, water:0 }
   },
   volcano: {
+    move: '#22d3ee',   // 이동 가능 칸 표시 색: 청록 — 붉은 화산
     colors: {
       plain:  { tc:'#3a2828', lc:'#2a1c1c', rc:'#1e1414' },
       forest: { tc:'#2e3020', lc:'#1e2214', rc:'#14180c' },
@@ -65,6 +71,7 @@ const MAP_THEMES = {
     dist: { rock:.22, hill:.18, forest:.03, water:.10 }
   },
   frozen: {
+    move: '#e879f9',   // 이동 가능 칸 표시 색: 자홍 — 하늘색·흰 설원
     colors: {
       plain:  { tc:'#d0e0f0', lc:'#b0c8dc', rc:'#90afc8' },
       forest: { tc:'#4a6070', lc:'#3a4e5c', rc:'#2a3e48' },
@@ -75,6 +82,7 @@ const MAP_THEMES = {
     dist: { rock:.15, hill:.20, forest:.10, water:.08, shallow:.08 }
   },
   ruins: {
+    move: '#38bdf8',   // 이동 가능 칸 표시 색: 하늘색 — 회색 폐허
     colors: {
       plain:  { tc:'#4a4a50', lc:'#3a3a40', rc:'#2a2a30' },
       forest: { tc:'#2a3a30', lc:'#1a2a20', rc:'#0a1a10' },
@@ -85,6 +93,7 @@ const MAP_THEMES = {
     dist: { rock:.35, hill:.15, forest:.08, water:.05, shallow:.03 }
   },
   swamp: {
+    move: '#fdba74',   // 이동 가능 칸 표시 색: 살구색 — 탁한 초록 늪
     colors: {
       plain:  { tc:'#3a4a38', lc:'#2a3a28', rc:'#1a2a18' },
       forest: { tc:'#2a4030', lc:'#1a3020', rc:'#0a2010' },
@@ -95,6 +104,7 @@ const MAP_THEMES = {
     dist: { rock:.08, hill:.10, forest:.25, water:.12, shallow:.20 }
   },
   fortress: {
+    move: '#2dd4bf',   // 이동 가능 칸 표시 색: 청록 — 회색 요새
     colors: {
       plain:  { tc:'#5a5860', lc:'#4a4850', rc:'#3a3840' },
       forest: { tc:'#3a4838', lc:'#2a3828', rc:'#1a2818' },
@@ -105,6 +115,7 @@ const MAP_THEMES = {
     dist: { rock:.20, hill:.15, forest:.05, water:.05, shallow:.03 }
   },
   abyss: {
+    move: '#67e8f9',   // 이동 가능 칸 표시 색: 밝은 청록 — 검보라 심연
     colors: {
       plain:  { tc:'#2a1a28', lc:'#1a0a18', rc:'#0a0008' },
       forest: { tc:'#1a2020', lc:'#0a1010', rc:'#000000' },

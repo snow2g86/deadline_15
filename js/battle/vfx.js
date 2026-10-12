@@ -327,16 +327,31 @@ const VFX = {
     return { x: (vc - vr) * TW, y: (vc + vr) * TH };
   },
 
-  // 발밑 방향 표시: 바라보는 쪽(타일 모서리 방향)을 가리키는 화살표 — 후방·측면 공격 판정 기준
-  //  바닥에 눕혀 그리면(납작하게 기울이면) 모양이 찌그러져 반대로 보여서, 모양은 그대로 두고 각도만 타일 방향으로
+  // 발밑 방향 표시: 바라보는 쪽 타일 변을 가리키는 삼각형 — 후방·측면 공격 판정 기준
+  //  바닥(격자 좌표)에서 반듯한 이등변 삼각형을 만들어 쿼터뷰로 투영 → 캐릭터 쪽 밑변은 가리키는 타일 변과 평행,
+  //  끝은 격자선(≈26.6°)을 따라 그 변의 가운데를 가리킴 (2026-10-12 사용자 요청: 밑변 각도 = 타일 변 각도)
+  //  단위: 타일 한 칸 = 1 (화면에서 한 칸 방향 길이 ≈ 53.7px)
+  FACE_TIP: 0.5,    // 발밑: 끝 = 가운데에서 반 칸 (타일 변 가운데)
+  FACE_LEN: 0.2,    // 발밑: 삼각형 길이 (≈10.7px)
+  FACE_HALF: 0.12,  // 발밑: 밑변 반폭 (≈6.4px)
   faceAngle(gdx, gdy) { const v = this._g2screen(gdx, gdy); return Math.atan2(v.y, v.x) * 180 / Math.PI; },
+  // (cx, cy) 기준, 바라보는 방향으로 tip 칸 앞이 끝, len 칸 뒤가 밑변, 밑변 반폭 half 칸 — SVG 문자열
+  //  방향 값은 대상까지의 거리(예: 3칸 앞)일 수도 있어서 네 방향 중 가까운 한 칸 방향으로 줄여 씀
+  faceTri(gdx, gdy, cx, cy, tip, len, half) {
+    const ax = Math.abs(gdx || 0), ay = Math.abs(gdy || 0);
+    const dx = ax >= ay ? Math.sign(gdx || 0) : 0, dy = ax >= ay ? 0 : Math.sign(gdy || 0);
+    const V = this._g2screen(dx, dy), E = this._g2screen(-dy, dx);   // 바라보는 방향, 타일 변 방향
+    const P = (s, w) => (cx + V.x * s + E.x * w).toFixed(1) + ',' + (cy + V.y * s + E.y * w).toFixed(1);
+    return '<svg width="1" height="1" overflow="visible"><polygon points="' +
+      [P(tip, 0), P(tip - len, half), P(tip - len, -half)].join(' ') + '"/></svg>';
+  },
   _faceMark(el, u) {
     const sh = el.querySelector('.u-shadow'); if (!sh) return;
     let m = sh.querySelector('.u-face');
     if (!m) { m = document.createElement('div'); m.className = 'u-face'; sh.appendChild(m); }
     if (!u._gdx && !u._gdy) { m.style.display = 'none'; return; }
     m.style.display = '';
-    m.style.transform = 'rotate(' + this.faceAngle(u._gdx, u._gdy).toFixed(1) + 'deg) translateX(24px)';
+    m.innerHTML = this.faceTri(u._gdx, u._gdy, 0, 0, this.FACE_TIP, this.FACE_LEN, this.FACE_HALF);
   },
 
   _applyFace(id) {
@@ -381,7 +396,8 @@ const VFX = {
     el._moveT = setTimeout(() => { el.classList.remove('moving', 'running'); if (u && icon) Rig.setLoop(icon, u, Renderer.loopKind(u)); }, 420);
     if (u && (u._gdx || u._gdy)) this._applyFace(id);
     el.style.transform = `translate(${Grid.uSX(x, y)}px,${Grid.uSY(x, y)}px)`;
-    const v = Grid.g2v(x, y); el.style.zIndex = 100 + v.vc + v.vr;
+    el.style.zIndex = Grid.depth(x, y, 2);
+    el.classList.toggle('in-forest', (GameStore.ter[y] || [])[x] === 'forest');   // 숲 안: 캐릭터 반투명
   },
 
   shakeU(id) {

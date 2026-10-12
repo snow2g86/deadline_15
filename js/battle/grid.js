@@ -46,6 +46,8 @@ const Grid = {
   // ── 타일 → 스크린 좌표 ──
   tSX(c, r) { const v = this.g2v(c, r); return this.isoX(v.vc, v.vr); },
   tSY(c, r, z) { const v = this.g2v(c, r); return this.isoY(v.vc, v.vr, z); },
+  // 앞뒤 순서(z-index): 화면 앞쪽 칸일수록 위. 같은 칸 안에서는 layer 0 보물상자 < 1 맵 오브젝트 < 2 유닛
+  depth(c, r, layer) { const v = this.g2v(c, r); return 100 + (v.vc + v.vr) * 3 + (layer || 0); },
   uSX(c, r) { return this.tSX(c, r) + TW - UCX; },
   uSY(c, r) { const t = GameStore.ter[r] ? GameStore.ter[r][c] : null; return this.tSY(c, r, t ? TI[t].z : 0) - UOY; },
 
