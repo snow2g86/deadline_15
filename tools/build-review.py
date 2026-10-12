@@ -18,7 +18,7 @@ SPEC = {'idle': (12, 0, 2.3, []), 'combat': (12, 0, 2.3, []), 'run': (14, 0.25, 
 
 def parse(path):
     name = os.path.basename(path)[:-4]
-    m = re.match(r'^([a-z]+_0[12])(?:_(idle|combat|run|hit))?_(\d+)$', name)
+    m = re.match(r'^([a-z]+_0[12](?:_b)?)(?:_(idle|combat|run|hit))?_(\d+)$', name)   # _b = 뒷모습
     return (name, m.group(1), m.group(2) or 'attack', int(m.group(3))) if m else None
 
 def conv(item):

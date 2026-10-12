@@ -131,6 +131,126 @@
       "who": "seductive female maestro commander in a cropped navy tailcoat, black corset and thigh-high stockings holding a silver conductor baton",
       "pron": "she",
       "action": "Wind-up: she lifts the conductor baton gracefully above her head with a sultry confident pose. Strike: she snaps the baton forward toward the right in one sharp elegant conducting stroke, pointing at the enemy."
+    },
+    "knight_01_b": {
+      "who": "armored knight seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he twists his upper body far back, and raises the sword high behind his head. Strike: he steps forward and swings the sword down in one big powerful diagonal slash in front of him toward the right, with his full body weight."
+    },
+    "knight_02_b": {
+      "who": "female armored knight with a large shield and a sword seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she raises the shield in front and pulls the sword back high behind her. Strike: she steps forward and swings the sword in one strong diagonal slash past the shield toward the right."
+    },
+    "warrior_01_b": {
+      "who": "warrior with a huge two-handed greatsword resting on his shoulder seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he leans back and lifts the greatsword high over his head with both hands, his back partly turning to the camera. Strike: he steps forward and brings the greatsword down in one heavy two-handed overhead chop in front of him toward the right."
+    },
+    "warrior_02_b": {
+      "who": "female warrior with a huge two-handed greatsword resting on her shoulder seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she leans back and lifts the greatsword high over her head with both hands, her back partly turning to the camera. Strike: she steps forward and brings the greatsword down in one heavy two-handed overhead chop in front of her toward the right."
+    },
+    "archer_01_b": {
+      "who": "elf archer with a bow seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he raises the bow pointing right and pulls the bowstring back to his cheek, aiming. Strike: he releases the string, the bow snaps forward with a small recoil, the arrow flies off to the right out of view."
+    },
+    "archer_02_b": {
+      "who": "female elf archer with a bow seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she raises the bow pointing right and pulls the bowstring back to her cheek, aiming. Strike: she releases the string, the bow snaps forward with a small recoil, the arrow flies off to the right out of view."
+    },
+    "assassin_01_b": {
+      "who": "hooded assassin with a dagger seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he crouches low and draws the dagger back. Strike: he dashes a short step forward and makes one quick sharp slash with the dagger toward the right."
+    },
+    "assassin_02_b": {
+      "who": "female ninja with a small blade seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she crouches low and draws the blade back. Strike: she dashes a short step forward and makes one quick sharp slash toward the right."
+    },
+    "mage_01_b": {
+      "who": "old wizard with a wooden staff seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he raises the staff high with both hands as if gathering power. Strike: he thrusts the head of the staff forward toward the right in one strong casting motion."
+    },
+    "priest_01_b": {
+      "who": "old priest with a jeweled staff seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he lifts the staff high above his head. Strike: he brings the staff down and points its head forward toward the right in one strong holy smite motion."
+    },
+    "priest_02_b": {
+      "who": "female priest with a golden staff seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she lifts the staff high above her head. Strike: she brings the staff down and points its head forward toward the right in one strong holy smite motion."
+    },
+    "lancer_01_b": {
+      "who": "spearman holding a long spear upright seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he lowers the spear to horizontal pointing right and pulls it back with both hands, crouching. Strike: he lunges forward and drives the spear in one long straight thrust toward the right."
+    },
+    "lancer_02_b": {
+      "who": "female spear fighter holding a long spear upright seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she lowers the spear to horizontal pointing right and pulls it back with both hands, crouching. Strike: she lunges forward and drives the spear in one long straight thrust toward the right."
+    },
+    "sapper_01_b": {
+      "who": "engineer in a hard hat holding a big wrench seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he raises the big wrench high over his head with both hands. Strike: he steps forward and smashes the wrench down in front of him toward the right in one heavy blow."
+    },
+    "sapper_02_b": {
+      "who": "female engineer in a hard hat holding a tool seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she raises the tool high over her head. Strike: she steps forward and smashes it down in front of her toward the right in one heavy blow."
+    },
+    "novice_01_b": {
+      "who": "young adventurer with a short sword and a round shield seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he raises the round shield and pulls the short sword back. Strike: he steps forward and makes one horizontal slash toward the right."
+    },
+    "novice_02_b": {
+      "who": "young female adventurer with a dagger seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she pulls the dagger back at her side. Strike: she steps forward and makes one quick forward stab toward the right."
+    },
+    "summoner_02_b": {
+      "who": "female summoner with a crystal staff seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she raises the staff high. Strike: she swings the staff forward and points its crystal toward the right in one strong summoning motion."
+    },
+    "brawler_01_b": {
+      "who": "bald monk fighter seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he takes a stance and pulls his right fist back to his hip. Strike: he steps forward and throws one powerful straight punch toward the right, arm fully extended."
+    },
+    "brawler_02_b": {
+      "who": "female martial artist in a white gi seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she takes a stance and pulls her fist back to her hip. Strike: she steps forward and throws one powerful straight punch toward the right, arm fully extended."
+    },
+    "mage_02_b": {
+      "who": "female mage holding a glowing orb in her hand seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she pulls the orb back close to her body. Strike: she pushes her hand with the orb forward toward the right in one strong casting motion, palm open."
+    },
+    "shaman_01_b": {
+      "who": "tribal shaman holding a crystal orb seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he lifts the orb up near his face. Strike: he thrusts the orb forward toward the right with an outstretched arm in one strong casting motion."
+    },
+    "shaman_02_b": {
+      "who": "shrine maiden holding a paper talisman seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "she",
+      "action": "Wind-up: she raises the paper talisman up between two fingers. Strike: she flicks her arm forward and throws the talisman toward the right in one quick motion."
+    },
+    "summoner_01_b": {
+      "who": "young summoner with glasses holding an open book seen diagonally from behind (three-quarter rear view, back and right side visible, facing away toward the upper right)",
+      "pron": "he",
+      "action": "Wind-up: he lifts the open book up and raises his free hand. Strike: he thrusts his free hand forward toward the right in one strong summoning gesture while holding the book."
     }
   },
   "motions": {

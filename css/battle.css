@@ -71,6 +71,12 @@
 .unit-sprite .u-icon{filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));line-height:0}
 .unit-sprite.acted{opacity:.7}
 .unit-sprite .u-shadow{width:40px;height:6px;background:rgba(0,0,0,.35);border-radius:50%;margin-top:-2px}
+/* 발밑 방향 표시: 바라보는 쪽을 가리키는 작은 화살표 (VFX._faceMark) */
+.unit-sprite .u-shadow{position:relative}
+.unit-sprite .u-face{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;transform-origin:0 0;--fc:rgba(96,165,250,.95)}
+.unit-sprite.enemy .u-face{--fc:rgba(248,113,113,.95)}
+/* 오른쪽을 가리키는 삼각형을 땅 평면에 눕혀 돌림 (VFX._faceMark: scaleY(.5) rotate(45°) = 쿼터뷰 바닥) */
+.unit-sprite .u-face::after{content:'';position:absolute;left:-6px;top:-8px;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid var(--fc);filter:drop-shadow(0 0 2px rgba(0,0,0,.9))}
 .hp-bg{width:48px;height:4px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
 .hp-fill{height:100%;border-radius:2px;transition:width .3s}
 .mp-bg{width:48px;height:3px;background:#181818;border-radius:2px;margin-top:2px;overflow:hidden}

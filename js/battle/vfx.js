@@ -319,9 +319,35 @@ const VFX = {
     this._applyFace(id);
   },
 
+  // 격자 방향(gdx, gdy) → 화면 방향 벡터 (카메라 회전 반영, 쿼터뷰 마름모 비율)
+  _g2screen(gdx, gdy) {
+    const x = gdx || 0, y = gdy || 0;
+    let vc, vr;
+    switch (GameStore.camDir) { case 0: vc = x; vr = y; break; case 1: vc = -y; vr = x; break; case 2: vc = -x; vr = -y; break; default: vc = y; vr = -x; }
+    return { x: (vc - vr) * TW, y: (vc + vr) * TH };
+  },
+
+  // 발밑 방향 표시: 바라보는 쪽을 가리키는 화살표를 땅 위에 눕혀 그림 (어디가 앞·뒤·옆인지 — 후방·측면 공격 판정 기준)
+  //  격자 방향 → 화면 격자(카메라 회전 반영) 각도 α, 바닥 평면 = scaleY(.5) rotate(45deg) (타일 마름모와 같은 원근)
+  _faceMark(el, u) {
+    const sh = el.querySelector('.u-shadow'); if (!sh) return;
+    let m = sh.querySelector('.u-face');
+    if (!m) { m = document.createElement('div'); m.className = 'u-face'; sh.appendChild(m); }
+    const x = u._gdx || 0, y = u._gdy || 0;
+    if (!x && !y) { m.style.display = 'none'; return; }
+    let vc, vr;
+    switch (GameStore.camDir) { case 0: vc = x; vr = y; break; case 1: vc = -y; vr = x; break; case 2: vc = -x; vr = -y; break; default: vc = y; vr = -x; }
+    m.style.display = '';
+    m.style.transform = 'scaleY(.5) rotate(45deg) rotate(' + (Math.atan2(vr, vc) * 180 / Math.PI).toFixed(1) + 'deg) translateX(30px)';
+  },
+
   _applyFace(id) {
     const el = document.getElementById('u-' + id); if (!el) return;
     const u = GameStore.units.find(v => v.id === id); if (!u) return;
+    this._faceMark(el, u);
+    // 화면 위쪽(안쪽)을 보면 뒷모습: 뒷모습 시트가 있는 캐릭터만 바뀜 (rig.js Rig.sheet)
+    const back = this._g2screen(u._gdx, u._gdy).y < 0;
+    if (back !== !!u._back) { u._back = back; const ic = el.querySelector('.u-icon'); if (ic) Rig.refreshFacing(ic, u); }
     const sdx = this._g2sx(u._gdx, u._gdy);
     if (!sdx) return;
     const img = el.querySelector('.u-icon > img, .u-icon > .rig');

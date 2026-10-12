@@ -317,6 +317,13 @@ const SPRITE_SHEETS = {
     idle: { src: 'image/character/anim/commander_02_idle.png', frames: 12, w: 121, h: 160, body: [4, 156], cx: 61.0, icx: 481.5, dur: 2400 },
     run: { src: 'image/character/anim/commander_02_run.png', frames: 14, w: 122, h: 160, body: [5, 153], cx: 57.5, icx: 481.5, dur: 1500 },
   },
+  knight_01_b: {
+    attack: { src: 'image/character/anim/knight_01_b_attack.png', frames: 14, w: 171, h: 160, body: [65, 153], cx: 81.0, icx: 480.5, dur: 840, hit: 9 },
+    combat: { src: 'image/character/anim/knight_01_b_combat.png', frames: 12, w: 171, h: 160, body: [34, 157], cx: 85.5, icx: 480.5, dur: 1600 },
+    hit: { src: 'image/character/anim/knight_01_b_hit.png', frames: 9, w: 189, h: 160, body: [57, 157], cx: 97.5, icx: 480.5, dur: 520, hit: 3 },
+    idle: { src: 'image/character/anim/knight_01_b_idle.png', frames: 12, w: 151, h: 160, body: [39, 157], cx: 75.5, icx: 480.5, dur: 2400 },
+    run: { src: 'image/character/anim/knight_01_b_run.png', frames: 14, w: 159, h: 160, body: [32, 154], cx: 79.0, icx: 480.5, dur: 1500 },
+  },
 };
 
 // 구간별 이징 (준비 감속 → 내려치기 가속 → 마무리 → 복귀). 전체 이징을 걸면 키프레임 시점이 밀린다
@@ -394,7 +401,15 @@ const Rig = {
     return true;
   },
 
-  sheet(u, kind) { const a = SPRITE_SHEETS[this.key(u)]; return a ? a[kind] || null : null; },
+  // 동작 시트. 바라보는 방향이 화면 안쪽(뒤)이면 뒷모습 시트(SPRITE_SHEETS['<키>_b'])가 있을 때 그것을 씀
+  //  (VFX._applyFace 가 u._back 을 정함. 뒷모습 그림은 image/character/<키>_b.png, tools/local-turn.py 로 만듦)
+  sheet(u, kind) {
+    const k = this.key(u), b = u && u._back && SPRITE_SHEETS[k + '_b'];
+    if (b && b[kind]) return b[kind];
+    const a = SPRITE_SHEETS[k]; return a ? a[kind] || null : null;
+  },
+  // 앞·뒤가 바뀌면 지금 반복 동작을 그 방향 시트로 다시 고름
+  refreshFacing(icon, u) { if (icon && icon._loopKind) this.setLoop(icon, u, icon._loopKind); },
 
   // ── 모션 시트 미리 불러오기: 불러오기 전에 그 동작이 나오면 캐릭터가 잠깐 사라지는 문제 방지 ──
   // 불러온 Image는 캐시에 붙잡아 두어 브라우저가 해제하지 않게 함
@@ -433,7 +448,7 @@ const Rig = {
       (st.en || []).forEach(c => both(typeof c === 'string' ? c : c && c.cls));
       if (st.boss) [].concat(st.boss).forEach(b => b && both(b.cls || b));
     }
-    return [...new Set(keys)].filter(k => SPRITE_SHEETS[k]);
+    return [...new Set(keys)].flatMap(k => [k, k + '_b']).filter(k => SPRITE_SHEETS[k]);   // 뒷모습 시트도 함께
   },
   // 전장 유닛 먼저 기다리고(최대 timeout), 나머지(증원·보스)는 뒤에서 이어 받기
   preloadBattle(S, onProgress, timeout) {
@@ -476,6 +491,7 @@ const Rig = {
   // 반복 동작(idle 대기 / combat 전투대기 / run 달리기). 해당 시트가 없으면 idle, 그것도 없으면 정지 그림
   setLoop(icon, u, kind) {
     if (!icon) return;
+    icon._loopKind = kind;
     const sh = this.sheet(u, kind) || this.sheet(u, 'idle');
     if (icon._loop && sh && icon._loop._src === sh.src) return;
     if (icon._loop) { icon._loop._anim.cancel(); icon._loop.remove(); icon._loop = null; }
