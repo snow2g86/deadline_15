@@ -48,7 +48,7 @@ const TurnManager = {
     }
 
     // 맵 환경 지속 피해 (화상·독 등, 사망하지는 않음) — 마법부여 장비가 있으면 면역
-    if (u.team === 'ally' && u._hazardDot && u.hp > 1 && S._hazard) {
+    if (u.team === 'ally' && u._hazardDot && u.hp > 1 && S._hazard && !Hazard.inSafe(S, u)) {   // 냉기 결계 칸에선 없음
       const dmg = Math.min(u.hp - 1, Math.max(1, Math.round(u.mhp * Hazard.dotPct(S._hazard, S.cStage) * GearFX.hazardMul(u))));
       u.hp -= dmg;
       Fx.float(u.x, u.y, S._hazard.icon + ' -' + dmg, 'damage');
@@ -114,6 +114,13 @@ const TurnManager = {
       S.turn = (S.turn || 1) + 1;
       S._turnActed = {};
       if (typeof tickPoisonMists === 'function') tickPoisonMists(); // 주술사 독안개 (라운드마다 1회)
+      // 냉기 결계: SAFE_ZONE.every 라운드마다 다른 자리로 옮겨 감
+      if (S._hazard && S._hazard.safe && (S.turn - 1) % SAFE_ZONE.every === 0) {
+        Hazard.placeSafe(S, S._hazard);
+        Fx.redrawTerrain();
+        const first = [...S.safeZones][0];
+        if (first) { const [x, y] = first.split(',').map(Number); Fx.float(x, y, SAFE_ZONE.icon + ' ' + t('hazard.safe_moved'), 'buff'); }
+      }
       EventBus.emit('round_end', { turn: S.turn });
       Fx.updateUI();
     }

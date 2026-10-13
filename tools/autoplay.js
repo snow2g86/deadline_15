@@ -575,7 +575,15 @@ async function runBattle(stageId, C, practice) {
       try { const b = bestAttack(g, u); if (b) g.A.doAtk(u, b.e); else g.A.actWait(); } catch (e) {}
       await waitTurnDone(g, u);
     }
-    if (g.S.turn > 250 && !done) { out('턴 제한 초과(250) → 항복', 'l'); try { g.R.surrender(); } catch (e) {} }
+    if (g.S.turn > 250 && !done) {
+      // 진단: 왜 안 끝났는지 — 남은 적·스폰·아군 상태
+      try {
+        const al = g.S.units.filter(v => v.team === 'ally' && v.hp > 0), en = g.S.units.filter(v => v.team === 'enemy' && v.hp > 0);
+        out('턴 제한 진단: 스폰 ' + g.S.eSpwn + '/' + (g.S.cStage && g.S.cStage.tot) + ' · 적 ' + en.length + ' [' + en.map(v => v.cls + (v.isSummon ? '*' : '') + '@' + v.x + ',' + v.y + ' ' + v.hp + '/' + v.mhp).join(' ') + ']', 'l');
+        out('  아군 ' + al.length + ' [' + al.map(v => v.cls + (v.isSummon ? '*' : '') + '@' + v.x + ',' + v.y + ' ' + v.hp + '/' + v.mhp + ' atk' + v.atk).join(' ') + '] · 행동 ' + JSON.stringify(acts), 'l');
+      } catch (e) {}
+      out('턴 제한 초과(250) → 항복', 'l'); try { g.R.surrender(); } catch (e) {}
+    }
     await sleep(12);
   }
   await sleep(120);

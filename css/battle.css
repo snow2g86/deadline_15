@@ -139,6 +139,11 @@
   50%{background:rgba(34,197,94,.4);box-shadow:inset 0 0 0 2px rgba(34,197,94,1)}}
 .iso-tile.hl-selected{background:rgba(240,192,64,.15);box-shadow:inset 0 0 0 2px rgba(240,192,64,.9);animation:selPulse 1.2s ease-in-out infinite}
 @keyframes selPulse{0%,100%{opacity:1}50%{opacity:.45}}
+.iso-tile.safe-zone::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(44px 22px at 50% 24px,rgba(125,211,252,0) 58%,rgba(125,211,252,.6) 72%,rgba(125,211,252,0) 82%),
+    radial-gradient(30px 15px at 50% 24px,rgba(186,230,253,.4),rgba(56,189,248,.12) 70%,transparent 100%);   /* 윗면 가운데(언덕 등 높은 칸도 윗면 기준) */
+  animation:safePulse 2.4s ease-in-out infinite}   /* 냉기 결계: 하늘색 고리 + 가운데 빛 (화산·지옥 맵, 화상 피해 없음) */
+@keyframes safePulse{0%,100%{opacity:.75}50%{opacity:1}}
 .iso-tile.hl-threat::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(-45deg,rgba(239,68,68,.22) 0 4px,rgba(239,68,68,.06) 4px 9px)}
 .cam-btn.on{background:rgba(239,68,68,.22);border-color:#ef4444;box-shadow:0 0 10px rgba(239,68,68,.35)}

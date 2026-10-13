@@ -150,6 +150,7 @@ Object.assign(window._LANG_es, {
             "stat_def": "DEF",
             "stat_hp": "PV",
             "stat_heal": "Curación",
+            "stat_frag": "Fragmentos de alma",
             "stat_move": "Mov",
             "stat_range": "Alcance",
             "only_ranged": "A distancia:",
@@ -173,7 +174,9 @@ Object.assign(window._LANG_es, {
             "fx_range": "Alcance a distancia {n}",
             "fx_def": "DEF -{n}%",
             "fx_heal": "Curación -{n}%",
-            "counter": "se bloquea con equipo encantado {e}"
+            "counter": "se bloquea con equipo encantado {e}",
+            "safe_zone": "{i} sin daño al terminar el turno en una casilla de Sello de escarcha (cambia de lugar cada {r} rondas)",
+            "safe_moved": "El sello se ha movido"
     },
     "enchant": {
             "tab": "Encantar",

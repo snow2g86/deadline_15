@@ -48,11 +48,16 @@ var Synergy = {
   // 효과를 '공격 ×2 · 방어 ×0.5' 같은 문구로
   describe: function(s) {
     var e = s.eff, parts = [];
-    ['atk', 'def', 'hp', 'heal'].forEach(function(k) { if (e[k] && e[k] !== 1) parts.push(t('synergy.stat_' + k) + ' ×' + (+e[k].toFixed(2))); });
+    ['atk', 'def', 'hp', 'heal', 'frag'].forEach(function(k) { if (e[k] && e[k] !== 1) parts.push(t('synergy.stat_' + k) + ' ×' + (+e[k].toFixed(2))); });
     ['move', 'range'].forEach(function(k) { if (e[k]) parts.push(t('synergy.stat_' + k) + ' ' + (e[k] > 0 ? '+' : '') + e[k]); });
     var txt = parts.join(' · ');
     if (s.to) txt = t('synergy.only_' + s.to) + ' ' + txt;
     return txt;
+  },
+  // 이번 전투에서 얻는 영혼석 조각 배율 (활성 조합 버프의 frag 를 곱함) — 조각 n 개 → 올림(n × 배율)
+  frags: function(list, n) {
+    var m = (list || []).reduce(function(a, s) { return a * ((s.eff && s.eff.frag) || 1); }, 1);
+    return Math.ceil(n * m);
   },
   // 전투 시작 때 클랜원 유닛에 적용 (소환수 제외). 같은 스탯 배율은 곱해짐
   apply: function(units, list) {

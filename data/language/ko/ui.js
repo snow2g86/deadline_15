@@ -140,6 +140,7 @@ Object.assign(window._LANG_ko, {
             "stat_def": "방어",
             "stat_hp": "체력",
             "stat_heal": "회복",
+            "stat_frag": "영혼석 조각",
             "stat_move": "이동",
             "stat_range": "사거리",
             "only_ranged": "원거리:",
@@ -163,7 +164,9 @@ Object.assign(window._LANG_ko, {
             "fx_range": "원거리 사거리 {n}",
             "fx_def": "방어 -{n}%",
             "fx_heal": "회복량 -{n}%",
-            "counter": "{e} 마법부여 장비로 막음"
+            "counter": "{e} 마법부여 장비로 막음",
+            "safe_zone": "{i} 냉기 결계 칸에서 차례를 마치면 피해 없음 ({r}라운드마다 자리 이동)",
+            "safe_moved": "결계가 옮겨 갔다"
     },
     "enchant": {
             "tab": "마법부여",

@@ -7,9 +7,10 @@
 //  ③ 보물상자: 전투 시작 때 맵 가운데 구역에 무작위로 놓이고, 클랜원이 밟으면 열림 (골드·전투 물약·장비·영혼석 조각·룬)
 // ═══════════════════════════════════════════
 // dot: 클랜원 차례가 끝날 때 최대 HP 비율 피해 (사망하지는 않음, 후반일수록 커짐) · move/range: 더하기 · def/heal: 배율
+// safe: 냉기 결계 — 그 칸에서 차례를 마치면 지속 피해 없음 (SAFE_ZONE 참고, 2026-10-13 사용자 요청)
 var HAZARDS = {
-  volcano: { id: 'burn',     icon: '🔥', enchant: 'fire',   dot: 0.05 },
-  abyss:   { id: 'hellfire', icon: '☄️', enchant: 'fire',   dot: 0.04 },   // 7% → 4% (후반 지옥 맵 소모전·판 길이 완화)
+  volcano: { id: 'burn',     icon: '🔥', enchant: 'fire',   dot: 0.035, safe: true },  // 5% → 3.5% (2026-10-13 자동 플레이: 화상 맵 사망 많음)
+  abyss:   { id: 'hellfire', icon: '☄️', enchant: 'fire',   dot: 0.03,  safe: true },  // 7% → 4% → 3% (후반 지옥 맵 소모전·판 길이 완화, 2026-10-13 사망 1위)
   desert:  { id: 'heat',     icon: '☀️', enchant: 'heat',   move: -1 },
   canyon:  { id: 'gale',     icon: '🌪️', enchant: 'wind',   range: -1 },
   jungle:  { id: 'venom',    icon: '🦟', enchant: 'poison', dot: 0.03 },
@@ -18,6 +19,9 @@ var HAZARDS = {
   ruins:   { id: 'curse',    icon: '🕯️', enchant: 'curse',  heal: 0.5 },
   // plains · fortress: 환경 디버프 없음
 };
+// 냉기 결계 배치: 결계 zones 곳 × 칸 size 개 (붙어 있는 칸), rows 행 범위 안의 빈 지나갈 수 있는 칸
+// every: 이 라운드마다 결계가 다른 자리로 옮겨 감 (2026-10-13 사용자 요청 — 한 자리에 버티지 못하게)
+var SAFE_ZONE = { zones: 2, size: 2, rows: [3, 10], icon: '❄️', every: 3 };
 // cat: 'def' = 환경 저항(item.enchant), 'atk' = 공격 효과(item.enchantAtk). 한 장비에 방어·공격 하나씩 함께 새길 수 있음
 var ENCHANTS = {
   fire:   { icon: '🔥', cat: 'def' }, heat: { icon: '☀️', cat: 'def' }, wind: { icon: '🌪️', cat: 'def' },

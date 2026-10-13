@@ -56,6 +56,26 @@ var Hazard = {
     });
     return h;
   },
+  // 냉기 결계: 맵 가운데 구역에 붙어 있는 칸 묶음을 놓음 → S.safeZones (Set 'x,y')
+  placeSafe: function(S, h) {
+    S.safeZones = new Set();
+    if (!h || !h.safe) return;
+    var ok = function(x, y) { var tl = S.ter[y] && S.ter[y][x]; return tl && TI[tl] && TI[tl].pass && tl !== 'shallow' && !S.safeZones.has(x + ',' + y); };
+    var cells = [];
+    for (var y = SAFE_ZONE.rows[0]; y <= SAFE_ZONE.rows[1]; y++) for (var x = 0; x < COLS; x++) if (ok(x, y)) cells.push([x, y]);
+    for (var z = 0; z < SAFE_ZONE.zones && cells.length; z++) {
+      var c = cells.splice(Math.floor(Math.random() * cells.length), 1)[0], zone = [c];
+      while (zone.length < SAFE_ZONE.size) {   // 붙어 있는 칸으로 넓힘
+        var nb = [];
+        zone.forEach(function(p) { [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function(d) { var nx = p[0] + d[0], ny = p[1] + d[1]; if (ok(nx, ny) && !zone.some(function(q) { return q[0] === nx && q[1] === ny; })) nb.push([nx, ny]); }); });
+        if (!nb.length) break;
+        zone.push(nb[Math.floor(Math.random() * nb.length)]);
+      }
+      zone.forEach(function(p) { S.safeZones.add(p[0] + ',' + p[1]); });
+      cells = cells.filter(function(p) { return !S.safeZones.has(p[0] + ',' + p[1]); });
+    }
+  },
+  inSafe: function(S, u) { return !!(S.safeZones && S.safeZones.has(u.x + ',' + u.y)); },
   name: function(h) { return t('hazard.' + h.id); },
   describe: function(h, stage) {
     var p = [];
@@ -64,7 +84,8 @@ var Hazard = {
     if (h.range) p.push(t('hazard.fx_range', { n: h.range }));
     if (h.def) p.push(t('hazard.fx_def', { n: Math.round((1 - h.def) * 100) }));
     if (h.heal) p.push(t('hazard.fx_heal', { n: Math.round((1 - h.heal) * 100) }));
-    return p.join(' · ') + ' — ' + t('hazard.counter', { e: ENCHANTS[h.enchant].icon + ' ' + t('enchant.' + h.enchant) });
+    return p.join(' · ') + ' — ' + t('hazard.counter', { e: ENCHANTS[h.enchant].icon + ' ' + t('enchant.' + h.enchant) }) +
+      (h.safe ? ' · ' + t('hazard.safe_zone', { i: SAFE_ZONE.icon, r: SAFE_ZONE.every }) : '');
   },
 };
 
@@ -137,7 +158,8 @@ var Chest = {
       return { kind: 'protect', text: '📜 ' + t('gear.protect') + ' +1' };
     }
     var cls = opener && opener.cls !== 'commander' ? opener.cls : 'novice';
-    if (typeof Soul !== 'undefined') Soul.add('frag', cls, 2);
-    return { kind: 'soul', text: '💠 ' + t('soul.reward_frag', { cls: t('classes.' + cls) }) + ' +2' };
+    var nf = typeof Synergy !== 'undefined' && typeof GameStore !== 'undefined' ? Synergy.frags(GameStore._synergies, 2) : 2;   // 외인부대: 조각 보너스
+    if (typeof Soul !== 'undefined') Soul.add('frag', cls, nf);
+    return { kind: 'soul', text: '💠 ' + t('soul.reward_frag', { cls: t('classes.' + cls) }) + ' +' + nf };
   },
 };

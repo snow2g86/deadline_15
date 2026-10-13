@@ -125,6 +125,7 @@ const Renderer = {
         (S.blockT || []).some(a => a.x === c && a.y === r));   // 쏠 수는 있지만 길목의 기사가 막음
       hlTile.classList.toggle('hl-selected', hl === 'selected');
       hlTile.classList.toggle('fow-dark', !S.fogVisible.has(pos));
+      hlTile.classList.toggle('safe-zone', !!(S.safeZones && S.safeZones.has(pos)));   // 냉기 결계 (화상 피해 없음)
     });
     Props.fog();   // 시야 밖 나무·장식도 어둡게
     this.fogChests();

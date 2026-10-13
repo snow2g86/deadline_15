@@ -14,5 +14,10 @@ class NoCache(SimpleHTTPRequestHandler):
         pass
 
 
+class Server(ThreadingHTTPServer):
+    request_queue_size = 128   # 기본 5 → 페이지가 스크립트 70여 개를 한꺼번에 요청하면 연결이 끊김(ERR_CONNECTION_RESET)
+    daemon_threads = True
+
+
 port = int(sys.argv[1]) if len(sys.argv) > 1 else 8799
-ThreadingHTTPServer(('127.0.0.1', port), NoCache).serve_forever()
+Server(('127.0.0.1', port), NoCache).serve_forever()

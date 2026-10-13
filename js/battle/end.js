@@ -24,7 +24,8 @@ const BattleEnd = {
     // 요일 던전: 영혼석 조각 + 강화석 + 그 직업 세트 장비(확률) (골드·클리어 기록·별·신규 유닛·스킬북 없음)
     if (S.cStage && S.cStage.daily) {
       S._soulReward = null;
-      if (win) { Soul.add('frag', S.cStage.daily.cls, S.cStage.daily.frags); S._soulReward = { kind: 'frag', cls: S.cStage.daily.cls, n: S.cStage.daily.frags };
+      if (win) { const nf = Synergy.frags(S._synergies, S.cStage.daily.frags);   // 외인부대: 조각 보너스
+        Soul.add('frag', S.cStage.daily.cls, nf); S._soulReward = { kind: 'frag', cls: S.cStage.daily.cls, n: nf };
         S._runeDrop = Math.random() < RUNE_DROP_CHANCE ? Rune.add(Rune.random()) : null;
         this._dailyGear(S); }
       S._deadAllyUids.forEach(uid => markDead(uid));
@@ -106,7 +107,7 @@ const BattleEnd = {
           const pcls = S.units.filter(u => u.team === 'ally' && u.uid && !u.isSummon).map(u => u.cls);
           const cls = pcls.length ? pcls[Math.floor(Math.random() * pcls.length)] : S.cStage.boss.cls;
           if (isFC) { Soul.add('stone', cls, SOUL.bossFirstStone); S._soulReward = { kind: 'stone', cls, n: SOUL.bossFirstStone }; }
-          else { Soul.add('frag', cls, SOUL.bossRepeatFrags); S._soulReward = { kind: 'frag', cls, n: SOUL.bossRepeatFrags }; }
+          else { const nf = Synergy.frags(S._synergies, SOUL.bossRepeatFrags); Soul.add('frag', cls, nf); S._soulReward = { kind: 'frag', cls, n: nf }; }
         }
 
         // 보스 스테이지: 확률로 전설 장비 (첫 클리어 15% · 반복 5%)

@@ -150,6 +150,7 @@ Object.assign(window._LANG_en, {
             "stat_def": "DEF",
             "stat_hp": "HP",
             "stat_heal": "Heal",
+            "stat_frag": "Soul shards",
             "stat_move": "Move",
             "stat_range": "Range",
             "only_ranged": "Ranged:",
@@ -173,7 +174,9 @@ Object.assign(window._LANG_en, {
             "fx_range": "Ranged range {n}",
             "fx_def": "DEF -{n}%",
             "fx_heal": "Healing -{n}%",
-            "counter": "blocked by {e} enchanted gear"
+            "counter": "blocked by {e} enchanted gear",
+            "safe_zone": "{i} no damage when ending a turn on a Frost Ward tile (moves every {r} rounds)",
+            "safe_moved": "The ward has moved"
     },
     "enchant": {
             "tab": "Enchant",

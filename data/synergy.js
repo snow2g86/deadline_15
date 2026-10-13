@@ -25,8 +25,9 @@ var SYNERGY_MONO = {
 var SYNERGY_LEGION = {
   classes: ['lancer', 'shaman', 'summoner', 'sapper', 'brawler'],
   icon: '🗡️',
-  part: { atk: 1.1, hp: 1.15 },            // 3~4명
-  full: { atk: 1.2, hp: 1.25 },            // 5명 전원 (5명이면 만능 부대도 함께 켜져 이동 +1 은 거기서 받음)
+  // frag: 전투에서 얻는 영혼석 조각 배율 (요일 던전·보스 반복·보물상자, 올림) — 이색 직업은 승급이 늦어서 (2026-10-13 자동 플레이: 60스테이지까지 B등급)
+  part: { atk: 1.1, hp: 1.15, frag: 1.25 },            // 3~4명
+  full: { atk: 1.2, hp: 1.25, frag: 1.5 },             // 5명 전원 (5명이면 만능 부대도 함께 켜져 이동 +1 은 거기서 받음)
 };
 var SYNERGY_TRIO = {   // 같은 직업 3~4인
   warrior:  { atk: 1.2, def: 0.9 },  knight:  { def: 1.25 },             archer:  { atk: 1.15 },
