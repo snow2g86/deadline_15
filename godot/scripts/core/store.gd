@@ -29,6 +29,7 @@ var save_path: String = DEFAULT_PATH
 
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
 const NumT := preload("res://scripts/core/num.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
 
 var _data: Dictionary = {}   # String → String
 var _loaded_path: String = ""
@@ -89,15 +90,15 @@ func get_json(key: String, fallback: Variant = null) -> Variant:
 	var raw: Variant = get_str(key)
 	if raw == null:
 		return fallback
-	var json := JSON.new()
-	if json.parse(String(raw)) != OK:
+	var r := JsonExact.parse_ex(String(raw))   # 실수를 정확히 (Godot JSON 은 17자리 실수를 잘못 읽음)
+	if not r[0]:
 		return fallback
-	return JsonNorm.normalize_store(key, json.data)
+	return JsonNorm.normalize_store(key, r[1])
 
 
 ## JSON 으로 저장 — 웹 Store.setJSON
 func set_json(key: String, value: Variant) -> bool:
-	return set_str(key, JSON.stringify(value))
+	return set_str(key, JsonExact.stringify(value))
 
 
 func remove(key: String) -> void:
@@ -120,6 +121,7 @@ func clear() -> void:
 
 
 ## 웹 localStorage 덤프(JSON.stringify(localStorage) 결과 사전)를 그대로 가져온다.
+## 옛 장비(gv 없음) 전환은 여기서 하지 않는다 — 웹처럼 규칙이 인벤토리를 처음 읽을 때(scripts/logic/profile.gd load_inventory) 난수를 써서 전환·저장.
 ## overwrite=false 면 이미 있는 키는 건드리지 않음. 가져온 키 개수 반환
 func import_web_dump(dump: Dictionary, overwrite: bool = true) -> int:
 	_ensure_loaded()
@@ -148,20 +150,20 @@ func _ensure_loaded() -> void:
 		if not FileAccess.file_exists(tmp):
 			return
 		# 바꿔치기 직전에 꺼진 경우: .tmp 가 온전하면 그것으로 복구
-		var tj := JSON.new()
-		if tj.parse(FileAccess.get_file_as_string(tmp)) == OK and typeof(tj.data) == TYPE_DICTIONARY:
+		var tj := JsonExact.parse_ex(FileAccess.get_file_as_string(tmp))
+		if tj[0] and typeof(tj[1]) == TYPE_DICTIONARY:
 			push_warning("Store: %s 가 없어 %s 로 복구" % [save_path, tmp])
 			DirAccess.rename_absolute(tmp, save_path)
 		else:
 			return
 	var text := FileAccess.get_file_as_string(save_path)
-	var json := JSON.new()
-	if json.parse(text) != OK or typeof(json.data) != TYPE_DICTIONARY:
+	var pr := JsonExact.parse_ex(text)
+	if not pr[0] or typeof(pr[1]) != TYPE_DICTIONARY:
 		# 깨진 저장은 지우지 않고 옆에 남겨 둔다 (복구용)
-		push_error("Store: %s 를 읽지 못했습니다 (%s) — .broken 으로 보관하고 빈 저장으로 시작" % [save_path, json.get_error_message()])
+		push_error("Store: %s 를 읽지 못했습니다 (%s) — .broken 으로 보관하고 빈 저장으로 시작" % [save_path, pr[2]])
 		DirAccess.rename_absolute(save_path, save_path + ".broken")
 		return
-	var d: Dictionary = json.data
+	var d: Dictionary = pr[1]
 	for k: Variant in d.keys():
 		_data[String(k)] = _js_string(d[k])
 
@@ -179,7 +181,7 @@ func _write(path: String) -> bool:
 	if f == null:
 		push_error("Store: %s 에 쓸 수 없습니다 (%s)" % [tmp, error_string(FileAccess.get_open_error())])
 		return false
-	f.store_string(JSON.stringify(_data, "", true))
+	f.store_string(JsonExact.stringify(_data, "", true))
 	f.close()
 	# rename 한 번으로 덮어쓰기 (먼저 지우지 않음 — 그 사이에 꺼지면 저장이 없어지므로)
 	var err := DirAccess.rename_absolute(tmp, path)
@@ -201,6 +203,6 @@ static func _js_string(value: Variant) -> String:
 		TYPE_FLOAT, TYPE_INT:
 			return NumT.fmt(value)
 		TYPE_DICTIONARY, TYPE_ARRAY:
-			return JSON.stringify(value)
+			return JsonExact.stringify(value)
 		_:
 			return str(value)

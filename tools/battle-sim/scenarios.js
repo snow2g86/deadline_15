@@ -142,4 +142,16 @@ module.exports = [
     inject: [{ ally: 0, set: { hp: 12 } }, { ally: 1, set: { hp: 1 } }].concat([0, 2, 3, 4].map(i => ({ ally: i, set: { buffs: [buff('shield', 'siege', 99, 0.5)] } })))
       .concat([{ enemy: 0, set: { buffs: [buff('fury_buff', 'fury', 99, 1.5)] } }, { enemyCls: 'warrior', set: { res: 10 } }]),
     party: [full('knight', 8), full('knight', 8), full('knight', 8), full('lancer', 8), full('archer', 8)] },
+
+  // 장비 개편 전 세이브(gv 없음): 전투 준비의 첫 loadInventory 가 Gear.migrate 로 옵션·강화 옵션을 전투 난수로 다시 굴림
+  //  (옛 무기 이름 → 직업 무기, 방어구 직업 제한, +10 고유 옵션 칸, 이미 가진 효과 제외). legacy: 옛 templateId 또는 true(그대로)
+  { name: 'legacy_gear_s08', seed: 2108, desc: '옛 장비(gv 없음) 전환: Gear.migrate·rollEnhanceOpt 가 전투 준비 중 난수 사용 (+10·+7·+4·+2)',
+    stage: { id: 8 },
+    party: [
+      full('knight', 6, 1, { gear: [{ tpl: 'wpn_knight', rarity: 'epic', legacy: 'sword_1h', enhanceLv: 10 }, { tpl: 'plate_helm', rarity: 'rare', legacy: true, enhanceLv: 4 }] }),
+      full('warrior', 6, 1, { gear: [{ tpl: 'wpn_warrior', rarity: 'rare', legacy: 'greatsword', enhanceLv: 7 }, { tpl: 'plate_armor', rarity: 'epic', legacy: true, enhanceLv: 2 }] }),
+      full('archer', 6, 1, { gear: [{ tpl: 'wpn_archer', rarity: 'rare', legacy: 'bow', enhanceLv: 3 }, { tpl: 'ring_power', rarity: 'uncommon', legacy: true }] }),
+      full('priest', 6, 1, { gear: [{ tpl: 'wpn_priest', rarity: 'uncommon', legacy: 'mace' }] }),
+      full('mage', 6, 1, { gear: [{ tpl: 'wpn_mage', rarity: 'rare', legacy: 'staff', enhanceLv: 9 }, { tpl: 'cloth_robe', rarity: 'rare', enchant: 'fire' }] }),
+    ] },
 ];

@@ -115,7 +115,8 @@ func on_battle_end(win: bool) -> void:
 				var ls_keys: Array = (D["LEARNABLE_SKILLS"] as Dictionary).keys()
 				if not ls_keys.is_empty():
 					var skd: Dictionary = D["LEARNABLE_SKILLS"][ls_keys[int(floorf(c.rand("onBattleEnd.book") * ls_keys.size()))]]
-					var inv := Profile.load_inventory(c)
+					var invv: Variant = c.store.get_json(Profile.INVENTORY_KEY)   # 웹은 Store 를 직접 읽음 (전환 없음)
+					var inv: Array = invv if typeof(invv) == TYPE_ARRAY else []
 					inv.append({"id": skd["id"], "cls": skd["cls"], "lv": 1})
 					Profile.save_inventory(c, inv)
 					S["_droppedBook"] = skd["id"]

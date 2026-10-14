@@ -7,6 +7,7 @@ extends SceneTree
 ##  비교에서 빼는 값: end.virtualMs(가상 시각), saveAfter 의 시계 기반 값(eid·rid·pid·diedAt) — tests/golden/README.md
 
 const DataDBScript := preload("res://scripts/core/data_db.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
 const Ctx := preload("res://scripts/logic/ctx.gd")
 const BattleEngine := preload("res://scripts/logic/battle/battle_engine.gd")
 
@@ -19,6 +20,8 @@ var _rng_log := false
 var _verbose := false
 ## --external: input_provider 없이 run() 이 "input" 을 돌려줄 때마다 command() 로 명령을 넣음 (3단계 화면이 쓰는 입구 시험)
 var _external := false
+## --resume [N]: --external 처럼 재생하며 N 번째 입력 대기마다 전투를 저장(정확한 JSON 문자열) → 새 엔진에 복원 → 이어서 (기본 N=1: 모든 입력 대기)
+var _resume := 0
 
 
 func _process(_delta: float) -> bool:
@@ -40,6 +43,11 @@ func _run() -> int:
 			_verbose = true
 		elif args[i] == "--external":
 			_external = true
+		elif args[i] == "--resume":
+			_external = true
+			_resume = 1
+			if i + 1 < args.size() and args[i + 1].is_valid_int():
+				_resume = args[i + 1].to_int()
 	var db: Object = root.get_node_or_null("DataDB")
 	var own_db: Node = null
 	if db == null:
@@ -88,7 +96,7 @@ func _read_json(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		return null
-	return JSON.parse_string(f.get_as_text())
+	return JsonExact.parse(f.get_as_text())
 
 
 func _replay(name: String, globals: Dictionary) -> Dictionary:
@@ -141,7 +149,19 @@ func _replay(name: String, globals: Dictionary) -> Dictionary:
 	# ── 실행 ──
 	eng.begin()
 	var status := eng.run()
+	var traces: Array = []
+	var waits := 0
+	var cuts := 0
 	while _external and status == "input" and ci[0] < cmds.size():
+		waits += 1
+		if _resume > 0 and waits % _resume == 0:
+			var text: String = eng.save_text()
+			traces.append_array(eng.trace)
+			eng.dispose()
+			eng = BattleEngine.new(globals, int(sc["seed"]))
+			eng.c.rng.log_enabled = _rng_log
+			eng.load_state(JsonExact.parse(text))
+			cuts += 1
 		var u: Variant = eng.awaiting_unit()
 		if u == null or int(u["id"]) != int(cmds[ci[0]]["u"]):
 			print("[%s] 입력 대기 유닛 %s ≠ 다음 명령 유닛 %s" % [name, str(u["id"] if u != null else null), str(cmds[ci[0]]["u"])])
@@ -150,7 +170,10 @@ func _replay(name: String, globals: Dictionary) -> Dictionary:
 		ci[0] += 1
 		status = eng.run()
 	var end := eng.finish(status)
-	var trace: Array = eng.trace
+	traces.append_array(eng.trace)
+	var trace: Array = traces
+	if _resume > 0 and _verbose:
+		print("[%s] 저장·복원 %d번" % [name, cuts])
 	# ── 사건 비교 ──
 	var n := mini(gevents.size(), trace.size())
 	for i2 in n:

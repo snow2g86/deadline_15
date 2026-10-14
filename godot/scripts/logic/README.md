@@ -1,6 +1,6 @@
 # 전투·성장 규칙 (GDScript) — 2b
 
-웹판 전투 규칙을 화면·노드와 무관한 GDScript 로 옮긴 것입니다. 황금 기록 21개(`godot/tests/golden/`)를
+웹판 전투 규칙을 화면·노드와 무관한 GDScript 로 옮긴 것입니다. 황금 기록 22개(`godot/tests/golden/`)를
 **사건 하나·난수 호출 하나까지** 똑같이 재현합니다 (`tests/replay_golden.gd`).
 
 - 모든 파일은 `RefCounted` 또는 정적 함수. 씬·노드·오토로드에 기대지 않습니다 (데이터는 `ctx.gd` 로 넘겨받음).
@@ -16,7 +16,7 @@
 | (전역 데이터·Math.random·localStorage·Date) | `ctx.gd` | 규칙 공통 환경: `D`(웹 전역 이름 → 값), `rng`, `store`, 가상 시계 `now_ms` |
 | `js/common/store.js` (localStorage) | `save_store.gd` | 키 → JSON 값. 꺼낼 때·넣을 때 복사 (웹의 JSON 문자열 저장과 같은 의미), 숫자 키 규칙은 `core/json_norm.gd` |
 | `js/common/storage.js` · `character.js` · `soul.js`, `equip.js` 인벤토리·Mats | `profile.gd` | 세이브·골드·별점·로스터(`get_roster` 보정 포함)·`gain_exp`·사망 표시·영혼석·재료 |
-| `js/logic/gear.js` (Gear) · `js/logic/equip.js` · `hazards.js` Rune | `gear.gd` | 장비 생성(`generate_equip`·`gacha_pull`·`make_legend`·`make_set_piece`·`roll`), `calc_equip_bonus`, 룬 |
+| `js/logic/gear.js` (Gear) · `js/logic/equip.js` · `hazards.js` Rune | `gear.gd` | 장비 생성(`generate_equip`·`gacha_pull`·`make_legend`·`make_set_piece`·`roll`), 옛 장비 전환(`migrate`·`roll_enhance_opt`), `calc_equip_bonus`, 룬 |
 | `js/logic/hazards.js` Hazard | `hazards.gd` | 환경 디버프 적용·`dot_pct`·냉기 결계 배치(`place_safe`) |
 | `js/logic/synergy.js` | `synergy.gd` | 조합 버프 (`SYNERGY_ROLE` 조건 함수는 `_role_test` 로 다시 씀) |
 | `js/logic/stages.js` · `js/common/daily.js` | `stage_rules.gd` | `stage_level`(float), 적 레벨·스킬 레벨, 요일 던전 스테이지 |
@@ -28,6 +28,7 @@
 | `js/battle/ai.js` | `battle/battle_ai.gd` | 적 AI (동기 함수로 — 아래 '시간 모델') |
 | `js/skills/*.js` · `_registry.js` | `battle/battle_skills.gd` | 41개 능동 스킬 `target`/`exec`, `_skill_done`·`_skill_refund` |
 | `js/battle/end.js` | `battle/battle_end.gd` | 전투 끝 보상·첫 클리어 신규 클랜원·영혼석·드랍·요일 던전 |
+| `render.js` previewAttack·calcThreat, `action.js` faceOptions·_setTargets | `battle/battle_query.gd` | 3단계 화면용 순수 조회 (`eng.q`) |
 
 옮기지 않은 웹 파일: 화면(`render`·`vfx`·`rig`·`motion`·`audio`·`pixelfx`·`terrain-tex`·`props`·`story-battle`), 번역·모달. 그 안에 섞여 있던 규칙은 엔진에 들어 있습니다 (아래).
 
@@ -61,17 +62,29 @@ eng.dispose()                      # 순환 참조 정리
   `wait|defend|overwatch{dx,dy}`(0,0 = 지금 방향) · `siege|climb{idx,x,y}`(idx = `S._siegeItems` 번호) · `potion{idx,x,y}` · `undo`.
   실패한 명령(`ok:false`)은 상태만 메뉴로 돌아가고 같은 클랜원이 계속 입력을 기다립니다. 이동·등반·이동 취소 뒤에도 같은 차례가 이어집니다.
 - `input_provider: Callable(u) -> Dictionary|null` 를 주면 엔진이 차례마다 직접 묻습니다 (재생 시험·AI 대리 조작용). null 이면 `command()` 를 기다림.
-- 화면이 미리 보여 줄 값(부작용 없음): `eng.gu.mv_cells(u)`, `eng.gu.atk_cells(u)`, `eng.am._set_targets(u)` 뒤 `S.atkT/healT/coverT/blockT`,
-  `eng.gu.shove_targets(u)`·`shove_plan(a,t)`, `eng.gu.tactic_bonus(a,t)`, `eng.gu.cover_of`·`intercept_of`, `eng.get_unit_skills(u)`, `eng.sk.target(id,u,sk)`(*소환·소환 강화는 안내 글자 사건을 냄*), `eng.is_stealthed(u)`, `eng.cb.chest_at(x,y)`.
-  ⚠ `eng.calc_dmg` 는 미리보기에 쓰지 마세요 — 난수(치명타)를 소모합니다 (웹도 같음).
+- `command()` 는 `{ ok, reason }` 을 돌려줍니다 (기록을 꺼도). 형식이 잘못된 명령은 **실행하지 않고** 거절합니다 (기록·상태 변화 없음):
+  `not_waiting`(입력 대기 아님) · `bad_op` · `wrong_unit`(cmd.u 가 지금 클랜원과 다름) · `bad_dir`(dx,dy 는 -1·0·1 이고 |dx|+|dy| ≤ 1) · `bad_skill` · `bad_item` · `bad_cell`(정수 아닌 칸).
+  실행했지만 안 된 명령은 웹처럼 기록되고 같은 클랜원이 계속 입력합니다: `move_failed`(제자리·범위 밖) · `attack_failed` · `no_resource` · `skill_failed` · `cannot_act` · `item_failed` · `cannot_undo`.
+- **조회 (`eng.q`, battle_query.gd — 모두 순수: 난수 상태·호출 수·유닛·기록·신호를 바꾸지 않음, `tests/check_battle_api.gd` 가 모든 입력 대기 때마다 확인)**
+  - `preview_attack(a, t)` → `{dmg, kill, tags, pct, support(%), shallow, evade(%), evade_buff, shield, counter, intercept(기사 id|null), intercept_dmg}` — 웹 `previewAttack`·`rPreview` 와 같은 값 (확률 요소는 발동 안 함으로 계산)
+  - `move_cells(u)`(이동했으면 []) · `attack_targets(u)` → `{attack, cover, block, heal}` · `skill_targets(u, idx)` → `{ok, cells, instant, reason}` · `skill_status(u)` → 스킬마다 `{idx, id, cost, passive, usable, reason}` (reason: passive·acted·no_resource·no_target — 웹에는 재사용 대기 없음)
+  - `can_undo()` · `actions(u)` → `[{op, ok, reason}]` (move·attack·heal·shove·skill·potion·siege·wait·defend·overwatch·undo)
+  - `face_options(u)` → 네 방향 `{dx, dy, back, side, cur, best}` (웹 faceOptions: 그 방향을 볼 때 등·옆구리에 놓이는 적 수, best = 추천)
+  - `threat_cells(only_visible = true)` → `["x,y", …]` (웹 calcThreat — 보이는 적이 이동 후 칠 수 있는 칸), `fog_visible()`
+  - 소환·소환 강화·영혼 폭발의 대상 조회(`skill_targets`)는 안내 글자(소환 제한·소환수 없음)를 **내지 않습니다**. 실제로 스킬 버튼을 누른 명령(`command`)에서만 웹처럼 기록됩니다.
+  - 그 밖의 부작용 없는 함수: `eng.gu.tactic_bonus(a,t)`, `cover_of`·`intercept_of`·`shove_plan`, `eng.get_unit_skills(u)`, `eng.is_stealthed(u)`, `eng.cb.chest_at(x,y)`, `eng.unit_view(u)`.
+  ⚠ `eng.calc_dmg`·`eng.sk.target` 를 직접 부르지 마세요 — 앞은 난수(치명타)를 쓰고 기록을 남기며, 뒤는 안내 글자 사건을 냅니다. `eng.q` 를 쓰세요.
 - 상태: `eng.S` (웹 GameStore 와 같은 키: `units, ter, turn, actCount, eQ, eSpwn, gateHP, wallHP, traps, poisonMists, chests, safeZones, battleExp, _battlePotions, _siegeItems, curUnit, sel …`),
   `eng.fsm`(BattleState 문자열), `eng.magic_walls`(그랜드 월), 각 유닛의 `_intent`(적의 행동 예고 대상 id).
   유닛은 Dictionary (웹 객체와 같은 키, `id·uid·x·y·lv` 는 int, 나머지 숫자는 float).
 - 신호:
-  - `bus_event(name, data)` — 웹 EventBus 알림 그대로 (`turn_start`, `unit_moved{unit,from,to}`, `unit_attacked{attacker,target,damage,isCounter…}`, `unit_killed`, `unit_healed`, `buff_applied/removed`, `skill_used`, `wave_spawn`, `siege_used`, `gate_attacked`, `breach`, `battle_end{win,message}` …). 데이터의 유닛은 Dictionary 참조.
+  - `bus_event(name, data)` — 웹 EventBus 알림 (`turn_start`, `unit_moved{unit,from,to}`, `unit_attacked{attacker,target,damage,isCounter…}`, `unit_killed`, `unit_healed`, `buff_applied/removed`, `skill_used`, `wave_spawn`, `siege_used`, `gate_attacked`, `breach`, `battle_end{win,message}` …). 데이터의 유닛은 **그 순간의 사본** `unit_view(u)` = `{id, uid, team, cls, x, y, hp, mhp, atk, def, res, maxRes, resType, move, range, ap, face, isBoss, isSummon, stealthed, defend, overwatch, intent, buffs[{type,duration,value,source}]}` — 연출을 쌓아 두었다가 나중에 재생해도 그 시점 값입니다 (연결된 곳이 없으면 만들지 않음).
   - `fx_event(kind, data)` — 연출 힌트 (규칙 영향 없음): `float{x,y,text}`(웹 Fx.float — text 는 번역 키 또는 숫자 글자), `face{id,dx,dy}`, `move{id,x,y}`(순간 이동·밀치기 등 unit_moved 없는 이동), `attack{a,t}`, `chest_open`, `redraw_units`, `redraw_terrain`.
   - 웹은 `Fx.later`·공격 동작 시간만큼 기다리지만 엔진은 기다리지 않습니다. 화면은 신호를 줄 세워 재생하면 됩니다 (사건 순서는 웹과 같음).
 - 기록: `eng.trace` (황금 기록 사건 형식). `eng.record_enabled = false` 로 끌 수 있음 (게임에서는 꺼도 규칙 결과는 같음).
+- **전투 저장·이어하기**: `eng.can_save()`(대기열이 빈 때 = `run()` 이 `"input"`/`"idle"` 을 돌려준 뒤) → `eng.save_text()`(정확한 JSON 문자열) 또는 `eng.save_state()`(사전).
+  복원: 같은 데이터로 새 엔진을 만들고 `eng2.load_state(JsonExact.parse(text))` → `eng2.input_provider`/`command()`/`run()` 으로 이어서. 난수 상태·저장소·기록기 상태까지 담겨,
+  이어 돌린 결과가 끊지 않고 돌린 것과 사건 하나까지 같습니다 (`replay_golden.gd -- --resume`: 22개 시나리오를 **모든 입력 대기마다** 끊고 이어 확인).
 - 저장: 전투 중 바뀐 저장값(골드·상자·경험치·로스터·영혼석 …)은 `eng.c.store` 에 있습니다. 끝나면 `eng.c.store.dump()` 를 오토로드 `Store` 로 되돌려 쓰세요.
 
 ## 시간 모델 (웹 async → 동기 + 대기열)
@@ -104,10 +117,20 @@ eng.dispose()                      # 순환 참조 정리
 - 이름·성별 표시값: 유닛 `name` 은 직업 id(적·소환수)나 저장 이름. 번역은 화면 몫입니다.
 - 순수 연출 호출(`Fx.burst/shake/sfx`, 메뉴 표시)은 없앴고, 규칙 결과를 알려 주는 것만 `fx_event` 로 냅니다.
 
-## 아직 옮기지 않은 것 (영향)
+## 장비 구버전 전환 (`Gear.migrate`·`rollEnhanceOpt`)
 
-- **이어하기**(`resumeBattle`·`saveBattle`/`loadBattle`): 전투 중 저장·복원. 화면 단계에서 `S` 직렬화로 붙일 예정 — 규칙 재현에는 영향 없음.
-- **장비 구버전 전환**(`Gear.migrate`, `gv` 없는 장비): 인벤토리를 읽을 때 웹은 옛 장비를 새 구조로 바꾸며 난수를 씁니다. 지금 세이브는 모두 `gv:2` 라 생략 — 옛 웹 세이브를 들여올 때만 필요.
+`gv` 없는 옛 장비는 웹처럼 **인벤토리를 처음 읽을 때**(`profile.gd load_inventory` = 웹 equip.js `loadInventory`) 새 구조로 바꾸고 저장합니다 — 옛 무기 이름 → 직업 무기, 방어구 직업 제한, 옵션 다시 굴림, 강화 단계마다 강화 옵션.
+난수를 쓰므로 전투 안이면 전투 난수 열에 들어갑니다 (전투 준비 중 `genT` 뒤의 첫 인벤토리 읽기 — 황금 기록 `legacy_gear_s08`).
+웹 세이브 가져오기(`Store.import_web_dump`)는 값을 그대로 넣고, 전환은 웹과 같은 시점(처음 읽을 때)에 일어납니다. 전투 밖(로비 등)에서 먼저 읽으면 그 ctx 의 난수를 씁니다.
+
+## 숫자 정밀도 (JSON)
+
+Godot 의 `JSON.parse_string`·`String.to_float`·`str_to_var` 는 17자리 실수를 정확히 읽지 못하고(`1.3599999999999999` → 1.36, 무작위 실수의 약 24%),
+`JSON.stringify`·`String.num_scientific` 도 가장 짧은 표기가 아닙니다. 그래서 `scripts/core/json_exact.gd`(읽기·쓰기)·`num_parse.gd`(정확한 10진 ↔ double)·`num.gd`(JS 표기)를 쓰며,
+Store·DataDB·시험·전투 저장이 모두 이것으로 통일되어 있습니다 (웹이 쓴 JSON 과 비트 단위로 같은 값). **GDScript 소스의 실수 리터럴도 같은 변환을 거치므로**
+규칙 코드에 17자리 리터럴을 쓰지 마세요 (`check_battle_api.gd` 가 모든 리터럴을 검사).
+
+## 아직 옮기지 않은 것 (영향)
 - 상점·강화·성소·뽑기 화면 규칙(`enhanceItem`·`repairItem`·`dismantleItem`·`Rune.apply` 등)은 전투 밖이라 아직 없음 (4단계 성장 화면 때).
 - 스토리 대사(`story-battle.js`)는 연출 — 규칙 영향 없음.
 - 황금 기록이 닿지 않는 경로(전설 장비 뽑기·보스 전설 드랍·스킬북 드랍·요일 던전 세트/지옥 전설·대부분의 GearFX 효과·적용 안 된 디버프 물약)는 웹 코드를 줄 단위로 옮겼지만 기록 비교로 확인되지는 않았습니다.
@@ -115,11 +138,14 @@ eng.dispose()                      # 순환 참조 정리
 ## 시험
 
 ```bash
-# 2b 재생 시험 (21개, 약 4초) — 모두 같으면 RESULT: PASS (21/21), 종료 코드 0
+# 2b 재생 시험 (22개, 약 7초) — 모두 같으면 RESULT: PASS (22/22), 종료 코드 0
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd
 #  -- --only boss_s10,gear_s15   일부만
 #  -- --external                 input_provider 없이 command() 입구로 재생 (3단계 API 시험)
 #  -- --rng-log                  user://rng-log/<이름>.txt 에 '번호<TAB>웹 함수' → node tools/battle-sim.js --only <이름> --rng-log 와 나란히 비교
+#  -- --resume [N]               command() 로 재생하며 N번째 입력 대기마다 저장 → 새 엔진에 복원 → 이어서 (기본 1 = 모든 입력 대기)
+# 엔진 API 시험 (조회 순수성·command 결과·bus_event 사본·plan_rule·실수 리터럴, 약 17초)
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_api.gd
 ```
 
 불일치가 나면 사건 번호·종류·난수 번호, 첫 차이의 경로(예: `events[197].dmg: 30 ≠ 31`), 바로 앞 사건 3개, 기대/실제 전체를 출력합니다.

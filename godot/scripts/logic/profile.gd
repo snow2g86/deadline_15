@@ -262,11 +262,17 @@ static func clear_battle(c: Object) -> void:
 	c.store.remove("game_battle")
 
 
-# ── 인벤토리 (storage.js / equip.js loadInventory — 장비 개편 전 저장 전환(Gear.migrate)은 이식하지 않음: 새 저장은 모두 gv:2) ──
+# ── 인벤토리 (equip.js loadInventory: 읽을 때 gv 없는 옛 장비를 새 구조로 전환하고 저장 — 웹과 같은 시점·같은 난수) ──
+#  웹 세이브를 가져오면(Store.import_web_dump) 값은 그대로 들어오고, 처음 인벤토리를 읽는 규칙 함수가 여기서 전환한다 (웹도 그 시점).
+#  전투 안이면 전투 난수, 전투 밖(로비 등)이면 그 ctx 의 난수를 쓴다.
 
 static func load_inventory(c: Object) -> Array:
 	var inv: Variant = c.store.get_json(INVENTORY_KEY)
-	return inv if typeof(inv) == TYPE_ARRAY else []
+	if typeof(inv) != TYPE_ARRAY:
+		return []
+	if (load("res://scripts/logic/gear.gd") as GDScript).call("migrate_inventory", c, inv):   # gear.gd 가 이 파일을 preload 해서 순환 preload 를 피함
+		save_inventory(c, inv)
+	return inv
 
 
 static func save_inventory(c: Object, inv: Array) -> void:

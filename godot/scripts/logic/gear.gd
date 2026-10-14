@@ -358,6 +358,90 @@ static func calc_equip_bonus(c: Object, ch: Dictionary) -> Dictionary:
 	return bonus
 
 
+# ── 장비 개편 전 저장 전환 (gear.js Gear.migrate · rollEnhanceOpt) ──
+
+## Gear.rollEnhanceOpt(it, lv) — 강화 단계 lv 에서 확률로 붙는 옵션 (없으면 null)
+static func roll_enhance_opt(c: Object, it: Dictionary, lv: int) -> Variant:
+	var band: Variant = null
+	for b: Dictionary in c.D["ENHANCE_OPT"]:
+		if float(lv) <= float(b["upTo"]):
+			band = b
+			break
+	if band == null or c.rand("rollEnhanceOpt") >= float(band["chance"]):
+		return null
+	var have: Dictionary = {}
+	if Js.truthy(it.get("fx")):
+		have[it["fx"]["id"]] = 1
+	var LG: Dictionary = c.D["LEGENDS"]
+	if Js.truthy(it.get("legend")) and LG.has(it["legend"]):
+		for k: String in LG[it["legend"]]["fx"].keys():
+			have[k] = 1
+	var eo: Dictionary = it["eOpts"] if typeof(it.get("eOpts")) == TYPE_DICTIONARY else {}
+	for k2: Variant in eo.keys():
+		var o: Variant = eo[k2]
+		if Js.truthy(o):
+			have[o["id"]] = int(have.get(o["id"], 0)) + 1
+	if Js.truthy(band.get("unique")):
+		var UP: Array = c.D["UNIQUE_POOL"]
+		var pool: Array = []
+		for u: Dictionary in UP:
+			if not have.has(u["id"]):
+				pool.append(u)
+		if pool.is_empty():
+			pool = UP
+		var pu: Dictionary = pool[int(floorf(c.rand("rollEnhanceOpt") * pool.size()))]
+		return {"id": pu["id"], "v": _rnd(c, pu["r"], false), "uq": 1}
+	var list: Array = []
+	for k3: String in band["pool"].keys():
+		if (k3 == "move" or k3 == "range") and have.has(k3):
+			continue
+		var r: Array = band["pool"][k3]
+		list.append({"id": k3, "r": [r[0], r[1]], "w": r[2] if r.size() > 2 and Js.truthy(r[2]) else 1.0})
+	var po := _pick_w(c, list)
+	return {"id": po["id"], "v": _rnd(c, po["r"], _is_dec(c, po["id"]))}
+
+
+## Gear.migrate(it) — gv 없는 옛 장비: 옛 무기 → 직업 무기, 방어구 직업 제한, 옵션 새로 굴림(난수), 강화 단계마다 강화 옵션(난수)
+static func migrate(c: Object, it: Dictionary) -> void:
+	var nw: Variant = (c.D["LEGACY_WEAPON"] as Dictionary).get(it.get("templateId"))
+	if Js.truthy(nw):
+		var tpl: Dictionary = equip_template(c, nw)
+		it["templateId"] = nw
+		if tpl.has("hand"):
+			it["hand"] = tpl["hand"]
+		else:
+			it.erase("hand")   # 웹: it.hand = undefined → 저장에서 빠짐
+		it["clsRestrict"] = (tpl["clsRestrict"] as Array).duplicate()
+	elif Js.truthy(it.get("armorType")) and (c.D["ARMOR_TYPE"] as Dictionary).has(it["armorType"]) and not Js.truthy(it.get("setCls")):
+		it["clsRestrict"] = (c.D["ARMOR_TYPE"][it["armorType"]] as Array).duplicate()
+	it.erase("enhanceAttempts")
+	it["enhanceBonus"] = 0.0
+	it["eOpts"] = {}
+	it["broken"] = false
+	it["legend"] = it["legend"] if Js.truthy(it.get("legend")) else null
+	roll(c, it)
+	for lv in range(1, int(Js.num(it.get("enhanceLv"))) + 1):
+		var o: Variant = roll_enhance_opt(c, it, lv)
+		if o != null:
+			it["eOpts"][str(lv)] = o
+	it["gv"] = 2.0
+
+
+## equip.js loadInventory 의 전환: gv 없는 장비가 하나라도 있으면 모두 전환하고 저장 (true = 전환함)
+static func migrate_inventory(c: Object, inv: Array) -> bool:
+	var need := false
+	for it: Variant in inv:
+		if typeof(it) == TYPE_DICTIONARY and it.get("type") == "equip" and not Js.truthy(it.get("gv")):
+			need = true
+			break
+	if not need:
+		return false
+	for it2: Variant in inv:
+		if typeof(it2) == TYPE_DICTIONARY and it2.get("type") == "equip" and not Js.truthy(it2.get("gv")):
+			migrate(c, it2)
+	return true
+
+
 # ── 마법부여 룬 (hazards.js Rune) ──
 
 static func rune_kinds(c: Object, cat: Variant = null) -> Array:

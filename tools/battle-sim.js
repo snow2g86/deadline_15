@@ -56,6 +56,12 @@ function makeItem(g, spec) {
   else it = g.generateEquip(g.equipTemplate(spec.tpl), spec.rarity || 'rare');
   if (spec.enchant) it.enchant = spec.enchant;
   if (spec.enchantAtk) it.enchantAtk = spec.enchantAtk;
+  // 장비 개편 전 모양 (gv·옵션·강화 옵션 없음, 옛 무기 이름, 강화 시도 횟수) — 게임이 읽을 때 Gear.migrate 로 전환
+  if (spec.legacy) {
+    it = { type: 'equip', eid: it.eid, templateId: spec.legacy === true ? it.templateId : spec.legacy, rarity: it.rarity, slot: it.slot,
+      armorType: it.armorType, clsRestrict: it.clsRestrict, stats: it.stats, equipped: null, enhanceLv: spec.enhanceLv || 0, enhanceAttempts: 3,
+      ...(spec.enchant ? { enchant: spec.enchant } : {}) };
+  }
   return it;
 }
 

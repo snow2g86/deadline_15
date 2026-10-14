@@ -32,7 +32,8 @@ godot/
   assets/image/        웹 image/ 사본 (git 제외)
   tests/check_foundation.gd   머리 없는 시험
   tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
-  tests/replay_golden.gd   2b 시험: 황금 기록 21개를 GDScript 규칙으로 재생해 사건·난수까지 비교
+  tests/replay_golden.gd   2b 시험: 황금 기록 22개를 GDScript 규칙으로 재생해 사건·난수까지 비교
+  tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
 ```
 
 ## 처음 한 번 / 웹 데이터가 바뀔 때마다
@@ -92,7 +93,8 @@ node tools/export-godot-data.js --check
 전투 규칙(2b) 시험 — 황금 기록 21개 재생 (`--only 이름`, `--external`, `--rng-log` 는 scripts/logic/README.md):
 
 ```bash
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd            # 22개 (-- --resume: 모든 입력 대기마다 저장·복원)
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_api.gd         # 엔진 조회 API·command·사본·plan_rule
 ```
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
@@ -144,7 +146,10 @@ Store.get_json("game_roster", {})
 - **화면에 숫자를 낼 때는 `Num.fmt(v)`** (`scripts/core/num.gd`): 웹 `String(number)` 와 같은 표기 — 가장 짧은 왕복 유효 숫자,
   `|f| >= 1e21` 이나 `0 < |f| < 1e-6` 은 JS 식 지수 표기 (`56.0 → "56"`, `0.1+0.2 → "0.30000000000000004"`, `1e21 → "1e+21"`, `1e-7 → "1e-7"`).
   `str(56.0)` 은 `"56.0"`, `str(0.1+0.2)` 는 `"0.3"` 이 됩니다.
-- Godot 의 `String.to_float()` 는 `1.79e308`, `5e-324` 같은 끝값을 정확히 못 읽습니다 (데이터 범위에서는 문제 없음).
+- **실수 정밀도**: Godot 의 `JSON.parse_string`·`String.to_float`·`str_to_var` 는 17자리 실수를 정확히 읽지 못합니다
+  (`"1.3599999999999999"` → 1.36, 무작위 실수의 약 24%가 1ulp 어긋남), `JSON.stringify`·`num_scientific` 도 가장 짧은 표기가 아닙니다.
+  그래서 **Store·DataDB·시험·전투 저장은 모두 `scripts/core/json_exact.gd`** 로 읽고 씁니다 (`num_parse.gd` 가 10진 ↔ double 을 정확히, `num.gd` 는 JS 와 같은 가장 짧은 표기).
+  새 코드에서 JSON 을 다룰 때도 `JsonExact.parse/stringify` 를 쓰세요. GDScript 소스의 실수 리터럴도 같은 변환을 거치니 17자리 리터럴은 피하세요.
 - 번역 자리표시자 값이 `null` 이면 웹처럼 `"null"`, 정수 값 실수는 `"3"` 처럼 표시됩니다.
 - JSON 객체의 숫자 키는 문자열이 됩니다 (스토리 `episodes["1"]`, `DAILY.schedule["0"]`).
 - `--script` 로 돌리는 시험에서는 오토로드 이름(`Store` 등)을 컴파일 때 쓸 수 없어, core 스크립트끼리는 `preload` 형식 + `/root/...` 경로로 서로를 찾습니다.

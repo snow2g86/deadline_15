@@ -17,6 +17,7 @@ extends Node
 const DATA_DIR := "res://data/"
 const MANIFEST_FILE := "manifest.json"
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
 
 var manifest: Dictionary = {}
 ## 검증 중 생긴 오류 (비어 있으면 정상)
@@ -295,12 +296,11 @@ func _read_json(rel: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		_fail("파일 없음: %s" % path)
 		return null
-	var json := JSON.new()
-	var err := json.parse(FileAccess.get_file_as_string(path))
-	if err != OK:
-		_fail("%s JSON 오류 %d행: %s" % [path, json.get_error_line(), json.get_error_message()])
+	var r := JsonExact.parse_ex(FileAccess.get_file_as_string(path))   # 실수를 정확히 (json_exact.gd)
+	if not r[0]:
+		_fail("%s JSON 오류 %s" % [path, r[2]])
 		return null
-	return JsonNorm.normalize(json.data)
+	return JsonNorm.normalize(r[1])
 
 
 func _fail(msg: String) -> void:

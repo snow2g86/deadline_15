@@ -24,8 +24,14 @@ static func _imul(a: int, b: int) -> int:   # Math.imul 의 하위 32비트 (부
 	return ((((ah * bl + al * bh) & 0xFFFF) << 16) + al * bl) & M32
 
 
+## 미리보기(순수 조회) 중에는 > 0: 상태를 바꾸지 않고 0.999 를 돌려줌 (웹 previewAttack 의 Math.random = () => 0.999 — 확률 요소 제외)
+var frozen: int = 0
+
+
 ## Math.random() — tag 는 기록용 (웹 함수 이름)
 func next(tag: String = "") -> float:
+	if frozen > 0:
+		return 0.999
 	_a = (_a + 0x6D2B79F5) & M32
 	var t := _a
 	t = _imul(t ^ (t >> 15), t | 1)
@@ -36,3 +42,13 @@ func next(tag: String = "") -> float:
 		if log_enabled:
 			log.append("%d\t%s" % [calls, tag])
 	return v
+
+
+## 저장·복원 (전투 이어하기)
+func get_state() -> Dictionary:
+	return {"a": _a, "calls": calls}
+
+
+func set_state(st: Dictionary) -> void:
+	_a = int(st["a"]) & M32
+	calls = int(st["calls"])

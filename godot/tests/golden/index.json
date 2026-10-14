@@ -22,6 +22,7 @@
 {"name":"drill_s35","seed":7,"stage":35,"result":"win","rounds":9,"actions":101,"events":667,"rngCalls":254,"sha1":"3101450ef8575beb0ffe14521b7c9ba142ab0420"},
 {"name":"drill_s28","seed":2,"stage":28,"result":"win","rounds":11,"actions":117,"events":793,"rngCalls":278,"sha1":"7d064f416886670cced3448f7f606a1a87a128cb"},
 {"name":"gate_breach_s01","seed":1901,"stage":1,"result":"lose","rounds":22,"actions":200,"events":945,"rngCalls":122,"sha1":"59298215f772509dc2fc973207be206789586916"},
-{"name":"edge_inject_s11","seed":5111,"stage":11,"result":"win","rounds":9,"actions":75,"events":574,"rngCalls":244,"sha1":"47917774be39e4b82464244cb5d8bb1efb716797"}
+{"name":"edge_inject_s11","seed":5111,"stage":11,"result":"win","rounds":9,"actions":75,"events":574,"rngCalls":244,"sha1":"47917774be39e4b82464244cb5d8bb1efb716797"},
+{"name":"legacy_gear_s08","seed":2108,"stage":8,"result":"win","rounds":3,"actions":37,"events":273,"rngCalls":417,"sha1":"539aeb0aa1acf9eca1a657cf2e2daece0a4f8979"}
 ]
 }

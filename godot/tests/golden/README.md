@@ -3,6 +3,7 @@
 웹판 전투 규칙(`js/battle/*`, `js/skills/*`, `js/logic/*`)을 **화면 없이·결정적으로** 돌려 남긴 기록입니다.
 2b 단계(전투 규칙 GDScript 이식)는 같은 세이브·같은 시드·같은 아군 명령으로 이 기록을 **사건 하나, 난수 호출 하나까지** 똑같이 재현해야 합니다.
 
+- 시나리오 22개 (2b 뒤 `legacy_gear_s08` 추가 — 기존 21개 기록은 그대로, `--check` 로 확인).
 - 만드는 도구: `tools/battle-sim.js` (+ `tools/battle-sim/` 의 `env.js` · `rules-shim.js` · `policy.js` · `scenarios.js` · `coverage.js`)
 - 웹 파일은 vm 에 그대로 적재하고 바깥에서 감싸기만 합니다. 단 하나, 기록 중 찾은 웹 버그(전투 중 인벤토리 번호 어긋남)를 `js/battle/action.js` 에서 고쳤습니다 (아래 '고친 웹 버그').
 - npm 의존성 없음. 시나리오 21개 전체가 약 1~2초.
@@ -58,6 +59,7 @@ node tools/battle-sim/coverage.js           # 기록에서 실제로 일어난 �
 | drill_s28 | 28 지옥 | 승 | 같은 목적 (응급처치·희생·치명적인 일격·폭파) |
 | gate_breach_s01 | 1 평지 방어전 | **패**(돌파) | 암살자 5명 은신 버프 주입 + 해자 함정 주입, 제자리 정책(`hold: 'breach'`) → 함정 밟힘·성문 공격·파괴·성벽 오르기·돌파 패배 |
 | edge_inject_s11 | 11 얼음 방어전 | 승 | 주입으로만 닿는 규칙: 기사 강인한(HP 1 주입 → HP 0 방지 1회), 방어막 버프(`shield_active`), FURY_BUFF 버프(`fury_triggered`), 적 전사 처형(ai.js tryUseSkill) |
+| legacy_gear_s08 | 8 | 승 | 장비 개편 전 세이브(`gv` 없는 장비, 옛 무기 이름, +2·+3·+4·+7·+9·+10): 전투 준비의 첫 `loadInventory` 가 `Gear.migrate`·`rollEnhanceOpt` 로 옵션을 **전투 난수로** 다시 굴림 (시나리오 `legacy` 명세) |
 
 상태 주입(`inject`)은 일반 플레이로 만들 수 없거나 너무 드문 상태를 시험하려고 쓴 것이며 모두 `setup.inject` 에 남습니다 (balanced_s05·drill_s35·drill_s28·gate_breach_s01·edge_inject_s11).
 

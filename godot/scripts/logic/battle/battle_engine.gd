@@ -32,6 +32,8 @@ const Action := preload("res://scripts/logic/battle/battle_action.gd")
 const AIScript := preload("res://scripts/logic/battle/battle_ai.gd")
 const Skills := preload("res://scripts/logic/battle/battle_skills.gd")
 const BattleEnd := preload("res://scripts/logic/battle/battle_end.gd")
+const Query := preload("res://scripts/logic/battle/battle_query.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
 
 # ── FSM 상태 (state.js BattleState) ──
 const LOADING := "LOADING"
@@ -69,6 +71,8 @@ var am: Action
 var ai: AIScript
 var sk: Skills
 var be: BattleEnd
+## 3단계 화면용 순수 조회 (피해 미리보기·이동/공격/스킬 칸·행동 목록·방향 추천·위협 범위) — battle_query.gd
+var q: Query
 
 ## 그랜드 월 (웹 G.magicWalls — GameStore 가 아닌 G 프록시에 저장되는 값)
 var magic_walls: Array = []
@@ -98,6 +102,8 @@ var _known: Dictionary = {}      # id → 유닛 (지금 S.units 에 있는 것,
 var _drawn: Dictionary = {}      # Renderer.rUnits 로 이미 그린 유닛 id
 var _init_ter: Array = []
 var _end_hp: Variant = null      # endUnitTurn 시작 때 {id, hp, rng} (env_dmg 기록용)
+## 순수 조회 깊이 (> 0 이면 난수 고정·미사용, 기록·신호 없음 — battle_query.gd)
+var _pure: int = 0
 var _skill_before: Variant = null
 
 
@@ -112,6 +118,18 @@ func _init(data_globals: Dictionary, seed: int) -> void:
 	ai = AIScript.new(self)
 	sk = Skills.new(self)
 	be = BattleEnd.new(self)
+	q = Query.new(self)
+
+
+## 순수 조회 구간 (battle_query.gd 가 씀): 난수는 상태를 바꾸지 않고 0.999, 기록·신호 없음
+func pure_begin() -> void:
+	_pure += 1
+	c.rng.frozen += 1
+
+
+func pure_end() -> void:
+	_pure -= 1
+	c.rng.frozen -= 1
 
 
 ## 순환 참조 끊기 (엔진을 버릴 때)
@@ -123,6 +141,7 @@ func dispose() -> void:
 	ai = null
 	sk = null
 	be = null
+	q = null
 	_q.clear()
 	input_provider = Callable()
 
@@ -372,7 +391,7 @@ func unit_snap(u: Dictionary) -> Dictionary:
 
 
 func _sync_units() -> void:
-	if not record_enabled:
+	if not record_enabled or _pure > 0:
 		return
 	var now_ids: Dictionary = {}
 	for u: Dictionary in S["units"]:
@@ -396,7 +415,7 @@ func _push(ev: String, data: Dictionary) -> Dictionary:
 
 ## 사건 기록 (유닛 등장·퇴장 먼저)
 func rec(ev: String, data: Dictionary) -> Dictionary:
-	if not record_enabled:
+	if not record_enabled or _pure > 0:
 		return {}
 	_sync_units()
 	return _push(ev, data)
@@ -404,7 +423,7 @@ func rec(ev: String, data: Dictionary) -> Dictionary:
 
 ## 감싼 함수의 결과 사건: rng = 시작 때, rngEnd = 지금
 func rec_r(ev: String, rng0: int, data: Dictionary) -> void:
-	if not record_enabled:
+	if not record_enabled or _pure > 0:
 		return
 	_sync_units()
 	var e := {"ev": ev, "rng": rng0, "rngEnd": c.rng.calls}
@@ -450,7 +469,7 @@ func snap_g() -> Dictionary:
 
 
 func snapshot(why: String) -> void:
-	if not record_enabled:
+	if not record_enabled or _pure > 0:
 		return
 	_sync_units()
 	var us: Array = []
@@ -462,6 +481,9 @@ func snapshot(why: String) -> void:
 # ═══════════ EventBus (구독 순서: GearFX → 화면 규칙(VFX) → 결과(Renderer)) ═══════════
 
 func emit(name: String, data: Dictionary = {}) -> void:
+	if _pure > 0:
+		push_error("battle_engine: 순수 조회 중 알림 %s (조회 함수가 상태를 바꿈)" % name)
+		return
 	if record_enabled and not SKIP_EV.has(name):
 		var o: Dictionary = {}
 		for k: String in data.keys():
@@ -492,7 +514,8 @@ func emit(name: String, data: Dictionary = {}) -> void:
 			_vfx_on_unit_attacked(data)
 		"battle_end":
 			_on_battle_end_listener(data)
-	bus_event.emit(name, data)
+	if bus_event.get_connections().size() > 0:
+		bus_event.emit(name, _event_view(data))
 	match name:
 		"turn_end":
 			snapshot("turn_end")
@@ -506,15 +529,45 @@ func emit(name: String, data: Dictionary = {}) -> void:
 			ended = true
 
 
+## bus_event 로 넘길 사본: 유닛은 그 순간의 값만 담은 새 사전(unit_view) — 화면이 연출을 쌓아 두었다가 나중에 재생해도 그 시점 값
+func _event_view(data: Dictionary) -> Dictionary:
+	var o: Dictionary = {}
+	for k: String in data.keys():
+		var v: Variant = data[k]
+		if _is_unit(v):
+			o[k] = unit_view(v)
+		elif typeof(v) == TYPE_DICTIONARY or typeof(v) == TYPE_ARRAY:
+			o[k] = Js.deep(v)
+		else:
+			o[k] = v
+	return o
+
+
+## 화면용 유닛 요약 (사본 — 원본과 연결 없음)
+func unit_view(u: Dictionary) -> Dictionary:
+	var buffs: Array = []
+	for b: Dictionary in u.get("buffs", []):
+		buffs.append({"type": b.get("type"), "duration": b.get("duration"), "value": b.get("value", 0.0), "source": b.get("source", "")})
+	return {"id": u["id"], "uid": u.get("uid", 0), "team": u["team"], "cls": u["cls"], "x": u["x"], "y": u["y"],
+		"hp": u["hp"], "mhp": u["mhp"], "atk": u["atk"], "def": u["def"], "res": u["res"], "maxRes": u["maxRes"], "resType": u.get("resType"),
+		"move": u["move"], "range": u["range"], "ap": u["actionPow"], "face": [u.get("_gdx"), u.get("_gdy")],
+		"isBoss": Js.truthy(u.get("isBoss")), "isSummon": Js.truthy(u.get("isSummon")), "stealthed": is_stealthed(u),
+		"defend": Js.truthy(u.get("_defend")), "overwatch": Js.truthy(u.get("_overwatch")), "intent": u.get("_intent"), "buffs": buffs}
+
+
 # ═══════════ 화면 모듈에 섞인 규칙 (tests/golden/README.md '화면 모듈에 섞인 규칙' 1~8) ═══════════
 
 ## 연출 힌트 (규칙과 무관 — 3단계 화면이 받음)
 func fx(kind: String, data: Dictionary = {}) -> void:
+	if _pure > 0:
+		return
 	fx_event.emit(kind, data)
 
 
 ## Fx.float — 'messages.*' 글자는 규칙 결과를 알려 주므로 기록 (선택 안내 messages.select_* 제외)
 func fx_float(x: int, y: int, text: String) -> void:
+	if _pure > 0:
+		return
 	if text.begins_with("messages.") and not text.begins_with("messages.select_"):
 		rec("float", {"x": x, "y": y, "key": text.substr(9)})
 	fx("float", {"x": x, "y": y, "text": text})
@@ -1136,27 +1189,98 @@ func awaiting_unit() -> Variant:
 	return _await.get("u")
 
 
-## 입력 대기 중인 클랜원에게 명령 하나 (op: move·attack·heal·shove·skill·wait·defend·overwatch·siege·climb·potion·undo)
-func command(cmd: Dictionary) -> bool:
+## 입력 대기 중인 클랜원에게 명령 하나 → { ok, reason } (기록을 꺼도 같음)
+##  op: move·attack·heal·shove{x,y} · skill{idx,x,y} · wait·defend·overwatch{dx,dy} · siege·climb·potion{idx,x,y} · undo
+##  reason (ok=false): not_waiting · bad_op · wrong_unit · bad_dir · bad_skill · bad_item · bad_cell — 실행하지 않고 거절 (기록도 없음)
+##                     move_failed · attack_failed · no_resource · skill_failed · cannot_act · item_failed · cannot_undo — 실행했지만 안 됨 (웹처럼 기록됨, 같은 클랜원이 계속 입력)
+func command(cmd: Dictionary) -> Dictionary:
 	if _await.is_empty():
-		return false
+		return {"ok": false, "reason": "not_waiting"}
 	var u: Dictionary = _await["u"]
+	var bad := _validate_cmd(u, cmd)
+	if bad != "":
+		return {"ok": false, "reason": bad}
 	var start: int = _await["start"]
 	_await = {}
-	_do_cmd(u, start, cmd)
-	return true
+	return _do_cmd(u, start, cmd)
 
 
-func _do_cmd(u: Dictionary, start: int, cmd: Dictionary) -> void:
-	var ok := am.exec_cmd(u, cmd)
+const CMD_OPS := ["move", "attack", "heal", "shove", "skill", "wait", "defend", "overwatch", "siege", "climb", "potion", "undo"]
+
+
+func _is_int_like(v: Variant) -> bool:
+	return (typeof(v) == TYPE_INT) or (typeof(v) == TYPE_FLOAT and float(v) == floorf(float(v)))
+
+
+func _validate_cmd(u: Dictionary, cmd: Dictionary) -> String:
+	var op: Variant = cmd.get("op")
+	if typeof(op) != TYPE_STRING or not CMD_OPS.has(op):
+		return "bad_op"
+	if cmd.has("u") and not Js.same(cmd["u"], u["id"]):
+		return "wrong_unit"
+	if op == "wait" or op == "defend" or op == "overwatch":
+		var dx: Variant = cmd.get("dx", 0)
+		var dy: Variant = cmd.get("dy", 0)
+		if not _is_int_like(dx) or not _is_int_like(dy) or absi(int(dx)) > 1 or absi(int(dy)) > 1 or absi(int(dx)) + absi(int(dy)) > 1:
+			return "bad_dir"
+		return ""
+	if op == "undo":
+		return ""
+	for k: String in ["x", "y"]:
+		if cmd.has(k) and not _is_int_like(cmd[k]):
+			return "bad_cell"
+	if op == "skill":
+		if not _is_int_like(cmd.get("idx")) or int(cmd["idx"]) < 0 or int(cmd["idx"]) >= get_unit_skills(u).size():
+			return "bad_skill"
+	elif op == "potion":
+		if not _is_int_like(cmd.get("idx")) or int(cmd["idx"]) < 0 or int(cmd["idx"]) >= (S["_battlePotions"] as Array).size():
+			return "bad_item"
+	elif op == "siege" or op == "climb":
+		if not _is_int_like(cmd.get("idx")) or int(cmd["idx"]) < 0 or int(cmd["idx"]) >= (S["_siegeItems"] as Array).size():
+			return "bad_item"
+	elif not cmd.has("x") or not cmd.has("y"):
+		return "bad_cell"
+	return ""
+
+
+func _do_cmd(u: Dictionary, start: int, cmd: Dictionary) -> Dictionary:
 	var op: String = cmd["op"]
+	var no_res := false
+	if op == "skill":
+		var sk_list := get_unit_skills(u)
+		var idx := int(cmd.get("idx", -1))
+		if idx >= 0 and idx < sk_list.size() and (sk_list[idx] as Dictionary).has("cost") and float(u["res"]) < float(sk_list[idx]["cost"]):
+			no_res = true
+	var bx: int = u["x"]
+	var by: int = u["y"]
+	var ok := am.exec_cmd(u, cmd)   # ok = 기록되는 cmd.ok (웹 시험 정책과 같은 정의)
 	if not ok:
 		_input_step(u, start)
-		return
+		return {"ok": false, "reason": _fail_reason(op, no_res)}
 	if op == "move" or op == "climb" or op == "undo":
 		later(400.0, _input_step.bind(u, start))
-		return
-	_busy = false
+	else:
+		_busy = false
+	if op == "move" and u["x"] == bx and u["y"] == by:
+		return {"ok": false, "reason": "move_failed"}   # 제자리 '이동' — 기록상 ok 지만 실제로 움직이지 않음
+	return {"ok": true, "reason": ""}
+
+
+func _fail_reason(op: String, no_res: bool) -> String:
+	match op:
+		"move":
+			return "move_failed"
+		"attack", "heal", "shove":
+			return "attack_failed"
+		"skill":
+			return "no_resource" if no_res else "skill_failed"
+		"wait", "defend", "overwatch":
+			return "cannot_act"
+		"siege", "climb", "potion":
+			return "item_failed"
+		"undo":
+			return "cannot_undo"
+	return "failed"
 
 
 # ═══════════ 끝 ═══════════
@@ -1194,3 +1318,170 @@ func finish(status: String) -> Dictionary:
 		sa[k] = c.store.get_json(k)
 	end["saveAfter"] = sa
 	return end
+
+
+# ═══════════ 전투 저장·이어하기 ═══════════
+#  저장은 대기열이 빈 때만 (run() 이 "input"/"idle" 을 돌려준 뒤 — 클랜원 입력 대기). 복원한 엔진을 이어 돌린 결과는
+#  끊지 않고 돌린 것과 사건 하나까지 같다 (tests/replay_golden.gd --resume). 형식은 JSON 으로 쓸 수 있는 사전 (JsonExact 로 정확히).
+
+const SAVE_FORMAT := "deadline15-battle-save/1"
+const S_INT_KEYS := ["nid", "turn", "actCount", "eSpwn", "breached", "_killCount"]
+const S_UNIT_KEYS := ["curUnit", "sel"]
+const UNIT_INT_KEYS := ["summonerId", "_gdx", "_gdy", "_intent", "_sacrificeKnight", "_sacrificeTarget", "_comboTgt"]
+
+
+func can_save() -> bool:
+	return _q.is_empty() and _pure == 0
+
+
+func save_state() -> Dictionary:
+	if not can_save():
+		push_error("battle_engine: 대기열에 작업이 남아 저장할 수 없음 (입력 대기 때 저장)")
+		return {}
+	var table: Dictionary = {}
+	var add := func(u: Variant) -> void:
+		if typeof(u) == TYPE_DICTIONARY and _is_unit(u) and not table.has(u["id"]):
+			table[u["id"]] = u
+	for u: Dictionary in S["units"]:
+		add.call(u)
+	for u2: Variant in _known.values():
+		add.call(u2)
+	for k: String in S_UNIT_KEYS:
+		add.call(S.get(k))
+	for u3: Variant in S.get("potionTargets", []):
+		add.call(u3)
+	if not _await.is_empty():
+		add.call(_await["u"])
+	var units: Array = []
+	for id: Variant in table.keys():
+		units.append(Js.deep(table[id]))
+	var st: Dictionary = {}
+	for k2: String in S.keys():
+		var v: Variant = S[k2]
+		if k2 == "units":
+			var ids: Array = []
+			for u4: Dictionary in v:
+				ids.append(u4["id"])
+			st[k2] = ids
+		elif S_UNIT_KEYS.has(k2):
+			st[k2] = v["id"] if v != null else null
+		elif k2 == "potionTargets":
+			var pids: Array = []
+			for u5: Dictionary in (v if v != null else []):
+				pids.append(u5["id"])
+			st[k2] = pids
+		elif k2 == "_curSkill":
+			st[k2] = v["id"] if v != null else null
+		elif k2 == "_curPotion" or k2 == "_curSiege":
+			st[k2] = {"idx": v["idx"]} if Js.truthy(v) else null
+		else:
+			st[k2] = Js.deep(v)
+	return {
+		"format": SAVE_FORMAT, "units": units, "S": st, "fsm": fsm, "magic_walls": Js.deep(magic_walls),
+		"max_rounds": max_rounds, "ended": ended, "end_info": Js.deep(end_info), "rewards": Js.deep(rewards), "turn_ends": turn_ends,
+		"busy": _busy, "last_act": _last_act, "await": {"u": _await["u"]["id"], "start": _await["start"]} if not _await.is_empty() else null,
+		"seq": _seq, "now_ms": c.now_ms, "eid_counter": c.eid_counter, "rng": c.rng.get_state(),
+		"record": record_enabled, "known": _known.keys(), "drawn": _drawn.keys(), "init_ter": Js.deep(_init_ter),
+		"store": c.store.dump(),
+	}
+
+
+## 저장 문자열 (실수 정확)
+func save_text() -> String:
+	return JsonExact.stringify(save_state())
+
+
+## 새 엔진(같은 데이터로 만든 것)에 복원. d 는 save_state() 결과 또는 그 JSON 을 읽은 것
+func load_state(d: Dictionary) -> void:
+	_q.clear()
+	var table: Dictionary = {}
+	for uv: Variant in d["units"]:
+		var u: Dictionary = JsonNorm.normalize(Js.deep(uv))
+		for k: String in UNIT_INT_KEYS:
+			if u.get(k) != null and (typeof(u[k]) == TYPE_FLOAT or typeof(u[k]) == TYPE_INT):
+				u[k] = int(u[k])
+		table[int(u["id"])] = u
+	var unit_of := func(id: Variant) -> Variant:
+		return table.get(int(id)) if id != null else null
+	var st: Dictionary = d["S"]
+	S.clear()
+	for k2: String in st.keys():
+		var v: Variant = st[k2]
+		if k2 == "units":
+			var arr: Array = []
+			for id: Variant in v:
+				arr.append(unit_of.call(id))
+			S[k2] = arr
+		elif S_UNIT_KEYS.has(k2):
+			S[k2] = unit_of.call(v)
+		elif k2 == "potionTargets":
+			var pa: Array = []
+			for id2: Variant in (v if v != null else []):
+				pa.append(unit_of.call(id2))
+			S[k2] = pa
+		else:
+			S[k2] = JsonNorm.normalize(Js.deep(v))
+	for k3: String in S_INT_KEYS:
+		if S.has(k3):
+			S[k3] = int(S[k3])
+	for k4: String in ["battleExp", "_turnActed", "allyPos"]:
+		var dd: Dictionary = {}
+		for kk: Variant in (S.get(k4, {}) as Dictionary).keys():
+			dd[int(kk)] = S[k4][kk]
+		S[k4] = dd
+	for k5: String in ["_battlePotionIndices", "_siegeInvIndices", "_deadAllyUids", "party"]:
+		var ia: Array = []
+		for x: Variant in S.get(k5, []):
+			ia.append(int(x))
+		S[k5] = ia
+	for m: Dictionary in S.get("poisonMists", []):
+		m["cx"] = int(m["cx"])
+		m["cy"] = int(m["cy"])
+	if S.get("_curSkill") != null:
+		var sid: String = S["_curSkill"]
+		S["_curSkill"] = null
+		var cu: Variant = S.get("sel")
+		if cu != null:
+			for skd: Dictionary in get_unit_skills(cu):
+				if skd["id"] == sid:
+					S["_curSkill"] = skd
+	if Js.truthy(S.get("_curPotion")):
+		var pi := int(S["_curPotion"]["idx"])
+		var pot: Dictionary = S["_battlePotions"][pi]
+		S["_curPotion"] = {"idx": pi, "def": D["BATTLE_POTIONS"][pot["potionId"]], "pot": pot}
+	if Js.truthy(S.get("_curSiege")):
+		var si := int(S["_curSiege"]["idx"])
+		var sie: Dictionary = S["_siegeItems"][si]
+		for sd: Dictionary in D["SIEGE_ITEMS"]:
+			if sd["id"] == sie["siegeId"]:
+				S["_curSiege"] = {"idx": si, "def": sd, "si": sie}
+	fsm = d["fsm"]
+	magic_walls = JsonNorm.normalize(Js.deep(d["magic_walls"]))
+	max_rounds = int(d["max_rounds"])
+	ended = bool(d["ended"])
+	end_info = Js.deep(d["end_info"])
+	rewards = Js.deep(d["rewards"])
+	turn_ends = int(d["turn_ends"])
+	_busy = bool(d["busy"])
+	_last_act = int(d["last_act"])
+	_await = {}
+	if d.get("await") != null:
+		_await = {"u": unit_of.call(d["await"]["u"]), "start": int(d["await"]["start"])}
+	_seq = int(d["seq"])
+	c.now_ms = float(d["now_ms"])
+	c.eid_counter = int(d["eid_counter"])
+	c.rng.set_state(d["rng"])
+	record_enabled = bool(d["record"])
+	_known = {}
+	for id3: Variant in d["known"]:
+		_known[int(id3)] = unit_of.call(id3)
+	_drawn = {}
+	for id4: Variant in d["drawn"]:
+		_drawn[int(id4)] = true
+	_init_ter = Js.deep(d["init_ter"])
+	c.store = c.store.get_script().new()
+	c.store.load_from(d["store"])
+	_end_hp = null
+	_skill_before = null
+	_aborted = false
+	trace = []

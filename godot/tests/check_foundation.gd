@@ -9,6 +9,9 @@ const TEST_SAVE := "user://test_foundation_save.json"
 const StoreScript := preload("res://scripts/core/store.gd")
 const DataDBScript := preload("res://scripts/core/data_db.gd")
 const I18nScript := preload("res://scripts/core/i18n.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
+const NumParse := preload("res://scripts/core/num_parse.gd")
+const NumFmt := preload("res://scripts/core/num.gd")
 
 var Store: StoreScript
 var DataDB: DataDBScript
@@ -46,6 +49,7 @@ func _run() -> void:
 	_test_data()
 	_test_i18n()
 	_test_store()
+	_test_numbers()
 
 	# 정리: 시험 저장 지우고 진짜 저장으로 되돌림
 	Store.clear()
@@ -316,6 +320,71 @@ func _find_by_id(arr: Array, id: int) -> Dictionary:
 		if x is Dictionary and int((x as Dictionary).get("id", -1)) == id:
 			return x
 	return {}
+
+
+# ── 실수 정밀도 (json_exact.gd · num_parse.gd · num.gd) ──
+
+func _test_numbers() -> void:
+	print("[실수 정밀도]")
+	# 1) 무작위 실수 1만 개: 쓰기(가장 짧은 표기) → 읽기 가 비트까지 같음 (Godot JSON 은 같은 일을 하면 상당수 틀림)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261014
+	var bad := 0
+	var godot_bad := 0
+	var n := 0
+	while n < 10000:
+		var x: float
+		if n % 2 == 0:   # 비트 무작위 (모든 크기)
+			x = NumParse._from_bits((rng.randi() << 32) | rng.randi())
+			if is_nan(x) or is_inf(x):
+				continue
+		else:            # 게임에 나오는 크기
+			x = rng.randf() * pow(10.0, float(rng.randi_range(-6, 9)))
+		n += 1
+		var txt := JsonExact.stringify([x])
+		var back: Variant = JsonExact.parse(txt)
+		if typeof(back) != TYPE_ARRAY or NumParse._bits(back[0]) != NumParse._bits(x):
+			bad += 1
+			if bad <= 3:
+				print("    · 왕복 실패 %s → %s" % [txt, str(back)])
+		var g: Variant = JSON.parse_string(txt)
+		if typeof(g) != TYPE_ARRAY or NumParse._bits(g[0]) != NumParse._bits(x):
+			godot_bad += 1
+	_check(bad == 0, "무작위 실수 1만 개 JSON 왕복이 비트까지 같음 (실패 %d — 참고: Godot JSON 이면 %d개 틀림)" % [bad, godot_bad])
+	# 2) JS 정답 (tests/fixtures/js_numbers.json: node 의 String(x) 와 비트) — 읽기·쓰기 모두 JS 와 같음
+	var fx: Variant = JsonExact.parse(FileAccess.get_file_as_string("res://tests/fixtures/js_numbers.json"))
+	var pbad := 0
+	var fbad := 0
+	for e: Array in fx:
+		var bits: int = String(e[1]).to_int()
+		if NumParse._bits(JsonExact.parse_number(e[0])) != bits:
+			pbad += 1
+		if NumFmt.fmt(NumParse._from_bits(bits)) != e[0]:
+			fbad += 1
+			if fbad <= 3:
+				print("    · 표기 %s ≠ JS %s" % [NumFmt.fmt(NumParse._from_bits(bits)), e[0]])
+	_check(pbad == 0 and fbad == 0 and (fx as Array).size() > 1000, "JS 정답 %d개: 읽기 틀림 %d · 표기(Num.fmt) 틀림 %d" % [(fx as Array).size(), pbad, fbad])
+	# 3) 검수에서 1ulp 어긋났던 값: 첫 클리어 신규 클랜원 actionRec = 직업 기본 + rollActionRec (toFixed(2)) — Store 왕복으로 정확히
+	var sbad := 0
+	for base: float in [1.0, 1.1, 1.2, 0.9, 0.8, 1.05, 0.95, 1.15]:
+		for k in range(5, 21):
+			var rec: float = base + float(k) / 100.0
+			Store.set_json("test_num", {"chars": [{"uid": 9, "actionRec": rec}]})
+			var got: Variant = Store.get_json("test_num", {})
+			if NumParse._bits(got["chars"][0]["actionRec"]) != NumParse._bits(rec):
+				sbad += 1
+	Store.remove("test_num")
+	_check(sbad == 0, "actionRec 류 값 128개 Store 저장·읽기 비트까지 같음 (틀림 %d)" % sbad)
+	# (GDScript 소스의 실수 리터럴도 같은 Godot 변환을 거쳐 틀릴 수 있어 문자열로만 비교)
+	var a := JsonExact.parse_number("1.3599999999999999")
+	_check(a != JsonExact.parse_number("1.36") and NumFmt.fmt(a) == "1.3599999999999999" and (JsonExact.parse("[1.3599999999999999]") as Array)[0] == a,
+		"1.3599999999999999 를 1.36 과 구별해 읽고 그대로 씀")
+	var ok_fmt := true
+	for t: String in ["5091.900000000001", "0.30000000000000004", "80185174942016600", "1.1500000000000001", "1e-7", "1.7976931348623157e+308", "5e-324"]:
+		if NumFmt.fmt(JsonExact.parse_number(t)) != t:
+			ok_fmt = false
+			print("    · %s → %s" % [t, NumFmt.fmt(JsonExact.parse_number(t))])
+	_check(ok_fmt, "Num.fmt 가 JS 처럼 가장 짧은 표기 (num_scientific 의 17자리 대신)")
 
 
 func _check(cond: bool, label: String) -> void:
