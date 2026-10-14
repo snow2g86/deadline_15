@@ -313,7 +313,8 @@ func _commander() -> Variant:
 
 func commander_name() -> String:
 	var ch: Variant = _commander()
-	if ch != null:
+	# 웹 story.js 와 같게: 지휘관 설정(setup) 전의 customName 은 로스터 생성 때 넣은 한국어 기본값 → 그 언어 대본의 이름
+	if ch != null and Js.truthy(ch.get("setup")):
 		if Js.truthy(ch.get("customName")):
 			return str(ch["customName"])
 		if Js.truthy(ch.get("name")):

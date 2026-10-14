@@ -69,7 +69,7 @@ eng.dispose()                      # 순환 참조 정리
   - `preview_attack(a, t, as_exec = false)` → `{dmg, kill, tags, pct, support(%), shallow, evade(%), evade_buff, shield, counter, intercept(기사 id|null), intercept_dmg}` — 웹 `previewAttack`·`rPreview` 와 같은 값 (확률 요소는 발동 안 함으로 계산)
     - `as_exec = true` (3b 화면, Godot 만): 실제 공격(`do_atk`)처럼 계산 — 주술사 고양(`shaman_exalt` atk_up, `_attackCount` ≤ 1)은 마지막 공격에서 피해 계산 **전에** 소모되므로
       계산 동안 그 버프를 잠시 빼고(끝나면 같은 자리에 되돌림) 계산. 웹 미리보기는 이 버프를 넣고 계산해 실제보다 크게 보임. 기본값 false 는 웹과 같은 값.
-  - `inventory_eids()` · `gear_drop_items(before_eids)` (3b 결과 화면) — 전투 시작 때 eid 를 기준으로, 끝 장비 보상(`S._gearDrops`)과 실제 인벤토리 물건(사본)을 짝지음
+  - `inventory_eids()` · `gear_drop_items(before_eids)` (3b 결과 화면) — 전투 시작 때 eid 를 기준으로, 끝 장비 보상(`S._gearDrops`)과 실제 인벤토리 물건(사본)을 짝지음 (eid 있는 물건만 — 룬·스킬북처럼 eid 없는 물건은 짝짓지 않음)
   - `move_cells(u)`(이동했으면 []) · `attack_targets(u)` → `{attack, cover, block, heal}` · `skill_targets(u, idx)` → `{ok, cells, instant, reason}` · `skill_status(u)` → 스킬마다 `{idx, id, cost, passive, usable, reason}` (reason: passive·acted·no_resource·no_target — 웹에는 재사용 대기 없음)
   - `can_undo()` · `actions(u)` → `[{op, ok, reason}]` (move·attack·heal·shove·skill·potion·siege·wait·defend·overwatch·undo)
   - `face_options(u)` → 네 방향 `{dx, dy, back, side, cur, best}` (웹 faceOptions: 그 방향을 볼 때 등·옆구리에 놓이는 적 수, best = 추천)

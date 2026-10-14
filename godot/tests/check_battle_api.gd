@@ -54,6 +54,7 @@ func _run() -> int:
 	_test_bus_snapshot()
 	_test_plan_rule()
 	_test_literals()
+	_test_gear_drop_items()
 	if own != null:
 		own.free()
 	print("──────────────────────────────")
@@ -245,6 +246,36 @@ func _test_plan_rule() -> void:
 
 
 ## 규칙·기반 코드의 실수 리터럴이 정확히 컴파일됐는지 (GDScript 리터럴도 Godot 의 부정확한 문자열→실수 변환을 거침)
+## gear_drop_items: 전투 뒤 새로 생긴 물건 중 eid 있는 것(장비)만 장비 보상과 짝지음 — 룬·스킬북(eid 없음)은 건너뜀
+func _test_gear_drop_items() -> void:
+	print("[gear_drop_items]")
+	var r := _make("gear_s15")
+	var eng: Object = r[0]
+	var store: Object = eng.c.store
+	var key := str(_globals.get("INV_KEY", "game_inventory"))
+	var keep: Variant = store.get_json(key)
+	store.set_json(key, [{"type": "equip", "eid": "eq_old", "templateId": "wpn_old"}])
+	var before: Dictionary = eng.q.inventory_eids()
+	store.set_json(key, [
+		{"type": "equip", "eid": "eq_old", "templateId": "wpn_old"},
+		{"type": "rune", "id": "rune_fire"},
+		{"type": "equip", "eid": "eq_new1", "templateId": "wpn_a"},
+		{"type": "skillbook", "id": "sb_x", "eid": null},
+		{"type": "equip", "eid": "eq_new2", "templateId": "arm_b"},
+		{"type": "rune", "id": "rune_ice"},
+	])
+	var drops_keep: Variant = eng.S.get("_gearDrops")
+	eng.S["_gearDrops"] = [{"templateId": "wpn_a"}, {"stone": 2}, {"templateId": "arm_b", "legend": true}]
+	var out: Array = eng.q.gear_drop_items(before)
+	eng.S["_gearDrops"] = drops_keep
+	store.set_json(key, keep if keep != null else [])
+	eng.dispose()
+	_check(before.size() == 1 and before.has("eq_old"), "inventory_eids: eid 있는 물건만 (%s)" % str(before.keys()))
+	var ok: bool = out.size() == 3 and out[0]["item"] != null and str(out[0]["item"]["eid"]) == "eq_new1" and out[1].has("stone") \
+		and out[2]["item"] != null and str(out[2]["item"]["eid"]) == "eq_new2" and bool(out[2]["legend"])
+	_check(ok, "장비 보상 2개 ↔ 새 장비 eq_new1·eq_new2 (룬·스킬북 건너뜀) %s" % str(out))
+
+
 func _test_literals() -> void:
 	print("[실수 리터럴]")
 	var re := RegEx.new()

@@ -125,10 +125,10 @@ UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
 - 클랜원 카드: 초상화 · 이름 · Lv·직업 · HP/자원 막대와 값 · ATK/DEF/RNG · 버프 아이콘(남은 턴 숫자, 툴팁 = 이름). 지금 차례 금빛, 행동 끝 흐림. 누르면 카메라 이동.
 - 미니맵: 누르거나 끌면 그 자리로 카메라. 카메라 방향(▲ N)은 오른쪽 아래.
 - 툴팁(0.25초 머물면): 유닛 = 이름·Lv·직업·HP·자원·ATK/DEF/RNG/MOV·버프(남은 턴)·지형·노리는 대상 / 칸 = 지형·이동 비용·높이·지형 효과·보물상자·냉기 결계·용암·위협·안개.
-- 적 정보 팝업(적을 누르면, 다음 누르기에 닫힘): 툴팁 내용 + 스킬 목록(그림·비용) + AI 성향(`AI_PROFILES` style·targetPriority) + 노리는 대상.
+- 적 정보 팝업(적을 누르면, 다음 누르기에 닫힘 — HUD 위 누르기 포함): 툴팁 내용 + 스킬 목록(그림·비용) + AI 성향(`AI_PROFILES` style·targetPriority) + 노리는 대상.
 - 머리 위 배지: 지형 효과·용암 옆·엄호·방어 태세·경계·광폭·방어 강화·무장해제·정신 집중, 기절/빙결 수(발밑), 소환 남은 턴.
 - 공격 예상: 대상 머리 위 상자 — 처치면 💀 그림·금빛, 기사가 대신 맞으면 🛡️·파랑, 아래 줄에 전술(후방·측면·협공·고지 +%)·방어막 ½·숲 회피·여울·연계·반격.
-- 설정(왼쪽 아래 톱니): 배경음·효과음 켜기/음량(값만 저장 — 소리는 5단계), 게임 속도 1x·2x·4x, 움직임 줄이기, 언어(ko·en·es — 바로 바뀜), 닫기, 항복(확인 창).
+- 설정(왼쪽 아래 톱니): 배경음·효과음 켜기/음량(값만 저장 — 소리는 5단계), 게임 속도 1x·2x·4x, 움직임 줄이기, 언어(6개 — 한국어·English·Español·日本語·简体中文·繁體中文 단추, 단추마다 그 언어 글꼴, 바로 바뀜), 닫기, 항복(확인 창).
   값은 Store `game_settings` 에 웹과 같은 키(`bgmOn`·`bgmVol`·`sfxOn`·`sfxVol`·`language`) + Godot 전용 `playSpeed`·`reduceMotion`.
 - 결과: VICTORY/DEFEAT, 결과 글, 연습 모드 안내, 별 3개(새 별 강조 + 조건), 보상(별 보상·골드·첫 클리어·새 클랜원·스킬북·룬·영혼석·장비 — 아이템 그림 + 등급 테두리),
   전사자, 클랜원마다 +EXP·다음 레벨까지 막대·레벨 업. 내용만 스크롤되고 단추 줄은 늘 보임. 장비 이름·등급은 순수 조회 `eng.q.gear_drop_items(전투 시작 eid)`. 단추: 로비로(지금은 시작 화면) · 다시 도전 · 다음 스테이지. 언어를 바꾸면 다시 그림.
@@ -136,7 +136,7 @@ UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
 
 ## 번역 (Godot 전용 키)
 
-웹 언어 팩(`data/lang/*.json`, 변환기 결과)은 고치지 않습니다. 웹에 없는 키는 `data/lang_extra/{ko,en,es}.json` 의 `gd.*` 에 두고,
+웹 언어 팩(`data/lang/*.json`, 변환기 결과)은 고치지 않습니다. 웹에 없는 키는 `data/lang_extra/{ko,en,es,ja,zh-CN,zh-TW}.json` 의 `gd.*` 에 두고 (6개 언어 같은 키 — `check_foundation` 이 검사),
 I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scripts/core/i18n.gd _with_extra`). DataDB 의 '목록에 없는 파일' 검사와 변환기 `--check` 는 `lang_extra/` 를 건너뜁니다.
 `gd.fail.*`(명령 실패 안내) · `gd.buff.*`(버프 이름) · `gd.tip.*`(툴팁) · `gd.ai.*`(AI 성향) · `gd.settings.*` · `gd.result.retry`.
 언어가 바뀌면(`I18n.language_changed`) 윗줄·행동 순서·카드·메뉴·공격 예상·방향 고르기·팝업·설정·결과를 바로 다시 그립니다.
@@ -157,7 +157,7 @@ I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scr
 
 - 마우스: 왼쪽 누르기 = 고르기(메뉴 중 적을 누르면 정보 팝업), 끌기 = 카메라 이동, 휠 = 확대(0.6~3배), 오른쪽 = 취소. 가운데 끌기도 이동. 칸·유닛 위에 머물면 툴팁.
 - 키: M 이동 · A 공격 · S 스킬 · I 아이템 · P 밀치기 · D 방어 · O 경계 · W·Space 대기 · 1~9 하위 메뉴 · Esc·Backspace 취소/되돌리기(설정 창이면 닫기) · Q/E 회전 · T 위협 범위 · 화살표 카메라.
-- 적 정보 팝업은 다음 누르기에 닫히고 그 누르기도 그대로 처리됨 (팝업·툴팁 안 부품은 마우스를 받지 않음). 툴팁은 다른 칸·유닛으로 옮기면 바로 숨고, 행동 메뉴와 겹치지 않는 자리에.
+- 적 정보 팝업은 다음 누르기에 닫히고 그 누르기도 그대로 처리됨 — 맵이든 HUD(단추·미니맵·설정)든 (`battle_scene._input`, 웹 pointerdown capture 처럼 GUI 보다 먼저 보고 먹지 않음. 팝업·툴팁 안 부품은 마우스를 받지 않음). 툴팁은 다른 칸·유닛으로 옮기면 바로 숨고, 행동 메뉴와 겹치지 않는 자리에.
   로딩·대사·결과 화면 중에는 맵 단축키를 받지 않습니다 (대사 창은 Space·Enter·→·Esc 를 먼저 받음).
 - 시험용 상태: `is_awaiting()`, `is_over()`, `awaiting_unit_id()`, `last_result`, `result`, `story_log`(재생한 장면 키), `is_story_playing()`, 신호 `input_ready(id)`·`battle_over(result)`.
 
@@ -173,6 +173,7 @@ I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scr
 - 장면 직접 실행: `Godot --path godot res://scenes/battle/battle.tscn -- --golden legion5_s09 [--autoplay] [--speed 2] [--rotate 1] [--stage 10] [--no-story]`
 - 화면 사진: `Godot --path godot --resolution 1280x720 --script res://tests/shots_3b.gd` → `godot/tests/screens/3b_*.png` (git 제외)
   (HUD 전체 · 적 팝업+툴팁 · 공격 예상 · 처치 순간 연출 · 결과 · 전투 전 대사 · 전투 중 대사)
+- 새 언어 화면 사진: `Godot --path godot --resolution 1280x720 --script res://tests/shots_lang6.gd` → `godot/tests/screens/lang6_godot_{ja,zh-CN,zh-TW}_{hud,settings,story,story_battle}.png`
 
 ## 시험
 
@@ -181,8 +182,8 @@ I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scr
 Godot --headless --path godot --script res://tests/check_battle_scene.gd
 #   끝에 회귀 시험 rotate:boss_s10 (8x 연출·로딩 포함, 유닛이 움직일 때마다 카메라 회전 → 멈춘 유닛이 늘 자기 칸에 있는지)
 #   -- --only boss_s10,gear_s15    일부만      -- --speed 4    실제 연출 시간으로      -- --smoke   여러 지도 연기 시험
-# UI 연기 시험: 모든 패널·팝업·툴팁·메뉴·연출·대사·결과를 열고 언어를 ko→en→es→ko 로 바꿈 — Godot 오류(Logger 로 셈) 0 이어야 통과
-#   + 진짜 마우스 누르기로 항복(1280×720·1024×600·1920×1080 × ko·es), 단축키, 팝업 다음 누르기, 연출 중 항복 미루기, es 메뉴 폭,
+# UI 연기 시험: 모든 패널·팝업·툴팁·메뉴·연출·대사·결과를 열고 언어를 en→es→ja→zh-CN→zh-TW→ko 로 바꿈(대사·결과 화면도) — Godot 오류(Logger 로 셈) 0 이어야 통과
+#   + 진짜 마우스 누르기로 항복(1280×720·1024×600·1920×1080 × ko·es, 1024×600 은 ja·zh-TW 도), 단축키, 팝업 다음 누르기(맵·HUD), 연출 중 항복 미루기, es 메뉴 폭,
 #     실제 세이브 전투 뒤 Store 의 다른 키(game_soul·game_mats) 보존·보상 더하기
 Godot --headless --path godot --script res://tests/check_battle_ui.gd
 # 성능 (창 모드): 유닛 40 · 맵 오브젝트 343 · HUD 전부 + 30프레임마다 연출 + 회전 4번 → 평균·95%·최대·회전 프레임 최대·그리기 CPU
@@ -192,9 +193,9 @@ cmd 사건은 `u·op·ok·idx·rng` 만 비교합니다.
 
 ## 웹과 다른 점
 
-- **글꼴**: 웹 제목 글꼴 Cinzel 이 없어 숫자·제목도 Noto Sans KR(굵게).
+- **글꼴**: 웹 제목 글꼴 Cinzel 이 없어 숫자·제목도 본문 글꼴(굵게). 본문 글꼴은 언어별 사슬 (`scripts/core/fonts.gd` — ko·en·es KR→JP→SC→TC, ja JP→KR→SC, zh-CN SC→TC→KR, zh-TW TC→SC→KR).
 - **필터 흉내**: CSS `drop-shadow`·글로 는 셰이더로 근사. 스토리 초상화의 붉은 물들임·유령 효과도 셰이더 근사 (drop-shadow 빛은 생략).
-- **아이콘**: 웹은 이모지를 화면에서 그림으로 바꾸는데(EmojiIcons), 여기서는 그릴 때 바로 그림을 씀. 그림이 없는 이모지는 지움 (예: 결과의 📈).
+- **아이콘**: 웹은 이모지를 화면에서 그림으로 바꾸는데(EmojiIcons), 여기서는 그릴 때 바로 그림을 씀. 그림이 없는 이모지는 지움 (예: 행동 메뉴 글자의 ⏸️·↩️). 결과의 📈 은 표(`EMOJI_ICON`)대로 `e_level_up` 그림.
   웹과 같은 표를 쓰므로 웹과 같은 그림이 나옴 (스킬 단추 🔱 → 장창 그림, 별 보상 ⭐ → 웹 표 그대로).
 - **전술 보너스 글자**: 웹은 공격자의 `_lastTactic` 을 읽는데, 엔진은 알림 전에 이 값을 지웁니다(규칙 그대로). 그래서 알림을 받는 순간 같은 엔진 상태로
   `tactic_bonus` 를 다시 계산(순수)합니다. 같은 값이지만, 공식 피해 중 일부(적 전사의 처형 일격)는 웹에서는 글자가 없는데 여기서는 뜰 수 있습니다

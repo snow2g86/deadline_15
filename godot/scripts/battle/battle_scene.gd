@@ -2195,6 +2195,16 @@ func _clamp_cam() -> void:
 
 # ═══════════ 마우스·키보드 ═══════════
 
+## 적 정보 팝업은 화면 어디를 누르든(맵·HUD 단추·미니맵 포함) 닫히고, 그 누르기는 먹지 않고 그대로 GUI·맵으로 감
+##  (웹 pointerdown capture 와 같음 — _input 은 GUI 보다 먼저 옴. 휠은 누르기가 아니라 뺌)
+func _input(ev: InputEvent) -> void:
+	if ui == null or not (ev is InputEventMouseButton):
+		return
+	var mb := ev as InputEventMouseButton
+	if mb.pressed and mb.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE] and ui.info.popup.visible:
+		ui.info.hide_popup()
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if eng == null or ui == null:
 		return
@@ -2217,9 +2227,6 @@ func _unhandled_input(ev: InputEvent) -> void:
 				_dragging = false
 				_drag_from = mb.position
 				_cam_from = cam.position
-				# 적 팝업은 다음 누르기에 닫히고, 그 누르기도 그대로 처리 (웹 pointerdown capture)
-				if ui.info.popup.visible:
-					ui.info.hide_popup()
 			else:
 				if _press and not _dragging:
 					_click(_to_world(mb.position))

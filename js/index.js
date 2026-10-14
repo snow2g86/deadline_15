@@ -384,7 +384,7 @@ function renderCommanderBtn() {
 	if (!ch) return;
 	var b = document.createElement('button'); b.className = 'lobby-cmd-btn'; b.title = t('commander_setup.edit');
 	var img = document.createElement('img'); img.src = 'image/character/commander_0' + (ch.gender === 'f' ? 2 : 1) + '.png'; img.alt = '';
-	var sp = document.createElement('span'); sp.textContent = ch.customName || COMMANDER_DEFAULT_NAME;
+	var sp = document.createElement('span'); sp.textContent = (ch.setup && ch.customName) || CommanderSetup.defaultName();
 	b.append(img, sp);
 	b.onclick = function() { CommanderSetup.open(function() { renderCommanderBtn(); if (typeof renderHideout === 'function') renderHideout(); }); };
 	document.body.appendChild(b);

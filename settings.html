@@ -21,7 +21,8 @@
 		};
 
 		function loadSettings() {
-			var def = { bgmOn:true, bgmVol:0.5, sfxOn:true, sfxVol:0.7, speed:1, language:'ko' };
+			// language 는 기본값에 넣지 않음: 사용자가 언어를 직접 고를 때만 저장 (그 전에는 i18n.js 가 브라우저 언어로 고름)
+			var def = { bgmOn:true, bgmVol:0.5, sfxOn:true, sfxVol:0.7, speed:1 };
 			try {
 				var s = JSON.parse(Store.get('game_settings'));
 				if (s) return Object.assign(def, s);
@@ -35,6 +36,8 @@
 
 		function renderSettings() {
 			var s = loadSettings();
+			// 지금 쓰는 언어 (설정이 비어 있으면 i18n.js 가 브라우저에서 고른 언어 = <html lang>)
+			var curLang = document.documentElement.lang || s.language || 'ko';
 			var c = document.getElementById('lset-content');
 			c.innerHTML =
 				'<div class="sp-toggle"><span class="sp-tlabel"><i class="sp-icon">' + SVG_ICONS.bgm + '</i>' + t('settings.bgm') + '</span>'
@@ -61,9 +64,9 @@
 
 				+ '<div class="sp-row"><span class="sp-label"><i class="sp-icon">' + SVG_ICONS.lang + '</i>' + t('settings.language') + '</span>'
 				+ '<select id="ls-lang">'
-				+ '<option value="ko"' + (s.language === 'ko' ? ' selected' : '') + '>' + t('settings.language_ko') + '</option>'
-				+ '<option value="en"' + (s.language === 'en' ? ' selected' : '') + '>' + t('settings.language_en') + '</option>'
-				+ '<option value="es"' + (s.language === 'es' ? ' selected' : '') + '>' + t('settings.language_es') + '</option>'
+				+ ['ko', 'en', 'es', 'ja', 'zh-CN', 'zh-TW'].map(function(code) {
+					return '<option value="' + code + '"' + (curLang === code ? ' selected' : '') + '>' + t('settings.language_' + code) + '</option>';
+				}).join('')
 				+ '</select></div>'
 
 				+ '<div class="sp-divider"></div>'

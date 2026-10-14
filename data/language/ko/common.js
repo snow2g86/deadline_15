@@ -49,7 +49,10 @@ Object.assign(window._LANG_ko, {
         "licenses": "오픈소스 라이선스",
         "language_ko": "한국어 (Korean)",
         "language_en": "English",
-        "language_es": "Español"
+        "language_es": "Español",
+        "language_ja": "日本語 (Japanese)",
+        "language_zh-CN": "简体中文 (Simplified Chinese)",
+        "language_zh-TW": "繁體中文 (Traditional Chinese)"
     },
     "compendium": {
         "title_class": "📖 직업 도감",

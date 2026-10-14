@@ -2,6 +2,7 @@ window._LANG_es = window._LANG_es || {};
 Object.assign(window._LANG_es, {
     "commander_setup": {
         "title": "Comandante",
+        "default_name": "Lian",
         "sub": "Elige al comandante que guiará tu clan",
         "male": "Hombre",
         "female": "Mujer",

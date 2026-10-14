@@ -48,7 +48,10 @@ Object.assign(window._LANG_es, {
         "licenses": "Licencias de C\u00f3digo Abierto",
         "language_ko": "한국어 (Korean)",
         "language_en": "English",
-        "language_es": "Español"
+        "language_es": "Español",
+        "language_ja": "日本語 (Japanese)",
+        "language_zh-CN": "简体中文 (Simplified Chinese)",
+        "language_zh-TW": "繁體中文 (Traditional Chinese)"
     },
     "compendium": {
         "title_class": "📖 Compendio de Clases",

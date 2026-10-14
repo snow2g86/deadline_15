@@ -11,7 +11,7 @@
   inset: 0;
   z-index: 9500;
   display: none;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-text), sans-serif;
   color: var(--st-text);
   user-select: none;
   -webkit-user-select: none;
@@ -65,7 +65,7 @@
   pointer-events: auto;
   margin-left: auto;
   flex: none;
-  font: 700 12px 'Noto Sans KR', sans-serif;
+  font: 700 12px var(--font-text), sans-serif;
   color: #cbd5e1;
   background: rgba(15, 23, 42, .8);
   border: 1px solid rgba(148, 163, 184, .35);
@@ -231,7 +231,7 @@
   justify-content: center;
   padding: 16px;
   background: rgba(5, 8, 18, .75);
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-text), sans-serif;
 }
 .story-replay.show { display: flex }
 .sr-box {
@@ -263,7 +263,7 @@
   display: block;
   width: 100%;
   text-align: left;
-  font: 400 14px 'Noto Sans KR', sans-serif;
+  font: 400 14px var(--font-text), sans-serif;
   color: #e2e8f0;
   background: rgba(30, 41, 59, .6);
   border: 1px solid rgba(148, 163, 184, .15);
@@ -282,7 +282,7 @@
 .story-replay-btn {
   display: block;
   margin: 0 auto 12px;
-  font: 700 13px 'Noto Sans KR', sans-serif;
+  font: 700 13px var(--font-text), sans-serif;
   color: #fbbf24;
   background: rgba(245, 158, 11, .08);
   border: 1px solid rgba(245, 158, 11, .4);

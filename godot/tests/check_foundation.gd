@@ -1,7 +1,7 @@
 extends SceneTree
 ## 1단계(기초) 머리 없는 시험
 ##   Godot --headless --path godot --script res://tests/check_foundation.gd
-## 모든 JSON 읽기·manifest 개수 대조, 알려진 값 몇 개, 3개 언어 번역, Store 저장 왕복을 확인하고
+## 모든 JSON 읽기·manifest 개수 대조, 알려진 값 몇 개, 6개 언어 번역(키 맞춤·글꼴 사슬), Store 저장 왕복을 확인하고
 ## 통과 0 / 실패 1 로 끝난다. 진짜 저장(user://save.json)은 건드리지 않는다.
 
 const TEST_SAVE := "user://test_foundation_save.json"
@@ -12,6 +12,8 @@ const I18nScript := preload("res://scripts/core/i18n.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const NumParse := preload("res://scripts/core/num_parse.gd")
 const NumFmt := preload("res://scripts/core/num.gd")
+const FontsT := preload("res://scripts/core/fonts.gd")
+const LANGS: PackedStringArray = ["ko", "en", "es", "ja", "zh-CN", "zh-TW"]
 
 var Store: StoreScript
 var DataDB: DataDBScript
@@ -132,9 +134,17 @@ func _test_data() -> void:
 	var jab: Dictionary = DataDB.global("JAB")
 	_check(jab.has("warrior") and int((jab["warrior"]["base"] as Dictionary)["hp"]) == 100, "JAB.warrior.base.hp == 100")
 
-	for code: String in ["ko", "en", "es"]:
+	for code: String in LANGS:
 		var st: Dictionary = DataDB.story(code)
 		_check((st.get("episodes", {}) as Dictionary).size() == 10 and st.has("cast"), "스토리 %s: 에피소드 10개 + cast" % code)
+	# 새 언어 대본: 한국어 대본과 장면 구성이 같은지 (에피소드·장면 키·대사 줄 수)
+	var st_ko: Dictionary = DataDB.story("ko")
+	for code: String in ["ja", "zh-CN", "zh-TW"]:
+		var st2: Dictionary = DataDB.story(code)
+		var diff := _story_shape_diff(st_ko, st2)
+		_check(diff.is_empty(), "스토리 %s: 장면 키·대사 줄 수가 ko 와 같음%s" % [code, ("" if diff.is_empty() else " — " + ", ".join(diff.slice(0, 5)))])
+	var cn: String = ((DataDB.story("zh-CN").get("cast", {}) as Dictionary).get("commander", {}) as Dictionary).get("name", "")
+	_check(cn == "里安", "스토리 zh-CN cast.commander.name == 里安 (실제 %s)" % cn)
 
 	# 화면 쪽 표 (아이콘·캐릭터 그림·리그·모션·하단 탭·영혼석 키)
 	for g: String in ["ITEM_SPRITE", "EMOJI_ICON", "ICON_RARITY", "CHAR_SPRITES", "CUTOUT_RIGS", "CHAR_FIG", "SPRITE_SHEETS", "ATK_MOTIONS", "NAV_TABS", "SOUL_KEY"]:
@@ -159,8 +169,9 @@ func _test_data() -> void:
 
 func _test_i18n() -> void:
 	print("[번역]")
+	_check(I18n.LANGS == LANGS and DataDB.lang_codes().size() == 6, "6개 언어: I18n.LANGS == %s, DataDB 언어 팩 %d개" % [str(LANGS), DataDB.lang_codes().size()])
 	var seen: Dictionary = {}
-	for code: String in ["ko", "en", "es"]:
+	for code: String in LANGS:
 		I18n.set_language(code)
 		_check(I18n.current_lang == code, "%s: 언어 바뀜" % code)
 		var title := I18n.t("common.game_title")
@@ -176,15 +187,19 @@ func _test_i18n() -> void:
 				_check(v != key and not v.is_empty(), "%s: %s → \"%s\"" % [code, key, v])
 		seen[code] = I18n.t("nav.sortie") + "|" + safe
 		_check(I18n.t("no.such.key") == "no.such.key", "%s: 없는 키는 키 그대로" % code)
-	_check(seen["ko"] != seen["en"] and seen["en"] != seen["es"], "언어마다 다른 문자열")
+	var uniq := {}
+	for code: String in LANGS:
+		uniq[seen[code]] = true
+	_check(uniq.size() == LANGS.size(), "언어마다 다른 문자열 (6개 모두)")
+	var saved: Variant = Store.get_json("game_settings", {})
+	_check(saved is Dictionary and (saved as Dictionary).get("language") == "zh-TW", "set_language 가 game_settings.language 에 저장 (마지막 zh-TW)")
+	_test_i18n_new_langs()
 	var tips: Variant = I18n.t_raw("battle.loading_tips")
 	_check(tips is Array and (tips as Array).size() > 0 and typeof((tips as Array)[0]) == TYPE_STRING, "t_raw: 배열 값(battle.loading_tips) 그대로")
 	_check(I18n.t_raw("character.names") is Array, "t_raw: character.names 그대로")
 	_check(I18n.t_raw("no.such") == "no.such" and I18n.t_raw("common.game_title") == "DEADLINE 15", "t_raw: 없는 키·문자열은 t() 와 같음")
 	_check(I18n.interpolate("[{n}]", {"n": null}) == "[null]", "null 자리표시자 → \"null\" (웹과 같음)")
 	_check(I18n.interpolate("a {x} {y}", {"y": 2.0}) == "a {x} 2", "없는 자리표시자는 그대로, 2.0 → \"2\"")
-	var settings: Variant = Store.get_json("game_settings", {})
-	_check(settings is Dictionary and (settings as Dictionary).get("language") == "es", "set_language 가 game_settings.language 에 저장")
 	Store.set_json("game_settings", {"language": "en", "speed": 2})
 	I18n.reload()
 	_check(I18n.current_lang == "en", "Store game_settings.language 에서 언어 읽기")
@@ -193,10 +208,140 @@ func _test_i18n() -> void:
 	_check(int(s2.get("speed", 0)) == 2, "set_language 가 다른 설정(speed)을 지우지 않음")
 	Store.set_json("game_settings", {"language": "xx"})
 	I18n.reload()
-	_check(I18n.current_lang == "ko", "모르는 언어면 ko")
+	_check(I18n.current_lang == I18nScript.detect_lang(OS.get_locale()), "저장된 언어가 모르는 값이면 OS 언어 감지로")
 	Store.remove("game_settings")
 	I18n.reload()
-	_check(I18n.current_lang == "ko", "설정이 없으면 ko")
+	var os_lang: String = I18nScript.detect_lang(OS.get_locale())
+	_check(I18n.current_lang == os_lang, "설정이 없으면 OS 언어(%s → %s, 웹 navigator.language 와 같은 규칙)" % [OS.get_locale(), os_lang])
+	# 웹 i18n.js _detectLang 과 같은 표
+	var cases := {"ko_KR": "ko", "en_US": "en", "es_MX": "es", "ja_JP": "ja", "ja": "ja", "zh_CN": "zh-CN", "zh": "zh-CN", "zh_SG": "zh-CN",
+		"zh_TW": "zh-TW", "zh_HK": "zh-TW", "zh_MO": "zh-TW", "zh_Hant": "zh-TW", "zh_Hant_TW": "zh-TW", "zh-Hans-HK": "zh-CN", "zh-TW": "zh-TW",
+		"ko": "ko", "ko-KR": "ko", "zh-Hans": "zh-CN", "zh-CN": "zh-CN", "zh-Hant": "zh-TW", "zh-HK": "zh-TW", "es": "es", "en": "en",
+		"fr_FR": "en", "fr-FR": "en", "de": "en", "de_DE": "en", "pt-BR": "en", "pt_BR": "en", "kok": "en", "": "en"}
+	var bad := []
+	for loc: String in cases.keys():
+		if I18nScript.detect_lang(loc) != cases[loc]:
+			bad.append("%s→%s" % [loc, I18nScript.detect_lang(loc)])
+	_check(bad.is_empty(), "detect_lang: ko→ko, ja→ja, zh-TW·HK·MO·Hant→zh-TW, 그 밖의 zh→zh-CN, 지원 안 하는 언어·빈 값→en %s" % str(bad))
+	Store.set_json("game_settings", {"language": "zh-TW"})
+	I18n.reload()
+	_check(I18n.current_lang == "zh-TW" and FontsT.lang == "zh-TW", "설정 zh-TW → 언어·글꼴 사슬 zh-TW")
+	Store.remove("game_settings")
+	I18n.set_language("ko")
+	Store.remove("game_settings")
+
+
+## ja·zh-CN·zh-TW: 웹 언어 팩 키가 ko 와 같음 (빠짐·남음 0), 자리표시자 같음, lang_extra 키는 6개 언어 모두 같음, 글꼴 사슬
+func _test_i18n_new_langs() -> void:
+	var ko_leaves := {}
+	_leaves(DataDB.lang("ko"), "", ko_leaves)
+	var ph := RegEx.create_from_string("\\{(\\w+)\\}")
+	for code: String in ["ja", "zh-CN", "zh-TW"]:
+		var lv := {}
+		_leaves(DataDB.lang(code), "", lv)
+		var miss := []
+		var extra := []
+		var ph_bad := []
+		for k: String in ko_leaves.keys():
+			if not lv.has(k):
+				miss.append(k)
+			elif typeof(ko_leaves[k]) == TYPE_STRING and _ph_set(ph, str(ko_leaves[k])) != _ph_set(ph, str(lv[k])):
+				ph_bad.append(k)
+		for k: String in lv.keys():
+			if not ko_leaves.has(k):
+				extra.append(k)
+		_check(miss.is_empty() and extra.is_empty(), "%s: 웹 언어 팩 키 %d개가 ko 와 같음 (빠짐 %d · 남음 %d %s)" % [code, lv.size(), miss.size(), extra.size(), str(miss.slice(0, 3) + extra.slice(0, 3))])
+		_check(ph_bad.is_empty(), "%s: 자리표시자 {..} 가 ko 와 같음 %s" % [code, str(ph_bad.slice(0, 5))])
+	# Godot 전용 키 (lang_extra) — 6개 언어 모두 같은 키
+	var extra_keys := {}
+	for code: String in LANGS:
+		var f := "res://data/lang_extra/%s.json" % code
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(f)) if FileAccess.file_exists(f) else null
+		var lv2 := {}
+		if d is Dictionary:
+			_leaves(d, "", lv2)
+		extra_keys[code] = lv2
+	var base: Dictionary = extra_keys["ko"]
+	for code: String in LANGS:
+		var other: Dictionary = extra_keys[code]
+		var same := other.size() == base.size()
+		var ph_bad2 := []
+		for k: String in base.keys():
+			if not other.has(k):
+				same = false
+			elif _ph_set(ph, str(base[k])) != _ph_set(ph, str(other[k])):
+				ph_bad2.append(k)
+		_check(same and base.size() > 50 and ph_bad2.is_empty(), "lang_extra %s: gd.* 키 %d개 ko 와 같음, 자리표시자 같음 %s" % [code, other.size(), str(ph_bad2)])
+	# 견본 문자열 (웹 팩 + Godot 전용)
+	var samples := {
+		"ja": {"nav.sortie": "出撃", "battle.surrender": "降伏", "gd.result.retry": "再挑戦", "settings.language_ja": "日本語 (Japanese)"},
+		"zh-CN": {"battle.surrender": "投降", "gd.buff.shield": "护盾", "gd.result.retry": "重新挑战", "settings.language_zh-CN": "简体中文 (Simplified Chinese)"},
+		"zh-TW": {"battle.surrender": "投降", "gd.buff.shield": "護盾", "gd.result.retry": "重新挑戰", "settings.language_zh-TW": "繁體中文 (Traditional Chinese)"},
+	}
+	for code: String in samples.keys():
+		I18n.set_language(code)
+		var sm: Dictionary = samples[code]
+		var bad := []
+		for k: String in sm.keys():
+			if I18n.t(k) != sm[k]:
+				bad.append("%s=%s" % [k, I18n.t(k)])
+		var tp := I18n.t("gd.tip.turns", {"n": 3})
+		_check(bad.is_empty() and tp.contains("3") and not tp.contains("{"), "%s: 견본 문자열 %s · gd.tip.turns → %s" % [code, str(bad), tp])
+		_check(FontsT.lang == code and FontsT.chain_keys(code)[0] == {"ja": "jp", "zh-CN": "sc", "zh-TW": "tc"}[code], "%s: 글꼴 사슬 맨 앞 %s" % [code, FontsT.chain_keys(code)])
+	# 설정 화면 라벨: 6개 언어 이름이 모든 언어에서 같은 자기 이름
+	var labels_ok := true
+	for code: String in LANGS:
+		I18n.set_language(code)
+		for c2: String in LANGS:
+			if I18n.t("settings.language_" + c2) != (DataDB.lang("ko")["settings"] as Dictionary)["language_" + c2]:
+				labels_ok = false
+	_check(labels_ok, "settings.language_* 6개 라벨이 모든 언어에서 같음 (자기 언어 이름)")
+	# 언어를 바꿔도 굵기 글꼴은 같은 객체 (덮어쓴 글꼴이 그대로 새 사슬로 그려짐)
+	var f700: Font = FontsT.weight(700)
+	I18n.set_language("ja")
+	var rid_ja: RID = f700.get_rids()[0]
+	I18n.set_language("zh-CN")
+	_check(FontsT.weight(700) == f700 and f700.get_rids()[0] != rid_ja and f700.get_rids().size() == 3, "언어를 바꾸면 같은 글꼴 객체의 사슬이 바뀜 (ja → zh-CN)")
+	I18n.set_language("ko")
+	_check(f700.get_rids().size() == 4 and FontsT.chain_keys("ko") == ["kr", "jp", "sc", "tc"] and FontsT.chain_keys("ja") == ["jp", "kr", "sc"]
+		and FontsT.chain_keys("zh-CN") == ["sc", "tc", "kr"] and FontsT.chain_keys("zh-TW") == ["tc", "sc", "kr"], "글꼴 사슬 순서 (ko·en·es KR→JP→SC→TC, ja JP→KR→SC, zh-CN SC→TC→KR, zh-TW TC→SC→KR)")
+
+
+func _leaves(node: Variant, pre: String, out: Dictionary) -> void:
+	if node is Dictionary:
+		for k: Variant in (node as Dictionary).keys():
+			_leaves(node[k], (pre + "." + str(k)) if pre != "" else str(k), out)
+	else:
+		out[pre] = node
+
+
+func _ph_set(re: RegEx, text: String) -> String:
+	var names := {}
+	for m: RegExMatch in re.search_all(text):
+		names[m.get_string(1)] = true
+	var arr := names.keys()
+	arr.sort()
+	return ",".join(arr)
+
+
+## 대본 모양 비교: episodes.<n>.<장면> 키와 각 장면 대사 줄 수
+func _story_shape_diff(a: Dictionary, b: Dictionary) -> Array:
+	var out := []
+	var ea: Dictionary = a.get("episodes", {})
+	var eb: Dictionary = b.get("episodes", {})
+	for ek: Variant in ea.keys():
+		if not eb.has(ek):
+			out.append("ep %s 없음" % ek)
+			continue
+		var sa: Variant = ea[ek]
+		var sb: Variant = eb[ek]
+		if sa is Dictionary and sb is Dictionary:
+			for sk: Variant in (sa as Dictionary).keys():
+				if not (sb as Dictionary).has(sk):
+					out.append("%s.%s 없음" % [ek, sk])
+				elif sa[sk] is Array and (not (sb[sk] is Array) or (sa[sk] as Array).size() != (sb[sk] as Array).size()):
+					out.append("%s.%s 줄 수" % [ek, sk])
+	return out
 
 
 # ── 저장 ──

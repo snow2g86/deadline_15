@@ -1371,6 +1371,7 @@
   text-align: left;
   min-height: 32px;
   flex-shrink: 0;
+  white-space: nowrap; /* 'パーティ 1' 처럼 띄어쓰기 있는 이름이 두 줄로 꺾이지 않게 */
 }
 
 .party-tab:hover {

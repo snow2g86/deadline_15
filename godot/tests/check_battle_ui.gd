@@ -6,6 +6,7 @@ extends SceneTree
 const BattleScene := preload("res://scripts/battle/battle_scene.gd")
 const PixelFx := preload("res://scripts/battle/pixel_fx.gd")
 const JsonX := preload("res://scripts/core/json_exact.gd")
+const FontsT := preload("res://scripts/core/fonts.gd")
 const SCENE := "res://scenes/battle/battle.tscn"
 const SAVE := "user://test_battle_ui_save.json"
 
@@ -194,16 +195,25 @@ func _main() -> void:
 	_check(ui.settings.panel.visible, "설정 창")
 	var ph_ko := str(ui.top.ti_label.text)
 	var menu_ko := str(ui.menu_buttons[0]["item"]["label"]) if not ui.menu_buttons.is_empty() else ""
-	for code: String in ["en", "es", "ko"]:
+	var grid: Node = ui.settings.panel.find_child("LangGrid", true, false)
+	_check(grid != null and grid.get_child_count() == 6, "설정 창 언어 단추 6개")
+	var natives := {"ko": "한국어", "en": "English", "es": "Español", "ja": "日本語", "zh-CN": "简体中文", "zh-TW": "繁體中文"}
+	var prev_top := ph_ko
+	var prev_menu := menu_ko
+	for code: String in ["en", "es", "ja", "zh-CN", "zh-TW", "ko"]:
 		var lb: Button = ui.settings.panel.find_child("Lang_" + code, true, false)
-		_check(lb != null, "언어 단추 " + code)
+		_check(lb != null and lb.text == natives[code], "언어 단추 %s = %s" % [code, lb.text if lb != null else "?"])
 		if lb != null:
 			lb.pressed.emit()
 		await _frames(3)
-		if code == "en":
-			_check(str(ui.top.ti_label.text) != ph_ko, "언어 en: 윗줄 바뀜 (%s → %s)" % [ph_ko, ui.top.ti_label.text])
-			var menu_en := str(ui.menu_buttons[0]["item"]["label"]) if not ui.menu_buttons.is_empty() else ""
-			_check(menu_en != menu_ko, "언어 en: 행동 메뉴 바뀜 (%s → %s)" % [menu_ko, menu_en])
+		_check(str(i18n.get("current_lang")) == code and FontsT.lang == code, "언어 %s: I18n·글꼴 사슬 바뀜" % code)
+		var top_now := str(ui.top.ti_label.text)
+		var menu_now := str(ui.menu_buttons[0]["item"]["label"]) if not ui.menu_buttons.is_empty() else ""
+		# zh-CN → zh-TW 는 윗줄(我方回合)이 같을 수 있어 둘 중 하나만 바뀌어도 됨
+		_check(top_now != prev_top or menu_now != prev_menu, "언어 %s: 윗줄·행동 메뉴 바뀜 (%s → %s / %s → %s)" % [code, prev_top, top_now, prev_menu, menu_now])
+		_check(ui.settings.panel.visible and ui.settings.panel.find_child("LangGrid", true, false) != null, "언어 %s: 설정 창 다시 그림" % code)
+		prev_top = top_now
+		prev_menu = menu_now
 	_check(str(i18n.get("current_lang")) == "ko", "언어 ko 로 돌아옴")
 	var rm: CheckButton = ui.settings.panel.find_child("Toggle_reduceMotion", true, false)
 	_check(rm != null, "움직임 줄이기 스위치")
@@ -295,6 +305,16 @@ func _main() -> void:
 	_check(ui.story.active and ui.story._full == sc.story._fmt(en_first), "언어를 바꾼 뒤 대사는 바뀐 언어 (%s)" % ui.story._full.left(30))
 	ui.story.skip()
 	await _until(func() -> bool: return sc._hold == 0)
+	for code: String in ["ja", "zh-CN", "zh-TW"]:
+		i18n.call("set_language", code)
+		await _frames(2)
+		sc._story_play([{"key": "s9_pre", "lines": lines, "title": "", "battle": false}])
+		await _frames(2)
+		var st_l: Dictionary = root.get_node("DataDB").call("story", code)
+		var first_l := str(st_l["stages"]["9"]["pre"][0]["text"])
+		_check(ui.story.active and ui.story._full == sc.story._fmt(first_l), "언어 %s: 대사도 그 언어 (%s)" % [code, ui.story._full.left(24)])
+		ui.story.skip()
+		await _until(func() -> bool: return sc._hold == 0)
 	i18n.call("set_language", "ko")
 	await _frames(2)
 	# 전투 대사 (작은 창) 한 번
@@ -319,6 +339,13 @@ func _main() -> void:
 	await _frames(3)
 	var title_lbl: Label = ui.result_view.find_child("Title", true, false)
 	_check(title_lbl != null and title_lbl.text.contains("DEFEAT"), "결과 화면 언어 바꿈")
+	for code: String in ["ja", "zh-CN", "zh-TW"]:
+		i18n.call("set_language", code)
+		await _frames(3)
+		# 제목(💀 DEFEAT)은 모든 언어에서 같아서, 다시 그린 단추 글자로 확인
+		var rb: Variant = ui.result_view.buttons.get("retry")
+		var want := str(i18n.call("t", "gd.result.retry"))
+		_check(rb is Button and is_instance_valid(rb) and (rb as Button).text.contains(want), "결과 화면 %s: 다시 그림 (%s)" % [code, (rb as Button).text if rb is Button and is_instance_valid(rb) else "?"])
 	i18n.call("set_language", "ko")
 	await _frames(3)
 	sc.queue_free()
@@ -328,7 +355,7 @@ func _main() -> void:
 	await _win_result()
 	# ── 실제 입력: 항복을 마우스 누르기로 (여러 해상도·언어) ──
 	for res: Vector2i in [Vector2i(1280, 720), Vector2i(1024, 600), Vector2i(1920, 1080)]:
-		for lang: String in ["ko", "es"]:
+		for lang: String in (["ko", "es", "ja", "zh-TW"] if res == Vector2i(1024, 600) else ["ko", "es"]):
 			await _click_surrender(res, lang)
 	root.size = Vector2i(1280, 720)
 	i18n.call("set_language", "ko")
@@ -535,6 +562,24 @@ func _input_details() -> void:
 		_check(not ui.info.popup.visible, "팝업 위·밖 누르기 → 팝업 닫힘")
 		_check(sc.mode != "target" and str(sc.last_result.get("reason", "?")) != "move_failed", "그 누르기로 이동 명령도 처리 (%s, %s)" % [sc.mode, str(sc.last_result)])
 	await _until(func() -> bool: return sc.is_awaiting(), 5.0)
+	# HUD 위를 눌러도 팝업이 닫히고, 그 누르기는 HUD 가 그대로 받음 (웹은 어디를 누르든 닫힘)
+	if enemy >= 0:
+		sc.show_enemy_popup(enemy)
+		await _frames(2)
+		_check(ui.info.popup.visible, "적 팝업 다시 엶")
+		var sb: Control = ui.settings.btn
+		await _click(sb.get_global_rect().get_center())
+		await _frames(2)
+		_check(not ui.info.popup.visible and ui.settings.panel.visible, "HUD(설정 단추) 누르기 → 팝업 닫힘 + 설정 창 열림")
+		ui.settings.close()
+		await _frames(1)
+		sc.show_enemy_popup(enemy)
+		await _frames(2)
+		var mm: Control = ui.minimap
+		await _click(mm.get_global_rect().get_center())
+		await _frames(2)
+		_check(not ui.info.popup.visible, "HUD(미니맵) 누르기 → 팝업 닫힘")
+		await _until(func() -> bool: return sc.is_awaiting(), 5.0)
 	# 대기 중이 아닐 때 항복 → 연출이 끝나고 입력 대기 때 항복
 	sc.ui_action("defend")
 	sc.ui_pick_face(0, 0)

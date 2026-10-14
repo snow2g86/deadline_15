@@ -346,7 +346,8 @@ func gear_drop_items(before_eids: Dictionary) -> Array:
 	var fresh: Array = []
 	if typeof(inv) == TYPE_ARRAY:
 		for it: Variant in inv:
-			if typeof(it) == TYPE_DICTIONARY and not before_eids.has(str(it.get("eid"))):
+			# eid 가 있는 물건(장비)만 — 룬·스킬북처럼 eid 없는 물건은 장비 보상과 짝짓지 않음
+			if typeof(it) == TYPE_DICTIONARY and Js.truthy(it.get("eid")) and not before_eids.has(str(it.get("eid"))):
 				fresh.append(it)
 	var n := 0
 	for g: Dictionary in drops:
@@ -370,6 +371,6 @@ func inventory_eids() -> Dictionary:
 	var inv: Variant = E.c.store.get_json(str(D.get("INV_KEY", "game_inventory")))
 	if typeof(inv) == TYPE_ARRAY:
 		for it: Variant in inv:
-			if typeof(it) == TYPE_DICTIONARY:
+			if typeof(it) == TYPE_DICTIONARY and Js.truthy(it.get("eid")):
 				out[str(it.get("eid"))] = true
 	return out

@@ -64,7 +64,7 @@
 
 /* ═══ 출격 버튼 (메인 CTA) ═══ */
 .lobby-cta{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:120px;height:78px;margin-top:-8px;
-  border:2px solid #f5d060;border-radius:14px;cursor:pointer;color:#1a1206;font-family:'Cinzel','Noto Sans KR',serif;font-weight:900;
+  border:2px solid #f5d060;border-radius:14px;cursor:pointer;color:#1a1206;font-family:'Cinzel',var(--font-text),serif;font-weight:900;
   background:linear-gradient(180deg,#ffe28a,#f0c040 45%,#c8961e);
   box-shadow:0 6px 20px rgba(240,192,64,.35),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18);
   transition:transform .15s,box-shadow .15s;animation:ctaGlow 2.4s ease-in-out infinite}

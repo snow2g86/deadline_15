@@ -10,7 +10,11 @@ signal speed_chosen(i: int)
 signal reduce_motion_changed(on: bool)
 signal opened_changed(open: bool)
 
+const Fonts := preload("res://scripts/core/fonts.gd")
+const I18nT := preload("res://scripts/core/i18n.gd")
+
 const KEY := "game_settings"
+const LANGS: PackedStringArray = I18nT.LANGS
 const SPEEDS := [1, 2, 4]
 
 var store: Node
@@ -93,6 +97,13 @@ func place(bottom_y: float) -> void:
 
 func t(k: String, p: Dictionary = {}) -> String:
 	return i18n.t(k, p) if i18n != null else k
+
+
+## 언어 이름 (설정 키 "日本語 (Japanese)" 의 앞부분 — 웹 설정 화면과 같은 키)
+func native_name(code: String) -> String:
+	var full := t("settings.language_" + code)
+	var cut := full.find(" (")
+	return full.substr(0, cut) if cut > 0 else full
 
 
 func load_settings() -> void:
@@ -226,16 +237,25 @@ func _build() -> void:
 	ll.text = t("settings.language")
 	ll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lr.add_child(ll)
-	for code: String in ["ko", "en", "es"]:
-		var lb := Kit.button(code.to_upper(), Kit.GOLD, 11, Vector2(40, 28))
+	# 6개 언어 — 단추 글자는 그 언어 이름 그대로(한국어·English·…·繁體中文), 글꼴도 그 언어 사슬 (화면 언어와 상관없이 맞는 한자 모양)
+	var lg := GridContainer.new()
+	lg.name = "LangGrid"
+	lg.columns = 3
+	lg.add_theme_constant_override("h_separation", 6)
+	lg.add_theme_constant_override("v_separation", 6)
+	_box.add_child(lg)
+	for code: String in LANGS:
+		var lb := Kit.button(native_name(code), Kit.GOLD, 12, Vector2(96, 28))
 		lb.name = "Lang_" + code
+		lb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		lb.tooltip_text = t("settings.language_" + code)
+		lb.add_theme_font_override("font", Fonts.for_lang(code, 700))
 		if i18n != null and str(i18n.get("current_lang")) == code:
 			lb.add_theme_stylebox_override("normal", Kit.box(Color(Kit.GOLD, 0.25), Kit.GOLD, 5, 1, 12, 5))
 		lb.pressed.connect(func() -> void:
 			if i18n != null:
 				i18n.call("set_language", code))
-		lr.add_child(lb)
+		lg.add_child(lb)
 	_box.add_child(_divider())
 	var br := HBoxContainer.new()
 	br.alignment = BoxContainer.ALIGNMENT_CENTER

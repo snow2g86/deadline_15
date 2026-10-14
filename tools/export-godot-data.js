@@ -8,7 +8,7 @@
 //
 //  사용: node tools/export-godot-data.js          (npm 의존성 없음)
 //        node tools/export-godot-data.js --check  (쓰지 않고 점검만: 바뀔 파일이 있으면 목록 출력 후 종료 코드 1 — 커밋 전 점검용)
-//  결과: godot/data/<모듈>.json, godot/data/lang/{ko,en,es}.json, godot/data/story/{ko,en,es,sample}.json,
+//  결과: godot/data/<모듈>.json, godot/data/lang/<언어>.json, godot/data/story/{<언어>,sample}.json  (언어 = js/common/i18n.js _I18N_LANGS),
 //        godot/data/manifest.json (전역별 개수·경고·특수값 위치 — Godot DataDB 가 검증에 사용)
 //
 //  규칙
@@ -27,7 +27,12 @@ const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'godot', 'data');
-const LANGS = ['ko', 'en', 'es'];
+// 언어 목록은 웹 js/common/i18n.js 의 _I18N_LANGS (설정 화면 순서) — 한 곳에서만 관리
+const LANGS = (() => {
+  const m = fs.readFileSync(path.join(ROOT, 'js/common/i18n.js'), 'utf8').match(/_I18N_LANGS\s*=\s*\[([^\]]*)\]/);
+  if (!m) throw new Error('js/common/i18n.js 에서 _I18N_LANGS 를 찾지 못함');
+  return m[1].split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+})();
 const CHECK = process.argv.includes('--check');
 
 // ── 데이터 모듈: 출력 파일 이름 → 원본 파일 (battle.html 의 <script> 순서대로 실행됨) ──
@@ -325,11 +330,13 @@ function exportLang(manifest) {
 // ═══ 3. 스토리 대본 ═══
 function exportStory(manifest) {
   manifest.story = {};
-  const files = { ko: 'data/story/story.ko.js', en: 'data/story/story.en.js', es: 'data/story/story.es.js', sample: 'data/story/story.sample.js' };
+  const files = {};
+  for (const lang of LANGS) files[lang] = `data/story/story.${lang}.js`;
+  files.sample = 'data/story/story.sample.js';
   for (const key of Object.keys(files)) {
     const env = makeContext('story.' + key);
     const names = runFile(env, files[key]);
-    const g = names.find(n => /^STORY_[A-Z]+$/.test(n));
+    const g = names.find(n => /^STORY_[A-Z]+(-[A-Z]+)?$/.test(n));   // STORY_KO · STORY_ZH-CN
     if (!g) throw new Error(`${files[key]} 에서 STORY_* 전역을 찾지 못함`);
     const j = toJSONValue(env.sandbox[g], `story/${key}.json`, [], new Set());
     writeJSON(`story/${key}.json`, j);

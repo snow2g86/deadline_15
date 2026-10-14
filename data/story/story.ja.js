@@ -1,0 +1,2172 @@
+/* DEADLINE 15 — ストーリー台本（日本語訳）
+ * 形式: docs/story-schema.md
+ * 物語設定: docs/STORY.md
+ * {commander} はプレイヤーの指揮官名に置き換えられる。指揮官に性別のある代名詞・語尾を使わない。
+ */
+window.STORY_JA = {
+  cast: {
+    commander: { name: 'リアン', portrait: 'commander', role: '主人公・クランの指揮官' },
+    narrator:  { name: '', portrait: null },
+    bram:  { name: 'ブラム',   portrait: 'story/bram',  fallback: 'knight_01',   role: '老騎士・自警団の教官、指揮官の師' },
+    sera:  { name: 'セラ',   portrait: 'story/sera',  fallback: 'priest_02',   role: 'クランの治癒師・指揮官の幼なじみ' },
+    bark:  { name: 'バーク',   portrait: 'story/bark',  fallback: 'brawler_01',  role: '元山賊・クランの突撃隊長' },
+    kasha: { name: 'カシャ',   portrait: 'story/kasha', fallback: 'assassin_02', role: '傭兵団「黒き羽」団長・ライバル' },
+    ordin: { name: 'オルディン', portrait: 'story/ordin', fallback: 'summoner_01', role: '王家の大魔導師・クランの後援者' },
+    fake_bram: { name: 'ブラム？', portrait: 'story/bram', fallback: 'knight_01', ghost: true, role: 'ブラムの姿を真似た幻影 (s70)' },
+  },
+
+  episodes: {
+    1: { title: '英雄の始まり',
+      prologue: [
+        { who: 'narrator', text: '15年前、空が裂けた夜があった。' },
+        { who: 'narrator', text: '紫色の裂け目が開き、夜明け前に閉じた。' },
+        { who: 'narrator', text: 'その夜の残骸の中から、ひとりの子どもが見つかった。' },
+        { who: 'narrator', text: '手のひらに、裂けた星の形の傷痕を持って。' },
+        { who: 'narrator', text: 'そして今――辺境、ソルビット村。' },
+        { who: 'bram', text: '自警団長が山賊の矢に倒れた。新しい指揮官が要る。' },
+        { who: 'commander', text: 'なぜ私なんですか？　古株の団員なら大勢いるのに。' },
+        { who: 'bram', text: 'お前は戦う前にまず周りを見る。それが指揮官の目だ。' },
+        { who: 'sera', text: '{commander}、私も一緒に行く。怪我したら私が治してあげる。' },
+        { who: 'commander', text: '……わかりました。ひとりも失いません。' },
+        { who: 'bram', text: 'いい覚悟だ、ちび。その言葉、最後まで守ってみせろ。' },
+        { who: 'bram', text: 'これを受け取れ。わしが王国の戦場で使っていた銀の指揮杖だ。' },
+        { who: 'commander', text: '剣ではなく、指揮杖ですか？' },
+        { who: 'bram', text: '指揮官は剣を手に先頭に立つ者ではない。' },
+        { who: 'bram', text: '後ろで盤面を読み、これで合図を送れ。' },
+        { who: 'bram', text: '指揮官の武器は団員たちだ。お前は正確に命令を下せばいい。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '山賊団は崩れ、ソルビット村に鐘の音が響いた。' },
+        { who: 'narrator', text: '三日後、王都の旗を掲げた馬車が村に入ってきた。' },
+        { who: 'ordin', text: '王家の大魔導師、オルディンと申す。貴殿が噂の指揮官ですな。' },
+        { who: 'ordin', text: '北方が凍りつきつつある。王家には貴殿のクランが必要なのです。' },
+        { who: 'commander', text: '私たちは、ただの村の自警団です。' },
+        { who: 'ordin', text: '山賊百人を退けた自警団なら、十分でしょう。' },
+        { who: 'ordin', text: '……その手の傷痕、いつからおありかな？' },
+        { who: 'commander', text: '物心ついた頃からです。それが何か？' },
+        { who: 'ordin', text: 'いや、なに。ただ興味深いと思いましてな。' },
+        { who: 'bram', text: '（あの目つき……15年前にも見たことがある。）' },
+        { who: 'narrator', text: 'クランは王家の委任状を受け、北へと旅立った。' },
+      ] },
+
+    2: { title: '凍てつく陰謀',
+      prologue: [
+        { who: 'narrator', text: '北方、白雪山脈。季節が巡っても雪の解けぬ地。' },
+        { who: 'narrator', text: '今年は麓の村までが、一夜にして凍りついた。' },
+        { who: 'bark', text: '大将、ここじゃ息するだけで鼻毛まで凍りますぜ。' },
+        { who: 'sera', text: '凍え死んだ人たちの顔……みんな何かを見て驚いたみたい。' },
+        { who: 'bram', text: '自然の寒さではない。これは誰かが呼び寄せた冷気だ。' },
+        { who: 'commander', text: '（手のひらの傷痕が……冷たく疼く。）' },
+        { who: 'commander', text: 'まずは麓の村を守る。原因はその後だ。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '冷気の騎士が倒れると、山脈に春風が降りてきた。' },
+        { who: 'bram', text: 'ハルヴァル……わしの古い戦友だ。15年前、同じ夜にいた。' },
+        { who: 'commander', text: '最期の言葉……大魔導師をどうしろと言いたかったんでしょう。' },
+        { who: 'bram', text: 'わからん。確かになるまでは口に出すな。' },
+        { who: 'kasha', text: '今回もあんたが先だったね、田舎指揮官。' },
+        { who: 'kasha', text: 'でも覚えときな。黒き羽は二度は負けない。' },
+        { who: 'narrator', text: 'そのとき、王都から急ぎの伝令が到着した。' },
+        { who: 'ordin', text: '南部の湿地に疫病が広がっておる。急いでいただきたい。' },
+        { who: 'commander', text: '……まるで、次にどこで何が起きるか知っているみたいだ。' },
+      ] },
+
+    3: { title: '沼地の呪い',
+      prologue: [
+        { who: 'narrator', text: '南部、黒水湿地。霧の中で咳の音が途切れることはなかった。' },
+        { who: 'narrator', text: '獣たちはねじれた姿に変わり果て、人を襲った。' },
+        { who: 'sera', text: '疫病なら私の出番だよ。今回は私が前に立つ。' },
+        { who: 'commander', text: 'セラ、ひとりで全部背負い込もうとしないで。' },
+        { who: 'bark', text: '泥んこの喧嘩なら、この俺の専門よ！' },
+        { who: 'bram', text: '浅瀬では足を取られる。そこで攻撃を受ければ傷も深い。' },
+        { who: 'commander', text: '浅瀬にはむやみに立たない。みんな、覚えておいて。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '湿地の帝王が沈むと、水の色が少しずつ澄んでいった。' },
+        { who: 'commander', text: 'この地図……北方、湿地、そして帝国の火山。' },
+        { who: 'bram', text: '三つを結べば三角形。巨大な陣だ。' },
+        { who: 'sera', text: '誰かがわざと、災いをひとつずつ起こしていたんだ。' },
+        { who: 'ordin', text: '報告は受けました。黒幕はヴォルカル帝国に違いありませんな。' },
+        { who: 'commander', text: '神殿からは、王家の紋章が刻まれた祭器も出てきました。' },
+        { who: 'ordin', text: '帝国が我らを陥れようとしたのでしょう。進軍なされよ。' },
+        { who: 'bram', text: '（答えが早すぎる。）' },
+        { who: 'narrator', text: '疑いを抱いたまま、クランは国境を越えた。' },
+      ] },
+
+    4: { title: '燃える帝国',
+      prologue: [
+        { who: 'narrator', text: 'ヴォルカル帝国。火山の炎で鉄を鍛える鋼の国。' },
+        { who: 'narrator', text: '今その国は、皇帝派と反乱軍に割れて燃えていた。' },
+        { who: 'bark', text: '帝国の連中が本当に黒幕なら、皇帝の首さえ取りゃ終わりっすね。' },
+        { who: 'bram', text: 'そう単純なら良いのだがな。' },
+        { who: 'sera', text: '焼けた村で子どもたちが泣いてる。あの人たちが先だよ。' },
+        { who: 'commander', text: '反乱軍と手を組む。敵はこの国の民じゃない。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '炎帝が倒れ、火山の赤い空は冷めていった。' },
+        { who: 'commander', text: '皇帝の最期の言葉、そして祭壇の書簡。すべてオルディンだ。' },
+        { who: 'bram', text: '「約束どおり炎を育てよ」か。これで確かになったな。' },
+        { who: 'kasha', text: 'あんたの後援者が、この盤面を全部仕組んでたってわけね。' },
+        { who: 'commander', text: '王都へ行って直接問いただす。なぜこんな真似をしたのか。' },
+        { who: 'narrator', text: 'だがその夜、大地が悲鳴を上げるように裂けた。' },
+        { who: 'narrator', text: '西の荒野に、底の見えない穴――深淵が口を開けた。' },
+        { who: 'sera', text: 'あそこから魔物があふれてる。村が危ない！' },
+        { who: 'bram', text: '真実は逃げん。だが人の命は待ってくれんぞ。' },
+        { who: 'commander', text: '……深淵へ向かう。オルディンはその後だ。' },
+      ] },
+
+    5: { title: '深淵の終焉',
+      prologue: [
+        { who: 'narrator', text: '深淵。大地の下に眠っていた古代文明の廃墟。' },
+        { who: 'narrator', text: '光の届かぬその場所で、何かが目覚めようとしていた。' },
+        { who: 'bark', text: '底が見えねえ。落ちたら一巻の終わりですぜ。' },
+        { who: 'sera', text: '空気が重い。祈りがうまく届かない気がする。' },
+        { who: 'bram', text: '指揮官。今度ばかりは、帰れぬ者が出るかもしれん。' },
+        { who: 'commander', text: 'そんなこと言わないでください。全員連れて帰ります。' },
+        { who: 'bram', text: 'そうか。その頑固さが、お前の長所だな。' },
+        { who: 'commander', text: '（傷痕が熱い。あの下で、誰かが呼んでいる。）' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '深淵の戦士が崩れ、深みの響きが静まっていった。' },
+        { who: 'narrator', text: 'クランは地上へ戻った。ひとりを残して。' },
+        { who: 'narrator', text: 'ソルビット村の丘に、空の棺がひとつ埋められた。' },
+        { who: 'sera', text: 'ブラムおじさんは……最後まで笑ってた。' },
+        { who: 'commander', text: '全員連れて帰るって言ったのに。そう言ったのに。' },
+        { who: 'bark', text: '大将のせいじゃないっすよ。爺さんが自分で選んだ場所だ。' },
+        { who: 'kasha', text: '悲しんでる暇はないよ。王都からオルディンが消えたって。' },
+        { who: 'kasha', text: 'それと、王都の北の空に……門ができつつある。' },
+        { who: 'commander', text: '……行きます。ブラムが守ろうとしたものを、代わりに守るために。' },
+      ] },
+
+    6: { title: '地獄門',
+      prologue: [
+        { who: 'narrator', text: '空のあちこちに裂け目が広がった。15年前のあの夜のように。' },
+        { who: 'narrator', text: 'だが今度は、夜が明けても閉じなかった。' },
+        { who: 'narrator', text: '王都の北、巨大な門がゆっくりと開きつつあった。' },
+        { who: 'sera', text: '{commander}、最近眠れてないでしょ。大丈夫？' },
+        { who: 'commander', text: '大丈夫じゃない。でも止まったら、もっと多くを失う。' },
+        { who: 'commander', text: 'ブラムは言っていた。指揮官は全員を救えはしないと。' },
+        { who: 'commander', text: 'でも、誰ひとり見捨てないことはできる。' },
+        { who: 'narrator', text: '折れた剣を懐にしまい、銀の指揮杖が再び掲げられた。' },
+        { who: 'bark', text: 'その言葉を待ってたんすよ、大将。もう一度行きましょうや。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '獄門の守護者が倒れた瞬間、地獄門が大きく開いた。' },
+        { who: 'ordin', text: 'ご苦労でしたな、若き指揮官。いや……鍵よ。' },
+        { who: 'commander', text: 'オルディン！　最初からこれが狙いだったのか！' },
+        { who: 'ordin', text: '守護者を倒せるのは、貴殿の血だけでしたのでな。' },
+        { who: 'ordin', text: '15年前、貴殿の両親が門を閉じた。命と引き換えに。' },
+        { who: 'ordin', text: '私は門を開かねばならぬのです。神を呼ぶために。' },
+        { who: 'narrator', text: 'オルディンは門の向こう、赤い闇の中へと消えた。' },
+        { who: 'kasha', text: '追うんでしょ？　その顔、もう決めてるね。' },
+        { who: 'commander', text: '門の向こうへ行く。今度こそ、私たちが終わらせる。' },
+      ] },
+
+    7: { title: '悪魔の領域',
+      prologue: [
+        { who: 'narrator', text: '魔界。空は血のように赤く、大地は息をしていた。' },
+        { who: 'narrator', text: 'ここでは道が日ごとに変わり、記憶が形を得た。' },
+        { who: 'bark', text: '今あの岩、俺のこと見てましたぜ。マジで。' },
+        { who: 'sera', text: 'ここじゃ、目に見えるものを全部信じちゃいけない気がする。' },
+        { who: 'kasha', text: 'あたしはついて来たよ。借りは返さなきゃね。本隊もすぐ来る。' },
+        { who: 'commander', text: '互いの名前を呼び続けて。自分を見失わないように。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '悪魔の法師が散ると、幻影の霧が晴れた。' },
+        { who: 'commander', text: '遺跡で聞いた声……本当に両親だったのかな。' },
+        { who: 'sera', text: '「鍵はひとりで回すものじゃない」――そう言ってたよね。' },
+        { who: 'commander', text: 'うん。あの言葉は幻じゃなかったって信じたい。' },
+        { who: 'kasha', text: '法師が吐いたよ。オルディンは魔界の頂に向かったって。' },
+        { who: 'kasha', text: '天上の光が漏れ込む場所。そこで神を呼ぶつもりだってさ。' },
+        { who: 'bark', text: '神って……今度は神様まで相手にするんすか？' },
+        { who: 'commander', text: '神だろうと何だろうと、人を材料にするなら止める。' },
+      ] },
+
+    8: { title: '神の審判',
+      prologue: [
+        { who: 'narrator', text: '魔界の空の頂に、白い裂け目が開いた。' },
+        { who: 'narrator', text: 'そこから降り注ぐ光は、悪魔も人も区別しなかった。' },
+        { who: 'sera', text: 'これ……私が一生祈ってきた光だ。' },
+        { who: 'sera', text: 'なのに、どうしてこんなに冷たいの。' },
+        { who: 'ordin', text: 'ご覧なさい。神は穢れたものすべてを焼き尽くすでしょう。' },
+        { who: 'ordin', text: '魔界も、魔界に触れた地も、そこに住まう人々も。' },
+        { who: 'commander', text: 'その地には私たちの故郷もあるんだ！' },
+        { who: 'ordin', text: '世界を救うには、一部を失わねばならぬ。それが計算というもの。' },
+        { who: 'commander', text: '誰を失うかを決めるのは、あなたじゃない。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '白い裂け目が閉じ、魔界の空は再び赤く染まった。' },
+        { who: 'ordin', text: '神は……すでに一度、君主に敗れていたのですな。' },
+        { who: 'ordin', text: '私は15年もの間、敗れた神に祈っていたというわけか。' },
+        { who: 'bark', text: '大将、この爺さんどうします？　ここに置いてきますかい？' },
+        { who: 'commander', text: '連れて行く。死んで償うなんて、楽すぎるから。' },
+        { who: 'sera', text: '{commander}……ずいぶん変わったね。いい方に。' },
+        { who: 'narrator', text: 'そのとき、魔界の奥底から巨大な太鼓の音が轟いた。' },
+        { who: 'kasha', text: '君主の大軍が動いてる。狙いは……あたしたちの世界だ！' },
+        { who: 'commander', text: '戻ろう。今止めなければ、帰る場所がなくなる。' },
+      ] },
+
+    9: { title: '絶体絶命',
+      prologue: [
+        { who: 'narrator', text: '魔界の君主の大軍が、世界中の裂け目からあふれ出した。' },
+        { who: 'narrator', text: '王国も、帝国も、北方も、湿地も、いまやひとつの戦場だった。' },
+        { who: 'narrator', text: '散り散りの生存者たちが、ひとつの旗の下に集った。' },
+        { who: 'kasha', text: 'みんな、あんたを総指揮官にって。笑えるね、田舎指揮官が。' },
+        { who: 'commander', text: '私は今でも、村の自警団の指揮官だよ。' },
+        { who: 'commander', text: 'ただ、守るべき村が少し大きくなっただけ。' },
+        { who: 'bark', text: 'ガハハ！　その言葉、旗に刻んでおきましょうや。' },
+        { who: 'sera', text: '今度はみんなで生きて終わらせよう。約束して。' },
+        { who: 'commander', text: '約束する。そして今度こそ、最後まで守る。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '戦の戦士が倒れると、魔界軍の進撃が止まった。' },
+        { who: 'narrator', text: '世界はかろうじて――本当にかろうじて持ちこたえた。' },
+        { who: 'ordin', text: '君主の玉座へ至る道を知っております。案内いたそう。' },
+        { who: 'kasha', text: '信じていいの？　この爺さんのせいで、全部こうなったのに。' },
+        { who: 'commander', text: '信じるんじゃない。機会を与えるだけだ。' },
+        { who: 'ordin', text: '……貴殿の両親も、同じことを言っておりましたな。' },
+        { who: 'bark', text: '明日で終わるんすか？　本当に？' },
+        { who: 'commander', text: '終わらせに行くんだ。みんなで。' },
+        { who: 'narrator', text: '出陣の前夜、陣営の焚き火は一晩じゅう消えなかった。' },
+      ] },
+
+    10: { title: '不可能の領域',
+      prologue: [
+        { who: 'narrator', text: '魔界の最深部。光も音も届かぬ底。' },
+        { who: 'narrator', text: 'そこに、魔界の君主の玉座があった。' },
+        { who: 'ordin', text: '玉座の前には、君主の五人の臣下が立ちはだかっております。' },
+        { who: 'kasha', text: '五人か。ひとりずつ順番に倒せばいいってことね。' },
+        { who: 'sera', text: '{commander}、手、出して。……傷痕が光ってる。' },
+        { who: 'commander', text: '両親が遺した鍵だ。今度は私たちが一緒に回す。' },
+        { who: 'bark', text: '大将の手の上に俺の手。さあ、みんなも重ねて！' },
+        { who: 'commander', text: '最後の作戦だ。ソルビット・クラン、出陣！' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '鍵が回り、空のすべての裂け目が同時に閉じた。' },
+        { who: 'narrator', text: '魔界は再び深い眠りについた。今度こそ、永遠に。' },
+        { who: 'narrator', text: 'そして数か月後、ソルビット村の春。' },
+        { who: 'bark', text: '大将！　畑を耕す人手が足りないっす。英雄も働かなきゃ！' },
+        { who: 'kasha', text: '黒き羽は解散した。今はただのカシャ。よろしくね。' },
+        { who: 'sera', text: 'ブラムおじさんのお墓に花を供えてきたの。一緒に行く？' },
+        { who: 'commander', text: 'うん。話したいことがたくさんある。全部終わったって伝えないと。' },
+        { who: 'commander', text: 'ブラム、約束は半分しか守れませんでした。でも、みんなここにいます。' },
+        { who: 'narrator', text: '丘の上を風が吹き抜けた。誰かが笑う声のようだった。' },
+        { who: 'commander', text: '私たちは平凡だった。でも、一緒だったから成し遂げられた。' },
+        { who: 'narrator', text: '― DEADLINE 15　完 ―' },
+      ] },
+  },
+
+  stages: {
+    // ═══ Episode 1: 英雄の始まり ═══
+    1: {
+      pre: [
+        { who: 'narrator', text: 'ソルビット村、東の柵。野の向こうで松明が揺れていた。' },
+        { who: 'bram', text: '山賊の下っ端どもだ。柵さえ守れば村は無事だ。' },
+        { who: 'commander', text: '最初の命令だ。柵の前を守って。私は後ろで戦局を読む。' },
+        { who: 'sera', text: '怪我したらすぐ下がってね。私がいるんだから。' },
+      ],
+      post: [
+        { who: 'bram', text: '悪くなかった。誰ひとり倒れずに済んだな。' },
+        { who: 'commander', text: '指揮杖の先が、まだ震えています。' },
+        { who: 'bram', text: '震える手でも命令は下せる。それで十分だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '柵が破られたら終わりだ。持ち場を守れ！' } ],
+        last: [ { who: 'sera', text: 'あと一人！　もう少しだよ！' } ],
+      },
+    },
+    2: {
+      pre: [
+        { who: 'narrator', text: '翌日の夜明け。山賊たちが再び押し寄せてきた。' },
+        { who: 'bram', text: '今度は斧持ちが混じっておる。戦士だ。' },
+        { who: 'bram', text: '戦士は殴られるほど頭に血が上る。長引かせるな。' },
+        { who: 'commander', text: '二人で一人を叩く。一体ずつ確実に。' },
+      ],
+      post: [
+        { who: 'sera', text: '{commander}、今の指示、本物の指揮官みたいだった。' },
+        { who: 'commander', text: 'ブラムの言葉を真似しただけだよ。' },
+        { who: 'bram', text: '真似を続けるうちに、自分のものになる。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'まず斧持ちを狙う。挟撃で仕留めろ！' } ],
+        wave: [ { who: 'bram', text: '第二陣だ。焦るな、柵はもつ。' } ],
+        danger: [ { who: 'sera', text: '{ally}、ひどい怪我！　下がって、私が治すから！' } ],
+      },
+    },
+    3: {
+      pre: [
+        { who: 'narrator', text: '村へ続く岩の峡谷。山賊どもの抜け道だった。' },
+        { who: 'bram', text: '峡谷の上の丘を取れ。高所から叩けば効きが違う。' },
+        { who: 'commander', text: '高いところから撃てる人が、もっといればよかったのに。' },
+        { who: 'bram', text: 'ないものを惜しむな。あるもので勝て。' },
+      ],
+      post: [
+        { who: 'narrator', text: '峡谷の底で、山賊の補給メモが見つかった。' },
+        { who: 'commander', text: '「森の伐採場に集結」。次はそこか。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '道は狭い。一度には来られない。ここで食い止める。' } ],
+        wave: [ { who: 'sera', text: '峡谷の奥からまた来る！　今度はもっと多い！' } ],
+        last: [ { who: 'commander', text: '最後の一人。逃がすな。' } ],
+      },
+    },
+    4: {
+      pre: [
+        { who: 'bram', text: '峡谷の反対側の入口だ。今日は奴らも本気のようだな。' },
+        { who: 'sera', text: 'あそこの影に、誰か隠れてる。' },
+        { who: 'bram', text: '暗殺者だ。あやつは盾の裏に潜り込んでくる。気をつけろ。' },
+        { who: 'commander', text: 'セラは私のそばに。一人で離れないで。' },
+      ],
+      post: [
+        { who: 'commander', text: 'あの暗殺者、懐に妙な水晶のかけらを持っていた。' },
+        { who: 'sera', text: '紫色だね。触ると手がしびれる。' },
+        { who: 'commander', text: '（傷痕が……反応している？）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '入口を塞げ。潜り込んだ奴から探し出す。' } ],
+        wave: [ { who: 'bram', text: '影が動いた。後ろを見張れ！' } ],
+        danger: [ { who: 'bram', text: '{ally}の側が崩れる。負傷者は盾の後ろへ！' } ],
+      },
+    },
+    5: {
+      pre: [
+        { who: 'narrator', text: '森の伐採場。村人たちの冬の薪が積まれた場所。' },
+        { who: 'bram', text: 'ここを焼かれたら、村は冬を越せん。守り抜け。' },
+        { who: 'commander', text: '木の間に隠れれば矢に当たりにくい。森を使って。' },
+        { who: 'sera', text: 'あっちに大柄な人が……素手だけで戦ってるみたい。' },
+      ],
+      post: [
+        { who: 'bark', text: '負けだ、負けだ。殺すならさっさと殺せ。' },
+        { who: 'commander', text: 'なぜわざと外した？　全部見ていたよ。' },
+        { who: 'bark', text: '……俺はバーク。食い詰めて山賊になっただけだ。人殺しは御免だね。' },
+        { who: 'commander', text: 'なら道案内をして。山賊の拠点まで。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '薪の山を背にして戦え。一歩も退くな。' } ],
+        wave: [ { who: 'bram', text: '森の奥から増援だ。隊列を詰めろ。' } ],
+        last: [ { who: 'sera', text: 'あと一人！　あの大男、さっきから攻撃してこない……' } ],
+      },
+    },
+    6: {
+      pre: [
+        { who: 'bark', text: 'へえ、この大将、肝が据わってるな。よし、ついて行くぜ。' },
+        { who: 'bark', text: 'この森の向こうが山賊の前哨基地ですぜ。近道を教えまさあ。' },
+        { who: 'bram', text: '初めてこちらから攻め込む戦いだ。' },
+        { who: 'bram', text: '守るのとは違う。前に出る勇気が要るぞ。' },
+        { who: 'commander', text: '側面に回り込んで叩く。正面はバークに任せる。' },
+        { who: 'bark', text: '初っ端から一番きつい持ち場か。気に入った！' },
+      ],
+      post: [
+        { who: 'bark', text: 'どうです、この俺、使えるでしょう？' },
+        { who: 'sera', text: '怪我はない？　……本当に仲間になったんだね。' },
+        { who: 'commander', text: '今日からバークは、うちのクランの一員だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '前進！　今度はこっちから攻める番だ。' } ],
+        last: [ { who: 'bark', text: 'あいつさえ倒せば、基地はいただきですぜ！' } ],
+      },
+    },
+    7: {
+      pre: [
+        { who: 'narrator', text: '森を抜けると、果てしない砂丘が広がっていた。' },
+        { who: 'bark', text: '山賊の補給路ですぜ。水も食料も全部ここを通るんでさあ。' },
+        { who: 'bram', text: '砂地には身を隠す場所がない。弓兵に気をつけろ。' },
+        { who: 'commander', text: '補給を断つだけでも山賊団は飢える。行こう。' },
+      ],
+      post: [
+        { who: 'sera', text: '補給箱に帝国の文字が押してある。' },
+        { who: 'bram', text: '山賊が帝国製の武器だと？　どこで手に入れた。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '弓兵の射程内に長く立ち止まるな！' } ],
+        wave: [ { who: 'bark', text: '砂丘の裏に伏兵っす！　やっぱりそう来たか。' } ],
+        danger: [ { who: 'sera', text: '{ally}、血が止まらない！　今すぐ治すね！' } ],
+      },
+    },
+    8: {
+      pre: [
+        { who: 'narrator', text: '砂漠の真ん中のオアシス。山賊どもの倉庫があった。' },
+        { who: 'bark', text: '頭目はここで武器を受け取ってたんでさあ。頭巾をかぶった魔法使いから。' },
+        { who: 'commander', text: '魔法使い？　山賊と取引する魔法使いだなんて。' },
+        { who: 'bram', text: '倉庫を漁れば分かるだろう。' },
+      ],
+      post: [
+        { who: 'commander', text: 'この帳簿……紫の水晶を集めてくれば金貨を払う、とある。' },
+        { who: 'bram', text: '水晶ごときで山賊を動かすとはな。裏に誰かおるな。' },
+        { who: 'bark', text: '頭目は赤岩峠にいますぜ。火山地帯でさあ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '倉庫の見張りから片付けろ。物資を守る。' } ],
+        last: [ { who: 'bark', text: '最後の一人っす！　倉庫の鍵を持ってるはずですぜ。' } ],
+      },
+    },
+    9: {
+      pre: [
+        { who: 'narrator', text: '赤岩峠。地の裂け目を溶岩が流れていた。' },
+        { who: 'bram', text: '溶岩のそばに長く留まれば火傷を負うぞ。' },
+        { who: 'sera', text: '手番を終えるときは、溶岩から一マス離れてね。' },
+        { who: 'commander', text: '頭目の巣穴は目の前だ。ここで疲れてはいられない。' },
+      ],
+      post: [
+        { who: 'bark', text: 'あの上が頭目の要塞ですぜ。今夜でけりをつけましょう。' },
+        { who: 'commander', text: '皆、休んで。明日の夜明けに攻める。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '溶岩の方へ押し込まれないように気をつけて！' } ],
+        wave: [ { who: 'bram', text: '要塞から援軍が降りてくる。峠を死守しろ！' } ],
+        danger: [ { who: 'bram', text: '下がれ、{ally}！　無理をすれば何も守れんぞ！' } ],
+        last: [ { who: 'sera', text: 'あと一人！　最後まで集中して！' } ],
+      },
+    },
+    10: {
+      pre: [
+        { who: 'narrator', text: '火山の麓の山賊要塞。旗が熱風にはためいていた。' },
+        { who: 'boss', text: '棒切れ一本のガキが大将だと？　笑わせる。' },
+        { who: 'commander', text: '村を苦しめるのは、今日で終わりだ。' },
+        { who: 'boss', text: 'バーク、この裏切り者め！　貴様から溶岩に放り込んでやる！' },
+        { who: 'bark', text: '頭目、俺にはもう別の大将がいるんですぜ。' },
+        { who: 'bram', text: '頭目の周りの手下から片付けろ。焦るな。' },
+      ],
+      post: [
+        { who: 'boss', text: 'ぐっ……あのお方が約束したのに……炎が開くと……。' },
+        { who: 'commander', text: 'あのお方とは誰だ？　炎が開くとはどういう意味だ！' },
+        { who: 'narrator', text: '頭目は答えぬまま、ついに息絶えた。' },
+        { who: 'bram', text: '終わったのではない。これは始まりかもしれんな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '頭目さえ倒せば、山賊団は散り散りになる！' } ],
+        boss: [ { who: 'boss', text: '取るに足らぬ自警団風情が！　この斧の味を知れ！' } ],
+        wave: [ { who: 'bark', text: '要塞の奥の精鋭どもっす！　頭目の護衛隊ですぜ！' } ],
+        danger: [ { who: 'sera', text: '頭目が{ally}を狙ってる！　距離を取って！' } ],
+        last: [ { who: 'bark', text: 'あと一人ですぜ！　山賊団は今日で終わりだ！' } ],
+      },
+    },
+    // ═══ Episode 2: 凍てつく陰謀 ═══
+    11: {
+      pre: [
+        { who: 'narrator', text: '山麓の村、白泉。井戸までもが凍りついた場所。' },
+        { who: 'sera', text: '村へ歩いてくる兵士たち……王国の鎧だよ。' },
+        { who: 'bram', text: '目が虚ろだ。生者ではない。氷に縛られた屍だ。' },
+        { who: 'commander', text: '村の城壁の内側へ！　門を守る！' },
+      ],
+      post: [
+        { who: 'bark', text: '倒しても血が出ねえ。ぞっとしますぜ。' },
+        { who: 'bram', text: 'あの紋章……15年前に解体された北方守備隊だ。' },
+        { who: 'commander', text: '死んだ守備隊が、なぜ今になって歩き回っているんですか？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁に取りつく奴から断ち切れ！' } ],
+        wave: [ { who: 'sera', text: '吹雪の中からまた出てくる！　きりがないよ！' } ],
+        last: [ { who: 'bark', text: 'あと一体ですぜ！　氷みたいに叩き割ってやりましょう！' } ],
+      },
+    },
+    12: {
+      pre: [
+        { who: 'narrator', text: '白泉の住民たちが、山の下へと避難を始めた。' },
+        { who: 'sera', text: 'あっちのアンデッドの中に、司祭服の人もいる。' },
+        { who: 'sera', text: 'あの司祭たちが、ほかの屍をまた起き上がらせてる。' },
+        { who: 'commander', text: '司祭から狙って。そうしないと戦いが終わらない。' },
+        { who: 'bram', text: '避難民が全員城門を抜けるまで持ちこたえろ。' },
+      ],
+      post: [
+        { who: 'sera', text: '死んだ司祭が神の名を唱えながら戦うなんて……嫌だよ。' },
+        { who: 'commander', text: '彼らをあんな姿にした者がいる。必ず見つけ出す。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '避難民が抜けきるまで城壁を守る！' } ],
+        wave: [ { who: 'bram', text: '騎士どもが先頭だ。盾の後ろの司祭を見逃すな。' } ],
+        danger: [ { who: 'sera', text: '{ally}、手が凍ってる！　ちょっとだけ耐えて！' } ],
+      },
+    },
+    13: {
+      pre: [
+        { who: 'narrator', text: '北方の関門、霜門要塞。城門は氷に覆われていた。' },
+        { who: 'kasha', text: 'あら、田舎の自警団がこんなところまで来たの？' },
+        { who: 'kasha', text: '傭兵団「黒き羽」のカシャよ。この要塞はあたしたちの獲物。' },
+        { who: 'commander', text: '誰の獲物でも構わない。一緒に攻めればすぐ終わる。' },
+        { who: 'kasha', text: '一緒に？　どっちが先に城主の間に着くか、勝負しなさいよ。' },
+        { who: 'bark', text: '大将、あの女、嫌な笑い方しますぜ。' },
+      ],
+      post: [
+        { who: 'kasha', text: 'ちっ、一歩遅れたか。運がよかったわね。' },
+        { who: 'commander', text: '運じゃない。団員たちがよくやってくれたんだ。' },
+        { who: 'kasha', text: 'ふん、次はあたしが先よ。覚えておきなさい。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '工兵に気をつけて。城門を越えてきたら爆弾を使う！' } ],
+        wave: [ { who: 'kasha', text: '城壁の上に増援よ。そっちに回してあげる。' } ],
+        last: [ { who: 'bark', text: '城主の間の前ですぜ！　あいつさえ倒せば俺たちが一番乗りだ！' } ],
+      },
+    },
+    14: {
+      pre: [
+        { who: 'narrator', text: '要塞の下の野営地。深い夜、焚き火が揺れていた。' },
+        { who: 'kasha', text: '寝てる場合じゃないわ。刺客があんたを狙ってる。' },
+        { who: 'commander', text: '私を？　どうして田舎の指揮官ひとりを。' },
+        { who: 'kasha', text: '依頼書にそう書いてあったの。「手に傷痕のある者」ってね。' },
+        { who: 'bram', text: '皆、起きろ。野営地を守るぞ。' },
+      ],
+      post: [
+        { who: 'commander', text: 'どうして教えてくれた？　競争相手なのに。' },
+        { who: 'kasha', text: 'あたしの競争相手が寝てる間に死んだら、つまらないじゃない。' },
+        { who: 'bram', text: '傷痕を狙う者がおる。これからは一人で出歩くな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '焚き火の周りに集まれ！　闇の中で散らばるな！' } ],
+        wave: [ { who: 'kasha', text: '召喚士が獣を呼び出したわ。あっちが先よ！' } ],
+        danger: [ { who: 'commander', text: '刺客は負傷者から狙う！　{ally}のそばを守れ！' } ],
+        last: [ { who: 'bark', text: '最後の刺客っす！　生かしておいて黒幕を吐かせましょう！' } ],
+      },
+    },
+    15: {
+      pre: [
+        { who: 'narrator', text: '氷河の中に埋もれていた古代遺跡が姿を現した。' },
+        { who: 'bram', text: '冷気はこの中から噴き出している。' },
+        { who: 'sera', text: '壁に刻まれた紋様……裂けた星の形だよ。' },
+        { who: 'commander', text: '（私の傷痕と、同じ形だ。）' },
+        { who: 'commander', text: '中に魔法使いが陣取っている。突破する。' },
+      ],
+      post: [
+        { who: 'narrator', text: '遺跡の紋様が{commander}の手に触れると、かすかに光った。' },
+        { who: 'sera', text: '{commander}、今の光……あなたに反応したの？' },
+        { who: 'commander', text: '分からない。でも、偶然じゃない気がする。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '魔法使いは打たれ弱い。素早く詰めて仕留めろ！' } ],
+        wave: [ { who: 'bram', text: '遺跡の奥から呪術師どもだ。呪いに気をつけろ。' } ],
+        last: [ { who: 'sera', text: 'あと一人！　紋様がずっと光ってるよ！' } ],
+      },
+    },
+    16: {
+      pre: [
+        { who: 'narrator', text: '凍てつく稜線。冷気の源は頂上にあった。' },
+        { who: 'kasha', text: '頂上まで競走よ。今度はあたしが勝つ。' },
+        { who: 'bram', text: '敵の騎士どもが互いに寄り添って動いておる。援護の陣形だ。' },
+        { who: 'bram', text: '騎士の隣の奴は、遠くから狙っても当たらん。' },
+        { who: 'commander', text: 'まず騎士を倒して陣形を崩す。その次が後ろだ。' },
+      ],
+      post: [
+        { who: 'kasha', text: '……また負けたわね。あんた、思ったよりやるじゃない。' },
+        { who: 'commander', text: '褒めてるのか？　初めて聞いた気がする。' },
+        { who: 'kasha', text: '勘違いしないで。観察記録よ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '騎士の陣形を崩せ！　援護が消えれば楽になる！' } ],
+        wave: [ { who: 'bark', text: '槍兵の群れが稜線を伝って降りてきますぜ！' } ],
+        danger: [ { who: 'bram', text: '{ally}、防御態勢で一手しのげ！' } ],
+      },
+    },
+    17: {
+      pre: [
+        { who: 'narrator', text: '稜線の向こうにまた別の遺跡。悲鳴が響き渡った。' },
+        { who: 'bark', text: 'ありゃ黒き羽の連中じゃないですかい？　囲まれてますぜ。' },
+        { who: 'sera', text: 'カシャが怪我してる！　どうしよう、{commander}？' },
+        { who: 'commander', text: '助ける。競争は生きてこそできるものだ。' },
+      ],
+      post: [
+        { who: 'kasha', text: '……ありがと。この言葉、二度は言わないから。' },
+        { who: 'kasha', text: '罠だったの。あたしたちを雇った側が居場所を漏らしたのよ。' },
+        { who: 'commander', text: '雇った側って、誰？' },
+        { who: 'kasha', text: '王都の代理人。顔は見てないわ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '包囲を破る！　黒き羽まで道を開け！' } ],
+        wave: [ { who: 'kasha', text: '工兵が遺跡の柱を爆破しようとしてる！　止めて！' } ],
+        last: [ { who: 'kasha', text: '最後の一人はあたしが借りを返す。どいて！' } ],
+      },
+    },
+    18: {
+      pre: [
+        { who: 'narrator', text: '頂上の下の野営地。三日経っても吹雪は止まなかった。' },
+        { who: 'bram', text: '話がある。冷気を呼ぶ者……心当たりがある。' },
+        { who: 'bram', text: 'ハルヴァル。15年前、わしと共に戦った王家の騎士だ。' },
+        { who: 'bram', text: 'あの夜の後、大魔導師の護衛隊に入った。' },
+        { who: 'commander', text: '大魔導師というと……オルディン様のことですか？' },
+        { who: 'bram', text: '……まずは今夜を乗り切ろう。奴らが来る。' },
+      ],
+      post: [
+        { who: 'commander', text: 'ブラム、さっきの話の続きを聞かせてください。' },
+        { who: 'bram', text: '確かでない疑いは、刃より危ういものだ。' },
+        { who: 'bram', text: 'ハルヴァルに会えたら、あやつの口から直接聞こう。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '吹雪で視界が利かない。互いに寄り添って戦え！' } ],
+        wave: [ { who: 'bram', text: '大軍だ！　防衛線を一列に絞れ！' } ],
+        danger: [ { who: 'sera', text: '{ally}、体が冷えきってる！　下がって！' } ],
+        last: [ { who: 'bark', text: '最後ですぜ！　こいつさえ片付ければ、ひと眠りできまさあ！' } ],
+      },
+    },
+    19: {
+      pre: [
+        { who: 'narrator', text: '氷河の裂け目。その下から紫の光が漏れ出していた。' },
+        { who: 'sera', text: 'これ……空が裂けたあの夜の話と同じだよ。' },
+        { who: 'bram', text: '15年前の裂け目だ。小さいが、間違いない。' },
+        { who: 'commander', text: '裂け目から出てくる奴らを食い止めないと。降りよう。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂け目は縮んだが、完全には閉じなかった。' },
+        { who: 'commander', text: 'この裂け目から冷気が流れ出して、山脈を覆っていたんだ。' },
+        { who: 'bram', text: '何者かがわざとこの裂け目を広げた。頂上のあやつがな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '裂け目から出てくる端から断ち切れ！　広げさせるな！' } ],
+        wave: [ { who: 'sera', text: '裂け目が脈打つみたいに広がった！　また溢れてくる！' } ],
+        last: [ { who: 'commander', text: 'あと一体。裂け目を押し返して閉じる！' } ],
+      },
+    },
+    20: {
+      pre: [
+        { who: 'narrator', text: '白雪山脈の頂、氷で築かれた城塞。' },
+        { who: 'bram', text: 'ハルヴァル！　わしだ、ブラムだ！　なぜこんな真似をする！' },
+        { who: 'boss', text: 'ブラム……久しいな。私は命令に従うまでだ。' },
+        { who: 'boss', text: '鍵を探せ。それが私に下された命令。' },
+        { who: 'boss', text: 'その手の傷痕……そうか、裂けた夜の子か。' },
+        { who: 'commander', text: '私を知っているのか？　鍵とは一体何なんだ！' },
+      ],
+      post: [
+        { who: 'boss', text: 'ブラム……礼を言う……ようやく氷が解ける……。' },
+        { who: 'boss', text: '大魔導師を……あの男を、信じては……。' },
+        { who: 'narrator', text: '言葉を言い終える前に、騎士の体は粉雪となって散った。' },
+        { who: 'bram', text: '……安らかに眠れ、友よ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'あの者を止めなければ山脈は救えない。行こう！' } ],
+        boss: [ { who: 'boss', text: '凍てつけ。迷いも、記憶も、すべて。' } ],
+        wave: [ { who: 'kasha', text: '後ろの増援は黒き羽が止める！　前だけ見てなさい！' } ],
+        danger: [ { who: 'bram', text: '{ally}！　冷気に呑まれるな、下がれ！' } ],
+        last: [ { who: 'sera', text: 'あと一人。この寒さを終わらせよう！' } ],
+      },
+    },
+    // ═══ Episode 3: 沼地の呪い ═══
+    21: {
+      pre: [
+        { who: 'narrator', text: '湿地の村、葦渡り。杭の上に建つ家々が傾いていた。' },
+        { who: 'sera', text: '村の人の半分が寝込んでる。動けないんだって。' },
+        { who: 'bark', text: 'なら、ここで踏ん張るしかねえ。奴らが押し寄せてきやがる。' },
+        { who: 'commander', text: '浅瀬で足を取られたら集中砲火だ。乾いた地面を選んで立て。' },
+      ],
+      post: [
+        { who: 'sera', text: 'あの獣たち、もとは湿地の鹿や狼だったんだって。' },
+        { who: 'commander', text: '病じゃない、変えられたんだ。誰が変えた？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '村の防壁を守れ！　水辺に引きずり出されるな！' } ],
+        wave: [ { who: 'bark', text: '水の中から何か這い出てきますぜ！　第二陣っす！' } ],
+        last: [ { who: 'sera', text: 'あと一体。村のみんなが見てるよ！' } ],
+      },
+    },
+    22: {
+      pre: [
+        { who: 'narrator', text: 'セラは村の集会所を診療所に変えた。' },
+        { who: 'sera', text: '治療は止められない。ここだけは絶対に守って。' },
+        { who: 'bram', text: '召喚士と呪術師が混じっておる。呪いが飛んでくるぞ。' },
+        { who: 'commander', text: '召喚獣は術者を倒せば消える。術者を狙え。' },
+      ],
+      post: [
+        { who: 'sera', text: 'みんな助かった。今日は……誰も死ななかった。' },
+        { who: 'commander', text: 'セラ、もう三日寝てないだろ。少し休んで。' },
+        { who: 'sera', text: '休んだら誰か死んじゃいそうで、怖いの。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '診療所の壁を守れ！　セラが治療中だ！' } ],
+        wave: [ { who: 'bram', text: '司祭まで連れてきおったか。回復される前に叩け。' } ],
+        danger: [ { who: 'sera', text: '{ally}！　今そっちに行くから、持ちこたえて！' } ],
+      },
+    },
+    23: {
+      pre: [
+        { who: 'narrator', text: '湿地の外れのマングローブの森。根が道を塞いでいた。' },
+        { who: 'bark', text: '疫病が始まったのは、この森の奥らしいっす。' },
+        { who: 'bram', text: '木々の間は身を隠しやすい。敵にとっても、わしらにとってもな。' },
+        { who: 'commander', text: '森を背にして戦え。暗殺者は影から飛び出してくる。' },
+      ],
+      post: [
+        { who: 'narrator', text: '森の真ん中に、黒い泥でこねたトーテムが立っていた。' },
+        { who: 'sera', text: 'このトーテムから病が広がってる。わざと立てたんだ！' },
+        { who: 'commander', text: '天災じゃなかった。誰かが湿地を病ませたんだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '木の陰を確かめろ！　暗殺者が潜んでいる！' } ],
+        wave: [ { who: 'bark', text: '工兵どもが根っこの間に爆弾を埋めやがったっす！' } ],
+        last: [ { who: 'commander', text: '最後の一体だ。トーテムへの道が開く！' } ],
+      },
+    },
+    24: {
+      pre: [
+        { who: 'narrator', text: 'トーテムはひとつではなかった。湿地のあちこちに立てられていた。' },
+        { who: 'commander', text: '一番大きなトーテムから壊す。今度はこっちが攻める番だ。' },
+        { who: 'bark', text: 'あの筋肉の塊ども、みんな武闘家っすね。俺と同類だ。' },
+        { who: 'bark', text: '武闘家は反撃が怖えんですぜ。一人で突っかかるんじゃねえっす。' },
+      ],
+      post: [
+        { who: 'narrator', text: 'トーテムが崩れると、淀んだ水から黒い煙が抜けていった。' },
+        { who: 'bark', text: 'くうっ、拳がジンジンする。けど、胸がすっとしたっす。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'トーテムまで押し込む！　泥に足を取られるな！' } ],
+        wave: [ { who: 'bram', text: 'トーテムを守る精鋭だ。二人一組で当たれ。' } ],
+        danger: [ { who: 'bark', text: '{ally}がやられたっす！　俺が前を塞ぐから下がってくだせえ！' } ],
+      },
+    },
+    25: {
+      pre: [
+        { who: 'narrator', text: '湿地のただ中に、半ば沈んだ古代の神殿が現れた。' },
+        { who: 'bram', text: 'ここが呪いの心臓か。臭いからして違う。' },
+        { who: 'sera', text: '神殿の中から詠唱が聞こえる。儀式の最中だよ。' },
+        { who: 'commander', text: '儀式が終わる前に断ち切る。突入！' },
+      ],
+      post: [
+        { who: 'commander', text: 'この祭器……アルデン王家の紋章が刻まれてる。' },
+        { who: 'bark', text: '王家？　俺たちをここへ寄越した、あの王家っすか？' },
+        { who: 'bram', text: '……ひとまず持っておけ。証拠になる。' },
+        { who: 'sera', text: 'ブラムおじさん、何か知ってるんでしょ？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '詠唱している奴らから！　儀式を止めろ！' } ],
+        wave: [ { who: 'bram', text: '神殿の奥から騎士どもが出てくる。正面から受けるな。' } ],
+        last: [ { who: 'sera', text: 'あと一体！　呪文が途切れてきてる！' } ],
+      },
+    },
+    26: {
+      pre: [
+        { who: 'narrator', text: '葦渡りの住民たちは、ついに湿地を離れることにした。' },
+        { who: 'commander', text: '隊列を守りながら移動する。休まずに進もう。' },
+        { who: 'sera', text: 'だめ！　病人たちはその速さについてこられない！' },
+        { who: 'commander', text: 'ここに長くいたら全員死ぬ。私だって選びたくない。' },
+        { who: 'bram', text: 'どちらも正しい。ならば、両方を守る手を探せ。' },
+        { who: 'commander', text: '……隊列の後ろに防衛線を張る。病人の速さに合わせよう。' },
+      ],
+      post: [
+        { who: 'sera', text: 'さっきは怒鳴ってごめんね。' },
+        { who: 'commander', text: 'いや。セラが言ってくれなかったら、私は選び間違えてた。' },
+        { who: 'bram', text: '一人で決めぬこと。それもまた指揮だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '避難の列の後ろを塞ぐ！　一人も取りこぼすな！' } ],
+        wave: [ { who: 'bark', text: '沼からまた這い出てきたっす！　隊列の脇腹ですぜ！' } ],
+        danger: [ { who: 'sera', text: '{ally}のところが破られたら隊列も崩れる！　支えて！' } ],
+        last: [ { who: 'bram', text: 'あと一体。隊列は無事だ。' } ],
+      },
+    },
+    27: {
+      pre: [
+        { who: 'narrator', text: '神殿の反対側の遺跡。赤いマントの騎士たちが陣を敷いていた。' },
+        { who: 'bram', text: 'ヴォルカル帝国の騎士団だ。なぜよその国の沼におる？' },
+        { who: 'kasha', text: '久しぶり。帝国の連中の臭いを嗅ぎつけて追ってきたの。' },
+        { who: 'commander', text: 'カシャ？……一緒に行こう。今回は競争なしで。' },
+        { who: 'kasha', text: 'ふん、今回だけよ。' },
+      ],
+      post: [
+        { who: 'kasha', text: '帝国騎士の懐にこれがあった。次の指令書よ。' },
+        { who: 'commander', text: '「湿地が済めば火山へ」。帝国もグルなのか。' },
+        { who: 'bram', text: 'あるいは、帝国もまた誰かの指令を受けておるか。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '騎士の隣は援護が付く。暗殺者で切り込め！' } ],
+        wave: [ { who: 'kasha', text: '遺跡の裏から弓兵よ！　高所を取られた！' } ],
+        last: [ { who: 'kasha', text: '最後はあたしがもらう。あの指令書を持ってる奴よ。' } ],
+      },
+    },
+    28: {
+      pre: [
+        { who: 'narrator', text: '神殿の地下。水の引いた床に、裂け目が口を開けていた。' },
+        { who: 'sera', text: '北方で見たのと同じ。紫色の裂け目だよ。' },
+        { who: 'commander', text: '傷痕が疼く。この下が呪いの根だ。' },
+        { who: 'bram', text: '裂け目を守る魔法使いどもがおる。儀式を断て。' },
+      ],
+      post: [
+        { who: 'narrator', text: '二つ目の裂け目が静まった。だが、閉じはしなかった。' },
+        { who: 'commander', text: '北方にも、ここにも。誰かが裂け目をひとつずつこじ開けてる。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '裂け目のほうへ押し込め！　儀式を砕け！' } ],
+        wave: [ { who: 'bark', text: '裂け目から工兵どもが這い出てきたっす！　火薬の臭いが！' } ],
+        danger: [ { who: 'bram', text: '{ally}！　裂け目の気に呑まれるでないぞ！' } ],
+      },
+    },
+    29: {
+      pre: [
+        { who: 'narrator', text: '毒霧が濃く立ちこめる湿地の深部。先が見えなかった。' },
+        { who: 'sera', text: 'この霧そのものが病なの。長居しちゃだめ。' },
+        { who: 'bram', text: 'あの先が、湿地の帝王が目覚めた神殿だ。' },
+        { who: 'commander', text: '道を開く。霧の中では互いに離れるな。' },
+      ],
+      post: [
+        { who: 'narrator', text: '霧が割れ、巨大な神殿の影が姿を現した。' },
+        { who: 'bark', text: 'あの中にいる奴が、本物の王ってわけっすね。' },
+        { who: 'commander', text: '明日で終わらせる。今夜はみんな体を温めて。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '霧の中では固まって動け！　連携攻撃を狙え！' } ],
+        wave: [ { who: 'sera', text: '霧の中で召喚獣がどんどん増えてる！' } ],
+        last: [ { who: 'commander', text: 'あと一体。道が開ける！' } ],
+      },
+    },
+    30: {
+      pre: [
+        { who: 'narrator', text: '神殿の最奥。沼の水が巨大な姿となって立ち上がった。' },
+        { who: 'boss', text: '小さき者どもよ。我を呼んだ者の匂いがするな。' },
+        { who: 'commander', text: 'お前を呼んだ者？　それは誰だ！' },
+        { who: 'boss', text: '紫の手を持つ子よ。貴様もじきに、あの方のもとへ行く。' },
+        { who: 'sera', text: 'あれさえ倒せば湿地はきれいになる。行こう！' },
+      ],
+      post: [
+        { who: 'boss', text: '沼は……涸れぬ……次は……炎の番だ……。' },
+        { who: 'narrator', text: '帝王が溶け崩れた跡から、古びた地図が見つかった。' },
+        { who: 'commander', text: '三か所に印がある。北方、湿地、そして帝国。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '帝王を守る術者から片付ける！' } ],
+        boss: [ { who: 'boss', text: '沼が貴様らを呑み込もう。息も、名も、すべて。' } ],
+        wave: [ { who: 'bram', text: '召喚獣がきりなく湧いてくる。本体を狙え！' } ],
+        danger: [ { who: 'sera', text: '毒が回ってる！　こっちに来て、{ally}！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　沼の大掃除、終わらせましょうぜ！' } ],
+      },
+    },
+    // ═══ Episode 4: 燃える帝国 ═══
+    31: {
+      pre: [
+        { who: 'narrator', text: '国境の石の要塞。反乱軍が守る最後の関門。' },
+        { who: 'narrator', text: '地平線の向こうで、帝国正規軍の槍先がきらめいた。' },
+        { who: 'bram', text: '数は多い。だが城壁は厚い。持ちこたえられる。' },
+        { who: 'commander', text: '城壁に取りついた順に断つ。攻める順番を焦るな。' },
+      ],
+      post: [
+        { who: 'narrator', text: '反乱軍の兵たちがクランに歓声を送った。' },
+        { who: 'bark', text: 'この国の連中に拍手されるとは思わなかったっす。' },
+        { who: 'commander', text: 'ここの人たちも、ただ家を守ろうとしてるだけだ。私たちと同じで。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁を背にして戦え！　この関門が落ちたら終わりだ！' } ],
+        wave: [ { who: 'bram', text: '帝国の槍兵隊だ。隊列が長い、側面を突け。' } ],
+        danger: [ { who: 'sera', text: '{ally}、城壁の内側に下がって！' } ],
+        last: [ { who: 'bark', text: '最後の一匹っす！　関門は俺たちのもんですぜ！' } ],
+      },
+    },
+    32: {
+      pre: [
+        { who: 'narrator', text: '帝国内陸へと続く赤い峡谷。' },
+        { who: 'kasha', text: '止まって、{commander}。この道には来ないで。' },
+        { who: 'kasha', text: '黒き羽の本隊が帝国と契約した。あたしは団長よ。' },
+        { who: 'commander', text: 'じゃあ、私たちは敵同士なのか？' },
+        { who: 'kasha', text: '……あたしは自分で剣は抜かない。でも峡谷は帝国軍でいっぱいよ。' },
+      ],
+      post: [
+        { who: 'commander', text: 'カシャは最後まで現れなかった。' },
+        { who: 'sera', text: 'あの人も苦しいんだよ。あの顔、見たでしょ。' },
+        { who: 'bram', text: '契約に縛られた刃は、いずれ自ら縄を断つものだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'まず高所だ！　初手を逃せば峡谷に閉じ込められる！' } ],
+        wave: [ { who: 'bark', text: '峡谷の両側から暗殺者がわんさか出てきやがったっす！' } ],
+        last: [ { who: 'commander', text: 'あと一体。峡谷を抜けよう！' } ],
+      },
+    },
+    33: {
+      pre: [
+        { who: 'narrator', text: '火山の麓の反乱軍の村、灰の井戸。' },
+        { who: 'narrator', text: '村を囲む溶岩の水路が赤く煮え立っていた。' },
+        { who: 'bram', text: '工兵どもが爆弾を抱えて来る。城壁を狙う気だ。' },
+        { who: 'sera', text: '溶岩のそばに立ってたら火傷するよ。位置に気をつけて。' },
+        { who: 'commander', text: '工兵から倒す。爆弾が炸裂する前に！' },
+      ],
+      post: [
+        { who: 'narrator', text: '村の子どもたちが、団員たちに焦げたパンを差し出した。' },
+        { who: 'bark', text: '焦げたパンがこんなに旨いとはなあ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '工兵を城壁に近づけるな！　寄られる前に断て！' } ],
+        wave: [ { who: 'bram', text: '魔法使いの部隊が後ろから火を放つ。散開しろ！' } ],
+        danger: [ { who: 'sera', text: '火傷がひどい！　溶岩から離れて、{ally}！' } ],
+        last: [ { who: 'sera', text: '最後だよ！　村は無事！' } ],
+      },
+    },
+    34: {
+      pre: [
+        { who: 'narrator', text: '火口の縁。帝国の魔法使いたちの儀式場。' },
+        { who: 'bram', text: '火山を目覚めさせる儀式だ。成功すれば、この地は火の海になる。' },
+        { who: 'commander', text: '北方の冷気、湿地の疫病……今度は炎か。' },
+        { who: 'commander', text: '儀式を断つ。溶岩に道を塞がれても、回り込んで進む。' },
+      ],
+      post: [
+        { who: 'narrator', text: '儀式が砕かれると、火口の轟きが静まっていった。' },
+        { who: 'commander', text: 'ここの床にも、裂けた星の紋様がある。' },
+        { who: 'bram', text: '三か所すべて、同じ者が仕組んだということだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '術者たちが儀式の最中だ。時間がない、突撃！' } ],
+        wave: [ { who: 'bark', text: '火口から召喚獣が這い上がってきますぜ！' } ],
+        last: [ { who: 'commander', text: '最後の術者だ。儀式を完全に断て！' } ],
+      },
+    },
+    35: {
+      pre: [
+        { who: 'narrator', text: '黒曜石の城塞、黒曜門。帝国西部防衛の要衝。' },
+        { who: 'narrator', text: '城塞の下の村が、帝国軍の手で焼かれていた。' },
+        { who: 'kasha', text: '……こんなの契約になかった。自分の民を焼くなんて。' },
+        { who: 'kasha', text: '黒き羽は契約を破棄する。今からあんたの味方よ。' },
+        { who: 'commander', text: '戻ってきてくれてありがとう、カシャ。' },
+        { who: 'kasha', text: '勘違いしないで。あたしも自分の名が汚れるのはごめんなの。' },
+      ],
+      post: [
+        { who: 'kasha', text: '帝国の指揮官の部屋でこれを見つけた。王国側からの書簡よ。' },
+        { who: 'commander', text: '署名が消されてる。でも、この筆跡……' },
+        { who: 'bram', text: '皇城へ行くぞ。原本は皇帝が持っておるはずだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城塞を守りながら門を開く！　両方やり遂げる！' } ],
+        wave: [ { who: 'kasha', text: '城壁の上の弓兵は黒き羽が引き受ける！' } ],
+        danger: [ { who: 'kasha', text: '{ally}のところががら空きよ！　あたしが援護する！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　城門をぶち開けましょうぜ！' } ],
+      },
+    },
+    36: {
+      pre: [
+        { who: 'narrator', text: '皇城へ物資を運ぶ溶岩の運河。' },
+        { who: 'bark', text: 'あの橋の上を、補給の馬車がひっきりなしに行き来してますぜ。' },
+        { who: 'bram', text: '橋の上では押し出しを使え。塞がった方へ押せばぶつかる。' },
+        { who: 'commander', text: '補給線を断てば皇城が揺らぐ。行こう！' },
+      ],
+      post: [
+        { who: 'narrator', text: '補給の橋が崩れ落ち、運河の向こうの皇城は孤立した。' },
+        { who: 'kasha', text: 'これで皇帝は袋のネズミね。' },
+        { who: 'commander', text: '追い詰められたネズミが一番凶暴になる。油断しないで。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '橋を制圧する！　溶岩の方へ押されるな！' } ],
+        wave: [ { who: 'bark', text: '皇城から騎士団が降りてきたっす！　橋の端ですぜ！' } ],
+        last: [ { who: 'kasha', text: '最後よ。橋を落とす準備して！' } ],
+      },
+    },
+    37: {
+      pre: [
+        { who: 'narrator', text: '反乱軍の本陣。皇帝が最後の反撃を始めた。' },
+        { who: 'narrator', text: '空から火の玉が雨のように降り注いだ。' },
+        { who: 'sera', text: '負傷兵があふれてる。本陣が破られたらみんな死んじゃう！' },
+        { who: 'bram', text: 'この戦は耐えた方が勝つ。陣地を守れ。' },
+        { who: 'commander', text: '防御態勢で耐える者と、攻める者に分ける！' },
+      ],
+      post: [
+        { who: 'narrator', text: '火の雨がやみ、皇帝軍は退いていった。' },
+        { who: 'sera', text: '耐えた……私たち、耐えきったんだ。' },
+        { who: 'bram', text: '見事だった、指揮官。もう「ちび」とは呼べんな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '防壁の前に立つ者から耐え抜け！　合図を見たら交代だ！' } ],
+        wave: [ { who: 'bram', text: '暗殺者どもが防壁の隙間から入ってくる！　後方を見ろ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　炎の中にいちゃだめ！' } ],
+        last: [ { who: 'bark', text: '最後の一匹！　本陣は無事っす！' } ],
+      },
+    },
+    38: {
+      pre: [
+        { who: 'narrator', text: 'ヴォルカル皇城の外郭。城壁が三重に巡らされていた。' },
+        { who: 'kasha', text: '一枚目の城壁はあたしたちが破って、反乱軍が背後を守るって。' },
+        { who: 'bram', text: '城壁の上の槍兵と弓兵が高所を押さえておる。' },
+        { who: 'commander', text: '騎士の援護の外にいる奴から叩いて、隙を作る。' },
+      ],
+      post: [
+        { who: 'narrator', text: '皇城の外壁が崩れた。内側から熱気が噴き出した。' },
+        { who: 'commander', text: '皇宮の下から、傷痕が痛むほど強い気配を感じる。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁の上を狙え！　高所を奪う！' } ],
+        wave: [ { who: 'kasha', text: '皇宮の近衛隊よ。こいつらは本当に強い！' } ],
+        danger: [ { who: 'bram', text: '{ally}、城壁の下で踏みとどまるな！　動け！' } ],
+      },
+    },
+    39: {
+      pre: [
+        { who: 'narrator', text: '皇宮の地下。巨大な裂け目が赤く脈打っていた。' },
+        { who: 'sera', text: '北方や湿地よりずっと大きい。これで三つ目だよ。' },
+        { who: 'bram', text: '三つの裂け目が揃えば……何か巨大な門が開く。' },
+        { who: 'commander', text: 'ここを守る奴らから片付ける。裂け目を食い止めないと。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂け目の前の祭壇に、封をされた書簡が一通置かれていた。' },
+        { who: 'commander', text: '「約束どおり炎を育てよ。門が開けば報いよう」' },
+        { who: 'commander', text: '印章は……オルディンだ。王家の大魔導師。' },
+        { who: 'sera', text: 'じゃあ私たち、今まで誰のために戦ってきたの？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '裂け目を守る術者を狙う！　突入！' } ],
+        wave: [ { who: 'bark', text: '裂け目が広がって、工兵まで飛び出してきたっす！' } ],
+        danger: [ { who: 'sera', text: '裂け目の気が押し寄せてる、{ally}！　離れて！' } ],
+        last: [ { who: 'commander', text: 'あと一体。祭壇まで行く！' } ],
+      },
+    },
+    40: {
+      pre: [
+        { who: 'narrator', text: '皇宮の玉座の間。四方が溶岩の光でぎらついていた。' },
+        { who: 'boss', text: '王国の犬どもが、ここまで来たか。' },
+        { who: 'commander', text: 'この書簡、オルディンが送ったものだな？　何を約束した！' },
+        { who: 'boss', text: '約束？　炎を育てれば新たな世界をくれる、と言っておったわ。' },
+        { who: 'boss', text: 'そんなことはもうどうでもよい。すべて焼き尽くしてくれる！' },
+      ],
+      post: [
+        { who: 'boss', text: 'ぐっ……我らは……ただの予備にすぎなかった……。' },
+        { who: 'boss', text: '真の門は……深淵に……貴様らの大魔導師が望むのは……。' },
+        { who: 'narrator', text: '皇帝の体は炎となって消えていった。' },
+        { who: 'commander', text: '予備……なら本命は、まだ始まってすらいない。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '皇帝の周りの魔法使いから！　炎を断つ！' } ],
+        boss: [ { who: 'boss', text: '燃え上がれ！　帝国の炎は決して消えぬ！' } ],
+        wave: [ { who: 'kasha', text: '玉座の裏から近衛の召喚士たちが出てきた！' } ],
+        danger: [ { who: 'bram', text: '{ally}！　火柱が来るぞ、避けろ！' } ],
+        last: [ { who: 'sera', text: '最後だよ！　この炎を終わらせよう！' } ],
+      },
+    },
+    // ═══ Episode 5: 深淵の終焉 ═══
+    41: {
+      pre: [
+        { who: 'narrator', text: '深淵のふち。反乱軍とクランが急ごしらえで築いた前線基地。' },
+        { who: 'bram', text: '下から這い上がってくる連中を、ここで食い止める。' },
+        { who: 'bark', text: 'この柵、ちょいと強い風が吹いただけで倒れそうですぜ。' },
+        { who: 'commander', text: '柵が脆いなら、私たちが壁になる。持ち場を守れ！' },
+      ],
+      post: [
+        { who: 'sera', text: 'あの魔物たち、北方のアンデッドみたいに目が空っぽ。' },
+        { who: 'commander', text: '同じ手から生まれたものだ。下へ降りなきゃ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '深淵から来る！　基地を守れ！' } ],
+        wave: [ { who: 'bram', text: '第二波だ。騎士どもが先頭に立ったか。' } ],
+        last: [ { who: 'bark', text: '最後の一匹っす！　穴に叩き返してやりましょう！' } ],
+      },
+    },
+    42: {
+      pre: [
+        { who: 'narrator', text: '深淵の壁に沿って、螺旋の道がどこまでも続いていた。' },
+        { who: 'sera', text: '降りるほど光が減っていく。祈りも重くなる。' },
+        { who: 'bram', text: '狭い道では押し出しが怖い。壁側に立て。' },
+        { who: 'commander', text: '道の節々に敵がいる。一つずつ突破して降りよう。' },
+      ],
+      post: [
+        { who: 'narrator', text: '闇の中で、誰かが{commander}の名を囁いた。' },
+        { who: 'commander', text: '……今、誰か呼んだ？' },
+        { who: 'bark', text: '誰も呼んでませんぜ、大将。鳥肌立つこと言わんでください。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '下り坂の勢いで押し込む！　前進！' } ],
+        wave: [ { who: 'bram', text: '下から弓兵だ。壁の陰に張りつけ。' } ],
+        danger: [ { who: 'sera', text: '{ally}、そっちは崖よ！　気をつけて！' } ],
+      },
+    },
+    43: {
+      pre: [
+        { who: 'narrator', text: '古代人の昇降祭壇。下へ降りる唯一の道。' },
+        { who: 'bram', text: '祭壇が動き出すまで時間がかかる。それまで持ちこたえろ。' },
+        { who: 'commander', text: '祭壇を中心に円陣。どの方向も空けるな。' },
+        { who: 'bark', text: '戦士どもが群れで来やがる。今日は拳が鳴りますぜ。' },
+      ],
+      post: [
+        { who: 'narrator', text: '石の祭壇が低く唸り、深淵の底へと沈み始めた。' },
+        { who: 'sera', text: 'この祭壇、本当に人が造ったもの？　古すぎるよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '祭壇が動くまで耐える！　陣形を崩すな！' } ],
+        wave: [ { who: 'bram', text: '闘士の部隊だ。反撃に気をつけろ、二人で叩け！' } ],
+        danger: [ { who: 'bram', text: '{ally}、一度防御態勢で息を整えろ！' } ],
+        last: [ { who: 'sera', text: 'あと一人！　祭壇が動き始めた！' } ],
+      },
+    },
+    44: {
+      pre: [
+        { who: 'narrator', text: '深淵の中腹。巨大な古代要塞が闇の中で眠っていた。' },
+        { who: 'bram', text: 'この城壁の紋様……北方の遺跡と同じ者たちが築いたものだ。' },
+        { who: 'commander', text: '中に居座る連中を追い出して、記録を探す。' },
+      ],
+      post: [
+        { who: 'narrator', text: '要塞の壁画には、裂けた星を手に宿す人々が描かれていた。' },
+        { who: 'sera', text: 'この人たち、空の裂け目を手で閉じてる。' },
+        { who: 'commander', text: '「封印者」。鍵は……血筋で受け継がれる、と書いてある。' },
+        { who: 'bram', text: '……時が来たか。この戦いが終わったら、すべて話してやろう。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城門を破って突入する！　古代要塞を取り戻せ！' } ],
+        wave: [ { who: 'bark', text: '城の奥から術師どもがわらわら出てきますぜ！' } ],
+        last: [ { who: 'commander', text: '最後の一体。壁画までの道を開く！' } ],
+      },
+    },
+    45: {
+      pre: [
+        { who: 'narrator', text: '要塞を抜け、さらに深く。黒い鎧の騎士が待ち構えていた。' },
+        { who: 'boss', text: '鍵が自ら降りてきたか。' },
+        { who: 'commander', text: '鍵、鍵と……私の名は{commander}だ。覚えておけ。' },
+        { who: 'boss', text: '名など、門の前では無意味だ。' },
+        { who: 'bram', text: '奴は騎士だ。正面は堅い。背後を狙え。' },
+      ],
+      post: [
+        { who: 'boss', text: '我は……下位の門番に過ぎぬ……さらなる深みで……。' },
+        { who: 'narrator', text: '騎士が倒れた場所から、大地がさらに深く崩れ落ちた。' },
+        { who: 'commander', text: 'まだ底じゃない。もっと大きなものがいる。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '護衛を剥がして、騎士を包囲する！' } ],
+        boss: [ { who: 'boss', text: '鍵は門へ。残りは闇へ。' } ],
+        wave: [ { who: 'bram', text: '深淵の騎士団だ。援護の隊形を崩せ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　あの騎士、あなただけを狙ってる！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　このブリキ缶、溶かしてやりましょう！' } ],
+      },
+    },
+    46: {
+      pre: [
+        { who: 'narrator', text: '深淵の下層。召喚術師たちが魔物を際限なく呼び出していた。' },
+        { who: 'bram', text: '術師を叩かねば、召喚獣はいくらでも湧いてくる。' },
+        { who: 'kasha', text: 'じゃあ、あたしが裏に潜り込む。影の道はあたしの専門さ。' },
+        { who: 'commander', text: 'カシャが術師を叩く間、私たちが前を食い止める。' },
+      ],
+      post: [
+        { who: 'kasha', text: '術師は十二。あたしが七つ。今回はあたしの勝ちだね。' },
+        { who: 'commander', text: 'ああ、今回は認めるよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '術師が最優先だ！　召喚獣に足止めされるな！' } ],
+        wave: [ { who: 'kasha', text: '術師がまた陣を張った！　今度は後ろだよ！' } ],
+        last: [ { who: 'kasha', text: '最後の術師、あたしが行く！' } ],
+      },
+    },
+    47: {
+      pre: [
+        { who: 'narrator', text: '四方を塞がれた洞窟。クランは孤立した。' },
+        { who: 'sera', text: '私……祈りが出てこない。力が尽きちゃった。' },
+        { who: 'commander', text: 'セラは後ろで休んで。前は私たちが守る。' },
+        { who: 'bram', text: '魔法使いの群れが上から見下ろしている。遮蔽を取れ。' },
+        { who: 'commander', text: '警戒態勢で、近づいてくる奴から先に叩く。' },
+      ],
+      post: [
+        { who: 'sera', text: 'ごめんね。私のせいで、みんなもっと傷ついた。' },
+        { who: 'commander', text: 'セラが休めたから、次の戦いがあるんだ。謝らないで。' },
+        { who: 'bram', text: '（……大きくなったな。あの二人にそっくりだ。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '洞窟の入口を塞ぐ！　セラを守れ！' } ],
+        wave: [ { who: 'bark', text: '天井から召喚獣が降ってきますぜ！' } ],
+        danger: [ { who: 'commander', text: '負傷者から後ろへ下げろ！　隊列は組み直す！' } ],
+        last: [ { who: 'bram', text: '残り一体だ。落ち着いて仕留めろ。' } ],
+      },
+    },
+    48: {
+      pre: [
+        { who: 'narrator', text: '深淵を横切る石橋。あちこちにひびが走っていた。' },
+        { who: 'bram', text: '橋の向こうが深淵の底だ。奴の気配を感じる。' },
+        { who: 'bark', text: 'この橋が落ちたら、帰り道もなくなりますぜ。' },
+        { who: 'commander', text: '素早く渡って、向こう岸を守る。両方やるしかない。' },
+      ],
+      post: [
+        { who: 'narrator', text: '橋の半分が崩れ落ちた。ブラムの脚から血が流れていた。' },
+        { who: 'sera', text: 'おじさん、脚が……今すぐ治療します！' },
+        { who: 'bram', text: '構わん。老いぼれの体は、もとより軋むものだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '橋の上を前進！　ひびの上に長く立つな！' } ],
+        wave: [ { who: 'kasha', text: '向こう岸で騎士団が橋を塞いでる！' } ],
+        danger: [ { who: 'bram', text: '{ally}、橋の端まで押されたら終わりだ！' } ],
+        last: [ { who: 'bark', text: '残り一体っす！　橋を渡っちまいましょう！' } ],
+      },
+    },
+    49: {
+      pre: [
+        { who: 'bram', text: '約束どおり話してやろう。15年前、あの夜のことを。' },
+        { who: 'bram', text: 'お前の親は王家の封印者だった。空の裂け目を閉じる者たちだ。' },
+        { who: 'bram', text: 'オルディンはその裂け目を開こうとし、二人は命と引き換えに閉じた。' },
+        { who: 'bram', text: 'わしはあの日、お前の親と約束した。この子を守る、とな。' },
+        { who: 'commander', text: '……だから村にいてくれたんですか？　15年もの間？' },
+        { who: 'bram', text: 'そうだ。そして今日が、その約束を果たす日だ。' },
+      ],
+      post: [
+        { who: 'bram', text: '指揮官。あの通路はわしが守る。お前たちは底へ行け。' },
+        { who: 'commander', text: 'だめです！　一緒に行きましょう、脚を怪我してるじゃないですか！' },
+        { who: 'bram', text: 'この脚では足手まといになる。指揮官なら分かるはずだ。' },
+        { who: 'bram', text: '全員は救えずとも、誰一人見捨てはしない。そういうことだ。行け。' },
+      ],
+      battle: {
+        start: [ { who: 'bram', text: 'この通路さえ守ればいい。わしが前に立つ！' } ],
+        wave: [ { who: 'commander', text: 'きりがない……ブラム、もう少しだけ耐えてください！' } ],
+        danger: [ { who: 'bram', text: '傷ついた者は下がれ！　この通路はわしが支える！' } ],
+        last: [ { who: 'bram', text: '残り一体だ。もう行く時だ、指揮官。' } ],
+      },
+    },
+    50: {
+      pre: [
+        { who: 'narrator', text: '深淵の底。背後の通路から聞こえていた剣戟の音が、止んだ。' },
+        { who: 'sera', text: '{commander}……ブラムおじさんの声が聞こえない。' },
+        { who: 'commander', text: '……前だけを見て。ブラムが開いてくれた道だ。' },
+        { who: 'boss', text: 'あの老騎士は見事だった。次は貴様の番だ、鍵よ。' },
+        { who: 'commander', text: 'その口でブラムを語るな！' },
+      ],
+      post: [
+        { who: 'boss', text: '深淵は……前触れに過ぎぬ……魔界への道が……開く……。' },
+        { who: 'narrator', text: '引き返した通路の果てには、折れた剣が一振り残されているだけだった。' },
+        { who: 'commander', text: 'ブラム……約束、守ったんですね。最後まで。' },
+        { who: 'commander', text: '今度は私が守ります。残された全員を。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '全員攻撃！　ブラムが守った道を無駄にするな！' } ],
+        boss: [ { who: 'boss', text: '怒りに乱れた指揮など隙だらけだ。来るがいい！' } ],
+        wave: [ { who: 'kasha', text: '底で精鋭が目を覚ました！　気を引き締めな！' } ],
+        danger: [ { who: 'sera', text: '{ally}、前に出ないで！　私が行くまで持ちこたえて！' } ],
+        last: [ { who: 'bark', text: '残り一体ですぜ、大将！　爺さんの分まで！' } ],
+      },
+    },
+    // ═══ Episode 6: 地獄門 ═══
+    51: {
+      pre: [
+        { who: 'narrator', text: '王都の南の野。空の裂け目の下に避難民が押し寄せていた。' },
+        { who: 'sera', text: '王都への道が塞がれたって。みんなここで立ち往生してる。' },
+        { who: 'commander', text: '避難陣地を築く。裂け目から降りてくるものは全部止めろ。' },
+        { who: 'bark', text: '爺さん抜きの、初めての防衛戦か。やってやりましょう。' },
+      ],
+      post: [
+        { who: 'narrator', text: 'ひとりの老人が{commander}の手を取り、深く頭を下げた。' },
+        { who: 'commander', text: '（ブラムも、こういう顔を見ながら踏ん張ってきたんだろうな。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '陣地を守れ！　避難民の方へは一匹も通すな！' } ],
+        wave: [ { who: 'kasha', text: '裂け目から二つ目の群れだ！　今度のはデカいよ！' } ],
+        last: [ { who: 'sera', text: 'あと一体！　みんな、もう少しだけ！' } ],
+      },
+    },
+    52: {
+      pre: [
+        { who: 'narrator', text: '二日目。裂け目から降りた敵の中に、見覚えのある顔があった。' },
+        { who: 'bark', text: 'あれは……山賊時代の弟分どもだ。目が真っ赤になってやがる。' },
+        { who: 'sera', text: '北方の氷の兵士も混じってる。みんな魔界に連れていかれたんだ。' },
+        { who: 'bark', text: '大将、あいつらは……俺の手で眠らせてやりてえんです。' },
+        { who: 'commander', text: '一人で背負うな、バーク。一緒に行こう。' },
+      ],
+      post: [
+        { who: 'bark', text: '……すまねえな、お前ら。もう腹を空かせるんじゃねえぞ。' },
+        { who: 'commander', text: 'バーク、大丈夫？' },
+        { who: 'bark', text: '大丈夫なわけねえっす。でも、大将が隣にいてくれて助かりました。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'かつての敵でも、今は魔界の操り人形だ。持ちこたえろ！' } ],
+        wave: [ { who: 'kasha', text: '騎士の群れが陣地の側面に回り込んでくる！' } ],
+        danger: [ { who: 'bark', text: '{ally}、俺の後ろに来な、今すぐ！' } ],
+      },
+    },
+    53: {
+      pre: [
+        { who: 'narrator', text: '裂け目の真下。魔物たちが巣を張った拠点。' },
+        { who: 'kasha', text: 'あの巣が裂け目を繋ぎ止めてる。壊せば裂け目が縮むよ。' },
+        { who: 'commander', text: '今度はこっちから攻め込む。巣を叩き壊せ！' },
+      ],
+      post: [
+        { who: 'narrator', text: '巣が崩れると、空の裂け目のひとつが薄れていった。' },
+        { who: 'sera', text: '閉じられる。一つずつなら閉じられるよ！' },
+        { who: 'commander', text: 'でも北のあの門は……こんな大きさじゃない。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '巣までの道を切り開く！　側面から崩せ！' } ],
+        wave: [ { who: 'bark', text: '巣から魔物がまた溢れてきますぜ！' } ],
+        last: [ { who: 'kasha', text: 'あと一体。巣の心臓部へ！' } ],
+      },
+    },
+    54: {
+      pre: [
+        { who: 'narrator', text: 'ヴォルカル帝国の火山地帯。ここにも裂け目が開いた。' },
+        { who: 'narrator', text: '反乱軍は今や、帝国の臨時政府となっていた。' },
+        { who: 'kasha', text: '帝国の連中が手を貸してほしいってさ。あんたへの借りを返したいんだって。' },
+        { who: 'commander', text: '一緒に戦おう。溶岩地帯なら私たちも経験済みだ。' },
+      ],
+      post: [
+        { who: 'narrator', text: '帝国兵たちがクランの旗の下に列をなした。' },
+        { who: 'bark', text: '帝国軍と肩を並べる日が来るとはね。長生きはしてみるもんですぜ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '溶岩の隣で手番を終えるな！　火傷に注意！' } ],
+        wave: [ { who: 'kasha', text: '裂け目からまた降りてくる！　帝国軍が左を受け持った！' } ],
+        danger: [ { who: 'sera', text: '{ally}、火傷がひどい！　下がって！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　帝国の連中に格好つけてやりましょう！' } ],
+      },
+    },
+    55: {
+      pre: [
+        { who: 'narrator', text: '王都へ続く要所。守りが崩れ落ちつつあった。' },
+        { who: 'sera', text: '今度は私が結界を張る。また祈れるようになったの。' },
+        { who: 'commander', text: '無理はしないで。セラが倒れたら結界も終わりだ。' },
+        { who: 'sera', text: '分かってる。だからみんなが守って。私を信じて。' },
+      ],
+      post: [
+        { who: 'sera', text: 'できた……祈りがまた届いた。' },
+        { who: 'commander', text: 'セラがいたから持ちこたえられた。' },
+        { who: 'sera', text: 'ブラムおじさんが言ってたでしょ。一人でやるものじゃないって。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'セラの結界を守れ！　近づく奴から叩け！' } ],
+        wave: [ { who: 'kasha', text: '術師どもが結界を狙ってる！　止めな！' } ],
+        danger: [ { who: 'sera', text: '{ally}、結界の中に入って！' } ],
+        last: [ { who: 'bark', text: '残り一体っす！　結界はまだびくともしてませんぜ！' } ],
+      },
+    },
+    56: {
+      pre: [
+        { who: 'narrator', text: '王都郊外の深い裂け目。魔界の空気が濃く流れ出していた。' },
+        { who: 'kasha', text: 'あの裂け目、王都まで続いてる。王都が危ないよ。' },
+        { who: 'commander', text: '正面突破する。裂け目をたどって王都へ向かう。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂け目の果てに王都の城壁が見えた。煙が立ちのぼっていた。' },
+        { who: 'sera', text: '王都が燃えてる……！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '裂け目に沿って前進！　止まるな！' } ],
+        wave: [ { who: 'bark', text: '前も後ろも塞がれましたぜ！　片側から破りましょう！' } ],
+        last: [ { who: 'commander', text: '残り一体。王都へ行こう！' } ],
+      },
+    },
+    57: {
+      pre: [
+        { who: 'narrator', text: '王都アルデン。城壁の半分が魔界軍の手に落ちていた。' },
+        { who: 'narrator', text: '王国近衛隊は、すでに王宮へ退いた後だった。' },
+        { who: 'commander', text: '城壁を取り戻して、民が逃げる道を開く。' },
+        { who: 'kasha', text: '王宮の連中、民を見捨てて隠れたってわけ。情けないね。' },
+        { who: 'commander', text: 'だからこそ、私たちがここにいる。' },
+      ],
+      post: [
+        { who: 'narrator', text: '王都の民が南門から脱出し始めた。' },
+        { who: 'sera', text: '大魔導師の塔が空っぽだって。オルディンはどこへ行ったの？' },
+        { who: 'commander', text: '塔の下を調べる。答えはそこにあるはずだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁の上を奪還する！　高所を奪え！' } ],
+        wave: [ { who: 'kasha', text: '城門の方へ騎士団が押し寄せてくる！' } ],
+        danger: [ { who: 'bark', text: '{ally}がやられた！　城壁の階段から下げてくだせえ！' } ],
+        last: [ { who: 'sera', text: '最後の一体！　南門が開いたよ！' } ],
+      },
+    },
+    58: {
+      pre: [
+        { who: 'narrator', text: '大魔導師の塔の地下。階段は裂け目の中へと続いていた。' },
+        { who: 'kasha', text: '自分の塔の下で裂け目を育ててたってことか。' },
+        { who: 'commander', text: '見張りがいる。突破して研究室まで行く。' },
+      ],
+      post: [
+        { who: 'commander', text: 'オルディンの日誌だ。「門を開き、神を呼ぶ」。' },
+        { who: 'commander', text: '「神のみが魔界を浄化する。門を開く鍵は、あの子だ」。' },
+        { who: 'sera', text: '神を呼ぶために、世界をこんなふうにしたの？' },
+        { who: 'kasha', text: '信仰心じゃない。狂気だね。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '研究室前の守護者を片付ける！　突入！' } ],
+        wave: [ { who: 'bark', text: '壁の中から召喚獣が飛び出してきますぜ！' } ],
+        last: [ { who: 'kasha', text: 'あと一体。研究室の扉の前だよ。' } ],
+      },
+    },
+    59: {
+      pre: [
+        { who: 'narrator', text: '王都の北、灰の平原。地獄門が天まで聳えていた。' },
+        { who: 'narrator', text: '門の前に、連合軍の最後の陣地が築かれた。' },
+        { who: 'commander', text: '門を守る守護者を叩く前に、まず陣地を守る。' },
+        { who: 'bark', text: '門から溢れてくる連中、数がとんでもねえですぜ。' },
+        { who: 'commander', text: '警戒態勢で迎え撃つ。先に撃ち、先に叩く。' },
+      ],
+      post: [
+        { who: 'narrator', text: '陣地は持ちこたえた。門の前に巨大な影が立った。' },
+        { who: 'sera', text: 'あれが門番だよ。あれさえ越えれば門を閉じられる。' },
+        { who: 'commander', text: '（本当にそうだろうか。傷痕が妙に疼いている。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '陣地を守れ！　ここが最後の防衛線だ！' } ],
+        wave: [ { who: 'kasha', text: '門から増援だ！　終わりが見えない！' } ],
+        danger: [ { who: 'commander', text: '負傷した{ally}の穴を埋めろ！　陣地は渡さない！' } ],
+        last: [ { who: 'bark', text: '残り一体っす！　陣地は俺たちのもんだ！' } ],
+      },
+    },
+    60: {
+      pre: [
+        { who: 'narrator', text: '地獄門の目前。巨大な騎士が門を背にして立っていた。' },
+        { who: 'boss', text: 'この門は、鍵の血をもってしか越えられぬ。' },
+        { who: 'commander', text: '越えるつもりはない。閉じに来た。' },
+        { who: 'boss', text: '閉じるか開くか……我を倒した瞬間に決まろう。' },
+        { who: 'kasha', text: '何か引っかかる。あの言い方、罠の匂いがするよ。' },
+      ],
+      post: [
+        { who: 'boss', text: 'よかろう……鍵の血が……門に届いた……。' },
+        { who: 'narrator', text: '守護者が倒れた後、{commander}の傷痕から血が滲み出した。' },
+        { who: 'narrator', text: '門の前に立つ指先から、血の雫が門に触れた。' },
+        { who: 'commander', text: '傷痕が焼けるようだ……門が、動いている！？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守護者を囲む護衛から剥がしていく！' } ],
+        boss: [ { who: 'boss', text: '我こそが門。門を越えたくば、我を越えよ。' } ],
+        wave: [ { who: 'kasha', text: '門の内側から増援だ！　前後を塞がれる！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　血が出すぎてる！' } ],
+        last: [ { who: 'bark', text: '残り一体ですぜ！　これで終わりだ！' } ],
+      },
+    },
+    // ═══ Episode 7: 悪魔の領域 ═══
+    61: {
+      pre: [
+        { who: 'narrator', text: '門を越えた最初の地。クランは黒い岩の上に橋頭堡を築いた。' },
+        { who: 'kasha', text: '帰りの門は背中にある。ここを失えば終わりだよ。' },
+        { who: 'commander', text: '橋頭堡を守る。魔界の連中に道を譲るな。' },
+        { who: 'sera', text: 'ここの空気……息を吸うたびに頭が響くの。' },
+      ],
+      post: [
+        { who: 'bark', text: '持ちこたえましたぜ。けど日が沈まねえ。ここには夜がないんすかね。' },
+        { who: 'commander', text: '時間も道も信じるな。互いだけを信じよう。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '橋頭堡死守！　門への道を守れ！' } ],
+        wave: [ { who: 'kasha', text: '岩の隙間から魔界の騎士団だ！　数が多いよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}、しっかりして！　私の声、聞こえる？' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　魔界での初勝利といきましょうや！' } ],
+      },
+    },
+    62: {
+      pre: [
+        { who: 'narrator', text: '赤い草が果てしなく揺れる野原が広がっていた。' },
+        { who: 'sera', text: '{commander}……あれ、ソルビット村だよ。あの丘、あの水車小屋。' },
+        { who: 'commander', text: '違う。村はあんなに赤くない。幻だ。' },
+        { who: 'kasha', text: '幻の中に本物の敵が混じってる。気をしっかり持ちな。' },
+        { who: 'commander', text: '故郷の姿でもためらうな。前進！' },
+      ],
+      post: [
+        { who: 'narrator', text: '幻が晴れると村は消え、灰の山だ怪我残った。' },
+        { who: 'commander', text: '魔界は、私たちが大切にしているものを武器にする。' },
+        { who: 'bark', text: '汚ねえ連中だ。なら、もっと強くぶん殴ってやるまでっす。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '見えるものを信じるな！　敵だけを見て撃て！' } ],
+        wave: [ { who: 'kasha', text: '丘の向こうからまだ来る！　幻じゃない、本物だよ！' } ],
+        last: [ { who: 'sera', text: '最後の一体だよ。さあ、本当の道を行こう。' } ],
+      },
+    },
+    63: {
+      pre: [
+        { who: 'narrator', text: '白い骨でできた木々が森をなしていた。' },
+        { who: 'bark', text: '枝が指みてえに動いてますぜ。ぞっとするな。' },
+        { who: 'kasha', text: 'それでも森は森さ。陰に身を隠せる。' },
+        { who: 'commander', text: '森を背に戦う。敵が押し寄せたら側面を突く。' },
+      ],
+      post: [
+        { who: 'narrator', text: '森の果てで古い道標が見つかった。人間の文字だった。' },
+        { who: 'commander', text: '「封印者の道」……父さんと母さんも、ここを通ったんだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '骨の木を遮蔽物にしろ！　身をさらすな！' } ],
+        wave: [ { who: 'kasha', text: '森の反対側から回り込んでくる！　背後に気をつけな！' } ],
+        danger: [ { who: 'bark', text: '{ally}！　枝は俺が止める、下がってくだせえ！' } ],
+      },
+    },
+    64: {
+      pre: [
+        { who: 'narrator', text: '赤い水がたまった沼。水の中で何かが息をしていた。' },
+        { who: 'sera', text: '黒水湿地に似てる。でも何倍もひどいよ。' },
+        { who: 'commander', text: '沼の真ん中の島に陣を張る。浅瀬には出るな。' },
+        { who: 'kasha', text: 'ここで粘れば、奴らは沼を渡るうちにへばるはずさ。' },
+      ],
+      post: [
+        { who: 'sera', text: '湿地のときを思い出すね。あのときはブラムおじさんがいたのに。' },
+        { who: 'commander', text: '今もいる。私たちが口にする言葉の中に。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '島を守る！　浅瀬に立った敵を狙え！' } ],
+        wave: [ { who: 'bark', text: '沼の底からまた這い上がってきやがった！' } ],
+        danger: [ { who: 'sera', text: '{ally}、水辺から離れて！' } ],
+        last: [ { who: 'kasha', text: 'あと一体。沼を渡るよ！' } ],
+      },
+    },
+    65: {
+      pre: [
+        { who: 'narrator', text: '風が吹き抜けるたびに悲鳴のような音を立てる峡谷。' },
+        { who: 'bark', text: '耳がちぎれそうだ。これが全部風の音だって？' },
+        { who: 'kasha', text: '峡谷の上の岩を取った側が勝つ。高所の取り合いだよ。' },
+        { who: 'commander', text: '遠距離は丘の上へ。射程がさらに伸びる。' },
+      ],
+      post: [
+        { who: 'narrator', text: '峡谷の果て、黒い城塞が天を突いていた。' },
+        { who: 'commander', text: 'あの城塞の向こうに法師の塔がある、という話だったな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '高所を先に取れ！　上から叩き込む！' } ],
+        wave: [ { who: 'kasha', text: '向こうの高所に術士どもが陣取ったよ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　峡谷突破ですぜ！' } ],
+      },
+    },
+    66: {
+      pre: [
+        { who: 'narrator', text: '魔界の黒い城塞。城壁が生きているかのようにうごめいていた。' },
+        { who: 'kasha', text: '黒き羽の本隊が門の向こうから追いついた。これで全員合流だよ。' },
+        { who: 'commander', text: '心強いな。城塞を守りながら奥を突き破る。' },
+        { who: 'kasha', text: '……昔あんたと競走してたのが、馬鹿みたいだね。' },
+      ],
+      post: [
+        { who: 'kasha', text: '{commander}。もう競争相手じゃない。戦友だよ。' },
+        { who: 'commander', text: 'わかってる。それでも、たまには競走しよう。' },
+        { who: 'kasha', text: 'ふん。次はあたしが勝つ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城塞の入口を押さえて、奥へ押し込め！' } ],
+        wave: [ { who: 'kasha', text: '黒き羽、左の城壁！　今だよ！' } ],
+        danger: [ { who: 'kasha', text: '{ally}、あたしの後ろへ！　援護する！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　城塞陥落だ！' } ],
+      },
+    },
+    67: {
+      pre: [
+        { who: 'narrator', text: '魔界のただ中に、人の手で築かれた遺跡があった。' },
+        { who: 'sera', text: 'ここにも裂けた星の紋章がある。封印者たちの遺跡だよ。' },
+        { who: 'commander', text: '傷痕が疼く。ここで何かが待っている。' },
+        { who: 'kasha', text: '魔界の連中が遺跡を壊そうとしてる。守らなきゃ！' },
+      ],
+      post: [
+        { who: 'narrator', text: '遺跡の中心の石が輝き、二人の声が響いた。' },
+        { who: 'narrator', text: '「私たちの子よ。鍵はひとりで回すものではないの」' },
+        { who: 'narrator', text: '「そばにいる手と一緒に回しなさい。そうすれば閉じるから」' },
+        { who: 'commander', text: '……母さん？　父さん？　待って、まだ言いたいことが……！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '遺跡を守る！　あの石に触れさせるな！' } ],
+        wave: [ { who: 'bark', text: '遺跡の四方から押し寄せてきやがる！　円陣を組んでくだせえ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　遺跡は私たちが守るから、下がって！' } ],
+        last: [ { who: 'sera', text: 'あと一体！　あの石が光り始めたよ！' } ],
+      },
+    },
+    68: {
+      pre: [
+        { who: 'sera', text: '{commander}、さっきの声……大丈夫？' },
+        { who: 'commander', text: 'うん。むしろ初めて、道が見えた気がする。' },
+        { who: 'commander', text: 'ひとりじゃなく、一緒に。それが鍵なんだって。' },
+        { who: 'narrator', text: 'クランは法師の塔へと続く深淵の回廊に足を踏み入れた。' },
+      ],
+      post: [
+        { who: 'bark', text: '回廊の先に塔が見えますぜ。あのてっぺんに法師がいるんでしょう。' },
+        { who: 'kasha', text: 'オルディンもあそこに立ち寄ったってさ。においが濃いよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '回廊を突破する！　まとまって動け！' } ],
+        wave: [ { who: 'kasha', text: '回廊の両側の壁が開いた！　伏兵だよ！' } ],
+        last: [ { who: 'commander', text: 'あと一体。塔へ向かう！' } ],
+      },
+    },
+    69: {
+      pre: [
+        { who: 'narrator', text: '法師の塔の麓の要塞。塔を守る最後の城壁。' },
+        { who: 'kasha', text: '城壁の上から魔法が雨みたいに降ってくる。' },
+        { who: 'commander', text: '敵が狙う団員には印が出る。その場所を空けてくれ。' },
+        { who: 'bark', text: '狙われてるのが見えりゃ、避けりゃいい。簡単っすね！' },
+      ],
+      post: [
+        { who: 'narrator', text: '城壁が崩れ、塔の扉がひとりでに開いた。' },
+        { who: 'sera', text: '招いてるんだよ。気味が悪い。' },
+        { who: 'commander', text: '招かれたなら行ってやろう。礼儀正しく、指揮杖を携えて。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '敵の標的表示を見ろ！　狙われた場所は空けろ！' } ],
+        wave: [ { who: 'kasha', text: '塔から精鋭が降りてくる！　魔法使いの護衛隊だよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}、魔法の集中砲火だよ！　避けて！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　塔の扉が開きますぜ！' } ],
+      },
+    },
+    70: {
+      pre: [
+        { who: 'narrator', text: '塔の頂。霧の中から見覚えのある影が歩み出てきた。' },
+        { who: 'commander', text: '……ブラム？' },
+        { who: 'fake_bram', text: 'そうだ、ちび。なぜわしを置いていった？' },
+        { who: 'sera', text: '騙されないで！　おじさんはそんなこと言わない！' },
+        { who: 'commander', text: 'わかってる。ブラムは最後まで、私を指揮官と呼んだ。' },
+        { who: 'boss', text: 'ふん、つまらん。ならば真の姿で相手をしてやろう。' },
+      ],
+      post: [
+        { who: 'boss', text: '心を揺さぶっても……崩れぬ人間だと……。' },
+        { who: 'boss', text: 'オルディンは……天の頂へ向かった……神を呼ぶために……。' },
+        { who: 'boss', text: 'そして君主様は……すでに貴様を見ておられる……。' },
+        { who: 'commander', text: '見させておけばいい。すぐにこちらから会いに行く。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '幻に惑わされるな！　法師を狙え！' } ],
+        boss: [ { who: 'boss', text: '貴様の記憶で貴様を引き裂いてやろう、鍵よ。' } ],
+        wave: [ { who: 'kasha', text: '塔の下の階から増援だよ！　階段を塞いで！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　幻じゃなくて、私の声を聞いて！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　この塔、ぶっ潰しましょうや！' } ],
+      },
+    },
+    // ═══ Episode 8: 神の審判 ═══
+    71: {
+      pre: [
+        { who: 'narrator', text: '白い光が突き刺さった野原。赤い草が白く焼け焦げていった。' },
+        { who: 'narrator', text: '光の中から鎧をまとった姿が歩み出た。翼があった。' },
+        { who: 'sera', text: '神の化身……経典で見た姿だよ。' },
+        { who: 'kasha', text: 'なのに、なんでこっちの陣に歩いてくるのさ？' },
+        { who: 'commander', text: '剣を抜いている。陣地を守れ！　あれも敵だ！' },
+      ],
+      post: [
+        { who: 'sera', text: '神の化身が私たちを打った。どうして……？' },
+        { who: 'commander', text: '魔界に触れたものはすべて穢れていると見なしているんだろう。私たちも。' },
+        { who: 'sera', text: 'じゃあ、私が一生祈ってきたのは何だったの。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '陣地死守！　光だろうと闇だろうと食い止める！' } ],
+        wave: [ { who: 'kasha', text: '空からまた降りてくる！　今度は騎士団だよ！' } ],
+        danger: [ { who: 'bark', text: '{ally}！　あの光、触れただけで焼けますぜ！' } ],
+        last: [ { who: 'sera', text: '……あと一体。終わらせよう。' } ],
+      },
+    },
+    72: {
+      pre: [
+        { who: 'narrator', text: '光と闇がぶつかり合う深淵の裂け目。' },
+        { who: 'kasha', text: '悪魔と化身が殺し合ってる。あたしらはどうする？' },
+        { who: 'commander', text: 'どっちも味方じゃない。間を突っ切って進む。' },
+        { who: 'bark', text: 'これ、両側から袋叩きにされるやつじゃないっすか？' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂け目の向こう、天の頂に白い裂け目が見えた。' },
+        { who: 'commander', text: 'あそこが、オルディンが神を呼んでいる場所だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '両方とも敵だ！　裂け目の間を突破しろ！' } ],
+        wave: [ { who: 'kasha', text: '悪魔側の増援がこっちに向きを変えた！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　この大混戦から抜け出しましょうや！' } ],
+      },
+    },
+    73: {
+      pre: [
+        { who: 'narrator', text: '白い石で築かれた城塞。魔界の只中に建つには清らかすぎた。' },
+        { who: 'kasha', text: 'これ、オルディンが建てたんだってさ。神を迎える聖殿だとか。' },
+        { who: 'commander', text: '城塞を制圧して、上へ向かう道を探す。' },
+        { who: 'sera', text: 'この城塞……祈る人たちの骸骨で積み上げてある……。' },
+      ],
+      post: [
+        { who: 'commander', text: 'オルディンが連れてきた人たちだ。神を呼ぶ生贄として。' },
+        { who: 'sera', text: '神のためなら、人をこんな目に遭わせてもいいっていうの？' },
+        { who: 'commander', text: 'いや。どんな理由があっても許されない。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城塞の門を守りながら、中へ食い込む！' } ],
+        wave: [ { who: 'kasha', text: '城塞の上階から光の術士どもが降りてくる！' } ],
+        danger: [ { who: 'sera', text: '{ally}、光を浴びすぎてるよ！' } ],
+        last: [ { who: 'bark', text: '最後の一体っす！　城塞は俺たちのもんだ！' } ],
+      },
+    },
+    74: {
+      pre: [
+        { who: 'narrator', text: '古代神殿の廃墟。セラがひとり、ひざまずいた。' },
+        { who: 'narrator', text: '「司祭よ。鍵のそばを離れよ。鍵は穢れた」' },
+        { who: 'sera', text: '……神の声だ。私に、離れろって。' },
+        { who: 'commander', text: 'セラ。君が選べばいい。恨んだりはしない。' },
+        { who: 'sera', text: 'ばか。私が誰を選ぶか、わからなくてそんなこと言ってるの？' },
+        { who: 'sera', text: '神が見捨てた人も、私が治す。それが私の祈りだよ。' },
+      ],
+      post: [
+        { who: 'sera', text: '神の声が止んだ。代わりに心が静かなの。' },
+        { who: 'commander', text: 'ありがとう、セラ。本当に。' },
+        { who: 'sera', text: '最初に言ったでしょ。怪我したら私が治してあげるって。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '廃墟を守る！　セラのそばへ行かせるな！' } ],
+        wave: [ { who: 'kasha', text: '化身どもがセラを連れ去る気だ！　止めな！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　私が治すから、耐えて！' } ],
+        last: [ { who: 'sera', text: '最後の一体。これは私の手で終わらせる。' } ],
+      },
+    },
+    75: {
+      pre: [
+        { who: 'narrator', text: '天へと続く深淵の柱。光のはしごが架かっていた。' },
+        { who: 'bark', text: 'あのはしごを登りゃ、てっぺんっすか？' },
+        { who: 'kasha', text: '守ってる連中がはしごの下に陣を張ってるよ。' },
+        { who: 'commander', text: 'はしごの下を制圧する。囲めば挟撃になる。' },
+      ],
+      post: [
+        { who: 'narrator', text: 'はしごがクランの重みを受け止め、光を放った。' },
+        { who: 'bark', text: '俺の体重にも耐えるとは。神さんの道具は頑丈ですぜ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '隊列を整えろ！　息を整えて、挟撃で仕留めろ！' } ],
+        wave: [ { who: 'kasha', text: '上から降りてくる！　はしご側を塞いで！' } ],
+        last: [ { who: 'commander', text: 'あと一体。登ろう！' } ],
+      },
+    },
+    76: {
+      pre: [
+        { who: 'narrator', text: '天と深淵の狭間。光と闇が入り乱れる戦場。' },
+        { who: 'kasha', text: '悪魔軍と化身軍、それにあたしたち。三つ巴だね。' },
+        { who: 'commander', text: '互いに戦わせておいて、こちらは道を開くだけだ。' },
+        { who: 'bark', text: '両方がへばるまで待つんすか？　大将、ずいぶんしたたかになりましたね。' },
+      ],
+      post: [
+        { who: 'commander', text: 'ブラムならこうしたはずだ。力を温存しないと。' },
+        { who: 'sera', text: 'これは君の判断だよ、{commander}。ブラムおじさんのじゃない。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'どちらも相手にするな！　道を開いて耐えろ！' } ],
+        wave: [ { who: 'kasha', text: '両方が同時にこっちを狙ってる！　陣形を詰めな！' } ],
+        danger: [ { who: 'bark', text: '{ally}！　防御態勢をとって、一度踏んばってくだせえ！' } ],
+        last: [ { who: 'kasha', text: 'あと一体！　隙ができた、行きな！' } ],
+      },
+    },
+    77: {
+      pre: [
+        { who: 'narrator', text: '天に近い要塞。魔界軍がクランを追って登ってきた。' },
+        { who: 'kasha', text: '頂に行く前に背後を断たなきゃ。ここで食い止めよう。' },
+        { who: 'commander', text: '要塞の門を閉じて耐える。警戒を敷け。' },
+        { who: 'commander', text: '射程に入った敵は先に叩く。' },
+      ],
+      post: [
+        { who: 'narrator', text: '追撃軍が崩れた。上のほうからオルディンの声が響いた。' },
+        { who: 'commander', text: 'オルディンが話しかけてきている。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '要塞の門を守れ！　追撃はここで断ち切る！' } ],
+        wave: [ { who: 'bark', text: '下からどんどん這い上がってきやがる！' } ],
+        danger: [ { who: 'sera', text: '{ally}、門の内側に下がって！' } ],
+        last: [ { who: 'kasha', text: 'あと一体。追撃はこれで終わりだよ！' } ],
+      },
+    },
+    78: {
+      pre: [
+        { who: 'ordin', text: '若き指揮官。取引をしよう。' },
+        { who: 'ordin', text: '鍵を私に渡しなさい。神が魔界を消し去れば、戦は終わるのですぞ。' },
+        { who: 'commander', text: '魔界に触れた土地も消すんだろう。私たちの故郷も。' },
+        { who: 'ordin', text: '犠牲なき救済はありませんな。貴殿の両親が証明したでしょう。' },
+        { who: 'commander', text: '父さんと母さんは自分で選んだ。あなたは他人を選んだ。' },
+        { who: 'commander', text: '誰を見捨てるかを、神に決めさせはしない。' },
+      ],
+      post: [
+        { who: 'ordin', text: '愚かですな。ならば神の御前で証明してみせなさい。' },
+        { who: 'narrator', text: 'オルディンの幻影が散り、天の頂の光が濃くなった。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '答えはこの戦いで示す！　団員たち、道を開け！' } ],
+        wave: [ { who: 'kasha', text: 'オルディンが化身をさらに呼び出したよ！' } ],
+        last: [ { who: 'commander', text: 'あと一体。頂へ向かう！' } ],
+      },
+    },
+    79: {
+      pre: [
+        { who: 'narrator', text: '天の頂へ登る最後の階段。古代の柱が立ち並んでいた。' },
+        { who: 'sera', text: '封印者たちの遺跡だよ。ここでも門を閉じようとしてたんだ。' },
+        { who: 'commander', text: '柱の間に陣取った敵を突破する。' },
+        { who: 'bark', text: 'ここさえ越えりゃ、あの爺さんの面を拝めるんすか？' },
+      ],
+      post: [
+        { who: 'narrator', text: '階段の果て、白い裂け目の前にオルディンが立っていた。' },
+        { who: 'narrator', text: 'オルディンの体は、すでに半分ほど光に変わっていた。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '階段を登る！　柱の陰に気をつけろ！' } ],
+        wave: [ { who: 'kasha', text: '上の柱から弓兵が撃ってくる！　高所だよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　階段の下に押し戻されないで！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　頂ですぜ！' } ],
+      },
+    },
+    80: {
+      pre: [
+        { who: 'narrator', text: '白い裂け目の前。オルディンはいまや自らを神の召喚士と名乗っていた。' },
+        { who: 'boss', text: 'ご覧なさい、神が来られる。15年待ち続けた瞬間ですぞ。' },
+        { who: 'commander', text: 'その15年で、何人を生贄に捧げた！' },
+        { who: 'boss', text: '世界を救うための代価でしたな。' },
+        { who: 'commander', text: 'その代価は、あなたが決めていいものじゃない。' },
+        { who: 'sera', text: '{commander}、召喚を断ち切らなきゃ。今すぐ！' },
+      ],
+      post: [
+        { who: 'boss', text: '神が……来ない……いや、来られなかったというのか……。' },
+        { who: 'narrator', text: '光がオルディンの体から抜け出し、老いた魔導士だ怪我残った。' },
+        { who: 'bark', text: '大将、とどめを刺しますかい？' },
+        { who: 'commander', text: 'いや。生きて見届けさせる。自分が何をしたのかを。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '召喚陣を守る化身から片付けろ！' } ],
+        boss: [ { who: 'boss', text: '神の名において、穢れし者どもを裁かん！' } ],
+        wave: [ { who: 'kasha', text: '裂け目から化身がまだ降りてくる！　急いで！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　裁きの光だよ、避けて！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　この召喚、終わらせてやりましょうや！' } ],
+      },
+    },
+    // ═══ Episode 9: 絶体絶命 ═══
+    81: {
+      pre: [
+        { who: 'narrator', text: '王都の前、灰の平原。連合軍の旗が初めてひとつに並んだ。' },
+        { who: 'kasha', text: '王国の残存軍、帝国軍、黒き羽。全員があんたの命令を待ってる。' },
+        { who: 'commander', text: '連合軍の初陣だ。誰ひとり、孤立して戦わせはしない。' },
+        { who: 'commander', text: '裂け目から出てくる連中を、ここで食い止める！' },
+      ],
+      post: [
+        { who: 'narrator', text: '連合軍の最初の防衛戦は、勝利に終わった。' },
+        { who: 'bark', text: '国の違う兵どうしが、肩を叩き合ってますぜ。' },
+        { who: 'sera', text: 'ブラムおじさんが見たら、きっと喜んだよね。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '連合軍、防衛線を維持！　裂け目を塞げ！' } ],
+        wave: [ { who: 'kasha', text: '裂け目から大軍だ！　帝国軍、右を支えて！' } ],
+        danger: [ { who: 'commander', text: '{ally}の防衛線が薄い！　予備隊、支えろ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　連合軍の初勝利だ！' } ],
+      },
+    },
+    82: {
+      pre: [
+        { who: 'narrator', text: '平原の北。魔界軍が裂け目の前に築いた前線陣地。' },
+        { who: 'kasha', text: 'あの陣地を放っておいたら、奴らは際限なく湧いてくるよ。' },
+        { who: 'commander', text: '攻め込む。守ってばかりじゃ、この戦は勝てない。' },
+      ],
+      post: [
+        { who: 'narrator', text: '魔界の陣地が燃え落ち、裂け目のひとつが息をひそめた。' },
+        { who: 'commander', text: '次は北方だ。霜門が包囲されているらしい。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '陣地を叩く！　側面から崩せ！' } ],
+        wave: [ { who: 'kasha', text: '陣地の奥から魔界の騎士団が来るよ！' } ],
+        last: [ { who: 'commander', text: 'あと一体だ。陣地に火を放て！' } ],
+      },
+    },
+    83: {
+      pre: [
+        { who: 'narrator', text: '北方、霜門要塞。クランが初めてカシャと出会った場所。' },
+        { who: 'kasha', text: 'あの時、ここであんたに負けたんだよね。覚えてる？' },
+        { who: 'commander', text: '覚えてる。あの頃は敵同士だったのに。' },
+        { who: 'narrator', text: '要塞の中の北方の生存者たちが、クランの旗を見て歓声を上げた。' },
+        { who: 'commander', text: '要塞を守りながら、包囲網を破る！' },
+      ],
+      post: [
+        { who: 'narrator', text: '北方の生存者たちが連合軍に加わった。' },
+        { who: 'kasha', text: '白泉の人たちだよ。あんたが守った村の。' },
+        { who: 'commander', text: '今度は、あの人たちが守りに来てくれたんだな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁を守りつつ包囲を破る！　両方やり遂げよう！' } ],
+        wave: [ { who: 'bark', text: '吹雪の中から、また魔界軍が来ますぜ！' } ],
+        danger: [ { who: 'kasha', text: '敵が背後に回った！　{ally}のほうを守って！' } ],
+        last: [ { who: 'sera', text: 'あと一体。霜門は無事だよ！' } ],
+      },
+    },
+    84: {
+      pre: [
+        { who: 'narrator', text: '南部、黒水湿地の葦渡り村。魔界軍が沼を渡ってきた。' },
+        { who: 'sera', text: 'あの時に治療した人たちだ！　みんな武器を取ってる。' },
+        { who: 'commander', text: '村を守る。今度は村の人たちも一緒だ。' },
+        { who: 'bark', text: '沼の戦いなら浅瀬に注意、っすね。もう目をつぶってても分かる。' },
+      ],
+      post: [
+        { who: 'narrator', text: '葦渡りの人々がセラを囲み、深く頭を下げた。' },
+        { who: 'sera', text: 'あの時救った人たちが、今日は私たちを救ってくれた。' },
+        { who: 'commander', text: 'それが、私たちが戦う理由だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '村の防壁を守れ！　沼に引きずり込まれるな！' } ],
+        wave: [ { who: 'kasha', text: '沼の向こうから第二陣だよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}、今行くから！　もう少しだけ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　葦渡り、万歳！' } ],
+      },
+    },
+    85: {
+      pre: [
+        { who: 'narrator', text: '大陸の中央に開いた巨大な裂け目。魔界軍の本流だった。' },
+        { who: 'kasha', text: 'あれを折れば、魔界軍の補給は半分になる。' },
+        { who: 'commander', text: '連合軍、全員突撃。今日、あの裂け目を折る。' },
+      ],
+      post: [
+        { who: 'narrator', text: '巨大な裂け目が半ば閉じ、魔界の悲鳴が響き渡った。' },
+        { who: 'ordin', text: '…見事ですな。私が15年かけてもできなかったことを。' },
+        { who: 'commander', text: 'ひとりでやろうとしたから、できなかったんだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '全軍突撃の合図だ！　裂け目の前の魔界軍を一掃しろ！' } ],
+        wave: [ { who: 'kasha', text: '裂け目から精鋭の騎士団！　隊列を立て直して！' } ],
+        last: [ { who: 'commander', text: 'あと一体。裂け目を断ち切ろう！' } ],
+      },
+    },
+    86: {
+      pre: [
+        { who: 'narrator', text: '帝国、黒曜門の城塞。帝国臨時政府の最後の拠点。' },
+        { who: 'kasha', text: '黒き羽が契約を破棄した場所だ。妙な気分だね。' },
+        { who: 'commander', text: '城塞を守りながら、外の包囲を払いのける。' },
+        { who: 'bark', text: '城壁の上の槍兵は帝国軍に、下は俺たちが受け持ちましょうぜ。' },
+      ],
+      post: [
+        { who: 'narrator', text: '黒曜門が守られ、帝国全土の抵抗軍が勢いづいた。' },
+        { who: 'kasha', text: 'あの時契約を破ったのは、正しい選択だったよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城門の内と外を同時に守る！　散らばるな！' } ],
+        wave: [ { who: 'bark', text: '火山のほうから増援っす！　城門を塞いで！' } ],
+        danger: [ { who: 'kasha', text: '{ally}、無理しないで。あたしが支える！' } ],
+        last: [ { who: 'sera', text: 'あと一体！　黒曜門は無事だよ！' } ],
+      },
+    },
+    87: {
+      pre: [
+        { who: 'narrator', text: '古代の封印者の遺跡。魔界軍がここを壊そうと押し寄せた。' },
+        { who: 'ordin', text: 'この遺跡が崩れれば、鍵の力も弱まりましょう。' },
+        { who: 'commander', text: 'なら守る。何があっても。' },
+        { who: 'bark', text: '大将、今回は俺がいちばん前に立ちますぜ。' },
+      ],
+      post: [
+        { who: 'narrator', text: '遺跡は守られた。だが、バークが倒れていた。' },
+        { who: 'sera', text: 'バーク！　目を開けて！　今、治してるから！' },
+        { who: 'bark', text: '……大将、俺は死にませんぜ。まだ畑を耕す仕事が残ってるんで。' },
+        { who: 'commander', text: '約束だ。必ず一緒に帰るんだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '遺跡を守れ！　石柱を背にして戦え！' } ],
+        wave: [ { who: 'kasha', text: '遺跡の裏が破られた！　誰か塞いで！' } ],
+        danger: [ { who: 'bark', text: '{ally}のほうが空いてる！　ここは俺が止めますぜ！' } ],
+        last: [ { who: 'bark', text: 'あと……一体っす……大将、決めてくだせえ！' } ],
+      },
+    },
+    88: {
+      pre: [
+        { who: 'narrator', text: 'バークは陣営で治療を受け、クランは再び出陣した。' },
+        { who: 'commander', text: 'バークの分まで戦う。そして、みんなで帰る。' },
+        { who: 'kasha', text: 'あの裂け目の向こうに、戦の戦士の陣営がある。' },
+        { who: 'commander', text: '道を開く。奴の目の前まで。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂け目の向こうに、魔界の大将軍の赤い旗が見えた。' },
+        { who: 'kasha', text: '奴はソルビット村のほうへ進軍してる。' },
+        { who: 'commander', text: '……故郷へ向かう。そこで終わらせる。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '裂け目を突破！　バークの分まで叩け！' } ],
+        wave: [ { who: 'kasha', text: '大将軍の親衛隊が立ちはだかる！　強いよ！' } ],
+        last: [ { who: 'commander', text: 'あと一体だ。故郷へ向かおう！' } ],
+      },
+    },
+    89: {
+      pre: [
+        { who: 'narrator', text: 'ソルビット村。柵の代わりに、石を積んだ城壁が立っていた。' },
+        { who: 'sera', text: '村の人たちが自分で積んだんだって。私たちが帰ってくる場所だからって。' },
+        { who: 'bark', text: '…くっ、誰だ、俺の目に砂をかけたのは。' },
+        { who: 'commander', text: '初めて指揮を執った、あの場所だ。ここで持ちこたえる。' },
+        { who: 'commander', text: '今度も、ひとりも失わない。' },
+      ],
+      post: [
+        { who: 'narrator', text: 'ソルビットの城壁は崩れなかった。' },
+        { who: 'commander', text: 'ブラム、見てくれましたか？　ちびが、ここまで来ましたよ。' },
+        { who: 'sera', text: 'ねえ、平原の果てに赤い鎧が見える。大将軍だよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '故郷の城壁だ！　一歩も退くな！' } ],
+        wave: [ { who: 'kasha', text: '大軍だ！　城壁の東に押し寄せてくる！' } ],
+        danger: [ { who: 'sera', text: '{ally}、城壁の裏へ！　傷を負ったまま踏ん張らないで！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　俺たちの村だ！' } ],
+      },
+    },
+    90: {
+      pre: [
+        { who: 'narrator', text: 'ソルビット村の前の平原。赤い鎧の巨人が歩み出た。' },
+        { who: 'boss', text: 'このちっぽけな村が、この戦の心臓だというのか。' },
+        { who: 'commander', text: '小さくても構わない。ここは私たちの家だ。' },
+        { who: 'boss', text: 'ならば家ごと踏み潰してくれよう。戦とはそういうものだ。' },
+        { who: 'kasha', text: '連合軍、全員準備できたよ。あんたの合図を待ってる。' },
+      ],
+      post: [
+        { who: 'boss', text: 'この戦……負けた……だが、君主様は……負けぬ……。' },
+        { who: 'narrator', text: '大将軍が倒れると、魔界軍は崩れるように裂け目の中へ退いた。' },
+        { who: 'commander', text: '残るはひとつ。魔界の君主だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '連合軍、総攻撃！　まずは大将軍の護衛からだ！' } ],
+        boss: [ { who: 'boss', text: '戦の名のもとに！　すべて薙ぎ払え！' } ],
+        wave: [ { who: 'kasha', text: '魔界の精鋭の増援！　これが最後の波のはずだよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　大将軍の攻撃は受けちゃだめ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　この戦、終わらせましょうぜ！' } ],
+      },
+    },
+    // ═══ Episode 10: 不可能の領域 ═══
+    91: {
+      pre: [
+        { who: 'narrator', text: '魔界の最深層。足元から巨大な心臓の鼓動が響いていた。' },
+        { who: 'ordin', text: '玉座まで行くには、ここに橋頭堡が要りますな。' },
+        { who: 'commander', text: 'ここを守る。帰る道であり、進む道だ。' },
+        { who: 'bark', text: '包帯巻いたまま来ましたぜ。抜けたら一生後悔しそうなんで。' },
+      ],
+      post: [
+        { who: 'narrator', text: '橋頭堡が築かれると、闇の向こうに五つの灯がともった。' },
+        { who: 'ordin', text: '君主の五人の臣下です。ひとりずつ、貴殿を待っておりますな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '橋頭堡を死守！　最後の旅の第一歩だ！' } ],
+        wave: [ { who: 'kasha', text: '闇の中から際限なく湧いてくる！　陣形を保って！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　ここで倒れちゃだめ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　道が開けますぜ！' } ],
+      },
+    },
+    92: {
+      pre: [
+        { who: 'narrator', text: '一つ目の灯。古びたマントの騎士が、剣を突いて立っていた。' },
+        { who: 'boss', text: '我は君主の第一の剣。正々堂々と剣を交えようぞ。' },
+        { who: 'commander', text: '……ブラムと同じ構えだ。古い王国の剣術。' },
+        { who: 'boss', text: '我もかつては人間の騎士であった。遠い昔の話だ。' },
+        { who: 'kasha', text: '感傷はあとにしな。あの騎士、援護の陣形が完璧だよ。' },
+      ],
+      post: [
+        { who: 'boss', text: '見事だ……貴様の師は、よき騎士であったのだろう。' },
+        { who: 'commander', text: '最高の騎士だった。あなたと同じくらい頑固だったよ。' },
+        { who: 'boss', text: 'そうか……ならば、我もようやく休めるな……。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '護衛の騎士から引き剥がせ！　援護を崩せ！' } ],
+        boss: [ { who: 'boss', text: 'その銀の指揮杖……王国の戦場指揮官か。指揮してみせよ。' } ],
+        wave: [ { who: 'kasha', text: '騎士団の増援だ！　側面を守って！' } ],
+        danger: [ { who: 'kasha', text: '{ally}が押されてる！　騎士の援護の外へ出して！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　一人目の臣下、片付きますぜ！' } ],
+      },
+    },
+    93: {
+      pre: [
+        { who: 'narrator', text: '二つ目の灯。虚空に数千の魔法陣が浮かんでいた。' },
+        { who: 'boss', text: 'あらゆる魔法は計算だ。貴様らの勝率は限りなく零に近い。' },
+        { who: 'ordin', text: '私もああして計算ずくで生きてきましたな。そして間違えた。' },
+        { who: 'commander', text: '計算にないものを見せてやる。互いを守る手を。' },
+      ],
+      post: [
+        { who: 'boss', text: '計算が……合わぬ……なぜ互いを庇う……？' },
+        { who: 'commander', text: 'それが、私たちが勝つ理由だ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '術師を狙え！　魔法陣が完成する前に！' } ],
+        boss: [ { who: 'boss', text: '変数の除去を開始する。一、二、三。' } ],
+        wave: [ { who: 'kasha', text: '魔法陣から召喚術師が溢れてくる！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　魔法陣のど真ん中だよ、出て！' } ],
+        last: [ { who: 'commander', text: 'あと一体だ。計算を終わらせてやろう！' } ],
+      },
+    },
+    94: {
+      pre: [
+        { who: 'narrator', text: '三つ目の灯。魔界の要塞が、クランを呑み込むようにそびえ立った。' },
+        { who: 'boss', text: '我は果てなき軍勢。我が召喚は尽きることがない。' },
+        { who: 'kasha', text: '要塞に閉じ込められた。耐えながら、あいつまで届かせないと。' },
+        { who: 'commander', text: '城壁を守って耐える。召喚獣が減る瞬間を狙え。' },
+      ],
+      post: [
+        { who: 'boss', text: '召喚が……途切れた……我が軍勢が……尽きた、だと……？' },
+        { who: 'bark', text: 'こっちはまだ尽きちゃいねえぜ！' },
+        { who: 'narrator', text: '三つ目の灯が消えた。残る灯は、二つ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城壁を死守！　崩れたら建て直す、波を受け止めろ！' } ],
+        boss: [ { who: 'boss', text: '数えきれぬものの前に、膝をつけ。' } ],
+        wave: [ { who: 'bark', text: 'また溢れてきますぜ！　こいつの召喚はキリがねえのか！' } ],
+        danger: [ { who: 'sera', text: '{ally}のほうに召喚獣が群がってる！　止めて！' } ],
+        last: [ { who: 'kasha', text: 'あと一体！　軍勢が途切れた！' } ],
+      },
+    },
+    95: {
+      pre: [
+        { who: 'narrator', text: '四つ目の灯。鎖に繋がれた黒い騎士が顔を上げた。' },
+        { who: 'boss', text: '人間よ。ひとつだけ問おう。人間とは何だ。' },
+        { who: 'boss', text: '我は人間になりたかった。ゆえに禁じられた。' },
+        { who: 'commander', text: '……どうして人間になりたかったんだ？' },
+        { who: 'boss', text: '分からぬ。その答えは、貴様らと戦いながら探そう。' },
+      ],
+      post: [
+        { who: 'boss', text: '倒れた仲間に手を差し伸べること……それが人間か。' },
+        { who: 'commander', text: 'ああ。少なくとも、私たちはそう思ってる。' },
+        { who: 'boss', text: 'ならば……最後に……少しは……似ていただろうか……。' },
+        { who: 'sera', text: '……安らかに眠って。これは私の祈りだよ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '鎖の周りの護衛から！　騎士を孤立させろ！' } ],
+        boss: [ { who: 'boss', text: '見せてくれ。貴様らが何者なのかを。' } ],
+        wave: [ { who: 'kasha', text: '鎖の向こうから増援だ！　後ろを見て！' } ],
+        danger: [ { who: 'bark', text: '{ally}！　あの騎士は本気ですぜ、下がって！' } ],
+        last: [ { who: 'sera', text: 'あと一体。答えを聞かせてあげよう。' } ],
+      },
+    },
+    96: {
+      pre: [
+        { who: 'narrator', text: '四人の臣下が倒れ、玉座へと続く回廊が開いた。' },
+        { who: 'ordin', text: 'この回廊の果てが、君主の近衛隊が守る扉ですな。' },
+        { who: 'kasha', text: '回廊が生きてる。壁が動いてるよ。' },
+        { who: 'commander', text: '止まらずに進む。壁に捕まるな。' },
+      ],
+      post: [
+        { who: 'narrator', text: '回廊の果て、黒く輝く巨大な扉が姿を現した。' },
+        { who: 'ordin', text: 'あの扉の前に、最後の陣地を張らねばなりませんな。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '回廊を守りながら前進！　途切れるな！' } ],
+        wave: [ { who: 'bark', text: '壁の中から敵が飛び出してきますぜ！' } ],
+        danger: [ { who: 'sera', text: '{ally}、回廊が狭まってる！　避けて！' } ],
+        last: [ { who: 'kasha', text: 'あと一体。扉の前だよ。' } ],
+      },
+    },
+    97: {
+      pre: [
+        { who: 'narrator', text: '玉座の扉の前。クランは最後の陣地を築いた。' },
+        { who: 'ordin', text: '扉の封印を解く時間が要ります。私を守っていただきたい。' },
+        { who: 'kasha', text: 'この爺さんを守る日が来るとはね。' },
+        { who: 'commander', text: '陣地を守る。オルディンが封印を解くまで。' },
+      ],
+      post: [
+        { who: 'ordin', text: '封印はほぼ解けました。残るは最後の一枚ですな。' },
+        { who: 'ordin', text: 'その一枚は……私の役目です。' },
+        { who: 'commander', text: 'どういう意味だ、オルディン？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '最後の陣地を死守！　オルディンを守れ！' } ],
+        wave: [ { who: 'kasha', text: '扉の向こうから近衛隊が飛び出してくる！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　陣地の内側へ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　陣地は無事ですぜ！' } ],
+      },
+    },
+    98: {
+      pre: [
+        { who: 'ordin', text: '15年前、私は貴殿の両親を置いて逃げたのです。' },
+        { who: 'ordin', text: 'それから私がしてきたことはすべて、その恐怖から生まれたもの。' },
+        { who: 'ordin', text: '最後の封印は、魔導師の命でしか解けませぬ。' },
+        { who: 'commander', text: '死んで償うのは簡単すぎると言ったはずだ。' },
+        { who: 'ordin', text: 'ゆえに、生きているうちに道を開きましょう。最後まで守ってくだされ。' },
+      ],
+      post: [
+        { who: 'narrator', text: '最後の封印が解け、オルディンの体は光となって散った。' },
+        { who: 'ordin', text: '貴殿の両親に……すまなかったと……伝えてくだされ……。' },
+        { who: 'commander', text: '……自分で謝ってくれ。いつか、向こう側で。' },
+        { who: 'narrator', text: '扉が開いた。その向こうで、近衛隊長が待ち構えていた。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: 'オルディンが封印を解く間に道を開く！' } ],
+        wave: [ { who: 'kasha', text: '近衛隊がオルディンを狙ってる！　止めて！' } ],
+        danger: [ { who: 'sera', text: '背後が破られた！　みんな、{ally}のほうへ！' } ],
+        last: [ { who: 'commander', text: 'あと一体だ。オルディン、もう少しだけ！' } ],
+      },
+    },
+    99: {
+      pre: [
+        { who: 'narrator', text: '玉座の前室。漆黒の戦士が大剣を地に突き立てて立っていた。' },
+        { who: 'boss', text: '四人の臣下を越えたか。だが我は君主の盾なり。' },
+        { who: 'boss', text: '君主に届きたくば、我を砕いてみせよ。' },
+        { who: 'commander', text: 'なら砕く。みんなで。' },
+        { who: 'bark', text: '包帯は外しましたぜ、大将。最後まで前に立ちます。' },
+      ],
+      post: [
+        { who: 'boss', text: '盾が……砕けた……君主よ……鍵が、参ります……。' },
+        { who: 'narrator', text: '最後の扉が、音もなく開いた。' },
+        { who: 'sera', text: '{commander}、手を。みんなで一緒に入ろう。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '近衛隊を払いのけ、戦士を包囲する！' } ],
+        boss: [ { who: 'boss', text: '君主の名において、ここで止まれ！' } ],
+        wave: [ { who: 'kasha', text: '最後の近衛隊だ！　この先は君主だけだよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　あの大剣は受けちゃだめ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす！　扉の前ですぜ！' } ],
+      },
+    },
+    100: {
+      pre: [
+        { who: 'narrator', text: '魔界の玉座。そこには兜をかぶった巨大な戦士が座していた。' },
+        { who: 'boss', text: '15年前、我が門を閉ざした二人の人間がいた。' },
+        { who: 'boss', text: 'その子が自ら来たか。鍵を捧げにな。' },
+        { who: 'commander', text: '捧げに来たんじゃない。閉ざしに来たんだ。' },
+        { who: 'commander', text: 'ひとりじゃない。ここにいる全員の手で。' },
+        { who: 'boss', text: '人間ごときが幾人集まろうと、結局ひとりずつ折れるだけのこと。' },
+      ],
+      post: [
+        { who: 'boss', text: 'なぜだ……ひとりを折れば……別の手が掴むのか……。' },
+        { who: 'narrator', text: '指揮官が指揮杖を下ろし傷痕をかざすと、皆がその手を重ねた。' },
+        { who: 'commander', text: 'これが鍵だ。私たち全員が。' },
+        { who: 'narrator', text: '鍵が回り、魔界の君主の玉座は光の中に沈んだ。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '最後の命令だ！　ソルビット・クラン、全員で共に！' } ],
+        boss: [ { who: 'boss', text: '来るがいい、鍵よ。貴様のすべてをへし折ってくれる。' } ],
+        wave: [ { who: 'kasha', text: '玉座の影が立ち上がる！　最後の軍勢だよ！' } ],
+        danger: [ { who: 'sera', text: '{ally}！　倒れないで！　私たちがいるよ！' } ],
+        last: [ { who: 'bark', text: 'あと一体っす、大将！　終わらせましょうぜ、みんなで！' } ],
+      },
+    },
+  },
+};

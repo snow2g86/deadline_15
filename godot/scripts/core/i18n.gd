@@ -5,21 +5,27 @@ extends Node
 ##   - 점(.)으로 나눈 키를 중첩 사전에서 차례로 찾는다 (배열이면 숫자 키를 번호로)
 ##   - 없으면 키 그대로 돌려준다 (웹과 같음)
 ##   - {이름} 자리표시자를 params 값으로 바꾼다. params 에 없는 이름은 {이름} 그대로 둔다
-##  언어: Store 의 game_settings.language → 없거나 모르는 언어면 ko
+##  언어(웹과 같은 규칙): Store 의 game_settings.language 가 LANGS 에 있으면 그것 → 아니면 OS 언어(OS.get_locale, 웹 navigator.language)
+##   에서 고름 (detect_lang: ko·es·en·ja, zh-TW·zh-HK·zh-MO·zh-Hant → zh-TW, 그 밖의 zh → zh-CN,
+##   그 밖의 언어(fr·de·pt 등)나 빈 값이면 en = DETECT_FALLBACK). 언어 팩 파일이 없으면 ko(FALLBACK_LANG).
 ##  set_language(lang) 은 game_settings.language 에 저장하고 language_changed 신호를 보낸다.
-##
-##  웹과 다른 점: 웹은 설정이 없을 때 브라우저 언어(navigator.language)를 보지만, 여기서는 정해진 대로 ko 로 시작한다.
+##  글꼴: 언어를 정할 때마다 Fonts.apply_lang(lang) 을 먼저 불러 한자 글자 모양이 맞는 글꼴 사슬로 바꾼다 (scripts/core/fonts.gd).
 
 signal language_changed(lang: String)
 
 const SETTINGS_KEY := "game_settings"
-const FALLBACK_LANG := "ko"
-const SUPPORTED: PackedStringArray = ["ko", "en", "es"]
+const FALLBACK_LANG := "ko"   # 언어 팩을 못 읽을 때
+## 지원하지 않는 OS 언어(fr·de·pt 등)·빈 값일 때 (웹 _detectLang 과 같음)
+const DETECT_FALLBACK := "en"
+## 지원 언어 (웹 js/common/i18n.js _I18N_LANGS 와 같은 순서 = 설정 화면 순서)
+const LANGS: PackedStringArray = ["ko", "en", "es", "ja", "zh-CN", "zh-TW"]
+const SUPPORTED: PackedStringArray = LANGS
 
 # 오토로드 이름(Store·DataDB)을 직접 쓰면 --script 시험에서 컴파일이 안 되므로, 스크립트 형식 + /root 경로로 찾는다
 const _StoreT := preload("res://scripts/core/store.gd")
 const _DataDBT := preload("res://scripts/core/data_db.gd")
 const _NumT := preload("res://scripts/core/num.gd")
+const _FontsT := preload("res://scripts/core/fonts.gd")
 
 var current_lang: String = FALLBACK_LANG
 
@@ -123,6 +129,7 @@ func _apply(lang: String) -> void:
 		lang = FALLBACK_LANG
 		data = _db().lang(lang)
 	_data = _with_extra(lang, data)
+	_FontsT.apply_lang(lang)
 	var changed := lang != current_lang
 	current_lang = lang
 	if changed:
@@ -160,7 +167,28 @@ func _lang_from_settings() -> String:
 		var lang := String((settings as Dictionary).get("language", ""))
 		if SUPPORTED.has(lang):
 			return lang
-	return FALLBACK_LANG
+	return detect_lang(OS.get_locale())
+
+
+## OS·브라우저 언어 코드 → 지원 언어 (웹 i18n.js _detectLang 과 같음). "ja_JP"·"zh-Hant-TW"·"zh_TW" 처럼 _ 와 - 모두 받음
+static func detect_lang(locale: String) -> String:
+	var nav := locale.to_lower().replace("_", "-")
+	if nav == "ko" or nav.begins_with("ko-"):
+		return "ko"
+	if nav.begins_with("es"):
+		return "es"
+	if nav.begins_with("en"):
+		return "en"
+	if nav.begins_with("ja"):
+		return "ja"
+	if nav == "zh" or nav.begins_with("zh-"):
+		var parts := nav.split("-")
+		if parts.has("hans"):
+			return "zh-CN"
+		if parts.has("hant") or parts.has("tw") or parts.has("hk") or parts.has("mo"):
+			return "zh-TW"
+		return "zh-CN"
+	return DETECT_FALLBACK
 
 
 ## 웹 문자열화와 같게: 정수 값 실수는 소수점 없이 (3.0 → "3"), null 은 "null" (Num.fmt)

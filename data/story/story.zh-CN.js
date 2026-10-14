@@ -1,0 +1,2172 @@
+/* DEADLINE 15 — 剧情脚本（简体中文译本）
+ * 格式：docs/story-schema.md
+ * 叙事设定：docs/STORY.md
+ * {commander} 会被替换为玩家指挥官的名字。不对指挥官使用性别代词。
+ */
+window['STORY_ZH-CN'] = {
+  cast: {
+    commander: { name: '里安', portrait: 'commander', role: '主角 · 战团指挥官' },
+    narrator:  { name: '', portrait: null },
+    bram:  { name: '布拉姆',   portrait: 'story/bram',  fallback: 'knight_01',   role: '老骑士 · 自卫团教官，指挥官的师父' },
+    sera:  { name: '塞拉',   portrait: 'story/sera',  fallback: 'priest_02',   role: '战团治疗师 · 指挥官的青梅竹马' },
+    bark:  { name: '巴克',   portrait: 'story/bark',  fallback: 'brawler_01',  role: '前山贼 · 战团突击队长' },
+    kasha: { name: '卡莎',   portrait: 'story/kasha', fallback: 'assassin_02', role: '佣兵团「黑羽」团长 · 劲敌' },
+    ordin: { name: '奥尔丁', portrait: 'story/ordin', fallback: 'summoner_01', role: '王室大魔导师 · 战团的资助者' },
+    fake_bram: { name: '布拉姆？', portrait: 'story/bram', fallback: 'knight_01', ghost: true, role: '模仿布拉姆样貌的幻影 (s70)' },
+  },
+
+  episodes: {
+    1: { title: '英雄的起点',
+      prologue: [
+        { who: 'narrator', text: '十五年前，有一夜，天空裂开了。' },
+        { who: 'narrator', text: '紫色的裂缝张开，又在黎明前合上。' },
+        { who: 'narrator', text: '那一夜的废墟中，人们发现了一个孩子。' },
+        { who: 'narrator', text: '孩子的掌心，留着一道裂星状的伤疤。' },
+        { who: 'narrator', text: '而如今，边境的松光村。' },
+        { who: 'bram', text: '自卫团长中了山贼的箭，倒下了。需要新的指挥官。' },
+        { who: 'commander', text: '为什么是我？比我资历老的团员多的是。' },
+        { who: 'bram', text: '你开战前总会先观察四周。那就是指挥官的眼睛。' },
+        { who: 'sera', text: '{commander}，我也跟你去。受了伤，我来治。' },
+        { who: 'commander', text: '……明白了。我绝不会让任何一个人倒下。' },
+        { who: 'bram', text: '好觉悟，小鬼。这句话，给我守到最后。' },
+        { who: 'bram', text: '拿着。这是我在王国战场上用过的银指挥杖。' },
+        { who: 'commander', text: '不是剑，是指挥杖？' },
+        { who: 'bram', text: '指挥官不是提着剑站在最前面的人。' },
+        { who: 'bram', text: '在后方看清战局，用它发出信号。' },
+        { who: 'bram', text: '指挥官的武器是团员。你只管下准确的命令。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '山贼团覆灭，松光村响起了钟声。' },
+        { who: 'narrator', text: '三天后，一辆挂着王都旗帜的马车驶进了村子。' },
+        { who: 'ordin', text: '吾乃王室大魔导师奥尔丁。阁下便是那位指挥官吧。' },
+        { who: 'ordin', text: '北方正在冰封。王室需要阁下的战团。' },
+        { who: 'commander', text: '我们只是村里的自卫团。' },
+        { who: 'ordin', text: '能击败上百山贼的自卫团，足矣。' },
+        { who: 'ordin', text: '……阁下手上那道伤疤，是何时有的？' },
+        { who: 'commander', text: '从我记事起就有了。怎么了？' },
+        { who: 'ordin', text: '无事。只是觉得有趣罢了。' },
+        { who: 'bram', text: '（那种眼神……十五年前我也见过。）' },
+        { who: 'narrator', text: '战团接过王室委任状，向北方启程。' },
+      ] },
+
+    2: { title: '冰封阴谋',
+      prologue: [
+        { who: 'narrator', text: '北方白雪山脉。四季更替，积雪却从不消融。' },
+        { who: 'narrator', text: '今年，就连山脚的村庄也在一夜之间冻结了。' },
+        { who: 'bark', text: '老大，这地方喘口气鼻毛都能冻住啊。' },
+        { who: 'sera', text: '冻死的人们的表情……都像是看到了什么，吓坏了。' },
+        { who: 'bram', text: '这不是自然的寒冷。是有人召来的寒气。' },
+        { who: 'commander', text: '（掌心的伤疤……冰冷地隐隐作痛。）' },
+        { who: 'commander', text: '先守住山脚的村子。原因之后再查。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '寒气骑士倒下后，春风吹进了山脉。' },
+        { who: 'bram', text: '哈尔瓦……是我的老战友。十五年前那一夜，他也在。' },
+        { who: 'commander', text: '他最后说的话，是要我们拿大魔导师怎么样？' },
+        { who: 'bram', text: '不知道。在弄清楚之前，别说出口。' },
+        { who: 'kasha', text: '这次又被你抢先了啊，乡巴佬指挥官。' },
+        { who: 'kasha', text: '不过你记住。「黑羽」不会输第二次。' },
+        { who: 'narrator', text: '就在这时，王都派来的急使赶到了。' },
+        { who: 'ordin', text: '南部沼泽正流行瘟疫。请速速前往。' },
+        { who: 'commander', text: '……简直像是早就知道下一个出事的地方。' },
+      ] },
+
+    3: { title: '沼泽诅咒',
+      prologue: [
+        { who: 'narrator', text: '南部黑水沼泽。水雾之中，咳嗽声不绝于耳。' },
+        { who: 'narrator', text: '野兽变得扭曲畸形，开始袭击人类。' },
+        { who: 'sera', text: '瘟疫的话就交给我。这次我来打头阵。' },
+        { who: 'commander', text: '塞拉，别想一个人扛下所有事。' },
+        { who: 'bark', text: '烂泥地里打架？那可是本大爷的专长！' },
+        { who: 'bram', text: '浅水处会绊住脚。在那里挨打会更疼。' },
+        { who: 'commander', text: '不要随便站进浅滩。大家都记住。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '沼泽之王沉入水底，水色渐渐变得清澈。' },
+        { who: 'commander', text: '这张地图……北方、沼泽，还有帝国的火山。' },
+        { who: 'bram', text: '三处连起来是个三角形。是一座巨大的阵法。' },
+        { who: 'sera', text: '有人在故意一个接一个地制造灾祸。' },
+        { who: 'ordin', text: '报告已收到。幕后黑手必是沃尔卡帝国无疑。' },
+        { who: 'commander', text: '神殿里还找到了刻着王室纹章的祭器。' },
+        { who: 'ordin', text: '想必是帝国意图嫁祸于我等。进军吧。' },
+        { who: 'bram', text: '（回答得太快了。）' },
+        { who: 'narrator', text: '怀着疑虑，战团越过了国境。' },
+      ] },
+
+    4: { title: '燃烧的帝国',
+      prologue: [
+        { who: 'narrator', text: '沃尔卡帝国。以火山之火锻铁的钢铁之国。' },
+        { who: 'narrator', text: '如今，这个国家分裂为皇帝派与义军，陷入战火。' },
+        { who: 'bark', text: '要是帝国那帮家伙真是幕后黑手，砍了皇帝的头就完事了。' },
+        { who: 'bram', text: '要真那么简单就好了。' },
+        { who: 'sera', text: '烧毁的村子里有孩子在哭。先救那些人。' },
+        { who: 'commander', text: '与义军联手。我们的敌人不是这个国家的百姓。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '烈焰皇帝倒下，火山染红的天空渐渐冷却。' },
+        { who: 'commander', text: '皇帝的遗言，还有祭坛上的书信。全都指向奥尔丁。' },
+        { who: 'bram', text: '“按约定把火烧旺。”这下确定了。' },
+        { who: 'kasha', text: '也就是说，这整盘棋都是你那位资助者布的局。' },
+        { who: 'commander', text: '我要去王都当面问清楚，为什么要这么做。' },
+        { who: 'narrator', text: '然而当夜，大地仿佛发出悲鸣般裂开了。' },
+        { who: 'narrator', text: '西方荒野上，一个深不见底的大洞——深渊，张开了。' },
+        { who: 'sera', text: '魔物正从那里涌出来。村子们有危险！' },
+        { who: 'bram', text: '真相不会逃走。可人命等不了。' },
+        { who: 'commander', text: '……去深渊。奥尔丁的事之后再说。' },
+      ] },
+
+    5: { title: '深渊终焉',
+      prologue: [
+        { who: 'narrator', text: '深渊。沉睡于大地之下的古代文明废墟。' },
+        { who: 'narrator', text: '在那光芒无法触及之处，有什么正在苏醒。' },
+        { who: 'bark', text: '看不见底啊。掉下去可就永远完蛋了。' },
+        { who: 'sera', text: '空气好沉重。感觉祈祷都传不出去。' },
+        { who: 'bram', text: '指挥官。这一次，也许会有人回不来。' },
+        { who: 'commander', text: '别说这种话。我会带所有人回去。' },
+        { who: 'bram', text: '是啊。这份倔强，就是你的长处。' },
+        { who: 'commander', text: '（伤疤在发烫。下面有谁在呼唤我。）' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '深渊战士崩毁，深处的轰鸣渐渐平息。' },
+        { who: 'narrator', text: '战团回到了地面。却留下了一个人。' },
+        { who: 'narrator', text: '松光村的山丘上，埋下了一口空棺。' },
+        { who: 'sera', text: '布拉姆大叔……直到最后都在笑着。' },
+        { who: 'commander', text: '我说过要带所有人回去的。是我亲口说的。' },
+        { who: 'bark', text: '不怪老大。那是老爷子自己选的位置。' },
+        { who: 'kasha', text: '没时间难过了。听说奥尔丁从王都消失了。' },
+        { who: 'kasha', text: '而且王都北方的天空……正在出现一扇门。' },
+        { who: 'commander', text: '……走吧。替布拉姆守护他想守护的东西。' },
+      ] },
+
+    6: { title: '地狱之门',
+      prologue: [
+        { who: 'narrator', text: '天空各处裂隙蔓延。就像十五年前那一夜。' },
+        { who: 'narrator', text: '但这一次，黎明到来，裂隙也没有合上。' },
+        { who: 'narrator', text: '王都北方，一扇巨大的门正缓缓开启。' },
+        { who: 'sera', text: '{commander}，你最近都睡不着吧。还好吗？' },
+        { who: 'commander', text: '不好。但停下来的话，会失去更多。' },
+        { who: 'commander', text: '布拉姆说过，指挥官没法救下所有人。' },
+        { who: 'commander', text: '但可以做到，不抛下任何一个人。' },
+        { who: 'narrator', text: '断剑收入怀中，银色的指挥杖再次举起。' },
+        { who: 'bark', text: '就等你这句话呢，老大。再上一次吧。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '狱门守护者倒下的瞬间，地狱之门豁然洞开。' },
+        { who: 'ordin', text: '辛苦了，年轻的指挥官。不……钥匙啊。' },
+        { who: 'commander', text: '奥尔丁！你从一开始就是冲着这个来的吗！' },
+        { who: 'ordin', text: '能击倒守护者的，唯有阁下的血。' },
+        { who: 'ordin', text: '十五年前，阁下的父母关上了门。以性命为代价。' },
+        { who: 'ordin', text: '而老夫必须打开这扇门。为了召唤神明。' },
+        { who: 'narrator', text: '奥尔丁消失在门后那片赤红的黑暗之中。' },
+        { who: 'kasha', text: '要追上去吧？看你的表情，已经决定了。' },
+        { who: 'commander', text: '去门的另一边。这一次，由我们来了结。' },
+      ] },
+
+    7: { title: '恶魔领域',
+      prologue: [
+        { who: 'narrator', text: '魔界。天空红如鲜血，大地在呼吸。' },
+        { who: 'narrator', text: '在这里，道路每天都会改变，记忆会化为实体。' },
+        { who: 'bark', text: '刚才那块石头在盯着俺看。真的。' },
+        { who: 'sera', text: '在这里，好像不能全信眼睛看到的东西。' },
+        { who: 'kasha', text: '我跟来了。欠的债总得还。本队也快到了。' },
+        { who: 'commander', text: '不停地呼唤彼此的名字。别迷失了自己。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '恶魔法师消散，幻影的迷雾随之散去。' },
+        { who: 'commander', text: '在遗迹里听到的声音……真的是我父母吗？' },
+        { who: 'sera', text: '“钥匙不是一个人转动的。”他们这么说过吧。' },
+        { who: 'commander', text: '嗯。我愿意相信，那句话不是幻影。' },
+        { who: 'kasha', text: '法师招了。奥尔丁去了魔界的顶端。' },
+        { who: 'kasha', text: '那里有天上的光透进来。他打算在那儿召唤神。' },
+        { who: 'bark', text: '神？现在连神都要对付了？' },
+        { who: 'commander', text: '不管是神还是什么，拿人当材料，就要阻止。' },
+      ] },
+
+    8: { title: '神之审判',
+      prologue: [
+        { who: 'narrator', text: '魔界天空的顶端，裂开了一道白色缝隙。' },
+        { who: 'narrator', text: '从中倾泻而下的光，不分恶魔，也不分人类。' },
+        { who: 'sera', text: '这是……我祈祷了一辈子的光。' },
+        { who: 'sera', text: '可为什么，会这么冰冷。' },
+        { who: 'ordin', text: '看吧。神将焚尽一切污秽之物。' },
+        { who: 'ordin', text: '魔界，与魔界相连之地，乃至那里的人们。' },
+        { who: 'commander', text: '那片土地上也有我们的故乡！' },
+        { who: 'ordin', text: '欲救世间，必有所失。此乃权衡。' },
+        { who: 'commander', text: '失去谁，轮不到你来决定。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '白色缝隙合拢，魔界的天空再度染红。' },
+        { who: 'ordin', text: '神……早已败给过君主一次。' },
+        { who: 'ordin', text: '老夫这十五年，竟是在向一位败北之神祈祷。' },
+        { who: 'bark', text: '老大，这老头怎么处置？扔这儿不管了？' },
+        { who: 'commander', text: '带走。一死了之，对他来说太便宜了。' },
+        { who: 'sera', text: '{commander}……你变了好多。往好的方向。' },
+        { who: 'narrator', text: '就在这时，魔界深处响起了巨大的战鼓声。' },
+        { who: 'kasha', text: '君主的大军动了。目标是……我们的世界！' },
+        { who: 'commander', text: '回去。现在不拦住，我们就无家可归了。' },
+      ] },
+
+    9: { title: '绝体绝命',
+      prologue: [
+        { who: 'narrator', text: '魔界君主的大军，从世间所有裂隙中涌出。' },
+        { who: 'narrator', text: '王国、帝国、北方、沼泽，如今已是同一片战场。' },
+        { who: 'narrator', text: '散落各地的幸存者，聚集到同一面旗帜下。' },
+        { who: 'kasha', text: '大家都要你当总指挥官。好笑吧，一个乡巴佬指挥官。' },
+        { who: 'commander', text: '我到现在也还是村里自卫团的指挥官。' },
+        { who: 'commander', text: '只不过，要守护的村子变大了一点而已。' },
+        { who: 'bark', text: '哈哈哈！把这句话绣到旗子上吧！' },
+        { who: 'sera', text: '这次大家一起活着走到最后。约好了。' },
+        { who: 'commander', text: '约好了。这一次，我会守到最后。' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '战争战士倒下，魔界军的进击停止了。' },
+        { who: 'narrator', text: '世界勉强地，真的是勉强地撑了下来。' },
+        { who: 'ordin', text: '老夫知晓通往君主王座之路。由老夫带路。' },
+        { who: 'kasha', text: '能信吗？都是因为这老头才搞成这样的。' },
+        { who: 'commander', text: '不是相信。是给他一个机会。' },
+        { who: 'ordin', text: '……阁下的父母，也曾说过同样的话。' },
+        { who: 'bark', text: '明天就结束了？真的？' },
+        { who: 'commander', text: '是去结束它。大家一起。' },
+        { who: 'narrator', text: '出征前夜，营地的篝火彻夜未熄。' },
+      ] },
+
+    10: { title: '不可能之境',
+      prologue: [
+        { who: 'narrator', text: '魔界最深处。光与声都无法触及的底层。' },
+        { who: 'narrator', text: '那里，矗立着魔界君主的王座。' },
+        { who: 'ordin', text: '王座之前，有君主的五名臣属挡住去路。' },
+        { who: 'kasha', text: '五个啊。一个一个依次打倒就行了。' },
+        { who: 'sera', text: '{commander}，把手给我。……伤疤在发光。' },
+        { who: 'commander', text: '这是父母留下的钥匙。这次我们一起转动它。' },
+        { who: 'bark', text: '俺的手叠在老大手上。来，大家都搭上来！' },
+        { who: 'commander', text: '最后的作战。松光战团，出征！' },
+      ],
+      epilogue: [
+        { who: 'narrator', text: '钥匙转动，天空中所有的裂隙同时合上了。' },
+        { who: 'narrator', text: '魔界再度陷入沉睡。这一次，是永远。' },
+        { who: 'narrator', text: '然后，数月之后，松光村的春天。' },
+        { who: 'bark', text: '老大！耕地的人手不够啊。英雄也得干活！' },
+        { who: 'kasha', text: '「黑羽」解散了。现在我只是卡莎。多关照。' },
+        { who: 'sera', text: '我在布拉姆大叔的墓前放了花。一起去吗？' },
+        { who: 'commander', text: '嗯。有好多话要说。得告诉他，一切都结束了。' },
+        { who: 'commander', text: '布拉姆，约定我只守住了一半。但大家都在这里。' },
+        { who: 'narrator', text: '风吹过山丘。仿佛有谁在笑。' },
+        { who: 'commander', text: '我们很平凡。但正因为在一起，才能做到。' },
+        { who: 'narrator', text: '— DEADLINE 15，完 —' },
+      ] },
+  },
+
+  stages: {
+    // ═══ Episode 1: 英雄的起点 ═══
+    1: {
+      pre: [
+        { who: 'narrator', text: '松光村东侧木栅。原野那头，火把摇曳。' },
+        { who: 'bram', text: '是山贼喽啰。守住木栅，村子就安全。' },
+        { who: 'commander', text: '第一道命令：守住木栅前方。我在后面看清全局。' },
+        { who: 'sera', text: '受伤了就马上退下来。有我在呢。' },
+      ],
+      post: [
+        { who: 'bram', text: '还不赖。一个人都没倒下。' },
+        { who: 'commander', text: '指挥杖的杖尖到现在还在抖。' },
+        { who: 'bram', text: '手在抖，命令照样能下。这就够了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '木栅一破就全完了。守住阵地！' } ],
+        last: [ { who: 'sera', text: '只剩一个了！再坚持一下！' } ],
+      },
+    },
+    2: {
+      pre: [
+        { who: 'narrator', text: '次日拂晓，山贼再度涌来。' },
+        { who: 'bram', text: '这回混着拿斧头的家伙。是战士。' },
+        { who: 'bram', text: '战士越挨打越凶。别拖太久。' },
+        { who: 'commander', text: '两人合打一个。一个一个稳稳解决。' },
+      ],
+      post: [
+        { who: 'sera', text: '{commander}，刚才那道指令真像个指挥官。' },
+        { who: 'commander', text: '我只是照着布拉姆平时说的讲而已。' },
+        { who: 'bram', text: '照着讲多了，就成你自己的了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先打拿斧头的。夹击解决！' } ],
+        wave: [ { who: 'bram', text: '第二批来了。别急，木栅撑得住。' } ],
+        danger: [ { who: 'sera', text: '{ally}，你伤得很重！快退下，我来治疗！' } ],
+      },
+    },
+    3: {
+      pre: [
+        { who: 'narrator', text: '通往村子的岩石峡谷，是山贼的捷径。' },
+        { who: 'bram', text: '占住峡谷上方的山丘。从高处打更疼。' },
+        { who: 'commander', text: '要是能多几个从高处放箭的人就好了。' },
+        { who: 'bram', text: '别惦记没有的，用手头有的去赢。' },
+      ],
+      post: [
+        { who: 'narrator', text: '峡谷底部发现了山贼的补给字条。' },
+        { who: 'commander', text: '“到林中伐木场集合。”下一站就是那里。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '路口很窄，他们没法一起上。就在这里拦住！' } ],
+        wave: [ { who: 'sera', text: '峡谷后面又来了！这次更多！' } ],
+        last: [ { who: 'commander', text: '最后一个。别让他跑了。' } ],
+      },
+    },
+    4: {
+      pre: [
+        { who: 'bram', text: '这是峡谷另一头的入口。今天那帮家伙也是铁了心。' },
+        { who: 'sera', text: '那边的阴影里藏着人。' },
+        { who: 'bram', text: '是刺客。那家伙专钻盾牌后面。小心。' },
+        { who: 'commander', text: '塞拉待在我身边。别一个人落单。' },
+      ],
+      post: [
+        { who: 'commander', text: '那个刺客怀里有块奇怪的水晶碎片。' },
+        { who: 'sera', text: '紫色的。一碰手就发麻。' },
+        { who: 'commander', text: '（伤疤……起反应了？）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '封住入口。先把藏起来的家伙找出来。' } ],
+        wave: [ { who: 'bram', text: '阴影动了。注意后方！' } ],
+        danger: [ { who: 'bram', text: '{ally}那边要垮了。伤员退到盾牌后面！' } ],
+      },
+    },
+    5: {
+      pre: [
+        { who: 'narrator', text: '林中伐木场。村民过冬的柴火都堆在这里。' },
+        { who: 'bram', text: '这里要是被烧了，村子就熬不过冬天。必须守住。' },
+        { who: 'commander', text: '躲在树间能少挨箭。利用森林。' },
+        { who: 'sera', text: '那边有个大块头……好像只用拳头打。' },
+      ],
+      post: [
+        { who: 'bark', text: '输了输了。要杀就痛快点。' },
+        { who: 'commander', text: '你为什么故意打偏？我都看见了。' },
+        { who: 'bark', text: '……俺叫巴克。饿得没法才当了山贼，俺不想杀人。' },
+        { who: 'commander', text: '那就带路吧。带我们去山贼据点。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '背靠柴堆作战。一步都不许退。' } ],
+        wave: [ { who: 'bram', text: '森林深处来了援兵。收紧队列。' } ],
+        last: [ { who: 'sera', text: '剩一个了！那个大块头从刚才起就没出手……' } ],
+      },
+    },
+    6: {
+      pre: [
+        { who: 'bark', text: '嚯，这位老大胆子不小。行，俺跟了。' },
+        { who: 'bark', text: '这片林子那头就是山贼前哨。俺给你们指条近路。' },
+        { who: 'bram', text: '这是我们第一次主动进攻。' },
+        { who: 'bram', text: '和防守不同。需要往前冲的勇气。' },
+        { who: 'commander', text: '从侧面绕过去打。正面交给巴克。' },
+        { who: 'bark', text: '一上来就是最险的位置。对俺胃口！' },
+      ],
+      post: [
+        { who: 'bark', text: '怎么样，俺这身板还中用吧？' },
+        { who: 'sera', text: '没受伤吧？……真的成自己人了呢。' },
+        { who: 'commander', text: '从今天起，巴克就是我们战团的人了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '前进！这次轮到我们找上门。' } ],
+        last: [ { who: 'bark', text: '干掉那家伙，据点就归咱们了！' } ],
+      },
+    },
+    7: {
+      pre: [
+        { who: 'narrator', text: '一出森林，无边的沙丘便铺展开来。' },
+        { who: 'bark', text: '这是山贼的补给线。水和粮食全打这儿过。' },
+        { who: 'bram', text: '沙地里无处藏身。当心弓箭手。' },
+        { who: 'commander', text: '只要切断补给，山贼就得挨饿。出发。' },
+      ],
+      post: [
+        { who: 'sera', text: '补给箱上印着帝国的文字。' },
+        { who: 'bram', text: '山贼用帝国造的兵器？哪儿弄来的。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '别在弓箭手射程里久站！' } ],
+        wave: [ { who: 'bark', text: '沙丘后面有埋伏！就知道会这样。' } ],
+        danger: [ { who: 'sera', text: '{ally}，血流得太多了！我马上治疗！' } ],
+      },
+    },
+    8: {
+      pre: [
+        { who: 'narrator', text: '沙漠正中的绿洲，山贼的仓库就在这里。' },
+        { who: 'bark', text: '头目在这儿领兵器。从一个戴兜帽的法师手里。' },
+        { who: 'commander', text: '法师？跟山贼做买卖的法师？' },
+        { who: 'bram', text: '抄了仓库就知道了。' },
+      ],
+      post: [
+        { who: 'commander', text: '这本账簿……说收集紫水晶就给金币。' },
+        { who: 'bram', text: '拿水晶就能驱使山贼。背后有人。' },
+        { who: 'bark', text: '头目在赤岩山口。那是火山地带。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先扫清仓库守卫。保住物资。' } ],
+        last: [ { who: 'bark', text: '最后一个！仓库门钥匙准在他身上。' } ],
+      },
+    },
+    9: {
+      pre: [
+        { who: 'narrator', text: '赤岩山口。熔岩在地缝间流淌。' },
+        { who: 'bram', text: '在熔岩旁待久了会被灼伤。' },
+        { who: 'sera', text: '结束行动时，记得离熔岩隔一格。' },
+        { who: 'commander', text: '头目的老巢就在眼前。不能在这儿耗尽力气。' },
+      ],
+      post: [
+        { who: 'bark', text: '上面就是头目的要塞。今晚了结吧。' },
+        { who: 'commander', text: '大家休息。明天拂晓进攻。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '小心别被逼到熔岩那边！' } ],
+        wave: [ { who: 'bram', text: '要塞派援兵下来了。死守山口！' } ],
+        danger: [ { who: 'bram', text: '退下，{ally}！硬撑什么都守不住！' } ],
+        last: [ { who: 'sera', text: '只剩一个了！集中到最后！' } ],
+      },
+    },
+    10: {
+      pre: [
+        { who: 'narrator', text: '火山脚下的山贼要塞。旗帜在热风中翻飞。' },
+        { who: 'boss', text: '拿根破棍子的毛孩子也当老大？笑死人了。' },
+        { who: 'commander', text: '欺压村子的日子，今天到头了。' },
+        { who: 'boss', text: '巴克，你这叛徒！先把你扔进熔岩！' },
+        { who: 'bark', text: '头目，俺现在另有老大了。' },
+        { who: 'bram', text: '先清掉头目身边的喽啰。别急。' },
+      ],
+      post: [
+        { who: 'boss', text: '呃……那位明明答应过……火会开启……' },
+        { who: 'commander', text: '那位是谁？火会开启是什么意思！' },
+        { who: 'narrator', text: '头目终究没能回答，就此断了气。' },
+        { who: 'bram', text: '还没完。这或许只是个开始。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '只要打倒头目，山贼就会溃散！' } ],
+        boss: [ { who: 'boss', text: '区区自卫团！尝尝老子的斧头！' } ],
+        wave: [ { who: 'bark', text: '要塞里的精锐！是头目的护卫队！' } ],
+        danger: [ { who: 'sera', text: '头目盯上{ally}了！拉开距离！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！山贼团今天就到头了！' } ],
+      },
+    },
+    // ═══ Episode 2: 冰封阴谋 ═══
+    11: {
+      pre: [
+        { who: 'narrator', text: '山麓的白泉村。连井水都冻住了。' },
+        { who: 'sera', text: '那些朝村子走来的士兵……穿着王国铠甲。' },
+        { who: 'bram', text: '眼神空洞。不是活人，是被冰束缚的尸体。' },
+        { who: 'commander', text: '退到村子城墙内侧！守住城门！' },
+      ],
+      post: [
+        { who: 'bark', text: '打倒了都不流血。真瘆人。' },
+        { who: 'bram', text: '那个纹章……是十五年前解散的北方守备队。' },
+        { who: 'commander', text: '死去的守备队，为什么现在会走动？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先截断贴上城墙的家伙！' } ],
+        wave: [ { who: 'sera', text: '暴风雪里又冒出来了！没完没了！' } ],
+        last: [ { who: 'bark', text: '剩一个！像敲冰一样砸碎它！' } ],
+      },
+    },
+    12: {
+      pre: [
+        { who: 'narrator', text: '白泉的居民开始向山下避难。' },
+        { who: 'sera', text: '那边的亡灵里，还有穿牧师袍的人。' },
+        { who: 'sera', text: '那些牧师会让别的尸体重新站起来。' },
+        { who: 'commander', text: '先打牧师。这样仗才打得完。' },
+        { who: 'bram', text: '撑到难民全部撤出城门为止。' },
+      ],
+      post: [
+        { who: 'sera', text: '死去的牧师一边呼唤神名一边战斗……好难受。' },
+        { who: 'commander', text: '有人把他们变成了那样。我一定会找到。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住城墙，直到难民全部撤离！' } ],
+        wave: [ { who: 'bram', text: '骑士打头阵。别放过盾牌后的牧师。' } ],
+        danger: [ { who: 'sera', text: '{ally}，你手都冻僵了！再撑一下！' } ],
+      },
+    },
+    13: {
+      pre: [
+        { who: 'narrator', text: '北方关隘霜门要塞。城门被冰层覆盖。' },
+        { who: 'kasha', text: '哎呀，乡下自卫团也跑到这儿来了？' },
+        { who: 'kasha', text: '我是佣兵团「黑羽」的卡莎。这座要塞归我们。' },
+        { who: 'commander', text: '归谁都无所谓。一起打更快结束。' },
+        { who: 'kasha', text: '一起？不如赌谁先到城主室。' },
+        { who: 'bark', text: '老大，那女人笑得真让人不舒服。' },
+      ],
+      post: [
+        { who: 'kasha', text: '啧，晚了一步。算你走运。' },
+        { who: 'commander', text: '不是运气，是团员们打得好。' },
+        { who: 'kasha', text: '哼，下次我先到。给我记着。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '小心工兵。他们翻过城门就会用炸弹！' } ],
+        wave: [ { who: 'kasha', text: '城墙上来了援兵。分给你那边吧。' } ],
+        last: [ { who: 'bark', text: '到城主室门口了！干掉他就是咱们先到！' } ],
+      },
+    },
+    14: {
+      pre: [
+        { who: 'narrator', text: '要塞下的营地。深夜，篝火摇曳。' },
+        { who: 'kasha', text: '还睡什么。刺客正盯着你呢。' },
+        { who: 'commander', text: '盯着我？为什么找一个乡下指挥官。' },
+        { who: 'kasha', text: '委托书上就是这么写的。“手上有伤疤的人。”' },
+        { who: 'bram', text: '全体起来。守住营地。' },
+      ],
+      post: [
+        { who: 'commander', text: '为什么告诉我？我们不是对手吗？' },
+        { who: 'kasha', text: '我的对手要是在睡梦里死了，多没意思。' },
+        { who: 'bram', text: '有人盯上了伤疤。从现在起别单独行动。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '向火堆靠拢！别在黑暗里散开！' } ],
+        wave: [ { who: 'kasha', text: '召唤师召出野兽了。先打那边！' } ],
+        danger: [ { who: 'commander', text: '刺客专挑伤员下手！守在{ally}身边！' } ],
+        last: [ { who: 'bark', text: '最后一个刺客！留活口，问出幕后的人！' } ],
+      },
+    },
+    15: {
+      pre: [
+        { who: 'narrator', text: '埋在冰川中的远古遗迹显露出来。' },
+        { who: 'bram', text: '寒气正是从这里面喷涌而出。' },
+        { who: 'sera', text: '墙上刻的纹样……是裂开的星星。' },
+        { who: 'commander', text: '（和我的伤疤一模一样。）' },
+        { who: 'commander', text: '里面有法师布阵。突破进去。' },
+      ],
+      post: [
+        { who: 'narrator', text: '遗迹的纹样一触到{commander}的手，便泛起微光。' },
+        { who: 'sera', text: '{commander}，刚才那道光……是对你起了反应？' },
+        { who: 'commander', text: '不知道。但应该不是巧合。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '法师经不起打。快贴上去解决！' } ],
+        wave: [ { who: 'bram', text: '遗迹深处来了萨满。当心诅咒。' } ],
+        last: [ { who: 'sera', text: '再一个！纹样一直在发光！' } ],
+      },
+    },
+    16: {
+      pre: [
+        { who: 'narrator', text: '冰封的山脊。寒气之源就在山顶。' },
+        { who: 'kasha', text: '比谁先到山顶。这次我赢定了。' },
+        { who: 'bram', text: '对面的骑士互相挨着走。是掩护阵型。' },
+        { who: 'bram', text: '骑士身旁的家伙，从远处打是打不中的。' },
+        { who: 'commander', text: '先打倒骑士破阵。然后再收拾后排。' },
+      ],
+      post: [
+        { who: 'kasha', text: '……这次又输了。你比我想的有两下子。' },
+        { who: 'commander', text: '这是夸我？好像头一回听到。' },
+        { who: 'kasha', text: '别误会。只是观察记录。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '打破骑士阵型！没了掩护就好打了！' } ],
+        wave: [ { who: 'bark', text: '一群枪兵顺着山脊冲下来了！' } ],
+        danger: [ { who: 'bram', text: '{ally}，用防御姿态撑过这一轮！' } ],
+      },
+    },
+    17: {
+      pre: [
+        { who: 'narrator', text: '山脊那头又一处遗迹。惨叫声回荡开来。' },
+        { who: 'bark', text: '那不是「黑羽」的人吗？被包围了。' },
+        { who: 'sera', text: '卡莎受伤了！怎么办，{commander}？' },
+        { who: 'commander', text: '救。要较量，也得活着才行。' },
+      ],
+      post: [
+        { who: 'kasha', text: '……谢了。这话我不会说第二遍。' },
+        { who: 'kasha', text: '是陷阱。雇我们的那边泄露了位置。' },
+        { who: 'commander', text: '雇你们的是谁？' },
+        { who: 'kasha', text: '王都的代理人。没看到脸。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '突破包围！给「黑羽」打开一条路！' } ],
+        wave: [ { who: 'kasha', text: '工兵想炸掉遗迹的柱子！拦住他们！' } ],
+        last: [ { who: 'kasha', text: '最后一个我来报仇。让开！' } ],
+      },
+    },
+    18: {
+      pre: [
+        { who: 'narrator', text: '山顶下的营地。暴风雪已连刮三天。' },
+        { who: 'bram', text: '有件事要说。召唤寒气的人……我大概知道是谁。' },
+        { who: 'bram', text: '哈尔瓦。十五年前与我并肩作战的王室骑士。' },
+        { who: 'bram', text: '那夜之后，他进了大魔导师的护卫队。' },
+        { who: 'commander', text: '大魔导师……是说奥尔丁大人吗？' },
+        { who: 'bram', text: '……先熬过今晚。那帮家伙来了。' },
+      ],
+      post: [
+        { who: 'commander', text: '布拉姆，把刚才的话说完吧。' },
+        { who: 'bram', text: '没有把握的怀疑，比刀剑更危险。' },
+        { who: 'bram', text: '见到哈尔瓦，让他亲口告诉我们。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '暴风雪遮住视野。彼此靠紧了打！' } ],
+        wave: [ { who: 'bram', text: '大部队！防线收成一排！' } ],
+        danger: [ { who: 'sera', text: '{ally}，你身体太冰了！快退下！' } ],
+        last: [ { who: 'bark', text: '最后一个！收拾掉就能合会儿眼了！' } ],
+      },
+    },
+    19: {
+      pre: [
+        { who: 'narrator', text: '冰川裂开的缝隙。紫光从底下渗出。' },
+        { who: 'sera', text: '这……和天空裂开那晚的传说一模一样。' },
+        { who: 'bram', text: '是十五年前的裂隙。虽小，但确凿无疑。' },
+        { who: 'commander', text: '必须拦住从缝里出来的东西。下去。' },
+      ],
+      post: [
+        { who: 'narrator', text: '缝隙缩小了，却没有完全闭合。' },
+        { who: 'commander', text: '寒气就是从这条缝流出来，笼罩了山脉。' },
+        { who: 'bram', text: '有人故意撑开了这条缝。就是山顶上那人。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '从缝里出来一个就截一个！别让它们扩散！' } ],
+        wave: [ { who: 'sera', text: '缝隙像脉搏一样胀大了！又涌出来了！' } ],
+        last: [ { who: 'commander', text: '剩一个了。压上去，把缝封住！' } ],
+      },
+    },
+    20: {
+      pre: [
+        { who: 'narrator', text: '白雪山脉之巅，一座以冰筑成的城寨。' },
+        { who: 'bram', text: '哈尔瓦！是我，布拉姆！你为何要这么做！' },
+        { who: 'boss', text: '布拉姆……好久不见。我只是服从命令。' },
+        { who: 'boss', text: '找到钥匙。这便是我接到的命令。' },
+        { who: 'boss', text: '那只手上的伤疤……是了，裂开那夜的孩子。' },
+        { who: 'commander', text: '你认识我？钥匙到底是什么！' },
+      ],
+      post: [
+        { who: 'boss', text: '布拉姆……谢谢……冰终于融化了……' },
+        { who: 'boss', text: '大魔导师……别相信那个人……' },
+        { who: 'narrator', text: '话未说完，骑士的身躯便化作雪尘消散。' },
+        { who: 'bram', text: '……安息吧，朋友。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '阻止那人，山脉才能得救。上！' } ],
+        boss: [ { who: 'boss', text: '冻结吧。犹豫也好，记忆也罢，全部。' } ],
+        wave: [ { who: 'kasha', text: '后面的援兵交给「黑羽」！你只管看前面！' } ],
+        danger: [ { who: 'bram', text: '{ally}！别被寒气卷进去，退后！' } ],
+        last: [ { who: 'sera', text: '只剩一个了。结束这场严寒吧！' } ],
+      },
+    },
+    // ═══ Episode 3: 沼泽诅咒 ═══
+    21: {
+      pre: [
+        { who: 'narrator', text: '沼泽村落芦苇渡。木桩上搭起的房屋东倒西歪。' },
+        { who: 'sera', text: '村里一半的人都病倒了，根本走不动。' },
+        { who: 'bark', text: '那就只能在这儿死守了。那帮家伙涌过来了。' },
+        { who: 'commander', text: '陷在浅滩就会挨集火。找干地站好。' },
+      ],
+      post: [
+        { who: 'sera', text: '听说那些野兽，原本是沼泽里的鹿和狼。' },
+        { who: 'commander', text: '不是生病，是被改变了。有人动了手脚。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住村子的防墙！别被引到水边去！' } ],
+        wave: [ { who: 'bark', text: '水里有东西爬出来了！第二批来了！' } ],
+        last: [ { who: 'sera', text: '只剩一个了。村民们都在看着呢！' } ],
+      },
+    },
+    22: {
+      pre: [
+        { who: 'narrator', text: '塞拉把村里的会堂改成了诊所。' },
+        { who: 'sera', text: '治疗不能停。这里无论如何都要守住。' },
+        { who: 'bram', text: '召唤师和萨满混在一起。诅咒要飞过来了。' },
+        { who: 'commander', text: '召唤物只要打倒本体就会消失。盯住施术者。' },
+      ],
+      post: [
+        { who: 'sera', text: '大家都活下来了。今天……一个人都没死。' },
+        { who: 'commander', text: '塞拉，你三天没合眼了吧。该歇歇了。' },
+        { who: 'sera', text: '我怕一歇下来，就会有人死掉。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住诊所的墙！塞拉正在治疗！' } ],
+        wave: [ { who: 'bram', text: '连牧师都带来了。趁敌人回血之前打掉。' } ],
+        danger: [ { who: 'sera', text: '{ally}！我马上过去，撑住！' } ],
+      },
+    },
+    23: {
+      pre: [
+        { who: 'narrator', text: '沼泽边缘的红树林。盘根错节，挡住了去路。' },
+        { who: 'bark', text: '听说瘟疫就是从这片林子深处开始的。' },
+        { who: 'bram', text: '林间好藏身。敌人如此，我们也一样。' },
+        { who: 'commander', text: '依托森林作战。刺客会从阴影里窜出来。' },
+      ],
+      post: [
+        { who: 'narrator', text: '森林正中，立着一座黑泥捏成的图腾。' },
+        { who: 'sera', text: '病就是从这座图腾散出来的。是有人故意立的！' },
+        { who: 'commander', text: '不是天灾。是有人让沼泽病了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '检查树后！有刺客埋伏！' } ],
+        wave: [ { who: 'bark', text: '工兵那帮家伙在树根间埋了炸弹！' } ],
+        last: [ { who: 'commander', text: '最后一个。通往图腾的路要开了！' } ],
+      },
+    },
+    24: {
+      pre: [
+        { who: 'narrator', text: '图腾不止一座。沼泽各处都立着。' },
+        { who: 'commander', text: '先拆最大的那座。这次轮到我们进攻了。' },
+        { who: 'bark', text: '那帮肌肉疙瘩，全是武斗家。跟俺一路的。' },
+        { who: 'bark', text: '武斗家的反击可吓人。别单枪匹马往上冲。' },
+      ],
+      post: [
+        { who: 'narrator', text: '图腾一倒，黑烟便从积水中散了出去。' },
+        { who: 'bark', text: '嘶，拳头都麻了。不过心里痛快！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '一路推进到图腾！别被泥沼绊住！' } ],
+        wave: [ { who: 'bram', text: '守护图腾的精锐。两人一组对付。' } ],
+        danger: [ { who: 'bark', text: '{ally}受伤了！俺来挡在前面，快退！' } ],
+      },
+    },
+    25: {
+      pre: [
+        { who: 'narrator', text: '沼泽中央，一座半沉的远古神殿浮现眼前。' },
+        { who: 'bram', text: '这里就是诅咒的心脏。连气味都不一样。' },
+        { who: 'sera', text: '神殿里传来念咒声。正在举行仪式。' },
+        { who: 'commander', text: '在仪式完成前打断它。突入！' },
+      ],
+      post: [
+        { who: 'commander', text: '这件祭器……上面刻着阿尔登王室的纹章。' },
+        { who: 'bark', text: '王室？就是派俺们来的那个王室？' },
+        { who: 'bram', text: '……先收好。会成为证据的。' },
+        { who: 'sera', text: '布拉姆大叔，你是不是知道些什么？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先打念咒的家伙！阻止仪式！' } ],
+        wave: [ { who: 'bram', text: '骑士从神殿深处出来了。别正面硬接。' } ],
+        last: [ { who: 'sera', text: '最后一个！咒语快断了！' } ],
+      },
+    },
+    26: {
+      pre: [
+        { who: 'narrator', text: '芦苇渡的村民终于决定离开沼泽。' },
+        { who: 'commander', text: '护着队伍转移。一刻不停地走。' },
+        { who: 'sera', text: '不行！病人跟不上那个速度！' },
+        { who: 'commander', text: '在这儿待久了大家都会死。我也不想做这种选择。' },
+        { who: 'bram', text: '你们都没错。所以，去找两边都能保住的办法。' },
+        { who: 'commander', text: '……在队伍后方设防线。按病人的速度走。' },
+      ],
+      post: [
+        { who: 'sera', text: '刚才冲你吼，对不起。' },
+        { who: 'commander', text: '不。要不是你开口，我就选错了。' },
+        { who: 'bram', text: '不独断专行。这也是指挥。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住避难队伍的后方！一个都不能落下！' } ],
+        wave: [ { who: 'bark', text: '沼泽里又爬出来了！在队伍侧面！' } ],
+        danger: [ { who: 'sera', text: '{ally}那边一破，队伍也会垮！快支援！' } ],
+        last: [ { who: 'bram', text: '只剩一个。队伍安然无恙。' } ],
+      },
+    },
+    27: {
+      pre: [
+        { who: 'narrator', text: '神殿另一侧的遗迹。红披风的骑士们扎下了阵。' },
+        { who: 'bram', text: '是沃尔卡帝国骑士团。为何会在别国的沼泽里？' },
+        { who: 'kasha', text: '好久不见。我闻着帝国那帮家伙的味儿追来的。' },
+        { who: 'commander', text: '卡莎？……一起走吧。这次不比赛。' },
+        { who: 'kasha', text: '哼，就这一次。' },
+      ],
+      post: [
+        { who: 'kasha', text: '帝国骑士怀里揣着这个。下一道指令。' },
+        { who: 'commander', text: '“沼泽之后，转往火山。”帝国也是一伙的？' },
+        { who: 'bram', text: '又或者，帝国也在听命于某人。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '骑士身边有掩护。派刺客切进去！' } ],
+        wave: [ { who: 'kasha', text: '遗迹后面有弓箭手！抢了高地！' } ],
+        last: [ { who: 'kasha', text: '最后一个归我。就是拿着指令的那家伙。' } ],
+      },
+    },
+    28: {
+      pre: [
+        { who: 'narrator', text: '神殿地下。水退去的地面上，裂隙张开了口。' },
+        { who: 'sera', text: '跟北方看到的一样。是紫色的裂缝。' },
+        { who: 'commander', text: '伤疤在刺痛。诅咒的根就在这下面。' },
+        { who: 'bram', text: '有法师守着裂缝。打断仪式。' },
+      ],
+      post: [
+        { who: 'narrator', text: '第二道裂隙平息了。然而并未闭合。' },
+        { who: 'commander', text: '北方也是，这里也是。有人在一道道撕开裂缝。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '向裂隙推进！破坏仪式！' } ],
+        wave: [ { who: 'bark', text: '裂缝里爬出工兵了！有火药味！' } ],
+        danger: [ { who: 'bram', text: '{ally}！别被裂隙的气息侵蚀！' } ],
+      },
+    },
+    29: {
+      pre: [
+        { who: 'narrator', text: '毒雾弥漫的沼泽深处。伸手不见五指。' },
+        { who: 'sera', text: '这雾本身就是病。不能待太久。' },
+        { who: 'bram', text: '那头就是沼泽之王苏醒的神殿。' },
+        { who: 'commander', text: '打开道路。雾里谁都别掉队。' },
+      ],
+      post: [
+        { who: 'narrator', text: '雾气散开，巨大神殿的阴影显露出来。' },
+        { who: 'bark', text: '里面那家伙才是真正的王啊。' },
+        { who: 'commander', text: '明天了结。今晚大家都暖暖身子。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '雾里要抱团行动！找机会连携攻击！' } ],
+        wave: [ { who: 'sera', text: '雾里的召唤物越来越多了！' } ],
+        last: [ { who: 'commander', text: '只剩一个。路要开了！' } ],
+      },
+    },
+    30: {
+      pre: [
+        { who: 'narrator', text: '神殿最深处。沼水化作巨大的身形站了起来。' },
+        { who: 'boss', text: '渺小之物。身上有召唤我之人的气味。' },
+        { who: 'commander', text: '召唤你的人？那是谁！' },
+        { who: 'boss', text: '紫色之手的孩子啊。你很快也会去那位身边。' },
+        { who: 'sera', text: '只要打倒它，沼泽就会变干净。上吧！' },
+      ],
+      post: [
+        { who: 'boss', text: '沼泽……不会干涸……火……就是下一个……' },
+        { who: 'narrator', text: '沼泽之王消融之处，找到了一张旧地图。' },
+        { who: 'commander', text: '标了三个地方。北方、沼泽，还有帝国。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先清掉守护沼泽之王的施术者！' } ],
+        boss: [ { who: 'boss', text: '沼泽将吞没你们。连同气息与名字。' } ],
+        wave: [ { who: 'bram', text: '召唤物没完没了。瞄准本体！' } ],
+        danger: [ { who: 'sera', text: '毒在扩散！到我这边来，{ally}！' } ],
+        last: [ { who: 'bark', text: '最后一个！把沼泽清扫干净！' } ],
+      },
+    },
+    // ═══ Episode 4: 燃烧的帝国 ═══
+    31: {
+      pre: [
+        { who: 'narrator', text: '国境的石砌要塞。义军守卫的最后一道关隘。' },
+        { who: 'narrator', text: '地平线那头，帝国正规军的枪尖寒光闪烁。' },
+        { who: 'bram', text: '人数很多。但城墙够厚。守得住。' },
+        { who: 'commander', text: '按贴上城墙的顺序逐个击破。别急着抢先动手。' },
+      ],
+      post: [
+        { who: 'narrator', text: '义军士兵向战团发出了欢呼。' },
+        { who: 'bark', text: '没想到会被这国家的人鼓掌欢迎。' },
+        { who: 'commander', text: '这里的人也只是想守住家园。跟我们一样。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '背靠城墙作战！这道关隘一破就全完了！' } ],
+        wave: [ { who: 'bram', text: '是帝国枪兵队。队列很长，打侧面。' } ],
+        danger: [ { who: 'sera', text: '{ally}，退到城墙里面！' } ],
+        last: [ { who: 'bark', text: '最后一个！关隘是咱们的了！' } ],
+      },
+    },
+    32: {
+      pre: [
+        { who: 'narrator', text: '通往帝国腹地的赤色峡谷。' },
+        { who: 'kasha', text: '站住，{commander}。别走这条路。' },
+        { who: 'kasha', text: '「黑羽」本队和帝国签了约。而我是团长。' },
+        { who: 'commander', text: '那我们就是敌人了？' },
+        { who: 'kasha', text: '……我不会亲自拔刀。但峡谷里全是帝国军。' },
+      ],
+      post: [
+        { who: 'commander', text: '卡莎到最后都没出现。' },
+        { who: 'sera', text: '她心里也不好受。你看到她的表情了吧。' },
+        { who: 'bram', text: '被契约束缚的刀，迟早会自己斩断枷锁。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先抢高地！先手一失就会被困在峡谷里！' } ],
+        wave: [ { who: 'bark', text: '峡谷两边涌出一大群刺客！' } ],
+        last: [ { who: 'commander', text: '只剩一个。冲出峡谷！' } ],
+      },
+    },
+    33: {
+      pre: [
+        { who: 'narrator', text: '火山脚下的义军村落——灰井。' },
+        { who: 'narrator', text: '环绕村落的熔岩水渠翻滚着红光。' },
+        { who: 'bram', text: '工兵带着炸弹过来了。目标是城墙。' },
+        { who: 'sera', text: '站在熔岩旁边会灼伤的。选好位置。' },
+        { who: 'commander', text: '先打倒工兵。赶在炸弹爆炸之前！' },
+      ],
+      post: [
+        { who: 'narrator', text: '村里的孩子们把烤焦的面包递给团员们。' },
+        { who: 'bark', text: '没想到烤焦的面包这么好吃。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '别让工兵贴上城墙！靠近前就截住！' } ],
+        wave: [ { who: 'bram', text: '法师部队在后方放火。散开！' } ],
+        danger: [ { who: 'sera', text: '灼伤太严重了！离熔岩远点，{ally}！' } ],
+        last: [ { who: 'sera', text: '最后一个！村子安全了！' } ],
+      },
+    },
+    34: {
+      pre: [
+        { who: 'narrator', text: '火山口边缘。帝国法师们的仪式场。' },
+        { who: 'bram', text: '这是唤醒火山的仪式。一旦成功，这片土地将化为火海。' },
+        { who: 'commander', text: '北方的寒气，沼泽的瘟疫……这次是火。' },
+        { who: 'commander', text: '打断仪式。熔岩挡路就绕过去。' },
+      ],
+      post: [
+        { who: 'narrator', text: '仪式一破，火山口的轰鸣渐渐平息。' },
+        { who: 'commander', text: '这里的地面也有裂星纹样。' },
+        { who: 'bram', text: '说明三处都是同一个人设计的。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '施术者正在仪式中。没时间了，突击！' } ],
+        wave: [ { who: 'bark', text: '火山口里爬上来召唤物了！' } ],
+        last: [ { who: 'commander', text: '最后一个施术者。彻底打断仪式！' } ],
+      },
+    },
+    35: {
+      pre: [
+        { who: 'narrator', text: '黑曜石城寨，黑曜门。帝国西部防卫的要冲。' },
+        { who: 'narrator', text: '城寨下的村子正被帝国军焚烧。' },
+        { who: 'kasha', text: '……契约里可没这条。居然烧自己的百姓。' },
+        { who: 'kasha', text: '「黑羽」撕毁契约。从现在起站你这边。' },
+        { who: 'commander', text: '谢谢你回来，卡莎。' },
+        { who: 'kasha', text: '别会错意。我只是不想自己的名声被弄脏。' },
+      ],
+      post: [
+        { who: 'kasha', text: '在帝国指挥官房里找到的。是王国那边的书信。' },
+        { who: 'commander', text: '署名被抹掉了。可这笔迹……' },
+        { who: 'bram', text: '去皇城。原件应该在皇帝手里。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住城寨，同时打开城门！两件都要办成！' } ],
+        wave: [ { who: 'kasha', text: '城墙上的弓箭手交给「黑羽」！' } ],
+        danger: [ { who: 'kasha', text: '{ally}那边暴露了！我来掩护！' } ],
+        last: [ { who: 'bark', text: '只剩一个！把城门撞开吧！' } ],
+      },
+    },
+    36: {
+      pre: [
+        { who: 'narrator', text: '向皇城输送物资的熔岩运河。' },
+        { who: 'bark', text: '那座桥上，补给马车来来往往没个停。' },
+        { who: 'bram', text: '桥上要用推挤。往堵死的方向推，就会撞上。' },
+        { who: 'commander', text: '切断补给线，皇城就会动摇。出发！' },
+      ],
+      post: [
+        { who: 'narrator', text: '补给桥崩塌，运河对岸的皇城陷入孤立。' },
+        { who: 'kasha', text: '现在皇帝就是瓮中之鳖了。' },
+        { who: 'commander', text: '困兽才最凶。别大意。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '控制桥面！别被推向熔岩！' } ],
+        wave: [ { who: 'bark', text: '骑士团从皇城下来了！在桥那头！' } ],
+        last: [ { who: 'kasha', text: '最后一个。准备断桥！' } ],
+      },
+    },
+    37: {
+      pre: [
+        { who: 'narrator', text: '义军大营。皇帝发起了最后的反攻。' },
+        { who: 'narrator', text: '火球如雨点般从天而降。' },
+        { who: 'sera', text: '伤兵太多了。大营一破，谁都活不了！' },
+        { who: 'bram', text: '这一仗，撑得住的一方赢。守住阵地。' },
+        { who: 'commander', text: '分成防御姿态坚守的和出手进攻的！' },
+      ],
+      post: [
+        { who: 'narrator', text: '火雨停歇，皇帝军撤退了。' },
+        { who: 'sera', text: '撑住了……我们撑住了。' },
+        { who: 'bram', text: '干得漂亮，指挥官。往后再也不能叫你小鬼了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '防墙前的人先顶住！看到信号就轮换！' } ],
+        wave: [ { who: 'bram', text: '刺客从防墙缝隙钻进来了！注意后方！' } ],
+        danger: [ { who: 'sera', text: '{ally}！不能待在火里！' } ],
+        last: [ { who: 'bark', text: '最后一个！大营安然无恙！' } ],
+      },
+    },
+    38: {
+      pre: [
+        { who: 'narrator', text: '沃尔卡皇城外围。城墙足有三重。' },
+        { who: 'kasha', text: '第一道城墙我们来破，义军负责守后方。' },
+        { who: 'bram', text: '城墙上的枪兵和弓箭手占着高地。' },
+        { who: 'commander', text: '先打骑士掩护范围外的，撕开缺口。' },
+      ],
+      post: [
+        { who: 'narrator', text: '皇城外墙崩塌。热浪从里面喷涌而出。' },
+        { who: 'commander', text: '皇宫底下的气息强得让伤疤都在疼。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '盯住城墙上方！夺下高地！' } ],
+        wave: [ { who: 'kasha', text: '是皇宫近卫队。这帮家伙是真的强！' } ],
+        danger: [ { who: 'bram', text: '{ally}，别在城墙下死守！动起来！' } ],
+      },
+    },
+    39: {
+      pre: [
+        { who: 'narrator', text: '皇宫地下。巨大的裂隙泛着红光搏动。' },
+        { who: 'sera', text: '比北方和沼泽的大得多。这是第三道了。' },
+        { who: 'bram', text: '三道裂隙汇合之时……某扇巨大的门就会开启。' },
+        { who: 'commander', text: '先清掉守在这里的家伙。必须堵住裂隙。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂隙前的祭坛上，放着一封密封的书信。' },
+        { who: 'commander', text: '“依约壮大火焰。门开之时，必有回报。”' },
+        { who: 'commander', text: '印章是……奥尔丁的。王室大魔导师。' },
+        { who: 'sera', text: '那我们一直以来，到底是在为谁而战？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '瞄准守护裂隙的施术者！突入！' } ],
+        wave: [ { who: 'bark', text: '裂隙越变越大，连工兵都蹦出来了！' } ],
+        danger: [ { who: 'sera', text: '裂隙的气息涌过去了，{ally}！快离开！' } ],
+        last: [ { who: 'commander', text: '只剩一个。前往祭坛！' } ],
+      },
+    },
+    40: {
+      pre: [
+        { who: 'narrator', text: '皇宫王座厅。四面八方都燃着熔岩般的光。' },
+        { who: 'boss', text: '王国的走狗竟追到了这里。' },
+        { who: 'commander', text: '这封信，是奥尔丁寄的吧？你们做了什么约定！' },
+        { who: 'boss', text: '约定？说只要壮大火焰，就赐我一个新世界。' },
+        { who: 'boss', text: '那种事已经无所谓了。统统烧光吧！' },
+      ],
+      post: [
+        { who: 'boss', text: '呃……我们……不过是备用的……' },
+        { who: 'boss', text: '真正的门……在深渊……你们的大魔导师想要的是……' },
+        { who: 'narrator', text: '皇帝的身躯化作火焰，渐渐熄灭。' },
+        { who: 'commander', text: '备用的……那真正的事，还根本没开始。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先打皇帝周围的法师！切断火焰！' } ],
+        boss: [ { who: 'boss', text: '燃烧吧！帝国之火永不熄灭！' } ],
+        wave: [ { who: 'kasha', text: '王座后面冒出了近卫召唤师！' } ],
+        danger: [ { who: 'bram', text: '{ally}！火柱来了，快躲！' } ],
+        last: [ { who: 'sera', text: '最后一个！把这场火了结吧！' } ],
+      },
+    },
+    // ═══ Episode 5: 深渊终焉 ═══
+    41: {
+      pre: [
+        { who: 'narrator', text: '深渊边缘。义军与战团仓促搭起的前进营地。' },
+        { who: 'bram', text: '从下面爬上来的家伙，就在这里挡住。' },
+        { who: 'bark', text: '这木栅，风大点儿都能吹倒吧。' },
+        { who: 'commander', text: '木栅不牢，我们就是墙。守住位置！' },
+      ],
+      post: [
+        { who: 'sera', text: '那些魔物，眼睛和北方的亡灵一样空洞。' },
+        { who: 'commander', text: '出自同一只手。我们得下去。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '深渊里有东西上来了！守住营地！' } ],
+        wave: [ { who: 'bram', text: '第二波。骑士打头阵了。' } ],
+        last: [ { who: 'bark', text: '最后一个！把它踹回洞里去！' } ],
+      },
+    },
+    42: {
+      pre: [
+        { who: 'narrator', text: '螺旋小道沿着深渊石壁，没有尽头地向下延伸。' },
+        { who: 'sera', text: '越往下光越暗，祈祷也越来越沉重。' },
+        { who: 'bram', text: '窄路上最怕被推挤。靠墙站。' },
+        { who: 'commander', text: '每个路口都有敌人。一个个打穿下去。' },
+      ],
+      post: [
+        { who: 'narrator', text: '黑暗中，有谁低声唤着{commander}的名字。' },
+        { who: 'commander', text: '……刚才有人叫我吗？' },
+        { who: 'bark', text: '没人叫啊，老大。别这样，怪瘆人的。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '顺着下坡压上去！前进！' } ],
+        wave: [ { who: 'bram', text: '下面有弓箭手。贴着岩壁的阴影走。' } ],
+        danger: [ { who: 'sera', text: '{ally}，那边是悬崖！小心！' } ],
+      },
+    },
+    43: {
+      pre: [
+        { who: 'narrator', text: '古人的升降祭坛。通往下方的唯一道路。' },
+        { who: 'bram', text: '祭坛启动需要时间。这段时间给我撑住。' },
+        { who: 'commander', text: '以祭坛为中心结圆阵。哪个方向都不许空。' },
+        { who: 'bark', text: '战士成群结队地来了。今天拳头有活干了。' },
+      ],
+      post: [
+        { who: 'narrator', text: '石祭坛低声轰鸣，开始向深渊下方沉去。' },
+        { who: 'sera', text: '这祭坛，真是人造的吗？也太古老了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '撑到祭坛启动！保持阵型！' } ],
+        wave: [ { who: 'bram', text: '是斗士部队。小心反击，两人一组上！' } ],
+        danger: [ { who: 'bram', text: '{ally}，先摆防御姿态，喘口气！' } ],
+        last: [ { who: 'sera', text: '只剩一个了！祭坛开始动了！' } ],
+      },
+    },
+    44: {
+      pre: [
+        { who: 'narrator', text: '深渊半腰，一座巨大的远古要塞沉睡在黑暗中。' },
+        { who: 'bram', text: '这城墙上的纹样，和北方遗迹出自同一批人。' },
+        { who: 'commander', text: '赶走里面的家伙，找到记录。' },
+      ],
+      post: [
+        { who: 'narrator', text: '要塞壁画上，画着手托裂星的人们。' },
+        { who: 'sera', text: '这些人，在用手合上天之裂缝。' },
+        { who: 'commander', text: '“封印者”。上面写着，钥匙……靠血脉传承。' },
+        { who: 'bram', text: '……是时候了。这一仗打完，我全都告诉你。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '破开城门冲进去！夺回远古要塞！' } ],
+        wave: [ { who: 'bark', text: '城里头的术士一窝蜂涌出来了！' } ],
+        last: [ { who: 'commander', text: '最后一个。打通去壁画的路！' } ],
+      },
+    },
+    45: {
+      pre: [
+        { who: 'narrator', text: '穿过要塞，更深处。黑甲骑士正等在那里。' },
+        { who: 'boss', text: '钥匙自己走下来了。' },
+        { who: 'commander', text: '钥匙钥匙……我叫{commander}。给我记住。' },
+        { who: 'boss', text: '在门前，名字毫无意义。' },
+        { who: 'bram', text: '那家伙是骑士，正面坚固。绕到背后打。' },
+      ],
+      post: [
+        { who: 'boss', text: '我……不过是下层的守门人……更深之处……' },
+        { who: 'narrator', text: '骑士倒下之处，地面又向下塌陷了一层。' },
+        { who: 'commander', text: '还没到底。下面还有更大的东西。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '清掉护卫，包围骑士！' } ],
+        boss: [ { who: 'boss', text: '钥匙归门。其余的，归于黑暗。' } ],
+        wave: [ { who: 'bram', text: '深渊骑士团。打破他们的掩护阵型！' } ],
+        danger: [ { who: 'sera', text: '{ally}！那个骑士只盯着你打！' } ],
+        last: [ { who: 'bark', text: '最后一个！把这铁皮罐头熔了！' } ],
+      },
+    },
+    46: {
+      pre: [
+        { who: 'narrator', text: '深渊下层。召唤师们无休止地召出魔物。' },
+        { who: 'bram', text: '不打术士，召唤物就没完没了。' },
+        { who: 'kasha', text: '那我绕到后面去。走暗影小路是我的拿手活。' },
+        { who: 'commander', text: '卡莎去打术士，我们在前面拖住。' },
+      ],
+      post: [
+        { who: 'kasha', text: '术士十二个，我干掉七个。这回我赢了。' },
+        { who: 'commander', text: '好，这回算你赢。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先打术士！别被召唤物缠住！' } ],
+        wave: [ { who: 'kasha', text: '术士又布阵了！这次在后面！' } ],
+        last: [ { who: 'kasha', text: '最后一个术士，交给我！' } ],
+      },
+    },
+    47: {
+      pre: [
+        { who: 'narrator', text: '四面封死的洞窟。战团陷入孤立。' },
+        { who: 'sera', text: '我……祈祷不出来了。力气用光了。' },
+        { who: 'commander', text: '塞拉在后面休息。前面交给我们。' },
+        { who: 'bram', text: '法师在上面居高临下。找掩护。' },
+        { who: 'commander', text: '保持警戒，谁先靠近就先打谁。' },
+      ],
+      post: [
+        { who: 'sera', text: '对不起。都怪我，大家伤得更重了。' },
+        { who: 'commander', text: '你休息了，才有下一仗。别道歉。' },
+        { who: 'bram', text: '（……长大了啊。真像那两个人。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '堵住洞口！保护塞拉！' } ],
+        wave: [ { who: 'bark', text: '召唤物从洞顶掉下来了！' } ],
+        danger: [ { who: 'commander', text: '伤员先撤下去！重新整队！' } ],
+        last: [ { who: 'bram', text: '还剩一个。沉住气，了结它。' } ],
+      },
+    },
+    48: {
+      pre: [
+        { who: 'narrator', text: '横跨深渊的石桥。处处布满裂纹。' },
+        { who: 'bram', text: '过了桥就是深渊之底。能感觉到那家伙的气息。' },
+        { who: 'bark', text: '这桥要是塌了，连回头路都没了。' },
+        { who: 'commander', text: '快速过桥，再守住对岸。两件事都得办到。' },
+      ],
+      post: [
+        { who: 'narrator', text: '石桥塌了一半。布拉姆的腿在流血。' },
+        { who: 'sera', text: '大叔，你的腿……我马上给你治！' },
+        { who: 'bram', text: '没事。老骨头本来就会嘎吱响。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '上桥前进！别在裂缝上久站！' } ],
+        wave: [ { who: 'kasha', text: '对岸的骑士团把桥堵住了！' } ],
+        danger: [ { who: 'bram', text: '{ally}，被逼到桥边就完了！' } ],
+        last: [ { who: 'bark', text: '还剩一个！过桥去！' } ],
+      },
+    },
+    49: {
+      pre: [
+        { who: 'bram', text: '照约定告诉你。十五年前，那一夜的事。' },
+        { who: 'bram', text: '你父母是王室封印者。负责合上天之裂缝的人。' },
+        { who: 'bram', text: '奥尔丁想打开裂缝，他们二人以性命将它封住。' },
+        { who: 'bram', text: '那天我向你父母立誓，要守护那个孩子。' },
+        { who: 'commander', text: '……所以您才待在村里？整整十五年？' },
+        { who: 'bram', text: '对。而今天，就是兑现那个誓言的日子。' },
+      ],
+      post: [
+        { who: 'bram', text: '指挥官。那条通道我来守。你们去深渊之底。' },
+        { who: 'commander', text: '不行！一起走，您腿还伤着！' },
+        { who: 'bram', text: '这条腿只会拖累你们。你是指挥官，该明白。' },
+        { who: 'bram', text: '救不了所有人，但谁也不抛下。去吧。' },
+      ],
+      battle: {
+        start: [ { who: 'bram', text: '只要守住这条通道。我站在最前面！' } ],
+        wave: [ { who: 'commander', text: '没完没了……布拉姆，再撑一会儿！' } ],
+        danger: [ { who: 'bram', text: '伤员退后！这条通道我来扛！' } ],
+        last: [ { who: 'bram', text: '还剩一个。该走了，指挥官。' } ],
+      },
+    },
+    50: {
+      pre: [
+        { who: 'narrator', text: '深渊之底。身后通道传来的刀剑声，停了。' },
+        { who: 'sera', text: '{commander}……听不到布拉姆大叔的声音了。' },
+        { who: 'commander', text: '……只看前面。这是布拉姆为我们开的路。' },
+        { who: 'boss', text: '老骑士很出色。下一个轮到你了，钥匙。' },
+        { who: 'commander', text: '别用你那张嘴提布拉姆！' },
+      ],
+      post: [
+        { who: 'boss', text: '深渊……只是准备……魔界之路……就要开启……' },
+        { who: 'narrator', text: '回程的通道尽头，只留下一把断剑。' },
+        { who: 'commander', text: '布拉姆……您守住了约定。直到最后。' },
+        { who: 'commander', text: '这次换我来守。剩下的每一个人。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '全员进攻！别让布拉姆守住的路白费！' } ],
+        boss: [ { who: 'boss', text: '被怒火搅乱的指挥，满是破绽。来吧！' } ],
+        wave: [ { who: 'kasha', text: '底下的精锐醒了！打起精神！' } ],
+        danger: [ { who: 'sera', text: '{ally}，别往前冲！撑到我过去！' } ],
+        last: [ { who: 'bark', text: '还剩一个，老大！连老爷子那份一起算！' } ],
+      },
+    },
+    // ═══ Episode 6: 地狱之门 ═══
+    51: {
+      pre: [
+        { who: 'narrator', text: '王都南郊原野。难民聚集在天空的裂隙之下。' },
+        { who: 'sera', text: '听说去王都的路断了。大家在这里进退两难。' },
+        { who: 'commander', text: '建难民营地。从裂隙下来的东西全部挡住。' },
+        { who: 'bark', text: '没有老爷子的第一场防守战啊。干吧。' },
+      ],
+      post: [
+        { who: 'narrator', text: '一位老人握住{commander}的手，低下了头。' },
+        { who: 'commander', text: '（布拉姆也是看着这样的面孔撑下来的吧。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住营地！一个也别放到难民那边！' } ],
+        wave: [ { who: 'kasha', text: '裂隙里下来第二批了！这次更多！' } ],
+        last: [ { who: 'sera', text: '还剩一个！大家再坚持一下！' } ],
+      },
+    },
+    52: {
+      pre: [
+        { who: 'narrator', text: '第二天。从裂隙下来的敌人中，有熟悉的面孔。' },
+        { who: 'bark', text: '那是……俺当山贼时的小弟们。眼睛血红。' },
+        { who: 'sera', text: '还混着北方的冰兵。全被拖进魔界了。' },
+        { who: 'bark', text: '老大，那些家伙……让俺亲手送他们安息。' },
+        { who: 'commander', text: '别一个人扛，巴克。一起去。' },
+      ],
+      post: [
+        { who: 'bark', text: '……对不住了，兄弟们。以后别再挨饿了。' },
+        { who: 'commander', text: '巴克，还好吗？' },
+        { who: 'bark', text: '哪能好啊。不过还好有老大在身边。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '哪怕是旧敌，现在也是魔界傀儡。撑住！' } ],
+        wave: [ { who: 'kasha', text: '骑士绕到营地侧面来了！' } ],
+        danger: [ { who: 'bark', text: '{ally}，到俺身后来，快！' } ],
+      },
+    },
+    53: {
+      pre: [
+        { who: 'narrator', text: '裂隙正下方，魔物筑巢的据点。' },
+        { who: 'kasha', text: '那个巢撑着裂隙。毁掉它，缝就会变小。' },
+        { who: 'commander', text: '这次轮到我们打进去。捣毁巢穴！' },
+      ],
+      post: [
+        { who: 'narrator', text: '巢穴崩塌，天上的一道裂隙随之变淡。' },
+        { who: 'sera', text: '能合上。一道一道来，就能合上！' },
+        { who: 'commander', text: '可北边那扇门……可不是这种大小。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '打通去巢穴的路！先瓦解侧翼！' } ],
+        wave: [ { who: 'bark', text: '巢里又涌出魔物了！' } ],
+        last: [ { who: 'kasha', text: '还剩一个。直捣巢穴核心！' } ],
+      },
+    },
+    54: {
+      pre: [
+        { who: 'narrator', text: '沃尔卡帝国火山地带。这里也开了裂隙。' },
+        { who: 'narrator', text: '义军如今已成为帝国残部的核心。' },
+        { who: 'kasha', text: '帝国的人来求援了。说想还欠你的人情。' },
+        { who: 'commander', text: '一起打。熔岩地带我们也闯过。' },
+      ],
+      post: [
+        { who: 'narrator', text: '帝国士兵在战团的旗帜下列队。' },
+        { who: 'bark', text: '居然跟帝国军并肩作战。活久了真是什么都能见到。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '别在熔岩边结束行动！小心灼烧！' } ],
+        wave: [ { who: 'kasha', text: '裂隙里又下来了！帝国军守住左边了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，烧伤太重了！退下！' } ],
+        last: [ { who: 'bark', text: '最后一个！在帝国那帮人面前长长脸！' } ],
+      },
+    },
+    55: {
+      pre: [
+        { who: 'narrator', text: '通往王都的要道。防线正在崩溃。' },
+        { who: 'sera', text: '这次由我来布结界。我又能祈祷了。' },
+        { who: 'commander', text: '别勉强。你倒下了，结界也就没了。' },
+        { who: 'sera', text: '我知道。所以你们要守住我。相信我。' },
+      ],
+      post: [
+        { who: 'sera', text: '成功了……祈祷又传达到了。' },
+        { who: 'commander', text: '多亏有你，我们才撑住了，塞拉。' },
+        { who: 'sera', text: '布拉姆大叔说过嘛。不是一个人在战斗。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住塞拉的结界！先打靠近的！' } ],
+        wave: [ { who: 'kasha', text: '术士在瞄准结界！拦住！' } ],
+        danger: [ { who: 'sera', text: '{ally}，快进结界里来！' } ],
+        last: [ { who: 'bark', text: '还剩一个！结界还好好的！' } ],
+      },
+    },
+    56: {
+      pre: [
+        { who: 'narrator', text: '王都外围的深邃裂隙。魔界的气息浓浓涌出。' },
+        { who: 'kasha', text: '那道裂隙一直连到王都。王都危险了。' },
+        { who: 'commander', text: '正面突破。顺着裂隙去王都。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂隙尽头，王都城墙映入眼帘。浓烟升起。' },
+        { who: 'sera', text: '王都在燃烧……！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '沿裂隙前进！不许停！' } ],
+        wave: [ { who: 'bark', text: '前后都被堵了！先打穿一边！' } ],
+        last: [ { who: 'commander', text: '还剩一个。去王都！' } ],
+      },
+    },
+    57: {
+      pre: [
+        { who: 'narrator', text: '阿尔登王都。半边城墙已落入魔界军之手。' },
+        { who: 'narrator', text: '王国近卫队早已退守王宫。' },
+        { who: 'commander', text: '夺回城墙，为百姓打开撤离的路。' },
+        { who: 'kasha', text: '王宫那帮人丢下百姓躲起来了。真可悲。' },
+        { who: 'commander', text: '所以我们才在这里。' },
+      ],
+      post: [
+        { who: 'narrator', text: '王都百姓开始从南门撤离。' },
+        { who: 'sera', text: '听说大魔导师的塔空了。奥尔丁去哪了？' },
+        { who: 'commander', text: '搜塔底下。答案应该就在那里。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '夺回城墙！抢下高地！' } ],
+        wave: [ { who: 'kasha', text: '骑士团朝城门压过来了！' } ],
+        danger: [ { who: 'bark', text: '{ally}受伤了！从城墙台阶撤下来！' } ],
+        last: [ { who: 'sera', text: '最后一个！南门开了！' } ],
+      },
+    },
+    58: {
+      pre: [
+        { who: 'narrator', text: '大魔导师之塔地下。台阶一路延伸进裂隙之中。' },
+        { who: 'kasha', text: '原来他一直在自己塔底下养着裂隙。' },
+        { who: 'commander', text: '有守卫。打穿过去，直达研究室。' },
+      ],
+      post: [
+        { who: 'commander', text: '奥尔丁的日志。“开启门扉，召唤神明。”' },
+        { who: 'commander', text: '“唯有神能净化魔界。开门的钥匙，便是那孩子。”' },
+        { who: 'sera', text: '为了召唤神，就把世界弄成这样？' },
+        { who: 'kasha', text: '这不是信仰，是疯狂。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '清掉研究室前的守护者！突入！' } ],
+        wave: [ { who: 'bark', text: '墙里蹦出召唤物来了！' } ],
+        last: [ { who: 'kasha', text: '还剩一个。就在研究室门口。' } ],
+      },
+    },
+    59: {
+      pre: [
+        { who: 'narrator', text: '王都北方灰色平原。地狱之门高耸入天。' },
+        { who: 'narrator', text: '门前，联军搭起了最后的营地。' },
+        { who: 'commander', text: '打守门的守护者之前，先守住营地。' },
+        { who: 'bark', text: '门里涌出来的家伙，数量可不是闹着玩的。' },
+        { who: 'commander', text: '保持警戒迎敌。先射，先打。' },
+      ],
+      post: [
+        { who: 'narrator', text: '营地守住了。门前立起一道巨大的黑影。' },
+        { who: 'sera', text: '那就是守门人。只要越过它，就能关上门。' },
+        { who: 'commander', text: '（真会这样吗？伤疤躁动得不对劲。）' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住营地！这里是最后的防线！' } ],
+        wave: [ { who: 'kasha', text: '门里来增援了！看不到尽头！' } ],
+        danger: [ { who: 'commander', text: '补上受伤的{ally}的位置！营地不能丢！' } ],
+        last: [ { who: 'bark', text: '还剩一个！营地是咱们的！' } ],
+      },
+    },
+    60: {
+      pre: [
+        { who: 'narrator', text: '地狱之门正前方。巨大的骑士背对大门而立。' },
+        { who: 'boss', text: '此门，唯有钥匙之血方能跨越。' },
+        { who: 'commander', text: '没打算跨过去。我是来关门的。' },
+        { who: 'boss', text: '关也好，开也罢，击败我的那一刻便会分晓。' },
+        { who: 'kasha', text: '有点不对劲。那句话，有陷阱的味道。' },
+      ],
+      post: [
+        { who: 'boss', text: '很好……钥匙之血……触到门了……' },
+        { who: 'narrator', text: '守护者倒下后，{commander}的伤疤渗出了血。' },
+        { who: 'narrator', text: '站在门前的指尖上，一滴血落在了门上。' },
+        { who: 'commander', text: '伤疤像在燃烧……门，在动？！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先清掉守护者周围的护卫！' } ],
+        boss: [ { who: 'boss', text: '我即是门。想跨过门，先跨过我。' } ],
+        wave: [ { who: 'kasha', text: '门内来增援了！前后都被堵住！' } ],
+        danger: [ { who: 'sera', text: '{ally}！血流得太多了！' } ],
+        last: [ { who: 'bark', text: '还剩一个！就此了结！' } ],
+      },
+    },
+    // ═══ Episode 7: 恶魔领域 ═══
+    61: {
+      pre: [
+        { who: 'narrator', text: '跨过门后的第一片土地。战团在黑岩上建起了桥头堡。' },
+        { who: 'kasha', text: '回去的门就在背后。这里丢了，就全完了。' },
+        { who: 'commander', text: '守住桥头堡。别给魔界那帮家伙让出一条路。' },
+        { who: 'sera', text: '这里的空气……每吸一口，脑袋都嗡嗡作响。' },
+      ],
+      post: [
+        { who: 'bark', text: '撑住了。可太阳一直不落啊。这儿没有夜晚吗？' },
+        { who: 'commander', text: '时间和道路都别信。只信彼此。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '死守桥头堡！守住通往门的路！' } ],
+        wave: [ { who: 'kasha', text: '岩缝里冒出魔界骑士团！数量很多！' } ],
+        danger: [ { who: 'sera', text: '{ally}，振作点！听得见我说话吗？' } ],
+        last: [ { who: 'bark', text: '只剩一个了！拿下魔界首胜！' } ],
+      },
+    },
+    62: {
+      pre: [
+        { who: 'narrator', text: '眼前是一片红草无尽摇曳的原野。' },
+        { who: 'sera', text: '{commander}……那里是松光村。那座山丘，那座磨坊。' },
+        { who: 'commander', text: '不对。村子不是那么红的。是幻影。' },
+        { who: 'kasha', text: '幻影里混着真正的敌人。打起精神。' },
+        { who: 'commander', text: '就算是故乡的模样也别犹豫。前进！' },
+      ],
+      post: [
+        { who: 'narrator', text: '幻影散去，村子消失了，只剩一片灰烬。' },
+        { who: 'commander', text: '魔界会把我们珍惜的东西当成武器。' },
+        { who: 'bark', text: '卑鄙的家伙。那就揍得更狠点。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '别信眼睛看到的！只盯着敌人打！' } ],
+        wave: [ { who: 'kasha', text: '山丘后面又来了！不是幻影，是真的！' } ],
+        last: [ { who: 'sera', text: '最后一个了。走吧，去走真正的路。' } ],
+      },
+    },
+    63: {
+      pre: [
+        { who: 'narrator', text: '白骨般的树木连成了一片森林。' },
+        { who: 'bark', text: '树枝跟手指似的会动。看得人起鸡皮疙瘩。' },
+        { who: 'kasha', text: '森林毕竟是森林。能藏在树荫里。' },
+        { who: 'commander', text: '依托森林作战。敌人涌上来就打侧翼。' },
+      ],
+      post: [
+        { who: 'narrator', text: '林子尽头发现了一块旧路标。上面是人类的字迹。' },
+        { who: 'commander', text: '“封印者之路。”……父母也曾走过这里。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '拿骨树当掩体！别暴露自己！' } ],
+        wave: [ { who: 'kasha', text: '森林另一侧包抄过来了！小心背后！' } ],
+        danger: [ { who: 'bark', text: '{ally}！俺挡住树枝，你快撤！' } ],
+      },
+    },
+    64: {
+      pre: [
+        { who: 'narrator', text: '积着红水的沼泽。水下有什么东西在呼吸。' },
+        { who: 'sera', text: '跟黑水沼泽很像。可要糟糕好几倍。' },
+        { who: 'commander', text: '在沼泽正中的小岛上布阵。别踏进浅滩。' },
+        { who: 'kasha', text: '在这里撑住，那帮家伙过沼泽就会累垮。' },
+      ],
+      post: [
+        { who: 'sera', text: '想起沼泽那一仗了。那时布拉姆大叔还在。' },
+        { who: 'commander', text: '现在也在。在我们说的每句话里。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住小岛！盯住站在浅滩上的家伙！' } ],
+        wave: [ { who: 'bark', text: '沼泽底下又爬上来了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，离水边远点！' } ],
+        last: [ { who: 'kasha', text: '只剩一个。准备过沼泽！' } ],
+      },
+    },
+    65: {
+      pre: [
+        { who: 'narrator', text: '每当风吹过，峡谷便发出惨叫般的声响。' },
+        { who: 'bark', text: '耳朵都要被撕裂了。这全是风声？' },
+        { who: 'kasha', text: '谁占住峡谷上方的岩石谁就赢。这是高地之争。' },
+        { who: 'commander', text: '远程上山丘。射程会变得更远。' },
+      ],
+      post: [
+        { who: 'narrator', text: '峡谷尽头，一座黑色城寨直刺天空。' },
+        { who: 'commander', text: '听说那座城寨后面就是法师之塔。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先抢高地！从上往下打！' } ],
+        wave: [ { who: 'kasha', text: '对面高地上术士们已经就位了！' } ],
+        last: [ { who: 'bark', text: '只剩一个！冲过峡谷！' } ],
+      },
+    },
+    66: {
+      pre: [
+        { who: 'narrator', text: '魔界的黑色城寨。城墙如活物般蠕动着。' },
+        { who: 'kasha', text: '「黑羽」主力从门那边跟过来了。现在全员会合。' },
+        { who: 'commander', text: '可靠。一边守住城寨，一边往里突破。' },
+        { who: 'kasha', text: '……以前跟你比赛，真是犯傻。' },
+      ],
+      post: [
+        { who: 'kasha', text: '{commander}。我们不再是对手了。是战友。' },
+        { who: 'commander', text: '我知道。不过偶尔还是比一比吧。' },
+        { who: 'kasha', text: '哼。下次我赢。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '拿下城寨入口，往里推进！' } ],
+        wave: [ { who: 'kasha', text: '「黑羽」，左侧城墙！就是现在！' } ],
+        danger: [ { who: 'kasha', text: '{ally}，到我身后！我来掩护！' } ],
+        last: [ { who: 'bark', text: '最后一个！攻陷城寨！' } ],
+      },
+    },
+    67: {
+      pre: [
+        { who: 'narrator', text: '魔界腹地，竟有一座人类亲手堆砌的遗迹。' },
+        { who: 'sera', text: '这里也有裂星纹。是封印者们的遗迹。' },
+        { who: 'commander', text: '伤疤在共鸣。这里有什么在等着。' },
+        { who: 'kasha', text: '魔界的家伙想毁掉遗迹。得守住！' },
+      ],
+      post: [
+        { who: 'narrator', text: '遗迹中央的石头亮起，响起了两个人的声音。' },
+        { who: 'narrator', text: '“孩子。钥匙不是一个人转动的。”' },
+        { who: 'narrator', text: '“和身边的那些手一起转吧。门就会关上。”' },
+        { who: 'commander', text: '……妈妈？爸爸？等等，我还有话要说……！' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住遗迹！别让它们碰那块石头！' } ],
+        wave: [ { who: 'bark', text: '遗迹四面八方都涌过来了！围成圆阵！' } ],
+        danger: [ { who: 'sera', text: '{ally}！遗迹交给我们，快退下！' } ],
+        last: [ { who: 'sera', text: '只剩一个了！那块石头开始发光了！' } ],
+      },
+    },
+    68: {
+      pre: [
+        { who: 'sera', text: '{commander}，刚才那个声音……你没事吧？' },
+        { who: 'commander', text: '嗯。反倒像是第一次看清了路。' },
+        { who: 'commander', text: '不是一个人，而是一起。那就是钥匙。' },
+        { who: 'narrator', text: '战团踏入了通往法师之塔的深渊回廊。' },
+      ],
+      post: [
+        { who: 'bark', text: '回廊尽头能看到塔了。法师就在塔顶吧。' },
+        { who: 'kasha', text: '听说奥尔丁也去过那里。气味很浓。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '突破回廊！一起行动！' } ],
+        wave: [ { who: 'kasha', text: '回廊两侧的墙打开了！是埋伏！' } ],
+        last: [ { who: 'commander', text: '只剩一个。向塔进发！' } ],
+      },
+    },
+    69: {
+      pre: [
+        { who: 'narrator', text: '法师之塔下的要塞。守护高塔的最后一道城墙。' },
+        { who: 'kasha', text: '城墙上的魔法像雨一样倾泻下来。' },
+        { who: 'commander', text: '敌人瞄准的团员会被标出来。把那个位置空出来。' },
+        { who: 'bark', text: '看到被盯上就躲开呗。简单！' },
+      ],
+      post: [
+        { who: 'narrator', text: '城墙崩塌，塔门自行打开了。' },
+        { who: 'sera', text: '这是在邀请我们。真让人不舒服。' },
+        { who: 'commander', text: '既然受邀，就该去一趟。客客气气地，握着指挥杖。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '看敌人的目标标记！被盯上的位置立刻空出！' } ],
+        wave: [ { who: 'kasha', text: '精锐从塔上下来了！是法师护卫队！' } ],
+        danger: [ { who: 'sera', text: '{ally}，魔法集中轰炸！快躲！' } ],
+        last: [ { who: 'bark', text: '只剩一个！塔门要开了！' } ],
+      },
+    },
+    70: {
+      pre: [
+        { who: 'narrator', text: '塔顶。雾中走出一个熟悉的身影。' },
+        { who: 'commander', text: '……布拉姆？' },
+        { who: 'fake_bram', text: '没错，小鬼。为什么丢下我走了？' },
+        { who: 'sera', text: '别上当！大叔才不会说这种话！' },
+        { who: 'commander', text: '我知道。布拉姆到最后都叫我指挥官。' },
+        { who: 'boss', text: '哼，真没意思。那就用真面目来对付你。' },
+      ],
+      post: [
+        { who: 'boss', text: '动摇了内心……却仍不崩溃的人类……' },
+        { who: 'boss', text: '奥尔丁……去了天之顶端……去召唤神……' },
+        { who: 'boss', text: '而君主大人……早已在注视着你……' },
+        { who: 'commander', text: '那就让他看着。我很快就会亲自找上门。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '别被幻影动摇！目标是法师！' } ],
+        boss: [ { who: 'boss', text: '就用你的记忆把你撕碎，钥匙。' } ],
+        wave: [ { who: 'kasha', text: '塔下层来了增援！堵住楼梯！' } ],
+        danger: [ { who: 'sera', text: '{ally}！别听幻影，听我的声音！' } ],
+        last: [ { who: 'bark', text: '最后一个！把这座塔推倒吧！' } ],
+      },
+    },
+    // ═══ Episode 8: 神之审判 ═══
+    71: {
+      pre: [
+        { who: 'narrator', text: '白光直落的原野。红草被烧得一片雪白。' },
+        { who: 'narrator', text: '光中走出身披铠甲的身影。它们长着翅膀。' },
+        { who: 'sera', text: '神之化身……和经书里画的一模一样。' },
+        { who: 'kasha', text: '可它们为什么朝我们阵地走来？' },
+        { who: 'commander', text: '它们在拔剑。守住阵地！那也是敌人！' },
+      ],
+      post: [
+        { who: 'sera', text: '神之化身攻击了我们。为什么……？' },
+        { who: 'commander', text: '大概觉得碰过魔界的都是污秽吧。我们也一样。' },
+        { who: 'sera', text: '那我这辈子的祈祷，又算什么。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '死守阵地！管它是光是暗，都挡住！' } ],
+        wave: [ { who: 'kasha', text: '天上又下来了！这次是骑士团！' } ],
+        danger: [ { who: 'bark', text: '{ally}！那道光，沾上就着火！' } ],
+        last: [ { who: 'sera', text: '……只剩一个了。结束吧。' } ],
+      },
+    },
+    72: {
+      pre: [
+        { who: 'narrator', text: '光与暗相撞的深渊裂缝。' },
+        { who: 'kasha', text: '恶魔和化身在互相厮杀。我们怎么办？' },
+        { who: 'commander', text: '两边都不是自己人。从中间穿过去。' },
+        { who: 'bark', text: '这不是要两头挨揍吗？' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂缝彼端，天之顶端现出一道白色裂隙。' },
+        { who: 'commander', text: '那里就是奥尔丁召唤神的地方。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '两边都是敌人！从缝隙中突破！' } ],
+        wave: [ { who: 'kasha', text: '恶魔那边的增援转向我们了！' } ],
+        last: [ { who: 'bark', text: '只剩一个！赶紧逃出这乱局！' } ],
+      },
+    },
+    73: {
+      pre: [
+        { who: 'narrator', text: '白石筑成的城寨。立在魔界中央，干净得过分。' },
+        { who: 'kasha', text: '听说是奥尔丁建的。说是迎接神的圣殿。' },
+        { who: 'commander', text: '控制城寨，找到往上的路。' },
+        { who: 'sera', text: '这座城寨……是用祈祷者的骸骨堆起来的……' },
+      ],
+      post: [
+        { who: 'commander', text: '是奥尔丁带来的人。当作召唤神的祭品。' },
+        { who: 'sera', text: '只要是为了神，就能这样对待人吗？' },
+        { who: 'commander', text: '不。无论什么理由都不行。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住城寨大门，同时往里突进！' } ],
+        wave: [ { who: 'kasha', text: '光之术士从城寨上层下来了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，被光照得太久了！' } ],
+        last: [ { who: 'bark', text: '最后一个！城寨归俺们了！' } ],
+      },
+    },
+    74: {
+      pre: [
+        { who: 'narrator', text: '远古神殿的废墟。塞拉独自跪了下来。' },
+        { who: 'narrator', text: '“牧师啊。离开钥匙吧。钥匙已被玷污。”' },
+        { who: 'sera', text: '……是神的声音。它叫我离开。' },
+        { who: 'commander', text: '塞拉。你自己选就好。我不会怪你。' },
+        { who: 'sera', text: '笨蛋。你不知道我会选谁，才说这种话？' },
+        { who: 'sera', text: '神抛弃的人，我也会治好。这就是我的祈祷。' },
+      ],
+      post: [
+        { who: 'sera', text: '神的声音停了。心里反而很平静。' },
+        { who: 'commander', text: '谢谢你，塞拉。真的。' },
+        { who: 'sera', text: '一开始就说过了吧。你受伤了，我来治。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住废墟！别让它们靠近塞拉！' } ],
+        wave: [ { who: 'kasha', text: '化身们想把塞拉带走！拦住！' } ],
+        danger: [ { who: 'sera', text: '{ally}！我来治疗，撑住！' } ],
+        last: [ { who: 'sera', text: '最后一个了。这个由我亲手了结。' } ],
+      },
+    },
+    75: {
+      pre: [
+        { who: 'narrator', text: '通往天空的深渊之柱。上面架着一道光之梯。' },
+        { who: 'bark', text: '顺着那梯子爬上去就是顶端？' },
+        { who: 'kasha', text: '守卫在梯子底下布了阵。' },
+        { who: 'commander', text: '控制梯子底部。包围起来就能夹击。' },
+      ],
+      post: [
+        { who: 'narrator', text: '光梯承住了战团的重量，微微发亮。' },
+        { who: 'bark', text: '连俺这身板都撑得住。神的东西就是结实。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '整顿队列！稳住呼吸，用夹击收尾！' } ],
+        wave: [ { who: 'kasha', text: '上面下来了！堵住梯子那边！' } ],
+        last: [ { who: 'commander', text: '只剩一个。往上走！' } ],
+      },
+    },
+    76: {
+      pre: [
+        { who: 'narrator', text: '天空与深渊之间。光与暗交缠的战场。' },
+        { who: 'kasha', text: '恶魔军、化身军，再加上我们。三方混战。' },
+        { who: 'commander', text: '让它们互相打，我们只管开路。' },
+        { who: 'bark', text: '等两边都累垮？老大，你可越来越精了。' },
+      ],
+      post: [
+        { who: 'commander', text: '布拉姆的话也会这么做。得保存实力。' },
+        { who: 'sera', text: '这是你的判断，{commander}。不是布拉姆大叔的。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '两边都别纠缠！打开通路，撑住！' } ],
+        wave: [ { who: 'kasha', text: '两边同时盯上我们了！收紧阵型！' } ],
+        danger: [ { who: 'bark', text: '{ally}！摆好防御姿态，先扛一下！' } ],
+        last: [ { who: 'kasha', text: '只剩一个！有破绽，上！' } ],
+      },
+    },
+    77: {
+      pre: [
+        { who: 'narrator', text: '靠近天空的要塞。魔界军追着战团爬了上来。' },
+        { who: 'kasha', text: '去顶端之前得斩断追兵。就在这里拦住。' },
+        { who: 'commander', text: '关上要塞大门坚守。布置警戒。' },
+        { who: 'commander', text: '进入射程的家伙，先打再说。' },
+      ],
+      post: [
+        { who: 'narrator', text: '追兵溃散了。上方传来了奥尔丁的声音。' },
+        { who: 'commander', text: '奥尔丁在跟我们说话。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住要塞大门！在这里斩断追兵！' } ],
+        wave: [ { who: 'bark', text: '下面还在不停往上爬！' } ],
+        danger: [ { who: 'sera', text: '{ally}，退到门里面！' } ],
+        last: [ { who: 'kasha', text: '只剩一个。追兵到此为止！' } ],
+      },
+    },
+    78: {
+      pre: [
+        { who: 'ordin', text: '年轻的指挥官。来做个交易吧。' },
+        { who: 'ordin', text: '把钥匙交予老夫。待神抹去魔界，战争便告终结。' },
+        { who: 'commander', text: '你说连碰过魔界的土地也要抹去。包括我们的故乡。' },
+        { who: 'ordin', text: '无牺牲则无救赎。阁下的父母已证明此事。' },
+        { who: 'commander', text: '父母是自己选择的。而你选的是别人。' },
+        { who: 'commander', text: '该舍弃谁，我不会交给神来决定。' },
+      ],
+      post: [
+        { who: 'ordin', text: '愚蠢。既如此，便在神的面前证明给老夫看吧。' },
+        { who: 'narrator', text: '奥尔丁的幻影消散，天之顶端的光愈发浓烈。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '用这一战来回答！团员们，开路！' } ],
+        wave: [ { who: 'kasha', text: '奥尔丁又召来了更多化身！' } ],
+        last: [ { who: 'commander', text: '只剩一个。登上顶端！' } ],
+      },
+    },
+    79: {
+      pre: [
+        { who: 'narrator', text: '登上天之顶端的最后阶梯。远古石柱林立两旁。' },
+        { who: 'sera', text: '是封印者们的遗迹。他们在这里也想过要关上门。' },
+        { who: 'commander', text: '突破在石柱间布阵的家伙。' },
+        { who: 'bark', text: '过了这一关，就能见到那老头的嘴脸了？' },
+      ],
+      post: [
+        { who: 'narrator', text: '阶梯尽头，奥尔丁站在白色裂隙前。' },
+        { who: 'narrator', text: '奥尔丁的身体已有一半化作了光。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '登上阶梯！小心石柱后面！' } ],
+        wave: [ { who: 'kasha', text: '上方石柱有弓箭手在射！是高地！' } ],
+        danger: [ { who: 'sera', text: '{ally}！别被推下阶梯！' } ],
+        last: [ { who: 'bark', text: '只剩一个！到顶了！' } ],
+      },
+    },
+    80: {
+      pre: [
+        { who: 'narrator', text: '白色裂隙前。奥尔丁如今自称为神之召唤师。' },
+        { who: 'boss', text: '看吧，神正在降临。这是老夫等了十五年的时刻。' },
+        { who: 'commander', text: '这十五年里，你献祭了多少人！' },
+        { who: 'boss', text: '那是拯救世界所需的代价。' },
+        { who: 'commander', text: '那个代价，轮不到你来定。' },
+        { who: 'sera', text: '{commander}，必须切断召唤。就是现在！' },
+      ],
+      post: [
+        { who: 'boss', text: '神……没有降临……不，是根本无法降临吗……' },
+        { who: 'narrator', text: '光从奥尔丁体内流失，只剩下一个衰老的魔导师。' },
+        { who: 'bark', text: '老大，要了结他吗？' },
+        { who: 'commander', text: '不。得让他活着看清。看清自己做了什么。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先清掉守护召唤阵的化身！' } ],
+        boss: [ { who: 'boss', text: '以神之名，审判一切污秽之物！' } ],
+        wave: [ { who: 'kasha', text: '裂隙里又降下化身了！快！' } ],
+        danger: [ { who: 'sera', text: '{ally}！是审判之光，快躲！' } ],
+        last: [ { who: 'bark', text: '只剩一个！把这召唤彻底终结！' } ],
+      },
+    },
+    // ═══ Episode 9: 绝体绝命 ═══
+    81: {
+      pre: [
+        { who: 'narrator', text: '王都前的灰色平原。联军的旗帜第一次并肩竖起。' },
+        { who: 'kasha', text: '王国残军、帝国军、「黑羽」。全都在等你的命令。' },
+        { who: 'commander', text: '这是联军的第一场作战。谁都不会孤军奋战。' },
+        { who: 'commander', text: '从裂隙里出来的家伙，就在这里挡住！' },
+      ],
+      post: [
+        { who: 'narrator', text: '联军的第一场防御战以胜利告终。' },
+        { who: 'bark', text: '不同国家的兵，居然互相拍着肩膀了。' },
+        { who: 'sera', text: '布拉姆大叔要是看到了，一定会很高兴。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '联军，守住防线！堵住裂隙！' } ],
+        wave: [ { who: 'kasha', text: '裂隙里涌出大军！帝国军，顶住右翼！' } ],
+        danger: [ { who: 'commander', text: '{ally}那边防线太薄！预备队，顶上去！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！联军的第一场胜仗！' } ],
+      },
+    },
+    82: {
+      pre: [
+        { who: 'narrator', text: '平原北面，魔界军在裂隙前筑起的前沿阵地。' },
+        { who: 'kasha', text: '放着那座阵地不管，那帮家伙会源源不断地涌出来。' },
+        { who: 'commander', text: '打进去。光靠防守，这场仗赢不了。' },
+      ],
+      post: [
+        { who: 'narrator', text: '魔界阵地陷入火海，一道裂隙随之沉寂。' },
+        { who: 'commander', text: '下一站是北方。听说霜门被包围了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '攻打阵地！先从侧翼击溃！' } ],
+        wave: [ { who: 'kasha', text: '阵地后方，魔界骑士团杀过来了！' } ],
+        last: [ { who: 'commander', text: '只剩一个。给阵地放火！' } ],
+      },
+    },
+    83: {
+      pre: [
+        { who: 'narrator', text: '北方霜门要塞。战团初次遇见卡莎的地方。' },
+        { who: 'kasha', text: '当年我就是在这儿输给你的。还记得吗？' },
+        { who: 'commander', text: '记得。那时我们还是敌人。' },
+        { who: 'narrator', text: '要塞里的北方幸存者看到战团的旗帜，欢呼起来。' },
+        { who: 'commander', text: '守住要塞，同时突破包围网！' },
+      ],
+      post: [
+        { who: 'narrator', text: '北方的幸存者们加入了联军。' },
+        { who: 'kasha', text: '是白泉的人。你守护过的那个村子。' },
+        { who: 'commander', text: '这回，换他们来守护我们了。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住城墙，打破包围！两边都要拿下！' } ],
+        wave: [ { who: 'bark', text: '暴风雪里，魔界军又来了！' } ],
+        danger: [ { who: 'kasha', text: '敌人绕到后方了！守住{ally}那边！' } ],
+        last: [ { who: 'sera', text: '只剩一个了。霜门安然无恙！' } ],
+      },
+    },
+    84: {
+      pre: [
+        { who: 'narrator', text: '南部黑水沼泽，芦苇渡村。魔界军渡过了沼泽。' },
+        { who: 'sera', text: '是当年我治疗过的人！大家都拿起了武器。' },
+        { who: 'commander', text: '守住村子。这次，村民们也和我们一起。' },
+        { who: 'bark', text: '沼泽里打仗要当心浅滩。如今闭着眼都知道。' },
+      ],
+      post: [
+        { who: 'narrator', text: '芦苇渡的村民们围住塞拉，低下了头。' },
+        { who: 'sera', text: '当年救下的人，今天救了我们。' },
+        { who: 'commander', text: '这就是我们战斗的理由。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住村子的防壁！别被拖进沼泽！' } ],
+        wave: [ { who: 'kasha', text: '沼泽对岸，第二批来了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，我这就过去！再撑一下！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！芦苇渡万岁！' } ],
+      },
+    },
+    85: {
+      pre: [
+        { who: 'narrator', text: '大地正中裂开的巨大裂隙。魔界军的主力所在。' },
+        { who: 'kasha', text: '打掉那个，魔界军的补给就断一半。' },
+        { who: 'commander', text: '联军全员突击。今天就封住那道裂隙。' },
+      ],
+      post: [
+        { who: 'narrator', text: '巨大裂隙合拢了一半，魔界的惨叫回荡不绝。' },
+        { who: 'ordin', text: '……了不起。老夫十五年都未能办到之事。' },
+        { who: 'commander', text: '那是因为你想一个人去做。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '全员突击的信号！扫清裂隙前的魔界军！' } ],
+        wave: [ { who: 'kasha', text: '裂隙里出来的是精锐骑士团！整顿队列！' } ],
+        last: [ { who: 'commander', text: '只剩一个。封住裂隙！' } ],
+      },
+    },
+    86: {
+      pre: [
+        { who: 'narrator', text: '帝国黑曜门城寨。帝国残部的最后据点。' },
+        { who: 'kasha', text: '这是「黑羽」撕毁契约的地方。感觉真微妙。' },
+        { who: 'commander', text: '守住城寨，同时击退外围的包围。' },
+        { who: 'bark', text: '城墙上的枪兵交给帝国军，下面归俺们！' },
+      ],
+      post: [
+        { who: 'narrator', text: '黑曜门守住了，帝国各地的抵抗军士气大振。' },
+        { who: 'kasha', text: '当年撕毁契约，是个正确的选择。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '城门内外同时守住！不许散开！' } ],
+        wave: [ { who: 'bark', text: '火山那边来了援军！快堵住城门！' } ],
+        danger: [ { who: 'kasha', text: '{ally}，别逞强。我来掩护！' } ],
+        last: [ { who: 'sera', text: '只剩一个了！黑曜门安然无恙！' } ],
+      },
+    },
+    87: {
+      pre: [
+        { who: 'narrator', text: '远古封印者遗迹。魔界军蜂拥而来，要将此地摧毁。' },
+        { who: 'ordin', text: '此遗迹若崩塌，钥匙之力亦将衰弱。' },
+        { who: 'commander', text: '那就守住。无论发生什么。' },
+        { who: 'bark', text: '老大，这次俺来站在最前面。' },
+      ],
+      post: [
+        { who: 'narrator', text: '遗迹守住了。然而，巴克倒在了地上。' },
+        { who: 'sera', text: '巴克！睁开眼！我正在给你治疗！' },
+        { who: 'bark', text: '……老大，俺死不了。还有地等着俺去耕呢。' },
+        { who: 'commander', text: '说好了。一定要一起回去。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住遗迹！背靠石柱作战！' } ],
+        wave: [ { who: 'kasha', text: '遗迹后方被突破了！谁去堵住！' } ],
+        danger: [ { who: 'bark', text: '{ally}那边空了！这里俺来挡！' } ],
+        last: [ { who: 'bark', text: '只剩……一个了……老大，了结它！' } ],
+      },
+    },
+    88: {
+      pre: [
+        { who: 'narrator', text: '巴克留在营地养伤，战团再度出征。' },
+        { who: 'commander', text: '连巴克那份一起打。然后，大家一起回去。' },
+        { who: 'kasha', text: '那道裂隙对面，就是战争战士的阵营。' },
+        { who: 'commander', text: '杀出一条路。一直杀到那家伙面前。' },
+      ],
+      post: [
+        { who: 'narrator', text: '裂隙对面，魔界大将军的赤色军旗映入眼帘。' },
+        { who: 'kasha', text: '那家伙正朝松光村进军。' },
+        { who: 'commander', text: '……回故乡。在那里了结一切。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '突破裂隙！连巴克那份一起打！' } ],
+        wave: [ { who: 'kasha', text: '大将军的亲卫队挡路！很强！' } ],
+        last: [ { who: 'commander', text: '只剩一个。回故乡去！' } ],
+      },
+    },
+    89: {
+      pre: [
+        { who: 'narrator', text: '松光村。木栅不见了，取而代之的是石砌的城墙。' },
+        { who: 'sera', text: '听说是村民们亲手砌的。说这里是我们回来的地方。' },
+        { who: 'bark', text: '……呜，谁往俺眼里撒沙子了。' },
+        { who: 'commander', text: '这是我第一次指挥的地方。就在这里坚守。' },
+        { who: 'commander', text: '这一次，也一个人都不会失去。' },
+      ],
+      post: [
+        { who: 'narrator', text: '松光村的城墙没有倒下。' },
+        { who: 'commander', text: '布拉姆，您看到了吗？小鬼走到这一步了。' },
+        { who: 'sera', text: '看，平原尽头有赤色铠甲。是大将军。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '这是故乡的城墙！一步也不许退！' } ],
+        wave: [ { who: 'kasha', text: '大军来了！冲着城墙东侧去了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，退到城墙后面！带着伤别硬撑！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！这是俺们的村子！' } ],
+      },
+    },
+    90: {
+      pre: [
+        { who: 'narrator', text: '松光村前的平原。身披赤色铠甲的巨人走了出来。' },
+        { who: 'boss', text: '没想到，这小小的村子竟是这场战争的心脏。' },
+        { who: 'commander', text: '小又怎样。这里是我们的家。' },
+        { who: 'boss', text: '那就连你们的家一起踏平。战争就是如此。' },
+        { who: 'kasha', text: '联军全员准备完毕。就等你的信号。' },
+      ],
+      post: [
+        { who: 'boss', text: '这场战争……输了……但君主大人……不会输……' },
+        { who: 'narrator', text: '大将军一倒，魔界军便溃散着退回了裂隙之中。' },
+        { who: 'commander', text: '只剩下一个了。魔界君主。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '联军，全军进攻！先解决大将军的护卫！' } ],
+        boss: [ { who: 'boss', text: '以战争之名！将一切扫荡殆尽！' } ],
+        wave: [ { who: 'kasha', text: '魔界精锐增援！这应该是最后一波了！' } ],
+        danger: [ { who: 'sera', text: '{ally}！大将军的攻击绝不能硬接！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！把这场仗打完吧！' } ],
+      },
+    },
+    // ═══ Episode 10: 不可能之境 ═══
+    91: {
+      pre: [
+        { who: 'narrator', text: '魔界最深层。脚下传来巨大的心跳声。' },
+        { who: 'ordin', text: '欲抵达王座，此处须有一座桥头堡。' },
+        { who: 'commander', text: '守住这里。这是回去的路，也是前进的路。' },
+        { who: 'bark', text: '俺缠着绷带来的。要是缺席，俺会后悔一辈子。' },
+      ],
+      post: [
+        { who: 'narrator', text: '桥头堡建起后，黑暗彼端亮起了五点火光。' },
+        { who: 'ordin', text: '那是君主的五名臣属。正一个个等候着阁下。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '死守桥头堡！这是最后旅程的第一步！' } ],
+        wave: [ { who: 'kasha', text: '黑暗里没完没了地冒出来！保持阵型！' } ],
+        danger: [ { who: 'sera', text: '{ally}！不能倒在这里！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！路要通了！' } ],
+      },
+    },
+    92: {
+      pre: [
+        { who: 'narrator', text: '第一点火光。披着破旧斗篷的骑士拄剑而立。' },
+        { who: 'boss', text: '吾乃君主的第一把剑。来，堂堂正正一决高下。' },
+        { who: 'commander', text: '……和布拉姆一样的架势。古老的王国剑术。' },
+        { who: 'boss', text: '我也曾是人类的骑士。在很久很久以前。' },
+        { who: 'kasha', text: '感慨留到以后。那骑士的掩护阵型无懈可击。' },
+      ],
+      post: [
+        { who: 'boss', text: '漂亮……你的师父，想必是位好骑士吧。' },
+        { who: 'commander', text: '是最好的骑士。脾气跟你一样倔。' },
+        { who: 'boss', text: '是吗……那么，我也终于可以安息了……' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先剥离护卫骑士！瓦解他们的掩护！' } ],
+        boss: [ { who: 'boss', text: '那根银色指挥杖……王国的战场指挥官吗。指挥给我看。' } ],
+        wave: [ { who: 'kasha', text: '骑士团增援！守住侧翼！' } ],
+        danger: [ { who: 'kasha', text: '{ally}那边被压着打！撤出骑士的掩护范围！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！第一个臣属，解决！' } ],
+      },
+    },
+    93: {
+      pre: [
+        { who: 'narrator', text: '第二点火光。半空中悬浮着成千上万的魔法阵。' },
+        { who: 'boss', text: '一切魔法皆是计算。你们的胜率趋近于零。' },
+        { who: 'ordin', text: '老夫也曾如此凡事计算而活。结果算错了。' },
+        { who: 'commander', text: '就让你看看计算之外的东西。彼此守护的手。' },
+      ],
+      post: [
+        { who: 'boss', text: '计算……对不上……为何要彼此庇护……？' },
+        { who: 'commander', text: '这就是我们能赢的理由。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '瞄准术士！趁魔法阵完成之前！' } ],
+        boss: [ { who: 'boss', text: '开始清除变量。一、二、三。' } ],
+        wave: [ { who: 'kasha', text: '魔法阵里涌出一大批召唤术士！' } ],
+        danger: [ { who: 'sera', text: '{ally}！你在魔法阵正中间，快出来！' } ],
+        last: [ { who: 'commander', text: '只剩一个。让它的计算到此为止！' } ],
+      },
+    },
+    94: {
+      pre: [
+        { who: 'narrator', text: '第三点火光。魔界的要塞拔地而起，仿佛要吞没战团。' },
+        { who: 'boss', text: '吾乃无尽之军势。吾之召唤永不枯竭。' },
+        { who: 'kasha', text: '我们被困在要塞里了。得边守边打到那家伙面前。' },
+        { who: 'commander', text: '守住城墙坚持住。瞅准召唤物变少的时机。' },
+      ],
+      post: [
+        { who: 'boss', text: '召唤……断了……吾之军势……竟已枯竭……？' },
+        { who: 'bark', text: '俺们可还没见底呢！' },
+        { who: 'narrator', text: '第三点火光熄灭了。剩下的光只有两点。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '死守城墙！塌了就重建，把攻势接下来！' } ],
+        boss: [ { who: 'boss', text: '在不可计数之物面前跪下吧。' } ],
+        wave: [ { who: 'bark', text: '又涌过来了！这召唤就没个完吗！' } ],
+        danger: [ { who: 'sera', text: '召唤物往{ally}那边涌过去了！快挡住！' } ],
+        last: [ { who: 'kasha', text: '只剩一个了！军势断了！' } ],
+      },
+    },
+    95: {
+      pre: [
+        { who: 'narrator', text: '第四点火光。被锁链缚住的黑色骑士抬起了头。' },
+        { who: 'boss', text: '人类啊。只问一件事。人类，究竟是什么？' },
+        { who: 'boss', text: '我曾想成为人类。因此，我被列为禁忌。' },
+        { who: 'commander', text: '……为什么想成为人类？' },
+        { who: 'boss', text: '不知道。这个答案，我要在与你们的战斗中寻找。' },
+      ],
+      post: [
+        { who: 'boss', text: '向倒下的同伴伸出手……这就是人类吗？' },
+        { who: 'commander', text: '嗯。至少我们是这么想的。' },
+        { who: 'boss', text: '那么……在最后……我是否……有那么一点相像……' },
+        { who: 'sera', text: '……安息吧。这是我的祈祷。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '先清掉锁链周围的护卫！孤立那名骑士！' } ],
+        boss: [ { who: 'boss', text: '让我看看。你们究竟是什么。' } ],
+        wave: [ { who: 'kasha', text: '锁链那头来了增援！注意后面！' } ],
+        danger: [ { who: 'bark', text: '{ally}！那骑士是动真格的，快退！' } ],
+        last: [ { who: 'sera', text: '只剩一个了。把答案告诉他吧。' } ],
+      },
+    },
+    96: {
+      pre: [
+        { who: 'narrator', text: '四名臣属倒下后，通往王座的回廊开启了。' },
+        { who: 'ordin', text: '此回廊尽头，便是君主近卫队把守之门。' },
+        { who: 'kasha', text: '这回廊是活的。墙壁在动。' },
+        { who: 'commander', text: '别停下，继续走。别被墙壁困住。' },
+      ],
+      post: [
+        { who: 'narrator', text: '回廊尽头，一扇泛着黑光的巨门显露出来。' },
+        { who: 'ordin', text: '须在那扇门前布下最后的阵地。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '守住回廊向前推进！队伍别断开！' } ],
+        wave: [ { who: 'bark', text: '敌人从墙里蹦出来了！' } ],
+        danger: [ { who: 'sera', text: '{ally}，回廊在变窄！快躲开！' } ],
+        last: [ { who: 'kasha', text: '只剩一个了。已经到门前了。' } ],
+      },
+    },
+    97: {
+      pre: [
+        { who: 'narrator', text: '王座之门前。战团布下了最后的阵地。' },
+        { who: 'ordin', text: '解开门上的封印需要时间。请护住老夫。' },
+        { who: 'kasha', text: '没想到会有保护这老头的一天。' },
+        { who: 'commander', text: '守住阵地。直到奥尔丁解开封印。' },
+      ],
+      post: [
+        { who: 'ordin', text: '封印几近解开。只剩最后一层。' },
+        { who: 'ordin', text: '那最后一层……由老夫来承担。' },
+        { who: 'commander', text: '这话什么意思，奥尔丁？' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '死守最后的阵地！保护奥尔丁！' } ],
+        wave: [ { who: 'kasha', text: '近卫队从门后冲出来了！' } ],
+        danger: [ { who: 'sera', text: '{ally}！退到阵地里面！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！阵地安然无恙！' } ],
+      },
+    },
+    98: {
+      pre: [
+        { who: 'ordin', text: '十五年前，老夫丢下阁下的双亲逃走了。' },
+        { who: 'ordin', text: '此后老夫所做的一切，皆源于那份恐惧。' },
+        { who: 'ordin', text: '最后的封印，唯有以魔导师之命方能解开。' },
+        { who: 'commander', text: '你说过，一死了之的偿还太轻松了。' },
+        { who: 'ordin', text: '所以趁老夫尚在人世，由老夫来开路。请守护到最后。' },
+      ],
+      post: [
+        { who: 'narrator', text: '最后的封印解开，奥尔丁的身躯化作光芒消散。' },
+        { who: 'ordin', text: '请替老夫……向阁下的双亲……道一声歉……' },
+        { who: 'commander', text: '……你自己去道歉。总有一天，在彼岸。' },
+        { who: 'narrator', text: '门开了。门的那一边，近卫队长正在等候。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '趁奥尔丁解封印，我们来开路！' } ],
+        wave: [ { who: 'kasha', text: '近卫队盯上奥尔丁了！挡住！' } ],
+        danger: [ { who: 'sera', text: '后方被突破了！大家去{ally}那边！' } ],
+        last: [ { who: 'commander', text: '只剩一个。奥尔丁，再坚持一下！' } ],
+      },
+    },
+    99: {
+      pre: [
+        { who: 'narrator', text: '王座前厅。漆黑的战士将大剑插在地上，伫立不动。' },
+        { who: 'boss', text: '越过了四名臣属吗。然而，吾乃君主之盾。' },
+        { who: 'boss', text: '想触及君主，就得先将我击碎。' },
+        { who: 'commander', text: '那就击碎你。大家一起。' },
+        { who: 'bark', text: '绷带拆了，老大。俺会一直站在最前面。' },
+      ],
+      post: [
+        { who: 'boss', text: '盾……碎了……君主大人……钥匙来了……' },
+        { who: 'narrator', text: '最后一扇门无声地开启了。' },
+        { who: 'sera', text: '{commander}，手给我。大家一起进去吧。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '清掉近卫队，包围那名战士！' } ],
+        boss: [ { who: 'boss', text: '以君主之名，止步于此！' } ],
+        wave: [ { who: 'kasha', text: '最后的近卫队！这后面就只有君主了！' } ],
+        danger: [ { who: 'sera', text: '{ally}！那把大剑绝不能硬接！' } ],
+        last: [ { who: 'bark', text: '只剩一个了！已经到门前了！' } ],
+      },
+    },
+    100: {
+      pre: [
+        { who: 'narrator', text: '魔界的王座。那里坐着一名头戴战盔的巨大战士。' },
+        { who: 'boss', text: '十五年前，有两个人类关上了我的门。' },
+        { who: 'boss', text: '那个孩子竟自己送上门来了。来献上钥匙吗。' },
+        { who: 'commander', text: '我不是来献钥匙的。是来上锁的。' },
+        { who: 'commander', text: '不是靠我一个人，而是靠在场所有人的手。' },
+        { who: 'boss', text: '区区人类，聚集多少都一样，终将被逐一折断。' },
+      ],
+      post: [
+        { who: 'boss', text: '为何……折断一只……就有另一只手握住……' },
+        { who: 'narrator', text: '指挥官放下指挥杖，摊开带疤的手掌，众人的手叠了上去。' },
+        { who: 'commander', text: '这就是钥匙。是我们所有人。' },
+        { who: 'narrator', text: '钥匙转动，魔界君主的王座沉没在光芒之中。' },
+      ],
+      battle: {
+        start: [ { who: 'commander', text: '最后的命令！松光战团，全员一起！' } ],
+        boss: [ { who: 'boss', text: '来吧，钥匙。我会将你的一切尽数折断。' } ],
+        wave: [ { who: 'kasha', text: '王座的影子站起来了！最后的军势！' } ],
+        danger: [ { who: 'sera', text: '{ally}！别倒下！有我们在！' } ],
+        last: [ { who: 'bark', text: '只剩一个了，老大！大家一起，了结它！' } ],
+      },
+    },
+  },
+};

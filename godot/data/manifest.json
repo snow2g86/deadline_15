@@ -876,11 +876,11 @@
     "file": "lang/ko.json",
     "type": "object",
     "count": 50,
-    "leaves": 2322,
+    "leaves": 2326,
     "sources": [
      {
       "file": "data/language/ko/common.js",
-      "sha1": "c6cfc786d0fce6fd4b5a8f8691d015669e944404"
+      "sha1": "b0715e289cdb608929731d225ba0acf41534056d"
      },
      {
       "file": "data/language/ko/battle.js",
@@ -892,7 +892,7 @@
      },
      {
       "file": "data/language/ko/classes.js",
-      "sha1": "e4534118539ac06dd6c395c9cf325454a196edd0"
+      "sha1": "d836b1911448e7bf524ca3aa3d5d2dadd1915375"
      },
      {
       "file": "data/language/ko/skills.js",
@@ -908,7 +908,7 @@
      },
      {
       "file": "data/language/ko/character.js",
-      "sha1": "975226e45c733098ca91339e31a782e4abb43684"
+      "sha1": "933f99a8670acba9c0a6bb1c5097f14a40faa7ca"
      },
      {
       "file": "data/language/ko/gear.js",
@@ -924,11 +924,11 @@
     "file": "lang/en.json",
     "type": "object",
     "count": 51,
-    "leaves": 2329,
+    "leaves": 2333,
     "sources": [
      {
       "file": "data/language/en/common.js",
-      "sha1": "da319ea9b0c272188ac3de0d8446c5f884a4802e"
+      "sha1": "8bf60c9d6e23a6efbab7ce6c4b7c1ad52672f709"
      },
      {
       "file": "data/language/en/battle.js",
@@ -940,7 +940,7 @@
      },
      {
       "file": "data/language/en/classes.js",
-      "sha1": "8a348d6205b0ff15e5774a6f018ae27a72f3da23"
+      "sha1": "13f687d306f1ed3ff77cbdbc79b0ce777e6a716e"
      },
      {
       "file": "data/language/en/skills.js",
@@ -956,7 +956,7 @@
      },
      {
       "file": "data/language/en/character.js",
-      "sha1": "a93f46eb20c30a8bc0c93610cc9a6e2aa70a943e"
+      "sha1": "1f912adf15e36004a98a81cb5c8213001e2d9906"
      },
      {
       "file": "data/language/en/gear.js",
@@ -972,11 +972,11 @@
     "file": "lang/es.json",
     "type": "object",
     "count": 51,
-    "leaves": 2329,
+    "leaves": 2333,
     "sources": [
      {
       "file": "data/language/es/common.js",
-      "sha1": "12c2a1ffcd63c7813e63fe70657e9123298c3989"
+      "sha1": "4203fdc51a973a722180e9d66bdb9c933a76b981"
      },
      {
       "file": "data/language/es/battle.js",
@@ -988,7 +988,7 @@
      },
      {
       "file": "data/language/es/classes.js",
-      "sha1": "9ddae3cd6befe087b83b488323d1bca1a24ea521"
+      "sha1": "84c1696c03a42dbadc3760883807c806e2bc252f"
      },
      {
       "file": "data/language/es/skills.js",
@@ -1004,7 +1004,7 @@
      },
      {
       "file": "data/language/es/character.js",
-      "sha1": "de3ce193738f7fe3cf9798c60514ce909a0cb3eb"
+      "sha1": "14c7052370685cdd751d0efdb4e1290d8a95f7e4"
      },
      {
       "file": "data/language/es/gear.js",
@@ -1013,6 +1013,150 @@
      {
       "file": "data/language/es/codex.js",
       "sha1": "8ddb4c46cf4ca9a11418830f85473b4a57824017"
+     }
+    ]
+   },
+   "ja": {
+    "file": "lang/ja.json",
+    "type": "object",
+    "count": 50,
+    "leaves": 2326,
+    "sources": [
+     {
+      "file": "data/language/ja/common.js",
+      "sha1": "04fbf144e12891af6a8e5e1ab47715764c4fc2f7"
+     },
+     {
+      "file": "data/language/ja/battle.js",
+      "sha1": "ed315cac2d2b7ff3e5a8de085efcea5ccea33748"
+     },
+     {
+      "file": "data/language/ja/stages.js",
+      "sha1": "1ed43c476d720d34005bbce79a0d1e334920f0df"
+     },
+     {
+      "file": "data/language/ja/classes.js",
+      "sha1": "2d5421bcd814e8e9ac9e932cbb9fb1ec37484f4d"
+     },
+     {
+      "file": "data/language/ja/skills.js",
+      "sha1": "bb06ba666597035507441fce324db808b04a7c7b"
+     },
+     {
+      "file": "data/language/ja/items.js",
+      "sha1": "2e3519d3ab501d506f215b9a8d1ca78c38cc0d21"
+     },
+     {
+      "file": "data/language/ja/ui.js",
+      "sha1": "194d5df92cdd1586e746aa5cc1e30d94de0f885e"
+     },
+     {
+      "file": "data/language/ja/character.js",
+      "sha1": "9057b5afa84298aff1b0f29b94007691eb844549"
+     },
+     {
+      "file": "data/language/ja/gear.js",
+      "sha1": "8697dd4011be2cd464008ebe32ecad3667d1f796"
+     },
+     {
+      "file": "data/language/ja/codex.js",
+      "sha1": "47a449270a34c5c6eadce3e6bdb03c0031ce1ae3"
+     }
+    ]
+   },
+   "zh-CN": {
+    "file": "lang/zh-CN.json",
+    "type": "object",
+    "count": 50,
+    "leaves": 2326,
+    "sources": [
+     {
+      "file": "data/language/zh-CN/common.js",
+      "sha1": "5d5a0f542ed336cc2c3eae3fd02dafd8aae3570f"
+     },
+     {
+      "file": "data/language/zh-CN/battle.js",
+      "sha1": "7ee41ac1e109d742dba9e7280a5fefcc299c2383"
+     },
+     {
+      "file": "data/language/zh-CN/stages.js",
+      "sha1": "1258a5a04aac22819e4f469cb96419e467edd655"
+     },
+     {
+      "file": "data/language/zh-CN/classes.js",
+      "sha1": "b305ed90008899db57322f0f879012176cacea9f"
+     },
+     {
+      "file": "data/language/zh-CN/skills.js",
+      "sha1": "a6e79a246b129ded47ec9e5a3fd90d4595a4452a"
+     },
+     {
+      "file": "data/language/zh-CN/items.js",
+      "sha1": "527e43a3a3f332f3d750e71a07c3063a6401f62d"
+     },
+     {
+      "file": "data/language/zh-CN/ui.js",
+      "sha1": "ca0e96d371859de727104561c00761c7fa7eb8f9"
+     },
+     {
+      "file": "data/language/zh-CN/character.js",
+      "sha1": "dc88d7fdfb490790f967edc31c176546d53d8d16"
+     },
+     {
+      "file": "data/language/zh-CN/gear.js",
+      "sha1": "55c636b17b4760c386a9f2c2d2a62daecfbbf404"
+     },
+     {
+      "file": "data/language/zh-CN/codex.js",
+      "sha1": "e0912c20fd5df89b9858cbb4b7f06d9ad1eeb45d"
+     }
+    ]
+   },
+   "zh-TW": {
+    "file": "lang/zh-TW.json",
+    "type": "object",
+    "count": 50,
+    "leaves": 2326,
+    "sources": [
+     {
+      "file": "data/language/zh-TW/common.js",
+      "sha1": "468b4cb88e0f1576c3e1f70565e057748a9faed1"
+     },
+     {
+      "file": "data/language/zh-TW/battle.js",
+      "sha1": "6aa2736c874d3f3981a02bae95dd3554308287ca"
+     },
+     {
+      "file": "data/language/zh-TW/stages.js",
+      "sha1": "4d253b18748b10b067405ee2033136967c6f67d1"
+     },
+     {
+      "file": "data/language/zh-TW/classes.js",
+      "sha1": "e7e131959a96fcb2ac47071628f6bbf87d366a41"
+     },
+     {
+      "file": "data/language/zh-TW/skills.js",
+      "sha1": "133f1a5b2ea85653636fc1e618313cb735f84e6d"
+     },
+     {
+      "file": "data/language/zh-TW/items.js",
+      "sha1": "18efa085692116353f65c027cc07f68996740b44"
+     },
+     {
+      "file": "data/language/zh-TW/ui.js",
+      "sha1": "a2ffee8275faa820ea7e686defc3e0e9d40c8619"
+     },
+     {
+      "file": "data/language/zh-TW/character.js",
+      "sha1": "8111eb6bf219f7d30a9b48227617705cbd23cd7a"
+     },
+     {
+      "file": "data/language/zh-TW/gear.js",
+      "sha1": "88d23d1f0f8376a4105c79bee7bbe514ec3b425a"
+     },
+     {
+      "file": "data/language/zh-TW/codex.js",
+      "sha1": "456e3e3f3b1bec5f91681579eb95dac6ba01772c"
      }
     ]
    }
@@ -1045,6 +1189,33 @@
    "episodes": 10,
    "leaves": 2600,
    "sha1": "8816b06cdfdd669f4aa149beab1f4089bbbae2e1"
+  },
+  "ja": {
+   "file": "story/ja.json",
+   "global": "STORY_JA",
+   "type": "object",
+   "count": 3,
+   "episodes": 10,
+   "leaves": 2600,
+   "sha1": "291676a4d83ff703bfa7ff562d7683eae900fdc1"
+  },
+  "zh-CN": {
+   "file": "story/zh-CN.json",
+   "global": "STORY_ZH-CN",
+   "type": "object",
+   "count": 3,
+   "episodes": 10,
+   "leaves": 2600,
+   "sha1": "381c9ab59614369c79d5a64dc4568f403d66bc44"
+  },
+  "zh-TW": {
+   "file": "story/zh-TW.json",
+   "global": "STORY_ZH-TW",
+   "type": "object",
+   "count": 3,
+   "episodes": 10,
+   "leaves": 2600,
+   "sha1": "6f0e2be63688de69e873ce1ec4cc834ebbca0f31"
   },
   "sample": {
    "file": "story/sample.json",

@@ -1,0 +1,89 @@
+{
+ "gd": {
+  "fail": {
+   "move_failed": "無法移動到該格",
+   "attack_failed": "無法攻擊該目標",
+   "no_resource": "資源不足",
+   "skill_failed": "無法使用技能",
+   "cannot_act": "無法行動",
+   "item_failed": "無法使用道具",
+   "cannot_undo": "無法復原",
+   "not_waiting": "目前不在等待輸入",
+   "bad_op": "無效指令",
+   "wrong_unit": "現在輪到其他單位行動",
+   "bad_dir": "無效面向",
+   "bad_skill": "無效技能",
+   "bad_item": "無效道具",
+   "bad_cell": "無效格子"
+  },
+  "buff": {
+   "fury_full": "怒氣已滿",
+   "disarm": "繳械",
+   "bleed": "流血",
+   "stun": "暈眩",
+   "freeze": "冰凍",
+   "root": "定身",
+   "summon_turns": "召喚持續",
+   "cursed": "詛咒",
+   "stealth_forest": "森林隱匿",
+   "atk_up": "攻擊強化",
+   "def_up": "防禦強化",
+   "atk_down": "攻擊削弱",
+   "def_down": "防禦削弱",
+   "fury_buff": "狂暴",
+   "iron_will": "鋼鐵意志",
+   "iron_phalanx": "鐵壁",
+   "poison": "中毒",
+   "regen": "再生",
+   "sanctuary": "聖域",
+   "shield": "護盾",
+   "evasion": "迴避",
+   "stealth": "隱匿",
+   "phalanx_def": "方陣防禦",
+   "tenacity": "毅力",
+   "sacrifice": "犧牲",
+   "curse": "詛咒",
+   "empower": "強化",
+   "channel_curse": "詛咒專注",
+   "channel_exalt": "激昂專注"
+  },
+  "tip": {
+   "impassable": "無法通行",
+   "move_cost": "移動消耗 {n}",
+   "height": "高度 {n}",
+   "forest_hide": "森林中的角色半透明・刺客隱匿",
+   "turns": "剩餘{n}回合",
+   "on_terrain": "地形：{t}",
+   "intent": "目標：{name}",
+   "passive": "被動",
+   "safe_zone": "寒氣結界 — 在此結束行動即不受環境傷害",
+   "lava": "熔岩 — 在相鄰格結束行動會燃燒",
+   "threat": "位於敵方威脅範圍內",
+   "fog": "視野外（迷霧）",
+   "shield_half": "護盾 ½"
+  },
+  "ai": {
+   "label": "AI：{style}・{target}",
+   "style_aggressive": "進攻型",
+   "style_defensive": "防守型",
+   "style_support": "輔助型",
+   "style_balanced": "均衡型",
+   "target_low_hp": "優先攻擊弱者",
+   "target_random_weak": "從弱者中隨機選擇",
+   "target_cluster": "瞄準密集處",
+   "target_nearest": "最近的目標",
+   "target_nearest_threat": "最近的威脅",
+   "target_never": "不攻擊",
+   "target_random": "隨機"
+  },
+  "settings": {
+   "reduce_motion": "減少動態效果",
+   "reduce_motion_tip": "關閉畫面震動、閃光、跳躍和攻擊動作",
+   "surrender_confirm": "投降後本場戰鬥將以失敗告終。確定要投降嗎？",
+   "surrender_pending": "演出結束後投降"
+  },
+  "result": {
+   "retry": "重新挑戰"
+  }
+ }
+}

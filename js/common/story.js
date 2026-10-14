@@ -11,7 +11,7 @@
 
   var SEEN_KEY = 'game_story_seen';
   // 대본 파일(data/story/story.<lang>.js)이 실제로 있는 언어. 새 언어 파일을 만들면 여기에 추가 (없는 파일 요청으로 404가 나지 않게)
-  var STORY_LANGS = ['ko', 'en', 'es'];
+  var STORY_LANGS = ['ko', 'en', 'es', 'ja', 'zh-CN', 'zh-TW'];
   var TYPE_MS = 28; // 한 글자 출력 간격(ms)
   var BATTLE_KINDS = ['start', 'wave', 'boss', 'danger', 'last'];
   // 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.png, docs/CAST.md)
@@ -30,7 +30,9 @@
     if (!lang) {
       try { var s = JSON.parse(Store.get('game_settings')); if (s && s.language) lang = s.language; } catch (_) {}
     }
-    return lang || 'ko';
+    // 둘 다 없으면 i18n.js 가 맞춘 문서 언어, 그것도 모르면 en (i18n.js 의 감지 기본값과 같음)
+    if (!lang) { var dl = document.documentElement.lang; lang = STORY_LANGS.indexOf(dl) !== -1 ? dl : 'en'; }
+    return lang;
   }
 
   function loadScript(src) {
@@ -196,7 +198,8 @@
     // 지휘관 이름: 로스터 지휘관(customName → name → 이름표) → 대본 기본값
     commanderName: function() {
       var ch = commanderChar();
-      if (ch) {
+      // 지휘관 설정(setup) 전의 customName 은 로스터를 만들 때 넣은 한국어 기본값이라 → 그 언어 대본의 이름을 씀
+      if (ch && ch.setup) {
         if (ch.customName) return ch.customName;
         if (ch.name) return ch.name;
         var names = tr('character.names', null);

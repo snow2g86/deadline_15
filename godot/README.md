@@ -18,7 +18,7 @@ godot/
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬) — 아래에 3a 전투 시험 실행기
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
-  scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시)
+  scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시) · fonts.gd(언어별 글꼴 사슬)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
@@ -27,13 +27,17 @@ godot/
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
                        CHAR_FIG·SPRITE_SHEETS·ATK_MOTIONS) · ui.json(NAV_TABS) · soul.json(SOUL_KEY)
-    lang/{ko,en,es}.json   언어 팩
-    lang_extra/{ko,en,es}.json   Godot 전용 번역 키 (gd.* — 손으로 관리. 웹 팩에 없는 키만 I18n 이 더함, 변환기·DataDB 검사는 건너뜀)
-    story/{ko,en,es,sample}.json   스토리 대본
+    lang/{ko,en,es,ja,zh-CN,zh-TW}.json   언어 팩 (언어 목록 = 웹 js/common/i18n.js _I18N_LANGS)
+    lang_extra/<언어>.json   Godot 전용 번역 키 (gd.* — 손으로 관리, 6개 언어 같은 키. 웹 팩에 없는 키만 I18n 이 더함, 변환기·DataDB 검사는 건너뜀.
+                       ja·zh 는 docs/i18n/glossary.*.md 용어)
+    story/{ko,en,es,ja,zh-CN,zh-TW,sample}.json   스토리 대본
     manifest.json      전역별 개수·원본 sha1·경고·특수값 위치 (DataDB 가 검증에 사용)
   assets/image/        웹 image/ 사본 (git 제외)
-  assets/fonts/        Noto Sans KR (가변 굵기, OFL — OFL.txt). git 에 올림. project.godot 기본 글꼴
-  tests/check_foundation.gd   머리 없는 시험
+  assets/fonts/        Noto Sans KR·JP·SC·TC (가변 굵기, OFL — OFL.txt 하나가 넷 모두의 라이선스, 같은 글). git 에 올림 (약 50MB).
+                       project.godot 기본 글꼴은 KR, 실행 중에는 scripts/core/fonts.gd 가 언어별 사슬로 바꿈 (아래 '글꼴')
+  tests/check_foundation.gd   머리 없는 시험 (6개 언어: 팩·대본·lang_extra 키 맞춤, 언어 감지, 글꼴 사슬)
+  tests/check_glyphs.gd        6개 언어 데이터의 모든 글자가 글꼴 사슬에 있는지 + 한자·가나가 그 언어 글꼴로 그려지는지 (두부 0)
+  tests/shots_lang6.gd         ja·zh-CN·zh-TW 전투 HUD·설정·대사 화면 사진 (창 모드 → tests/screens/lang6_godot_*.png)
   tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
   tests/replay_golden.gd   2b 시험: 황금 기록 22개를 GDScript 규칙으로 재생해 사건·난수까지 비교
   tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
@@ -86,7 +90,7 @@ node tools/export-godot-data.js --check
 
 ## 열기 · 실행
 
-- 편집기: Godot 4.5 에서 `godot/project.godot` 열기 → F5 (시작 화면: 제목, 데이터 모듈 개수, ko/en/es 버튼)
+- 편집기: Godot 4.5 에서 `godot/project.godot` 열기 → F5 (시작 화면: 제목, 데이터 모듈 개수, 6개 언어 버튼)
 - 명령줄: `/Applications/Godot.app/Contents/MacOS/Godot --path godot`
 
 ## 시험
@@ -96,6 +100,7 @@ node tools/export-godot-data.js --check
 ```
 
 마지막 줄이 `RESULT: PASS (n개 통과)` 이면 성공(종료 코드 0), 실패면 `RESULT: FAIL` 과 실패 항목 목록(종료 코드 1).
+글자 시험(6개 언어 × 모든 글자, 끝에 글꼴 읽기 시간·메모리 출력): `... --script res://tests/check_glyphs.gd`
 
 전투 규칙(2b) 시험 — 황금 기록 21개 재생 (`--only 이름`, `--external`, `--rng-log` 는 scripts/logic/README.md):
 
@@ -111,6 +116,26 @@ node tools/export-godot-data.js --check
 ```
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
+## 글꼴 (6개 언어)
+
+한·중·일 통합 한자는 같은 코드라도 언어마다 글자 모양이 달라서(例: 直·骨), 언어마다 맨 앞 글꼴을 바꿉니다 (웹 `css/common.css` 의 `:lang()` 과 같은 순서).
+
+| 언어 | 사슬 (맨 앞 → 대체) |
+|---|---|
+| ko · en · es | KR → JP → SC → TC |
+| ja | JP → KR → SC |
+| zh-CN | SC → TC → KR |
+| zh-TW | TC → SC → KR |
+
+- 어느 사슬이든 한글·가나·간체·번체가 다 있어, 플레이어가 입력한 이름이 두부(□)로 나오지 않습니다 (`tests/check_glyphs.gd`).
+- `Kit.font()`·`Kit.bold(w)` 는 `Fonts.weight(w)` — 굵기마다 **같은 객체**이고, 언어가 바뀌면 그 안의 `base_font`·`fallbacks` 만 바꿔 `changed` 를 보내므로
+  `add_theme_font_override` 로 붙인 글꼴도 바로 다시 그려집니다. 대체 글꼴도 같은 굵기(wght)로 만듭니다. 루트 창 테마 기본 글꼴도 같이 바뀌어 테마 없는 화면(시작 화면)도 언어 글꼴.
+- 화면 언어와 상관없이 특정 언어 글자 모양이 필요하면 `Fonts.for_lang("ja", 700)` (설정 창의 언어 이름 단추).
+- 비용 (M3 Max 실측): 파일 4개 47MB(KR 10 · JP 9 · SC 17 · TC 12). **시작할 때 4개를 모두 읽음**, 약 83ms.
+  정적 메모리는 약 **+80MB**(KR 16 · JP 16 · SC 32 · TC 16 — 파일 크기보다 큼).
+- 남은 과제(모바일): ko·en·es 데이터 글자는 KR 하나로 다 그려지므로, 모바일에서 메모리가 문제면 현재 언어에 필요 없는 대체 글꼴(JP·SC·TC)을
+  필요할 때(예: 그 언어로 바꿀 때·이름 입력 화면) 늦게 읽도록 바꿀 것. 아직 코드에는 없음.
+
 ## 오토로드 사용법
 
 ```gdscript
@@ -121,7 +146,9 @@ var hz: Dictionary = DataDB.module("hazards")["HAZARDS"]
 # 번역 (웹 t() 와 같은 점 키 · {이름} 자리표시자)
 I18n.t("hazard.safe_zone", {"i": "❄️", "r": 3})   # 항상 String (값이 배열·사전이면 키 그대로)
 I18n.t_raw("battle.loading_tips")                 # 웹 t() 와 똑같이: 배열·사전 값은 그대로 (Variant)
-I18n.set_language("en")          # game_settings.language 에 저장 + language_changed 신호
+I18n.set_language("ja")          # game_settings.language 에 저장 + 글꼴 사슬 바꿈 + language_changed 신호 (I18n.LANGS 6개)
+# 언어 고르기(웹 i18n.js 와 같음): 저장된 game_settings.language → 없으면 OS 언어 감지(I18n.detect_lang).
+#   ko·en·es·ja·zh(Hans/CN/SG→zh-CN, Hant/TW/HK/MO→zh-TW) 외의 언어(fr·de·pt 등)나 빈 값은 en
 I18n.t("gd.fail.move_failed")     # Godot 전용 키 (data/lang_extra — 웹 팩에 없는 키만 더해짐)
 
 # 저장 (웹 Store 와 같은 키 이름, 값은 문자열)

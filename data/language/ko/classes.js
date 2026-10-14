@@ -2,6 +2,7 @@ window._LANG_ko = window._LANG_ko || {};
 Object.assign(window._LANG_ko, {
     "commander_setup": {
         "title": "지휘관",
+        "default_name": "리안",
         "sub": "클랜을 이끌 지휘관을 정하세요",
         "male": "남성",
         "female": "여성",

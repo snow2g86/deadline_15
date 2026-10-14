@@ -7,6 +7,12 @@ var CommanderSetup = (function () {
     var r = getRoster();
     return { roster: r, ch: r.chars.find(function (c) { return c && c.cls === COMMANDER_CLS; }) };
   }
+  // 기본 이름: 언어 팩 commander_setup.default_name (= 그 언어 대본의 cast.commander.name), 없으면 COMMANDER_DEFAULT_NAME.
+  // 로스터가 만들 때 넣는 customName(COMMANDER_DEFAULT_NAME)은 아직 고르지 않은 값이라, setup 전에는 언어별 기본 이름을 보여 줌
+  function defaultName() {
+    var v = typeof t === 'function' ? t('commander_setup.default_name') : null;
+    return (typeof v === 'string' && v && v !== 'commander_setup.default_name') ? v : COMMANDER_DEFAULT_NAME;
+  }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   function open(onDone) {
@@ -25,7 +31,7 @@ var CommanderSetup = (function () {
           }).join('') +
         '</div>' +
         '<label class="cmd-name"><span>' + t('commander_setup.name') + '</span>' +
-          '<input maxlength="10" value="' + esc(x.ch.customName || COMMANDER_DEFAULT_NAME) + '" placeholder="' + esc(t('commander_setup.name_ph')) + '"></label>' +
+          '<input maxlength="10" value="' + esc((x.ch.setup && x.ch.customName) || defaultName()) + '" placeholder="' + esc(t('commander_setup.name_ph')) + '"></label>' +
         '<button class="cmd-ok">' + t('commander_setup.confirm') + '</button>' +
       '</div>';
     document.body.appendChild(ov);
@@ -34,7 +40,7 @@ var CommanderSetup = (function () {
     });
     var input = ov.querySelector('input');
     var done = function () {
-      var name = input.value.trim().slice(0, 10) || COMMANDER_DEFAULT_NAME;
+      var name = input.value.trim().slice(0, 10) || defaultName();
       var y = getCmd(); if (!y.ch) return;
       y.ch.gender = gender; y.ch.customName = name; y.ch.setup = true;
       saveRoster(y.roster);
@@ -48,6 +54,7 @@ var CommanderSetup = (function () {
 
   return {
     open: open,
+    defaultName: defaultName,
     // 아직 설정하지 않았으면 열기
     ensure: function (onDone) { var x = getCmd(); if (x.ch && !x.ch.setup) open(onDone); },
   };

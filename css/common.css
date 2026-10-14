@@ -1,10 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Cinzel:wght@700;900&display=swap');
+/* 글꼴 파일(Google Fonts)은 js/common/i18n.js 의 _loadFonts 가 현재 언어에 필요한 것만 <link> 로 넣음
+   (KR·Cinzel 은 늘, ja → +JP, zh-CN → +SC, zh-TW → +TC). render-blocking @import 를 쓰지 않음 */
+
+/* 본문 글꼴 — 한자(통합 한자)는 언어마다 글자 모양이 달라 <html lang>(i18n.js 가 맞춤)에 따라 앞 글꼴을 바꿈.
+   Google Fonts 는 unicode-range 조각으로 나눠 실제 쓰인 글자 조각만 받음. 사용: font-family: var(--font-text), sans-serif */
+:root { --font-text: 'Noto Sans KR', 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans TC'; }
+:root:lang(ja) { --font-text: 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC'; }
+:root:lang(zh-CN) { --font-text: 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR'; }
+:root:lang(zh-TW) { --font-text: 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans KR'; }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box
 }
+
+/* 폼 요소는 브라우저 기본 글꼴(시스템 글꼴)을 쓰므로 본문 글꼴 사슬(--font-text·:lang())을 이어받게 함.
+   크기·굵기는 각 클래스가 정하므로 font-family 만 상속 */
+button, input, select, textarea { font-family: inherit; }
 
 /* Splash */
 #splash {
@@ -71,7 +83,7 @@ body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-text), sans-serif;
   overflow: hidden;
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -576,7 +588,7 @@ body:not([data-page="battle"]) {
 .sp-icon{display:inline-flex;align-items:center;vertical-align:middle;margin-right:5px;font-style:normal}
 .sp-icon svg{width:14px;height:14px;stroke:var(--gold);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .sp-divider{height:1px;background:rgba(255,255,255,.06)}
-.sp-btn{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:10px;
+.sp-btn{font-family:var(--font-text),sans-serif;font-weight:700;font-size:10px;
   padding:5px 14px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.12);
   color:var(--text);background:rgba(255,255,255,.06);transition:all .15s}
 .sp-btn:hover{background:rgba(255,255,255,.12);border-color:var(--gold)}
@@ -768,7 +780,7 @@ body[data-page="skill-balance-report"] main {
   background:radial-gradient(ellipse at 50% 40%,rgba(30,41,70,.92),rgba(5,8,15,.96))}
 .cmd-box{width:min(440px,100%);background:#141b29;border:1px solid #2c3648;border-radius:16px;padding:22px 20px;text-align:center;
   box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.12) inset}
-.cmd-title{font-family:'Cinzel','Noto Sans KR',serif;font-size:22px;font-weight:800;color:#f5c45a;letter-spacing:.04em}
+.cmd-title{font-family:'Cinzel',var(--font-text),serif;font-size:22px;font-weight:800;color:#f5c45a;letter-spacing:.04em}
 .cmd-sub{color:#94a3b8;font-size:13px;margin:4px 0 16px}
 .cmd-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .cmd-card{background:#0f1520;border:2px solid #2c3648;border-radius:12px;padding:8px 6px 10px;cursor:pointer;color:#cbd5e1;font:inherit;font-weight:700;

@@ -2,7 +2,7 @@ extends RefCounted
 ## 전투 HUD 공용 부품 — 글꼴·상자 모양·작은 위젯 (웹 css/battle.css 의 색·모양을 옮김)
 ##  Portrait(원형 얼굴 크롭) · IconRect(아이콘 + 등급 테두리) · Bar(막대) · VecIcon(웹 SVG 단추 그림을 선으로) · Kit.box/label/button
 
-const FONT_PATH := "res://assets/fonts/NotoSansKR-VariableFont_wght.ttf"
+const Fonts := preload("res://scripts/core/fonts.gd")
 const GOLD := Color("f0c040")
 const GOLD_D := Color("b8860b")
 const TEXT := Color("e5e7eb")
@@ -11,24 +11,14 @@ const RED := Color("ef4444")
 const PANEL := Color(17 / 255.0, 24 / 255.0, 39 / 255.0, 0.96)
 const RES_COLOR := {"mana": Color("4488ff"), "energy": Color("f0c040"), "fury": Color("ff6644")}
 
-static var _font: FontFile
-static var _bold: Dictionary = {}
-
-
-static func font() -> FontFile:
-	if _font == null:
-		_font = load(FONT_PATH)
-	return _font
+## 글꼴은 언어별 사슬 (scripts/core/fonts.gd) — 언어가 바뀌면 같은 객체 안의 사슬이 바뀌어 바로 다시 그려짐
+static func font() -> Font:
+	return Fonts.weight(Fonts.REGULAR)
 
 
 ## 굵기 (wght 100~900) — 같은 굵기는 한 번만 만듦
 static func bold(w: int = 800) -> Font:
-	if not _bold.has(w):
-		var fv := FontVariation.new()
-		fv.base_font = font()
-		fv.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): w}
-		_bold[w] = fv
-	return _bold[w]
+	return Fonts.weight(w)
 
 
 static func box(bg: Color, border: Color = Color(0, 0, 0, 0), radius: int = 6, bw: int = 1, mx: int = 8, my: int = 4) -> StyleBoxFlat:

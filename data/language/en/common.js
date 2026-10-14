@@ -46,9 +46,12 @@ Object.assign(window._LANG_en, {
         "game_speed": "Game Speed",
         "reset_all": "Reset All Data",
         "licenses": "Open Source Licenses",
-        "language_ko": "\ud55c\uad6d\uc5b4 (Korean)",
+        "language_ko": "한국어 (Korean)",
         "language_en": "English",
-        "language_es": "Espa\u00f1ol"
+        "language_es": "Español",
+        "language_ja": "日本語 (Japanese)",
+        "language_zh-CN": "简体中文 (Simplified Chinese)",
+        "language_zh-TW": "繁體中文 (Traditional Chinese)"
     },
     "compendium": {
         "title_class": "\ud83d\udcd6 Class Compendium",

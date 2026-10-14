@@ -2,12 +2,13 @@ extends Control
 ## 시작 화면 (1단계 기초 확인용)
 ##  - 게임 제목·메뉴 이름을 I18n 으로 표시
 ##  - 읽어 들인 데이터 모듈과 전역 개수, DataDB 검증 결과 표시
-##  - ko / en / es 버튼으로 언어 바꾸기 (Store 의 game_settings.language 에 저장)
+##  - 6개 언어(I18n.LANGS) 단추로 언어 바꾸기 (Store 의 game_settings.language 에 저장)
 ##  - (3a) 전투 시험 실행기: 스테이지·시드·파티(저장된 파티 또는 디버그 세이브)를 골라 전투 장면으로
 ## 화면 코드는 여기만: 데이터·규칙은 DataDB / scripts/logic 쪽에 둔다.
 
 const BattleScene := preload("res://scripts/battle/battle_scene.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
+const _FontsT := preload("res://scripts/core/fonts.gd")
 ## 디버그 세이브로 쓸 수 있는 황금 기록 (tests/golden — 가짜 세이브·파티가 들어 있음)
 const DEBUG_SAVES := ["balanced_s05", "legion5_s09", "assassins_s06", "knights_s11", "boss_s10", "abyss_s19", "siege_items_s13", "gear_s15", "swamp_s21", "drill_s35"]
 
@@ -63,8 +64,10 @@ func _build() -> void:
 	box.add_child(row)
 	for code: String in I18n.SUPPORTED:
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(170, 44)
+		b.custom_minimum_size = Vector2(150, 44)
 		b.toggle_mode = true
+		# 언어 이름은 그 언어 글꼴로 (화면 언어와 상관없이 맞는 한자 모양)
+		b.add_theme_font_override("font", _FontsT.for_lang(code))
 		b.pressed.connect(I18n.set_language.bind(code))
 		row.add_child(b)
 		_lang_buttons[code] = b
@@ -85,7 +88,9 @@ func _refresh() -> void:
 
 	for code: String in _lang_buttons.keys():
 		var b: Button = _lang_buttons[code]
-		b.text = I18n.t("settings.language_" + code)
+		var full := I18n.t("settings.language_" + code)
+		b.text = full.substr(0, full.find(" (")) if full.find(" (") > 0 else full
+		b.tooltip_text = full
 		b.set_pressed_no_signal(code == I18n.current_lang)
 
 	if DataDB.is_ok():
