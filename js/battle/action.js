@@ -625,9 +625,7 @@ const ActionManager = {
           inv.splice(invIdx, 1);
           S._battlePotions.splice(potion.idx, 1);
           S._battlePotionIndices.splice(potion.idx, 1);
-          for (let i = 0; i < S._battlePotionIndices.length; i++) {
-            if (S._battlePotionIndices[i] > invIdx) S._battlePotionIndices[i]--;
-          }
+          this._invRemoved(invIdx);
         }
         saveInventory(inv);
       }
@@ -636,6 +634,15 @@ const ActionManager = {
     S._curPotion = null; S.potionTargets = [];
     u.ha = true;
     Fx.hideActionMenu(); Fx.redrawUnits(); this.clrSel(); TurnManager.endUnitTurn(u);
+  },
+
+  // 전투 중 인벤토리에서 invIdx 칸을 지운 뒤: 물약·공성 아이템 번호 목록 둘 다 뒤쪽 번호를 하나씩 당김
+  // (예전엔 지운 쪽 목록만 고쳐, 공성 아이템을 쓴 뒤 물약이 줄지 않거나 다른 아이템 수량을 깎는 문제가 있었음)
+  _invRemoved(invIdx) {
+    const S = GameStore;
+    [S._battlePotionIndices, S._siegeInvIndices].forEach(list => {
+      for (let i = 0; i < list.length; i++) if (list[i] > invIdx) list[i]--;
+    });
   },
 
   actSiege(idx) {
@@ -703,9 +710,7 @@ const ActionManager = {
       if (invIdx >= 0 && invIdx < inv.length) { inv.splice(invIdx, 1); saveInventory(inv); }
     }
     S._siegeItems.splice(siege.idx, 1); S._siegeInvIndices.splice(siege.idx, 1);
-    for (let i = 0; i < S._siegeInvIndices.length; i++) {
-      if (S._siegeInvIndices[i] > invIdx) S._siegeInvIndices[i]--;
-    }
+    this._invRemoved(invIdx);
 
     if (def.effect !== 'climb') u.ha = true;
     S._curSiege = null;

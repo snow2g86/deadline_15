@@ -30,6 +30,7 @@ godot/
     manifest.json      전역별 개수·원본 sha1·경고·특수값 위치 (DataDB 가 검증에 사용)
   assets/image/        웹 image/ 사본 (git 제외)
   tests/check_foundation.gd   머리 없는 시험
+  tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
 ```
 
 ## 처음 한 번 / 웹 데이터가 바뀔 때마다

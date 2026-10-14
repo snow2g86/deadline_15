@@ -1,0 +1,27 @@
+{
+"format": "deadline15-battle-trace/1",
+"generator": "tools/battle-sim.js",
+"scenarios": [
+{"name":"balanced_s05","seed":1005,"stage":5,"result":"win","rounds":4,"actions":68,"events":489,"rngCalls":426,"sha1":"0a51ae0478c21ebc9877aace593fa5614c12f220"},
+{"name":"legion5_s09","seed":2009,"stage":9,"result":"win","rounds":5,"actions":54,"events":413,"rngCalls":249,"sha1":"3775d4b511f54b5d0e9a84ae87ac271cbd984b5c"},
+{"name":"assassins_s06","seed":3006,"stage":6,"result":"win","rounds":7,"actions":82,"events":514,"rngCalls":340,"sha1":"89f0eadac19e72c5cf9a53eca82ce2f2aad7f78a"},
+{"name":"mono_warrior_s03","seed":4003,"stage":3,"result":"win","rounds":4,"actions":39,"events":271,"rngCalls":324,"sha1":"1265d7c04f1fbcdf2b28b926ed1c663a02fa4a95"},
+{"name":"knights_s11","seed":5011,"stage":11,"result":"win","rounds":15,"actions":140,"events":917,"rngCalls":312,"sha1":"ac52899d7a78fd696c42e8e65f3a96a0b80cf8dd"},
+{"name":"boss_s10","seed":6010,"stage":10,"result":"win","rounds":5,"actions":71,"events":546,"rngCalls":252,"sha1":"186fd01de4da9f6a2fefce635e00d1d21e5b9333"},
+{"name":"daily_mage_normal","seed":7001,"stage":"daily:mage:1","result":"win","rounds":8,"actions":95,"events":684,"rngCalls":209,"sha1":"0fdd4418ce005af6243afa0fdc48a5f0007cc682"},
+{"name":"abyss_s19","seed":8019,"stage":19,"result":"win","rounds":8,"actions":117,"events":780,"rngCalls":219,"sha1":"d32f3e4c58ead218896b2885ab01ab1b76ea2726"},
+{"name":"loss_s30","seed":9030,"stage":30,"result":"lose","rounds":6,"actions":56,"events":316,"rngCalls":194,"sha1":"afc875e0ca913446eecb87d71c68ebf8d1f3d422"},
+{"name":"stall_passive_s02","seed":1102,"stage":2,"result":"stalled","rounds":7,"actions":65,"events":325,"rngCalls":395,"sha1":"888f1ee4c17623cb9fe4316e0e1171ec482ac9c1"},
+{"name":"siege_items_s13","seed":1213,"stage":13,"result":"win","rounds":6,"actions":70,"events":504,"rngCalls":219,"sha1":"2146ce0a0c3bd2c834fc229d127c95253e5a578f"},
+{"name":"gear_s15","seed":1329,"stage":15,"result":"win","rounds":7,"actions":86,"events":624,"rngCalls":262,"sha1":"938d6d5e7446109fe25fd9eb81b697a9b609128d"},
+{"name":"practice_s04","seed":1404,"stage":4,"result":"win","rounds":4,"actions":62,"events":427,"rngCalls":417,"sha1":"1355669cff9f444fa2efa9f4b13833fcbfce3243"},
+{"name":"mono_archer_s07","seed":1507,"stage":7,"result":"win","rounds":5,"actions":34,"events":274,"rngCalls":234,"sha1":"2c2630df38874e1be70013294b8bc49de475c73e"},
+{"name":"firstclear_s02","seed":1602,"stage":2,"result":"win","rounds":5,"actions":40,"events":319,"rngCalls":275,"sha1":"3a2b8128f97ce1e1fa5498522ade43b582b44f3b"},
+{"name":"swamp_s21","seed":1721,"stage":21,"result":"win","rounds":7,"actions":101,"events":705,"rngCalls":506,"sha1":"08342ad3501f4828e6c30a617d27f6630ebcbadb"},
+{"name":"loss_boss_s45","seed":1845,"stage":45,"result":"lose","rounds":10,"actions":92,"events":587,"rngCalls":284,"sha1":"6a8ce7ac46e423739df55caffd88832d318a295c"},
+{"name":"drill_s35","seed":7,"stage":35,"result":"win","rounds":9,"actions":101,"events":667,"rngCalls":254,"sha1":"3101450ef8575beb0ffe14521b7c9ba142ab0420"},
+{"name":"drill_s28","seed":2,"stage":28,"result":"win","rounds":11,"actions":117,"events":793,"rngCalls":278,"sha1":"7d064f416886670cced3448f7f606a1a87a128cb"},
+{"name":"gate_breach_s01","seed":1901,"stage":1,"result":"lose","rounds":22,"actions":200,"events":945,"rngCalls":122,"sha1":"59298215f772509dc2fc973207be206789586916"},
+{"name":"edge_inject_s11","seed":5111,"stage":11,"result":"win","rounds":9,"actions":75,"events":574,"rngCalls":244,"sha1":"47917774be39e4b82464244cb5d8bb1efb716797"}
+]
+}
