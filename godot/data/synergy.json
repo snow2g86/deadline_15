@@ -1,0 +1,202 @@
+{
+ "SYNERGY_MONO": {
+  "warrior": {
+   "icon": "🔥",
+   "eff": {
+    "atk": 2,
+    "def": 0.5
+   }
+  },
+  "knight": {
+   "icon": "🏰",
+   "eff": {
+    "def": 2,
+    "hp": 1.3,
+    "atk": 0.6
+   }
+  },
+  "archer": {
+   "icon": "🎯",
+   "eff": {
+    "range": 1,
+    "atk": 1.4,
+    "hp": 0.75
+   }
+  },
+  "mage": {
+   "icon": "🌌",
+   "eff": {
+    "atk": 1.6,
+    "hp": 0.75,
+    "def": 0.7
+   }
+  },
+  "priest": {
+   "icon": "🕊️",
+   "eff": {
+    "heal": 1.8,
+    "hp": 1.3,
+    "atk": 0.6
+   }
+  },
+  "assassin": {
+   "icon": "🌑",
+   "eff": {
+    "atk": 1.5,
+    "move": 1,
+    "hp": 0.7
+   }
+  },
+  "brawler": {
+   "icon": "🥊",
+   "eff": {
+    "hp": 1.4,
+    "atk": 1.3,
+    "def": 0.7
+   }
+  },
+  "lancer": {
+   "icon": "🛡️",
+   "eff": {
+    "def": 1.5,
+    "atk": 1.25,
+    "move": -1
+   }
+  },
+  "sapper": {
+   "icon": "🧨",
+   "eff": {
+    "atk": 1.35,
+    "hp": 1.2,
+    "def": 0.8
+   }
+  },
+  "shaman": {
+   "icon": "🪬",
+   "eff": {
+    "atk": 1.45,
+    "hp": 0.85
+   }
+  },
+  "summoner": {
+   "icon": "📜",
+   "eff": {
+    "atk": 1.45,
+    "hp": 0.8
+   }
+  },
+  "novice": {
+   "icon": "🌱",
+   "eff": {
+    "hp": 1.15,
+    "atk": 1.15,
+    "def": 1.15
+   }
+  }
+ },
+ "SYNERGY_LEGION": {
+  "classes": [
+   "lancer",
+   "shaman",
+   "summoner",
+   "sapper",
+   "brawler"
+  ],
+  "icon": "🗡️",
+  "part": {
+   "atk": 1.1,
+   "hp": 1.15,
+   "frag": 1.25
+  },
+  "full": {
+   "atk": 1.2,
+   "hp": 1.25,
+   "frag": 1.5
+  }
+ },
+ "SYNERGY_TRIO": {
+  "warrior": {
+   "atk": 1.2,
+   "def": 0.9
+  },
+  "knight": {
+   "def": 1.25
+  },
+  "archer": {
+   "atk": 1.15
+  },
+  "mage": {
+   "atk": 1.2,
+   "hp": 0.9
+  },
+  "priest": {
+   "heal": 1.3
+  },
+  "assassin": {
+   "atk": 1.2,
+   "hp": 0.9
+  },
+  "brawler": {
+   "hp": 1.15,
+   "atk": 1.1
+  },
+  "lancer": {
+   "def": 1.15,
+   "atk": 1.05
+  },
+  "sapper": {
+   "atk": 1.15
+  },
+  "shaman": {
+   "atk": 1.15
+  },
+  "summoner": {
+   "atk": 1.15
+  },
+  "novice": {
+   "hp": 1.1,
+   "atk": 1.05
+  }
+ },
+ "SYNERGY_ROLE": [
+  {
+   "id": "balanced",
+   "icon": "⚖️",
+   "eff": {
+    "hp": 1.1,
+    "def": 1.1
+   }
+  },
+  {
+   "id": "diverse",
+   "icon": "🌈",
+   "eff": {
+    "atk": 1.1,
+    "move": 1
+   }
+  },
+  {
+   "id": "artillery",
+   "icon": "💥",
+   "eff": {
+    "atk": 1.15
+   },
+   "to": "ranged"
+  },
+  {
+   "id": "vanguard",
+   "icon": "🐎",
+   "eff": {
+    "move": 1
+   },
+   "to": "melee"
+  },
+  {
+   "id": "bulwark",
+   "icon": "🧱",
+   "eff": {
+    "def": 1.1
+   }
+  }
+ ]
+}

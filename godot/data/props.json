@@ -1,0 +1,128 @@
+{
+ "PROP_ART": {
+  "tree_a": {
+   "h": 41
+  },
+  "tree_b": {
+   "h": 58
+  },
+  "pine": {
+   "h": 48
+  },
+  "grass": {
+   "h": 16
+  },
+  "stones": {
+   "h": 12
+  }
+ },
+ "TILE_PROPS": {
+  "forest": {
+   "art": [
+    "tree_a",
+    "tree_a",
+    "pine"
+   ],
+   "spots": [
+    [
+     0,
+     -0.55
+    ],
+    [
+     -0.5,
+     -0.05
+    ],
+    [
+     0.5,
+     -0.05
+    ],
+    [
+     0,
+     0.1
+    ],
+    [
+     -0.15,
+     0.5
+    ]
+   ],
+   "count": [
+    4,
+    5
+   ],
+   "spread": 0.25,
+   "scale": [
+    0.8,
+    1.1
+   ]
+  },
+  "plain": {
+   "art": [
+    "grass",
+    "grass",
+    "grass",
+    "stones"
+   ],
+   "spots": [
+    [
+     -0.45,
+     0
+    ],
+    [
+     0.45,
+     0
+    ],
+    [
+     0,
+     -0.45
+    ],
+    [
+     0,
+     0.45
+    ],
+    [
+     -0.2,
+     -0.2
+    ],
+    [
+     0.25,
+     0.2
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0.22,
+     -0.25
+    ],
+    [
+     -0.25,
+     0.22
+    ],
+    [
+     0.5,
+     0.3
+    ]
+   ],
+   "count": [
+    5,
+    8
+   ],
+   "spread": 0.3,
+   "scale": [
+    0.7,
+    1.15
+   ],
+   "chance": 0.6,
+   "ground": true
+  }
+ },
+ "PROP_THEME_FILTER": {
+  "desert": "sepia(.55) saturate(.8) brightness(1.05)",
+  "volcano": "sepia(.7) saturate(.5) brightness(.75)",
+  "frozen": "saturate(.35) brightness(1.2) hue-rotate(150deg)",
+  "swamp": "saturate(.7) brightness(.8)",
+  "ruins": "saturate(.75) brightness(.9)",
+  "abyss": "saturate(.4) brightness(.65) hue-rotate(220deg)"
+ }
+}

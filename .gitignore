@@ -14,3 +14,8 @@ tools/_work/
 # 아이콘 일러스트 원본 (tools/import-icons.py 가 image/icon/item 으로 변환)
 image/icon/src/
 image/character/story/src/
+
+# Godot 이전 (godot/README.md) — 그림은 tools/sync-godot-assets.sh 로 복사하는 사본, .godot/ 는 편집기 캐시
+godot/assets/
+godot/.godot/
+godot/export/
