@@ -3,6 +3,7 @@ extends RefCounted
 ##  계산 중 웹 함수가 공격자에 남기는 표시 값(_lastTactic·_lastCrit·방향)은 원래대로 되돌리고, 확률 요소는 웹 미리보기처럼 0.999(발동 안 함)로 본다.
 ##  E.q.preview_attack(a, t)   — 웹 Renderer.previewAttack + rPreview(투사체 차단)
 ##  E.q.move_cells(u) · attack_targets(u) · skill_targets(u, idx) · skill_status(u) · can_undo() · actions(u) · face_options(u) · threat_cells()
+##  (3a 추가) shove_cells(u) · potion_targets(u, idx) · siege_targets(u, idx)
 ##  E = battle_engine.gd
 
 const Js := preload("res://scripts/logic/js.gd")
@@ -157,6 +158,59 @@ func skill_status(u: Dictionary) -> Array:
 			o["reason"] = t["reason"]
 		out.append(o)
 	return out
+
+
+## 밀치기 대상 칸 [{x, y}] (웹 act_shove 의 atkT — 인접 적 중 밀 수 있는 것)
+func shove_cells(u: Dictionary) -> Array:
+	E.pure_begin()
+	var out: Array = []
+	for v: Dictionary in E.gu.shove_targets(u):
+		out.append({"x": v["x"], "y": v["y"]})
+	E.pure_end()
+	return out
+
+
+## 물약 대상 → { ok, cells([{x,y}]), debuff } (웹 act_potion 의 potionTargets — 사거리 안 아군, 약화 물약은 적)
+func potion_targets(u: Dictionary, idx: int) -> Dictionary:
+	var pots: Array = S["_battlePotions"]
+	if idx < 0 or idx >= pots.size():
+		return {"ok": false, "cells": [], "debuff": false}
+	var def: Variant = (D["BATTLE_POTIONS"] as Dictionary).get(pots[idx]["potionId"])
+	if def == null:
+		return {"ok": false, "cells": [], "debuff": false}
+	var is_debuff: bool = def["type"] == "debuff"
+	var cells: Array = []
+	for tu: Dictionary in S["units"]:
+		if tu["hp"] <= 0 or float(Js.mh(u["x"], u["y"], tu["x"], tu["y"])) > float(def["range"]):
+			continue
+		if (is_debuff and tu["team"] == "enemy") or (not is_debuff and tu["team"] == "ally"):
+			cells.append({"x": tu["x"], "y": tu["y"]})
+	return {"ok": not cells.is_empty(), "cells": cells, "debuff": is_debuff}
+
+
+## 공성 아이템 대상 → { ok, cells([{x,y}]), effect } (웹 act_siege 의 atkT — 사거리 안 성벽·성문(·바위)·물 칸)
+func siege_targets(u: Dictionary, idx: int) -> Dictionary:
+	var items: Array = S["_siegeItems"]
+	if idx < 0 or idx >= items.size():
+		return {"ok": false, "cells": [], "effect": ""}
+	var def: Variant = null
+	for d: Dictionary in D["SIEGE_ITEMS"]:
+		if d["id"] == items[idx]["siegeId"]:
+			def = d
+			break
+	if def == null:
+		return {"ok": false, "cells": [], "effect": ""}
+	var cells: Array = []
+	for r in int(D["ROWS"]):
+		for cc in int(D["COLS"]):
+			if float(Js.mh(u["x"], u["y"], cc, r)) > float(def["range"]):
+				continue
+			var tl: Variant = S["ter"][r][cc]
+			if (def["targetType"] == "wall" and (tl == "wall" or tl == "gate")) \
+					or (def["targetType"] == "wall_rock" and (tl == "wall" or tl == "gate" or tl == "rock")) \
+					or (def["targetType"] == "water" and tl == "water"):
+				cells.append({"x": cc, "y": r})
+	return {"ok": not cells.is_empty(), "cells": cells, "effect": str(def.get("effect", ""))}
 
 
 ## 이동 취소 가능 (방금 이동한 뒤, 아직 행동 전)

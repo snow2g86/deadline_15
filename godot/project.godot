@@ -35,6 +35,10 @@ window/stretch/aspect="expand"
 import/blender/enabled=false
 import/fbx/enabled=false
 
+[gui]
+
+theme/custom_font="res://assets/fonts/NotoSansKR-VariableFont_wght.ttf"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

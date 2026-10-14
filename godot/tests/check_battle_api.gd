@@ -111,6 +111,12 @@ func _query_all(eng: Object) -> int:
 	if u != null:
 		n += eng.q.actions(u).size()
 		n += 1 if eng.q.can_undo() else 0
+		# 3a 에서 더한 조회 (밀치기·물약·공성 아이템 대상)
+		n += eng.q.shove_cells(u).size()
+		for i2 in (eng.S["_battlePotions"] as Array).size():
+			n += (eng.q.potion_targets(u, i2)["cells"] as Array).size()
+		for i3 in (eng.S["_siegeItems"] as Array).size():
+			n += (eng.q.siege_targets(u, i3)["cells"] as Array).size()
 	n += eng.q.threat_cells().size()
 	n += eng.q.threat_cells(false).size()
 	return n

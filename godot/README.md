@@ -16,11 +16,12 @@
 godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
-  scenes/boot.tscn     시작 화면 (메인 씬)
+  scenes/boot.tscn     시작 화면 (메인 씬) — 아래에 3a 전투 시험 실행기
+  scenes/battle/battle.tscn   전투 장면 (3a 뼈대 — scripts/battle/README.md)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
-  scripts/battle/      (2단계~) 전투 화면
+  scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생 — scripts/battle/README.md)
   scripts/ui/          화면 스크립트 (boot.gd)
   data/                변환된 JSON (git 에 올림)
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
@@ -30,10 +31,13 @@ godot/
     story/{ko,en,es,sample}.json   스토리 대본
     manifest.json      전역별 개수·원본 sha1·경고·특수값 위치 (DataDB 가 검증에 사용)
   assets/image/        웹 image/ 사본 (git 제외)
+  assets/fonts/        Noto Sans KR (가변 굵기, OFL — OFL.txt). git 에 올림. project.godot 기본 글꼴
   tests/check_foundation.gd   머리 없는 시험
   tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
   tests/replay_golden.gd   2b 시험: 황금 기록 22개를 GDScript 규칙으로 재생해 사건·난수까지 비교
   tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
+  tests/check_battle_scene.gd  3a: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 → 결과가 같은지
+  tests/perf_battle_scene.gd   3a: 창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340)
 ```
 
 ## 처음 한 번 / 웹 데이터가 바뀔 때마다
@@ -95,6 +99,11 @@ node tools/export-godot-data.js --check
 ```bash
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd            # 22개 (-- --resume: 모든 입력 대기마다 저장·복원)
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_api.gd         # 엔진 조회 API·command·사본·plan_rule
+```
+전투 장면(3a) 시험 — 화면 입구로 황금 기록 22개 재생 (`-- --smoke` 는 여러 지도 연기 시험, scripts/battle/README.md):
+
+```bash
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_scene.gd
 ```
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
