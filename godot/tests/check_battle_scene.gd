@@ -9,6 +9,8 @@ extends SceneTree
 ##  안내 줄: 진짜 실패한 명령 뒤엔 메뉴로 돌아와도(다음 프레임까지) 실패 안내가 남고, 정상 명령·회피된 공격 뒤엔 안내가 없어야 함
 ##  끝에 회귀 시험 하나: rotate:boss_s10 — 실제 연출 속도(8x)로 재생하며 유닛이 움직일 때마다 카메라를 돌려, 멈춘 유닛이 늘 자기 칸에 있는지
 ##  기본은 연출 없이(speed 0 — 재생 처리기는 모두 돌지만 기다리지 않음). --speed 4 처럼 주면 실제 연출 속도로 (느림)
+##  (3b) HUD·연출·스토리 대사를 모두 켠 채 재생: 스토리는 story=auto (대사를 프레임마다 저절로 넘김 — 재생을 붙잡는 경로를 그대로 지남).
+##       끝나면 결과 화면이 떠야 하고(이긴 판은 클랜원 경험치 줄), 재생한 스토리 장면 수를 출력 (보스전 등에서 0 이면 실패)
 
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const BattleScene := preload("res://scripts/battle/battle_scene.gd")
@@ -20,6 +22,7 @@ const MAX_FRAMES := 200000
 const ROTATE_SCENARIO := "boss_s10"
 
 var _only: PackedStringArray = PackedStringArray()
+var _story_total := 0
 var _speed := 0.0
 ## --smoke: 황금 기록 대신 테마·진형이 다른 스테이지들을 디버그 세이브로 띄워 '방어 태세'만 반복 (화면 코드가 모든 지도에서 오류 없이 도는지)
 var _smoke := false
@@ -42,7 +45,7 @@ func _initialize() -> void:
 
 
 func _smoke_main() -> void:
-	print("── 3a 전투 장면 연기 시험 (여러 지도·진형, 방어 태세만) ──")
+	print("── 3b 전투 장면 연기 시험 (여러 지도·진형, 방어 태세만 · HUD·스토리 켬) ──")
 	for sid: int in SMOKE_STAGES:
 		var cfg := BattleScene.golden_cfg("balanced_s05")
 		cfg["stage"] = {"id": sid}
@@ -50,6 +53,7 @@ func _smoke_main() -> void:
 		cfg["maxRounds"] = 6
 		cfg["speed"] = _speed
 		cfg["seed"] = 100 + sid
+		cfg["story"] = "auto"
 		BattleScene.pending = cfg
 		var scene: Node = (load(SCENE) as PackedScene).instantiate()
 		root.add_child(scene)
@@ -74,7 +78,7 @@ func _smoke_main() -> void:
 
 
 func _main() -> void:
-	print("── DEADLINE 15 · 3a 전투 장면 시험 (화면 입구로 황금 기록 재생) ──")
+	print("── DEADLINE 15 · 3b 전투 장면 시험 (화면 입구로 황금 기록 재생 · HUD·연출·스토리 켬) ──")
 	var index: Dictionary = JsonExact.parse(FileAccess.get_file_as_string(GOLDEN + "index.json"))
 	var rows: Array = []
 	var npass := 0
@@ -104,6 +108,10 @@ func _main() -> void:
 		if rr["ok"]:
 			npass += 1
 	print("")
+	print("재생한 스토리 장면 합계 %d" % _story_total)
+	if _story_total == 0 and (_only.is_empty() or _only.has("boss_s10")):
+		print("[story] FAIL 스토리 장면이 하나도 재생되지 않음")
+		rows.append({"name": "story", "ok": false, "cmds": 0, "cmds_done": 0, "events": 0, "ms": 0})
 	print("시나리오                 결과   명령     사건      시간")
 	for r2: Dictionary in rows:
 		print("%-24s %-6s %-8s %-9s %5dms" % [r2["name"], "PASS" if r2["ok"] else "FAIL", "%d/%d" % [r2["cmds_done"], r2["cmds"]], str(r2["events"]), r2["ms"]])
@@ -128,6 +136,7 @@ func _run_one(name: String, rotate: bool = false) -> Dictionary:
 	cfg["record"] = true
 	cfg["speed"] = 8.0 if rotate else _speed
 	cfg["source"] = "test"
+	cfg["story"] = "auto"
 	BattleScene.pending = cfg
 	var rotations := 0
 	var misplaced := 0
@@ -208,6 +217,23 @@ func _run_one(name: String, rotate: bool = false) -> Dictionary:
 		fail = "이동 중 회전: 어긋난 프레임 %d · 회전 %d번" % [misplaced, rotations]
 	if fail == "":
 		fail = _compare(gold, scene)
+	# 결과 화면 (승리 뒤 스토리가 있으면 대사가 끝난 다음)
+	if fail == "":
+		var wf := 0
+		while not scene.ui.result_view.visible and wf < 3000:
+			await process_frame
+			wf += 1
+		if not scene.ui.result_view.visible:
+			fail = "결과 화면이 뜨지 않음"
+		else:
+			var rm: Dictionary = scene._result_model()
+			if str(rm["title"]) == "" or (rm["buttons"] as Array).is_empty():
+				fail = "결과 화면 내용이 비었음 %s" % str(rm)
+			elif scene.result.get("result") == "win" and not (scene.result.get("rewards", {}).get("exp", []) as Array).is_empty() and (rm["exp"] as Array).is_empty():
+				fail = "이긴 판인데 결과 화면에 경험치 줄이 없음"
+	_story_total += scene.story_log.size()
+	if not scene.story_log.is_empty():
+		print("[%s] 스토리 장면 %s" % [name, ",".join(scene.story_log)])
 	if hint_fail + hint_pass_over > 0:
 		print("[%s] 안내 줄: 실패 안내 %d번 · 차례 넘어감(안내 없음) %d번" % [name, hint_fail, hint_pass_over])
 	if rotate:
@@ -323,6 +349,7 @@ func _hint_probe() -> Dictionary:
 	var cfg := BattleScene.golden_cfg("balanced_s05")
 	cfg["speed"] = 0.0
 	cfg["source"] = "test"
+	cfg["story"] = "auto"
 	BattleScene.pending = cfg
 	var scene: Node = (load(SCENE) as PackedScene).instantiate()
 	root.add_child(scene)

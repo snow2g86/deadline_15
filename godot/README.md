@@ -17,17 +17,18 @@ godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬) — 아래에 3a 전투 시험 실행기
-  scenes/battle/battle.tscn   전투 장면 (3a 뼈대 — scripts/battle/README.md)
+  scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
-  scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생 — scripts/battle/README.md)
+  scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
   scripts/ui/          화면 스크립트 (boot.gd)
   data/                변환된 JSON (git 에 올림)
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
                        CHAR_FIG·SPRITE_SHEETS·ATK_MOTIONS) · ui.json(NAV_TABS) · soul.json(SOUL_KEY)
     lang/{ko,en,es}.json   언어 팩
+    lang_extra/{ko,en,es}.json   Godot 전용 번역 키 (gd.* — 손으로 관리. 웹 팩에 없는 키만 I18n 이 더함, 변환기·DataDB 검사는 건너뜀)
     story/{ko,en,es,sample}.json   스토리 대본
     manifest.json      전역별 개수·원본 sha1·경고·특수값 위치 (DataDB 가 검증에 사용)
   assets/image/        웹 image/ 사본 (git 제외)
@@ -36,8 +37,10 @@ godot/
   tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
   tests/replay_golden.gd   2b 시험: 황금 기록 22개를 GDScript 규칙으로 재생해 사건·난수까지 비교
   tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
-  tests/check_battle_scene.gd  3a: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 → 결과가 같은지
-  tests/perf_battle_scene.gd   3a: 창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340)
+  tests/check_battle_scene.gd  3a·3b: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 (HUD·연출·스토리 켬) → 결과가 같은지
+  tests/check_battle_ui.gd     3b: UI 연기 시험 (모든 패널·팝업·툴팁·결과·스토리·언어 바꾸기, Godot 오류 0)
+  tests/perf_battle_scene.gd   창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340·HUD·연출·회전)
+  tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
 ## 처음 한 번 / 웹 데이터가 바뀔 때마다
@@ -78,7 +81,7 @@ node tools/export-godot-data.js --check
 ## 내보내기(export) 설정
 
 `data/*.json` 은 Godot 리소스가 아니라 `FileAccess` 로 읽는 일반 파일입니다. 내보내기 프리셋을 만들 때
-**Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/story/*` 처럼 하위 폴더 포함).
+**Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/lang_extra/*, data/story/*` 처럼 하위 폴더 포함).
 빠지면 내보낸 게임에서 DataDB 가 "manifest.json 을 읽지 못했습니다" 오류를 냅니다.
 
 ## 열기 · 실행
@@ -100,10 +103,11 @@ node tools/export-godot-data.js --check
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd            # 22개 (-- --resume: 모든 입력 대기마다 저장·복원)
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_api.gd         # 엔진 조회 API·command·사본·plan_rule
 ```
-전투 장면(3a) 시험 — 화면 입구로 황금 기록 22개 재생 (`-- --smoke` 는 여러 지도 연기 시험, scripts/battle/README.md):
+전투 장면(3a·3b) 시험 — 화면 입구로 황금 기록 22개 재생 (`-- --smoke` 는 여러 지도 연기 시험), UI 연기 시험 (scripts/battle/README.md):
 
 ```bash
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_scene.gd
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_ui.gd
 ```
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
@@ -118,6 +122,7 @@ var hz: Dictionary = DataDB.module("hazards")["HAZARDS"]
 I18n.t("hazard.safe_zone", {"i": "❄️", "r": 3})   # 항상 String (값이 배열·사전이면 키 그대로)
 I18n.t_raw("battle.loading_tips")                 # 웹 t() 와 똑같이: 배열·사전 값은 그대로 (Variant)
 I18n.set_language("en")          # game_settings.language 에 저장 + language_changed 신호
+I18n.t("gd.fail.move_failed")     # Godot 전용 키 (data/lang_extra — 웹 팩에 없는 키만 더해짐)
 
 # 저장 (웹 Store 와 같은 키 이름, 값은 문자열)
 Store.set_json("game_settings", {"language": "ko"})

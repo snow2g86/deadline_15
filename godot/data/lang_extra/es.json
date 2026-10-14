@@ -1,0 +1,89 @@
+{
+ "gd": {
+  "fail": {
+   "move_failed": "No puedes moverte ahí",
+   "attack_failed": "Objetivo no válido",
+   "no_resource": "Recurso insuficiente",
+   "skill_failed": "No puedes usar esa habilidad",
+   "cannot_act": "No puede actuar",
+   "item_failed": "No puedes usar ese objeto",
+   "cannot_undo": "No se puede deshacer",
+   "not_waiting": "No se espera ninguna orden",
+   "bad_op": "Orden no válida",
+   "wrong_unit": "Es el turno de otra unidad",
+   "bad_dir": "Dirección no válida",
+   "bad_skill": "Habilidad no válida",
+   "bad_item": "Objeto no válido",
+   "bad_cell": "Casilla no válida"
+  },
+  "buff": {
+   "fury_full": "Furia al máximo",
+   "disarm": "Desarmado",
+   "bleed": "Sangrado",
+   "stun": "Aturdido",
+   "freeze": "Congelado",
+   "root": "Enraizado",
+   "summon_turns": "Duración de invocación",
+   "cursed": "Maldito",
+   "stealth_forest": "Sigilo en el bosque",
+   "atk_up": "ATQ +",
+   "def_up": "DEF +",
+   "atk_down": "ATQ −",
+   "def_down": "DEF −",
+   "fury_buff": "Frenesí",
+   "iron_will": "Voluntad de hierro",
+   "iron_phalanx": "Muro de hierro",
+   "poison": "Envenenado",
+   "regen": "Regeneración",
+   "sanctuary": "Santuario",
+   "shield": "Escudo",
+   "evasion": "Evasión",
+   "stealth": "Sigilo",
+   "phalanx_def": "Defensa de falange",
+   "tenacity": "Tenacidad",
+   "sacrifice": "Sacrificio",
+   "curse": "Maldición",
+   "empower": "Potenciado",
+   "channel_curse": "Canalizando maldición",
+   "channel_exalt": "Canalizando exaltación"
+  },
+  "tip": {
+   "impassable": "Intransitable",
+   "move_cost": "Coste de movimiento {n}",
+   "height": "Altura {n}",
+   "forest_hide": "Las unidades en el bosque son translúcidas · los asesinos se ocultan",
+   "turns": "Quedan {n} turnos",
+   "on_terrain": "Terreno: {t}",
+   "intent": "Objetivo: {name}",
+   "passive": "Pasiva",
+   "safe_zone": "Barrera de escarcha — terminar el turno aquí evita el daño del entorno",
+   "lava": "Lava — terminar una acción a su lado quema",
+   "threat": "Dentro del alcance enemigo",
+   "fog": "Fuera de la vista (niebla)",
+   "shield_half": "Escudo ½"
+  },
+  "ai": {
+   "label": "IA: {style} · {target}",
+   "style_aggressive": "Agresiva",
+   "style_defensive": "Defensiva",
+   "style_support": "Apoyo",
+   "style_balanced": "Equilibrada",
+   "target_low_hp": "Primero el más débil",
+   "target_random_weak": "Débil al azar",
+   "target_cluster": "Busca grupos",
+   "target_nearest": "El más cercano",
+   "target_nearest_threat": "Amenaza más cercana",
+   "target_never": "Nunca ataca",
+   "target_random": "Al azar"
+  },
+  "settings": {
+   "reduce_motion": "Reducir movimiento",
+   "reduce_motion_tip": "Desactiva sacudidas, destellos, saltos y animaciones de ataque",
+   "surrender_confirm": "Rendirse termina esta batalla como derrota. ¿Rendirse?",
+   "surrender_pending": "Te rendirás cuando termine la acción actual"
+  },
+  "result": {
+   "retry": "Reintentar"
+  }
+ }
+}

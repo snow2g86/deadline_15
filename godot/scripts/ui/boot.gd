@@ -119,7 +119,7 @@ func _build_launcher(box: VBoxContainer) -> void:
 	var sep := HSeparator.new()
 	box.add_child(sep)
 	var head := _label(16, GOLD)
-	head.text = "전투 시험 (3a 디버그 실행기)"
+	head.text = "전투 시험 (3b 디버그 실행기)"
 	box.add_child(head)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -164,7 +164,7 @@ func _build_launcher(box: VBoxContainer) -> void:
 	warn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(warn)
 	_launch_info = _label(12, TEXT_DIM)
-	_launch_info.text = "Q/E 회전 · 휠 확대 · 끌어서 이동 · T 위협 범위 · M/A/S/I/D/O/W/P 행동 · Esc 취소"
+	_launch_info.text = "Q/E 회전 · 휠 확대 · 끌어서 이동 · T 위협 범위 · M/A/S/I/D/O/W/P 행동 · Esc 취소 · 적을 누르면 정보 · 왼쪽 아래 톱니 = 설정"
 	box.add_child(_launch_info)
 
 
@@ -192,12 +192,8 @@ func _launch() -> void:
 	var src: String = str(_src_opt.get_item_metadata(_src_opt.selected))
 	var cfg: Dictionary
 	if src == "store":
-		var save: Dictionary = {}
-		for k: String in ["game_save", "game_roster", "game_parties", "game_inventory"]:
-			var v: Variant = Store.get_json(k)
-			if v != null:
-				save[k] = v
-		cfg = {"save": save, "source": "store"}
+		# Store 의 모든 키를 넘김 (전투 끝에 엔진이 쓰는 game_soul·game_mats 등이 진짜 값에서 시작해야 되돌려 쓸 때 덮어쓰지 않음)
+		cfg = {"save": BattleScene.store_save(Store), "source": "store"}
 	elif _replay_chk.button_pressed:
 		cfg = BattleScene.golden_cfg(src)
 		cfg["autoplay"] = src
@@ -209,6 +205,6 @@ func _launch() -> void:
 		cfg["stage"] = {"id": int(_stage_spin.value)}
 		cfg["seed"] = int(_seed_spin.value)
 		cfg["practice"] = false
-	cfg["speed"] = 1.0
+	# 연출 속도는 설정(game_settings.playSpeed — 전투 설정 창에서 바꿈)을 따름
 	BattleScene.pending = cfg
 	get_tree().change_scene_to_file(BATTLE_SCENE)

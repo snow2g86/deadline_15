@@ -47,8 +47,19 @@ func _restore(saved: Array) -> void:
 
 ## a 가 t 를 일반 공격할 때 예상 → { dmg, kill, tags, pct, support(%), shallow, evade(%), evade_buff, shield, counter, intercept, intercept_dmg }
 ##  투사체가 기사에게 막히면 intercept = 기사 id, intercept_dmg = 기사가 받을 피해 (웹 rPreview), dmg 는 그 기사 기준
-func preview_attack(a: Dictionary, t: Dictionary) -> Dictionary:
+##  as_exec = true (3b 화면, Godot 만): 실제 공격(do_atk)처럼 계산 — 주술사 고양(shaman_exalt atk_up, _attackCount ≤ 1)은
+##   피해 계산 **전에** 소모되어 마지막 공격에는 붙지 않으므로 미리보기에서도 뺌. 웹 미리보기는 이 버프를 넣고 계산해 실제보다 크게 보임.
+##   (기본값 false 는 웹 previewAttack 과 같은 값 — tests/check_battle_api.gd)
+func preview_attack(a: Dictionary, t: Dictionary, as_exec: bool = false) -> Dictionary:
 	E.pure_begin()
+	var held: Array = []   # [번호, 버프] — 계산 동안 잠시 뺀 고양 버프 (끝나면 같은 자리에)
+	if as_exec and typeof(a.get("buffs")) == TYPE_ARRAY:
+		var arr: Array = a["buffs"]
+		for i in range(arr.size() - 1, -1, -1):
+			var b: Dictionary = arr[i]
+			if b.get("source") == "shaman_exalt" and Js.num(b.get("_attackCount")) > 0 and Js.num(b.get("_attackCount")) - 1.0 <= 0.0:
+				held.push_front([i, b])
+				arr.remove_at(i)
 	var saved := _keep([a, t])
 	var out: Dictionary
 	var blk: Variant = E.gu.intercept_of(a, t)
@@ -63,6 +74,8 @@ func preview_attack(a: Dictionary, t: Dictionary) -> Dictionary:
 		out["intercept"] = null
 		out["intercept_dmg"] = 0.0
 	_restore(saved)
+	for h: Array in held:
+		(a["buffs"] as Array).insert(int(h[0]), h[1])
 	E.pure_end()
 	return out
 
@@ -318,3 +331,45 @@ func threat_cells(only_visible: bool = true) -> Array:
 						set[str(x) + "," + str(y)] = true
 	E.pure_end()
 	return set.keys()
+
+
+## 전투 끝 장비 보상의 실제 물건 (3b 결과 화면용, 순수) — before_eids: 전투 시작 때 인벤토리의 eid 들 {eid: true}
+##  S._gearDrops 는 templateId·legend 만 담으므로, 이번 전투에 새로 생긴 물건(시작 때 없던 eid) 중 끝에서부터
+##  드랍 수만큼을 _gearDrops 순서대로 짝지음 (보물상자 장비는 전투 중에 먼저 들어가므로 앞쪽, 끝 보상은 마지막에 들어감)
+##  → [{stone: n} | {templateId, legend, item(사본|null)}]
+func gear_drop_items(before_eids: Dictionary) -> Array:
+	var out: Array = []
+	var drops: Variant = S.get("_gearDrops")
+	if typeof(drops) != TYPE_ARRAY:
+		return out
+	var inv: Variant = E.c.store.get_json(str(D.get("INV_KEY", "game_inventory")))
+	var fresh: Array = []
+	if typeof(inv) == TYPE_ARRAY:
+		for it: Variant in inv:
+			if typeof(it) == TYPE_DICTIONARY and not before_eids.has(str(it.get("eid"))):
+				fresh.append(it)
+	var n := 0
+	for g: Dictionary in drops:
+		if g.has("templateId"):
+			n += 1
+	var tail: Array = fresh.slice(maxi(0, fresh.size() - n))
+	var ti := 0
+	for g2: Dictionary in drops:
+		if g2.has("stone"):
+			out.append({"stone": g2["stone"]})
+			continue
+		var it2: Variant = tail[ti] if ti < tail.size() else null
+		ti += 1
+		out.append({"templateId": g2.get("templateId"), "legend": Js.truthy(g2.get("legend")), "item": Js.deep(it2) if it2 != null else null})
+	return out
+
+
+## 지금 인벤토리의 eid 들 (gear_drop_items 의 기준점, 순수)
+func inventory_eids() -> Dictionary:
+	var out: Dictionary = {}
+	var inv: Variant = E.c.store.get_json(str(D.get("INV_KEY", "game_inventory")))
+	if typeof(inv) == TYPE_ARRAY:
+		for it: Variant in inv:
+			if typeof(it) == TYPE_DICTIONARY:
+				out[str(it.get("eid"))] = true
+	return out

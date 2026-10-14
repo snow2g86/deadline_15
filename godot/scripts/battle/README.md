@@ -1,71 +1,145 @@
-# 전투 화면 (Godot) — 3a 뼈대
+# 전투 화면 (Godot) — 3b 완성판
 
 `scenes/battle/battle.tscn` (스크립트 `battle_scene.gd`). **화면만** 맡습니다. 규칙은 전부 엔진(`scripts/logic/battle/battle_engine.gd`, `scripts/logic/README.md`)이 정하고,
-화면은 엔진 신호를 받아 재생하고 플레이어 조작을 엔진 명령으로 바꿀 뿐입니다. 규칙 코드는 이 단계에서 바꾸지 않았고,
-화면에 필요한 것은 **순수 조회**로만 더했습니다 (`battle_query.gd`: `shove_cells` · `potion_targets` · `siege_targets` — `tests/check_battle_api.gd` 의 순수성 시험에 포함).
+화면은 엔진 신호를 받아 재생하고 플레이어 조작을 엔진 명령으로 바꿀 뿐입니다. 규칙 코드는 바꾸지 않았고,
+화면에 필요한 것은 **순수 조회**로만 더했습니다 (`battle_query.gd`: `shove_cells` · `potion_targets` · `siege_targets` · (3b) `preview_attack(a, t, as_exec)` — `tests/check_battle_api.gd` 의 순수성 시험에 포함).
+
+3a(뼈대) → 3b 에서 더한 것: HUD 전부(윗줄·행동 순서·클랜원 카드·미니맵·카메라 방향·설정), 칸·유닛 툴팁, 적 정보 팝업, 머리 위 상태 배지, 다듬은 공격 예상,
+직업별 타격 효과·픽셀 투사체·화면 흔들림·번쩍임·도약·버프 빛·소환 등장, 결과 화면, 로딩 화면·스테이지 소개, 스토리 대사, Godot 전용 번역 키, 회전 끊김 제거.
 
 ## 장면 구조
 
 ```
-Battle (Node2D, battle_scene.gd)          엔진 소유 · 신호 대기열 · 재생 · 입력 · 카메라 · UI 수준 입구
+Battle (Node2D, battle_scene.gd)          엔진 소유 · 신호 대기열 · 재생 · 입력 · 카메라(흔들림) · UI 수준 입구 · HUD 모델 · 스토리 진행
 ├─ Background (CanvasLayer -10)           웹 #map-container 배경 (#0a0e1a + 위쪽 푸른 빛)
 ├─ World (Node2D)
-│  ├─ Map (battle_map.gd)                 바닥 — 아래 'z 순서'
-│  │   TilesK · GroundDiag · WaterDiag · HlDiag (대각선 k 마다), TreeNode (숲 칸마다), ChestNode
-│  ├─ Units (Node2D)  → U<id> (unit_view.gd) × 유닛 수
-│  └─ Fx (fx_layer.gd, z 500)             떠오르는 글자 · 입자 · 행동 예고 화살표 · 공격 예상 · 방향 고르기
-├─ Camera (Camera2D)                      끌기·휠·화살표 이동, Q/E 회전
-└─ UI (CanvasLayer 10, battle_ui.gd)      윗줄(턴·카메라·위협·속도) · 행동 메뉴 · 안내 줄 · 웨이브 알림 · 결과 판
+│  ├─ Map (battle_map.gd)                 바닥 — 카메라 방향마다 노드 묶음 Dir0~3 (아래 '회전')
+│  │   DirN: TilesK · GroundDiag · WaterDiag · HlDiag (대각선 k 마다), TreeNode (숲 칸마다)   + ChestNode
+│  ├─ Units (Node2D)  → U<id> (unit_view.gd: Body · Bars · Top(배지))
+│  ├─ Fx (fx_layer.gd, z 500)             떠오르는 글자 · 입자 · 무기 궤적 · 행동 예고 · 공격 예상 · 방향 고르기
+│  └─ PixelFx (pixel_fx.gd, z 501)        원거리 픽셀 투사체·임팩트
+├─ Camera (Camera2D)                      끌기·휠·화살표 이동, Q/E 회전, offset = 화면 흔들림
+└─ UI (CanvasLayer 10, battle_ui.gd)
+   ├─ TurnFlash                            차례 번쩍임·큰 번쩍임 (셰이더 원형 빛)
+   ├─ TopBar (hud_top.gd)                  차례 표시 · 스테이지 제목·턴 · 칩 · 위협/회전/속도 단추
+   ├─ Minimap (hud_minimap.gd) · TurnOrder (hud_order.gd) · ClanCards (hud_cards.gd) · CamDir
+   ├─ WaveBanner · StageBanner · ActionMenu · Hint
+   ├─ Info (hud_info.gd)                   툴팁 · 적 정보 팝업
+   ├─ Settings (hud_settings.gd)           톱니 단추 · 설정 창 · 항복 확인
+   ├─ Result (result_view.gd) · Story (story_view.gd) · Loading (loading_view.gd)
 ```
 
 | 파일 | 웹 원본 | 내용 |
 |---|---|---|
 | `iso.gd` | `grid.js` g2v·v2g·isoX·isoY·tSX·tSY·depth·isoHit, `vfx.js` _g2screen·_g2sx·faceTri | 아이소 좌표 (TW 48·TH 24·ZH 10), 카메라 방향 0~3 |
-| `terrain_tex.gd` | `terrain-tex.js` _draw | 절차적 타일 그림 (윗면 그라디언트·노이즈·풀·꽃·등고선·바위·물결·여울·석판·벽돌 옆면·지층·성문 판자·성가퀴). **같은 LCG·같은 난수 순서** 라 웹과 같은 자리에 같은 모양 |
-| `battle_map.gd` | `render.js` rTerBg·rTer, `props.js`, `data/props.js` | 타일·하이라이트·안개·냉기 결계·위협·숲 나무·평지 풀돌·보물상자 |
-| `unit_view.gd` | `render.js` rUnits, `rig.js` Rig.fit·sheet·_sheetEl·setLoop·playOnce, `vfx.js` animU·shakeU·_faceMark | 유닛 그림·막대·발밑 방향 삼각형·동작 |
+| `terrain_tex.gd` | `terrain-tex.js` _draw | 절차적 타일 그림 (같은 LCG·같은 난수 순서) |
+| `battle_map.gd` | `render.js` rTerBg·rTer, `props.js`, `data/props.js` | 타일·하이라이트·안개·냉기 결계·위협·숲 나무·평지 풀돌·보물상자, 방향별 노드 묶음 |
+| `unit_view.gd` | `render.js` rUnits(배지·기절 수·소환 턴), `rig.js` 시트, `vfx.js` animU·shakeU·vaultHop·buff-glow, `motion.js` playAtkMotion | 유닛 그림·막대·발밑 방향·동작·키프레임 공격(시트 없는 소환수) |
 | `sprite_db.gd` | `rig.js` CHAR_FIG·SPRITE_SHEETS, `sprites.js` _svgSprite | 그림 불러오기·몸 높이 맞춤·소환수 도트 그림·CSS filter → 색 행렬 |
-| `fx_layer.gd` | `render.js` floatT·rIntent·rPreview·showFacePicker, `vfx.js` spawn | 연출 층 (3a 는 기본만) |
-| `battle_ui.gd` | `render.js` showAM·showMainMenu·showSkillSubMenu·showItemSubMenu, 결과 | 기본 UI (3b 에서 HUD 로 확장) |
-| `shaders/unit.gdshader` | `.u-icon` filter | 바닥 그림자(drop-shadow) · 적 붉은빛 · 현재 차례 금빛 · 기절 회색 · 피격 번쩍임 · 숲 반투명 |
-| `shaders/prop.gdshader` | `PROP_THEME_FILTER` | 테마 색 보정 (sepia·saturate·brightness·hue-rotate 를 3x3 행렬로) |
-| `shaders/water.gdshader` | `.t-water::after` · `.t-lava::after` | 물·용암 반짝임 띠 |
+| `fx_layer.gd` | `render.js` floatT·rIntent·rPreview·showFacePicker, `vfx.js` spawn·_vfxHit·vfxHeal·vfxDeath·vfxBuff·vfxSiege, `motion.js` _atkTrail·_fx·_projectile | 연출 층 |
+| `pixel_fx.gd` | `pixelfx.js` 전부 (KINDS·스프라이트·고리·마름모·파편 풀) | 궁수 화살·마법사 마탄·사제 성광·소환사 룬·주술사 영혼 불꽃·지휘관 음표 |
+| `battle_ui.gd` | `battle.html` 화면 부품, `render.js` showAM·_amBtn·_placeAM·showWv, `vfx.js` turnFlash·vfxFlash | UI 층 (부품 배치·행동 메뉴·띠·번쩍임) |
+| `hud_top.gd` | `render.js` uUI, `css/battle.css` #top-bar·.si-chip·.cam-btn | 윗줄 |
+| `hud_order.gd` | `render.js` rTurnOrder | 행동 순서 (다음 행동까지 틱 = (5 − 행동력) / 회복 속도) |
+| `hud_cards.gd` | `render.js` rInfoPanel | 클랜원 카드 |
+| `hud_minimap.gd` | `render.js` rMM·rMMvp·mmClick | 미니맵 |
+| `hud_info.gd` | `render.js` showEnemyPopup (+ Godot 툴팁) | 툴팁·적 팝업 |
+| `hud_settings.gd` | `render.js` toggleSettings·syncSettingsUI·saveSett·surrender, `battle.html` #settings-panel | 설정 |
+| `result_view.gd` | `render.js` showRes | 결과 화면 |
+| `loading_view.gd` | `boot.js` #battle-loading | 로딩 화면 |
+| `story_view.gd` | `js/common/story.js` Story.play·_next·_advance·_skip, `css/story.css` | 대사 창 |
+| `story_battle.gd` | `js/battle/story-battle.js` StoryBattle, `story.js` linesOf·_speaker·beforeStage·afterStage | 대사 시점·대본 조회·화자 |
+| `unit_info.gd` | `render.js` getBuffs·unitName, `_common.js` getSkillBuffs, `hazards.js` Hazard.name/describe, `synergy.js` name/describe, `stages.js` bossName | 버프 목록·배지·이름·환경·조합 버프 글 |
+| `icons.gd` | `item-icons.js` itemIcon, `emoji-icons.js` EmojiIcons, `skills.js` skillIcon, `render.js` portrait | 그림 아이콘 창구 (아래) |
+| `ui_kit.gd` | `css/battle.css` 색·모양 | 글꼴·상자·Portrait·IconRect·Bar·VecIcon |
+| `shaders/unit.gdshader` · `prop.gdshader` · `water.gdshader` · `portrait.gdshader` | `.u-icon` filter · `PROP_THEME_FILTER` · 물 반짝임 · `.st-pt` | |
+
+### 그림 아이콘 (디자인 정책)
+
+UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
+- `icons.item(key)` — `image/icon/item-sprite.webp` (8×25 칸, `ITEM_SPRITE`), `icons.rarity_frame(key)` — 등급 테두리(`frame_*`, `ICON_RARITY`)
+- `icons.skill(id, 대체 이모지)` — `image/icon/skill-sprite.png` (`SKILL_SPRITE`), 없으면 그 이모지의 그림
+- `icons.emoji(e)` — 웹 `EmojiIcons` 와 같은 표 `EMOJI_ICON` → 그림. `icons.split(text)` / `fill_rich` 은 글 속 이모지를 그림으로,
+  시트에 그림이 없는 이모지(그림 문자)는 지움. ⚑ ⚔ ⚠ ✓ ★ ▲ 같은 **글자 기호는 글자로** 둡니다.
+- 버튼 그림(위협·회전·톱니·소리…)은 웹 SVG 를 선으로 다시 그린 `Kit.VecIcon`.
+- 초상화는 캐릭터 그림의 얼굴 크롭 (웹 `.an-portrait`: background-size 210%, position 50% 12%) 을 원 안에 (`Kit.Portrait`).
 
 ### z 순서 (웹 z-index 규칙 그대로)
 
-- 대각선 k = vc + vr (화면 기준 칸 번호 합). 타일 노드 z = 2k, 같은 z 로 바닥 장식·물 반짝임, 하이라이트 z = 2k+1 → 앞쪽 높은 타일(언덕·바위·성벽)의 옆면이 뒤 칸 하이라이트를 가림.
-- 맵 오브젝트·유닛은 `Grid.depth(c, r, layer) = 100 + 3k + layer` — 보물상자 0 < 나무 1 < 유닛 2. 유닛은 **도착 칸 기준** (웹과 같음).
-- 연출 층 z 500 (방향 고르기 단추 포함).
+- 대각선 k = vc + vr. 타일 노드 z = 2k, 같은 z 로 바닥 장식·물 반짝임, 하이라이트 z = 2k+1.
+- 맵 오브젝트·유닛은 `Grid.depth(c, r, layer) = 100 + 3k + layer` — 보물상자 0 < 나무 1 < 유닛 2 (유닛 배지는 유닛 안에서 +1).
+- 연출 층 z 500, 픽셀 투사체 z 501. HUD 는 CanvasLayer 10.
 
-### 타일 그림 굽기
+### 타일 그림 굽기 · 회전 (3b)
 
-`terrain_tex.gd` 의 벡터 명령은 타일 한 장에 수백 개라, 매 프레임 다시 제출하면 CPU 가 무거워집니다 (실측 12 ms/프레임).
-그래서 웹처럼 **(종류·테마·변형·높이·성가퀴) 마다 한 번** SubViewport 에 3배 크기로 그려 `ImageTexture`(밉맵)로 캐시하고, 타일마다 그 그림 한 장을 붙입니다 (3.3 ms/프레임).
-굽기 전 첫 프레임과 화면 없는 실행(`--headless`)은 같은 벡터 명령으로 바로 그립니다.
+- 타일 그림은 (종류·테마·변형·높이·성가퀴) 마다 한 번 SubViewport 에 3배로 그려 `ImageTexture`(밉맵) 캐시 — 3a 와 같음.
+- **카메라 방향마다 노드 묶음**(`Dir0~3`)을 따로 만들고, 회전은 `switch_dir()` 로 묶음의 보이기만 바꿉니다 (3a 는 회전마다 노드 전부를 다시 만듦).
+  로딩 화면이 떠 있는 동안 `prebuild_step()` 이 나머지 세 방향 묶음을 프레임마다 하나씩 만들고 (로딩 화면이 덮고 있으니 보이게 두어 한 번 그려 둠 → 나중에 `_draw` 다시 안 함),
+  그 방향 타일 그림도 굽습니다. 지형이 바뀌면(`rebuild`) 묶음을 모두 버리고 다시.
+- 회전 때 시야는 그대로라 다시 계산하지 않고, 행동 메뉴는 다시 만들지 않고 자리만 옮깁니다. 미니맵 지형은 삼각형 배열 한 번으로 그립니다.
+- 매 프레임 할당 줄이기: 깜빡이는 하이라이트 여부는 상태가 바뀔 때만 계산(`HlDiag.animated`), 냉기 결계 그림은 칸마다 점 배열·밝기 16단계 색 배열을 한 번 만들어 재사용,
+  유닛 시트는 직업·성별·동작마다 한 번 찾아 두고(`_sheet_cache`) 프레임 번호가 바뀔 때만 다시 그림, 숲 여부는 칸이 바뀔 때만, 셰이더 값은 바뀐 것만,
+  연출 층 상자 모양(StyleBoxFlat)은 한 번 만들어 재사용.
 
 ## 엔진 사건 → 화면 (재생 모델)
 
-1. `eng.command()` / `eng.run()` 은 기다리지 않고 끝까지 진행합니다 (적 차례 전부 포함). 그 사이 엔진은 `bus_event`·`fx_event` 를 **동기**로 냅니다.
+1. `eng.command()` / `eng.run()` 은 기다리지 않고 끝까지 진행합니다. 그 사이 엔진은 `bus_event`·`fx_event` 를 **동기**로 냅니다.
 2. 장면은 신호를 받는 즉시 대기열 `_evq` 에 `[종류, 이름, 자료, 전장 사본]` 으로 쌓습니다.
-   - `bus_event` 자료의 유닛은 엔진이 만든 **그 순간의 사본**(`unit_view`) 입니다.
-   - `turn_start · turn_end · unit_added · wave_spawn · round_end` 와 fx `redraw_units · redraw_terrain · chest_open` 때는 **전장 전체 사본**(유닛·지형·상자·결계·턴)을 같이 떠 둡니다.
-     (신호 처리기 안에서 엔진 상태를 읽기만 함 — `unit_view`·`is_stealthed` 는 순수)
-3. `_process` 가 대기열을 시간에 맞춰 재생: 항목 하나 처리 → 반환된 초만큼 기다림 (속도 1x/2x/4x 반영, 0 = 즉시).
+   - 전장 사본(`_snap_engine`)에는 유닛마다 `unit_view` + 배지·카드용 값(`SNAP_EXTRA`: lv·name·actionRec·furyBuff·channeling·skillLv …)과 eSpwn·actCount·breached.
+   - `unit_attacked` 에는 그 순간의 전술 보너스(`_tactic`: 후방·측면·협공·고지 +%)를 순수 조회로 붙여 둡니다 (아래 '웹과 다른 점').
+3. `_process` 가 대기열을 시간에 맞춰 재생 (속도 1x/2x/4x, 0 = 즉시). **`_hold` 가 0 이 아니면(로딩·스토리 대사) 대기열을 멈춤** — 엔진 진행·결과는 그대로.
    | 사건 | 화면 | 기다림 |
    |---|---|---|
-   | `turn_start` | 현재 차례 금빛, 윗줄 갱신, 전장 사본 반영 | 적 0.27s / 아군 0.1s |
-   | `unit_moved` · fx `move` | 달리기 시트로 0.32s 이동, 끝나면 시야·나무 가림·대기 동작 갱신 | 0.36s |
-   | fx `attack` → `unit_attacked` | 공격자 attack 시트 → **타격 프레임**(`dur·hit/frames`)에 대상 흔들림·hit 시트·피해 숫자·HP | 타격까지 + 0.3s |
-   | `unit_killed` | 타격 뒤 쓰러짐(0.6s 사라짐) + 입자 | 0.35s |
-   | `unit_healed` · `buff_tick_*` · `trap_triggered` | 숫자·입자·HP | 0.2~0.3s |
-   | `skill_used` | 스킬 이름 글자 | 0.35s |
-   | `wave_spawn` · `wave_announce` | 새 유닛 등장(0.4s), 웨이브 알림 | 0.6s |
-   | fx `float` | 엔진 안내 글자 (번역 키면 번역, `messages.select_*` 는 아래 안내 줄로) | 0 |
-   | fx `face` | 발밑 삼각형·좌우 뒤집기 | 0 |
-   | `camera_focus` | 화면 밖이면 카메라를 그 유닛으로 | 0 |
-4. 대기열이 비고(재생이 엔진을 따라잡음) 엔진이 입력을 기다리면(`run()` 이 `"input"`): **엔진 상태로 화면을 한 번 맞춘 뒤**(`_sync_from_engine`) 메뉴를 띄웁니다.
-   안개·행동 예고·위협 범위·공격 예상은 이때 엔진 조회(`eng.q`)로 계산합니다. 재생 중 안개는 화면 사본으로 같은 식(이동력+1)을 씁니다.
-5. 엔진이 멈추면(`"stopped"` 등) `eng.finish()` 결과로 결과 판. Store 세이브로 시작한 전투면 `eng.c.store` 를 Store 에 되돌려 씁니다 (디버그 세이브·시험은 쓰지 않음).
+   | `turn_start` | 현재 차례 금빛, 차례 번쩍임(아군 파랑·적 빨강), HUD 갱신, **쌓인 스토리 대사 재생** | 적 0.27s / 아군 0.1s |
+   | `unit_moved` · fx `move` | 달리기 시트로 0.32s 이동, 도움닫기면 포물선 도약 + '도움닫기!' | 0.36s |
+   | fx `attack` → `unit_attacked` | 공격 동작(시트, 없으면 키프레임 + 무기 궤적) → 타격 프레임에: 원거리는 픽셀 투사체 발사 → 비행 뒤 임팩트, 근접은 직업별 타격 효과 → 대상 흔들림·피격 동작·피해 숫자·전술 보너스 글자 | 타격+비행 + 0.3s |
+   | `unit_killed` | 맞는 순간 죽음 입자 + 화면 흔들림(보스는 크게 + 붉은 번쩍임) + 사라짐 | 0.35s |
+   | `unit_healed` · `buff_applied` | 회복 입자·고리·별 / 버프 별 + 유닛 초록 빛 | 0.3s / 0 |
+   | fx `float` `messages.critical_hit` | 큰 금빛 글자 + 큰 흔들림 + 금빛 번쩍임 | 0 |
+   | `siege_used`(폭탄) · `gate_destroyed` | 폭발 입자 + 흔들림 | 0.35s / 0.3s |
+   | `wave_announce` / `wave_announce_end` | 붉은 웨이브 띠 펼침 / 접음 | 0.3s |
+   | 새 유닛 (사본) | 등장 동작, 소환수는 보랏빛 고리·별 | 0.6s (wave) |
+4. 대기열이 비고 엔진이 입력을 기다리면: 엔진 상태로 화면을 맞춘 뒤(`_sync_from_engine`) 메뉴. 끝났으면 결과 (이겼으면 승리 뒤 대사 먼저).
+5. Store 세이브로 시작한 전투는 시작할 때 **Store 의 모든 키**를 넘기고(`BattleScene.store_save` — 시작 화면·다시 하기가 같이 씀),
+   끝나면 `eng.c.store` 에서 **넘긴 값과 달라진 키·새 키만** Store 에 쓰고 엔진이 지운 키는 지움 (`_write_back`). 그래서 game_soul·game_mats 등을 덮어쓰지 않음.
+   본 스토리 기록 `game_story_seen` 은 전투 중에 바로 Store 에 쓰므로 되돌려 쓰기에서 뺌.
+
+## 스토리 대사 (`story_battle.gd` + `story_view.gd`)
+
+웹 `story-battle.js` 와 같은 시점입니다. 규칙은 동기로 끝나 있으므로 대사는 **재생·입력만** 멈춥니다 (`_hold`).
+- 로딩이 끝나면 출전 전 장면 (에피소드 프롤로그 `ep{n}_pro` → `s{id}_pre`, 본 것은 건너뜀) 후 `start` 를 쌓음.
+- `turn_start` 재생 때 조건 확인(scan) 후 쌓인 대사 재생 — 웹은 아군 `turn_start` 와 적 행동 직전(`AI.eAI`)에서 flush (둘 다 그 차례 시작).
+- `wave_spawn` (첫 배치 뒤) → `wave`, 맞을 때·쓰러질 때 → scan (`boss`: 보스 생존, `danger`: 30% 이상이던 클랜원이 처음 30% 아래, `last`: 증원 끝 + 적 1명). 우선순위 start < boss < wave < danger < last.
+- 승리 뒤 결과 화면 전: `s{id}_post` → 에피소드 마지막 스테이지면 에필로그.
+- 장면마다 재생할 때 지금 언어의 대본을 다시 고름 (전투 중 언어를 바꿔도).
+- 대사 창: 화자 초상화(`image/character/story/`, 없으면 직업 그림), 지휘관은 로스터의 이름·성별, 보스는 전용 그림(없으면 직업 그림을 붉게), 환영은 보랏빛.
+  한 글자씩 28ms, 누르기·Space·Enter·→ = 다음(출력 중이면 즉시 완성), Esc·'건너뛰기' = 장면 끝. 끝까지 보거나 건너뛰면 본 것으로 기록.
+- 본 장면 기록 `game_story_seen`: Store 세이브 전투만 진짜 Store 에, 디버그·시험은 이번 실행 안에서만 (세이브에 있으면 그 값에서 시작).
+- 설정: `cfg.story` = `on`(기본, 속도 0 이면 off) · `off` · `auto`(시험: 프레임마다 저절로 넘김) · `autoplay`(자동 재생 화면 확인: 1.4초마다 넘김). `game_story_dev = sample` 이면 샘플 대본.
+
+## HUD · 정보
+
+- 윗줄: 차례 표시(점이 깜빡임), `STAGE n` + 이름 + 턴, 칩 — 증원 진행 막대(끝나면 초록) · 남은 적 · 돌파(한도 1 전부터 경고) · 환경(툴팁 = `Hazard.describe`) · 조합 버프(툴팁 = `Synergy.describe`) · 연습 모드.
+- 이름: 클랜원은 로스터(uid)의 customName → character.names[nameId] → 직업 이름 (결과 화면과 같음, `unit_info.unit_name`).
+- 행동 순서: 숨은 적 제외, 다음 행동까지 틱 순서 (현재 = '행동 중', 준비 = ✓). 클랜원 줄을 누르면 카메라 이동, 마우스를 올리면 맵의 그 유닛이 하얗게 빛남. 화면 높이에 맞춰 줄 수 제한.
+- 클랜원 카드: 초상화 · 이름 · Lv·직업 · HP/자원 막대와 값 · ATK/DEF/RNG · 버프 아이콘(남은 턴 숫자, 툴팁 = 이름). 지금 차례 금빛, 행동 끝 흐림. 누르면 카메라 이동.
+- 미니맵: 누르거나 끌면 그 자리로 카메라. 카메라 방향(▲ N)은 오른쪽 아래.
+- 툴팁(0.25초 머물면): 유닛 = 이름·Lv·직업·HP·자원·ATK/DEF/RNG/MOV·버프(남은 턴)·지형·노리는 대상 / 칸 = 지형·이동 비용·높이·지형 효과·보물상자·냉기 결계·용암·위협·안개.
+- 적 정보 팝업(적을 누르면, 다음 누르기에 닫힘): 툴팁 내용 + 스킬 목록(그림·비용) + AI 성향(`AI_PROFILES` style·targetPriority) + 노리는 대상.
+- 머리 위 배지: 지형 효과·용암 옆·엄호·방어 태세·경계·광폭·방어 강화·무장해제·정신 집중, 기절/빙결 수(발밑), 소환 남은 턴.
+- 공격 예상: 대상 머리 위 상자 — 처치면 💀 그림·금빛, 기사가 대신 맞으면 🛡️·파랑, 아래 줄에 전술(후방·측면·협공·고지 +%)·방어막 ½·숲 회피·여울·연계·반격.
+- 설정(왼쪽 아래 톱니): 배경음·효과음 켜기/음량(값만 저장 — 소리는 5단계), 게임 속도 1x·2x·4x, 움직임 줄이기, 언어(ko·en·es — 바로 바뀜), 닫기, 항복(확인 창).
+  값은 Store `game_settings` 에 웹과 같은 키(`bgmOn`·`bgmVol`·`sfxOn`·`sfxVol`·`language`) + Godot 전용 `playSpeed`·`reduceMotion`.
+- 결과: VICTORY/DEFEAT, 결과 글, 연습 모드 안내, 별 3개(새 별 강조 + 조건), 보상(별 보상·골드·첫 클리어·새 클랜원·스킬북·룬·영혼석·장비 — 아이템 그림 + 등급 테두리),
+  전사자, 클랜원마다 +EXP·다음 레벨까지 막대·레벨 업. 내용만 스크롤되고 단추 줄은 늘 보임. 장비 이름·등급은 순수 조회 `eng.q.gear_drop_items(전투 시작 eid)`. 단추: 로비로(지금은 시작 화면) · 다시 도전 · 다음 스테이지. 언어를 바꾸면 다시 그림.
+- 로딩: 스테이지 이름 · 금빛 막대 · 팁(`battle.loading_tips` 중 하나, 화면 난수). 끝나면 스테이지 소개(EP.x-y + 이름) 잠깐.
+
+## 번역 (Godot 전용 키)
+
+웹 언어 팩(`data/lang/*.json`, 변환기 결과)은 고치지 않습니다. 웹에 없는 키는 `data/lang_extra/{ko,en,es}.json` 의 `gd.*` 에 두고,
+I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scripts/core/i18n.gd _with_extra`). DataDB 의 '목록에 없는 파일' 검사와 변환기 `--check` 는 `lang_extra/` 를 건너뜁니다.
+`gd.fail.*`(명령 실패 안내) · `gd.buff.*`(버프 이름) · `gd.tip.*`(툴팁) · `gd.ai.*`(AI 성향) · `gd.settings.*` · `gd.result.retry`.
+언어가 바뀌면(`I18n.language_changed`) 윗줄·행동 순서·카드·메뉴·공격 예상·방향 고르기·팝업·설정·결과를 바로 다시 그립니다.
 
 ## 조작 (UI 수준 입구)
 
@@ -78,57 +152,69 @@ Battle (Node2D, battle_scene.gd)          엔진 소유 · 신호 대기열 · �
 | `ui_pick_item(kind, idx)` | potion · siege (사다리 effect `climb` 은 `climb`) | `{op, idx, x, y}` |
 | `ui_click_cell(x, y)` | 칸 고르기 중 칸 누르기 (치유 대상 칸이면 heal) | move · attack · heal · shove · skill · potion · siege · climb |
 | `ui_pick_face(dx, dy)` | 방향 고르기 (0,0 = 지금 방향) | `{op: wait·defend·overwatch, dx, dy}` |
-| `ui_cancel()` | 칸·방향·하위 메뉴 → 메뉴, 메뉴에서는 이동 취소 | (undo) |
+| `ui_cancel()` | (팝업 닫고) 칸·방향·하위 메뉴 → 메뉴, 메뉴에서는 이동 취소 | (undo) |
+| `surrender()` | 항복 — 웹 `Renderer.surrender` 처럼 엔진 공개 함수 `transition(BATTLE_END)` + `emit("battle_end", {win:false})`. **입력 대기 중에만** — 연출(적 차례·대사·로딩) 중이면 끝나고 입력을 기다릴 때 항복 (아직 안 보인 결과가 반영되지 않게) | — |
 
-- 단추를 보일지(가능한지)는 메뉴가 정하고, 입구 함수는 막지 않습니다. 마우스는 하이라이트 밖 칸을 누르면 취소로 걸러 냅니다.
-  그래서 황금 기록의 **실패한 명령**(ok:false)도 같은 입구로 그대로 재현됩니다 (엔진이 웹처럼 기록·거절).
-- 마우스: 왼쪽 누르기 = 고르기, 끌기 = 카메라 이동, 휠 = 확대(0.6~3배), 오른쪽 = 취소. 가운데 끌기도 이동.
-- 키: M 이동 · A 공격 · S 스킬 · I 아이템 · P 밀치기 · D 방어 · O 경계 · W 대기 · 1~9 하위 메뉴 · Esc 취소/되돌리기 · Q/E 회전 · T 위협 범위 · 화살표 카메라.
-  방향 고르는 중 Enter·Space·W·D·O = 지금 방향 그대로 (웹과 같음).
-- 시험용 상태: `is_awaiting()`, `is_over()`, `awaiting_unit_id()`, `last_result`(마지막 command 결과), `result`(finish), 신호 `input_ready(id)`·`battle_over(result)`.
+- 마우스: 왼쪽 누르기 = 고르기(메뉴 중 적을 누르면 정보 팝업), 끌기 = 카메라 이동, 휠 = 확대(0.6~3배), 오른쪽 = 취소. 가운데 끌기도 이동. 칸·유닛 위에 머물면 툴팁.
+- 키: M 이동 · A 공격 · S 스킬 · I 아이템 · P 밀치기 · D 방어 · O 경계 · W·Space 대기 · 1~9 하위 메뉴 · Esc·Backspace 취소/되돌리기(설정 창이면 닫기) · Q/E 회전 · T 위협 범위 · 화살표 카메라.
+- 적 정보 팝업은 다음 누르기에 닫히고 그 누르기도 그대로 처리됨 (팝업·툴팁 안 부품은 마우스를 받지 않음). 툴팁은 다른 칸·유닛으로 옮기면 바로 숨고, 행동 메뉴와 겹치지 않는 자리에.
+  로딩·대사·결과 화면 중에는 맵 단축키를 받지 않습니다 (대사 창은 Space·Enter·→·Esc 를 먼저 받음).
+- 시험용 상태: `is_awaiting()`, `is_over()`, `awaiting_unit_id()`, `last_result`, `result`, `story_log`(재생한 장면 키), `is_story_playing()`, 신호 `input_ready(id)`·`battle_over(result)`.
+
+## 움직임 줄이기 · 속도
+
+- 속도 1x/2x/4x: 대기열 기다림·동작·입자·투사체·트윈이 모두 같은 배율로 빨라짐 (스토리 글자 속도는 그대로). 0 = 즉시(시험).
+- 움직임 줄이기(설정 `reduceMotion` 또는 macOS 손쉬운 사용 '동작 줄이기'): 화면 흔들림·번쩍임·도약·공격 동작(시트·키프레임)·흔들림 이동·메뉴 펼침·결과 등장 동작을 끔. 타이밍(타격 시점)은 그대로 —
+  웹 `_reduceMotion()` 처럼 시트 대신 `ATK_MOTIONS` 의 dur×hit 를 씀.
 
 ## 실행 · 디버그
 
-- 편집기 F5 → 시작 화면 아래 **전투 시험 (3a 디버그 실행기)**: 스테이지·시드·파티를 고르고 '전투 시작'.
-  파티는 Store 에 활성 파티가 있으면 '저장된 파티', 없으면 황금 기록의 가짜 세이브(디버그 세이브).
-  '황금 기록 그대로 자동 재생' 을 켜면 그 기록의 스테이지·시드·명령을 사람이 누르듯 천천히 재생합니다.
-- 장면 직접 실행 (명령줄):
-  ```bash
-  Godot --path godot res://scenes/battle/battle.tscn -- --golden legion5_s09 [--autoplay] [--speed 2] [--rotate 1]
-  ```
-- 화면 사진 (Movie Maker, 창 모드): `Godot --path godot --resolution 1280x720 --write-movie /tmp/f.png --fixed-fps 8 --quit-after 200 res://scenes/battle/battle.tscn -- --golden boss_s10 --autoplay`
-  → 고른 사진은 `godot/tests/screens/` (git 제외).
+- 편집기 F5 → 시작 화면 아래 **전투 시험 (3b 디버그 실행기)**: 스테이지·시드·파티를 고르고 '전투 시작'. 연출 속도는 설정값(`playSpeed`).
+- 장면 직접 실행: `Godot --path godot res://scenes/battle/battle.tscn -- --golden legion5_s09 [--autoplay] [--speed 2] [--rotate 1] [--stage 10] [--no-story]`
+- 화면 사진: `Godot --path godot --resolution 1280x720 --script res://tests/shots_3b.gd` → `godot/tests/screens/3b_*.png` (git 제외)
+  (HUD 전체 · 적 팝업+툴팁 · 공격 예상 · 처치 순간 연출 · 결과 · 전투 전 대사 · 전투 중 대사)
 
 ## 시험
 
 ```bash
-# 화면 입구로 황금 기록 22개 재생 → end(보상·saveAfter 포함)·사건 기록이 황금 기록과 같은지 (연출 없이, 약 20초)
+# 화면 입구로 황금 기록 22개 재생 — HUD·연출·스토리(auto)를 모두 켠 채 → end(보상·saveAfter)·사건 기록이 황금 기록과 같은지 + 결과 화면 + 재생한 대사 수
 Godot --headless --path godot --script res://tests/check_battle_scene.gd
-#   끝에 회귀 시험 rotate:boss_s10 (8x 연출로 재생하며 유닛이 움직일 때마다 카메라 회전 → 멈춘 유닛이 늘 자기 칸에 있는지)
-#   -- --only boss_s10,gear_s15    일부만      -- --speed 4    실제 연출 시간으로 (느림, 타이머 경로 확인)
-#   -- --smoke                     황금 기록 대신 테마·진형이 다른 20개 스테이지를 '방어 태세'만으로 돌려 화면 코드 오류 확인
-# 성능 (창 모드 — 실제로 그림): 밀림 지도 + 유닛 40 · 맵 오브젝트 343, 수직 동기 끔
-Godot --path godot --script res://tests/perf_battle_scene.gd
+#   끝에 회귀 시험 rotate:boss_s10 (8x 연출·로딩 포함, 유닛이 움직일 때마다 카메라 회전 → 멈춘 유닛이 늘 자기 칸에 있는지)
+#   -- --only boss_s10,gear_s15    일부만      -- --speed 4    실제 연출 시간으로      -- --smoke   여러 지도 연기 시험
+# UI 연기 시험: 모든 패널·팝업·툴팁·메뉴·연출·대사·결과를 열고 언어를 ko→en→es→ko 로 바꿈 — Godot 오류(Logger 로 셈) 0 이어야 통과
+#   + 진짜 마우스 누르기로 항복(1280×720·1024×600·1920×1080 × ko·es), 단축키, 팝업 다음 누르기, 연출 중 항복 미루기, es 메뉴 폭,
+#     실제 세이브 전투 뒤 Store 의 다른 키(game_soul·game_mats) 보존·보상 더하기
+Godot --headless --path godot --script res://tests/check_battle_ui.gd
+# 성능 (창 모드): 유닛 40 · 맵 오브젝트 343 · HUD 전부 + 30프레임마다 연출 + 회전 4번 → 평균·95%·최대·회전 프레임 최대·그리기 CPU
+Godot --path godot --script res://tests/perf_battle_scene.gd   [-- --no-hud --no-fx --no-prebuild --hide map,units,fx,pfx --no-rotate]
 ```
-cmd 사건은 `u·op·ok·idx·rng` 만 비교합니다 (시험 정책이 붙인 참고 키 `target·skill·item` 과 즉시형 스킬의 x·y 는 화면이 보내지 않음 — 엔진 결과에는 영향 없음).
+cmd 사건은 `u·op·ok·idx·rng` 만 비교합니다.
 
-## 웹과 다른 점 (3a)
+## 웹과 다른 점
 
-- **글꼴**: 웹 제목 글꼴 Cinzel 이 없어 떠오르는 숫자·제목도 Noto Sans KR(굵게)로 씀 (`assets/fonts/`, OFL). 이모지는 시스템 대체 글꼴에 맡김.
-- **필터 흉내**: CSS `drop-shadow`·글로 는 셰이더로 근사 (8방향×2겹 표본). 웹보다 약간 단단한 테두리.
-- **스프라이트 확대**: 웹 `image-rendering: pixelated` 와 같게 최근접(nearest) 표본. 타일 그림은 3배로 구워 선형+밉맵.
-- **행동 메뉴 아이콘**: 웹 이모지 대신 글자 기호 (디자인 정책: 이모지는 그림 아이콘으로 바꾸는 중 — 3b 에서 아이콘 그림).
-- **스킬 이름 글자**: 스킬을 쓰면 시전자 위에 스킬 이름을 띄움 (웹은 HUD 기록에만). 3b HUD 가 생기면 정리.
-- **안내 줄**: 웹 Fx.float 의 `messages.select_*` 는 떠오르는 글자 대신 화면 아래 안내 줄. 명령 실패 이유는 임시 한국어 문구(번역 키는 3b).
-  실패 안내는 명령 뒤에도 같은 클랜원이 같은 상태(위치·행동·이동·자원·행동 수)로 입력을 기다릴 때만 띄움 — 엔진 `ok` 는 행동 직후 `ha` 기준이라 공격이 회피되면 false 가 되기 때문 (엔진은 그대로).
-- **안개 전환**: 웹 CSS transition(.2s)·물 반짝임 위상 등 작은 시간 연출은 생략하거나 근사.
-- **안개 속 나무 가림**: 안개 속에 숨은 적 앞의 나무는 반투명으로 만들지 않음 (웹은 숨은 적 앞 나무도 반투명이 되어 적 위치가 드러나는 문제가 있음). 보이는 유닛만 가림 판정에 씀.
-- 이동은 웹처럼 출발 → 도착 직선 0.32s (경로를 따라 걷지 않음). 도움닫기 도약 연출 없음.
+- **글꼴**: 웹 제목 글꼴 Cinzel 이 없어 숫자·제목도 Noto Sans KR(굵게).
+- **필터 흉내**: CSS `drop-shadow`·글로 는 셰이더로 근사. 스토리 초상화의 붉은 물들임·유령 효과도 셰이더 근사 (drop-shadow 빛은 생략).
+- **아이콘**: 웹은 이모지를 화면에서 그림으로 바꾸는데(EmojiIcons), 여기서는 그릴 때 바로 그림을 씀. 그림이 없는 이모지는 지움 (예: 결과의 📈).
+  웹과 같은 표를 쓰므로 웹과 같은 그림이 나옴 (스킬 단추 🔱 → 장창 그림, 별 보상 ⭐ → 웹 표 그대로).
+- **전술 보너스 글자**: 웹은 공격자의 `_lastTactic` 을 읽는데, 엔진은 알림 전에 이 값을 지웁니다(규칙 그대로). 그래서 알림을 받는 순간 같은 엔진 상태로
+  `tactic_bonus` 를 다시 계산(순수)합니다. 같은 값이지만, 공식 피해 중 일부(적 전사의 처형 일격)는 웹에서는 글자가 없는데 여기서는 뜰 수 있습니다
+  (스킬 범위·창벽·스플래시·격투가 반격은 웹처럼 뺌).
+- **공격 예상 — 주술사 고양**: 고양(shaman_exalt atk_up)은 공격 횟수가 남은 마지막 공격에서 **피해 계산 전에** 사라지는데, 웹 미리보기는 버프를 넣고 계산해
+  실제보다 크게 보여 줍니다. Godot 화면은 `eng.q.preview_attack(a, t, true)` 로 실제처럼 계산합니다 (기본값 false 는 웹과 같은 값 — API 시험).
+- **치명타**: 웹은 `messages.critical_hit` 를 평범한 글자로만 띄움 — 여기서는 크게 + 흔들림 + 금빛 번쩍임.
+- **소환 등장·보스 처치**: 보랏빛 고리·별 / 큰 흔들림·붉은 번쩍임을 더함 (웹은 spawnPop·보통 흔들림만).
+- **항복 확인 창**: 웹은 바로 항복 — 실수 방지로 확인 창을 더함.
+- **적 정보 팝업**: 웹 내용에 스킬·AI 성향·노리는 대상을 더함. 툴팁은 Godot 에만 있음 (웹은 title 속성 정도).
+- **스테이지 소개**: 로딩 뒤 'EP.x-y + 이름' 띠 (웹은 로딩 화면 제목뿐).
+- **속도**: 웹 설정은 늘이기 배율(0.5~2.0) — 여기는 연출 재생 배율 1·2·4 (`playSpeed`, 웹 `speed` 키와 따로).
+- **결과 단추**: '로비로' 는 지금 시작 화면으로 (로비는 4단계). '다시 도전' 은 Godot 에만.
+- **행동 순서 줄 수**: 화면 높이에 들어가는 만큼만 (웹은 스크롤).
+- **안개 속 나무 가림**·**이동 경로**: 3a 와 같음 (숨은 적 앞 나무는 반투명 안 함, 직선 0.32s 이동).
+- **스킬 이름 글자**: 스킬을 쓰면 시전자 위에 스킬 이름 (웹은 기록에만) — 3a 와 같음.
 
-## 3b 로 넘길 것
+## 아직 없는 것
 
-- HUD: 아래 클랜원 카드(HP·자원·능력치·장비), 오른쪽 행동 순서, 윗줄 스테이지 정보·돌파·환경·조합 버프 칩, 미니맵, 설정(음량·속도)·항복.
-- 미리보기 다듬기: 칸 위에 마우스를 올렸을 때 정보, 적 정보 팝업, 스킬·아이템 설명, 상태 배지(버프·기절 수·소환 턴·은신).
-- VFX: 직업별 타격 효과·픽셀 투사체(`pixelfx.js`)·화면 흔들림·차례 번쩍임·버프 빛·도움닫기 도약, 소리(`audio.js`).
-- 결과 화면(경험치 막대·레벨업·드랍·별점), 이어하기(엔진 `save_text`/`load_state` 는 준비됨), 로딩 화면.
-- 스토리 대사(`story-battle.js`), 뒷모습 시트(웹도 꺼 둠), 컷아웃 리그(시트가 없는 그림용).
+- 소리(배경음·효과음) — 5단계. 설정 값만 저장합니다.
+- 로비·스테이지 선택·성장 화면 — 4단계. 결과의 '로비로' 는 시작 화면.
+- 뒷모습 시트(웹도 꺼 둠), 컷아웃 리그(모든 직업이 시트가 있어 안 씀 — 시트가 없는 소환수는 `ATK_MOTIONS` 키프레임).
+- 전투 이어하기 화면 (엔진 `save_text`/`load_state` 는 준비됨).

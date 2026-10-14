@@ -1,0 +1,89 @@
+{
+ "gd": {
+  "fail": {
+   "move_failed": "갈 수 없는 칸",
+   "attack_failed": "공격할 수 없는 대상",
+   "no_resource": "자원이 부족합니다",
+   "skill_failed": "스킬을 쓸 수 없습니다",
+   "cannot_act": "행동할 수 없습니다",
+   "item_failed": "아이템을 쓸 수 없습니다",
+   "cannot_undo": "되돌릴 수 없습니다",
+   "not_waiting": "입력을 기다리는 중이 아닙니다",
+   "bad_op": "잘못된 명령",
+   "wrong_unit": "다른 유닛의 차례입니다",
+   "bad_dir": "잘못된 방향",
+   "bad_skill": "잘못된 스킬",
+   "bad_item": "잘못된 아이템",
+   "bad_cell": "잘못된 칸"
+  },
+  "buff": {
+   "fury_full": "분노 최대",
+   "disarm": "무장해제",
+   "bleed": "출혈",
+   "stun": "기절",
+   "freeze": "빙결",
+   "root": "속박",
+   "summon_turns": "소환 유지",
+   "cursed": "저주",
+   "stealth_forest": "숲 은신",
+   "atk_up": "공격 강화",
+   "def_up": "방어 강화",
+   "atk_down": "공격 약화",
+   "def_down": "방어 약화",
+   "fury_buff": "광폭",
+   "iron_will": "철의 의지",
+   "iron_phalanx": "철벽",
+   "poison": "중독",
+   "regen": "재생",
+   "sanctuary": "성역",
+   "shield": "방어막",
+   "evasion": "회피",
+   "stealth": "은신",
+   "phalanx_def": "방진 방어",
+   "tenacity": "근성",
+   "sacrifice": "희생",
+   "curse": "저주",
+   "empower": "강화",
+   "channel_curse": "저주 집중",
+   "channel_exalt": "고양 집중"
+  },
+  "tip": {
+   "impassable": "지나갈 수 없음",
+   "move_cost": "이동 비용 {n}",
+   "height": "높이 {n}",
+   "forest_hide": "숲 안의 캐릭터는 반투명 · 암살자는 은신",
+   "turns": "{n}턴 남음",
+   "on_terrain": "지형: {t}",
+   "intent": "노리는 대상: {name}",
+   "passive": "패시브",
+   "safe_zone": "냉기 결계 — 여기서 차례를 마치면 환경 피해 없음",
+   "lava": "용암 — 옆 칸에서 행동을 마치면 화상",
+   "threat": "적 위협 범위 안",
+   "fog": "시야 밖 (안개)",
+   "shield_half": "방어막 ½"
+  },
+  "ai": {
+   "label": "AI: {style} · {target}",
+   "style_aggressive": "공격형",
+   "style_defensive": "수비형",
+   "style_support": "지원형",
+   "style_balanced": "균형형",
+   "target_low_hp": "약한 대상 우선",
+   "target_random_weak": "약한 대상 중 무작위",
+   "target_cluster": "뭉친 곳 노림",
+   "target_nearest": "가까운 대상",
+   "target_nearest_threat": "가까운 위협",
+   "target_never": "공격하지 않음",
+   "target_random": "무작위"
+  },
+  "settings": {
+   "reduce_motion": "움직임 줄이기",
+   "reduce_motion_tip": "화면 흔들림·번쩍임·도약·공격 동작을 끕니다",
+   "surrender_confirm": "항복하면 이 전투는 패배로 끝납니다. 정말 항복할까요?",
+   "surrender_pending": "연출이 끝나면 항복합니다"
+  },
+  "result": {
+   "retry": "다시 도전"
+  }
+ }
+}

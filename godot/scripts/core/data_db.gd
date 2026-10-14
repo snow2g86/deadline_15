@@ -176,7 +176,8 @@ func _check_unlisted_files() -> void:
 	for code: String in manifest.get("story", {}).keys():
 		listed[String(manifest["story"][code].get("file", ""))] = true
 	for rel: String in _list_json(""):
-		if not listed.has(rel):
+		# lang_extra/ 는 변환기 결과가 아니라 Godot 전용 번역 키 (I18n 이 직접 읽음)
+		if not listed.has(rel) and not rel.begins_with("lang_extra/"):
 			_fail("manifest 에 없는 데이터 파일: %s" % rel)
 
 

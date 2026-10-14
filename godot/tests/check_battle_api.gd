@@ -94,6 +94,7 @@ func _query_all(eng: Object) -> int:
 	var n := 0
 	var u: Variant = eng.awaiting_unit()
 	var units: Array = eng.S["units"]
+	n += eng.q.gear_drop_items(eng.q.inventory_eids()).size()
 	for a: Dictionary in units:
 		n += eng.q.move_cells(a).size()
 		var at: Dictionary = eng.q.attack_targets(a)
@@ -102,6 +103,9 @@ func _query_all(eng: Object) -> int:
 			if t["team"] != a["team"] and t["hp"] > 0:
 				var p: Dictionary = eng.q.preview_attack(a, t)
 				n += int(p["dmg"])
+				# 3b: 실제 공격처럼 계산하는 미리보기(고양 버프를 잠시 뺌)도 순수해야 함
+				var p2: Dictionary = eng.q.preview_attack(a, t, true)
+				n += int(p2["dmg"])
 		n += eng.q.face_options(a).size()
 		if a["team"] == "ally":
 			for st: Dictionary in eng.q.skill_status(a):

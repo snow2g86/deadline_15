@@ -24,6 +24,9 @@ const _NumT := preload("res://scripts/core/num.gd")
 var current_lang: String = FALLBACK_LANG
 
 var _data: Dictionary = {}
+## Godot 전용 추가 키 (res://data/lang_extra/<언어>.json) — 웹 언어 팩에 없는 키만 더함 (웹 키가 늘 우선)
+const EXTRA_DIR := "res://data/lang_extra/"
+var _extra_cache: Dictionary = {}   # 언어 → 합친 사전
 var _placeholder := RegEx.create_from_string("\\{(\\w+)\\}")
 
 
@@ -119,11 +122,36 @@ func _apply(lang: String) -> void:
 		push_warning("I18n: %s 언어 팩이 없어 %s 로" % [lang, FALLBACK_LANG])
 		lang = FALLBACK_LANG
 		data = _db().lang(lang)
-	_data = data
+	_data = _with_extra(lang, data)
 	var changed := lang != current_lang
 	current_lang = lang
 	if changed:
 		language_changed.emit(lang)
+
+
+## 웹 언어 팩 + Godot 전용 키 (lang_extra). 웹 사전은 고치지 않고 사본에 없는 키만 깊게 더함
+func _with_extra(lang: String, data: Dictionary) -> Dictionary:
+	if _extra_cache.has(lang):
+		return _extra_cache[lang]
+	var out := data
+	var path := EXTRA_DIR + lang + ".json"
+	if FileAccess.file_exists(path):
+		var ex: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if ex is Dictionary:
+			out = data.duplicate(true)
+			_merge_missing(out, ex)
+		else:
+			push_warning("I18n: %s 를 읽지 못했습니다" % path)
+	_extra_cache[lang] = out
+	return out
+
+
+static func _merge_missing(dst: Dictionary, src: Dictionary) -> void:
+	for k: Variant in src.keys():
+		if not dst.has(k):
+			dst[k] = src[k]
+		elif dst[k] is Dictionary and src[k] is Dictionary:
+			_merge_missing(dst[k], src[k])
 
 
 func _lang_from_settings() -> String:

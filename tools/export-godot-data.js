@@ -223,6 +223,7 @@ function staleFiles() {
     if (!fs.existsSync(dir)) return;
     for (const f of fs.readdirSync(dir)) {
       const rel = sub ? sub + '/' + f : f;
+      if (rel === 'lang_extra') continue;   // Godot 전용 번역 키 (손으로 관리, godot/scripts/core/i18n.gd 가 합침)
       if (fs.statSync(path.join(dir, f)).isDirectory()) walk(rel);
       else if (f.endsWith('.json') && !produced.has(rel)) out.push(rel);
     }

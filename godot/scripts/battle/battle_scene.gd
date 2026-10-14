@@ -1,8 +1,10 @@
 extends Node2D
-## 전투 장면 (3a 뼈대) — 화면만. 규칙은 전부 엔진(scripts/logic/battle/battle_engine.gd)이 정하고, 이 장면은
+## 전투 장면 (3b) — 화면만. 규칙은 전부 엔진(scripts/logic/battle/battle_engine.gd)이 정하고, 이 장면은
 ##  ① 엔진 신호(bus_event·fx_event)를 받아 대기열에 쌓았다가 시간에 맞춰 재생하고 (엔진은 기다리지 않음)
 ##  ② 재생이 끝나고 엔진이 클랜원 입력을 기다리면 메뉴를 띄워 플레이어 조작을 엔진 명령(command)으로 바꾼다.
 ##  화면 상태는 사건의 사본으로만 바꾸고, 입력을 받을 때(재생이 따라잡은 때)만 엔진 상태로 한 번 맞춘다.
+##  (3b) HUD(윗줄·행동 순서·카드·미니맵·설정)·툴팁·적 팝업·직업별 연출·픽셀 투사체·화면 흔들림·결과·로딩·스토리 대사.
+##  로딩·스토리 대사는 재생 대기열을 붙잡을 뿐(_hold) — 엔진 진행·결과는 그대로.
 ##  시험용 입구(UI 수준): ui_action · ui_pick_skill · ui_pick_item · ui_click_cell · ui_pick_face · ui_cancel
 ##  (마우스·단축키·메뉴 단추도 모두 이 함수들을 거침 — tests/check_battle_scene.gd 가 황금 기록을 이 입구로 재생)
 ##  자세한 구조는 scripts/battle/README.md
@@ -12,6 +14,7 @@ signal battle_over(result: Dictionary)
 
 const Ctx := preload("res://scripts/logic/ctx.gd")
 const BattleEngine := preload("res://scripts/logic/battle/battle_engine.gd")
+const Profile := preload("res://scripts/logic/profile.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const Js := preload("res://scripts/logic/js.gd")
 const Num := preload("res://scripts/core/num.gd")
@@ -20,7 +23,12 @@ const SpriteDB := preload("res://scripts/battle/sprite_db.gd")
 const BattleMap := preload("res://scripts/battle/battle_map.gd")
 const UnitView := preload("res://scripts/battle/unit_view.gd")
 const FxLayer := preload("res://scripts/battle/fx_layer.gd")
+const PixelFx := preload("res://scripts/battle/pixel_fx.gd")
 const BattleUI := preload("res://scripts/battle/battle_ui.gd")
+const Icons := preload("res://scripts/battle/icons.gd")
+const UnitInfo := preload("res://scripts/battle/unit_info.gd")
+const StoryBattle := preload("res://scripts/battle/story_battle.gd")
+const Kit := preload("res://scripts/battle/ui_kit.gd")
 
 const BOOT_SCENE := "res://scenes/boot.tscn"
 const GOLDEN := "res://tests/golden/"
@@ -30,13 +38,15 @@ const DEBUG_GOLDEN := "balanced_s05"
 const SNAP_BUS := ["turn_start", "turn_end", "unit_added", "wave_spawn", "round_end"]
 const SNAP_FX := ["redraw_units", "redraw_terrain", "chest_open"]
 const SPEEDS := [1.0, 2.0, 4.0]
-## command() 실패 이유 → 안내 (3a 임시 문구 — 번역 키는 3b HUD 때)
-const FAIL_TEXT := {"move_failed": "갈 수 없는 칸", "attack_failed": "대상이 아님", "no_resource": "자원 부족", "skill_failed": "스킬을 쓸 수 없음",
-	"cannot_act": "행동할 수 없음", "item_failed": "아이템을 쓸 수 없음", "cannot_undo": "되돌릴 수 없음", "not_waiting": "입력 대기 아님",
-	"bad_op": "잘못된 명령", "wrong_unit": "다른 유닛 차례", "bad_dir": "잘못된 방향", "bad_skill": "잘못된 스킬", "bad_item": "잘못된 아이템", "bad_cell": "잘못된 칸"}
+## 화면 사본에 덧붙이는 엔진 유닛 값 (배지·카드·툴팁 — 읽기만)
+const SNAP_EXTRA := ["lv", "name", "role", "actionRec", "furyBuff", "defBuff", "disarmed", "channeling", "_rootedTurns", "_bleedTurns",
+	"_sanctuaryTurns", "_phalanxTurns", "_empowerTurns", "_cursed", "_sacrificeKnight", "_sacrificeDmgCount", "_tenacityDef", "skillLv", "summonerId"]
+## 로딩 화면 최소 시간 (초)
+const LOADING_MIN := 0.7
 
 ## 런처(boot.gd)가 넣고 장면이 _ready 에서 꺼내 씀
-##  { save, stage, practice, inject, maxRounds, seed, source("store"|"debug"|"test"), record, speed(0 = 연출 없이 즉시), autoplay(황금 이름) }
+##  { save, stage, practice, inject, maxRounds, seed, source("store"|"debug"|"test"), record, speed(0 = 연출 없이 즉시, 없으면 설정값), autoplay(황금 이름),
+##    story("on"|"off"|"auto" — auto 는 시험: 대사를 저절로 넘김), loading(bool) }
 static var pending: Dictionary = {}
 
 var cfg: Dictionary = {}
@@ -46,11 +56,16 @@ var iso: Iso
 var sdb: SpriteDB
 var map: BattleMap
 var fx: FxLayer
+var pfx: PixelFx
 var ui: BattleUI
 var cam: Camera2D
 var world: Node2D
 var unit_layer: Node2D
 var i18n: Node
+var store: Node
+var icons: Icons
+var info: UnitInfo
+var story: StoryBattle
 
 ## 재생
 var speed := 1.0
@@ -66,6 +81,17 @@ var _eng_status := ""
 var _listening := false
 var result: Dictionary = {}
 var _over := false
+## 재생을 붙잡는 이유 수 (로딩·스토리 대사) — 0 이 아니면 대기열을 진행하지 않음
+var _hold := 0
+var _loading_t := 0.0
+var _loading_on := false
+var reduce_motion := false
+## 항복을 연출이 끝난 뒤로 미룸 (적 차례 연출 중 항복하면 아직 안 보인 결과까지 반영되지 않게)
+var _surrender_pending := false
+## 전투 시작 때 넘긴 세이브 (끝나고 Store 에 바뀐 키만 되돌려 씀) · 인벤토리 eid (장비 보상 짝짓기 기준)
+var _save_in: Dictionary = {}
+var _inv_eids0: Dictionary = {}
+var _db: Node
 
 ## 화면 상태
 var units: Dictionary = {}    # id → UnitView
@@ -75,8 +101,16 @@ var view_safe: Array = []
 var view_turn := 1
 var view_phase := "player"
 var view_eq := 0
+var view_espwn := 0
+var view_actcount := 0
+var view_breached := 0
 var cur_id := -1
 var show_threat := false
+var _hud_dirty := true
+var _badges_dirty := true
+var _shake_t := 9.0
+var _shake_dur := 0.3
+var _shake_amp := 4.0
 
 ## 조작
 var mode := "busy"            # busy · menu · skills · items · target · face · over
@@ -93,6 +127,11 @@ var _drag_from := Vector2.ZERO
 var _dragging := false
 var _press := false
 var _cam_from := Vector2.ZERO
+## 마우스 툴팁: 대상 ("u:id" | "c:x,y" | "") · 머문 시간
+var _hover_key := ""
+var _hover_t := 0.0
+var _hover_pos := Vector2.ZERO
+var _nav_hover := -1
 
 ## 자동 진행 (Movie Maker 화면 확인용: 황금 기록 명령을 사람이 누르듯 천천히)
 var _auto_cmds: Array = []
@@ -109,6 +148,7 @@ func _svc(n: String) -> Node:
 
 func _ready() -> void:
 	i18n = _svc("I18n")
+	store = _svc("Store")
 	var db: Node = _svc("DataDB")
 	if db == null:
 		push_error("battle_scene: DataDB 오토로드가 없습니다")
@@ -116,8 +156,18 @@ func _ready() -> void:
 	D = Ctx.globals_from_db(db)
 	cfg = pending.duplicate(true) if not pending.is_empty() else _cfg_from_cmdline()
 	pending = {}
-	speed = float(cfg.get("speed", 1.0))
+	var sett: Dictionary = _settings()
+	# 움직임 줄이기: 저장한 설정 또는 OS 설정(macOS 손쉬운 사용 '동작 줄이기')
+	reduce_motion = bool(sett.get("reduceMotion", false)) or _os_reduce_motion()
+	if cfg.has("speed"):
+		speed = float(cfg["speed"])
+	else:
+		var ps: Variant = sett.get("playSpeed", 1)
+		speed = float(ps) if (typeof(ps) == TYPE_INT or typeof(ps) == TYPE_FLOAT) and [1.0, 2.0, 4.0].has(float(ps)) else 1.0
+	_speed_i = maxi(0, SPEEDS.find(speed))
 	sdb = SpriteDB.new(D)
+	icons = Icons.get_for(D)
+	info = UnitInfo.new(D, i18n)
 	eng = BattleEngine.new(D, int(cfg.get("seed", 1)))
 	eng.record_enabled = bool(cfg.get("record", false))
 	eng.bus_event.connect(_on_bus)
@@ -125,7 +175,12 @@ func _ready() -> void:
 	eng.start({"save": cfg.get("save", {}), "stage": cfg["stage"], "practice": bool(cfg.get("practice", false)),
 		"inject": cfg.get("inject", []), "maxRounds": int(cfg.get("maxRounds", 0))})
 	_listening = true
+	_db = db
+	_save_in = (cfg.get("save", {}) as Dictionary).duplicate(true)
+	_inv_eids0 = eng.q.inventory_eids()
+	info.set_roster(eng.c.store.get_json("game_roster"))
 	_build_world()
+	_setup_story(db)
 	var autoplay := str(cfg.get("autoplay", ""))
 	if autoplay != "":
 		var g: Variant = _read_golden(autoplay)
@@ -137,6 +192,35 @@ func _ready() -> void:
 		rotate_cam(int(cfg["cam_dir"]))
 	eng.begin()
 	_eng_status = eng.run()
+	if i18n != null and i18n.has_signal("language_changed"):
+		i18n.connect("language_changed", _on_language)
+	_start_loading()
+
+
+## OS 의 '동작 줄이기' (macOS 만 — defaults 로 읽음, 화면 없는 실행·다른 OS 는 false)
+static func _os_reduce_motion() -> bool:
+	if OS.get_name() != "macOS" or DisplayServer.get_name() == "headless":
+		return false
+	var out: Array = []
+	if OS.execute("defaults", ["read", "com.apple.universalaccess", "reduceMotion"], out, false) != 0:
+		return false
+	return not out.is_empty() and str(out[0]).strip_edges() == "1"
+
+
+## Store 세이브로 전투 설정 (시작 화면·다시 하기가 같이 씀): Store 의 모든 키를 넘김 —
+##  엔진이 전투 끝에 쓰는 값(game_soul·game_mats·인벤토리 …)이 처음부터 진짜 값이어야 되돌려 쓸 때 덮어쓰지 않음
+static func store_save(store_node: Node) -> Dictionary:
+	var save: Dictionary = {}
+	for k: String in store_node.call("keys"):
+		var v: Variant = store_node.call("get_json", k)
+		if v != null:
+			save[k] = v
+	return save
+
+
+func _settings() -> Dictionary:
+	var v: Variant = store.call("get_json", "game_settings", {}) if store != null else {}
+	return v if v is Dictionary else {}
 
 
 ## 직접 실행(F6·명령줄)할 때: -- --golden 이름 [--autoplay] [--speed n] 또는 기본 디버그 세이브
@@ -157,8 +241,14 @@ func _cfg_from_cmdline() -> Dictionary:
 	for j in args.size():
 		if args[j] == "--rotate" and j + 1 < args.size():
 			c["cam_dir"] = args[j + 1].to_int()
+		elif args[j] == "--stage" and j + 1 < args.size():
+			c["stage"] = {"id": args[j + 1].to_int()}
+			c["inject"] = []
+		elif args[j] == "--no-story":
+			c["story"] = "off"
 	if auto:
 		c["autoplay"] = name
+		c["story"] = c.get("story", "autoplay")
 	return c
 
 
@@ -200,25 +290,34 @@ func _build_world() -> void:
 	fx = FxLayer.new()
 	fx.name = "Fx"
 	fx.iso = iso
+	fx.icons = icons
 	fx.speed = speed
 	world.add_child(fx)
+	pfx = PixelFx.new()
+	pfx.name = "PixelFx"
+	pfx.time_scale = speed
+	world.add_child(pfx)
 	view_chests = _chest_list()
 	view_safe = (S["safeZones"] as Array).duplicate()
 	map.chests = view_chests
 	map.rebuild()
 	map.set_safe(view_safe)
+	var snaps: Array = []
 	for u: Dictionary in S["units"]:
 		if float(u["hp"]) > 0.0:
-			_add_unit(_unit_snap(u), false)
+			snaps.append(_unit_snap(u))
+	for v: Dictionary in snaps:
+		_add_unit(v, false)
 	cam = Camera2D.new()
 	cam.name = "Camera"
 	add_child(cam)
-	cam.position = iso.world_size() / 2.0 + Vector2(0, -10)
+	cam.position = iso.world_size() / 2.0 + Vector2(0, 10)
 	cam.make_current()
 	ui = BattleUI.new()
 	ui.name = "UI"
+	ui.reduce_motion = reduce_motion
 	add_child(ui)
-	ui.setup(i18n)
+	ui.setup(i18n, icons, store)
 	ui.action_pressed.connect(func(op: String) -> void: ui_action(op))
 	ui.skill_pressed.connect(func(idx: int) -> void: ui_pick_skill(idx))
 	ui.item_pressed.connect(func(k: String, idx: int) -> void: ui_pick_item(k, idx))
@@ -227,14 +326,31 @@ func _build_world() -> void:
 	ui.threat_pressed.connect(toggle_threat)
 	ui.speed_pressed.connect(_cycle_speed)
 	ui.back_pressed.connect(_go_back)
-	ui.set_cam("%s %s" % [str(D["CARR"][iso.cam_dir]), str(D["CLAB"][iso.cam_dir])])
+	ui.order.unit_clicked.connect(_on_unit_nav_click)
+	ui.order.unit_hover.connect(_on_nav_hover)
+	ui.cards.unit_clicked.connect(_on_unit_nav_click)
+	ui.cards.unit_hover.connect(_on_nav_hover)
+	ui.minimap.setup(iso, D["TI"])
+	ui.minimap.pan_to.connect(func(p: Vector2) -> void:
+		cam.position = p
+		_clamp_cam())
+	ui.settings.surrender_confirmed.connect(surrender)
+	ui.settings.speed_chosen.connect(set_speed_index)
+	ui.settings.reduce_motion_changed.connect(set_reduce_motion)
+	ui.result_view.button_pressed.connect(_on_result_button)
+	ui.story.closed.connect(_on_story_closed)
+	_update_cam_label()
 	ui.set_speed_label("%dx" % int(SPEEDS[_speed_i]))
 	view_turn = int(S["turn"])
 	view_eq = (S["eQ"] as Array).size()
-	_update_top()
+	view_espwn = int(S["eSpwn"])
+	view_actcount = int(S["actCount"])
+	view_breached = int(S["breached"])
 	_refresh_fog_view()
 	_refresh_loops()
 	_refresh_fade()
+	ui.minimap.rebuild(_minimap_units())
+	_refresh_hud()
 
 
 ## 배경 (웹 #map-container: --bg #0a0e1a + 위쪽 가운데 푸른 빛 radial-gradient(ellipse at 50% 30%, rgba(20,40,80,.4), transparent 70%))
@@ -274,7 +390,7 @@ func _chest_list() -> Array:
 	return out
 
 
-## 화면용 유닛 사본 = 엔진 unit_view + 그림·상태 표시에 필요한 몇 값 (읽기만)
+## 화면용 유닛 사본 = 엔진 unit_view + 그림·배지·카드에 필요한 몇 값 (읽기만)
 func _unit_snap(u: Dictionary) -> Dictionary:
 	var v: Dictionary = eng.unit_view(u)
 	v["gender"] = str(u.get("gender", "m")) if u.get("gender") != null else "m"
@@ -283,6 +399,10 @@ func _unit_snap(u: Dictionary) -> Dictionary:
 	v["frozen"] = Js.num(u.get("frozen"))
 	if u.has("summonTurns"):
 		v["summonTurns"] = u["summonTurns"]
+	for k: String in SNAP_EXTRA:
+		if u.has(k):
+			var x: Variant = u[k]
+			v[k] = Js.deep(x) if (typeof(x) == TYPE_DICTIONARY or typeof(x) == TYPE_ARRAY) else x
 	return v
 
 
@@ -293,18 +413,159 @@ func _snap_engine() -> Dictionary:
 		if float(u["hp"]) > 0.0:
 			us.append(_unit_snap(u))
 	return {"units": us, "ter": Js.deep(eng.S["ter"]), "chests": _chest_list(), "safe": (eng.S["safeZones"] as Array).duplicate(),
-		"turn": int(eng.S["turn"]), "eq": (eng.S["eQ"] as Array).size()}
+		"turn": int(eng.S["turn"]), "eq": (eng.S["eQ"] as Array).size(), "espwn": int(eng.S["eSpwn"]), "act": int(eng.S["actCount"]),
+		"breached": int(eng.S["breached"])}
 
 
 func _add_unit(v: Dictionary, spawn: bool) -> UnitView:
 	var uv := UnitView.new()
 	uv.name = "U%d" % int(v["id"])
+	uv.reduce_motion = reduce_motion
 	unit_layer.add_child(uv)
-	uv.setup(iso, sdb, v, speed)
+	uv.setup(iso, sdb, v, speed, icons)
 	if spawn:
 		uv.spawn_anim()
+		if bool(v.get("isSummon", false)):
+			fx.summon_fx(uv.position + Vector2(0, -20))
 	units[int(v["id"])] = uv
+	_badges_dirty = true
+	_hud_dirty = true
 	return uv
+
+
+# ═══════════ 로딩 · 스토리 ═══════════
+
+func _start_loading() -> void:
+	var st: Variant = eng.S["cStage"]
+	var title: Array = info.stage_title(st)
+	if speed <= 0.0 or not bool(cfg.get("loading", true)):
+		_after_loading()
+		return
+	var tips: Variant = i18n.t_raw("battle.loading_tips") if i18n != null else null
+	var tip := ""
+	if tips is Array and not (tips as Array).is_empty():
+		tip = str(tips[randi() % (tips as Array).size()])   # 화면 난수 (엔진 난수와 무관)
+	ui.loading.show_for(("%s · %s" % [title[0], title[1]]) if str(title[1]) != "" else str(title[0]), tip)
+	_hold += 1
+	_loading_on = true
+	_loading_t = 0.0
+
+
+## 로딩 중 프레임마다: 다른 카메라 방향 묶음을 하나씩 미리 만들고, 타일 그림 굽기를 기다림
+func _loading_tick(delta: float) -> void:
+	_loading_t += delta
+	var more := map.prebuild_step()
+	var f := clampf(_loading_t / LOADING_MIN, 0.0, 1.0)
+	ui.loading.progress(f * (0.6 if more else 1.0))
+	if not more and _loading_t >= LOADING_MIN and not map._baking:
+		_loading_on = false
+		map.finish_prebuild()
+		ui.loading.finish()
+		_hold -= 1
+		_after_loading()
+
+
+func _after_loading() -> void:
+	var st: Variant = eng.S["cStage"]
+	if speed > 0.0 and st != null:
+		var title: Array = info.stage_title(st)
+		var sub := story.stage_label(int(st["id"])).split(" ")[0] if not Js.truthy(st.get("daily")) else str(title[0])
+		ui.show_stage_banner(sub, str(title[1]) if str(title[1]) != "" else str(title[0]))
+	# 출전 전 대사 (프롤로그·전투 전) → 'start' 는 첫 turn_start 재생 때
+	_story_play(story.intro())
+
+
+func _setup_story(db: Node) -> void:
+	story = StoryBattle.new(D, i18n, icons)
+	var mode_s := str(cfg.get("story", "on" if speed > 0.0 else "off"))
+	story.enabled = mode_s != "off"
+	ui.story.auto = mode_s == "auto" or mode_s == "autoplay"
+	ui.story.set("auto_delay", 1.4 if mode_s == "autoplay" else 0.0)
+	story.stage = eng.S["cStage"]
+	var dev: Variant = store.call("get_str", "game_story_dev") if store != null else null
+	story.load_data(db, str(i18n.get("current_lang")) if i18n != null else "ko", dev)
+	story.roster = eng.c.store.get_json("game_roster")
+	if str(cfg.get("source", "")) == "store" and store != null:
+		var sv: Variant = store.call("get_json", StoryBattle.SEEN_KEY, {})
+		story.seen = sv if sv is Dictionary else {}
+		story.store = store
+	else:
+		var sv2: Variant = (cfg.get("save", {}) as Dictionary).get(StoryBattle.SEEN_KEY)
+		story.seen = (sv2 as Dictionary).duplicate() if sv2 is Dictionary else {}
+
+
+var _story_scenes: Array = []
+## 재생한 장면 키 (시험·확인용)
+var story_log: Array = []
+var _story_cur: Dictionary = {}
+var _story_after: Callable = Callable()
+
+
+## 장면 묶음 재생 (재생 대기열·입력을 붙잡음) — done 은 다 끝난 뒤 부를 것
+func _story_play(scenes: Array, done: Callable = Callable()) -> void:
+	if scenes.is_empty():
+		if done.is_valid():
+			done.call()
+		return
+	if _story_scenes.is_empty() and _story_cur.is_empty():
+		_hold += 1
+	_story_scenes.append_array(scenes)
+	if done.is_valid():
+		_story_after = done
+	if _story_cur.is_empty():
+		_story_next()
+
+
+func _story_next() -> void:
+	if _story_scenes.is_empty():
+		_story_cur = {}
+		_hold -= 1
+		if _story_after.is_valid():
+			var f := _story_after
+			_story_after = Callable()
+			f.call()
+		return
+	_story_cur = _story_scenes.pop_front()
+	ui.hide_menu()
+	ui.info.hide_tip()
+	ui.info.hide_popup()
+	# 재생할 때마다 지금 언어의 대본으로 (전투 중에 언어를 바꿔도)
+	story.load_data(_db, str(i18n.get("current_lang")) if i18n != null else "ko", store.call("get_str", "game_story_dev") if store != null else null)
+	var src: Variant = story.lines_of(str(_story_cur["key"]))
+	var lines := story.resolve_lines(src if src is Array and not (src as Array).is_empty() else _story_cur["lines"])
+	if lines.is_empty():
+		_story_next()
+		return
+	ui.story.play(lines, {"title": _story_cur.get("title", ""), "battle": _story_cur.get("battle", false), "skip_text": _t("story.skip")})
+
+
+func _on_story_closed() -> void:
+	if _story_cur.is_empty():
+		return
+	story.mark_seen(str(_story_cur["key"]))
+	story_log.append(str(_story_cur["key"]))
+	_story_next()
+
+
+## 웹 StoryBattle.allyName: 글자가 있는 이름만 (아이콘뿐인 이름은 비워 대본 기본값 '클랜원')
+static var _name_re := RegEx.create_from_string("[A-Za-z0-9\\x{3131}-\\x{D79D}\\x{00C0}-\\x{024F}]")
+
+
+## 지금 화면 상태 (스토리 조건 확인용)
+func _story_view() -> Dictionary:
+	var us: Array = []
+	var names: Dictionary = {}
+	for uv: UnitView in units.values():
+		if uv.has_meta("doomed"):
+			continue
+		us.append(uv.d)
+		var nm := str(uv.d.get("name", ""))
+		names[uv.d["id"]] = info.unit_name(uv.d) if _name_re.search(nm) != null else ""
+	return {"units": us, "espwn": view_espwn, "ended": _over, "name_of": names}
+
+
+func is_story_playing() -> bool:
+	return not _story_cur.is_empty()
 
 
 # ═══════════ 엔진 신호 → 대기열 ═══════════
@@ -312,6 +573,8 @@ func _add_unit(v: Dictionary, spawn: bool) -> UnitView:
 func _on_bus(name: String, data: Dictionary) -> void:
 	if not _listening:
 		return
+	if name == "unit_attacked":
+		data["_tactic"] = _tactic_of(data)
 	_evq.append(["bus", name, data, _snap_engine() if SNAP_BUS.has(name) else null])
 
 
@@ -319,6 +582,23 @@ func _on_fx(kind: String, data: Dictionary) -> void:
 	if not _listening:
 		return
 	_evq.append(["fx", kind, data, _snap_engine() if SNAP_FX.has(kind) else null])
+
+
+## 맞는 순간의 전술 보너스 (웹 VFX: attacker._lastTactic 을 떠오르는 글자로) — 엔진은 알림 전에 이 값을 지우므로
+##  같은 순간 엔진 상태로 다시 계산 (순수 조회: 위치·방향·지형만 읽음). 공식 피해(스킬 범위·창벽·격투가 반격)는 웹처럼 표시 안 함
+func _tactic_of(data: Dictionary) -> Variant:
+	if Js.truthy(data.get("isSplash")) or Js.truthy(data.get("isAoE")) or Js.truthy(data.get("isSpearwall")):
+		return null
+	var a: Variant = eng.unit_by_id(data["attacker"]["id"])
+	var t: Variant = eng.unit_by_id(data["target"]["id"])
+	if a == null or t == null:
+		return null
+	if (Js.truthy(data.get("isCounter")) or Js.truthy(data.get("counter"))) and a["cls"] == "brawler" and Js.num((a.get("skillLv", {}) as Dictionary).get("brawler_counter")) >= 1:
+		return null
+	var tb: Dictionary = eng.gu.tactic_bonus(a, t)
+	if (tb["tags"] as Array).is_empty():
+		return null
+	return {"tags": (tb["tags"] as Array).duplicate(), "pct": Js.round_js((float(tb["mul"]) - 1.0) * 100.0)}
 
 
 # ═══════════ 재생 ═══════════
@@ -329,6 +609,8 @@ func _process(delta: float) -> void:
 	var instant := speed <= 0.0
 	var dt := delta * (1.0 if instant else speed)
 	_clock += dt
+	if _loading_on:
+		_loading_tick(delta)
 	# 예약된 연출 (타격 시점 등)
 	var i := 0
 	while i < _sched.size():
@@ -340,22 +622,33 @@ func _process(delta: float) -> void:
 		else:
 			i += 1
 	if instant:
-		while _qi < _evq.size():
+		while _qi < _evq.size() and _hold == 0:
 			_play(_evq[_qi])
 			_qi += 1
 		_wait = 0.0
-	else:
+	elif _hold == 0:
 		_wait -= dt
-		while _wait <= 0.0 and _qi < _evq.size():
+		while _wait <= 0.0 and _qi < _evq.size() and _hold == 0:
 			_wait += _play(_evq[_qi])
 			_qi += 1
 	if _qi >= _evq.size() and _qi > 0:
 		_evq.clear()
 		_qi = 0
-	if mode == "busy" and _qi >= _evq.size() and _wait <= 0.0 and (_sched.is_empty() or instant):
+	if mode == "busy" and _hold == 0 and _qi >= _evq.size() and _wait <= 0.0 and (_sched.is_empty() or instant):
 		_on_drained()
 	if not _auto_cmds.is_empty():
 		_autoplay_tick(delta)
+	if _badges_dirty:
+		_badges_dirty = false
+		_refresh_badges()
+	if _hud_dirty:
+		_hud_dirty = false
+		_refresh_hud()
+	_update_shake(delta)
+	_update_hover(delta)
+	if ui != null and cam != null:
+		var vs := get_viewport().get_visible_rect().size / cam.zoom
+		ui.minimap.set_view(Rect2(cam.get_screen_center_position() - vs / 2.0, vs))
 
 
 func _schedule(secs: float, fn: Callable) -> void:
@@ -379,18 +672,29 @@ func _play(item: Array) -> float:
 			var u: Dictionary = d["unit"]
 			_set_cur(int(u["id"]))
 			view_phase = str(d.get("phase", "player"))
-			_update_top()
+			_hud_dirty = true
 			_refresh_loops()
+			ui.turn_flash(view_phase)
+			# 스토리 (웹: 아군 turn_start 와 적 행동 직전에 쌓인 대사 재생)
+			if story.enabled and not _over:
+				_story_play(story.flush(_story_view()))
 			return 0.27 if view_phase == "enemy" else 0.1
 		"turn_end", "round_end", "unit_added":
 			_apply_snap(sn)
 			return 0.0
 		"wave_spawn":
 			_apply_snap(sn)
+			if story.enabled:
+				if typeof(sn) == TYPE_DICTIONARY and int(sn["act"]) > 0:
+					story.enqueue("wave")
+				story.scan(_story_view())
 			return 0.6
 		"wave_announce":
-			ui.show_banner(_t("messages.wave_info", {"count": d.get("remaining", 0)}))
+			ui.show_banner(_t("messages.wave_info", {"count": d.get("remaining", 0)}), 3.0, true)
 			return 0.3
+		"wave_announce_end":
+			ui.hide_banner()
+			return 0.0
 		"unit_moved":
 			return _ev_moved(d)
 		"unit_attacked":
@@ -401,7 +705,7 @@ func _play(item: Array) -> float:
 			var t: Dictionary = d["target"]
 			_stats(t)
 			fx.float_text(int(t["x"]), int(t["y"]), "+" + _num(d.get("amount", 0)), "heal")
-			fx.burst(_body(t), {"count": 14, "colors": ["#44ff88", "#88ffaa", "#aaffcc", "#ffffff"], "shape": "circle", "speed": 1.5, "spread": 14, "decay": 0.018, "size": 3, "vy": -1.5, "gravity": -0.02})
+			fx.heal_fx(_body(t))
 			return 0.3
 		"buff_tick_damage", "trap_triggered":
 			var u2: Dictionary = d["unit"]
@@ -418,7 +722,10 @@ func _play(item: Array) -> float:
 			if d.has("unit"):
 				_stats(d["unit"])
 			if name == "buff_applied" and d.has("unit"):
-				fx.burst(_body(d["unit"]), {"count": 8, "colors": ["#22c55e", "#4ade80", "#ffffff"], "shape": "star", "speed": 1.5, "spread": 12, "decay": 0.025, "size": 2.5, "vy": -1})
+				fx.buff_fx(_body(d["unit"]))
+				var gv: UnitView = units.get(int(d["unit"]["id"]))
+				if gv != null:
+					gv.glow()
 			return 0.0
 		"skill_used":
 			var cu: Variant = d.get("unit", d.get("caster"))
@@ -435,9 +742,12 @@ func _play(item: Array) -> float:
 		"siege_used":
 			var su: Dictionary = d["unit"]
 			_stats(su)
-			if str(d.get("type")) == "bomb" and typeof(d.get("target")) == TYPE_DICTIONARY:
+			var tp := str(d.get("type"))
+			fx.float_text(int(su["x"]), int(su["y"]), "💣" if tp == "bomb" else ("🛡️" if tp == "shield" else "⚡"), "heal")
+			if tp == "bomb" and typeof(d.get("target")) == TYPE_DICTIONARY:
 				var tg: Dictionary = d["target"]
-				fx.burst(iso.top_center(int(tg["x"]), int(tg["y"])), {"count": 30, "colors": ["#ff8844", "#ff6600", "#ffff44", "#ffffff"], "shape": "spark", "speed": 4, "spread": 16, "decay": 0.02, "size": 3.5})
+				fx.siege_fx("siege_bomb", iso.top_center(int(tg["x"]), int(tg["y"])))
+				screen_shake(false)
 			return 0.35
 		"gate_attacked":
 			fx.float_text(int(d["x"]), int(d["y"]), _t("messages.gate_hit"), "damage")
@@ -445,15 +755,18 @@ func _play(item: Array) -> float:
 			return 0.3
 		"gate_destroyed":
 			fx.float_text(int(d["x"]), int(d["y"]), _t("messages.gate_destroyed"), "damage")
+			screen_shake(true)
 			return 0.3
 		"breach":
 			var bu: Dictionary = d["unit"]
 			fx.float_text(int(bu["x"]), int(bu["y"]), "%s %s/%s" % [_t("messages.breach"), _num(d.get("count", 0)), _num(d.get("limit", 0))], "damage")
+			view_breached = int(Js.num(d.get("count", view_breached)))
+			_hud_dirty = true
 			return 0.3
 		"evasion", "fury_triggered", "retreat", "root_blocked", "shield_active":
 			var eu: Dictionary = d["unit"]
-			var key: String = {"evasion": "messages.evasion", "fury_triggered": "messages.fury_buff", "retreat": "messages.retreat", "root_blocked": "messages.rooted", "shield_active": "battle.defend"}[name]
-			fx.float_text(int(eu["x"]), int(eu["y"]), _t(key), "debuff" if name == "root_blocked" else ("damage" if name == "retreat" else "heal"))
+			var key: String = {"evasion": "messages.evasion", "fury_triggered": "messages.fury_buff", "retreat": "messages.retreat", "root_blocked": "messages.rooted", "shield_active": "🛡️"}[name]
+			fx.float_text(int(eu["x"]), int(eu["y"]), _t(key) if key.contains(".") else key, "debuff" if name == "root_blocked" else ("damage" if name == "retreat" else "heal"))
 			return 0.2
 		"soulbond_restore":
 			var sm: Dictionary = d["summoner"]
@@ -486,18 +799,23 @@ func _play_fx(kind: String, d: Dictionary, sn: Variant) -> float:
 			return 0.0
 		"attack":
 			var av: UnitView = units.get(int(d["a"]))
+			var tv: UnitView = units.get(int(d["t"]))
 			if av != null and not av.dying:
-				var h := av.play_once("attack")
-				_motion[int(d["a"])] = _clock + h
+				_motion[int(d["a"])] = _clock + _start_attack(av, tv)
 			return 0.0
 		"float":
 			# 선택 안내(messages.select_*)는 아래 안내 줄로 보여 주므로 떠오르는 글자로는 안 띄움
-			if not str(d["text"]).begins_with("messages.select_"):
-				fx.float_text(int(d["x"]), int(d["y"]), _tr_float(str(d["text"])), "info")
+			var tx := str(d["text"])
+			if not tx.begins_with("messages.select_"):
+				var crit := tx == "messages.critical_hit"
+				fx.float_text(int(d["x"]), int(d["y"]), _tr_float(tx), "crit" if crit else "info")
+				if crit:
+					screen_shake(true)
+					ui.big_flash(Color(250 / 255.0, 204 / 255.0, 21 / 255.0, 0.22), 0.4)
 			return 0.0
 		"chest_open":
 			_apply_snap(sn)
-			fx.float_text(int(d["x"]), int(d["y"]), _t("chest." + str(d.get("kind", ""))), "heal")
+			fx.float_text(int(d["x"]), int(d["y"]), "🎁 " + _t("chest." + str(d.get("kind", ""))), "heal")
 			fx.burst(iso.foot(int(d["x"]), int(d["y"])) + Vector2(0, -24), {"count": 14, "colors": ["#fde68a", "#facc15", "#ffffff"], "shape": "star", "speed": 2.5, "spread": 10, "decay": 0.03, "size": 3})
 			return 0.25
 		"redraw_units", "redraw_terrain":
@@ -506,57 +824,131 @@ func _play_fx(kind: String, d: Dictionary, sn: Variant) -> float:
 	return 0.0
 
 
+## 공격 동작 시작 → 타격 시점까지 초 (웹 vfxAtk: 시트가 있으면 시트, 없으면 키프레임·무기 궤적. 움직임 줄이기면 동작 없이 타이밍만)
+func _start_attack(av: UnitView, tv: UnitView) -> float:
+	var cls := str(av.d["cls"])
+	var m: Dictionary = _atk_motion(cls)
+	if av.has_sheet("attack"):
+		if reduce_motion:
+			return float(m.get("dur", 400)) * float(m.get("hit", 0.5)) / 1000.0
+		return av.play_once("attack")
+	var dir := Vector2.RIGHT
+	if tv != null:
+		dir = (tv.position - av.position).normalized() if tv.position != av.position else Vector2.RIGHT
+	var hit := av.play_motion(m, dir)
+	if tv != null and not PixelFx.handles(cls) and not reduce_motion:
+		fx.atk_trail(m, av.position + Vector2(0, -Iso.UCY + 8.0), tv.position + Vector2(0, -Iso.UCY + 8.0), hit)
+	return hit
+
+
+func _atk_motion(cls: String) -> Dictionary:
+	var M: Dictionary = D.get("ATK_MOTIONS", {})
+	return M.get(cls, M.get("_default", {"dur": 360, "hit": 0.5}))
+
+
 func _ev_moved(d: Dictionary) -> float:
 	var u: Dictionary = d["unit"]
 	var uv: UnitView = units.get(int(u["id"]))
 	if uv == null:
 		return 0.0
 	var to: Dictionary = d["to"]
+	var from: Dictionary = d.get("from", {"x": uv.d["x"], "y": uv.d["y"]})
+	var vault := _is_vault(uv, int(from["x"]), int(from["y"]), int(to["x"]), int(to["y"]))
 	if int(uv.d["x"]) != int(to["x"]) or int(uv.d["y"]) != int(to["y"]):
 		uv.move_to(int(to["x"]), int(to["y"]))
 		_schedule(0.34, _after_move)
 	uv.apply_stats(u)
+	if vault:
+		uv.hop()
+		fx.float_text(int(to["x"]), int(to["y"]), _t("battle.vault"), "tactic")
+	_hud_dirty = true
 	return 0.36
+
+
+## 도움닫기 판정 (웹 VFX._isVault, 연출용): 궁수·도적이 일직선 2~3칸을 가는데 바로 앞 칸에 같은 편이 있음
+func _is_vault(uv: UnitView, fx0: int, fy0: int, tx: int, ty: int) -> bool:
+	if not (D.get("VAULT_CLASSES", []) as Array).has(uv.d.get("cls")):
+		return false
+	var dx := signi(tx - fx0)
+	var dy := signi(ty - fy0)
+	var dist := absi(tx - fx0) + absi(ty - fy0)
+	if (dx != 0 and dy != 0) or dist < 2 or dist > int(Js.num(D.get("VAULT_DIST", 2))) + 1:
+		return false
+	for o: UnitView in units.values():
+		if o != uv and not o.has_meta("doomed") and int(o.d["x"]) == fx0 + dx and int(o.d["y"]) == fy0 + dy:
+			return o.d.get("team") == uv.d.get("team")
+	return false
 
 
 func _after_move() -> void:
 	_refresh_fog_view()
 	_refresh_fade()
 	_refresh_loops()
+	_badges_dirty = true
+	_hud_dirty = true
 
 
-## 공격: 공격자 동작 → 타격 프레임에 대상 흔들림·피격 동작·피해 숫자 (웹 VFX unit_attacked 구독)
+## 공격: 공격자 동작 → 타격 프레임에 대상 흔들림·피격 동작·피해 숫자·직업별 효과 (웹 VFX unit_attacked 구독)
+##  원거리(궁수·마법사·사제·소환사·주술사·지휘관)는 타격 프레임에 픽셀 투사체를 쏘고 비행 뒤 명중
 func _ev_attacked(d: Dictionary) -> float:
 	var a: Dictionary = d["attacker"]
 	var t: Dictionary = d["target"]
 	var av: UnitView = units.get(int(a["id"]))
 	var tid := int(t["id"])
 	var hit_in := 0.1
+	var cls := str(a.get("cls", ""))
+	var splash := Js.truthy(d.get("isSplash"))
 	if av != null:
 		av.apply_stats(a)
-	if not Js.truthy(d.get("isSplash")):
+	if not splash:
 		var aid := int(a["id"])
 		if _motion.has(aid) and float(_motion[aid]) >= _clock - 0.05:
 			hit_in = maxf(0.0, float(_motion[aid]) - _clock)
 			_motion.erase(aid)
 		elif av != null and not av.dying:
-			hit_in = av.play_once("attack")
-	_hit_at[tid] = _clock + hit_in
+			hit_in = _start_attack(av, units.get(tid))
+	var ranged := PixelFx.handles(cls) and not splash
+	var fl := PixelFx.flight(cls) if ranged else 0.0
+	var ap := _body(a)
+	var tp := _body(t)
+	if ranged and speed > 0.0:
+		var dir := (tp - ap).normalized() if tp != ap else Vector2.RIGHT
+		var up := PixelFx.up_of(cls)
+		_schedule(hit_in, func() -> void: pfx.shoot(cls, ap.x + dir.x * 18.0, ap.y + dir.y * 18.0 - up, tp.x - dir.x * 8.0, tp.y - dir.y * 8.0, fl * 1000.0))
+	var land := hit_in + fl
+	_hit_at[tid] = _clock + land
 	var dmg := _num(d.get("damage", 0))
-	_schedule(hit_in, func() -> void:
+	var tac: Variant = d.get("_tactic")
+	_schedule(land, func() -> void:
 		var tv: UnitView = units.get(tid)
 		if tv != null:
 			tv.apply_stats(t)
 			tv.shake()
-			if float(t["hp"]) > 0.0:
+			if float(t["hp"]) > 0.0 and not reduce_motion:
 				tv.play_once("hit")
 		fx.float_text(int(t["x"]), int(t["y"]), "-" + dmg, "damage")
-		fx.burst(_body(t), {"count": 8, "colors": ["#ffffff", "#ffcc44", "#ff8800"], "shape": "spark", "speed": 3, "spread": 8, "decay": 0.035, "size": 2.5}))
-	if Js.truthy(d.get("counter")):
+		if typeof(tac) == TYPE_DICTIONARY:
+			var tags: Array = []
+			for tg: String in tac["tags"]:
+				tags.append(_t("battle.tactic_" + tg))
+			fx.float_text(int(t["x"]), int(t["y"]), "%s +%s%%" % ["·".join(tags), _num(tac["pct"])], "tactic")
+		if ranged:
+			if speed > 0.0:
+				var dd := (tp - ap).normalized() if tp != ap else Vector2.RIGHT
+				pfx.impact(cls, tp.x - dd.x * 8.0, tp.y - dd.y * 8.0)
+		elif not splash:
+			fx.hit_fx(cls, ap, tp)
+		else:
+			fx.burst(tp, {"count": 8, "colors": ["#ffffff", "#ffcc44", "#ff8800"], "shape": "spark", "speed": 3, "spread": 8, "decay": 0.035, "size": 2.5})
+		_hud_dirty = true
+		_badges_dirty = true
+		if story.enabled:
+			story.scan(_story_view()))
+	if Js.truthy(d.get("counter")) or Js.truthy(d.get("isCounter")):
 		fx.float_text(int(a["x"]), int(a["y"]), _t("messages.brawler_counter"), "heal")
 	if Js.truthy(d.get("isSupport")):
 		fx.float_text(int(a["x"]), int(a["y"]), _t("battle.support_hit"), "tactic")
-	return hit_in + 0.3
+	return land + 0.3
 
 
 func _ev_killed(d: Dictionary) -> float:
@@ -567,14 +959,21 @@ func _ev_killed(d: Dictionary) -> float:
 		return 0.0
 	tv.set_meta("doomed", true)
 	var at := maxf(0.0, float(_hit_at.get(tid, 0.0)) - _clock) + 0.05
+	var boss := bool(tv.d.get("isBoss", false))
 	_schedule(at, func() -> void:
 		if is_instance_valid(tv):
-			fx.burst(tv.position + Vector2(0, -24), {"count": 25, "colors": (["#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"] if tv.d.get("team") == "ally" else ["#ef4444", "#f87171", "#fca5a5", "#fecaca"]), "shape": "diamond", "speed": 1.5, "spread": 16, "decay": 0.012, "size": 3, "gravity": 0.03, "vy": -0.5})
+			fx.death_fx(tv.position + Vector2(0, -24), tv.d.get("team") == "ally")
 			tv.die()
+		screen_shake(boss)
+		if boss:
+			ui.big_flash(Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.25), 0.5)
 		units.erase(tid)
 		_refresh_fog_view()
 		_refresh_loops()
-		_update_top())
+		_hud_dirty = true
+		_badges_dirty = true
+		if story.enabled:
+			story.scan(_story_view()))
 	return 0.35
 
 
@@ -609,6 +1008,7 @@ func _apply_snap(sn: Variant) -> void:
 		map.set_safe(view_safe)
 		for uv2: UnitView in units.values():
 			uv2.refresh_camera()
+		ui.minimap.rebuild(_minimap_units())
 	if sn["chests"] != view_chests:
 		view_chests = sn["chests"]
 		map.set_chests(view_chests)
@@ -617,7 +1017,11 @@ func _apply_snap(sn: Variant) -> void:
 		map.set_safe(view_safe)
 	view_turn = int(sn["turn"])
 	view_eq = int(sn["eq"])
-	_update_top()
+	view_espwn = int(sn.get("espwn", view_espwn))
+	view_actcount = int(sn.get("act", view_actcount))
+	view_breached = int(sn.get("breached", view_breached))
+	_hud_dirty = true
+	_badges_dirty = true
 	_refresh_fog_view()
 	_refresh_fade()
 
@@ -628,6 +1032,8 @@ func _stats(v: Variant) -> void:
 	var uv: UnitView = units.get(int(v["id"]))
 	if uv != null and not uv.has_meta("doomed"):
 		uv.apply_stats(v)
+		_hud_dirty = true
+		_badges_dirty = true
 
 
 func _shake(v: Dictionary) -> void:
@@ -644,6 +1050,29 @@ func _set_cur(id: int) -> void:
 	cur_id = id
 	for uv: UnitView in units.values():
 		uv.cur_turn = int(uv.id) == id
+	_hud_dirty = true
+
+
+# ── 화면 흔들림 (웹 #iso-world.screen-shake .3s / heavy .45s) ──
+
+func screen_shake(heavy: bool = false) -> void:
+	if speed <= 0.0 or reduce_motion:
+		return
+	_shake_t = 0.0
+	_shake_dur = 0.45 if heavy else 0.3
+	_shake_amp = 8.0 if heavy else 4.0
+
+
+func _update_shake(delta: float) -> void:
+	if cam == null:
+		return
+	if _shake_t < _shake_dur:
+		_shake_t += delta * maxf(speed, 1.0)
+		var k := clampf(_shake_t / _shake_dur, 0.0, 1.0)
+		var a := _shake_amp * (1.0 - k)
+		cam.offset = Vector2(sin(k * 31.0) * a, cos(k * 23.0) * a * 0.75)
+	elif cam.offset != Vector2.ZERO:
+		cam.offset = Vector2.ZERO
 
 
 # ── 화면 상태 계산 (재생 중에는 화면 사본으로) ──
@@ -668,6 +1097,7 @@ func _refresh_fog_view() -> void:
 		var key := "%d,%d" % [int(uv2.d["x"]), int(uv2.d["y"])]
 		var hidden: bool = uv2.d.get("team") == "enemy" and (not vis.has(key) or bool(uv2.d.get("stealthed", false)))
 		uv2.visible = not hidden
+	_hud_dirty = true
 
 
 func _refresh_fade() -> void:
@@ -695,12 +1125,241 @@ func _refresh_loops() -> void:
 		uv.set_loop(k)
 
 
-func _update_top() -> void:
-	var n := view_eq
+## 머리 위 배지 (웹 rUnits .u-badges) — 화면 사본으로 (엄호·용암 옆은 이웃 유닛·지형으로 계산)
+func _refresh_badges() -> void:
+	var list: Array = []
 	for uv: UnitView in units.values():
-		if uv.d.get("team") == "enemy" and not uv.has_meta("doomed"):
-			n += 1
-	ui.set_turn(view_turn, view_phase, n)
+		if not uv.has_meta("doomed"):
+			list.append(uv.d)
+	var lava := map.lava
+	for uv2: UnitView in units.values():
+		if uv2.has_meta("doomed"):
+			continue
+		uv2.d["badges"] = info.badges(uv2.d, view_ter, list, lava)
+		uv2._update_top()
+
+
+# ═══════════ HUD 모델 ═══════════
+
+func _visible_units() -> Array:
+	var out: Array = []
+	for uv: UnitView in units.values():
+		if uv.has_meta("doomed") or float(uv.d["hp"]) <= 0.0 or not uv.visible:
+			continue
+		out.append(uv)
+	return out
+
+
+func _minimap_units() -> Array:
+	var out: Array = []
+	for uv: UnitView in _visible_units():
+		out.append({"x": uv.d["x"], "y": uv.d["y"], "team": uv.d["team"]})
+	return out
+
+
+func _refresh_hud() -> void:
+	if ui == null:
+		return
+	var S: Dictionary = eng.S
+	var st: Variant = S["cStage"]
+	var title: Array = info.stage_title(st)
+	var tot := int(Js.num(st.get("tot"))) if st != null else 0
+	var enemies := 0
+	for uv: UnitView in units.values():
+		if uv.d.get("team") == "enemy" and not uv.has_meta("doomed") and float(uv.d["hp"]) > 0.0:
+			enemies += 1
+	var m := {"phase": view_phase, "phase_text": _t("battle.player_phase" if view_phase == "player" else "battle.enemy_phase"),
+		"no": title[0], "name": title[1], "turn_text": _t("battle.turn_n", {"n": view_turn}),
+		"wave": {"done": view_espwn >= tot, "ratio": float(view_espwn) / float(tot) if tot > 0 else 0.0, "text": "%d/%d" % [view_espwn, tot],
+			"tip": "%s %d/%d" % [_t("battle.summon"), view_espwn, tot]},
+		"foe": {"text": _t("battle.enemy_left", {"n": enemies}), "tip": _t("battle.remaining")}, "breach": null, "hazard": null, "synergies": [], "practice": ""}
+	var blim := int(ceilf(float(tot) / 4.0)) if st != null else 0
+	if blim > 0:
+		m["breach"] = {"text": "%s %d/%d" % [_t("battle.breach"), view_breached, blim], "tip": _t("battle.breach_tip", {"n": blim}),
+			"hit": view_breached > 0, "danger": view_breached >= blim - 1 and view_breached > 0}
+	var hz: Variant = S.get("_hazard")
+	if typeof(hz) == TYPE_DICTIONARY:
+		m["hazard"] = {"icon": str(hz["icon"]), "name": info.hazard_name(hz), "tip": info.hazard_name(hz) + " — " + icons.strip(info.hazard_describe(hz, st))}
+	for sy: Dictionary in S.get("_synergies", []):
+		(m["synergies"] as Array).append({"icon": str(sy.get("icon", "")), "name": info.synergy_name(sy), "tip": info.synergy_name(sy) + " — " + info.synergy_describe(sy)})
+	if Js.truthy(S.get("practiceMode")):
+		m["practice"] = _t("stage.practice")
+	ui.update_top(m)
+	# 행동 순서 (웹 rTurnOrder: 숨은 적 제외, 다음 행동까지 틱 = (5 - 행동력) / 회복 속도)
+	var rows: Array = []
+	for uv2: UnitView in _visible_units():
+		var ap := Js.num(uv2.d.get("ap"))
+		var rec := Js.num(uv2.d.get("actionRec"))
+		if rec <= 0.0:
+			rec = 1.0
+		rows.append({"uv": uv2, "ticks": 0.0 if ap >= 4.999 else (5.0 - ap) / rec, "ap": ap, "rec": rec})
+	rows = Js.stable_sort(rows, func(p: Dictionary, q: Dictionary) -> float: return float(p["ticks"]) - float(q["ticks"]))
+	var order_rows: Array = []
+	var stage_v: Variant = st
+	for r: Dictionary in rows:
+		var u: UnitView = r["uv"]
+		var cur := u.id == cur_id
+		var ready := float(r["ap"]) >= 4.999
+		var nm := info.unit_name(u.d, stage_v)
+		order_rows.append({"id": u.id, "team": u.d["team"], "boss": bool(u.d.get("isBoss", false)), "cur": cur, "name": nm,
+			"tip": "%s · HP %s/%s · AP %.1f/5 (%.1fx)" % [nm, _num(u.d["hp"]), _num(u.d["mhp"]), float(r["ap"]), float(r["rec"])],
+			"hp_ratio": maxf(0.0, float(u.d["hp"]) / maxf(1.0, float(u.d["mhp"]))), "ap_ratio": minf(1.0, float(r["ap"]) / 5.0),
+			"eta": _t("battle.acting") if cur else ("✓" if ready else "%.1f" % float(r["ticks"])), "ready": ready,
+			"tex": icons.char_tex(str(u.d["cls"]), str(u.d.get("gender", "m")), sdb), "summon": str(u.d["cls"]).begins_with("summon_")})
+	ui.order.update(order_rows)
+	# 클랜원 카드 (웹 rInfoPanel)
+	var cards: Array = []
+	var RL: Dictionary = D.get("RES_LABEL", {})
+	for uv3: UnitView in units.values():
+		var dd: Dictionary = uv3.d
+		if dd.get("team") != "ally" or uv3.has_meta("doomed") or float(dd["hp"]) <= 0.0:
+			continue
+		var rt := str(dd.get("resType", ""))
+		var bl: Array = info.buffs(dd, view_ter, _units_d())
+		for b: Dictionary in bl:
+			b["turns_text"] = _t("gd.tip.turns", {"n": b["turns"]})
+		cards.append({"id": uv3.id, "name": info.unit_name(dd, stage_v), "cls": "Lv.%s %s" % [_num(dd.get("lv", 1)), info.class_name_of(str(dd["cls"]))],
+			"hp": dd["hp"], "mhp": dd["mhp"], "hp_text": _num(dd["hp"]), "mhp_text": _num(dd["mhp"]),
+			"res": Js.num(dd.get("res")), "maxres": Js.num(dd.get("maxRes")), "res_text": _num(Js.num(dd.get("res"))), "maxres_text": _num(Js.num(dd.get("maxRes"))),
+			"res_label": str(RL.get(rt, "")), "res_color": Kit.RES_COLOR.get(rt, Color.WHITE),
+			"atk": _num(dd.get("atk", 0)), "def": _num(dd.get("def", 0)), "rng": _num(dd.get("range", 0)), "buffs": bl,
+			"sel": uv3.id == cur_id and view_phase == "player", "cur": uv3.id == cur_id, "done": bool(dd.get("ha", false)),
+			"tex": icons.char_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_")})
+	ui.cards.update(cards)
+	ui.minimap.set_units(_minimap_units())
+
+
+func _units_d() -> Array:
+	var out: Array = []
+	for uv: UnitView in units.values():
+		if not uv.has_meta("doomed"):
+			out.append(uv.d)
+	return out
+
+
+# ═══════════ 툴팁 · 적 팝업 ═══════════
+
+## 유닛 정보 모델 (툴팁·팝업 공통). 입력 대기 중이면 엔진 유닛(정확), 재생 중이면 화면 사본
+func _unit_model(uv: UnitView, full: bool) -> Dictionary:
+	var dd: Dictionary = uv.d
+	var team := str(dd.get("team"))
+	var boss := bool(dd.get("isBoss", false))
+	var st: Variant = eng.S["cStage"]
+	var m := {"title_icon": icons.emoji("💀") if boss else null, "title": info.unit_name(dd, st), "title_color": Color("fbbf24") if boss else (Color("f87171") if team == "enemy" else Color("93c5fd")),
+		"sub": "Lv.%s %s" % [_num(dd.get("lv", 1)), info.class_name_of(str(dd["cls"]))],
+		"portrait": {"tex": icons.char_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_"),
+			"ring": Color("ef4444") if team == "enemy" else Color("3b82f6")},
+		"border": Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.4) if team == "enemy" else Color(59 / 255.0, 130 / 255.0, 246 / 255.0, 0.4)}
+	var hp := float(dd["hp"])
+	var mhp := maxf(1.0, float(dd["mhp"]))
+	var low := hp / mhp <= 0.25
+	var bars: Array = [{"label": "HP", "ratio": hp / mhp, "text": "%s/%s" % [_num(dd["hp"]), _num(dd["mhp"])],
+		"c0": Color("ef4444") if low else Color("22c55e"), "c1": Color("ef4444") if low else Color("22c55e")}]
+	var rt := str(dd.get("resType", ""))
+	var RL: Dictionary = D.get("RES_LABEL", {})
+	if RL.has(rt) and Js.num(dd.get("maxRes")) > 0.0:
+		var rc: Color = Kit.RES_COLOR.get(rt, Color.WHITE)
+		bars.append({"label": RL[rt], "label_color": rc, "ratio": Js.num(dd.get("res")) / maxf(1.0, Js.num(dd.get("maxRes"))),
+			"text": "%s/%s" % [_num(Js.num(dd.get("res"))), _num(Js.num(dd.get("maxRes")))], "c0": rc, "c1": rc})
+	m["bars"] = bars
+	m["stats"] = "ATK %s   DEF %s   RNG %s   MOV %s" % [_num(dd.get("atk", 0)), _num(dd.get("def", 0)), _num(dd.get("range", 0)), _num(dd.get("move", 0))]
+	var bl: Array = info.buffs(dd, view_ter, _units_d())
+	for b: Dictionary in bl:
+		b["turns_text"] = _t("gd.tip.turns", {"n": b["turns"]})
+	m["buffs"] = bl
+	var tile := info._tile(view_ter, int(dd["x"]), int(dd["y"]))
+	m["lines"] = [_t("gd.tip.on_terrain", {"t": _t("terrain." + tile)})] if tile != "" else []
+	if team == "enemy" and dd.get("intent") != null:
+		var tgt: UnitView = units.get(int(dd["intent"]))
+		if tgt != null:
+			m["intent"] = _t("gd.tip.intent", {"name": info.unit_name(tgt.d, st)})
+	if full:
+		var eu: Variant = eng.unit_by_id(uv.id)
+		var skills: Array = []
+		if eu != null:
+			for sk: Dictionary in eng.get_unit_skills(eu):
+				var sid := str(sk.get("id", ""))
+				var sub := _t("gd.tip.passive") if Js.truthy(sk.get("passive")) else ("%s %s" % [_num(sk.get("cost", 0)), _t("resources." + str(sk.get("costType", dd.get("resType", ""))))] if Js.num(sk.get("cost")) > 0.0 else "")
+				skills.append({"tex": icons.skill(sid, str(sk.get("icon", ""))), "name": _t("skills." + sid), "sub": sub})
+		m["skills"] = skills
+		if team == "enemy":
+			var prof: Variant = (D.get("AI_PROFILES", {}) as Dictionary).get(dd["cls"])
+			if typeof(prof) == TYPE_DICTIONARY:
+				m["ai"] = _t("gd.ai.label", {"style": _t("gd.ai.style_" + str(prof["style"])), "target": _t("gd.ai.target_" + str(prof["targetPriority"]))})
+	return m
+
+
+## 칸 정보 모델 (지형 효과·상자·결계·위협·안개)
+func _cell_model(c: int, r: int) -> Dictionary:
+	var tile := iso.tile_type(c, r)
+	var TI: Dictionary = D["TI"]
+	var m := {"title": _t("terrain." + tile), "title_color": Color("e5e7eb"), "lines": info.terrain_lines(tile), "border": Color(1, 1, 1, 0.18)}
+	if TI.has(tile) and TI[tile].get("buff") != null:
+		m["icon"] = icons.emoji(str(TI[tile]["buff"]["icon"]))
+	var key := "%d,%d" % [c, r]
+	var lines: Array = m["lines"]
+	if view_chests.has([c, r]):
+		lines.append(_t("chest.tip"))
+	if view_safe.has(key):
+		lines.append(_t("gd.tip.safe_zone"))
+	if map.lava and tile == "water":
+		lines.append(_t("gd.tip.lava"))
+	if show_threat and map.threat.has(key):
+		lines.append(_t("gd.tip.threat"))
+	if map.fog_on and not map.fog_vis.has(key):
+		lines.append(_t("gd.tip.fog"))
+	m["sub"] = "(%d, %d)" % [c, r]
+	return m
+
+
+## 마우스 아래 유닛 (몸통 상자) → 없으면 칸
+func _hover_target(world_p: Vector2) -> String:
+	var best: UnitView = null
+	for uv: UnitView in _visible_units():
+		var p := uv.position
+		if absf(world_p.x - p.x) <= 18.0 and world_p.y <= p.y + 6.0 and world_p.y >= p.y - 56.0:
+			if best == null or uv.z_index > best.z_index:
+				best = uv
+	if best != null:
+		return "u:%d" % best.id
+	var c := iso.iso_hit(world_p)
+	if c.x >= 0:
+		return "c:%d,%d" % [c.x, c.y]
+	return ""
+
+
+func _update_hover(delta: float) -> void:
+	if ui == null:
+		return
+	if _hover_key == "" or _dragging or _hold > 0 or _over or ui.settings.is_open() or ui.over_hud(_hover_pos):
+		ui.info.hide_tip()
+		return
+	_hover_t += delta
+	if _hover_t < 0.25:
+		return
+	var m: Dictionary = {}
+	if _hover_key.begins_with("u:"):
+		var uv: UnitView = units.get(_hover_key.substr(2).to_int())
+		if uv == null or not uv.visible:
+			ui.info.hide_tip()
+			return
+		if ui.info.popup.visible and ui.info.popup_unit == uv.id:
+			ui.info.hide_tip()
+			return
+		m = _unit_model(uv, false)
+	else:
+		var xy := _hover_key.substr(2).split(",")
+		m = _cell_model(int(xy[0]), int(xy[1]))
+	ui.info.show_tip(m, _hover_pos, ui.menu.get_global_rect() if ui.menu.visible else Rect2())
+
+
+## 적 정보 팝업 (웹 showEnemyPopup) — 다음 누르기에 닫힘
+func show_enemy_popup(id: int) -> void:
+	var uv: UnitView = units.get(id)
+	if uv == null:
+		return
+	ui.info.hide_tip()
+	ui.info.show_popup(id, _unit_model(uv, true), _unit_screen(id) + Vector2(0, -28))
 
 
 # ═══════════ 입력 대기 ═══════════
@@ -709,6 +1368,11 @@ func _update_top() -> void:
 func _on_drained() -> void:
 	if _over:
 		return
+	if _surrender_pending and _eng_status == "input" and eng.awaiting_unit() != null:
+		_surrender_pending = false
+		_do_surrender()
+		return
+	_surrender_pending = false
 	if _eng_status == "input" and eng.awaiting_unit() != null:
 		_enter_menu()
 	else:
@@ -742,7 +1406,7 @@ func _enter_menu() -> void:
 	var u: Dictionary = eng.awaiting_unit()
 	_set_cur(int(u["id"]))
 	view_phase = "player"
-	_update_top()
+	_hud_dirty = true
 	_refresh_loops()
 	for uv: UnitView in units.values():
 		uv.selected = uv.id == int(u["id"])
@@ -782,6 +1446,10 @@ func _unit_screen(id: int) -> Vector2:
 	return get_viewport().get_canvas_transform() * (uv.position + Vector2(0, -30))
 
 
+func _e(emoji: String) -> Texture2D:
+	return icons.emoji(emoji)
+
+
 func _show_main_menu(u: Dictionary) -> void:
 	var acts: Dictionary = {}
 	for a: Dictionary in eng.q.actions(u):
@@ -789,12 +1457,12 @@ func _show_main_menu(u: Dictionary) -> void:
 	var acted := Js.truthy(u.get("ha"))
 	var items: Array = []
 	if acts["move"]["ok"]:
-		items.append({"op": "move", "icon": "»", "label": _t("battle.move"), "sub": _t("battle.am_move_sub", {"n": u["move"]}), "key": "M", "ac": "move"})
+		items.append({"op": "move", "tex": _e("👣"), "glyph": "»", "label": _t("battle.move"), "sub": _t("battle.am_move_sub", {"n": u["move"]}), "key": "M", "ac": "move"})
 	var healer: bool = u.get("role") == "healer"
 	var at: Dictionary = eng.q.attack_targets(u)
 	var n_t: int = (at["attack"] as Array).size() + ((at["heal"] as Array).size() if healer else 0)
 	if not acted and n_t > 0:
-		items.append({"op": "attack", "icon": "✚" if healer else "⚔", "label": _t("battle.attack_heal" if healer else "battle.attack"), "sub": _t("battle.am_targets", {"n": n_t}), "key": "A", "ac": "attack"})
+		items.append({"op": "attack", "tex": null if healer else _e("⚔️"), "glyph": "✚" if healer else "⚔", "label": _t("battle.attack_heal" if healer else "battle.attack"), "sub": _t("battle.am_targets", {"n": n_t}), "key": "A", "ac": "attack"})
 	var actives := 0
 	var usable := 0
 	for st: Dictionary in eng.q.skill_status(u):
@@ -803,22 +1471,22 @@ func _show_main_menu(u: Dictionary) -> void:
 			if st["usable"]:
 				usable += 1
 	if not acted and actives > 0:
-		items.append({"op": "skill", "icon": "✦", "label": _t("battle.skill"), "sub": _t("battle.am_usable", {"n": usable, "total": actives}), "key": "S", "ac": "skill", "warn": usable == 0})
+		items.append({"op": "skill", "tex": _e("🔱"), "glyph": "✦", "label": _t("battle.skill"), "sub": _t("battle.am_usable", {"n": usable, "total": actives}), "key": "S", "ac": "skill", "warn": usable == 0})
 	var n_items := 0
 	for p: Dictionary in eng.S["_battlePotions"]:
 		n_items += int(Js.num(p.get("quantity", 1))) if p.get("quantity") != null else 1
 	for s: Dictionary in eng.S["_siegeItems"]:
 		n_items += int(Js.num(s.get("quantity", 1))) if s.get("quantity") != null else 1
 	if not acted and n_items > 0:
-		items.append({"op": "item", "icon": "◆", "label": _t("battle.item"), "sub": _t("battle.am_count", {"n": n_items}), "key": "I", "ac": "item"})
+		items.append({"op": "item", "tex": _e("🎒"), "glyph": "◆", "label": _t("battle.item"), "sub": _t("battle.am_count", {"n": n_items}), "key": "I", "ac": "item"})
 	if not acted:
 		if acts["shove"]["ok"]:
-			items.append({"op": "shove", "icon": "⇥", "label": _t("battle.shove"), "sub": _t("battle.am_shove_sub", {"n": eng.q.shove_cells(u).size()}), "key": "P", "ac": "wait"})
-		items.append({"op": "defend", "icon": "▣", "label": _t("battle.defend"), "sub": _t("battle.am_defend_sub"), "key": "D", "ac": "wait"})
-		items.append({"op": "overwatch", "icon": "◉", "label": _t("battle.overwatch"), "sub": _t("battle.am_overwatch_sub"), "key": "O", "ac": "wait"})
-	items.append({"op": "wait", "icon": "Ⅱ", "label": _t("battle.wait"), "sub": _t("battle.am_wait_sub"), "key": "W", "ac": "wait"})
+			items.append({"op": "shove", "tex": _e("🫸"), "glyph": "⇥", "label": _t("battle.shove"), "sub": _t("battle.am_shove_sub", {"n": eng.q.shove_cells(u).size()}), "key": "P", "ac": "wait"})
+		items.append({"op": "defend", "tex": _e("🛡️"), "glyph": "▣", "label": _t("battle.defend"), "sub": _t("battle.am_defend_sub"), "key": "D", "ac": "wait"})
+		items.append({"op": "overwatch", "tex": _e("👁"), "glyph": "◉", "label": _t("battle.overwatch"), "sub": _t("battle.am_overwatch_sub"), "key": "O", "ac": "wait"})
+	items.append({"op": "wait", "glyph": "Ⅱ", "label": _t("battle.wait"), "sub": _t("battle.am_wait_sub"), "key": "W", "ac": "wait"})
 	if acts["undo"]["ok"]:
-		items.append({"op": "undo", "icon": "↩", "label": _t("battle.undo_move"), "key": "Esc", "ac": "cancel"})
+		items.append({"op": "undo", "glyph": "↩", "label": _t("battle.undo_move"), "key": "Esc", "ac": "cancel"})
 	ui.show_menu("", items, _unit_screen(int(u["id"])))
 	map.set_hl({"%d,%d" % [int(u["x"]), int(u["y"])]: "selected"})
 
@@ -843,9 +1511,11 @@ func _show_skill_menu(u: Dictionary) -> void:
 				reason = _t("battle.reason_no_res", {"cost": cost})
 			"no_target":
 				reason = _t("battle.reason_no_target")
-		items.append({"op": "skill_pick", "idx": int(st["idx"]), "icon": "✦", "label": _t("skills." + str(st["id"])), "sub": reason if reason != "" else cost,
-			"warn": reason != "", "enabled": bool(st["usable"]), "key": str(n), "ac": "skill"})
-	items.append({"op": "cancel", "icon": "↩", "label": _t("battle.cancel"), "key": "Esc", "ac": "cancel"})
+		var sid := str(st["id"])
+		var desc_k := "skills_desc." + sid
+		items.append({"op": "skill_pick", "idx": int(st["idx"]), "tex": icons.skill(sid, str(skd.get("icon", ""))), "glyph": "✦", "label": _t("skills." + sid), "sub": reason if reason != "" else cost,
+			"warn": reason != "", "enabled": bool(st["usable"]), "key": str(n), "ac": "skill", "tip": icons.strip(_t(desc_k)) if i18n.has_key(desc_k) else ""})
+	items.append({"op": "cancel", "glyph": "↩", "label": _t("battle.cancel"), "key": "Esc", "ac": "cancel"})
 	ui.show_menu(_t("battle.skill"), items, _unit_screen(int(u["id"])))
 
 
@@ -865,8 +1535,10 @@ func _show_item_menu(u: Dictionary) -> void:
 			seen[id]["count"] += int(Js.num(it.get("quantity"))) if it.get("quantity") != null else 1
 		for id2: String in order:
 			n += 1
-			items.append({"op": "item_pick", "kind": grp[0], "idx": int(seen[id2]["idx"]), "icon": "◆", "label": _t(str(grp[3]) + id2), "sub": "×%d" % int(seen[id2]["count"]), "key": str(n), "ac": "item"})
-	items.append({"op": "cancel", "icon": "↩", "label": _t("battle.cancel"), "key": "Esc", "ac": "cancel"})
+			var tip_k := str(grp[3]) + id2 + "_desc"
+			items.append({"op": "item_pick", "kind": grp[0], "idx": int(seen[id2]["idx"]), "tex": icons.item(id2), "frame": icons.rarity_frame(id2), "framed": true,
+				"glyph": "◆", "label": _t(str(grp[3]) + id2), "sub": "×%d" % int(seen[id2]["count"]), "key": str(n), "ac": "item", "tip": _t(tip_k) if i18n.has_key(tip_k) else ""})
+	items.append({"op": "cancel", "glyph": "↩", "label": _t("battle.cancel"), "key": "Esc", "ac": "cancel"})
 	ui.show_menu(_t("battle.item"), items, _unit_screen(int(u["id"])))
 
 
@@ -888,7 +1560,7 @@ func _show_intents() -> void:
 	for id: int in cnt.keys():
 		var uv: UnitView = units.get(id)
 		if uv != null:
-			badges.append({"pos": uv.position + Vector2(22, -60), "n": cnt[id]})
+			badges.append({"pos": uv.position + Vector2(24, -62), "n": cnt[id]})
 	fx.intent_badges = badges
 	fx.queue_redraw()
 
@@ -911,6 +1583,7 @@ func ui_action(op: String) -> bool:
 	var u: Variant = eng.awaiting_unit()
 	if u == null:
 		return false
+	ui.info.hide_popup()
 	if mode != "menu":
 		_back_to_menu(false)
 	match op:
@@ -1027,6 +1700,8 @@ func ui_pick_face(dx: int, dy: int) -> bool:
 ## 취소: 칸·방향·하위 메뉴 → 행동 메뉴, 행동 메뉴에서는 이동 취소(가능할 때)
 func ui_cancel() -> bool:
 	fail_hint = ""
+	if ui.info.popup.visible:
+		ui.info.hide_popup()
 	match mode:
 		"target", "face", "skills", "items":
 			_back_to_menu(true)
@@ -1079,7 +1754,8 @@ func _clear_target() -> void:
 		map.set_hl({})
 
 
-## 공격 예상 (웹 rPreview): 공격 가능한 적 머리 위 피해·처치·보조 정보
+## 공격 예상 (웹 rPreview): 공격 가능한 적 머리 위 피해(처치면 💀)·전술 보정·방어막·숲 회피·여울·연계·반격
+##  Godot: 실제 공격처럼 계산(as_exec) — 주술사 고양 마지막 공격 차이를 바로잡음 (scripts/logic/battle/battle_query.gd)
 func _show_previews(u: Dictionary, at: Dictionary) -> void:
 	var list: Array = []
 	for c: Dictionary in at["attack"]:
@@ -1090,10 +1766,10 @@ func _show_previews(u: Dictionary, at: Dictionary) -> void:
 				break
 		if v == null or v["team"] == u["team"]:
 			continue
-		var p: Dictionary = eng.q.preview_attack(u, v)
-		var pos := iso.foot(int(v["x"]), int(v["y"])) + Vector2(0, -62)
+		var p: Dictionary = eng.q.preview_attack(u, v, true)
+		var pos := iso.foot(int(v["x"]), int(v["y"])) + Vector2(0, -64)
 		if p["intercept"] != null:
-			list.append({"pos": pos, "main": "-" + _num(p["intercept_dmg"]), "sub": _t("battle.preview_intercept"), "kind": "block"})
+			list.append({"pos": pos, "main": "-" + _num(p["intercept_dmg"]), "sub": _t("battle.preview_intercept"), "kind": "block", "icon": _e("🛡️")})
 			continue
 		var sub: Array = []
 		if float(p["pct"]) != 0.0:
@@ -1101,15 +1777,18 @@ func _show_previews(u: Dictionary, at: Dictionary) -> void:
 			for tg: String in p["tags"]:
 				tags.append(_t("battle.tactic_" + tg))
 			sub.append("%s +%s%%" % ["·".join(tags), _num(p["pct"])])
+		if p["shield"]:
+			sub.append(_t("gd.tip.shield_half"))
 		if p["evade"]:
 			sub.append(_t("battle.tactic_evade", {"n": p["evade"]}))
+		if p["shallow"]:
+			sub.append(_t("battle.tactic_shallow", {"n": Js.round_js(float(D["TACTIC"]["shallowVuln"]) * 100.0)}))
 		if p["support"]:
 			sub.append(_t("battle.preview_support", {"n": p["support"]}))
 		if float(p["counter"]) > 0.0:
 			sub.append(_t("battle.preview_counter", {"n": p["counter"]}))
-		list.append({"pos": pos, "main": "-" + _num(p["dmg"]), "sub": "  ".join(sub), "kind": "kill" if p["kill"] else "dmg"})
-	fx.previews = list
-	fx.queue_redraw()
+		list.append({"pos": pos, "main": "-" + _num(p["dmg"]), "sub": "  ".join(sub), "kind": "kill" if p["kill"] else "dmg", "icon": _e("💀") if p["kill"] else null})
+	fx.set_previews(list)
 
 
 ## 방향 고르기 (웹 showFacePicker: 유닛 둘레 네 칸 + 그 방향일 때 등 뒤·옆 적 수)
@@ -1150,10 +1829,17 @@ func _send(cmd: Dictionary) -> void:
 		uv.face_hidden = false
 		uv.selected = false
 	ui.hide_menu()
-	fail_hint = str(FAIL_TEXT.get(str(last_result["reason"]), last_result["reason"])) if really_failed else ""
+	ui.info.hide_popup()
+	fail_hint = _fail_text(str(last_result["reason"])) if really_failed else ""
 	ui.show_hint(fail_hint)
 	mode = "busy"
 	_eng_status = eng.run()
+
+
+## command() 실패 이유 → 안내 (gd.fail.* — Godot 전용 번역 키)
+func _fail_text(reason: String) -> String:
+	var k := "gd.fail." + reason
+	return _t(k) if i18n != null and i18n.has_key(k) else reason
 
 
 ## 행동 여부를 가르는 값 (위치·행동·이동·자원)
@@ -1161,35 +1847,202 @@ func _act_state(u: Dictionary) -> Array:
 	return [int(u["x"]), int(u["y"]), Js.truthy(u.get("ha")), Js.truthy(u.get("hm")), float(u.get("res", 0.0)), int(eng.S["actCount"])]
 
 
-# ═══════════ 끝 ═══════════
+# ═══════════ 항복 · 끝 ═══════════
+
+## 항복 (웹 Renderer.surrender: FSM → BATTLE_END + battle_end{win:false} — 엔진의 공개 함수 transition·emit 을 웹과 같은 순서로 부름)
+func surrender() -> void:
+	if _over or eng.fsm == BattleEngine.BATTLE_END:
+		return
+	# 입력 대기 중에만 — 연출 중(적 차례·대사·로딩)이면 연출이 끝나 입력을 기다릴 때 항복
+	if mode == "busy" or _hold > 0 or _eng_status != "input":
+		_surrender_pending = true
+		ui.show_hint(_t("gd.settings.surrender_pending"))
+		return
+	_do_surrender()
+
+
+func _do_surrender() -> void:
+	eng.transition(BattleEngine.BATTLE_END)
+	eng.emit("battle_end", {"win": false, "message": "messages.surrender"})
+	_eng_status = eng.run()
+	# 남은 연출은 건너뜀 — 엔진 상태로 맞추고 바로 결과
+	_evq.clear()
+	_qi = 0
+	_wait = 0.0
+	_clear_target()
+	_hide_intents()
+	ui.hide_menu()
+	_sync_from_engine()
+	_finish()
+
 
 func _finish() -> void:
+	if _over:
+		return
 	_over = true
 	mode = "over"
 	result = eng.finish(_eng_status)
 	ui.hide_menu()
+	ui.info.hide_tip()
+	ui.info.hide_popup()
 	_hide_intents()
 	map.set_hl({})
-	# 실제 세이브로 시작한 전투면 결과(골드·경험치·보상)를 Store 에 되돌려 씀
-	if str(cfg.get("source", "")) == "store":
-		var store: Node = _svc("Store")
-		if store != null:
-			for k: String in eng.c.store.keys():
-				store.call("set_json", k, eng.c.store.get_json(k))
-	var win: bool = result.get("result") == "win"
-	var lines: Array = []
-	lines.append("%s · %s" % [_t("battle.turn_n", {"n": result.get("rounds", 0)}), str(result.get("reason", result.get("result", "")))])
-	var rw: Variant = result.get("rewards")
-	if typeof(rw) == TYPE_DICTIONARY:
-		lines.append("%s +%s" % [_t("common.gold"), _num(rw.get("gold", 0))])
-		var ex: Array = rw.get("exp", [])
-		if not ex.is_empty():
-			var tot := 0.0
-			for e: Dictionary in ex:
-				tot += float(e.get("exp", 0))
-			lines.append("%s +%s (%d)" % [_t("common.exp"), _num(tot), ex.size()])
-	ui.show_result(win, lines)
+	# 실제 세이브로 시작한 전투면 결과(골드·경험치·보상)를 Store 에 되돌려 씀 (본 스토리 기록은 이번 전투에서 늘었을 수 있어 합쳐서)
+	if str(cfg.get("source", "")) == "store" and store != null:
+		_write_back()
 	battle_over.emit(result)
+	if result.get("result") == "win" and story.enabled:
+		_story_play(story.outro(), _show_result)
+	else:
+		_show_result()
+
+
+## 엔진 저장소 → Store: 전투가 바꾼 키만 (넘긴 값과 다른 키·새 키), 엔진이 지운 키는 지움. 본 스토리 기록은 따로 (이미 Store 에 씀)
+func _write_back() -> void:
+	var now: Dictionary = {}
+	for k: String in eng.c.store.keys():
+		now[k] = true
+		if k == StoryBattle.SEEN_KEY:
+			continue
+		var v: Variant = eng.c.store.get_json(k)
+		if not _save_in.has(k) or JsonExact.stringify(_save_in[k]) != JsonExact.stringify(v):
+			store.call("set_json", k, v)
+	for k2: String in _save_in.keys():
+		if not now.has(k2) and k2 != StoryBattle.SEEN_KEY:
+			store.call("remove", k2)
+
+
+func _show_result() -> void:
+	ui.show_result(_result_model())
+
+
+## 결과 화면 모델 (웹 showRes 와 같은 순서·같은 글) — 엔진 S 의 보상 값을 읽기만
+func _result_model() -> Dictionary:
+	var S: Dictionary = eng.S
+	var win: bool = result.get("result") == "win"
+	var st: Variant = S["cStage"]
+	var reason := str(result.get("reason", result.get("result", "")))
+	var mkey := reason if reason.contains(".") else "messages." + reason
+	var msg := _t(mkey, {"stage_id": st["id"] if st != null else 0, "turn": S["turn"], "count": S["breached"]}) if i18n.has_key(mkey) else reason
+	var m := {"win": win, "title": _t("messages.victory" if win else "messages.defeat"), "msg": icons.strip(msg), "notes": [], "rewards": [], "exp": [], "buttons": []}
+	var EC: Dictionary = D["ECON"]
+	if Js.truthy(S.get("practiceMode")):
+		var notes: Array = [_t("stage.practice_mode_active"), "%s (%d%%)" % [_t("stage.reduced_gold"), int(Js.round_js(float(EC["practiceMul"]) * 100.0))], _t("stage.full_exp") + " (100%)"]
+		var ar := int(Js.num(S.get("_autoRevivedCount")))
+		if ar > 0:
+			notes.append(_t("stage.auto_revived", {"count": ar}))
+		notes.append(_t("stage.no_clear_recorded"))
+		m["notes"] = notes
+	var sr: Variant = S.get("_starResult")
+	if win and typeof(sr) == TYPE_DICTIONARY:
+		m["stars"] = {"merged": sr["merged"], "newly": sr["newly"], "flags": sr["flags"],
+			"conds": [_t("stars.cond_clear"), _t("stars.cond_nodeath"), "%s (%s)" % [_t("stars.cond_turns", {"n": sr["limit"]}), _t("battle.turn_n", {"n": sr["turn"]})]]}
+	var rw: Array = m["rewards"]
+	if win:
+		if typeof(sr) == TYPE_DICTIONARY and Js.num(sr.get("bonus")) > 0.0:
+			rw.append({"tex": _e("⭐"), "label": _t("stars.bonus"), "value": "+%s G" % _num(sr["bonus"])})
+		var actual := Js.num(S.get("_baseReward")) + Js.num(S.get("_bonusReward"))
+		if actual > 0.0:
+			rw.append({"tex": icons.item("gold"), "label": _t("messages.reward"), "value": "+%s G" % _num(actual)})
+		if Js.num(S.get("_firstClearBonus")) > 0.0:
+			rw.append({"tex": _e("🎉"), "label": _t("messages.first_clear_bonus"), "value": "+%s G" % _num(S["_firstClearBonus"])})
+		var fcu: Variant = S.get("_firstClearUnit")
+		if typeof(fcu) == TYPE_DICTIONARY:
+			rw.append({"tex": icons.char_tex(str(fcu["cls"]), str(fcu.get("gender", "m")), sdb), "portrait": true, "label": _t("messages.first_clear_unit", {"cls": _t("classes." + str(fcu["cls"]))}), "value": ""})
+		if Js.truthy(S.get("_droppedBook")):
+			rw.append({"tex": icons.item("skillbook"), "frame": icons.rarity_frame("skillbook"), "label": _t("academy.skillbook_drop", {"skill": _t("skills." + str(S["_droppedBook"]))}), "value": ""})
+		if Js.truthy(S.get("_runeDrop")):
+			var rk := str(S["_runeDrop"])
+			rw.append({"tex": icons.item("rune_" + rk) if icons.item("rune_" + rk) != null else _e(str(D["ENCHANTS"][rk]["icon"])), "label": _t("enchant.rune_name", {"e": _t("enchant." + rk)}), "value": "+1"})
+		var so: Variant = S.get("_soulReward")
+		if typeof(so) == TYPE_DICTIONARY:
+			rw.append({"tex": icons.item("soul_stone"), "label": _t("soul.reward_stone" if so["kind"] == "stone" else "soul.reward_frag", {"cls": _t("classes." + str(so["cls"]))}), "value": "+%s" % _num(so["n"])})
+		for g: Dictionary in _gear_drop_items():
+			rw.append(g)
+	var dead := (S.get("_deadAllyUids", []) as Array).size()
+	if dead > 0:
+		m["fallen"] = _t("results.fallen", {"n": dead})
+	var er: Array = S.get("_expResults", []) if typeof(S.get("_expResults")) == TYPE_ARRAY else []
+	if not er.is_empty():
+		m["detail"] = _t("results.battle_detail", {"kills": Js.num(S.get("_deadEnemyCount")), "exp": Js.num(S.get("_totalExp")), "survivors": er.size()})
+		var roster: Variant = eng.c.store.get_json("game_roster")
+		var chars: Array = roster.get("chars", []) if typeof(roster) == TYPE_DICTIONARY else []
+		for r: Dictionary in er:
+			var ch: Variant = null
+			for c: Variant in chars:
+				if typeof(c) == TYPE_DICTIONARY and Js.same(c.get("uid"), r["uid"]):
+					ch = c
+					break
+			if ch == null:
+				continue
+			var nm := info.char_name(ch)
+			var lv := float(ch.get("lv", 1))
+			var need := 0.0 if lv >= Profile.max_level_of(eng.c, ch) else Profile.exp_for_level(eng.c, lv)
+			var leveled := Js.num(r.get("leveled")) > 0.0
+			(m["exp"] as Array).append({"tex": icons.char_tex(str(ch["cls"]), str(ch.get("gender", "m")), sdb), "summon": false, "name": nm,
+				"ratio": minf(1.0, Js.num(ch.get("exp")) / need) if need > 0.0 else 1.0, "exp_text": "+%s EXP" % _num(r["exp"]),
+				"lv_text": ("LV %s → %s" % [_num(r.get("prevLv", lv)), _num(lv)]) if leveled else "Lv.%s" % _num(lv), "lvup": leveled})
+	var btns: Array = m["buttons"]
+	var daily: bool = st != null and Js.truthy(st.get("daily"))
+	btns.append({"id": "back", "text": _t("daily.back") if daily else _t("results.return_to_lobby"), "primary": not win})
+	btns.append({"id": "retry", "text": _t("gd.result.retry")})
+	if win and not daily and st != null:
+		for s2: Dictionary in D["STAGES"]:
+			if int(s2["id"]) == int(st["id"]) + 1:
+				btns.append({"id": "next", "text": _t("results.next_stage"), "primary": true})
+				break
+	return m
+
+
+## 장비 보상 — 엔진 순수 조회 gear_drop_items(전투 시작 때 eid 기준)로 실제 물건의 이름·등급
+func _gear_drop_items() -> Array:
+	var out: Array = []
+	for g: Dictionary in eng.q.gear_drop_items(_inv_eids0):
+		if g.has("stone"):
+			out.append({"tex": icons.item("mat_stone"), "label": "%s +%s" % [_t("gear.stone"), _num(g["stone"])], "value": ""})
+			continue
+		var it: Variant = g.get("item")
+		var tid := str(g["templateId"])
+		var legend: bool = g.get("legend", false)
+		var key := tid
+		var name := ""
+		var rar := "common"
+		if typeof(it) == TYPE_DICTIONARY:
+			rar = str(it.get("rarity", "common"))
+			if Js.truthy(it.get("legend")):
+				key = "legend_" + str(it["legend"])
+				name = _t("gear.legend." + str(it["legend"]))
+			elif Js.truthy(it.get("setCls")):
+				name = _t("gear.set_piece", {"set": _t("gear.set." + str(it["setCls"])), "slot": _t("equip.slot." + str(it.get("slot", "")))})
+		if name == "":
+			name = _t("gear.item." + tid) if i18n.has_key("gear.item." + tid) else _t("equip.item." + tid)
+		var tex: Texture2D = icons.item(key) if icons.item(key) != null else icons.item(tid)
+		out.append({"tex": tex, "frame": icons.rarity_frame(key, "legendary" if legend else rar), "label": ("★ " if legend else "") + name, "value": "", "legend": legend})
+	return out
+
+
+func _on_result_button(id: String) -> void:
+	match id:
+		"back":
+			_go_back()
+		"retry":
+			_restart(0)
+		"next":
+			_restart(1)
+
+
+## 다시 하기·다음 스테이지: 같은 설정(세이브 출처·시드·파티)으로 장면을 다시 — Store 세이브면 지금 Store 값을 다시 읽음
+func _restart(stage_add: int) -> void:
+	var c := cfg.duplicate(true)
+	if str(c.get("source", "")) == "store" and store != null:
+		c["save"] = store_save(store)
+	if stage_add != 0:
+		var st: Variant = eng.S["cStage"]
+		c["stage"] = {"id": int(st["id"]) + stage_add}
+		c["inject"] = []
+	c.erase("autoplay")
+	pending = c
+	get_tree().reload_current_scene()
 
 
 func _go_back() -> void:
@@ -1204,32 +2057,83 @@ func _exit_tree() -> void:
 		if eng.fx_event.is_connected(_on_fx):
 			eng.fx_event.disconnect(_on_fx)
 		eng.dispose()
+	if i18n != null and i18n.is_connected("language_changed", _on_language):
+		i18n.disconnect("language_changed", _on_language)
+
+
+# ═══════════ 설정 · 언어 ═══════════
+
+func _on_language(_lang: String) -> void:
+	ui.relabel()
+	_hud_dirty = true
+	_badges_dirty = true
+	ui.info.hide_tip()
+	if ui.info.popup.visible:
+		show_enemy_popup(ui.info.popup_unit)
+	match mode:
+		"menu":
+			_show_main_menu(eng.awaiting_unit())
+			ui.show_hint(fail_hint)
+		"skills":
+			_show_skill_menu(eng.awaiting_unit())
+		"items":
+			_show_item_menu(eng.awaiting_unit())
+		"target":
+			if target_op == "attack":
+				_show_previews(eng.awaiting_unit(), eng.q.attack_targets(eng.awaiting_unit()))
+		"face":
+			_enter_face(face_op, eng.awaiting_unit())
+	if ui.result_view.visible:
+		_show_result()
+	_update_cam_label()
+
+
+func set_speed_index(i: int) -> void:
+	_speed_i = clampi(i, 0, SPEEDS.size() - 1)
+	speed = SPEEDS[_speed_i]
+	fx.speed = speed
+	pfx.time_scale = speed
+	for uv: UnitView in units.values():
+		uv.speed = speed
+	ui.set_speed_label("%dx" % int(speed))
+
+
+func set_reduce_motion(on: bool) -> void:
+	reduce_motion = on
+	ui.reduce_motion = on
+	for uv: UnitView in units.values():
+		uv.reduce_motion = on
 
 
 # ═══════════ 카메라 ═══════════
 
+func _update_cam_label() -> void:
+	ui.set_cam(str(D["CARR"][iso.cam_dir]), str(D["CLAB"][iso.cam_dir]))
+
+
+## 카메라 회전 (3b): 맵은 방향별 묶음을 바꿔 보이기만 하고(battle_map.switch_dir), 시야는 그대로라 다시 계산하지 않음.
+##  메뉴는 다시 만들지 않고 자리만 옮김 — 한 프레임 끊김을 줄임 (3a: 맵 전체 다시 만들기 + 메뉴 다시 만들기 ~35ms)
 func rotate_cam(d: int) -> void:
-	var center := cam.get_screen_center_position()
+	var center := cam.get_screen_center_position() - cam.offset
 	var g := iso.screen_to_grid_f(center)
 	iso.cam_dir = ((iso.cam_dir + d) % 4 + 4) % 4
-	map.rebuild()
+	map.switch_dir()
 	map.set_safe(view_safe)
 	for uv: UnitView in units.values():
 		uv.refresh_camera()
 	cam.position = iso.grid_f_to_screen(g)
 	cam.reset_smoothing()
-	_refresh_fog_view()
 	_refresh_fade()
-	ui.set_cam("%s %s" % [str(D["CARR"][iso.cam_dir]), str(D["CLAB"][iso.cam_dir])])
-	# 보이던 하이라이트·메뉴를 새 방향으로
-	var hl := map.hl
-	map.set_hl(hl)
+	_update_cam_label()
+	ui.minimap.rebuild(_minimap_units())
 	if show_threat and mode != "busy":
 		map.set_threat(eng.q.threat_cells())
+	ui.info.hide_popup()
+	ui.info.hide_tip()
 	match mode:
-		"menu":
+		"menu", "skills", "items":
 			_show_intents()
-			_show_main_menu(eng.awaiting_unit())
+			ui.place_menu(_unit_screen(awaiting_unit_id()))
 		"face":
 			_show_intents()
 			_enter_face(face_op, eng.awaiting_unit())
@@ -1237,12 +2141,6 @@ func rotate_cam(d: int) -> void:
 			_show_intents()
 			if target_op == "attack":
 				_show_previews(eng.awaiting_unit(), eng.q.attack_targets(eng.awaiting_unit()))
-		"skills":
-			_show_intents()
-			_show_skill_menu(eng.awaiting_unit())
-		"items":
-			_show_intents()
-			_show_item_menu(eng.awaiting_unit())
 
 
 func toggle_threat() -> void:
@@ -1255,12 +2153,10 @@ func toggle_threat() -> void:
 
 
 func _cycle_speed() -> void:
-	_speed_i = (_speed_i + 1) % SPEEDS.size()
-	speed = SPEEDS[_speed_i]
-	fx.speed = speed
-	for uv: UnitView in units.values():
-		uv.speed = speed
-	ui.set_speed_label("%dx" % int(speed))
+	set_speed_index((_speed_i + 1) % SPEEDS.size())
+	ui.settings.s["playSpeed"] = int(speed)
+	if str(cfg.get("source", "")) != "test":
+		ui.settings.save_settings()
 
 
 func _focus(p: Vector2) -> void:
@@ -1273,6 +2169,25 @@ func _focus(p: Vector2) -> void:
 		tw.tween_property(cam, "position", p, 0.35 / speed).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
+## 행동 순서·카드 누르기 (웹: 지금 차례 클랜원이면 선택, 아니면 그 유닛으로 화면 이동)
+func _on_unit_nav_click(id: int) -> void:
+	var uv: UnitView = units.get(id)
+	if uv == null:
+		return
+	var tw := create_tween()
+	tw.tween_property(cam, "position", uv.position + Vector2(0, -20), 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if mode == "menu" and id == awaiting_unit_id():
+		_show_main_menu(eng.awaiting_unit())
+
+
+func _on_nav_hover(id: int) -> void:
+	if _nav_hover >= 0 and units.has(_nav_hover):
+		(units[_nav_hover] as UnitView).hover = false
+	_nav_hover = id
+	if id >= 0 and units.has(id):
+		(units[id] as UnitView).hover = true
+
+
 func _clamp_cam() -> void:
 	var ws := iso.world_size()
 	cam.position = cam.position.clamp(Vector2(-100, -100), ws + Vector2(100, 100))
@@ -1281,10 +2196,12 @@ func _clamp_cam() -> void:
 # ═══════════ 마우스·키보드 ═══════════
 
 func _unhandled_input(ev: InputEvent) -> void:
-	if eng == null:
+	if eng == null or ui == null:
 		return
 	if ev is InputEventMouseButton:
 		var mb := ev as InputEventMouseButton
+		if _hold > 0 or ui.result_view.visible:
+			return
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP or mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			if mb.pressed:
 				var before := _to_world(mb.position)
@@ -1300,6 +2217,9 @@ func _unhandled_input(ev: InputEvent) -> void:
 				_dragging = false
 				_drag_from = mb.position
 				_cam_from = cam.position
+				# 적 팝업은 다음 누르기에 닫히고, 그 누르기도 그대로 처리 (웹 pointerdown capture)
+				if ui.info.popup.visible:
+					ui.info.hide_popup()
 			else:
 				if _press and not _dragging:
 					_click(_to_world(mb.position))
@@ -1322,7 +2242,19 @@ func _unhandled_input(ev: InputEvent) -> void:
 			if h != fx.picker_hover:
 				fx.picker_hover = h
 				fx.queue_redraw()
+		var hk := _hover_target(_to_world(mm.position)) if not _dragging else ""
+		if hk != _hover_key:
+			_hover_key = hk
+			_hover_t = 0.0
+			ui.info.hide_tip()   # 다른 칸·유닛으로 옮기면 바로 숨기고 다시 기다림
+		_hover_pos = mm.position
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
+		if _hold > 0 or ui.result_view.visible:
+			return
+		if ui.settings.is_open():
+			if (ev as InputEventKey).keycode == KEY_ESCAPE:
+				ui.settings.close()
+			return
 		_key((ev as InputEventKey).keycode)
 
 
@@ -1346,10 +2278,17 @@ func _key(k: Key) -> void:
 		KEY_T:
 			toggle_threat()
 			return
-		KEY_ESCAPE:
+		KEY_ESCAPE, KEY_BACKSPACE:
 			ui_cancel()
 			return
-		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+		KEY_SPACE:
+			# 웹: Space = 대기 (방향 고르는 중이면 지금 방향 그대로)
+			if mode == "face":
+				ui_pick_face(0, 0)
+			elif mode == "menu":
+				ui_action("wait")
+			return
+		KEY_ENTER, KEY_KP_ENTER:
 			if mode == "face":
 				ui_pick_face(0, 0)
 			return
@@ -1378,13 +2317,20 @@ func _click(p: Vector2) -> void:
 				ui_click_cell(c.x, c.y)
 			else:
 				ui_cancel()
+		_:
+			# 적을 누르면 정보 팝업 (웹 showEnemyPopup)
+			var hk := _hover_target(p)
+			if hk.begins_with("u:"):
+				var uv: UnitView = units.get(hk.substr(2).to_int())
+				if uv != null and uv.d.get("team") == "enemy":
+					show_enemy_popup(uv.id)
 
 
 # ═══════════ 자동 진행 (화면 확인용) ═══════════
 
 ## 황금 기록의 명령을 사람이 고르듯: 메뉴 0.5초 → 행동 고르기(하이라이트) 0.7초 → 칸·방향 누르기
 func _autoplay_tick(delta: float) -> void:
-	if mode == "busy" or mode == "over" or _auto_i >= _auto_cmds.size():
+	if mode == "busy" or mode == "over" or _auto_i >= _auto_cmds.size() or _hold > 0:
 		return
 	_auto_t += delta
 	var cmd: Dictionary = _auto_cmds[_auto_i]

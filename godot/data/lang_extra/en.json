@@ -1,0 +1,89 @@
+{
+ "gd": {
+  "fail": {
+   "move_failed": "Can't move there",
+   "attack_failed": "Not a valid target",
+   "no_resource": "Not enough resource",
+   "skill_failed": "Can't use that skill",
+   "cannot_act": "Can't act",
+   "item_failed": "Can't use that item",
+   "cannot_undo": "Can't undo",
+   "not_waiting": "Not waiting for input",
+   "bad_op": "Invalid command",
+   "wrong_unit": "It's another unit's turn",
+   "bad_dir": "Invalid direction",
+   "bad_skill": "Invalid skill",
+   "bad_item": "Invalid item",
+   "bad_cell": "Invalid cell"
+  },
+  "buff": {
+   "fury_full": "Fury maxed",
+   "disarm": "Disarmed",
+   "bleed": "Bleeding",
+   "stun": "Stunned",
+   "freeze": "Frozen",
+   "root": "Rooted",
+   "summon_turns": "Summon duration",
+   "cursed": "Cursed",
+   "stealth_forest": "Forest stealth",
+   "atk_up": "ATK up",
+   "def_up": "DEF up",
+   "atk_down": "ATK down",
+   "def_down": "DEF down",
+   "fury_buff": "Berserk",
+   "iron_will": "Iron Will",
+   "iron_phalanx": "Iron Wall",
+   "poison": "Poisoned",
+   "regen": "Regeneration",
+   "sanctuary": "Sanctuary",
+   "shield": "Shield",
+   "evasion": "Evasion",
+   "stealth": "Stealth",
+   "phalanx_def": "Phalanx guard",
+   "tenacity": "Tenacity",
+   "sacrifice": "Sacrifice",
+   "curse": "Curse",
+   "empower": "Empowered",
+   "channel_curse": "Channeling curse",
+   "channel_exalt": "Channeling exalt"
+  },
+  "tip": {
+   "impassable": "Impassable",
+   "move_cost": "Move cost {n}",
+   "height": "Height {n}",
+   "forest_hide": "Units in forest are translucent · assassins hide",
+   "turns": "{n} turns left",
+   "on_terrain": "Terrain: {t}",
+   "intent": "Targeting: {name}",
+   "passive": "Passive",
+   "safe_zone": "Frost ward — ending a turn here avoids hazard damage",
+   "lava": "Lava — ending an action next to it burns",
+   "threat": "Inside enemy threat range",
+   "fog": "Out of sight (fog)",
+   "shield_half": "Shield ½"
+  },
+  "ai": {
+   "label": "AI: {style} · {target}",
+   "style_aggressive": "Aggressive",
+   "style_defensive": "Defensive",
+   "style_support": "Support",
+   "style_balanced": "Balanced",
+   "target_low_hp": "Weakest first",
+   "target_random_weak": "Random weak target",
+   "target_cluster": "Targets clusters",
+   "target_nearest": "Nearest target",
+   "target_nearest_threat": "Nearest threat",
+   "target_never": "Never attacks",
+   "target_random": "Random"
+  },
+  "settings": {
+   "reduce_motion": "Reduce motion",
+   "reduce_motion_tip": "Turns off screen shake, flashes, hops and attack motions",
+   "surrender_confirm": "Surrendering ends this battle as a defeat. Surrender?",
+   "surrender_pending": "Surrendering once the current action finishes"
+  },
+  "result": {
+   "retry": "Retry"
+  }
+ }
+}

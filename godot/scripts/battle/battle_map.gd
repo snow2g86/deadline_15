@@ -4,6 +4,8 @@ extends Node2D
 ##    대각선 k = vc+vr 마다 타일 노드 z = 2k (+ 같은 z 의 바닥 장식·물 반짝임), 하이라이트 노드 z = 2k+1
 ##    나무 (칸마다 한 노드) z = Grid.depth(c,r,1) = 100 + 3k + 1, 보물상자 z = 100 + 3k, 유닛 z = 100 + 3k + 2 (unit_view.gd)
 ##  타일 그림은 바뀔 때(카메라 회전·지형 변화)만 다시 그림. 하이라이트는 깜빡임 때문에 보일 때만 매 프레임 다시 그림.
+##  (3b) 카메라 방향마다 노드 묶음(타일·장식·나무·하이라이트)을 따로 만들어 두고, 회전은 묶음을 바꿔 보이기만 함 (다시 만들지 않음 →
+##       회전 끊김 제거). 지형이 바뀌면 묶음을 모두 버리고 다시. prebuild_step() 으로 로딩 중에 네 방향을 미리 만들고 타일 그림도 미리 구움.
 
 const Iso := preload("res://scripts/battle/iso.gd")
 const TerrainTex := preload("res://scripts/battle/terrain_tex.gd")
@@ -35,6 +37,9 @@ var move_color := Color("3b82f6")
 var _tile_nodes: Array = []
 var _hl_nodes: Array = []         # 대각선마다 HlDiag
 var _tree_nodes: Dictionary = {}  # "x,y" → TreeNode
+## 카메라 방향 → {root: Node2D, tiles, hls, trees} (지금 방향 묶음만 보임)
+var _sets: Dictionary = {}
+var _set_dir := -1
 var _chest_nodes: Array = []
 var _prop_mat: ShaderMaterial
 var _clr: Dictionary = {}         # 타일 종류 → {tc, lc, rc} (Color)
@@ -125,6 +130,7 @@ class HlDiag extends Node2D:
 	var map: Node   # battle_map
 	var cells: Array = []   # {key, o, h, shape, inset}
 	var stripes: Dictionary = {}   # key → [[poly, color], …] (줄무늬 — 하이라이트가 바뀔 때만 계산)
+	var animated := false   # 깜빡이는 칸이 있음 (상태가 바뀔 때만 다시 계산)
 
 	func _draw() -> void:
 		map._draw_hl_diag(self)
@@ -160,10 +166,13 @@ func setup(p_iso: Iso, D: Dictionary, p_theme: String, p_sdb: SpriteDB, p_lava: 
 
 func _process(d: float) -> void:
 	_t += d
-	# 깜빡이는 하이라이트가 있는 대각선만 다시 그림
+	# 깜빡이는 하이라이트가 있는 대각선만 다시 그림 (깜빡임 여부는 상태가 바뀔 때 _redraw_hl 이 계산)
 	for n: HlDiag in _hl_nodes:
-		if n.visible and _diag_animated(n):
+		if n.animated:
 			n.queue_redraw()
+
+
+const ANIM_KINDS := {"move": true, "attack": true, "heal": true, "selected": true, "skill": true}
 
 
 func _diag_animated(n: HlDiag) -> bool:
@@ -171,7 +180,7 @@ func _diag_animated(n: HlDiag) -> bool:
 		var k: String = c["key"]
 		if safe.has(k):
 			return true
-		if hl.has(k) and (not fog_on or fog_vis.has(k)) and ["move", "attack", "heal", "selected"].has(hl[k]):
+		if hl.has(k) and (not fog_on or fog_vis.has(k)) and ANIM_KINDS.has(hl[k]):
 			return true
 	return false
 
@@ -225,21 +234,79 @@ func _bake_batch() -> void:
 			_tex_cache[j[0]] = ImageTexture.create_from_image(img)
 		vp2.queue_free()
 	_baking = false
-	for n: Node in _tile_nodes:
-		if is_instance_valid(n):
-			(n as CanvasItem).queue_redraw()
+	# 구운 그림으로 다시 그림 (숨은 방향 묶음도 — 그래야 나중에 보일 때 벡터 그림 대신 구운 그림)
+	for st: Dictionary in _sets.values():
+		for n: Node in st["tiles"]:
+			if is_instance_valid(n):
+				(n as CanvasItem).queue_redraw()
 	if not _bake_wait.is_empty():
 		_baking = true
 		_bake_batch.call_deferred()
 
 
+## 지형이 바뀜 (또는 처음): 방향별 묶음을 모두 버리고 지금 방향을 다시 만듦
 func rebuild() -> void:
-	for n: Node in get_children():
-		n.queue_free()
-	_tile_nodes.clear()
-	_hl_nodes.clear()
-	_tree_nodes.clear()
-	_chest_nodes.clear()
+	for dir: int in _sets.keys():
+		(_sets[dir]["root"] as Node).queue_free()
+	_sets.clear()
+	_set_dir = -1
+	switch_dir()
+
+
+## 카메라 회전: 그 방향 묶음이 있으면 보이기만, 없으면 만듦 (지형은 그대로)
+func switch_dir() -> void:
+	var dir := iso.cam_dir
+	if not _sets.has(dir):
+		_build_set(dir)
+	_activate(dir)
+
+
+## 아직 없는 방향 묶음 하나를 미리 만듦 (로딩 중 프레임마다) — 더 만들 것이 남았으면 true
+func prebuild_step() -> bool:
+	for k in 4:
+		var dir := (iso.cam_dir + k) % 4
+		if not _sets.has(dir):
+			var keep := iso.cam_dir
+			iso.cam_dir = dir
+			_build_set(dir)
+			iso.cam_dir = keep
+			# 로딩 화면이 덮고 있는 동안은 보이게 두어 한 번 그려 둠 (그리기 명령이 기록되어, 나중에 보이기만 바꿀 때 _draw 를 다시 안 함)
+			#  — finish_prebuild() 가 지금 방향 묶음만 남기고 숨김. 타일 그림도 이때 함께 구워짐
+			for tn: TileDiag in _sets[dir]["tiles"]:
+				for t: Dictionary in tn.tiles:
+					_tile_tex(t)
+			return true
+	return false
+
+
+## 로딩 끝: 지금 방향 묶음만 보이게
+func finish_prebuild() -> void:
+	for d2: int in _sets.keys():
+		(_sets[d2]["root"] as Node2D).visible = d2 == _set_dir
+
+
+func _activate(dir: int) -> void:
+	for d2: int in _sets.keys():
+		(_sets[d2]["root"] as Node2D).visible = d2 == dir
+	var st: Dictionary = _sets[dir]
+	_tile_nodes = st["tiles"]
+	_hl_nodes = st["hls"]
+	_tree_nodes = st["trees"]
+	_set_dir = dir
+	_rebuild_chests()
+	_restripe()
+	apply_fog_to_props()
+	_redraw_hl()
+
+
+## 한 방향의 노드 묶음 (iso.cam_dir 가 그 방향인 상태에서 부름)
+func _build_set(dir: int) -> void:
+	var root := Node2D.new()
+	root.name = "Dir%d" % dir
+	add_child(root)
+	var keep_trees := _tree_nodes
+	_tree_nodes = {}
+	var hls: Array = []
 	var nd := iso.diag_count()
 	var tdiag: Array = []
 	var gdiag: Array = []
@@ -270,7 +337,7 @@ func rebuild() -> void:
 		var h := HlDiag.new()
 		h.z_index = 2 * k + 1
 		h.map = self
-		_hl_nodes.append(h)
+		hls.append(h)
 	for r in iso.rows:
 		for c in iso.cols:
 			var tp := iso.tile_type(c, r)
@@ -285,26 +352,24 @@ func rebuild() -> void:
 			if tp == "water":
 				var uv := PackedVector2Array([Vector2(TW, 0), Vector2(TW * 2, TH), Vector2(TW, TH * 2), Vector2(0, TH)])
 				(wdiag[k2] as WaterDiag).polys.append([Iso.diamond(o), uv])
-			(_hl_nodes[k2] as HlDiag).cells.append({"key": "%d,%d" % [c, r], "c": c, "r": r, "o": o, "h": h2,
+			(hls[k2] as HlDiag).cells.append({"key": "%d,%d" % [c, r], "c": c, "r": r, "o": o, "h": h2,
 				"shape": Iso.hl_shape(o, h2), "inset": _inset(Iso.hl_shape(o, h2))})
 			_place_props(c, r, tp, gdiag[k2])
 	for k3 in nd:
-		add_child(tdiag[k3])
+		root.add_child(tdiag[k3])
 		if not (gdiag[k3] as GroundDiag).props.is_empty():
-			add_child(gdiag[k3])
+			root.add_child(gdiag[k3])
 		else:
 			(gdiag[k3] as Node).free()
 		if not (wdiag[k3] as WaterDiag).polys.is_empty():
-			add_child(wdiag[k3])
+			root.add_child(wdiag[k3])
 		else:
 			(wdiag[k3] as Node).free()
-		add_child(_hl_nodes[k3])
-	_tile_nodes = tdiag
+		root.add_child(hls[k3])
 	for key: String in _tree_nodes.keys():
-		add_child(_tree_nodes[key])
-	_rebuild_chests()
-	_restripe()
-	apply_fog_to_props()
+		root.add_child(_tree_nodes[key])
+	_sets[dir] = {"root": root, "tiles": tdiag, "hls": hls, "trees": _tree_nodes}
+	_tree_nodes = keep_trees
 
 
 ## 성벽 성가퀴: 이웃이 성벽이 아닌 화면 가장자리 (1 뒤-왼쪽, 2 뒤-오른쪽, 4 앞-왼쪽, 8 앞-오른쪽 — 카메라 회전 반영)
@@ -423,9 +488,10 @@ func apply_fog_to_props() -> void:
 		tn.modulate = Color(0.4, 0.4, 0.4) if fog_on and not fog_vis.has(key) else Color.WHITE
 	for ch: Node2D in _chest_nodes:
 		ch.visible = not fog_on or fog_vis.has(str(ch.get_meta("key")))
-	for n: Node in get_children():
-		if n is GroundDiag:
-			(n as CanvasItem).queue_redraw()
+	if _sets.has(_set_dir):
+		for n: Node in (_sets[_set_dir]["root"] as Node).get_children():
+			if n is GroundDiag:
+				(n as CanvasItem).queue_redraw()
 
 
 # ── 보물상자 ──
@@ -486,6 +552,7 @@ func set_safe(cells: Array) -> void:
 
 func _redraw_hl() -> void:
 	for n: HlDiag in _hl_nodes:
+		n.animated = n.visible and _diag_animated(n)
 		n.queue_redraw()
 
 
@@ -580,31 +647,54 @@ func _draw_hl_diag(n: HlDiag) -> void:
 					continue
 				n.draw_colored_polygon(s[0], s[1])
 		if safe.has(k):
-			_draw_safe(n, c["o"] + Vector2(TW, TH), 0.75 + 0.25 * (0.5 - 0.5 * cos(tm / 2.4 * TAU)))
+			_draw_safe(n, c["o"] + Vector2(TW, TH), 0.75 + 0.25 * (0.5 - 0.5 * cos(tm / 2.4 * TAU)), c)
 
 
-## 냉기 결계 (웹 .safe-zone::before: 하늘색 고리 + 가운데 빛)
-static func _draw_safe(ci: CanvasItem, ctr: Vector2, op: float) -> void:
-	_ell_band(ci, ctr, 44.0, 22.0, [0.58, 0.72, 0.82], [Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.0), Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.6 * op), Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.0)])
-	_ell_band(ci, ctr, 30.0, 15.0, [0.0, 0.7, 1.0], [Color(186 / 255.0, 230 / 255.0, 253 / 255.0, 0.4 * op), Color(56 / 255.0, 189 / 255.0, 248 / 255.0, 0.12 * op), Color(56 / 255.0, 189 / 255.0, 248 / 255.0, 0.0)])
+## 냉기 결계 (웹 .safe-zone::before: 하늘색 고리 + 가운데 빛) — 모양은 칸마다 한 번, 색은 밝기 16단계로 한 번씩 만들어 둠 (매 프레임 새 배열 없음)
+static var _safe_cols: Dictionary = {}   # 단계 → PackedColorArray
+static var _safe_idx: PackedInt32Array = PackedInt32Array()
+const SAFE_SEG := 28
+const SAFE_RINGS := [[44.0, 22.0, [0.58, 0.72, 0.82]], [30.0, 15.0, [0.0, 0.7, 1.0]]]
 
 
-## 타원 원형 그라디언트 (정지점 fr, 색 cols) — 고리 띠를 삼각형으로
-static func _ell_band(ci: CanvasItem, c: Vector2, rx: float, ry: float, fr: Array, cols: Array) -> void:
-	var seg := 28
+static func _draw_safe(ci: CanvasItem, ctr: Vector2, op: float, cell: Dictionary = {}) -> void:
+	var pts: PackedVector2Array
+	if cell.has("safe_pts"):
+		pts = cell["safe_pts"]
+	else:
+		pts = _safe_points(ctr)
+		if not cell.is_empty():
+			cell["safe_pts"] = pts
+	if _safe_idx.is_empty():
+		for ring in 2:
+			var base := ring * 3 * SAFE_SEG
+			for ri2 in 2:
+				for i2 in SAFE_SEG:
+					var a0 := base + ri2 * SAFE_SEG + i2
+					var a1 := base + ri2 * SAFE_SEG + (i2 + 1) % SAFE_SEG
+					var b0 := base + (ri2 + 1) * SAFE_SEG + i2
+					var b1 := base + (ri2 + 1) * SAFE_SEG + (i2 + 1) % SAFE_SEG
+					_safe_idx.append_array([a0, b0, b1, a0, b1, a1])
+	var lv := clampi(int(round((op - 0.75) / 0.25 * 15.0)), 0, 15)
+	if not _safe_cols.has(lv):
+		var o := 0.75 + 0.25 * float(lv) / 15.0
+		var cols := PackedColorArray()
+		var ring_cols := [[Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.0), Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.6 * o), Color(125 / 255.0, 211 / 255.0, 252 / 255.0, 0.0)],
+			[Color(186 / 255.0, 230 / 255.0, 253 / 255.0, 0.4 * o), Color(56 / 255.0, 189 / 255.0, 248 / 255.0, 0.12 * o), Color(56 / 255.0, 189 / 255.0, 248 / 255.0, 0.0)]]
+		for ring2 in 2:
+			for ri3 in 3:
+				for i3 in SAFE_SEG:
+					cols.append(ring_cols[ring2][ri3])
+		_safe_cols[lv] = cols
+	RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), _safe_idx, pts, _safe_cols[lv])
+
+
+static func _safe_points(c: Vector2) -> PackedVector2Array:
 	var pts := PackedVector2Array()
-	var col := PackedColorArray()
-	var idx := PackedInt32Array()
-	for ri in fr.size():
-		for i in seg:
-			var a := TAU * float(i) / float(seg)
-			pts.append(c + Vector2(cos(a) * rx, sin(a) * ry) * float(fr[ri]))
-			col.append(cols[ri])
-	for ri2 in fr.size() - 1:
-		for i2 in seg:
-			var a0 := ri2 * seg + i2
-			var a1 := ri2 * seg + (i2 + 1) % seg
-			var b0 := (ri2 + 1) * seg + i2
-			var b1 := (ri2 + 1) * seg + (i2 + 1) % seg
-			idx.append_array([a0, b0, b1, a0, b1, a1])
-	RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), idx, pts, col)
+	for rg: Array in SAFE_RINGS:
+		var fr: Array = rg[2]
+		for ri in 3:
+			for i in SAFE_SEG:
+				var a := TAU * float(i) / float(SAFE_SEG)
+				pts.append(c + Vector2(cos(a) * float(rg[0]), sin(a) * float(rg[1])) * float(fr[ri]))
+	return pts
