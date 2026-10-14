@@ -9,7 +9,7 @@ extends RefCounted
 ##  주의 — 목록 안의 값도 웹에서 나누는 곳이 있다. 이식할 때 float() 를 씌울 것:
 ##   - js/logic/stages.js  stageEnemySkillLv: Math.floor(id / ENEMY_SKILL_EVERY) — 양수라 정수 나눗셈과 결과 같음
 ##   - js/logic/hazards.js:31  h.dot * (1 + stageLevel(stage) / 100) — stageLevel 이 int id 를 돌려주면 정수 나눗셈이 되어
-##     결과가 달라진다 (2단계에서 stage_level() 은 float 를 돌려주도록 정할 예정)
+##     결과가 달라진다 (2b: scripts/logic/stage_rules.gd 의 stage_level() 은 float 를 돌려줌)
 ##  DataDB(모든 데이터 JSON)와 Store.get_json 이 같은 규칙을 쓴다.
 ##
 ##  규칙: 사전의 키가 INT_KEYS 에 있으면 그 값이 숫자면 int, 숫자 배열이면 원소를 int 로 (정수 값일 때만, null 은 그대로).

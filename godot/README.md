@@ -18,7 +18,8 @@ godot/
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시)
-  scripts/logic/       (2단계~) 전투·성장 규칙 — 화면 코드 없이
+  scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
+  scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
   scripts/battle/      (2단계~) 전투 화면
   scripts/ui/          화면 스크립트 (boot.gd)
   data/                변환된 JSON (git 에 올림)
@@ -31,6 +32,7 @@ godot/
   assets/image/        웹 image/ 사본 (git 제외)
   tests/check_foundation.gd   머리 없는 시험
   tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
+  tests/replay_golden.gd   2b 시험: 황금 기록 21개를 GDScript 규칙으로 재생해 사건·난수까지 비교
 ```
 
 ## 처음 한 번 / 웹 데이터가 바뀔 때마다
@@ -86,6 +88,12 @@ node tools/export-godot-data.js --check
 ```
 
 마지막 줄이 `RESULT: PASS (n개 통과)` 이면 성공(종료 코드 0), 실패면 `RESULT: FAIL` 과 실패 항목 목록(종료 코드 1).
+
+전투 규칙(2b) 시험 — 황금 기록 21개 재생 (`--only 이름`, `--external`, `--rng-log` 는 scripts/logic/README.md):
+
+```bash
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd
+```
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
 ## 오토로드 사용법
@@ -129,7 +137,7 @@ Store.get_json("game_roster", {})
   `slots.has(uid)`, `cleared.has(2)` 가 웹처럼 됩니다.
 - **이식 주의 — int 값을 나누는 곳**: 위 목록의 값을 나눌 때는 `float()` 를 씌우세요 (`int / int` 는 정수 나눗셈).
   - `js/logic/hazards.js:31` `h.dot * (1 + stageLevel(stage) / 100)` — `stageLevel` 이 int 스테이지 번호를 돌려주면 `56 / 100 == 0` 이 되어
-    환경 피해가 웹과 달라집니다. **2단계에서 `stage_level()` 은 float 를 돌려주도록 정할 예정**입니다.
+    환경 피해가 웹과 달라집니다. 2b 에서 `scripts/logic/stage_rules.gd` 의 `stage_level()` 은 **float 를 돌려주도록** 했습니다.
   - `js/logic/stages.js` `Math.floor(id / ENEMY_SKILL_EVERY)` — 양수라 정수 나눗셈과 결과가 같지만 명시적으로 `floori(float(id) / …)` 권장.
   - 웹에서 데이터끼리 나누는 값(`tot`, `frames`, `hit`, `exp`, `gold` …)은 일부러 목록에서 뺐습니다. INT_KEYS 에 키를 더할 때는 웹 코드에서 그 값을 나누는 곳이 없는지 먼저 확인하세요.
   - 목록 밖의 정수 값(예: `ITEM_SPRITE` 시트 좌표, `JAB.*.base.hp`)은 float 이므로 배열 번호·`match` 에 쓸 때는 `int()` 로 바꾸세요.
