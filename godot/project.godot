@@ -21,6 +21,7 @@ config/icon="res://icon.png"
 Store="*res://scripts/core/store.gd"
 DataDB="*res://scripts/core/data_db.gd"
 I18n="*res://scripts/core/i18n.gd"
+Router="*res://scripts/core/router.gd"
 
 [display]
 

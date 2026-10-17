@@ -164,7 +164,7 @@ static func _merge_missing(dst: Dictionary, src: Dictionary) -> void:
 func _lang_from_settings() -> String:
 	var settings: Variant = _store().get_json(SETTINGS_KEY, null)
 	if settings is Dictionary:
-		var lang := String((settings as Dictionary).get("language", ""))
+		var lang := str((settings as Dictionary).get("language", ""))
 		if SUPPORTED.has(lang):
 			return lang
 	return detect_lang(OS.get_locale())

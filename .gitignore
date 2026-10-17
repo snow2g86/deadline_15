@@ -20,6 +20,7 @@ godot/assets/*
 # 글꼴은 사본이 아니라 원본이라 git 에 올림 (Noto Sans KR, OFL — godot/assets/fonts/OFL.txt)
 !godot/assets/fonts/
 # 3단계 전투 화면 시험이 남기는 화면 사진 (tests/check_battle_scene.gd, Movie Maker)
-godot/tests/screens/
+godot/tests/screens/*
+!godot/tests/screens/.gdignore
 godot/.godot/
 godot/export/

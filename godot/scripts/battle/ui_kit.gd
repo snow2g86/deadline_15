@@ -281,3 +281,26 @@ class VecIcon extends Control:
 				e2.append(e2[0])
 				draw_polyline(e2, col, w, true)
 				draw_circle(c, 2.6 * k, col)
+			# ── 바깥 화면(4a) 웹 SVG: 뒤로(polyline 15 18 9 12 15 6) · 자물쇠(🔒 글자 대신) · 정보(ℹ️) · 닫기(✕) · 휴지통(초기화) · 재생(▶)
+			"chev_l":
+				draw_polyline(PackedVector2Array([P.call(15, 18), P.call(9, 12), P.call(15, 6)]), col, w * 1.25, true)
+			"lock":
+				draw_rect(Rect2(P.call(5, 11), Vector2(14, 10) * k), col, true)
+				draw_arc(P.call(12, 11), 4.5 * k, PI, TAU, 12, col, w, true)
+				draw_line(P.call(7.5, 11), P.call(7.5, 8), col, w, true)
+				draw_line(P.call(16.5, 11), P.call(16.5, 8), col, w, true)
+			"info":
+				draw_arc(P.call(12, 12), 9.5 * k, 0, TAU, 24, col, w, true)
+				draw_line(P.call(12, 11), P.call(12, 17), col, w * 1.2, true)
+				draw_circle(P.call(12, 7.5), w * 0.75, col)
+			"close":
+				draw_line(P.call(6, 6), P.call(18, 18), col, w * 1.1, true)
+				draw_line(P.call(18, 6), P.call(6, 18), col, w * 1.1, true)
+			"trash":
+				draw_polyline(PackedVector2Array([P.call(3, 6), P.call(21, 6)]), col, w, true)
+				draw_polyline(PackedVector2Array([P.call(19, 6), P.call(19, 20), P.call(17, 22), P.call(7, 22), P.call(5, 20), P.call(5, 6)]), col, w, true)
+				draw_polyline(PackedVector2Array([P.call(8, 6), P.call(8, 4), P.call(10, 2), P.call(14, 2), P.call(16, 4), P.call(16, 6)]), col, w, true)
+				draw_line(P.call(10, 11), P.call(10, 17), col, w, true)
+				draw_line(P.call(14, 11), P.call(14, 17), col, w, true)
+			"play":
+				draw_colored_polygon(PackedVector2Array([P.call(6, 4), P.call(20, 12), P.call(6, 20)]), col)

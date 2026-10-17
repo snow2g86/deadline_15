@@ -16,13 +16,18 @@
 godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
-  scenes/boot.tscn     시작 화면 (메인 씬) — 아래에 3a 전투 시험 실행기
+  scenes/boot.tscn     시작 화면 (메인 씬) — 잠깐 제목을 보여 주고 로비로 (Router). 개발용: -- --dev (예전 시작 화면 + 전투 시험 실행기), -- --screen <이름>, -- --save <경로>
+  scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings (scripts/ui/*.gd)
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시) · fonts.gd(언어별 글꼴 사슬)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
-  scripts/ui/          화면 스크립트 (boot.gd)
+  scripts/core/router.gd  오토로드 Router — 화면 전환 한 곳 (go · back · launch_battle), Esc·마우스 뒤로 단추 → 화면의 on_back()
+  scripts/ui/          바깥 화면 (4a): screen_base.gd(윗줄·아래 탭·창·알림 공통) · outer_kit.gd(부품) · lobby · stage_select · party_select ·
+                       settings_screen · flow.gd(game_nav → 전투 설정) · boot.gd · dev_launcher.gd
+  scripts/logic/*_rules.gd  4a 규칙 (화면 코드 없이): lobby_rules(첫 실행·저장값 점검·자동 부활·지휘관) · party_rules(파티 저장·편성·출격 판단) ·
+                       progress_rules(해금·별·요일 던전) · settings_rules(설정 키, 전투 설정 창과 공용) · store_ctx.gd(진짜 Store 를 규칙 저장소 모양으로)
   data/                변환된 JSON (git 에 올림)
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
@@ -44,6 +49,9 @@ godot/
   tests/check_battle_scene.gd  3a·3b: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 (HUD·연출·스토리 켬) → 결과가 같은지
   tests/check_battle_ui.gd     3b: UI 연기 시험 (모든 패널·팝업·툴팁·결과·스토리·언어 바꾸기, Godot 오류 0)
   tests/perf_battle_scene.gd   창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340·HUD·연출·회전)
+  tests/check_outer_4a.gd      4a: 규칙을 웹 정답(tests/fixtures/outer_4a_web.json ← node tools/outer-4a-expect.js)과 비교 · 편성 저장 · 설정 키 ·
+                               진짜 장면 흐름 · 6개 언어 넘침·두부 · 창 크기
+  tests/play_4a.gd · shots_4a.gd  4a 실제 창 한 판(진짜 입력) · 화면 사진 (tests/screens/4a_*.png)
   tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
@@ -194,3 +202,34 @@ Store.get_json("game_roster", {})
 - 번역 자리표시자 값이 `null` 이면 웹처럼 `"null"`, 정수 값 실수는 `"3"` 처럼 표시됩니다.
 - JSON 객체의 숫자 키는 문자열이 됩니다 (스토리 `episodes["1"]`, `DAILY.schedule["0"]`).
 - `--script` 로 돌리는 시험에서는 오토로드 이름(`Store` 등)을 컴파일 때 쓸 수 없어, core 스크립트끼리는 `preload` 형식 + `/root/...` 경로로 서로를 찾습니다.
+
+## 바깥 화면 (4a) — 웹판과 다른 점
+
+흐름: 시작 화면 → 로비(첫 실행이면 클랜원 만들기·지휘관 설정) → 스테이지 선택 → (출전 전 스토리) → 5명이면 전투, 아니면 편성 → 전투 → 결과 → 로비 / 다음 스테이지.
+화면 전환은 오토로드 `Router` 한 곳 (`scripts/core/router.gd`). 규칙은 `scripts/logic/*_rules.gd`, 웹 정답 비교는 `tests/check_outer_4a.gd`.
+
+- **이상한 값이 든 세이브 (디렉터 결정: 웹보다 관대하게, 절대 오류 없이)**: 바깥 화면에 들어올 때마다 `scripts/logic/save_sanitize.gd` 가
+  잘못된 항목만 걸러내거나 기본값으로 바꿉니다. 웹처럼 파티를 통째로 초기화하지 않습니다. 올바른 세이브는 손대지 않습니다.
+  - 파티: 목록의 null·숫자 항목은 뺌, 글자 id·nextPartyId("2")는 숫자로(JS `+p.id`), 숫자가 아닌 id 는 겹치지 않는 새 번호, 칸은 5칸(정수 uid 또는 null — 숫자 글자는 숫자로)
+  - 클리어 기록: 숫자 글자("50")는 숫자로, 숫자가 아닌 것은 버림. stars 가 사전이 아니면(배열 등) 지움, 칸 길이·형이 이상하면 3칸으로
+  - `game_daily.used`: 글자 숫자는 숫자로, 소수는 올림, 없거나 숫자가 아니면 0
+  - `game_save` 가 숫자·배열이면 `{gold: 2000}`. 빈 문자열 원본("")은 웹 `!raw` 처럼 없는 것으로
+  - 로스터: 사전이 아닌 항목·정수가 아닌 uid 는 뺌, 직업이 글자가 아니거나 모르는 직업이면 novice, 잠재력이 `[]`·숫자면 새로 (profile.gd 도 형 검사), 숫자 칸·성별·이름·장비·스킬 레벨은 형이 맞지 않으면 기본값·지움
+  - 인벤토리: 사전이 아닌 항목·쓸 수 없는 장비(부위·등급·능력치가 잘못됨)는 뺌. 설정·출격 정보·영혼석·본 장면은 형이 틀린 부분만 지움
+  - 그 결과 지휘관은 어떤 세이브에서도 파티에 들어가지 않습니다.
+- **연타 막기**: 요일 던전 입장·출격·다음 스테이지·결과 단추·지휘관 확정·초기화·창 단추는 같은 프레임에 여러 번 눌러도 한 번만. Router 도 장면을 바꾸는 중에는 다른 이동을 받지 않음.
+- **전투 재개 단추**: 4b 의 이어하기 화면까지 로비에서 숨김 (디렉터 결정). 웹이 만든 `game_battle` 은 Godot 전투가 끝날 때 지워짐 — 웹도 새 전투가 덮어쓰므로 같은 동작.
+- **게임 속도**: 웹 설정 화면의 늘이기 배율 `speed` 대신 전투 설정 창과 같은 1x·2x·4x (`playSpeed`). `playSpeed` 가 없는 웹 세이브는 처음 읽을 때
+  speed ≤ 0.5 → 2x, 그 밖 → 1x 로 정해 저장 (디렉터 결정). 웹 `speed` 값은 그대로 둠.
+- **언어**: 웹의 드롭다운 대신 전투 설정 창과 같은 6개 단추, 바로 바뀜 (웹은 새로고침). 고를 때만 저장.
+- **설정 화면의 뒤로**: 연 화면으로 돌아감 (웹은 늘 로비). 스테이지 목록에서 고른 에피소드는 기록에 남아 유지, 요일 던전 창 열기 같은 한 번만 쓰는 값은 남기지 않음.
+- **Esc · 마우스 뒤로 단추**: 웹에 없음. 열린 창을 먼저 닫고, 없으면 화면의 뒤로 단추와 같은 곳.
+- **지휘관 설정 창**: 웹 commander.js 는 처음이든 다시 열었든 닫는 길이 없음(확인으로만). Godot 은 첫 설정은 웹처럼 닫을 수 없고, 로비 단추로 다시 열었을 때만 Esc·바깥 누르기로 닫힘.
+  이름은 웹과 같게 JS `trim` 공백(전각 공백·NBSP·BOM 등)을 지우고 UTF-16 단위로 10자 (반쪽 글자는 뺌 — Godot 문자열은 반쪽 글자를 담지 못함).
+- **다시 도전(Godot 전용)**: 실제 세이브의 요일 던전 결과에서는 뺌 (입장 횟수를 쓰지 않고 다시 들어가게 되므로).
+- **다음 스테이지 막다른 길**: 살아 있는 클랜원이 5명 미만이면 편성 화면으로 가는데 출격 단추가 켜지지 않던 웹 버그 — 웹 `js/battle/end.js goNextStage` 와 Godot 을 같이 고침 (`ps_can_start = 'true'`).
+- **아이콘**: 시트에 그림이 없는 🔒·ℹ️ 는 선 그림.
+
+### 남은 일
+- 4b: 상점·성소·아카데미·도감·가이드·장비/소모품/강화 탭·라이선스·Credits·전투 이어하기 (지금은 '준비 중' 알림 또는 숨김), 소리(5단계).
+- 좁은 창(480×900 등 휴대폰 폭) 모바일 배치는 PC 출시 뒤로 미룸. 지금은 canvas_items·expand 늘이기라 논리 폭이 늘 1280 이상이어서 깨지지 않지만 작게 보임.

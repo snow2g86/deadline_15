@@ -17,6 +17,7 @@ const BattleEngine := preload("res://scripts/logic/battle/battle_engine.gd")
 const Profile := preload("res://scripts/logic/profile.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const Js := preload("res://scripts/logic/js.gd")
+const StageRules := preload("res://scripts/logic/stage_rules.gd")
 const Num := preload("res://scripts/core/num.gd")
 const Iso := preload("res://scripts/battle/iso.gd")
 const SpriteDB := preload("res://scripts/battle/sprite_db.gd")
@@ -88,6 +89,7 @@ var _loading_on := false
 var reduce_motion := false
 ## 항복을 연출이 끝난 뒤로 미룸 (적 차례 연출 중 항복하면 아직 안 보인 결과까지 반영되지 않게)
 var _surrender_pending := false
+var _leaving := false
 ## 전투 시작 때 넘긴 세이브 (끝나고 Store 에 바뀐 키만 되돌려 씀) · 인벤토리 eid (장비 보상 짝짓기 기준)
 var _save_in: Dictionary = {}
 var _inv_eids0: Dictionary = {}
@@ -219,6 +221,8 @@ static func store_save(store_node: Node) -> Dictionary:
 
 
 func _settings() -> Dictionary:
+	if store != null:
+		(load("res://scripts/logic/settings_rules.gd") as GDScript).call("migrate_web_speed", store)
 	var v: Variant = store.call("get_json", "game_settings", {}) if store != null else {}
 	return v if v is Dictionary else {}
 
@@ -1985,7 +1989,9 @@ func _result_model() -> Dictionary:
 	var btns: Array = m["buttons"]
 	var daily: bool = st != null and Js.truthy(st.get("daily"))
 	btns.append({"id": "back", "text": _t("daily.back") if daily else _t("results.return_to_lobby"), "primary": not win})
-	btns.append({"id": "retry", "text": _t("gd.result.retry")})
+	# 다시 도전(Godot 전용)은 실제 세이브의 요일 던전에서는 뺌 — 입장 횟수를 쓰지 않고 다시 들어가게 되므로
+	if not (daily and str(cfg.get("source", "")) == "store"):
+		btns.append({"id": "retry", "text": _t("gd.result.retry")})
 	if win and not daily and st != null:
 		for s2: Dictionary in D["STAGES"]:
 			if int(s2["id"]) == int(st["id"]) + 1:
@@ -2022,13 +2028,39 @@ func _gear_drop_items() -> Array:
 
 
 func _on_result_button(id: String) -> void:
+	# 결과 단추는 한 번만 (같은 프레임 연타로 두 번 이동·두 번 출격하지 않게)
+	if _leaving:
+		return
+	_leaving = true
 	match id:
 		"back":
 			_go_back()
 		"retry":
 			_restart(0)
 		"next":
-			_restart(1)
+			if _router_flow():
+				_next_stage_flow()
+			else:
+				_restart(1)
+
+
+## 실제 세이브 전투이고 Router 가 있으면 바깥 화면 흐름으로 (로비·스테이지 선택·편성). 시험·디버그 전투는 예전처럼
+func _router_flow() -> bool:
+	return str(cfg.get("source", "")) == "store" and _svc("Router") != null and store != null
+
+
+## 웹 BattleEnd.goNextStage: 활성 파티의 산 클랜원이 5명이면 바로 다음 스테이지 전투, 아니면 편성 화면 (scripts/logic/party_rules.gd next_stage)
+func _next_stage_flow() -> void:
+	var PartyRules: GDScript = load("res://scripts/logic/party_rules.gd")
+	var Flow: GDScript = load("res://scripts/ui/flow.gd")
+	var StoreCtx: GDScript = load("res://scripts/logic/store_ctx.gd")
+	var c2 := Ctx.new(D, randi() & 0x7fffffff, StoreCtx.new(store))
+	var st: Variant = eng.S["cStage"]
+	var ns: Variant = StageRules.find_stage(D, int(st["id"]) + 1)
+	if ns == null:
+		_go_back()
+		return
+	Flow.call("follow", _svc("Router"), store, c2, PartyRules.call("next_stage", c2, ns))
 
 
 ## 다시 하기·다음 스테이지: 같은 설정(세이브 출처·시드·파티)으로 장면을 다시 — Store 세이브면 지금 Store 값을 다시 읽음
@@ -2045,7 +2077,15 @@ func _restart(stage_add: int) -> void:
 	get_tree().reload_current_scene()
 
 
+## 로비로 (요일 던전이면 스테이지 선택의 요일 던전 창으로 — 웹 render.js showRes). Router 가 없거나 시험·디버그 전투면 시작 화면
 func _go_back() -> void:
+	if _router_flow():
+		var st: Variant = eng.S["cStage"] if eng != null else null
+		if st != null and Js.truthy(st.get("daily")):
+			_svc("Router").call("go", "stage_select", {"daily": true}, false)
+		else:
+			_svc("Router").call("go", "lobby")
+		return
 	get_tree().change_scene_to_file(BOOT_SCENE)
 
 

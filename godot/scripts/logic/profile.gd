@@ -111,8 +111,12 @@ static func get_roster(c: Object) -> Dictionary:
 								left.append(i)
 						if left.size() != inv.size():
 							c.store.set_json(INVENTORY_KEY, left)
+			# (4a) 잘못된 형의 pot([] · 숫자 · 글자)은 없는 것으로 (웹은 [] 에 속성을 붙여 저장 때 사라짐 — 오류 없이 새로 만듦)
+			if ch.has("pot") and typeof(ch.get("pot")) != TYPE_DICTIONARY and Js.truthy(ch.get("pot")):
+				ch.erase("pot")
+			var cls_ok := typeof(ch.get("cls")) == TYPE_STRING and JAB.has(ch["cls"])
 			if not Js.truthy(ch.get("pot")):
-				var gj: Variant = JAB[ch["cls"]].get("growth") if JAB.has(ch["cls"]) else null
+				var gj: Variant = JAB[ch["cls"]].get("growth") if cls_ok else null
 				if gj != null:
 					ch["pot"] = {
 						"hp": Js.to_fixed_num(gj["hp"][0] + (gj["hp"][1] - gj["hp"][0]) * 0.5, 1),
@@ -125,7 +129,7 @@ static func get_roster(c: Object) -> Dictionary:
 				ch["pot"]["actionRec"] = roll_action_rec(c)
 				need_save = true
 			if not Js.truthy(ch.get("actionRec")):
-				var base_rec: float = float(JAB[ch["cls"]]["actionRec"]) if JAB.has(ch["cls"]) and Js.truthy(JAB[ch["cls"]].get("actionRec")) else 1.0
+				var base_rec: float = float(JAB[ch["cls"]]["actionRec"]) if cls_ok and Js.truthy(JAB[ch["cls"]].get("actionRec")) else 1.0
 				var pot_rec := 0.0
 				if Js.truthy(ch.get("pot")):
 					pot_rec = Js.num(ch["pot"].get("actionRec"))
@@ -134,14 +138,14 @@ static func get_roster(c: Object) -> Dictionary:
 	var CMD: String = c.D["COMMANDER_CLS"]
 	if typeof(roster.get("chars")) == TYPE_ARRAY and JAB.has(CMD):
 		for ch2: Variant in roster["chars"]:
-			if typeof(ch2) != TYPE_DICTIONARY or ch2.get("cls") != CMD or Js.same(ch2.get("buffer"), 2):
+			if typeof(ch2) != TYPE_DICTIONARY or not Js.same(ch2.get("cls"), CMD) or Js.same(ch2.get("buffer"), 2):
 				continue
 			var d: Dictionary = JAB[CMD]
 			var lv: float = (Js.num(ch2.get("lv")) if Js.truthy(ch2.get("lv")) else 1.0) - 1.0
 			var p: Dictionary = ch2["pot"] if typeof(ch2.get("pot")) == TYPE_DICTIONARY else {}
-			ch2["hp"] = Js.round_js(d["base"]["hp"] + lv * (p["hp"] if Js.truthy(p.get("hp")) else 8.0))
-			ch2["atk"] = Js.round_js(d["base"]["atk"] + lv * (p["atk"] if Js.truthy(p.get("atk")) else 1.5))
-			ch2["def"] = Js.round_js(d["base"]["def"] + lv * (p["def"] if Js.truthy(p.get("def")) else 0.6))
+			ch2["hp"] = Js.round_js(d["base"]["hp"] + lv * (Js.num(p["hp"]) if Js.truthy(p.get("hp")) else 8.0))
+			ch2["atk"] = Js.round_js(d["base"]["atk"] + lv * (Js.num(p["atk"]) if Js.truthy(p.get("atk")) else 1.5))
+			ch2["def"] = Js.round_js(d["base"]["def"] + lv * (Js.num(p["def"]) if Js.truthy(p.get("def")) else 0.6))
 			ch2["move"] = d["base"]["move"]
 			ch2["range"] = d["base"]["range"]
 			ch2["buffer"] = 2
@@ -149,7 +153,7 @@ static func get_roster(c: Object) -> Dictionary:
 	if typeof(roster.get("chars")) == TYPE_ARRAY and not (roster["chars"] as Array).is_empty() and JAB.has(CMD):
 		var has_cmd := false
 		for ch3: Variant in roster["chars"]:
-			if typeof(ch3) == TYPE_DICTIONARY and ch3.get("cls") == CMD:
+			if typeof(ch3) == TYPE_DICTIONARY and Js.same(ch3.get("cls"), CMD):
 				has_cmd = true
 		if not has_cmd:
 			var nid: int = int(roster["nextId"])
@@ -159,6 +163,9 @@ static func get_roster(c: Object) -> Dictionary:
 	if need_save:
 		c.store.set_json(ROSTER_KEY, roster)
 		roster = c.store.get_json(ROSTER_KEY)
+	# (4a) chars 가 배열이 아닌 세이브: 부르는 쪽이 늘 배열을 쓰도록 (저장값은 그대로 둠)
+	if typeof(roster.get("chars")) != TYPE_ARRAY:
+		roster["chars"] = []
 	return roster
 
 
@@ -191,13 +198,16 @@ static func exp_for_level(c: Object, lv: float) -> float:
 
 
 static func pot_grade(c: Object, ch: Dictionary) -> String:
+	# (4a) 직업·잠재력 형이 잘못된 세이브는 C (오류 없이)
+	if typeof(ch.get("cls")) != TYPE_STRING or not c.D["JAB"].has(ch["cls"]) or typeof(ch.get("pot")) != TYPE_DICTIONARY:
+		return "C"
 	var g: Dictionary = c.D["JAB"][ch["cls"]]["growth"]
 	var tot := 0.0
 	for k: String in ["hp", "atk", "def"]:
 		var mn: float = g[k][0]
 		var mx: float = g[k][1]
 		var rng := mx - mn
-		tot += (float(ch["pot"][k]) - mn) / rng if rng > 0.0 else 0.5
+		tot += (Js.num(ch["pot"].get(k)) - mn) / rng if rng > 0.0 else 0.5
 	var avg := tot / 3.0
 	if avg >= 0.85:
 		return "S"
@@ -250,7 +260,7 @@ static func mark_dead(c: Object, uid: Variant) -> void:
 	var roster := get_roster(c)
 	for ch: Variant in roster["chars"]:
 		if typeof(ch) == TYPE_DICTIONARY and Js.same(ch.get("uid"), uid):
-			if ch.get("cls") == c.D["COMMANDER_CLS"]:
+			if Js.same(ch.get("cls"), c.D["COMMANDER_CLS"]):
 				return
 			ch["dead"] = true
 			ch["diedAt"] = c.date_now()

@@ -1,215 +1,67 @@
 extends Control
-## 시작 화면 (1단계 기초 확인용)
-##  - 게임 제목·메뉴 이름을 I18n 으로 표시
-##  - 읽어 들인 데이터 모듈과 전역 개수, DataDB 검증 결과 표시
-##  - 6개 언어(I18n.LANGS) 단추로 언어 바꾸기 (Store 의 game_settings.language 에 저장)
-##  - (3a) 전투 시험 실행기: 스테이지·시드·파티(저장된 파티 또는 디버그 세이브)를 골라 전투 장면으로
-## 화면 코드는 여기만: 데이터·규칙은 DataDB / scripts/logic 쪽에 둔다.
+## 시작 화면 (메인 씬) — 웹 #splash (제목 DEADLINE 15 + loading…) 를 잠깐 보여 준 뒤 로비로 (Router).
+##  지휘관 첫 설정은 로비가 엽니다 (웹 index.js 와 같음). 프롤로그(에피소드 1 시작 장면)는 웹처럼 첫 출격 직전에 나옵니다.
+##
+##  개발용 명령줄 (Godot --path godot -- <인자>):
+##   --dev                  예전 시작 화면 + 전투 시험 실행기 (scripts/ui/dev_launcher.gd)
+##   --screen <이름>        바로 그 화면으로 (lobby · stage_select · party_select · settings)
+##   --save <경로>          다른 저장 파일 사용 (예: user://dev_save.json — 진짜 세이브를 건드리지 않고 시험)
+##   --lang <코드>          이번 실행만 언어 (저장하지 않음)
 
-const BattleScene := preload("res://scripts/battle/battle_scene.gd")
-const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
-const _FontsT := preload("res://scripts/core/fonts.gd")
-## 디버그 세이브로 쓸 수 있는 황금 기록 (tests/golden — 가짜 세이브·파티가 들어 있음)
-const DEBUG_SAVES := ["balanced_s05", "legion5_s09", "assassins_s06", "knights_s11", "boss_s10", "abyss_s19", "siege_items_s13", "gear_s15", "swamp_s21", "drill_s35"]
-
-const BG_COLOR := Color("0f1420")
-const GOLD := Color("f0c040")
-const TEXT_DIM := Color("9aa4b8")
+const DevLauncher := preload("res://scripts/ui/dev_launcher.gd")
+const OKit := preload("res://scripts/ui/outer_kit.gd")
+const SPLASH_SECS := 0.6
 
 var _title: Label
-var _subtitle: Label
-var _sample: Label
-var _status: Label
-var _modules: Label
-var _lang_buttons: Dictionary = {}   # 언어 코드 → Button
-var _stage_spin: SpinBox
-var _seed_spin: SpinBox
-var _src_opt: OptionButton
-var _replay_chk: CheckBox
-var _launch_info: Label
+var _loading: Label
+var _t := 0.0
 
 
 func _ready() -> void:
-	_build()
-	I18n.language_changed.connect(func(_lang: String) -> void: _refresh())
-	_refresh()
-
-
-func _build() -> void:
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var args := OS.get_cmdline_user_args()
+	var i18n: Node = get_node_or_null("/root/I18n")
+	var store: Node = get_node_or_null("/root/Store")
+	var save_i := args.find("--save")
+	if save_i >= 0 and save_i + 1 < args.size() and store != null:
+		store.call("use_path", args[save_i + 1])
+		if i18n != null:
+			i18n.call("reload")
+	var lang_i := args.find("--lang")
+	if lang_i >= 0 and lang_i + 1 < args.size() and i18n != null:
+		i18n.call("_apply", args[lang_i + 1])
+	if args.has("--dev"):
+		var dl: Control = DevLauncher.new()
+		dl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		add_child(dl)
+		return
 	var bg := ColorRect.new()
-	bg.color = BG_COLOR
+	bg.color = OKit.BG
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-
-	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(720, 0)
-	box.add_theme_constant_override("separation", 14)
-	center.add_child(box)
-
-	_title = _label(56, GOLD)
-	box.add_child(_title)
-	_subtitle = _label(22, Color.WHITE)
-	box.add_child(_subtitle)
-	_sample = _label(16, TEXT_DIM)
-	_sample.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_sample)
-
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 12)
-	box.add_child(row)
-	for code: String in I18n.SUPPORTED:
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(150, 44)
-		b.toggle_mode = true
-		# 언어 이름은 그 언어 글꼴로 (화면 언어와 상관없이 맞는 한자 모양)
-		b.add_theme_font_override("font", _FontsT.for_lang(code))
-		b.pressed.connect(I18n.set_language.bind(code))
-		row.add_child(b)
-		_lang_buttons[code] = b
-
-	_status = _label(16, Color.WHITE)
-	box.add_child(_status)
-	_modules = _label(14, TEXT_DIM)
-	_modules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_modules)
-	_build_launcher(box)
+	var v := OKit.vbox(16)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(v)
+	_title = OKit.label(36, OKit.GOLD, 900)
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.text = i18n.call("t", "common.game_title") if i18n != null else "DEADLINE 15"
+	v.add_child(_title)
+	_loading = OKit.label(14, OKit.DIM, 600)
+	_loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_loading.text = i18n.call("t", "common.loading") if i18n != null else "loading..."
+	v.add_child(_loading)
+	var screen := "lobby"
+	var si := args.find("--screen")
+	if si >= 0 and si + 1 < args.size():
+		screen = args[si + 1]
+	var router: Node = get_node_or_null("/root/Router")
+	get_tree().create_timer(SPLASH_SECS).timeout.connect(func() -> void:
+		if router != null:
+			router.call("go", screen, {}, false))
 
 
-func _refresh() -> void:
-	_title.text = I18n.t("common.game_title")
-	_subtitle.text = "%s · %s · %s" % [I18n.t("nav.sortie"), I18n.t("nav.party"), I18n.t("nav.settings")]
-	var safe: Dictionary = DataDB.global("SAFE_ZONE")
-	_sample.text = I18n.t("hazard.safe_zone", {"i": safe.get("icon", ""), "r": safe.get("every", 0)})
-
-	for code: String in _lang_buttons.keys():
-		var b: Button = _lang_buttons[code]
-		var full := I18n.t("settings.language_" + code)
-		b.text = full.substr(0, full.find(" (")) if full.find(" (") > 0 else full
-		b.tooltip_text = full
-		b.set_pressed_no_signal(code == I18n.current_lang)
-
-	if DataDB.is_ok():
-		_status.text = "DataDB OK · %s: %s" % [I18n.t("settings.language"), I18n.current_lang]
-		_status.add_theme_color_override("font_color", Color("6ee7a0"))
-	else:
-		_status.text = "DataDB 오류 %d개 — %s" % [DataDB.errors.size(), DataDB.errors[0]]
-		_status.add_theme_color_override("font_color", Color("ff6b6b"))
-
-	var parts := PackedStringArray()
-	var summary: Dictionary = DataDB.summary()
-	for name: String in summary.keys():
-		parts.append("%s %d" % [name, summary[name]])
-	var stages: Array = DataDB.global("STAGES")
-	var episodes: Dictionary = DataDB.story(I18n.current_lang).get("episodes", {})
-	_modules.text = "%s\nSTAGES %d · lang %s · story episodes %d" % [
-		" · ".join(parts), stages.size(), ",".join(DataDB.lang_codes()), episodes.size()]
-
-
-func _label(size: int, color: Color) -> Label:
-	var l := Label.new()
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
-	return l
-
-
-# ═══════════ 전투 시험 실행기 (3a 디버그) ═══════════
-
-func _build_launcher(box: VBoxContainer) -> void:
-	var sep := HSeparator.new()
-	box.add_child(sep)
-	var head := _label(16, GOLD)
-	head.text = "전투 시험 (3b 디버그 실행기)"
-	box.add_child(head)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 8)
-	box.add_child(row)
-	row.add_child(_small("스테이지"))
-	_stage_spin = SpinBox.new()
-	var stages: Array = DataDB.global("STAGES")
-	_stage_spin.min_value = 1
-	_stage_spin.max_value = maxi(1, stages.size())
-	_stage_spin.value = 5
-	row.add_child(_stage_spin)
-	row.add_child(_small("시드"))
-	_seed_spin = SpinBox.new()
-	_seed_spin.min_value = 0
-	_seed_spin.max_value = 2147483647
-	_seed_spin.value = int(Time.get_unix_time_from_system()) % 100000
-	row.add_child(_seed_spin)
-	row.add_child(_small("파티"))
-	_src_opt = OptionButton.new()
-	if _has_store_party():
-		_src_opt.add_item("저장된 파티 (Store)")
-		_src_opt.set_item_metadata(_src_opt.item_count - 1, "store")
-	for g: String in DEBUG_SAVES:
-		_src_opt.add_item("디버그 세이브: " + g)
-		_src_opt.set_item_metadata(_src_opt.item_count - 1, g)
-	row.add_child(_src_opt)
-	var row2 := HBoxContainer.new()
-	row2.alignment = BoxContainer.ALIGNMENT_CENTER
-	row2.add_theme_constant_override("separation", 12)
-	box.add_child(row2)
-	_replay_chk = CheckBox.new()
-	_replay_chk.text = "황금 기록 그대로 자동 재생 (스테이지·시드 무시)"
-	row2.add_child(_replay_chk)
-	var go := Button.new()
-	go.text = "전투 시작"
-	go.custom_minimum_size = Vector2(160, 40)
-	go.pressed.connect(_launch)
-	row2.add_child(go)
-	var warn := _label(12, Color("fbbf24"))
-	warn.text = "※ '저장된 파티 (Store)' 로 시작하면 전투 결과(골드·경험치·보상)가 실제 세이브에 저장됩니다. 디버그 세이브는 저장하지 않습니다."
-	warn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(warn)
-	_launch_info = _label(12, TEXT_DIM)
-	_launch_info.text = "Q/E 회전 · 휠 확대 · 끌어서 이동 · T 위협 범위 · M/A/S/I/D/O/W/P 행동 · Esc 취소 · 적을 누르면 정보 · 왼쪽 아래 톱니 = 설정"
-	box.add_child(_launch_info)
-
-
-func _small(t: String) -> Label:
-	var l := _label(13, TEXT_DIM)
-	l.text = t
-	return l
-
-
-## Store 에 활성 파티가 있는지 (로스터 + 파티 슬롯)
-func _has_store_party() -> bool:
-	var parties: Variant = Store.get_json("game_parties")
-	var roster: Variant = Store.get_json("game_roster")
-	if typeof(parties) != TYPE_DICTIONARY or typeof(roster) != TYPE_DICTIONARY:
-		return false
-	for p: Dictionary in parties.get("parties", []):
-		if p.get("id") == parties.get("activePartyId"):
-			for sl: Variant in p.get("slots", []):
-				if sl != null:
-					return true
-	return false
-
-
-func _launch() -> void:
-	var src: String = str(_src_opt.get_item_metadata(_src_opt.selected))
-	var cfg: Dictionary
-	if src == "store":
-		# Store 의 모든 키를 넘김 (전투 끝에 엔진이 쓰는 game_soul·game_mats 등이 진짜 값에서 시작해야 되돌려 쓸 때 덮어쓰지 않음)
-		cfg = {"save": BattleScene.store_save(Store), "source": "store"}
-	elif _replay_chk.button_pressed:
-		cfg = BattleScene.golden_cfg(src)
-		cfg["autoplay"] = src
-	else:
-		cfg = BattleScene.golden_cfg(src)
-		cfg["inject"] = []
-		cfg["maxRounds"] = 0
-	if not _replay_chk.button_pressed or src == "store":
-		cfg["stage"] = {"id": int(_stage_spin.value)}
-		cfg["seed"] = int(_seed_spin.value)
-		cfg["practice"] = false
-	# 연출 속도는 설정(game_settings.playSpeed — 전투 설정 창에서 바꿈)을 따름
-	BattleScene.pending = cfg
-	get_tree().change_scene_to_file(BATTLE_SCENE)
+func _process(delta: float) -> void:
+	_t += delta
+	if _loading != null:
+		_loading.modulate.a = 0.55 + 0.45 * absf(sin(_t * 2.2))

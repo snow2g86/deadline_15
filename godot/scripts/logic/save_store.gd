@@ -7,6 +7,7 @@ extends RefCounted
 
 const Js := preload("res://scripts/logic/js.gd")
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
+const JsonExact := preload("res://scripts/core/json_exact.gd")
 
 var _mem: Dictionary = {}   # 키 → 값 (JSON 해석된 Variant)
 
@@ -28,6 +29,18 @@ func set_json(key: String, v: Variant) -> void:
 
 func remove(key: String) -> void:
 	_mem.erase(key)
+
+
+## 웹 Store.get / Store.set — JSON 이 아닌 문자열 값(ps_can_start = 'true' 등). 메모리에서는 문자열 그대로 둠
+func get_str(key: String) -> Variant:
+	if not _mem.has(key):
+		return null
+	var v: Variant = _mem[key]
+	return v if typeof(v) == TYPE_STRING else JsonExact.stringify(v)
+
+
+func set_str(key: String, v: String) -> void:
+	_mem[key] = v
 
 
 func keys() -> Array:

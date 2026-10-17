@@ -169,6 +169,8 @@ const BattleEnd = {
       location.href = 'battle.html';
     } else {
       Store.set('game_nav', JSON.stringify({ cStage: stage }));
+      // 편성 화면의 출격 단추를 켬 (stage-select _launchStage 와 같음). 없으면 아래 탭으로 편성에 들렀던 뒤에는 단추가 끝내 나오지 않음
+      Store.set('ps_can_start', 'true');
       location.href = 'party-select.html';
     }
   },

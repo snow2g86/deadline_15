@@ -84,6 +84,9 @@
   },
   "result": {
    "retry": "Retry"
+  },
+  "outer": {
+   "coming_soon": "Coming soon — available in a later update"
   }
  }
 }

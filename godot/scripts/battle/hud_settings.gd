@@ -2,6 +2,7 @@ extends Control
 ## 설정 — 웹 #settings-btn · #settings-panel (render.js toggleSettings·syncSettingsUI·surrender): 배경음·효과음(켜기·음량 — 소리는 5단계,
 ##  지금은 값만 저장), 게임 속도(1x·2x·4x), 움직임 줄이기, 언어(바로 바뀜), 닫기, 항복(확인 창)
 ##  값은 Store game_settings 에 웹과 같은 키(bgmOn·bgmVol·sfxOn·sfxVol·language)로, Godot 전용은 playSpeed·reduceMotion
+##  읽기·쓰기 규칙은 바깥 설정 화면과 같은 scripts/logic/settings_rules.gd
 
 const Kit := preload("res://scripts/battle/ui_kit.gd")
 
@@ -13,9 +14,10 @@ signal opened_changed(open: bool)
 const Fonts := preload("res://scripts/core/fonts.gd")
 const I18nT := preload("res://scripts/core/i18n.gd")
 
-const KEY := "game_settings"
+const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
+const KEY := SettingsRules.KEY
 const LANGS: PackedStringArray = I18nT.LANGS
-const SPEEDS := [1, 2, 4]
+const SPEEDS := SettingsRules.SPEEDS
 
 var store: Node
 var i18n: Node
@@ -25,7 +27,7 @@ var panel: PanelContainer
 var confirm: PanelContainer
 var confirm_wrap: CenterContainer   # 확인 창은 화면 가운데 고정 (줄바꿈 글자 높이가 정해지기 전 위치 계산 문제 없음)
 var _box: VBoxContainer
-var s := {"bgmOn": true, "bgmVol": 0.5, "sfxOn": true, "sfxVol": 0.7, "playSpeed": 1, "reduceMotion": false}
+var s := SettingsRules.defaults()
 
 
 func setup(p_store: Node, p_i18n: Node) -> void:
@@ -109,29 +111,12 @@ func native_name(code: String) -> String:
 func load_settings() -> void:
 	if store == null:
 		return
-	var d: Variant = store.call("get_json", KEY, {})
-	if d is Dictionary:
-		for k: String in s.keys():
-			if not (d as Dictionary).has(k):
-				continue
-			var v: Variant = d[k]
-			var num_v := typeof(v) == TYPE_FLOAT or typeof(v) == TYPE_INT
-			var num_s := typeof(s[k]) == TYPE_FLOAT or typeof(s[k]) == TYPE_INT
-			if typeof(v) == typeof(s[k]) or (num_v and num_s):
-				s[k] = v
-	if not SPEEDS.has(int(s["playSpeed"])):
-		s["playSpeed"] = 1
+	SettingsRules.load_into(store, s)
 
 
 ## 웹 saveSett: 다른 페이지가 쓴 값(언어 등)은 그대로 두고 바꾼 값만 덮어씀
 func save_settings() -> void:
-	if store == null:
-		return
-	var cur: Variant = store.call("get_json", KEY, {})
-	var d: Dictionary = cur if cur is Dictionary else {}
-	for k: String in s.keys():
-		d[k] = s[k]
-	store.call("set_json", KEY, d)
+	SettingsRules.save_from(store, s)
 
 
 func is_open() -> bool:
