@@ -28,6 +28,9 @@
 | `js/battle/ai.js` | `battle/battle_ai.gd` | 적 AI (동기 함수로 — 아래 '시간 모델') |
 | `js/skills/*.js` · `_registry.js` | `battle/battle_skills.gd` | 41개 능동 스킬 `target`/`exec`, `_skill_done`·`_skill_refund` |
 | `js/battle/end.js` | `battle/battle_end.gd` | 전투 끝 보상·첫 클리어 신규 클랜원·영혼석·드랍·요일 던전 |
+| `js/party-select.js` 장비·아이템·강화 탭, `js/logic/equip.js` 강화·수리·분해·Mats, `gear.js` name·fmt·lines | `equip_rules.gd` | (4b-1) 끼우기·빼기·판매·강화(난수 순서 같음)·목록 정렬·단추 조건·물약 |
+| `js/shop.js`, `character.js` addChar | `shop_rules.gd` | (4b-1) 상점 생성·1시간 갱신·사기·룬·뽑기·재료·전설 교환 (V8 정렬 재현 `Js.v8_sort`) |
+| (Godot 전용) | `resume_rules.gd` | (4b-1) 전투 이어하기 저장 `gd_battle` · 웹 `game_battle` 판정 |
 | `render.js` previewAttack·calcThreat, `action.js` faceOptions·_setTargets | `battle/battle_query.gd` | 3단계 화면용 순수 조회 (`eng.q`) |
 
 옮기지 않은 웹 파일: 화면(`render`·`vfx`·`rig`·`motion`·`audio`·`pixelfx`·`terrain-tex`·`props`·`story-battle`), 번역·모달. 그 안에 섞여 있던 규칙은 엔진에 들어 있습니다 (아래).
@@ -134,7 +137,7 @@ Store·DataDB·시험·전투 저장이 모두 이것으로 통일되어 있습�
 규칙 코드에 17자리 리터럴을 쓰지 마세요 (`check_battle_api.gd` 가 모든 리터럴을 검사).
 
 ## 아직 옮기지 않은 것 (영향)
-- 상점·강화·성소·뽑기 화면 규칙(`enhanceItem`·`repairItem`·`dismantleItem`·`Rune.apply` 등)은 전투 밖이라 아직 없음 (4단계 성장 화면 때).
+- 성소 규칙(`Rune.apply`·부활·승급 등)은 4b-2. 상점·강화·수리·분해는 4b-1 (`equip_rules.gd`·`shop_rules.gd`).
 - 스토리 대사(`story-battle.js`)는 연출 — 규칙 영향 없음.
 - 황금 기록이 닿지 않는 경로(전설 장비 뽑기·보스 전설 드랍·스킬북 드랍·요일 던전 세트/지옥 전설·대부분의 GearFX 효과·적용 안 된 디버프 물약)는 웹 코드를 줄 단위로 옮겼지만 기록 비교로 확인되지는 않았습니다.
 

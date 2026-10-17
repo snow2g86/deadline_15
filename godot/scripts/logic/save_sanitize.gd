@@ -9,6 +9,9 @@ extends RefCounted
 ##   - game_save: 사전이 아니면 {gold:2000}, 클리어 기록의 숫자 글자는 숫자로(숫자 아닌 것은 뺌), stars 가 사전이 아니면 지움
 ##   - 인벤토리: 사전이 아닌 항목·쓸 수 없는 장비(부위·등급·능력치가 잘못됨) 뺌
 ##   - 요일 던전·본 장면·설정·출격 정보·영혼석: 형이 맞지 않는 부분만 지우거나 기본값
+##   (4b-1) 상점(game_shop): 사전이 아니거나 items 가 배열이 아니면 지움(들어가면 새로 만듦), 모르는 물건·형이 틀린 물건은 뺌, ts 가 숫자가 아니면 0(→ 갱신)
+##          재료(game_mats): 숫자가 아닌 값은 뺌 · 천장(game_gacha_pity): 숫자가 아니면 지움 · 편성 탭(ps_active_tab): 모르는 탭이면 지움
+##          인벤토리: 장비의 옵션(subs·eOpts·fx·cOpt)·직업 제한·장착자·전설·세트·강화 보정 형 정리, 물약·전투 물약·공성·룬·전직서는 모르는 종류면 뺌
 ##  빈 문자열 원본("")은 없는 것으로 (웹 !raw)
 
 const Js := preload("res://scripts/logic/js.gd")
@@ -46,7 +49,12 @@ static func _put(c: Object, key: String, before: Variant, after: Variant) -> boo
 ## 모두 다듬기 → 바뀐 키 목록
 static func sanitize(c: Object) -> Array:
 	var changed: Array = []
-	for k: String in ["game_roster", "game_parties", "game_save", "game_inventory", "game_daily", "game_story_seen", "game_settings", "game_nav", "game_soul", "game_party", "game_cleared"]:
+	var tab: Variant = c.store.get_str("ps_active_tab")
+	if tab != null and not ["party", "equip", "item", "enhance"].has(str(tab)):
+		c.store.remove("ps_active_tab")
+		changed.append("ps_active_tab")
+	for k: String in ["game_roster", "game_parties", "game_save", "game_inventory", "game_daily", "game_story_seen", "game_settings", "game_nav", "game_soul", "game_party", "game_cleared",
+			"game_shop", "game_mats", "game_gacha_pity"]:
 		var r := _raw(c, k)
 		if not r[0]:
 			continue
@@ -87,6 +95,12 @@ static func sanitize(c: Object) -> Array:
 				after = v if v is Array else null
 			"game_cleared":
 				after = v if v is Array else []
+			"game_shop":
+				after = _shop(c, v)
+			"game_mats":
+				after = _mats(v)
+			"game_gacha_pity":
+				after = v if _is_num(v) else null
 		if after == null:
 			c.store.remove(k)
 			changed.append(k)
@@ -231,8 +245,149 @@ static func _inventory(c: Object, v: Variant) -> Variant:
 				it["enhanceLv"] = en if en != null else 0.0
 			if it.has("armorType") and it["armorType"] != null and typeof(it["armorType"]) != TYPE_STRING:
 				it.erase("armorType")
+			_equip_fields(c, it)
+		elif ty == "potion" or ty == "battle_potion":
+			if typeof(it.get("potionId")) != TYPE_STRING:
+				continue
+			if ty == "battle_potion" and not (c.D["BATTLE_POTIONS"] as Dictionary).has(it["potionId"]):
+				continue
+			if ty == "potion" and not _is_num(it.get("exp")):
+				var ex: Variant = PartyRules.to_number(it.get("exp"))
+				it["exp"] = ex if ex != null else 0.0
+		elif ty == "siege":
+			var known := false
+			for sd: Dictionary in c.D["SIEGE_ITEMS"]:
+				if Js.same(sd["id"], it.get("siegeId")):
+					known = true
+			if not known:
+				continue
+		elif ty == "rune":
+			if typeof(it.get("enchant")) != TYPE_STRING or not (c.D["ENCHANTS"] as Dictionary).has(it["enchant"]):
+				continue
+		elif ty == "scroll":
+			if typeof(it.get("scrollCls")) != TYPE_STRING:
+				continue
+		if it.has("quantity") and it["quantity"] != null and not _is_num(it["quantity"]):
+			it.erase("quantity")
 		out.append(it)
 	return out
+
+
+## 장비 옵션·부가 칸 형 정리 (규칙·화면이 형을 믿고 씀)
+static func _equip_fields(c: Object, it: Dictionary) -> void:
+	var FX: Dictionary = c.D["GEAR_FX"]
+	var opt_ok := func(o: Variant) -> bool: return o is Dictionary and typeof(o.get("id")) == TYPE_STRING and FX.has(o["id"]) and _is_num(o.get("v"))
+	if it.has("subs"):
+		if not (it["subs"] is Array):
+			it["subs"] = []
+		else:
+			var keep: Array = []
+			for sub: Variant in it["subs"]:
+				if opt_ok.call(sub):
+					keep.append(sub)
+			if keep.size() != (it["subs"] as Array).size():
+				it["subs"] = keep
+	if it.has("eOpts"):
+		if not (it["eOpts"] is Dictionary):
+			it["eOpts"] = {}
+		else:
+			for k: Variant in (it["eOpts"] as Dictionary).keys():
+				var o: Variant = it["eOpts"][k]
+				if o != null and not opt_ok.call(o):
+					it["eOpts"].erase(k)
+	for f: String in ["fx", "cOpt"]:
+		if it.has(f) and it[f] != null and not opt_ok.call(it[f]):
+			it[f] = null
+	if it.get("cOpt") is Dictionary and typeof(it["cOpt"].get("cls")) != TYPE_STRING:
+		it["cOpt"] = null
+	if it.has("clsRestrict") and it["clsRestrict"] != null:
+		if not (it["clsRestrict"] is Array):
+			it.erase("clsRestrict")
+		else:
+			var cl: Array = []
+			for x: Variant in it["clsRestrict"]:
+				if typeof(x) == TYPE_STRING:
+					cl.append(x)
+			if cl.size() != (it["clsRestrict"] as Array).size():
+				it["clsRestrict"] = cl
+	if it.has("equipped") and it["equipped"] != null:
+		var eu: Variant = PartyRules.to_int_id(it["equipped"])
+		if typeof(it["equipped"]) == TYPE_BOOL or eu == null:
+			it["equipped"] = null
+		elif not _is_num(it["equipped"]):
+			it["equipped"] = eu
+	if it.has("legend") and it["legend"] != null and not (typeof(it["legend"]) == TYPE_STRING and (c.D["LEGENDS"] as Dictionary).has(it["legend"])):
+		it["legend"] = null
+	if it.has("setCls") and it["setCls"] != null and not (typeof(it["setCls"]) == TYPE_STRING and (c.D["CLASS_SETS"] as Dictionary).has(it["setCls"])):
+		it.erase("setCls")
+	if it.has("setId") and it["setId"] != null and typeof(it["setId"]) != TYPE_STRING:
+		it["setId"] = null
+	if it.has("hand") and it["hand"] != null and typeof(it["hand"]) != TYPE_STRING:
+		it["hand"] = null
+	if it.has("enhanceBonus") and not _is_num(it["enhanceBonus"]):
+		it["enhanceBonus"] = 0.0
+	if it.has("enhanceLv") and _is_num(it["enhanceLv"]) and float(it["enhanceLv"]) < 0.0:
+		it["enhanceLv"] = 0.0
+	if it.has("broken") and typeof(it["broken"]) != TYPE_BOOL:
+		it["broken"] = Js.truthy(it["broken"])
+
+
+## (4b-1) 상점 저장: 형이 틀린 물건만 뺌. 통째로 쓸 수 없으면 null (지움 → 들어갈 때 새 상점)
+static func _shop(c: Object, v: Variant) -> Variant:
+	if not (v is Dictionary) or not (v.get("items") is Array):
+		return null
+	if not _is_num(v.get("ts")):
+		v["ts"] = 0.0
+	var JAB: Dictionary = c.D["JAB"]
+	var keep: Array = []
+	for it: Variant in v["items"]:
+		if not (it is Dictionary) or not _is_num(it.get("cost")):
+			continue
+		var ty: String = str(it["type"]) if typeof(it.get("type")) == TYPE_STRING else ("char" if it.get("type") == null else "")
+		var ok := false
+		match ty:
+			"char":
+				ok = typeof(it.get("cls")) == TYPE_STRING and JAB.has(it["cls"]) and JAB[it["cls"]].get("growth") is Dictionary and it.get("pot") is Dictionary
+				if ok:
+					for pk: String in ["hp", "atk", "def", "actionRec"]:
+						if not _is_num(it["pot"].get(pk)):
+							ok = false
+				if ok and it.has("name") and it["name"] != null and typeof(it["name"]) != TYPE_STRING:
+					it["name"] = str(it["name"]) if _is_num(it["name"]) else null
+				if ok and it.has("gender") and not ["m", "f"].has(it["gender"]):
+					it.erase("gender")
+			"skillbook":
+				ok = typeof(it.get("skillId")) == TYPE_STRING and (c.D["LEARNABLE_SKILLS"] as Dictionary).has(it["skillId"]) and typeof(it.get("cls")) == TYPE_STRING
+			"soulstone":
+				ok = typeof(it.get("cls")) == TYPE_STRING
+			"scroll":
+				ok = typeof(it.get("scrollCls")) == TYPE_STRING and JAB.has(it["scrollCls"])
+			"potion":
+				ok = typeof(it.get("potionId")) == TYPE_STRING and _is_num(it.get("exp"))
+			"battle_potion":
+				ok = typeof(it.get("potionId")) == TYPE_STRING and (c.D["BATTLE_POTIONS"] as Dictionary).has(it["potionId"])
+			"siege":
+				for sd: Dictionary in c.D["SIEGE_ITEMS"]:
+					if Js.same(sd["id"], it.get("siegeId")):
+						ok = true
+		if not ok:
+			continue
+		if it.has("sold") and typeof(it["sold"]) != TYPE_BOOL:
+			it["sold"] = Js.truthy(it["sold"])
+		if it.has("quantity") and not _is_num(it["quantity"]):
+			it["quantity"] = 1
+		keep.append(it)
+	v["items"] = keep
+	return v
+
+
+static func _mats(v: Variant) -> Variant:
+	if not (v is Dictionary):
+		return {}
+	for k: Variant in (v as Dictionary).keys():
+		if not _is_num(v[k]):
+			v.erase(k)
+	return v
 
 
 static func _settings(v: Variant) -> Variant:

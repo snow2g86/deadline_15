@@ -179,3 +179,128 @@ static func base36(n: int) -> String:
 		s = digits[n % 36] + s
 		n = n / 36
 	return s
+
+
+## (4b-1) V8 Array.prototype.sort 와 같은 비교 호출 순서·결과 (TimSort: 64개 미만은 run 세기 + 이진 삽입 정렬)
+##  웹의 `.sort(function() { return Math.random() - 0.5; })` 처럼 비교 함수가 난수를 쓰는 곳을 같은 씨앗으로 같은 순서로 재현할 때 씀.
+##  64개 이상은 병합 단계가 더 있어 옮기지 않았음 → stable_sort 로 (지금 쓰는 곳은 모두 40개 이하)
+static func v8_sort(arr: Array, cmp: Callable) -> Array:
+	var w: Array = arr.duplicate()
+	var n := w.size()
+	if n < 2:
+		return w
+	if n >= 64:
+		return stable_sort(arr, cmp)
+	var low := 0
+	var rem := n
+	var min_run := n   # n < 64 → ComputeMinRunLength(n) = n
+	while rem > 0:
+		var cl := _v8_count_run(w, low, low + rem, cmp)
+		if cl < min_run:
+			var forced := mini(min_run, rem)
+			_v8_bis(w, low, low + cl, low + forced, cmp)
+			cl = forced
+		low += cl
+		rem -= cl
+	return w
+
+
+static func _v8_count_run(w: Array, lo: int, hi: int, cmp: Callable) -> int:
+	var low := lo + 1
+	if low == hi:
+		return 1
+	var run := 2
+	var order: float = cmp.call(w[low], w[low - 1])
+	var desc := order < 0.0
+	var prev: Variant = w[low]
+	for i in range(low + 1, hi):
+		var cur: Variant = w[i]
+		order = cmp.call(cur, prev)
+		if desc:
+			if order >= 0.0:
+				break
+		elif order < 0.0:
+			break
+		prev = cur
+		run += 1
+	if desc:
+		var l := lo
+		var h := lo + run - 1
+		while l < h:
+			var t: Variant = w[l]
+			w[l] = w[h]
+			w[h] = t
+			l += 1
+			h -= 1
+	return run
+
+
+static func _v8_bis(w: Array, lo: int, start: int, hi: int, cmp: Callable) -> void:
+	if lo == start:
+		start += 1
+	while start < hi:
+		var left := lo
+		var right := start
+		var pivot: Variant = w[start]
+		while left < right:
+			var mid := left + ((right - left) >> 1)
+			var o: float = cmp.call(pivot, w[mid])
+			if o < 0.0:
+				right = mid
+			else:
+				left = mid + 1
+		var p := start
+		while p > left:
+			w[p] = w[p - 1]
+			p -= 1
+		w[left] = pivot
+		start += 1
+
+
+static func _next_up(x: float) -> float:
+	var b := PackedByteArray()
+	b.resize(8)
+	b.encode_double(0, x)
+	b.encode_s64(0, b.decode_s64(0) + 1)
+	return b.decode_double(0)
+
+
+## (4b-1) 0 ≤ v < 1 의 Number.prototype.toString(36) 와 같은 글 (V8 DoubleToRadixCString — 마지막 자리 반올림까지)
+##  웹 `Math.random().toString(36).slice(2, 6)` (물약·공성 아이템 id, 장비 eid 꼬리)를 같은 씨앗으로 같게
+static func frac_to_base36(value: float) -> String:
+	var chars := "0123456789abcdefghijklmnopqrstuvwxyz"
+	var fraction := value
+	var delta := maxf(_next_up(0.0), 0.5 * (_next_up(value) - value))
+	var digits: Array = []
+	var integer := 0
+	if fraction >= delta:
+		while true:
+			fraction *= 36.0
+			delta *= 36.0
+			var digit := int(floorf(fraction))
+			digits.append(digit)
+			fraction -= float(digit)
+			if fraction > 0.5 or (fraction == 0.5 and (digit & 1) == 1):
+				if fraction + delta > 1.0:
+					while true:
+						if digits.is_empty():
+							integer += 1
+							break
+						var d: int = digits.pop_back()
+						if d + 1 < 36:
+							digits.append(d + 1)
+							break
+					break
+			if not (fraction >= delta):
+				break
+	var s := "1" if integer > 0 else "0"
+	if not digits.is_empty():
+		s += "."
+		for d2: int in digits:
+			s += chars[d2]
+	return s
+
+
+## 웹 Math.random().toString(36).slice(2, 6)
+static func rand36_4(r: float) -> String:
+	return frac_to_base36(r).substr(2, 4)

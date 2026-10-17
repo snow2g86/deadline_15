@@ -80,13 +80,27 @@
    "reduce_motion": "減少動態效果",
    "reduce_motion_tip": "關閉畫面震動、閃光、跳躍和攻擊動作",
    "surrender_confirm": "投降後本場戰鬥將以失敗告終。確定要投降嗎？",
-   "surrender_pending": "演出結束後投降"
+   "surrender_pending": "演出結束後投降",
+   "leave": "離開",
+   "leave_tip": "儲存戰鬥並返回大廳 — 在大廳點「繼續戰鬥」接著打",
+   "leave_confirm": "將儲存戰鬥並返回大廳。\n在大廳點「繼續戰鬥」可從本回合繼續。",
+   "leave_pending": "動畫結束後儲存並離開"
   },
   "result": {
    "retry": "重新挑戰"
   },
   "outer": {
    "coming_soon": "敬請期待——將於後續更新中開放"
+  },
+  "resume": {
+   "web_notice": "這場戰鬥是在網頁版開始的，無法在這裡繼續。\n{stage}\n放棄將刪除儲存的戰鬥（成員與金幣保留）。",
+   "broken": "無法讀取儲存的戰鬥，不能繼續。\n放棄將刪除儲存的戰鬥（成員與金幣保留）。",
+   "abandon": "放棄",
+   "abandoned": "已放棄儲存的戰鬥",
+   "stage_n": "關卡 {n}"
+  },
+  "equip": {
+   "upgrade": "有更好的裝備"
   }
  }
 }

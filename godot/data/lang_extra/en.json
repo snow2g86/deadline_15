@@ -80,13 +80,27 @@
    "reduce_motion": "Reduce motion",
    "reduce_motion_tip": "Turns off screen shake, flashes, hops and attack motions",
    "surrender_confirm": "Surrendering ends this battle as a defeat. Surrender?",
-   "surrender_pending": "Surrendering once the current action finishes"
+   "surrender_pending": "Surrendering once the current action finishes",
+   "leave": "Leave",
+   "leave_tip": "Save the battle and return to the lobby — continue with 'Resume Battle' in the lobby",
+   "leave_confirm": "Save the battle and return to the lobby.\nUse 'Resume Battle' in the lobby to continue from this turn.",
+   "leave_pending": "Will save and leave after the animation"
   },
   "result": {
    "retry": "Retry"
   },
   "outer": {
    "coming_soon": "Coming soon — available in a later update"
+  },
+  "resume": {
+   "web_notice": "This battle was started in the web version and can't be resumed here.\n{stage}\nAbandoning deletes the saved battle (clan members and gold stay).",
+   "broken": "The saved battle can't be read, so it can't be resumed.\nAbandoning deletes the saved battle (clan members and gold stay).",
+   "abandon": "Abandon",
+   "abandoned": "Saved battle abandoned",
+   "stage_n": "Stage {n}"
+  },
+  "equip": {
+   "upgrade": "Better gear available"
   }
  }
 }

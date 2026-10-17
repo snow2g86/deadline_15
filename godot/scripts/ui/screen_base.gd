@@ -74,6 +74,18 @@ func go_back() -> void:
 		router.call("go", "lobby")
 
 
+## (4b-1) 자원이 오가는 단추의 같은 프레임 연타 막기: 한 프레임에 한 번만 true (사기·강화·끼우기·판매·분해·수리·물약·뽑기·재개)
+var _act_frame := -1
+
+
+func act_once() -> bool:
+	var f := Engine.get_process_frames()
+	if f == _act_frame:
+		return false
+	_act_frame = f
+	return true
+
+
 ## 지금 무엇을 재생 중이라 뒤로 가기를 받지 않을 때 (스토리 등)
 func busy() -> bool:
 	return false
@@ -92,6 +104,7 @@ func _ready() -> void:
 	router = _svc("Router")
 	D = Ctx.globals_from_db(db)
 	c = Ctx.new(D, randi() & 0x7fffffff, StoreCtx.new(store))
+	c.clock = func() -> float: return Ctx.real_now()
 	# 이상한 값이 든 세이브 다듬기 (웹보다 관대하게, 오류 없이 — scripts/logic/save_sanitize.gd)
 	sanitized = SaveSanitize.sanitize(c)
 	icons = Icons.get_for(D)
@@ -279,7 +292,7 @@ func _refresh_chrome() -> void:
 		(tb["bar"] as Control).modulate.a = 1.0 if on else 0.0
 
 
-## 아래 탭 (웹 nav.js renderBottomNav: 스테이지 · 파티 · 성소 · 아카데미 · 상점) — 아직 옮기지 않은 화면은 '준비 중'
+## 아래 탭 (웹 nav.js renderBottomNav: 스테이지 · 파티 · 성소 · 아카데미 · 상점) — 아직 옮기지 않은 화면(성소·아카데미, 4b-2)은 '준비 중'
 func _on_tab(key: String) -> void:
 	match key:
 		"stage":
@@ -288,6 +301,8 @@ func _on_tab(key: String) -> void:
 			# 웹: 편성 화면으로 갈 때 출격 단추 끔
 			c.store.set_str("ps_can_start", "false")
 			router.call("go", "party_select")
+		"shop":
+			router.call("go", "shop")
 		_:
 			coming_soon()
 
@@ -325,9 +340,13 @@ func open_modal(content: Control, opts: Dictionary = {}) -> Control:
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	ov.add_child(dim)
 	if bool(opts.get("close_on_bg", true)):
+		# (4b-1) 연 직후 0.3초 안의 바깥 누르기는 무시 — 창을 연 단추를 두 번 누르면(더블클릭·같은 프레임 연타) 두 번째가 바로 창을 닫지 않게
+		var opened := Time.get_ticks_msec()
 		dim.gui_input.connect(func(ev: InputEvent) -> void:
 			if ev is InputEventMouseButton and ev.pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-				close_modal())
+				if Time.get_ticks_msec() - opened < 300:
+					return
+				_close_modal_node(ov, true))
 	var cc := CenterContainer.new()
 	cc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	cc.mouse_filter = Control.MOUSE_FILTER_IGNORE

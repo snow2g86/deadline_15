@@ -36,11 +36,11 @@ static func equip_template(c: Object, base_id: String) -> Variant:
 	return null
 
 
-## equip.js genEid — Date.now() 와 난수 1회 (값은 저장 식별자일 뿐)
+## equip.js genEid — Date.now() 와 난수 1회 (값은 저장 식별자일 뿐 — 4b-1: 꼬리 4자도 웹 toString(36) 그대로)
 static func gen_eid(c: Object) -> String:
 	c.eid_counter += 1
 	var r: float = c.rand("genEid")
-	return "eq_" + Js.base36(int(c.date_now())) + "_" + Js.base36(c.eid_counter) + "_" + Js.base36(int(r * 1679616.0))
+	return "eq_" + Js.base36(int(c.date_now())) + "_" + Js.base36(c.eid_counter) + "_" + Js.rand36_4(r)
 
 
 static func roll_rarity(c: Object, min_rarity: Variant) -> String:

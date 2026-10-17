@@ -1,6 +1,6 @@
 extends "res://scripts/ui/screen_base.gd"
 ## 파티 편성 — 웹 party-select.html + js/party-select.js(파티 탭 부분) + css/party-select.css
-##  골드 배지, 페이지 탭(파티 · 장비 · 소모품 · 강화 — 장비·소모품·강화는 4b: '준비 중'),
+##  골드 배지, 페이지 탭(파티 · 장비 · 소모품 · 강화 — 장비·소모품·강화 탭은 4b-1: scripts/ui/party_gear_tabs.gd, 마지막 탭을 기억 = 웹 ps_active_tab),
 ##  왼쪽: 인원 'n / 5' + 파티 탭 5개(파티 1~5), 오른쪽: 5칸(클랜원 그림·Lv·직업·스킬·이름·등급·HP/ATK/DEF(+장비)·AR, ✕ 빼기 / 빈 칸 +) + 조합 버프,
 ##  출격 단추(스테이지를 고르고 왔을 때만 = ps_can_start 'true' 이고 5명일 때).
 ##  칸 누르기 → 유닛 고르기 창(직업군 필터 · 카드: 그림·등급·Lv·이름·스탯(+장비)(+잠재력)·장비 8칸(등급 색·+강화)·스킬) → 그 칸에 배치(다른 칸에 있으면 옮김)
@@ -12,6 +12,7 @@ const Gear := preload("res://scripts/logic/gear.gd")
 const Synergy := preload("res://scripts/logic/synergy.gd")
 const UnitInfo := preload("res://scripts/battle/unit_info.gd")
 const Flow := preload("res://scripts/ui/flow.gd")
+const PartyGearTabs := preload("res://scripts/ui/party_gear_tabs.gd")
 
 const PAGE_TABS := [["party", "nav.party"], ["equip", "nav.equip"], ["item", "party.tab_item"], ["enhance", "nav.enhance"]]
 const GRADE_BG := {"S": Color(240 / 255.0, 192 / 255.0, 64 / 255.0, 0.15), "A": Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.15),
@@ -35,6 +36,9 @@ var _started := false
 var _modal_slot := -1
 var unit_modal: Control
 var _inv_map: Dictionary = {}
+var cur_tab := "party"
+var sec_party: VBoxContainer
+var gear: RefCounted   # party_gear_tabs.gd
 
 
 func page_id() -> String:
@@ -82,15 +86,13 @@ func _build() -> void:
 	tabs.name = "PageTabs"
 	tw.add_child(tabs)
 	for pt: Array in PAGE_TABS:
-		var on: bool = pt[0] == "party"
-		var b := OKit.styled_button(OKit.box(Color(OKit.GOLD, 0.12) if on else Color(1, 1, 1, 0.04), OKit.GOLD if on else Color(1, 1, 1, 0.08), 8, 1, 8, 12),
-			OKit.box(Color(1, 1, 1, 0.08), Color(1, 1, 1, 0.15) if not on else OKit.GOLD, 8, 1, 8, 12), null, 8)
+		var b := OKit.styled_button(OKit.box(Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.08), 8, 1, 8, 12),
+			OKit.box(Color(1, 1, 1, 0.08), Color(1, 1, 1, 0.15), 8, 1, 8, 12), null, 8)
 		b.name = "PageTab_" + str(pt[0])
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.add_theme_font_size_override("font_size", 13)
-		b.add_theme_color_override("font_color", Color.WHITE if on else OKit.DIM)
 		b.add_theme_color_override("font_hover_color", OKit.TEXT)
-		b.add_theme_color_override("font_focus_color", Color.WHITE if on else OKit.TEXT)
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var key: String = pt[0]
 		b.pressed.connect(func() -> void: switch_page_tab(key))
 		tabs.add_child(b)
@@ -100,12 +102,19 @@ func _build() -> void:
 	gap.custom_minimum_size = Vector2(0, 10)
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(gap)
-	# 본문: 왼쪽(인원·파티 탭) | 오른쪽(칸·조합 버프)
+	# 본문: 파티 탭 / 장비 · 소모품 · 강화 탭 (하나만 보임)
+	sec_party = OKit.vbox(0)
+	sec_party.name = "SectionParty"
+	sec_party.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(sec_party)
+	gear = PartyGearTabs.new(self)
+	gear.build(col)
+	# 파티: 왼쪽(인원·파티 탭) | 오른쪽(칸·조합 버프)
 	var lw := OKit.MaxWidth.new()
 	lw.max_w = 480.0
 	lw.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lw.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(lw)
+	sec_party.add_child(lw)
 	var lay := OKit.hbox(12)
 	lay.name = "Layout"
 	lw.add_child(lay)
@@ -141,30 +150,51 @@ func _build() -> void:
 	var sw := CenterContainer.new()
 	sw.custom_minimum_size = Vector2(0, 76)
 	sw.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(sw)
+	sec_party.add_child(sw)
 	start_btn = OKit.modal_button("", false, 18)
 	start_btn.name = "Start"
 	start_btn.custom_minimum_size = Vector2(150, 48)
 	start_btn.pressed.connect(confirm_start)
 	sw.add_child(start_btn)
-	# 저장된 탭이 파티가 아니어도 이 화면은 파티 탭으로 엶 (장비·소모품·강화는 4b)
+	# 저장된 탭으로 엶 (웹 Store ps_active_tab — 출격 단추는 파티 탭에서만)
+	var saved: Variant = store.call("get_str", PartyRules.ACTIVE_TAB_KEY)
+	for pt2: Array in PAGE_TABS:
+		if saved != null and str(saved) == str(pt2[0]):
+			cur_tab = str(saved)
 
 
 func _refresh() -> void:
-	gold_lbl.text = "%s G" % grouped(Js.num(Profile.load_save(c).get("gold")))
+	refresh_gold()
 	for k: String in page_tab_btns.keys():
 		(page_tab_btns[k][0] as Button).text = t(page_tab_btns[k][1])
 	start_btn.text = t("party.start_battle")
-	render_party_tabs()
-	render_slots()
+	_show_tab()
 
 
-## 장비·소모품·강화 탭은 4b — 누르면 '준비 중' (파티 탭에 머묾)
+func refresh_gold() -> void:
+	gold_lbl.text = "%s G" % grouped(Js.num(Profile.load_save(c).get("gold")))
+
+
+## 페이지 탭 바꾸기 (웹 switchPageTab: Store ps_active_tab 에 기억)
 func switch_page_tab(key: String) -> void:
-	if key == "party":
-		store.call("set_str", PartyRules.ACTIVE_TAB_KEY, "party")
-		return
-	coming_soon()
+	cur_tab = key
+	store.call("set_str", PartyRules.ACTIVE_TAB_KEY, key)
+	_show_tab()
+
+
+func _show_tab() -> void:
+	for k: String in page_tab_btns.keys():
+		var b: Button = page_tab_btns[k][0]
+		var on := k == cur_tab
+		b.add_theme_stylebox_override("normal", OKit.box(Color(OKit.GOLD, 0.12) if on else Color(1, 1, 1, 0.04), OKit.GOLD if on else Color(1, 1, 1, 0.08), 8, 1, 8, 12))
+		b.add_theme_color_override("font_color", Color.WHITE if on else OKit.DIM)
+		b.add_theme_color_override("font_focus_color", Color.WHITE if on else OKit.TEXT)
+	sec_party.visible = cur_tab == "party"
+	gear.show(cur_tab)
+	if cur_tab == "party":
+		render_party_tabs()
+		render_slots()
+	refresh_gold()
 
 
 func render_party_tabs() -> void:
@@ -477,6 +507,8 @@ func render_unit_cards() -> void:
 	var first: Button = null
 	for ch: Dictionary in list:
 		var card := _unit_card(ch, inp.has(ch["uid"]))
+		var uid: Variant = ch["uid"]
+		card.pressed.connect(func() -> void: select_unit(uid))
 		_unit_grid.add_child(card)
 		if first == null:
 			first = card
@@ -485,7 +517,8 @@ func render_unit_cards() -> void:
 	_fit_modal.call_deferred(unit_modal)
 
 
-func _unit_card(ch: Dictionary, in_party: bool) -> Button:
+## 클랜원 카드 (유닛 고르기 창 · 장비 탭 같이 씀). slots: EquipRules.card_slots 결과를 주면 장비 탭 모양 (더 좋은 장비 ↑, 강화 단계 없음)
+func _unit_card(ch: Dictionary, in_party: bool, slots: Array = []) -> Button:
 	var nb := OKit.box(Color(240 / 255.0, 170 / 255.0, 50 / 255.0, 0.1) if in_party else Color(1, 1, 1, 0.025), Color(OKit.GOLD, 0.4) if in_party else Color(1, 1, 1, 0.08), 12, 2, 12, 12)
 	var hb := OKit.box(Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.08), Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.4), 12, 2, 12, 12)
 	if in_party:
@@ -559,9 +592,14 @@ func _unit_card(ch: Dictionary, in_party: bool) -> Button:
 	eg.add_theme_constant_override("v_separation", 4)
 	ep.add_child(eg)
 	var equip: Dictionary = ch.get("equip", {}) if typeof(ch.get("equip")) == TYPE_DICTIONARY else {}
+	var marks: Dictionary = {}
+	for sm: Dictionary in slots:
+		marks[sm["slot"]] = sm
 	for slot: String in D["EQUIP_SLOTS"]:
 		var eid: Variant = equip.get(slot)
 		var item: Variant = _inv_map.get(eid) if eid != null else null
+		if marks.has(slot):
+			item = marks[slot]["item"]
 		var cell := PanelContainer.new()
 		cell.mouse_filter = Control.MOUSE_FILTER_PASS
 		cell.tooltip_text = t("equip.slot." + slot)
@@ -583,11 +621,20 @@ func _unit_card(ch: Dictionary, in_party: bool) -> Button:
 		if item == null:
 			et.modulate = Color(0.55, 0.55, 0.55, 0.38)
 		cc.add_child(et)
-		if item != null:
+		if item != null and slots.is_empty():
 			var el := OKit.pill("+" + num(Js.num(item.get("enhanceLv"))), 8, OKit.GOLD, Color(0, 0, 0, 0.6))
 			el.position = Vector2(20, 1)
 			el.set_meta("overflow_ok", true)   # 웹 .unit-card-equip-lv: 칸 오른쪽 위 모서리에 겹친 배지
 			cc.add_child(el)
+		if marks.has(slot) and marks[slot]["upgrade"]:
+			# 웹 .eq-char-slot.upgrade: 초록 바탕 + 오른쪽 위 ↑ (더 높은 등급의 안 낀 장비가 있음)
+			cell.add_theme_stylebox_override("panel", OKit.box(Color(34 / 255.0, 197 / 255.0, 94 / 255.0, 0.15), rc, 6, 1, 0, 0))
+			var up := OKit.pill("↑", 8, Color.WHITE, Color("22c55e"))
+			up.name = "Upgrade"
+			up.position = Vector2(30, -3)
+			up.set_meta("overflow_ok", true)
+			cell.tooltip_text = t("equip.slot." + slot) + " · " + t("gd.equip.upgrade")
+			cc.add_child(up)
 		eg.add_child(cell)
 	# 스킬
 	var sks := PartyRules.learned_skills(c, ch)
@@ -607,8 +654,6 @@ func _unit_card(ch: Dictionary, in_party: bool) -> Button:
 			sl.set_meta("overflow_ok", true)   # 웹 .unit-card-skill-lv: 아이콘 모서리에 겹친 배지
 			sc.add_child(sl)
 			sr.add_child(sc)
-	var uid: Variant = ch["uid"]
-	b.pressed.connect(func() -> void: select_unit(uid))
 	return b
 
 

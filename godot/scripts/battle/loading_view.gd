@@ -49,6 +49,7 @@ func show_for(stage_name: String, tip_text: String) -> void:
 	progress(0.0)
 	modulate.a = 1.0
 	visible = true
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	_done = false
 
 
@@ -61,6 +62,9 @@ func finish(instant: bool = false) -> void:
 		return
 	_done = true
 	progress(1.0)
+	# (4b-1) 흐려지는 0.4초 동안 누르기를 막지 않음 — 그 사이 전투는 이미 시작되어 행동 메뉴가 뜰 수 있는데,
+	#  보이는 채로 STOP 이면 맵 칸 누르기를 먹어 '대상 고르기'에서 멈춘 것처럼 보였음 (tests/play_4a.gd 멈춤의 원인)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if instant:
 		visible = false
 		finished.emit()

@@ -18,6 +18,7 @@ const SCREENS := {
 	"stage_select": "res://scenes/outer/stage_select.tscn",
 	"party_select": "res://scenes/outer/party_select.tscn",
 	"settings": "res://scenes/outer/settings.tscn",
+	"shop": "res://scenes/outer/shop.tscn",
 	"battle": "res://scenes/battle/battle.tscn",
 }
 const NO_HISTORY := ["boot", "battle"]
@@ -32,7 +33,7 @@ var last_request: Dictionary = {}
 
 
 ## 한 번만 쓰는 값 (기록에 남기지 않음 — 예: stage_select {daily: true} = 요일 던전 창 바로 열기)
-const ONE_SHOT := ["daily"]
+const ONE_SHOT := ["daily", "tab"]
 ## 장면을 바꾸는 중 (바뀐 장면이 들어올 때까지 다른 이동을 받지 않음 — 같은 프레임 연타로 두 번 이동하지 않게)
 var _changing := false
 

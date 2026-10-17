@@ -17,7 +17,7 @@ godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬) — 잠깐 제목을 보여 주고 로비로 (Router). 개발용: -- --dev (예전 시작 화면 + 전투 시험 실행기), -- --screen <이름>, -- --save <경로>
-  scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings (scripts/ui/*.gd)
+  scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings, 4b-1: shop (scripts/ui/*.gd)
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시) · fonts.gd(언어별 글꼴 사슬)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
@@ -25,9 +25,11 @@ godot/
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
   scripts/core/router.gd  오토로드 Router — 화면 전환 한 곳 (go · back · launch_battle), Esc·마우스 뒤로 단추 → 화면의 on_back()
   scripts/ui/          바깥 화면 (4a): screen_base.gd(윗줄·아래 탭·창·알림 공통) · outer_kit.gd(부품) · lobby · stage_select · party_select ·
-                       settings_screen · flow.gd(game_nav → 전투 설정) · boot.gd · dev_launcher.gd
+                       settings_screen · flow.gd(game_nav → 전투 설정, 이어하기 설정) · boot.gd · dev_launcher.gd
+                       4b-1: shop.gd(상점) · party_gear_tabs.gd(편성 화면의 장비·소모품·강화 탭) · item_view.gd(아이템 그림·옵션 줄)
   scripts/logic/*_rules.gd  4a 규칙 (화면 코드 없이): lobby_rules(첫 실행·저장값 점검·자동 부활·지휘관) · party_rules(파티 저장·편성·출격 판단) ·
                        progress_rules(해금·별·요일 던전) · settings_rules(설정 키, 전투 설정 창과 공용) · store_ctx.gd(진짜 Store 를 규칙 저장소 모양으로)
+                       4b-1: equip_rules(장비·강화·수리·분해·아이템 탭·Gear 표시) · shop_rules(상점 생성·갱신·사기·뽑기) · resume_rules(전투 이어하기 저장 gd_battle)
   data/                변환된 JSON (git 에 올림)
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
@@ -51,7 +53,10 @@ godot/
   tests/perf_battle_scene.gd   창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340·HUD·연출·회전)
   tests/check_outer_4a.gd      4a: 규칙을 웹 정답(tests/fixtures/outer_4a_web.json ← node tools/outer-4a-expect.js)과 비교 · 편성 저장 · 설정 키 ·
                                진짜 장면 흐름 · 6개 언어 넘침·두부 · 창 크기
-  tests/play_4a.gd · shots_4a.gd  4a 실제 창 한 판(진짜 입력) · 화면 사진 (tests/screens/4a_*.png)
+  tests/play_4a.gd · shots_4a.gd  4a 실제 창 한 판(진짜 입력, '대상 고르기' 멈춤을 세어 PLAY_RESULT) · 화면 사진 (tests/screens/4a_*.png)
+  tests/check_outer_4b1.gd     4b-1: 상점·장비·강화·아이템 규칙을 웹 정답(tests/fixtures/outer_4b1_web.json ← node tools/outer-4b1-expect.js, 같은 씨앗·시각)과 비교 ·
+                               이어하기(끊고 이어도 같은 결과) · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 6개 언어 넘침·두부 · 웹 왕복(--roundtrip)
+  tests/play_4b1.gd            4b-1 실제 창: 로비 → 상점 → 편성(장비·강화) → 전투 → 나가기 → 전투 재개 → 끝 (tests/screens/4b1_*.png, -- --size 1920x1080)
   tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
@@ -218,7 +223,7 @@ Store.get_json("game_roster", {})
   - 인벤토리: 사전이 아닌 항목·쓸 수 없는 장비(부위·등급·능력치가 잘못됨)는 뺌. 설정·출격 정보·영혼석·본 장면은 형이 틀린 부분만 지움
   - 그 결과 지휘관은 어떤 세이브에서도 파티에 들어가지 않습니다.
 - **연타 막기**: 요일 던전 입장·출격·다음 스테이지·결과 단추·지휘관 확정·초기화·창 단추는 같은 프레임에 여러 번 눌러도 한 번만. Router 도 장면을 바꾸는 중에는 다른 이동을 받지 않음.
-- **전투 재개 단추**: 4b 의 이어하기 화면까지 로비에서 숨김 (디렉터 결정). 웹이 만든 `game_battle` 은 Godot 전투가 끝날 때 지워짐 — 웹도 새 전투가 덮어쓰므로 같은 동작.
+- **전투 재개 단추**: (4b-1) 저장 전투가 있으면 로비 맨 앞에 — 아래 '4b-1' 의 이어하기.
 - **게임 속도**: 웹 설정 화면의 늘이기 배율 `speed` 대신 전투 설정 창과 같은 1x·2x·4x (`playSpeed`). `playSpeed` 가 없는 웹 세이브는 처음 읽을 때
   speed ≤ 0.5 → 2x, 그 밖 → 1x 로 정해 저장 (디렉터 결정). 웹 `speed` 값은 그대로 둠.
 - **언어**: 웹의 드롭다운 대신 전투 설정 창과 같은 6개 단추, 바로 바뀜 (웹은 새로고침). 고를 때만 저장.
@@ -231,5 +236,39 @@ Store.get_json("game_roster", {})
 - **아이콘**: 시트에 그림이 없는 🔒·ℹ️ 는 선 그림.
 
 ### 남은 일
-- 4b: 상점·성소·아카데미·도감·가이드·장비/소모품/강화 탭·라이선스·Credits·전투 이어하기 (지금은 '준비 중' 알림 또는 숨김), 소리(5단계).
+- 4b-2: 성소·아카데미·도감·가이드·라이선스·Credits (지금은 '준비 중' 알림), 소리(5단계).
 - 좁은 창(480×900 등 휴대폰 폭) 모바일 배치는 PC 출시 뒤로 미룸. 지금은 canvas_items·expand 늘이기라 논리 폭이 늘 1280 이상이어서 깨지지 않지만 작게 보임.
+
+## 4b-1 — 편성 화면의 장비·소모품·강화 탭 · 상점 · 전투 이어하기
+
+규칙은 `scripts/logic/equip_rules.gd` · `shop_rules.gd` · `resume_rules.gd`, 화면은 `scripts/ui/party_gear_tabs.gd` · `shop.gd`.
+웹 정답 비교: `node tools/outer-4b1-expect.js` → `tests/fixtures/outer_4b1_web.json` → `tests/check_outer_4b1.gd` (같은 mulberry32 씨앗·같은 시각으로 웹 코드와 저장값·난수 호출 수까지).
+
+- **무작위 (상점·뽑기·강화)**: 웹과 같은 씨앗·같은 순서. `Math.random` 호출 순서를 줄 단위로 맞췄고, 웹의 `.sort(() => Math.random() - 0.5)` 는
+  V8 정렬(TimSort: 64개 미만은 run 세기 + 이진 삽입)의 비교 호출 순서까지 `Js.v8_sort` 로, id 꼬리 `Math.random().toString(36).slice(2, 6)` 은
+  V8 `DoubleToRadixCString` 그대로 `Js.rand36_4` 로 재현 (장비 eid 꼬리도 이것으로 바꿈 — 예전 근사는 앞자리 0 을 빼먹을 수 있었음).
+- **바깥 화면의 시계**: 상점 갱신 시각(ts)·물약 id 는 진짜 `Date.now()` 가 필요해 `ctx.clock` 을 둠 (screen_base 가 실제 시각, 전투·시험은 가상 시계).
+- **웹 버그 (웹은 고치지 않음, Godot 은 바르게)**:
+  - 상점 1시간 갱신(`refreshRotatingItems`)이 `_shopData` 를 넣기 전에 `saveShop()` → `game_shop` 에 `"null"` 이 저장됨 (다음에 열면 새 상점 — 갱신된 진열이 저장되지 않음).
+    Godot 은 갱신한 상점을 저장. 시험이 웹의 이 버그를 확인하고, 웹이 메모리에 든 상점과 같은지 비교.
+  - `ts` 가 숫자가 아닌 상점이면 웹 타이머가 'NaN:aN:aN' — Godot 은 다듬기에서 ts 를 0(→ 갱신)으로, 타이머는 숨김.
+  - 웹 소모품 물약은 사도 단추 상태(골드 부족 흐림)를 다시 그리지 않음 — Godot 은 사면 목록을 다시 그림.
+  - 스킬북 카드 설명이 웹은 한국어 고정(`LEARNABLE_SKILLS.desc`) — Godot 은 번역 키 `skills_desc.*` 가 있으면 그것.
+  - 웹 상점 룬 뽑기 카드의 룬 수가 세로로 흩어져 보임 — Godot 은 그림 + 수를 줄 맞춤 (같은 정보).
+- **아이템(소모품) 탭**: 웹과 같이 경험치 물약(exp_s·m·l)과 공성 아이템만 보임 (전투 물약·룬·스킬북·전직서는 웹 탭에도 없음).
+- **비교 표시**: 웹과 같은 것 — 장비 탭 카드 장비 칸의 ↑(같은 부위에 더 높은 등급의 안 낀 장비), 장비 창 목록의 '장착 중(이 클랜원 / 다른 클랜원)'.
+- **연타 막기**: 자원이 오가는 단추는 화면마다 한 프레임에 한 번 (`screen_base.act_once`). 창의 바깥(어두운 곳) 누르기는 연 뒤 0.3초 동안 무시 —
+  창을 연 단추를 두 번 누르면 두 번째가 바로 창을 닫던 것.
+- **이상한 세이브**: `save_sanitize.gd` 가 `game_shop`(형이 틀린 물건만 뺌)·`game_mats`·`game_gacha_pity`·`ps_active_tab`·인벤토리 장비 옵션 형까지 다듬음. 정상 세이브는 그대로.
+- **전투 이어하기**:
+  - Godot 은 입력을 기다릴 때마다(그리고 설정 창 '나가기'에서) 엔진 상태를 **Godot 전용 키 `gd_battle`** 에 저장하고, 그때까지 바뀐 저장값(상자 골드·쓴 물약 …)을 Store 에 씀 (웹은 늘 바로 씀).
+    웹 키 `game_battle` 을 쓰지 않는 이유: 웹 로비가 그 키를 보고 웹 형식으로 이어하려다 깨지므로. 웹은 `gd_battle` 을 무시 (왕복 안전 — 시험이 웹 코드로 확인).
+  - 저장에 상태 글의 md5 를 넣어, 고치거나 잘린 저장은 '깨진 저장'으로 보고 이어하지 않음 (엔진에 이상한 상태를 넣지 않게).
+  - 이어할 때 저장소는 **지금 Store 값**(나가 있는 동안 상점에서 쓴 골드·산 물건 반영 — 웹은 저장소가 하나라 늘 그 값),
+    전투 물약·공성 아이템의 인벤토리 번호는 물건 id(pid·sid)로 다시 찾음. 골드·클리어 기록도 웹 전투 페이지처럼 들어올 때 다시 읽음. 출전 전 대사는 다시 보이지 않음.
+  - 새 전투를 시작하면 예전 저장 전투는 지워짐 (웹도 전투 저장은 하나), 전투가 끝나면 지움.
+  - **웹이 만든 `game_battle`**: 2026-02 이후 웹은 전투 중 저장을 하지 않아(`saveBattle` 을 부르는 곳이 없음) 예전 세이브에만 남음.
+    형식이 웹 GameStore 사본(ter·units·eQ …)이라 난수 상태·행동 대기열·엔진 내부 상태가 없고, 유닛 필드도 예전 구조여서 Godot 엔진으로 옮기면
+    '같은 전투'를 보장할 수 없음 → 로비 '전투 재개'에서 '웹판에서 시작된 전투라 이어할 수 없음' 안내 + 포기(game_battle 지움)만.
+- **전투 설정 창 '나가기'**: 실제 세이브 전투에만 (웹에는 없음 — 웹은 창을 닫으면 전투가 사라짐). 연출 중이면 입력을 기다릴 때 나감.
+- **로딩 화면**: 흐려지는 0.4초 동안 누르기를 막지 않도록 고침 (그 사이 첫 행동 메뉴가 뜨면 칸 누르기를 먹어 '대상 고르기'에서 멈춘 것처럼 보였음 — play_4a 멈춤 원인).

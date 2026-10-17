@@ -14,6 +14,8 @@ var store: SaveStore
 var now_ms: float = 0.0
 const DATE_BASE := 1791936000000.0   # 2026-10-14T00:00:00Z (battle-sim 과 같은 기준)
 var eid_counter: int = 0
+## (4b-1) 실제 시계 — 바깥 화면(상점 갱신 시각·물약 id)은 진짜 Date.now() 가 필요해 screen_base 가 넣음. 비어 있으면 가상 시계 (전투·시험)
+var clock: Callable = Callable()
 
 
 ## DataDB(오토로드 또는 같은 스크립트로 만든 노드)에서 모든 전역을 모음
@@ -36,4 +38,11 @@ func rand(tag: String = "") -> float:
 
 
 func date_now() -> float:
+	if clock.is_valid():
+		return float(clock.call())
 	return DATE_BASE + now_ms
+
+
+## 실제 시각 (ms, 정수) — 웹 Date.now()
+static func real_now() -> float:
+	return floorf(Time.get_unix_time_from_system() * 1000.0)

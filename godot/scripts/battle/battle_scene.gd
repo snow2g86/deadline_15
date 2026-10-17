@@ -30,6 +30,9 @@ const Icons := preload("res://scripts/battle/icons.gd")
 const UnitInfo := preload("res://scripts/battle/unit_info.gd")
 const StoryBattle := preload("res://scripts/battle/story_battle.gd")
 const Kit := preload("res://scripts/battle/ui_kit.gd")
+const ResumeRules := preload("res://scripts/logic/resume_rules.gd")
+const StoreCtx := preload("res://scripts/logic/store_ctx.gd")
+const SaveStore := preload("res://scripts/logic/save_store.gd")
 
 const BOOT_SCENE := "res://scenes/boot.tscn"
 const GOLDEN := "res://tests/golden/"
@@ -47,7 +50,8 @@ const LOADING_MIN := 0.7
 
 ## 런처(boot.gd)가 넣고 장면이 _ready 에서 꺼내 씀
 ##  { save, stage, practice, inject, maxRounds, seed, source("store"|"debug"|"test"), record, speed(0 = 연출 없이 즉시, 없으면 설정값), autoplay(황금 이름),
-##    story("on"|"off"|"auto" — auto 는 시험: 대사를 저절로 넘김), loading(bool) }
+##    story("on"|"off"|"auto" — auto 는 시험: 대사를 저절로 넘김), loading(bool),
+##    resume(4b-1: 엔진 save_state 사전 — 있으면 새로 시작하지 않고 이어하기. save 는 지금 Store 값) }
 static var pending: Dictionary = {}
 
 var cfg: Dictionary = {}
@@ -90,6 +94,12 @@ var reduce_motion := false
 ## 항복을 연출이 끝난 뒤로 미룸 (적 차례 연출 중 항복하면 아직 안 보인 결과까지 반영되지 않게)
 var _surrender_pending := false
 var _leaving := false
+## (4b-1) 저장하고 로비로 — 연출 중이면 입력을 기다릴 때로 미룸 (항복과 같은 방식)
+var _leave_pending := false
+## 이어하기로 시작한 전투인가 · 자동 저장 횟수 (시험·확인용)
+var resumed := false
+var autosaves := 0
+var _rc: Object = null   # ResumeRules 용 ctx (진짜 Store)
 ## 전투 시작 때 넘긴 세이브 (끝나고 Store 에 바뀐 키만 되돌려 씀) · 인벤토리 eid (장비 보상 짝짓기 기준)
 var _save_in: Dictionary = {}
 var _inv_eids0: Dictionary = {}
@@ -174,8 +184,19 @@ func _ready() -> void:
 	eng.record_enabled = bool(cfg.get("record", false))
 	eng.bus_event.connect(_on_bus)
 	eng.fx_event.connect(_on_fx)
-	eng.start({"save": cfg.get("save", {}), "stage": cfg["stage"], "practice": bool(cfg.get("practice", false)),
-		"inject": cfg.get("inject", []), "maxRounds": int(cfg.get("maxRounds", 0))})
+	if store != null:
+		_rc = Ctx.new(D, 1, StoreCtx.new(store))
+	resumed = cfg.get("resume") is Dictionary
+	if resumed:
+		# (4b-1) 이어하기: 저장한 엔진 상태 그대로 + 저장소는 지금 Store 값 (나가 있는 동안 바뀐 골드·인벤토리 반영 — 웹은 저장소가 하나라 늘 그 값)
+		eng.load_state(cfg["resume"])
+		_resume_sync_store(cfg.get("save", {}))
+	else:
+		eng.start({"save": cfg.get("save", {}), "stage": cfg["stage"], "practice": bool(cfg.get("practice", false)),
+			"inject": cfg.get("inject", []), "maxRounds": int(cfg.get("maxRounds", 0))})
+		# 새 전투가 예전 저장 전투를 덮어씀 (웹도 전투 저장은 하나)
+		if _is_store() and _rc != null:
+			ResumeRules.clear_gd(_rc)
 	_listening = true
 	_db = db
 	_save_in = (cfg.get("save", {}) as Dictionary).duplicate(true)
@@ -192,7 +213,8 @@ func _ready() -> void:
 					_auto_cmds.append(e)
 	if int(cfg.get("cam_dir", 0)) != 0:
 		rotate_cam(int(cfg["cam_dir"]))
-	eng.begin()
+	if not resumed:
+		eng.begin()
 	_eng_status = eng.run()
 	if i18n != null and i18n.has_signal("language_changed"):
 		i18n.connect("language_changed", _on_language)
@@ -214,6 +236,8 @@ static func _os_reduce_motion() -> bool:
 static func store_save(store_node: Node) -> Dictionary:
 	var save: Dictionary = {}
 	for k: String in store_node.call("keys"):
+		if k == ResumeRules.KEY:
+			continue   # 저장 전투 자체는 전투 저장소에 넣지 않음 (넣으면 저장할 때마다 겹겹이 커짐)
 		var v: Variant = store_node.call("get_json", k)
 		if v != null:
 			save[k] = v
@@ -339,6 +363,8 @@ func _build_world() -> void:
 		cam.position = p
 		_clamp_cam())
 	ui.settings.surrender_confirmed.connect(surrender)
+	ui.settings.leave_confirmed.connect(leave_battle)
+	ui.settings.allow_leave = _is_store() and _svc("Router") != null
 	ui.settings.speed_chosen.connect(set_speed_index)
 	ui.settings.reduce_motion_changed.connect(set_reduce_motion)
 	ui.result_view.button_pressed.connect(_on_result_button)
@@ -475,8 +501,9 @@ func _after_loading() -> void:
 		var title: Array = info.stage_title(st)
 		var sub := story.stage_label(int(st["id"])).split(" ")[0] if not Js.truthy(st.get("daily")) else str(title[0])
 		ui.show_stage_banner(sub, str(title[1]) if str(title[1]) != "" else str(title[0]))
-	# 출전 전 대사 (프롤로그·전투 전) → 'start' 는 첫 turn_start 재생 때
-	_story_play(story.intro())
+	# 출전 전 대사 (프롤로그·전투 전) → 'start' 는 첫 turn_start 재생 때. 이어하기는 이미 시작한 전투라 건너뜀
+	if not resumed:
+		_story_play(story.intro())
 
 
 func _setup_story(db: Node) -> void:
@@ -1376,6 +1403,11 @@ func _on_drained() -> void:
 		_surrender_pending = false
 		_do_surrender()
 		return
+	if _leave_pending and _eng_status == "input" and eng.awaiting_unit() != null:
+		_leave_pending = false
+		_enter_menu()
+		leave_battle()
+		return
 	_surrender_pending = false
 	if _eng_status == "input" and eng.awaiting_unit() != null:
 		_enter_menu()
@@ -1422,6 +1454,7 @@ func _enter_menu() -> void:
 	mode = "menu"
 	_show_main_menu(u)
 	ui.show_hint(fail_hint)   # 방금 명령이 진짜 실패했으면 메뉴로 돌아와도 안내를 남김 (다음 조작 때 지움)
+	_autosave()
 	input_ready.emit(int(u["id"]))
 
 
@@ -1851,6 +1884,88 @@ func _act_state(u: Dictionary) -> Array:
 	return [int(u["x"]), int(u["y"]), Js.truthy(u.get("ha")), Js.truthy(u.get("hm")), float(u.get("res", 0.0)), int(eng.S["actCount"])]
 
 
+# ═══════════ 이어하기 (4b-1) ═══════════
+
+func _is_store() -> bool:
+	return str(cfg.get("source", "")) == "store" and store != null
+
+
+## 입력을 기다릴 때마다 저장 (실제 세이브 전투만): 지금까지 바뀐 저장값을 Store 에 쓰고(웹은 늘 바로 씀) → 엔진 상태를 gd_battle 에
+##  창을 닫거나 앱이 꺼져도 로비의 '전투 재개'로 이 차례부터 이어 함
+func _autosave() -> void:
+	if not _is_store() or _over or _rc == null or not eng.can_save():
+		return
+	_write_back()
+	ResumeRules.save_gd(_rc, cfg, eng.save_text())
+	autosaves += 1
+
+
+## 저장하고 로비로 (설정 창 '나가기') — 연출 중이면 입력을 기다릴 때 나감
+func leave_battle() -> void:
+	if _over or _leaving:
+		return
+	if not _is_store() or _svc("Router") == null:
+		_leaving = true
+		_go_back()
+		return
+	if mode == "busy" or _hold > 0 or _eng_status != "input" or eng.awaiting_unit() == null:
+		_leave_pending = true
+		ui.show_hint(_t("gd.settings.leave_pending"))
+		return
+	_autosave()
+	_leaving = true
+	_svc("Router").call("go", "lobby")
+
+
+## 이어하기: 엔진 저장소를 지금 Store 값으로 바꾸고, 전투 물약·공성 아이템의 인벤토리 번호를 물건(pid·sid)으로 다시 찾음
+##  (나가 있는 동안 상점에서 사거나 판 물건 때문에 번호가 밀려도 같은 물건을 쓰게. 없어진 물건은 전투 목록에서 뺌)
+func _resume_sync_store(save: Dictionary) -> void:
+	var ss := SaveStore.new()
+	ss.load_from(save)
+	eng.c.store = ss
+	# 웹 전투 페이지도 들어올 때마다(이어하기 포함) GameStore.gold·cleared 를 저장값에서 다시 읽음 (boot.js DOMContentLoaded loadGoldData)
+	var gdat := Profile.load_gold_data(eng.c)
+	eng.S["gold"] = gdat["gold"]
+	eng.S["cleared"] = gdat["cleared"]
+	var inv: Variant = ss.get_json(Profile.INVENTORY_KEY)
+	var inv_a: Array = inv if inv is Array else []
+	var used: Dictionary = {}
+	for pair: Array in [["_battlePotions", "_battlePotionIndices", "pid", "potionId"], ["_siegeItems", "_siegeInvIndices", "sid", "siegeId"]]:
+		var items: Array = eng.S.get(pair[0], [])
+		var idxs: Array = eng.S.get(pair[1], [])
+		var keep_i: Array = []
+		var keep_x: Array = []
+		for i in items.size():
+			var it: Variant = items[i]
+			if not (it is Dictionary) or i >= idxs.size():
+				continue
+			var at := _match_inv(inv_a, it, int(idxs[i]), str(pair[2]), str(pair[3]), used)
+			if at < 0:
+				continue
+			used[at] = true
+			keep_x.append(it)
+			keep_i.append(at)
+		eng.S[pair[0]] = keep_x
+		eng.S[pair[1]] = keep_i
+
+
+static func _same_item(a: Variant, b: Dictionary, id_key: String, kind_key: String) -> bool:
+	if not (a is Dictionary) or not Js.same(a.get("type"), b.get("type")):
+		return false
+	if b.get(id_key) != null:
+		return Js.same(a.get(id_key), b.get(id_key))
+	return Js.same(a.get(kind_key), b.get(kind_key))
+
+
+static func _match_inv(inv: Array, it: Dictionary, old: int, id_key: String, kind_key: String, used: Dictionary) -> int:
+	if old >= 0 and old < inv.size() and not used.has(old) and _same_item(inv[old], it, id_key, kind_key):
+		return old
+	for j in inv.size():
+		if not used.has(j) and _same_item(inv[j], it, id_key, kind_key):
+			return j
+	return -1
+
+
 # ═══════════ 항복 · 끝 ═══════════
 
 ## 항복 (웹 Renderer.surrender: FSM → BATTLE_END + battle_end{win:false} — 엔진의 공개 함수 transition·emit 을 웹과 같은 순서로 부름)
@@ -1894,6 +2009,8 @@ func _finish() -> void:
 	# 실제 세이브로 시작한 전투면 결과(골드·경험치·보상)를 Store 에 되돌려 씀 (본 스토리 기록은 이번 전투에서 늘었을 수 있어 합쳐서)
 	if str(cfg.get("source", "")) == "store" and store != null:
 		_write_back()
+		if _rc != null:
+			ResumeRules.clear_gd(_rc)   # 끝난 전투는 이어할 것이 없음
 	battle_over.emit(result)
 	if result.get("result") == "win" and story.enabled:
 		_story_play(story.outro(), _show_result)
@@ -1911,9 +2028,11 @@ func _write_back() -> void:
 		var v: Variant = eng.c.store.get_json(k)
 		if not _save_in.has(k) or JsonExact.stringify(_save_in[k]) != JsonExact.stringify(v):
 			store.call("set_json", k, v)
+			_save_in[k] = Js.deep(v)   # (4b-1) 전투 중 자동 저장에서도 부름 → 다음엔 그 뒤에 바뀐 것만
 	for k2: String in _save_in.keys():
 		if not now.has(k2) and k2 != StoryBattle.SEEN_KEY:
 			store.call("remove", k2)
+			_save_in.erase(k2)
 
 
 func _show_result() -> void:

@@ -80,13 +80,27 @@
    "reduce_motion": "减少动态效果",
    "reduce_motion_tip": "关闭画面震动、闪光、跳跃和攻击动作",
    "surrender_confirm": "投降后本场战斗将以失败告终。确定要投降吗？",
-   "surrender_pending": "演出结束后投降"
+   "surrender_pending": "演出结束后投降",
+   "leave": "离开",
+   "leave_tip": "保存战斗并返回大厅 — 在大厅点「继续战斗」接着打",
+   "leave_confirm": "将保存战斗并返回大厅。\n在大厅点「继续战斗」可从本回合继续。",
+   "leave_pending": "动画结束后保存并离开"
   },
   "result": {
    "retry": "重新挑战"
   },
   "outer": {
    "coming_soon": "敬请期待——将在后续更新中开放"
+  },
+  "resume": {
+   "web_notice": "这场战斗是在网页版开始的，无法在这里继续。\n{stage}\n放弃将删除保存的战斗（成员和金币保留）。",
+   "broken": "无法读取保存的战斗，不能继续。\n放弃将删除保存的战斗（成员和金币保留）。",
+   "abandon": "放弃",
+   "abandoned": "已放弃保存的战斗",
+   "stage_n": "关卡 {n}"
+  },
+  "equip": {
+   "upgrade": "有更好的装备"
   }
  }
 }

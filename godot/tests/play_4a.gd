@@ -11,6 +11,9 @@ const SAVE := "user://test_play_4a_save.json"
 var store: Node
 var log_lines: Array = []
 var _shot_n := 0
+## '대상 고르기'에서 칸 누르기가 먹히지 않아 메뉴로 돌아오지 않은 횟수 (4b-1: 원인은 로딩 화면이 흐려지는 0.4초 동안 누르기를 막던 것 — 고침)
+var stuck := 0
+var timed_out := false
 
 
 func _initialize() -> void:
@@ -200,10 +203,13 @@ func _main() -> void:
 	_say("로비로 돌아옴: %s · 골드 %s · 클리어 %s" % [str(_scene_is("ui/lobby.gd")), current_scene.gold_lbl.text, str(store.call("get_json", "game_save").get("cleared", []))])
 	await _shot("lobby_after")
 	print("PLAY_LOG: " + " | ".join(log_lines))
+	var clear_n: int = (store.call("get_json", "game_save", {}) as Dictionary).get("cleared", []).size()
+	var ok := stuck == 0 and _scene_is("ui/lobby.gd") and not timed_out
+	print("PLAY_RESULT: %s (멈춤 %d · 클리어 %d)" % ["OK" if ok else "FAIL", stuck, clear_n])
 	store.call("clear")
 	store.call("flush")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
-	quit(0)
+	quit(0 if ok else 1)
 
 
 # ═══════════ 전투: 진짜 입력으로 한 판 ═══════════
@@ -237,6 +243,15 @@ func _enemies(bt: Node) -> Array:
 	return out
 
 
+## 칸을 누른 뒤 메뉴(또는 끝)로 돌아올 때까지 — '대상 고르기'에 남으면 멈춤으로 세고 Esc 로 풀어 계속 (예전에는 여기서 240초 동안 멈춤)
+func _after_pick(bt: Node) -> void:
+	var ok: bool = await _until(func() -> bool: return bt.is_over() or (bt.is_awaiting() and bt.mode == "menu"), 6.0)
+	if not ok and bt.mode == "target":
+		stuck += 1
+		_say("멈춤: 대상 고르기에서 누르기를 받지 않음")
+		await _key(KEY_ESCAPE)
+
+
 func _play_battle(bt: Node) -> void:
 	var t0 := Time.get_ticks_msec()
 	var acts := 0
@@ -261,7 +276,7 @@ func _play_battle(bt: Node) -> void:
 			await _key(KEY_A)
 			var p := await _ensure_visible(bt, int(c["x"]), int(c["y"]))
 			await _click(p)
-			await _until(func() -> bool: return bt.is_over() or (bt.is_awaiting() and bt.mode == "menu"), 6.0)
+			await _after_pick(bt)
 			continue
 		# 2) 이동 전이면 M + 가장 가까운 적 쪽 칸 누르기
 		var cells: Array = bt.eng.q.move_cells(u)
@@ -281,7 +296,7 @@ func _play_battle(bt: Node) -> void:
 				await _key(KEY_M)
 				var p2 := await _ensure_visible(bt, int(best["x"]), int(best["y"]))
 				await _click(p2)
-				await _until(func() -> bool: return bt.is_over() or (bt.is_awaiting() and bt.mode == "menu"), 6.0)
+				await _after_pick(bt)
 				if bt.is_awaiting() and bt.eng.awaiting_unit() != null and bt.eng.awaiting_unit()["id"] == u["id"] and bt.eng.q.can_undo():
 					continue   # 이동했으면 같은 유닛 다시 (공격할 수 있나)
 		# 3) 대기 (Space) + 지금 방향 (Enter)
@@ -289,6 +304,7 @@ func _play_battle(bt: Node) -> void:
 		await _key(KEY_ENTER)
 		await _until(func() -> bool: return bt.is_over() or (bt.is_awaiting() and bt.mode == "menu"), 8.0)
 	if not bt.is_over():
+		timed_out = true
 		# 시간 안에 끝나지 않으면 톱니 → 항복 → 확인 (마우스)
 		await _click_ctl(bt.ui.settings.btn)
 		await _click_ctl(bt.ui.settings.panel.find_child("Surrender", true, false))

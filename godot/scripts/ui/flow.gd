@@ -27,3 +27,13 @@ static func follow(router: Node, store_node: Node, c: Object, res: Dictionary) -
 		start_battle(router, store_node, c, res["nav"])
 	else:
 		router.call("go", "party_select")
+
+
+## (4b-1) 이어하기 설정: 저장 전투(gd_battle 의 {cfg, state}) + 지금 Store 값
+static func resume_cfg(store_node: Node, gd: Dictionary) -> Dictionary:
+	var g: Dictionary = gd["cfg"]
+	var cfg := {"save": BattleScene.store_save(store_node), "stage": g["stage"], "practice": bool(g.get("practice", false)),
+		"seed": int(g.get("seed", 1)), "source": "store", "resume": gd["state"]}
+	if g.get("party") is Array:
+		cfg["party"] = (g["party"] as Array).duplicate()
+	return cfg

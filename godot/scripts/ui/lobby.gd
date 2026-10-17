@@ -2,12 +2,14 @@ extends "res://scripts/ui/screen_base.gd"
 ## 로비 — 웹 index.html + js/index.js + js/common/commander.js + css/lobby.css
 ##  윗줄(제목 DEADLINE 15 · 톱니), 왼쪽 위 지휘관 단추(초상화 + 이름 → 지휘관 설정 다시 열기), 골드 배지,
 ##  클랜 아지트(횃불 6 · 원탁 · 레벨 높은 클랜원 최대 10명이 원탁 둘레에), 아래 단추(도감 · 출격 · 가이드), 아래 탭.
-##  (웹의 '전투 재개' 단추는 4b 이어하기 화면까지 숨김)
+##  (4b-1) 전투 재개: Godot 저장 전투(gd_battle)면 이어하기, 웹이 만든 game_battle 이면 '이어할 수 없음' 안내 + 포기 (scripts/logic/resume_rules.gd)
 ##  들어올 때 웹과 같은 순서: 첫 실행이면 클랜원 만들기 → 저장값 점검·복구(알림) → 지휘관 첫 설정 → 성별 보정 → 자동 부활(알림)
 ##  규칙은 scripts/logic/lobby_rules.gd. 도감·가이드·성소·아카데미·상점은 4b — '준비 중' 알림.
 
 const LobbyRules := preload("res://scripts/logic/lobby_rules.gd")
 const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
+const ResumeRules := preload("res://scripts/logic/resume_rules.gd")
+const Flow := preload("res://scripts/ui/flow.gd")
 
 var cmd_btn: Button
 var cmd_name: Label
@@ -17,6 +19,9 @@ var hideout: Hideout
 var popups: HBoxContainer
 var _popup_labels: Dictionary = {}   # name → [Label, key]
 var resume_btn: Button
+## "gd" · "web" · "broken" · "" (ResumeRules.status)
+var resume_status := ""
+var _resuming := false
 var cta: Button
 var setup_dialog: Control
 ## 시험·확인용
@@ -83,7 +88,11 @@ func _build() -> void:
 	popups.offset_bottom = -46
 	popups.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(popups)
-	# 전투 재개(웹: game_battle 이 있으면 단추)는 4b 의 이어하기 화면까지 숨김 (디렉터 결정). 규칙은 LobbyRules.saved_battle_stage
+	# 전투 재개 (웹: 저장된 전투가 있으면 맨 앞에 단추)
+	resume_status = ResumeRules.status(c)
+	if resume_status != "":
+		resume_btn = _popup_btn("Resume", "⚔️", "messages.resume_battle")
+		resume_btn.pressed.connect(press_resume)
 	var comp := _popup_btn("Compendium", "📖", "nav.compendium")
 	comp.pressed.connect(coming_soon)
 	cta = _cta_btn()
@@ -101,6 +110,39 @@ func _build() -> void:
 	if not revived.is_empty():
 		get_tree().create_timer(1.2).timeout.connect(_alert_revived)
 	cta.grab_focus.call_deferred()
+
+
+## 전투 재개: Godot 저장이면 이어하기, 아니면 안내 + 포기 (같은 프레임 연타 → 한 번만)
+func press_resume() -> void:
+	if _resuming or not act_once():
+		return
+	resume_status = ResumeRules.status(c)
+	if resume_status == "gd":
+		var gd: Dictionary = ResumeRules.load_gd(c)
+		_resuming = true
+		router.call("launch_battle", Flow.resume_cfg(store, gd))
+		return
+	var msg := t("gd.resume.broken")
+	if resume_status == "web":
+		var st: Variant = ResumeRules.web_stage(c)
+		var nm := ""
+		if st is Dictionary:
+			nm = str(st.get("name", "")) if st.get("name") != null else ""
+			if st.get("id") != null and (typeof(st["id"]) == TYPE_INT or typeof(st["id"]) == TYPE_FLOAT):
+				nm = "%s %s" % [t("gd.resume.stage_n", {"n": int(st["id"])}), nm]
+		msg = t("gd.resume.web_notice", {"stage": nm.strip_edges()})
+	open_modal(_msg_label(msg), {"name": "ResumeNotice", "title": t("messages.resume_battle"),
+		"buttons": [{"text": t("gd.resume.abandon"), "cb": abandon_resume, "name": "Abandon"}, {"text": t("common.close"), "secondary": true, "name": "Close"}]})
+
+
+## 이어할 수 없는 전투 포기 → 단추 없앰
+func abandon_resume() -> void:
+	ResumeRules.abandon(c)
+	resume_status = ""
+	if resume_btn != null and is_instance_valid(resume_btn):
+		resume_btn.queue_free()
+		resume_btn = null
+	toast(t("gd.resume.abandoned"))
 
 
 ## (타이머) 저장값 점검 결과 알림 — 화면이 이미 바뀌었으면 연결이 저절로 끊김 (메서드 연결)

@@ -80,13 +80,27 @@
    "reduce_motion": "Reducir movimiento",
    "reduce_motion_tip": "Desactiva sacudidas, destellos, saltos y animaciones de ataque",
    "surrender_confirm": "Rendirse termina esta batalla como derrota. ¿Rendirse?",
-   "surrender_pending": "Te rendirás cuando termine la acción actual"
+   "surrender_pending": "Te rendirás cuando termine la acción actual",
+   "leave": "Salir",
+   "leave_tip": "Guarda la batalla y vuelve al vestíbulo — continúa con 'Reanudar batalla'",
+   "leave_confirm": "Se guardará la batalla y volverás al vestíbulo.\nUsa 'Reanudar batalla' para continuar desde este turno.",
+   "leave_pending": "Se guardará y saldrá al terminar la animación"
   },
   "result": {
    "retry": "Reintentar"
   },
   "outer": {
    "coming_soon": "Próximamente: llegará en una próxima actualización"
+  },
+  "resume": {
+   "web_notice": "Esta batalla empezó en la versión web y no se puede reanudar aquí.\n{stage}\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
+   "broken": "No se puede leer la batalla guardada, así que no se puede reanudar.\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
+   "abandon": "Abandonar",
+   "abandoned": "Batalla guardada abandonada",
+   "stage_n": "Fase {n}"
+  },
+  "equip": {
+   "upgrade": "Hay mejor equipo"
   }
  }
 }

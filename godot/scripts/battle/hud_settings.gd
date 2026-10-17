@@ -7,6 +7,8 @@ extends Control
 const Kit := preload("res://scripts/battle/ui_kit.gd")
 
 signal surrender_confirmed
+## (4b-1) 저장하고 로비로 — 실제 세이브 전투에서만 단추가 보임 (allow_leave)
+signal leave_confirmed
 signal speed_chosen(i: int)
 signal reduce_motion_changed(on: bool)
 signal opened_changed(open: bool)
@@ -28,6 +30,8 @@ var confirm: PanelContainer
 var confirm_wrap: CenterContainer   # 확인 창은 화면 가운데 고정 (줄바꿈 글자 높이가 정해지기 전 위치 계산 문제 없음)
 var _box: VBoxContainer
 var s := SettingsRules.defaults()
+var allow_leave := false
+var _confirm_kind := "surrender"
 
 
 func setup(p_store: Node, p_i18n: Node) -> void:
@@ -170,7 +174,7 @@ func relabel() -> void:
 		_build()
 		_place_panel()
 	if confirm_wrap.visible:
-		ask_surrender()
+		ask_confirm(_confirm_kind)
 
 
 func _build() -> void:
@@ -256,6 +260,12 @@ func _build() -> void:
 	sb.add_theme_stylebox_override("normal", Kit.box(Color(1, 1, 1, 0.06), Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.3), 5, 1, 12, 5))
 	sb.pressed.connect(ask_surrender)
 	br.add_child(sb)
+	if allow_leave:
+		var lb := Kit.button(t("gd.settings.leave"), Kit.GOLD, 12)
+		lb.name = "Leave"
+		lb.tooltip_text = t("gd.settings.leave_tip")
+		lb.pressed.connect(func() -> void: ask_confirm("leave"))
+		br.add_child(lb)
 
 
 func _icon(kind: String, sz: float) -> Control:
@@ -328,6 +338,13 @@ func _slider_row(label: String, key: String) -> void:
 
 ## 항복 확인 (웹은 바로 항복 — 실수로 누르지 않게 확인 창을 더함)
 func ask_surrender() -> void:
+	ask_confirm("surrender")
+
+
+## 확인 창: surrender(항복) · leave(저장하고 로비로 — 4b-1)
+func ask_confirm(kind: String) -> void:
+	_confirm_kind = kind
+	var leave := kind == "leave"
 	panel.visible = false
 	backdrop.visible = true
 	for c: Node in confirm.get_children():
@@ -338,11 +355,13 @@ func ask_surrender() -> void:
 	v.custom_minimum_size = Vector2(300, 0)
 	confirm.add_child(v)
 	var hl := Kit.label(16, Color("fca5a5"), 800)
-	hl.text = t("battle.surrender")
+	hl.text = t("gd.settings.leave") if leave else t("battle.surrender")
+	if leave:
+		hl.add_theme_color_override("font_color", Kit.GOLD)
 	hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(hl)
 	var ml := Kit.label(13, Kit.TEXT, 500)
-	ml.text = t("gd.settings.surrender_confirm")
+	ml.text = t("gd.settings.leave_confirm") if leave else t("gd.settings.surrender_confirm")
 	ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(ml)
@@ -354,13 +373,19 @@ func ask_surrender() -> void:
 	no.name = "No"
 	no.pressed.connect(close)
 	br.add_child(no)
-	var yes := Kit.button(t("battle.surrender"), Kit.RED, 13, Vector2(110, 34))
+	var yes := Kit.button(t("gd.settings.leave") if leave else t("battle.surrender"), Kit.GOLD if leave else Kit.RED, 13, Vector2(110, 34))
 	yes.name = "Yes"
-	yes.add_theme_color_override("font_color", Color("fca5a5"))
-	yes.add_theme_stylebox_override("normal", Kit.box(Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.18), Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.6), 5, 1, 12, 5))
+	if not leave:
+		yes.add_theme_color_override("font_color", Color("fca5a5"))
+		yes.add_theme_stylebox_override("normal", Kit.box(Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.18), Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.6), 5, 1, 12, 5))
 	yes.pressed.connect(func() -> void:
+		if not confirm_wrap.visible:
+			return   # 같은 프레임 두 번 누름 → 한 번만
 		close()
-		surrender_confirmed.emit())
+		if leave:
+			leave_confirmed.emit()
+		else:
+			surrender_confirmed.emit())
 	br.add_child(yes)
 	confirm_wrap.visible = true
 	confirm.reset_size()
