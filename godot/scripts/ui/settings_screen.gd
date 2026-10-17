@@ -5,7 +5,7 @@ extends "res://scripts/ui/screen_base.gd"
 ##  게임 속도: 웹 설정 화면은 늘이기 배율 speed(0.5~2.0) 이지만 Godot 전투는 재생 배율 playSpeed 를 쓰므로 전투 설정 창과 같은 1x·2x·4x 단추 (웹 speed 값은 건드리지 않음)
 ##  언어: 전투 설정 창과 같은 6개 단추(그 언어 이름·글꼴), 바로 바뀜 (웹은 고른 뒤 페이지 새로고침)
 ##  초기화: 확인 → Store 전부 지움 → 시작 화면부터 (웹: index.html 로 — 첫 실행처럼 클랜원·지휘관 설정)
-##  라이선스·Credits 화면은 4b — '준비 중'. 뒤로: 열기 전 화면 (웹은 늘 로비 — 보고서 '갈림길')
+##  라이선스·Credits → licenses · credits 화면 (4b-2). 뒤로: 열기 전 화면 (웹은 늘 로비 — 보고서 '갈림길')
 
 const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
 const Fonts := preload("res://scripts/core/fonts.gd")
@@ -141,7 +141,7 @@ func _refresh() -> void:
 	_box.add_child(OKit.divider(0.06))
 	var links := OKit.vbox(2)
 	_box.add_child(links)
-	for lk: Array in [["Licenses", t("settings.licenses")], ["Credits", "Credits"]]:
+	for lk: Array in [["Licenses", t("settings.licenses"), "licenses"], ["Credits", "Credits", "credits"]]:
 		var b3 := OKit.styled_button(StyleBoxEmpty.new(), StyleBoxEmpty.new(), null, 4)
 		b3.name = str(lk[0])
 		b3.text = str(lk[1])
@@ -150,7 +150,8 @@ func _refresh() -> void:
 		b3.add_theme_color_override("font_hover_color", OKit.GOLD)
 		b3.add_theme_color_override("font_focus_color", OKit.GOLD)
 		b3.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		b3.pressed.connect(coming_soon)
+		var dest := str(lk[2])
+		b3.pressed.connect(func() -> void: router.call("go", dest))
 		links.add_child(b3)
 
 

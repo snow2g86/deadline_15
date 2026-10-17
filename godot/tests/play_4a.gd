@@ -6,6 +6,7 @@ extends SceneTree
 ##  저장은 user://test_play_4a_save.json (진짜 세이브는 건드리지 않음)
 
 const OUT := "res://tests/screens/"
+const PlayKit := preload("res://tests/play_kit.gd")
 const SAVE := "user://test_play_4a_save.json"
 
 var store: Node
@@ -43,7 +44,9 @@ func _say(s: String) -> void:
 
 func _shot(name: String) -> void:
 	await _frames(4)
-	await RenderingServer.frame_post_draw
+	if not await PlayKit.post_draw(self, 5.0):
+		_fail_quit("화면 그리기(frame_post_draw)를 5초 안에 받지 못함")
+		return
 	var img := root.get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	_shot_n += 1
@@ -64,19 +67,15 @@ func _move_mouse(p: Vector2) -> void:
 
 func _click(p: Vector2) -> void:
 	await _move_mouse(p)
-	var d := InputEventMouseButton.new()
-	d.button_index = MOUSE_BUTTON_LEFT
-	d.pressed = true
-	d.position = p
-	d.global_position = p
-	Input.parse_input_event(d)
-	await _frames(1)
-	var u := InputEventMouseButton.new()
-	u.button_index = MOUSE_BUTTON_LEFT
-	u.pressed = false
-	u.position = p
-	u.global_position = p
-	Input.parse_input_event(u)
+	# (4b-2) 누르기·떼기를 같은 프레임에 (play_4b1 과 같음 — 사이에 창 초점 잃음 사건이 끼면 누르는 중인 것이 버려짐)
+	for pressed: bool in [true, false]:
+		var d := InputEventMouseButton.new()
+		d.button_index = MOUSE_BUTTON_LEFT
+		d.pressed = pressed
+		d.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
+		d.position = p
+		d.global_position = p
+		Input.parse_input_event(d)
 	await _frames(3)
 
 
@@ -166,8 +165,14 @@ func _main() -> void:
 			idle = Time.get_ticks_msec()
 		await process_frame
 	_say("스토리: %d번 넘기고 %d장면 건너뜀" % [advanced, skipped])
-	await _until(func() -> bool: return _scene_is("battle/battle_scene.gd"), 10.0)
+	if not await _until(func() -> bool: return _scene_is("battle/battle_scene.gd"), 10.0):
+		_fail_quit("10초 안에 전투 장면으로 가지 못함")
+		return
 	var bt: Node = current_scene
+	# 로딩(지형 굽기 포함) 뒤 첫 입력 대기까지 시간 제한
+	if not await _until(func() -> bool: return bt.is_awaiting() or bt.is_over() or bt.is_story_playing() or not bt.ui.loading.visible, 30.0):
+		_fail_quit("전투 로딩(지형 굽기)이 30초 안에 끝나지 않음")
+		return
 	_say("전투 시작 (스테이지 %d, 파티 %s)" % [int(bt.cfg["stage"]["id"]), str(bt.cfg.get("party"))])
 	await _play_battle(bt)
 	# 승리 뒤 대사(스테이지 post)는 Enter 로 넘김
@@ -185,8 +190,13 @@ func _main() -> void:
 	if bt.ui.result_view.buttons.has("next"):
 		var old_id := bt.get_instance_id()
 		await _click_ctl(bt.ui.result_view.buttons["next"])
-		await _until(func() -> bool: return current_scene != null and current_scene.get_instance_id() != old_id and _scene_is("battle/battle_scene.gd"), 10.0)
+		if not await _until(func() -> bool: return current_scene != null and current_scene.get_instance_id() != old_id and _scene_is("battle/battle_scene.gd"), 10.0):
+			_fail_quit("다음 스테이지 전투 장면으로 가지 못함")
+			return
 		bt = current_scene
+		if not await _until(func() -> bool: return bt.is_awaiting() or bt.is_over() or bt.is_story_playing() or not bt.ui.loading.visible, 30.0):
+			_fail_quit("다음 스테이지 로딩 뒤 입력 대기가 오지 않음")
+			return
 		_say("다음 스테이지 → 전투 (스테이지 %d)" % int(bt.cfg["stage"]["id"]))
 		await _play_battle(bt)
 		var t2 := Time.get_ticks_msec()
@@ -218,21 +228,23 @@ func _cell_screen(bt: Node, x: int, y: int) -> Vector2:
 	return bt.get_viewport().get_canvas_transform() * bt.iso.top_center(x, y)
 
 
+## 칸이 논리 화면 가운데 쪽에 오고 HUD 위가 아닐 때까지 화살표 키로 카메라를 옮김 (tests/play_kit.gd) → 누를 곳, 못 누르면 Vector2.INF
 func _ensure_visible(bt: Node, x: int, y: int) -> Vector2:
-	var p := _cell_screen(bt, x, y)
-	var r := Rect2(Vector2(260, 120), Vector2(760, 420))
-	if not r.has_point(p):
-		# 화살표 키로 카메라를 옮김 (진짜 입력)
-		for i in 30:
-			p = _cell_screen(bt, x, y)
-			if r.has_point(p):
-				break
-			var d := p - r.get_center()
-			if absf(d.x) > absf(d.y):
-				await _key(KEY_RIGHT if d.x > 0 else KEY_LEFT)
-			else:
-				await _key(KEY_DOWN if d.y > 0 else KEY_UP)
-	return _cell_screen(bt, x, y)
+	var r: Array = await PlayKit.ensure_visible(self, bt, x, y, _key)
+	return r[0] if r[1] else Vector2.INF
+
+
+## 칸 누르기 — HUD 에 가려 누를 수 없으면 누르지 않고 Esc (고르기 취소)
+var hud_blocked := 0
+
+
+func _click_cell(p: Vector2) -> void:
+	if p == Vector2.INF:
+		hud_blocked += 1
+		print("  HUD 에 가려 칸을 누르지 않음 (Esc)")
+		await _key(KEY_ESCAPE)
+		return
+	await _click(p)
 
 
 func _enemies(bt: Node) -> Array:
@@ -248,7 +260,7 @@ func _after_pick(bt: Node) -> void:
 	var ok: bool = await _until(func() -> bool: return bt.is_over() or (bt.is_awaiting() and bt.mode == "menu"), 6.0)
 	if not ok and bt.mode == "target":
 		stuck += 1
-		_say("멈춤: 대상 고르기에서 누르기를 받지 않음")
+		_say("멈춤: 대상 고르기에서 누르기를 받지 않음 (창 초점 %s)" % str(DisplayServer.window_is_focused()))
 		await _key(KEY_ESCAPE)
 
 
@@ -275,7 +287,7 @@ func _play_battle(bt: Node) -> void:
 			var c: Dictionary = tg[0]
 			await _key(KEY_A)
 			var p := await _ensure_visible(bt, int(c["x"]), int(c["y"]))
-			await _click(p)
+			await _click_cell(p)
 			await _after_pick(bt)
 			continue
 		# 2) 이동 전이면 M + 가장 가까운 적 쪽 칸 누르기
@@ -295,7 +307,7 @@ func _play_battle(bt: Node) -> void:
 			if not best.is_empty():
 				await _key(KEY_M)
 				var p2 := await _ensure_visible(bt, int(best["x"]), int(best["y"]))
-				await _click(p2)
+				await _click_cell(p2)
 				await _after_pick(bt)
 				if bt.is_awaiting() and bt.eng.awaiting_unit() != null and bt.eng.awaiting_unit()["id"] == u["id"] and bt.eng.q.can_undo():
 					continue   # 이동했으면 같은 유닛 다시 (공격할 수 있나)
@@ -310,3 +322,19 @@ func _play_battle(bt: Node) -> void:
 		await _click_ctl(bt.ui.settings.panel.find_child("Surrender", true, false))
 		await _click_ctl(bt.ui.settings.confirm.find_child("Yes", true, false))
 	_say("전투 행동 %d번 (%.0f초)" % [acts, float(Time.get_ticks_msec() - t0) / 1000.0])
+
+
+## (4b-2) 기다림 시간 초과 등: 바로 실패로 끝냄 (저장 지우고 quit(1))
+var _quitting := false
+
+
+func _fail_quit(why: String) -> void:
+	if _quitting:
+		return
+	_quitting = true
+	print("  FAIL " + why)
+	print("PLAY_RESULT: FAIL (%s)" % why)
+	store.call("clear")
+	store.call("flush")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
+	quit(1)

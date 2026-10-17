@@ -740,5 +740,8 @@ func show_gacha_results(results: Array) -> void:
 			v.add_child(_center_label(t("equip.set." + str(it["setId"])), 10, OKit.GOLD, 700, 150))
 		v.add_child(ItemView.lines_box(EquipRules.lines(c, it, null, tw), 150, 9))
 		g.add_child(p)
-	open_modal(g, {"name": "GachaModal", "title": t("shop.gacha_results"), "width": 820.0 if results.size() > 1 else 320.0,
+	# 카드 묶음을 창 가운데에 (open_modal 은 내용을 가로로 채우므로 CenterContainer 로 감쌈)
+	var gc := CenterContainer.new()
+	gc.add_child(g)
+	open_modal(gc, {"name": "GachaModal", "title": t("shop.gacha_results"), "width": 820.0 if results.size() > 1 else 320.0,
 		"buttons": [{"text": t("common.confirm"), "name": "Ok"}]})

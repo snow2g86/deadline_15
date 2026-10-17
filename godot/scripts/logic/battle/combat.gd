@@ -49,7 +49,7 @@ func buff_apply(unit: Dictionary, def: Dictionary) -> Dictionary:
 	var bid: Variant = def.get("id")
 	if not Js.truthy(bid):
 		var r: float = E.c.rand("BuffSystem.apply")
-		bid = str(def["type"]) + "_" + Js.base36(int(r * 1679616.0))
+		bid = str(def["type"]) + "_" + Js.rand36_4(r)   # 웹 Math.random().toString(36).slice(2, 6) — 장비 eid 와 같은 V8 표기 (4b-2)
 	var buff := {
 		"id": bid,
 		"type": def["type"],

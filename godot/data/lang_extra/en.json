@@ -89,18 +89,25 @@
   "result": {
    "retry": "Retry"
   },
-  "outer": {
-   "coming_soon": "Coming soon — available in a later update"
-  },
   "resume": {
    "web_notice": "This battle was started in the web version and can't be resumed here.\n{stage}\nAbandoning deletes the saved battle (clan members and gold stay).",
    "broken": "The saved battle can't be read, so it can't be resumed.\nAbandoning deletes the saved battle (clan members and gold stay).",
    "abandon": "Abandon",
    "abandoned": "Saved battle abandoned",
-   "stage_n": "Stage {n}"
+   "stage_n": "Stage {n}",
+   "old_notice": "This battle was saved by an earlier version of the game and can't be resumed.\n(The game data or save format has changed)\nAbandoning deletes the saved battle (clan members and gold stay).",
+   "abandon_confirm": "Abandon the saved battle?\n{stage}\nIt can't be resumed afterwards. Anything already gained or used in the battle (chest gold, potions, etc.) stays."
   },
   "equip": {
    "upgrade": "Better gear available"
+  },
+  "licenses": {
+   "godot_note": "This game is made with the Godot Engine. The full Godot Engine license follows.",
+   "third_party": "Components included in Godot Engine",
+   "third_party_note": "Third-party components included in the Godot Engine and their licenses.",
+   "show": "Show full text",
+   "hide": "Hide",
+   "v8_note": "The game's sorting (Array.prototype.sort) and base-36 number formatting are ported from V8 engine code."
   }
  }
 }

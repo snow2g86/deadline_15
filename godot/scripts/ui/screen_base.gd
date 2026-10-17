@@ -292,7 +292,7 @@ func _refresh_chrome() -> void:
 		(tb["bar"] as Control).modulate.a = 1.0 if on else 0.0
 
 
-## 아래 탭 (웹 nav.js renderBottomNav: 스테이지 · 파티 · 성소 · 아카데미 · 상점) — 아직 옮기지 않은 화면(성소·아카데미, 4b-2)은 '준비 중'
+## 아래 탭 (웹 nav.js renderBottomNav: 스테이지 · 파티 · 성소 · 아카데미 · 상점)
 func _on_tab(key: String) -> void:
 	match key:
 		"stage":
@@ -301,10 +301,8 @@ func _on_tab(key: String) -> void:
 			# 웹: 편성 화면으로 갈 때 출격 단추 끔
 			c.store.set_str("ps_can_start", "false")
 			router.call("go", "party_select")
-		"shop":
-			router.call("go", "shop")
-		_:
-			coming_soon()
+		"sanctuary", "academy", "shop":
+			router.call("go", key)
 
 
 # ── 뒤로 가기 ──
@@ -541,11 +539,6 @@ func toast(msg: String, kind: String = "") -> void:
 	tw.tween_interval(3.0)
 	tw.tween_property(p, "modulate:a", 0.0, 0.5)
 	tw.tween_callback(p.queue_free)
-
-
-## 아직 옮기지 않은 화면·기능 (4b 에서): '준비 중' 알림
-func coming_soon() -> void:
-	toast(t("gd.outer.coming_soon"))
 
 
 # ── 공용 표시 ──

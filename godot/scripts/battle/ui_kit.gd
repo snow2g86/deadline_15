@@ -284,6 +284,14 @@ class VecIcon extends Control:
 			# ── 바깥 화면(4a) 웹 SVG: 뒤로(polyline 15 18 9 12 15 6) · 자물쇠(🔒 글자 대신) · 정보(ℹ️) · 닫기(✕) · 휴지통(초기화) · 재생(▶)
 			"chev_l":
 				draw_polyline(PackedVector2Array([P.call(15, 18), P.call(9, 12), P.call(15, 6)]), col, w * 1.25, true)
+			# (4b-2) 접고 펴기 (웹 details summary::after '›' — 펴면 아래로)
+			"chev_r":
+				draw_polyline(PackedVector2Array([P.call(9, 6), P.call(15, 12), P.call(9, 18)]), col, w * 1.25, true)
+			"chev_d":
+				draw_polyline(PackedVector2Array([P.call(6, 9), P.call(12, 15), P.call(18, 9)]), col, w * 1.25, true)
+			"search":
+				draw_arc(P.call(10.5, 10.5), 6.5 * k, 0, TAU, 20, col, w, true)
+				draw_line(P.call(15.5, 15.5), P.call(20.5, 20.5), col, w * 1.3, true)
 			"lock":
 				draw_rect(Rect2(P.call(5, 11), Vector2(14, 10) * k), col, true)
 				draw_arc(P.call(12, 11), 4.5 * k, PI, TAU, 12, col, w, true)

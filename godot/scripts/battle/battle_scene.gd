@@ -189,7 +189,16 @@ func _ready() -> void:
 	resumed = cfg.get("resume") is Dictionary
 	if resumed:
 		# (4b-1) 이어하기: 저장한 엔진 상태 그대로 + 저장소는 지금 Store 값 (나가 있는 동안 바뀐 골드·인벤토리 반영 — 웹은 저장소가 하나라 늘 그 값)
-		eng.load_state(cfg["resume"])
+		if not eng.load_state(cfg["resume"]):
+			# (4b-2) 이전 판 저장 — 로비가 먼저 막지만, 혹시 들어와도 새로 시작하지 않고 저장을 지우고 로비로 (안내는 로비가)
+			push_warning("battle_scene: 이전 판 전투 저장이라 이어할 수 없음")
+			if _rc != null:
+				ResumeRules.clear_gd(_rc)
+			eng.dispose()
+			eng = null
+			if _svc("Router") != null:
+				_svc("Router").call_deferred("go", "lobby")
+			return
 		_resume_sync_store(cfg.get("save", {}))
 	else:
 		eng.start({"save": cfg.get("save", {}), "stage": cfg["stage"], "practice": bool(cfg.get("practice", false)),

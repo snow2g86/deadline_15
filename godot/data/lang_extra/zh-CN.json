@@ -89,18 +89,25 @@
   "result": {
    "retry": "重新挑战"
   },
-  "outer": {
-   "coming_soon": "敬请期待——将在后续更新中开放"
-  },
   "resume": {
    "web_notice": "这场战斗是在网页版开始的，无法在这里继续。\n{stage}\n放弃将删除保存的战斗（成员和金币保留）。",
    "broken": "无法读取保存的战斗，不能继续。\n放弃将删除保存的战斗（成员和金币保留）。",
    "abandon": "放弃",
    "abandoned": "已放弃保存的战斗",
-   "stage_n": "关卡 {n}"
+   "stage_n": "关卡 {n}",
+   "old_notice": "这场战斗是由旧版本游戏保存的，无法继续。\n（游戏数据或存档格式已改变）\n放弃将删除保存的战斗（成员和金币保留）。",
+   "abandon_confirm": "要放弃保存的战斗吗？\n{stage}\n放弃后将无法继续。战斗中已获得或使用的东西（宝箱金币、药水等）会保留。"
   },
   "equip": {
    "upgrade": "有更好的装备"
+  },
+  "licenses": {
+   "godot_note": "本游戏使用 Godot 引擎制作。以下是 Godot Engine 许可证全文。",
+   "third_party": "Godot 引擎包含的组件",
+   "third_party_note": "Godot 引擎包含的第三方组件及其许可证。",
+   "show": "查看全文",
+   "hide": "收起",
+   "v8_note": "游戏中的排序（Array.prototype.sort）和三十六进制表示移植自 V8 引擎的代码。"
   }
  }
 }

@@ -706,7 +706,9 @@ func _resume() -> void:
 	for bad: String in ["", "{bad", "{\"format\":1}", "{\"format\":1,\"cfg\":{\"stage\":{\"id\":1}},\"sum\":\"x\",\"state\":{}}", "5", "null"]:
 		store.call("set_str", ResumeRules.KEY, bad)
 		var st := ResumeRules.status(rc)
-		_check(st == ("" if bad == "" else "broken"), "깨진 gd_battle '%s' → %s" % [bad.substr(0, 30), st])
+		# (4b-2) format 1 (4b-1 저장 형식)은 '이전 판' → "old" (안내 + 포기는 같음)
+		var want := "" if bad == "" else ("old" if bad.begins_with("{\"format\":1") else "broken")
+		_check(st == want, "깨진 gd_battle '%s' → %s" % [bad.substr(0, 30), st])
 	router.set("dry_run", router_dry)
 	store.call("clear")
 

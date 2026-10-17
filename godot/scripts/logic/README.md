@@ -11,7 +11,7 @@
 
 | 웹 | GDScript | 내용 |
 |---|---|---|
-| (Math.round·toFixed·sort·참거짓) | `js.gd` | JS 의미 그대로 계산: `round_js`(.5 → +∞), `to_fixed_num`(정확한 10진 반올림·동점은 큰 쪽), `stable_sort`, `truthy`(빈 배열·사전도 참), `deep`(JSON 복사), `mh` |
+| (Math.round·toFixed·sort·참거짓) | `js.gd` | JS 의미 그대로 계산: `round_js`(.5 → +∞), `to_fixed_num`(정확한 10진 반올림·동점은 큰 쪽), `stable_sort`, `v8_sort`(V8 TimSort 전체 — 비교 호출 순서까지), `truthy`(빈 배열·사전도 참), `deep`(JSON 복사), `mh` |
 | `tools/battle-sim/env.js` mulberry32 | `rng.gd` | `next(tag)` = Math.random(), `calls` = 호출 수, `log_enabled` 면 호출마다 태그 기록 |
 | (전역 데이터·Math.random·localStorage·Date) | `ctx.gd` | 규칙 공통 환경: `D`(웹 전역 이름 → 값), `rng`, `store`, 가상 시계 `now_ms` |
 | `js/common/store.js` (localStorage) | `save_store.gd` | 키 → JSON 값. 꺼낼 때·넣을 때 복사 (웹의 JSON 문자열 저장과 같은 의미), 숫자 키 규칙은 `core/json_norm.gd` |
@@ -30,7 +30,10 @@
 | `js/battle/end.js` | `battle/battle_end.gd` | 전투 끝 보상·첫 클리어 신규 클랜원·영혼석·드랍·요일 던전 |
 | `js/party-select.js` 장비·아이템·강화 탭, `js/logic/equip.js` 강화·수리·분해·Mats, `gear.js` name·fmt·lines | `equip_rules.gd` | (4b-1) 끼우기·빼기·판매·강화(난수 순서 같음)·목록 정렬·단추 조건·물약 |
 | `js/shop.js`, `character.js` addChar | `shop_rules.gd` | (4b-1) 상점 생성·1시간 갱신·사기·룬·뽑기·재료·전설 교환 (V8 정렬 재현 `Js.v8_sort`) |
-| (Godot 전용) | `resume_rules.gd` | (4b-1) 전투 이어하기 저장 `gd_battle` · 웹 `game_battle` 판정 |
+| (Godot 전용) | `resume_rules.gd` | (4b-1) 전투 이어하기 저장 `gd_battle` · 웹 `game_battle` 판정, (4b-2) 판 확인(저장 형식·데이터 해시·게임 버전) · md5(저장 글 전체) · 포기 |
+| `js/sanctuary.js`, `soul.js` Soul, `character.js` _rollPotentialWithGrade, `hazards.js` Rune.apply | `sanctuary_rules.gd` | (4b-2) 부활·무료 부활·영혼석 합치기·승급(제물 점수·스킬 계승·스킬북)·개명·마법부여 |
+| `js/academy.js` | `academy_rules.gd` | (4b-2) 전직(전직서)·스킬북 사용 |
+| `compendium.html` · `guide.html` 인라인 스크립트 | `codex_rules.gd` | (4b-2) 도감·가이드 내용 블록 (글 조각을 웹 HTML 과 비교) |
 | `render.js` previewAttack·calcThreat, `action.js` faceOptions·_setTargets | `battle/battle_query.gd` | 3단계 화면용 순수 조회 (`eng.q`) |
 
 옮기지 않은 웹 파일: 화면(`render`·`vfx`·`rig`·`motion`·`audio`·`pixelfx`·`terrain-tex`·`props`·`story-battle`), 번역·모달. 그 안에 섞여 있던 규칙은 엔진에 들어 있습니다 (아래).
@@ -92,6 +95,8 @@ eng.dispose()                      # 순환 참조 정리
   복원: 같은 데이터로 새 엔진을 만들고 `eng2.load_state(JsonExact.parse(text))` → `eng2.input_provider`/`command()`/`run()` 으로 이어서. 난수 상태·저장소·기록기 상태까지 담겨,
   이어 돌린 결과가 끊지 않고 돌린 것과 사건 하나까지 같습니다 (`replay_golden.gd -- --resume`: 22개 시나리오를 **모든 입력 대기마다** 끊고 이어 확인).
 - 저장: 전투 중 바뀐 저장값(골드·상자·경험치·로스터·영혼석 …)은 `eng.c.store` 에 있습니다. 끝나면 `eng.c.store.dump()` 를 오토로드 `Store` 로 되돌려 쓰세요.
+- (4b-2) `load_state(d)` 는 `d.format` 이 `SAVE_FORMAT` 과 다르면 아무것도 바꾸지 않고 `false` (같으면 `true`). `BattleEngine.state_format_ok(d)` 로 미리 볼 수 있음.
+  게임 쪽 저장(`gd_battle`)은 `resume_rules.gd` 가 저장 형식·데이터 해시·게임 버전까지 확인하고, 다르면 이어하지 않음.
 
 ## 시간 모델 (웹 async → 동기 + 대기열)
 
@@ -106,7 +111,7 @@ eng.dispose()                      # 순환 참조 정리
 
 황금 기록과 같아야 하므로 고치지 않았습니다 (tests/golden/README.md '2b 가 그대로 따라야 할 규칙 특이점' 전부 포함).
 
-- 난수: 새 버프 id 1회(값 안 씀)·적 생성 3회(성별·공성 종류·공성 id)·`&&` 단락 평가·후보 칸마다 `_tacticScore` 1회·벽 이웃마다 등반 판정·장비 eid 1회.
+- 난수: 새 버프 id 1회(글자는 웹과 같은 V8 표기 `Js.rand36_4` — 규칙에는 안 씀)·적 생성 3회(성별·공성 종류·공성 id)·`&&` 단락 평가·후보 칸마다 `_tacticScore` 1회·벽 이웃마다 등반 판정·장비 eid 1회.
 - `Math.round` 는 `.5 → +∞`, `toFixed` 는 정확한 10진 값 기준. JS 나눗셈은 실수(`stage_level` 을 float 로 돌려줌 — `Hazard.dotPct` 의 `/100`).
 - 안정 정렬 동점 처리(다음 유닛·대상 고르기·지원자·고통 분담 기사·`_findAdj`), BFS 큐 순서·중복 푸시, `vis` 삽입 순서(도움닫기), 스킬 칸 목록의 x 바깥·y 안쪽 순서.
 - JS 객체의 정수 키는 오름차순 (`_turnActed` → 스냅샷 `acted`).
@@ -137,7 +142,7 @@ Store·DataDB·시험·전투 저장이 모두 이것으로 통일되어 있습�
 규칙 코드에 17자리 리터럴을 쓰지 마세요 (`check_battle_api.gd` 가 모든 리터럴을 검사).
 
 ## 아직 옮기지 않은 것 (영향)
-- 성소 규칙(`Rune.apply`·부활·승급 등)은 4b-2. 상점·강화·수리·분해는 4b-1 (`equip_rules.gd`·`shop_rules.gd`).
+- 성소·아카데미 규칙은 4b-2 (`sanctuary_rules.gd`·`academy_rules.gd`), 상점·강화·수리·분해는 4b-1 (`equip_rules.gd`·`shop_rules.gd`).
 - 스토리 대사(`story-battle.js`)는 연출 — 규칙 영향 없음.
 - 황금 기록이 닿지 않는 경로(전설 장비 뽑기·보스 전설 드랍·스킬북 드랍·요일 던전 세트/지옥 전설·대부분의 GearFX 효과·적용 안 된 디버프 물약)는 웹 코드를 줄 단위로 옮겼지만 기록 비교로 확인되지는 않았습니다.
 

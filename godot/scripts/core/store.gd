@@ -182,6 +182,7 @@ func _write(path: String) -> bool:
 		push_error("Store: %s 에 쓸 수 없습니다 (%s)" % [tmp, error_string(FileAccess.get_open_error())])
 		return false
 	f.store_string(JsonExact.stringify(_data, "", true))
+	f.flush()   # (4b-2) 이름 바꾸기 전에 디스크로 (Godot FileAccess 가 할 수 있는 만큼 — fsync 는 OS 몫)
 	f.close()
 	# rename 한 번으로 덮어쓰기 (먼저 지우지 않음 — 그 사이에 꺼지면 저장이 없어지므로)
 	var err := DirAccess.rename_absolute(tmp, path)

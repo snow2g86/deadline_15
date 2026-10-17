@@ -3,8 +3,9 @@ extends "res://scripts/ui/screen_base.gd"
 ##  윗줄(제목 DEADLINE 15 · 톱니), 왼쪽 위 지휘관 단추(초상화 + 이름 → 지휘관 설정 다시 열기), 골드 배지,
 ##  클랜 아지트(횃불 6 · 원탁 · 레벨 높은 클랜원 최대 10명이 원탁 둘레에), 아래 단추(도감 · 출격 · 가이드), 아래 탭.
 ##  (4b-1) 전투 재개: Godot 저장 전투(gd_battle)면 이어하기, 웹이 만든 game_battle 이면 '이어할 수 없음' 안내 + 포기 (scripts/logic/resume_rules.gd)
+##  (4b-2) 이전 판(저장 형식·데이터·게임 버전이 다른) Godot 전투도 '이어할 수 없음' 안내 + 포기. 정상 저장 전투는 단추 오른쪽 위 ✕ → 확인 창 → 포기
 ##  들어올 때 웹과 같은 순서: 첫 실행이면 클랜원 만들기 → 저장값 점검·복구(알림) → 지휘관 첫 설정 → 성별 보정 → 자동 부활(알림)
-##  규칙은 scripts/logic/lobby_rules.gd. 도감·가이드·성소·아카데미·상점은 4b — '준비 중' 알림.
+##  규칙은 scripts/logic/lobby_rules.gd. 도감·가이드 단추 → compendium · guide 화면 (4b-2)
 
 const LobbyRules := preload("res://scripts/logic/lobby_rules.gd")
 const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
@@ -19,9 +20,11 @@ var hideout: Hideout
 var popups: HBoxContainer
 var _popup_labels: Dictionary = {}   # name → [Label, key]
 var resume_btn: Button
-## "gd" · "web" · "broken" · "" (ResumeRules.status)
+## "gd" · "old" · "web" · "broken" · "" (ResumeRules.status)
 var resume_status := ""
 var _resuming := false
+var abandon_btn: Button
+var _abandoning := false
 var cta: Button
 var setup_dialog: Control
 ## 시험·확인용
@@ -67,7 +70,8 @@ func _build() -> void:
 	center.name = "LobbyContent"
 	center.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.offset_bottom = -40
+	# (4b-2) 아지트가 아래 단추 줄(출격 등, 위 끝 −124) 위에서 끝나게 — 아래쪽 클랜원 이름표가 출격 단추와 겹치던 것
+	center.offset_bottom = -128
 	body.add_child(center)
 	var gb := gold_badge("0 G")
 	gb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -93,13 +97,15 @@ func _build() -> void:
 	if resume_status != "":
 		resume_btn = _popup_btn("Resume", "⚔️", "messages.resume_battle")
 		resume_btn.pressed.connect(press_resume)
+		if resume_status == "gd":
+			_add_abandon_btn()
 	var comp := _popup_btn("Compendium", "📖", "nav.compendium")
-	comp.pressed.connect(coming_soon)
+	comp.pressed.connect(func() -> void: router.call("go", "compendium"))
 	cta = _cta_btn()
 	cta.pressed.connect(func() -> void: router.call("go", "stage_select"))
 	popups.add_child(cta)
 	var guide := _popup_btn("Guide", "📚", "nav.guide")
-	guide.pressed.connect(coming_soon)
+	guide.pressed.connect(func() -> void: router.call("go", "guide"))
 	# 저장값 점검 결과 알림 (웹: 0.5초 뒤 토스트)
 	get_tree().create_timer(0.5).timeout.connect(_toast_validate)
 	# 지휘관 첫 설정 → 그 뒤 성별 보정·자동 부활
@@ -123,7 +129,9 @@ func press_resume() -> void:
 		router.call("launch_battle", Flow.resume_cfg(store, gd))
 		return
 	var msg := t("gd.resume.broken")
-	if resume_status == "web":
+	if resume_status == "old":
+		msg = t("gd.resume.old_notice")
+	elif resume_status == "web":
 		var st: Variant = ResumeRules.web_stage(c)
 		var nm := ""
 		if st is Dictionary:
@@ -135,14 +143,50 @@ func press_resume() -> void:
 		"buttons": [{"text": t("gd.resume.abandon"), "cb": abandon_resume, "name": "Abandon"}, {"text": t("common.close"), "secondary": true, "name": "Close"}]})
 
 
-## 이어할 수 없는 전투 포기 → 단추 없앰
+## 전투 포기 → 저장 전투 지우고 단추 없앰 (이어할 수 없는 전투 · (4b-2) 정상 저장 전투도 확인 창 뒤에) — 한 번만
 func abandon_resume() -> void:
+	if resume_status == "" or _abandoning or _resuming:
+		return
+	_abandoning = true
 	ResumeRules.abandon(c)
 	resume_status = ""
 	if resume_btn != null and is_instance_valid(resume_btn):
 		resume_btn.queue_free()
 		resume_btn = null
+	abandon_btn = null
 	toast(t("gd.resume.abandoned"))
+	cta.grab_focus.call_deferred()
+	_abandoning = false
+
+
+## (4b-2) 정상 저장 전투 포기 단추 (전투 재개 단추 오른쪽 위 ✕) → 확인 창
+func _add_abandon_btn() -> void:
+	abandon_btn = OKit.styled_button(OKit.box(Color("1f2937"), Color(OKit.RED, 0.6), 999, 1, 0, 0), OKit.box(Color("7f1d1d"), OKit.RED, 999, 1, 0, 0), null, 999)
+	abandon_btn.name = "AbandonBtn"
+	abandon_btn.custom_minimum_size = Vector2(22, 22)
+	abandon_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	abandon_btn.offset_left = -25
+	abandon_btn.offset_right = -3
+	abandon_btn.offset_top = 3
+	abandon_btn.offset_bottom = 25
+	var xi := OKit.vec_icon("close", 10, Color("fca5a5"))
+	xi.position = Vector2(6, 6)
+	abandon_btn.add_child(xi)
+	abandon_btn.pressed.connect(ask_abandon)
+	resume_btn.add_child(abandon_btn)
+
+
+func ask_abandon() -> void:
+	if resume_status != "gd" or _resuming or _abandoning or modal_open() or not act_once():
+		return
+	var st: Variant = ResumeRules.gd_stage(c)
+	var nm := ""
+	if st is Dictionary and st.get("id") != null and (typeof(st["id"]) == TYPE_INT or typeof(st["id"]) == TYPE_FLOAT):
+		nm = t("gd.resume.stage_n", {"n": int(st["id"])})
+	elif st is Dictionary and st.get("daily") is Dictionary:
+		nm = t("daily.title") if has_t("daily.title") else ""
+	open_modal(_msg_label(t("gd.resume.abandon_confirm", {"stage": nm})), {"name": "AbandonConfirm", "title": t("gd.resume.abandon"),
+		"buttons": [{"text": t("gd.resume.abandon"), "cb": abandon_resume, "name": "Abandon"}, {"text": t("common.cancel"), "secondary": true, "name": "Close"}]})
 
 
 ## (타이머) 저장값 점검 결과 알림 — 화면이 이미 바뀌었으면 연결이 저절로 끊김 (메서드 연결)
@@ -206,12 +250,14 @@ func _cta_btn() -> Button:
 
 
 func _refresh() -> void:
-	gold_lbl.text = "%s G" % num(LobbyRules.gold(c))
+	gold_lbl.text = "%s G" % grouped(LobbyRules.gold(c))   # 상점·성소·아카데미와 같은 천 단위 쉼표 (웹 상점·성소 toLocaleString)
 	for nm: String in _popup_labels.keys():
 		var pl: Array = _popup_labels[nm]
 		(pl[0] as Label).text = t(pl[1])
 	if resume_btn != null:
 		resume_btn.tooltip_text = t("messages.resume_battle")
+	if abandon_btn != null and is_instance_valid(abandon_btn):
+		abandon_btn.tooltip_text = t("gd.resume.abandon")
 	_refresh_commander()
 	hideout.set_chars(LobbyRules.hideout_chars(c), self)
 
@@ -438,7 +484,8 @@ class Hideout extends Control:
 			w.reset_size()
 			var ms := w.get_combined_minimum_size()
 			w.size = ms
-			w.position = Vector2(cx, cy) - ms * 0.5
+			# 아지트 밖으로 나가지 않게 (긴 이름표)
+			w.position = (Vector2(cx, cy) - ms * 0.5).clamp(Vector2(2, 2), (size - ms - Vector2(2, 2)).max(Vector2(2, 2)))
 			u["cy"] = cy
 		# 아래쪽 클랜원일수록 앞에 (웹 z-index 5 + cy%) — z_index 대신 그리는 순서로 (창이 아지트 위에 오도록)
 		var order := _units.duplicate()

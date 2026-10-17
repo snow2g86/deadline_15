@@ -1391,8 +1391,16 @@ func save_text() -> String:
 	return JsonExact.stringify(save_state())
 
 
+## (4b-2) 저장 형식이 이 엔진과 같은지 (다르면 load_state 가 받지 않음)
+static func state_format_ok(d: Variant) -> bool:
+	return d is Dictionary and typeof((d as Dictionary).get("format")) == TYPE_STRING and str(d["format"]) == SAVE_FORMAT
+
+
 ## 새 엔진(같은 데이터로 만든 것)에 복원. d 는 save_state() 결과 또는 그 JSON 을 읽은 것
-func load_state(d: Dictionary) -> void:
+##  (4b-2) d.format 이 SAVE_FORMAT 과 다르면 아무것도 바꾸지 않고 false (이전 판 저장은 이어하지 않음 — resume_rules.gd)
+func load_state(d: Dictionary) -> bool:
+	if not state_format_ok(d):
+		return false
 	_q.clear()
 	var table: Dictionary = {}
 	for uv: Variant in d["units"]:
@@ -1485,3 +1493,4 @@ func load_state(d: Dictionary) -> void:
 	_skill_before = null
 	_aborted = false
 	trace = []
+	return true

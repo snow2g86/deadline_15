@@ -89,18 +89,25 @@
   "result": {
    "retry": "Reintentar"
   },
-  "outer": {
-   "coming_soon": "Próximamente: llegará en una próxima actualización"
-  },
   "resume": {
    "web_notice": "Esta batalla empezó en la versión web y no se puede reanudar aquí.\n{stage}\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
    "broken": "No se puede leer la batalla guardada, así que no se puede reanudar.\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
    "abandon": "Abandonar",
    "abandoned": "Batalla guardada abandonada",
-   "stage_n": "Fase {n}"
+   "stage_n": "Fase {n}",
+   "old_notice": "Esta batalla se guardó con una versión anterior del juego y no se puede reanudar.\n(Cambiaron los datos del juego o el formato de guardado)\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
+   "abandon_confirm": "¿Abandonar la batalla guardada?\n{stage}\nDespués no se podrá reanudar. Lo ya obtenido o usado en la batalla (oro de cofres, pociones, etc.) se mantiene."
   },
   "equip": {
    "upgrade": "Hay mejor equipo"
+  },
+  "licenses": {
+   "godot_note": "Este juego está hecho con el motor Godot. A continuación, la licencia completa de Godot Engine.",
+   "third_party": "Componentes incluidos en Godot Engine",
+   "third_party_note": "Componentes de terceros incluidos en Godot Engine y sus licencias.",
+   "show": "Ver texto completo",
+   "hide": "Ocultar",
+   "v8_note": "La ordenación (Array.prototype.sort) y el formato en base 36 del juego se han portado del código del motor V8."
   }
  }
 }

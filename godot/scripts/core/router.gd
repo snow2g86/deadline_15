@@ -19,6 +19,12 @@ const SCREENS := {
 	"party_select": "res://scenes/outer/party_select.tscn",
 	"settings": "res://scenes/outer/settings.tscn",
 	"shop": "res://scenes/outer/shop.tscn",
+	"sanctuary": "res://scenes/outer/sanctuary.tscn",
+	"academy": "res://scenes/outer/academy.tscn",
+	"compendium": "res://scenes/outer/compendium.tscn",
+	"guide": "res://scenes/outer/guide.tscn",
+	"credits": "res://scenes/outer/credits.tscn",
+	"licenses": "res://scenes/outer/licenses.tscn",
 	"battle": "res://scenes/battle/battle.tscn",
 }
 const NO_HISTORY := ["boot", "battle"]

@@ -204,13 +204,7 @@ func scan(view: Dictionary) -> void:
 				vars["ally"] = str(view.get("name_of", {}).get(u2["id"], ""))
 				enqueue("danger")
 				break
-	if float(view.get("espwn", 0)) >= float(stage.get("tot", 0)):
-		var n := 0
-		for u3: Dictionary in units:
-			if u3.get("team") == "enemy" and float(u3["hp"]) > 0.0 and not Js.truthy(u3.get("isSummon")):
-				n += 1
-		if n == 1:
-			enqueue("last")
+	# 마지막 적 하나 남았을 때 대사("last")는 2026-10-18 사용자 요청으로 뺌
 
 
 ## 쌓인 전투 대사 → 재생할 장면 목록 (StoryBattle.flush)

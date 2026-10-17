@@ -93,7 +93,7 @@ const StoryBattle = {
       }
     }
     // 남은 적 1명 (더 나올 증원 없음)
-    if (S.eSpwn >= st.tot && S.units.filter(u => u.team === 'enemy' && u.hp > 0 && !u.isSummon).length === 1) this.enqueue('last');
+    // 마지막 적 하나 남았을 때 대사('last')는 2026-10-18 사용자 요청으로 뺌
   },
 
   // 대사에 넣을 클랜원 이름 (이름이 없거나 아이콘뿐이면 비워 두어 Story 쪽 기본값 '클랜원'을 쓴다)

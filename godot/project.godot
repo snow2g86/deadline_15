@@ -12,6 +12,7 @@ config_version=5
 
 config/name="DEADLINE 15"
 config/description="턴제 아이소메트릭 전술·방어 RPG (웹판 Godot 4 이전)"
+config/version="0.4.2"
 run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.png"

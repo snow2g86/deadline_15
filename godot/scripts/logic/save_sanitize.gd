@@ -54,7 +54,7 @@ static func sanitize(c: Object) -> Array:
 		c.store.remove("ps_active_tab")
 		changed.append("ps_active_tab")
 	for k: String in ["game_roster", "game_parties", "game_save", "game_inventory", "game_daily", "game_story_seen", "game_settings", "game_nav", "game_soul", "game_party", "game_cleared",
-			"game_shop", "game_mats", "game_gacha_pity"]:
+			"game_shop", "game_mats", "game_gacha_pity", "gd_class_preview"]:
 		var r := _raw(c, k)
 		if not r[0]:
 			continue
@@ -101,6 +101,8 @@ static func sanitize(c: Object) -> Array:
 				after = _mats(v)
 			"game_gacha_pity":
 				after = v if _is_num(v) else null
+			"gd_class_preview":
+				after = _class_preview(c, v)
 		if after == null:
 			c.store.remove(k)
 			changed.append(k)
@@ -434,3 +436,19 @@ static func _soul(v: Variant) -> Variant:
 			if not _is_num(v[b][k]):
 				v[b].erase(k)
 	return v
+
+
+## (4b-2) 전직 미리보기 보관함: 사전이 아니면 지움, 모양이 틀린 항목·직업만 뺌 (오래된 uid·레벨 변화 같은 '무효'는 academy_rules 가 쓸 때 정리)
+static func _class_preview(c: Object, v: Variant) -> Variant:
+	if not (v is Dictionary):
+		return null
+	var AR: GDScript = load("res://scripts/logic/academy_rules.gd")
+	for k: Variant in (v as Dictionary).keys():
+		var e: Variant = v[k]
+		if not str(k).is_valid_int() or not (e is Dictionary) or not (e.get("fp") is Dictionary) or not (e.get("cls") is Dictionary):
+			v.erase(k)
+			continue
+		for cl: Variant in (e["cls"] as Dictionary).keys():
+			if not bool(AR.call("pv_ok", c, e["cls"][cl], str(cl))):
+				(e["cls"] as Dictionary).erase(cl)
+	return null if (v as Dictionary).is_empty() else v

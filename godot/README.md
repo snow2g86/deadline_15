@@ -17,7 +17,7 @@ godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
   icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬) — 잠깐 제목을 보여 주고 로비로 (Router). 개발용: -- --dev (예전 시작 화면 + 전투 시험 실행기), -- --screen <이름>, -- --save <경로>
-  scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings, 4b-1: shop (scripts/ui/*.gd)
+  scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings, 4b-1: shop, 4b-2: sanctuary · academy · compendium · guide · credits · licenses (scripts/ui/*.gd)
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
   scripts/core/        오토로드: store.gd(Store) · data_db.gd(DataDB) · i18n.gd(I18n), json_norm.gd(번호 키 int) · num.gd(Num.fmt 표시) · fonts.gd(언어별 글꼴 사슬)
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
@@ -27,9 +27,13 @@ godot/
   scripts/ui/          바깥 화면 (4a): screen_base.gd(윗줄·아래 탭·창·알림 공통) · outer_kit.gd(부품) · lobby · stage_select · party_select ·
                        settings_screen · flow.gd(game_nav → 전투 설정, 이어하기 설정) · boot.gd · dev_launcher.gd
                        4b-1: shop.gd(상점) · party_gear_tabs.gd(편성 화면의 장비·소모품·강화 탭) · item_view.gd(아이템 그림·옵션 줄)
+                       4b-2: tabbed_list_screen.gd(골드·탭·카드 목록 공통) · sanctuary.gd(성소) · academy.gd(아카데미) ·
+                             codex_screen.gd(도감·가이드 공통 틀) · codex_view.gd(블록 그리기) · compendium.gd(도감) · guide.gd(가이드) ·
+                             info_page.gd(크레딧·라이선스 공통) · credits.gd · licenses.gd
   scripts/logic/*_rules.gd  4a 규칙 (화면 코드 없이): lobby_rules(첫 실행·저장값 점검·자동 부활·지휘관) · party_rules(파티 저장·편성·출격 판단) ·
                        progress_rules(해금·별·요일 던전) · settings_rules(설정 키, 전투 설정 창과 공용) · store_ctx.gd(진짜 Store 를 규칙 저장소 모양으로)
                        4b-1: equip_rules(장비·강화·수리·분해·아이템 탭·Gear 표시) · shop_rules(상점 생성·갱신·사기·뽑기) · resume_rules(전투 이어하기 저장 gd_battle)
+                       4b-2: sanctuary_rules(부활·무료 부활·영혼석·승급·개명·마법부여) · academy_rules(전직·스킬북) · codex_rules(도감·가이드 내용 블록)
   data/                변환된 JSON (git 에 올림)
     *.json             모듈별 전역 (stages.json 의 STAGES 등)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
@@ -57,6 +61,11 @@ godot/
   tests/check_outer_4b1.gd     4b-1: 상점·장비·강화·아이템 규칙을 웹 정답(tests/fixtures/outer_4b1_web.json ← node tools/outer-4b1-expect.js, 같은 씨앗·시각)과 비교 ·
                                이어하기(끊고 이어도 같은 결과) · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 6개 언어 넘침·두부 · 웹 왕복(--roundtrip)
   tests/play_4b1.gd            4b-1 실제 창: 로비 → 상점 → 편성(장비·강화) → 전투 → 나가기 → 전투 재개 → 끝 (tests/screens/4b1_*.png, -- --size 1920x1080)
+  tests/check_outer_4b2.gd     4b-2: 성소·아카데미 규칙을 웹 정답(tests/fixtures/outer_4b2_web.json ← node tools/outer-4b2-expect.js)과 비교 · 도감·가이드 글 조각 = 웹 HTML ·
+                               V8 정렬(64개 이상) · 이어하기 판 확인·포기 · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 웹 왕복 · 6개 언어 넘침·두부 · '준비 중' 없음
+  tests/play_kit.gd            실제 창 시험 공용 (논리 화면 기준 칸 보이기 · HUD 피하기 · 그리기 기다림 시간 제한)
+  tests/aux_class_preview.gd   check_outer_4b2 보조 (다른 프로세스에서 전직 미리보기 보관값 읽기)
+  tests/play_4b2.gd            4b-2 실제 창: 로비 → 성소 → 아카데미 → 도감 → 가이드 → 설정 → 크레딧 → 라이선스 → 로비 → 전투 한 판 (tests/screens/4b2_*.png, -- --size 1920x1080)
   tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
@@ -100,6 +109,8 @@ node tools/export-godot-data.js --check
 `data/*.json` 은 Godot 리소스가 아니라 `FileAccess` 로 읽는 일반 파일입니다. 내보내기 프리셋을 만들 때
 **Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/lang_extra/*, data/story/*` 처럼 하위 폴더 포함).
 빠지면 내보낸 게임에서 DataDB 가 "manifest.json 을 읽지 못했습니다" 오류를 냅니다.
+(4b-2) 라이선스 화면이 글꼴 라이선스 전문을 읽으므로 **`assets/fonts/OFL.txt` 도 같은 칸에 넣으세요** (빠지면 OFL 전문 펼치기 단추가 나오지 않음).
+게임 버전은 `project.godot` 의 `application/config/version` — 전투 이어하기 저장이 이 값을 기록하므로 출시 때마다 올리세요 (다르면 예전 저장 전투는 '이전 버전' 안내 + 포기).
 
 ## 열기 · 실행
 
@@ -236,7 +247,7 @@ Store.get_json("game_roster", {})
 - **아이콘**: 시트에 그림이 없는 🔒·ℹ️ 는 선 그림.
 
 ### 남은 일
-- 4b-2: 성소·아카데미·도감·가이드·라이선스·Credits (지금은 '준비 중' 알림), 소리(5단계).
+- (4b-2 에서 성소·아카데미·도감·가이드·라이선스·Credits 완료 — 아래 '4b-2') 소리는 5단계.
 - 좁은 창(480×900 등 휴대폰 폭) 모바일 배치는 PC 출시 뒤로 미룸. 지금은 canvas_items·expand 늘이기라 논리 폭이 늘 1280 이상이어서 깨지지 않지만 작게 보임.
 
 ## 4b-1 — 편성 화면의 장비·소모품·강화 탭 · 상점 · 전투 이어하기
@@ -272,3 +283,49 @@ Store.get_json("game_roster", {})
     '같은 전투'를 보장할 수 없음 → 로비 '전투 재개'에서 '웹판에서 시작된 전투라 이어할 수 없음' 안내 + 포기(game_battle 지움)만.
 - **전투 설정 창 '나가기'**: 실제 세이브 전투에만 (웹에는 없음 — 웹은 창을 닫으면 전투가 사라짐). 연출 중이면 입력을 기다릴 때 나감.
 - **로딩 화면**: 흐려지는 0.4초 동안 누르기를 막지 않도록 고침 (그 사이 첫 행동 메뉴가 뜨면 칸 누르기를 먹어 '대상 고르기'에서 멈춘 것처럼 보였음 — play_4a 멈춤 원인).
+
+## 4b-2 — 성소 · 아카데미 · 도감 · 가이드 · 크레딧 · 라이선스 · 4b-1 검수 남은 것
+
+규칙은 `scripts/logic/sanctuary_rules.gd` · `academy_rules.gd` · `codex_rules.gd`, 화면은 `scripts/ui/sanctuary.gd` · `academy.gd` · `compendium.gd` · `guide.gd` · `credits.gd` · `licenses.gd`.
+웹 정답 비교: `node tools/outer-4b2-expect.js` → `tests/fixtures/outer_4b2_web.json` → `tests/check_outer_4b2.gd`
+(성소·아카데미: 같은 mulberry32 씨앗·시각으로 화면 단추 차례대로 → 저장소 전체·난수 호출 수, 도감·가이드: 진짜 언어 팩 ko·en 으로 웹 HTML 을 만들어 태그를 걷어낸 글 조각 6천여 개를 순서까지).
+
+- **'준비 중' 없음**: 로비 도감·가이드, 아래 탭 성소·아카데미, 설정 라이선스·Credits 가 모두 진짜 화면. `gd.outer.coming_soon` 키와 `coming_soon()` 을 지움.
+  일부러 남긴 것 (웹 js/shop.js 와 같은 화면, Godot '준비 중' 알림이 아님 — 출시 전에 숨길지는 사용자 결정):
+  - 상점 각 탭 맨 위 광고 카드의 꺼진 '추후 개발'(`common.coming_soon`) 단추 (광고 기능 자체가 웹에도 없음)
+  - 상점 골드 탭의 결제 꾸러미 카드 4개 — 가격 아래 '추후 오픈 예정'(`shop.gold_iap_coming`), 흐리게 표시되고 누를 수 없음
+- **웹판과 다른 점 (웹 버그 — 웹은 고치지 않음)**:
+  - 승급 제물 후보의 '파티 편성 제외'를 웹은 옛 키 `game_party`(마이그레이션 때 지워진 레거시)로 봐서 늘 비어 있음 → Godot 은 **지금 활성 파티**(game_parties)의 클랜원과
+    (디렉터 결정) **중단된 저장 전투(`gd_battle`)에 나가 있는 클랜원**(state 의 아군 유닛 uid + cfg.party)을 뺌. 그 전투를 포기하거나 끝내면(저장이 지워짐) 다시 후보.
+  - 승급 제물이 끼고 있던 장비를 웹은 그대로 둬 '없는 클랜원이 낀 장비'가 남음 → Godot 은 그 장비의 `equipped` 를 비움.
+  - 부활: 웹은 페이지를 연 때의 골드(`_gold`)로 계산하고 없는 클랜원이어도 골드를 씀 → Godot 은 누를 때의 저장 골드, 없는 클랜원이면 쓰지 않음.
+  - 아카데미 전직: 웹 확인 창은 열 때마다 잠재력을 굴려 '전직 후 예상 스탯'을 보이고 실행 때 또 굴려 실제 능력치가 달라짐(창을 닫았다 열어 '다시 뽑기' 가능) →
+    Godot 은 (디렉터 결정) **클랜원 + 대상 직업마다 한 번만 굴려 Store 에 보관**하고 그 값 그대로 전직 (예상 = 결과, 창을 다시 열거나 게임을 다시 켜도 같은 값).
+    - 키 `gd_class_preview` (Godot 전용, 웹은 무시) = `{ "<uid>": { "fp": { "lv": 레벨, "pot": 잠재력 }, "cls": { "<직업>": { "hp", "atk", "def", "move", "range", "pot", "grade", "cls" } } } }`
+    - 무효 규칙 (`academy_rules.gd` 가 읽을 때 정리): uid 가 없거나 · 죽었거나 · 노비스가 아니면 항목 지움 / 레벨이나 잠재력(fp)이 바뀌면(레벨 업·승급) 그 클랜원 미리보기 모두 버리고 새로 굴림 /
+      전직을 실행하면 그 클랜원 항목 지움 / 키가 비면 키 지움
+    - 이상한 값: `save_sanitize.gd` 가 사전이 아니면 지우고, 모양이 틀린 항목·직업(숫자 칸·잠재력·등급·모르는 직업)만 뺌. 정상 값은 그대로
+    승급 확인 창은 웹처럼 '~' 예상치(실행 때 다시 굴림)를 그대로 둠 — 글에 '~' 가 있어 예상치임이 드러나 있으므로.
+  - 전직서·스킬북: 웹은 창을 연 때의 인벤토리 번호로 지움 → Godot 은 그 번호의 물건이 맞는지 보고, 다르면 같은 물건을 다시 찾음.
+  - 도감: 웹이 `gear.item.*`(21개)·`maps.*`(8개) 없는 키를 조회해 키를 돌려받던 것 → Godot 은 있는 키만 조회 (화면 글은 같음 — 시험이 '없는 키 조회 0' 확인). `maps.*` 는 어느 언어 팩에도 없어 검색 글에 맵 id 를 씀(웹 대체값과 같음).
+  - 도감 직업 상세: 웹의 아래에서 올라오는 시트 대신 가운데 창(✕ · Esc · 바깥 누르기로 닫힘). 탭은 웹처럼 스크롤하면 위에 붙음, 누르면 머리 그림 아래로.
+  - 무료 부활(웹 '광고 보기'): 웹처럼 광고 없이 30분마다 1명 (`game_sanc_ad_cooldown`). 실제 광고 연동은 출시 단계 일.
+- **크레딧·라이선스**: 뒤로 = 연 화면(설정). 크레딧 글은 웹처럼 영어 그대로. 라이선스: Noto Sans KR·JP·SC·TC(OFL 1.1, `assets/fonts/OFL.txt` 전문) · Godot Engine(MIT 전문 `Engine.get_license_text()`) ·
+  엔진의 제3자 구성 요소(`Engine.get_copyright_info()` 95개 · 라이선스 전문 17종 `get_license_info()`). 웹의 Cinzel 은 Godot 판이 쓰지 않아 뺌. 라이선스 원문은 번역하지 않음.
+- **전투 이어하기 판 확인 (디렉터 결정)**: `gd_battle` = `{"format":2,"sum":…,"cfg":{…, saveFormat, dataHash, gameVersion},"state":…}`.
+  저장 형식(엔진 `SAVE_FORMAT`) · 데이터 해시(manifest.sources 의 sha1 묶음 md5 — 번역은 넣지 않음) · 게임 버전(`application/config/version`) 중 하나라도 지금과 다르거나,
+  4b-1 저장(format 1)이거나, `state.format` 이 다르면 로비 '전투 재개' → **'이전 버전의 전투라 이어할 수 없음' 안내 + 포기**. md5 는 저장 글 전체(형식·cfg·state)를 덮음.
+  `battle_engine.load_state` 도 형식이 다르면 아무것도 바꾸지 않고 false, 전투 장면은 그때 새로 시작하지 않고 저장을 지우고 로비로.
+- **포기 (디렉터 결정)**: 정상 저장 전투도 로비 '전투 재개' 단추 오른쪽 위 ✕ → 확인 창 → 포기 (같은 프레임 연타 막음). 전투 중 이미 저장소에 쓴 것(상자 골드·쓴 물약·쓰러진 클랜원)은 웹처럼 그대로.
+- **이어할 때의 저장값 (확정)**: 나가 있는 동안 바뀐 골드·인벤토리(상점에서 산 물건·쓴 골드)는 이어한 전투에 반영(4b-1 방식 그대로). 
+  **장비를 바꾸거나 레벨·전직·승급으로 능력치가 바뀌어도 이미 시작한 전투 안의 클랜원 능력치에는 반영하지 않음** (전투 시작 때 정해진 유닛 그대로 — 끝난 뒤 저장소의 로스터에만 반영).
+- **V8 정렬**: `Js.v8_sort` 가 V8 TimSort 전체(64개 이상의 최소 run · run 쌓기 · 질주 병합)를 옮김 — node 가 낸 정답과 64~700개 40가지(비교 호출 수까지) 같음. 일관되지 않은 비교 함수(난수)에도 오류 없이 결정적.
+- **전투 버프 id**: `combat.gd` 의 새 버프 id 꼬리를 장비 eid 와 같은 `Js.rand36_4`(웹 `Math.random().toString(36).slice(2, 6)` V8 표기)로. 난수 1회는 그대로라 replay_golden 22/22 · --resume 22/22 같음
+  (황금 기록에는 버프 id 가 들어 있지 않아 글자 자체의 비교는 없음).
+- **로비 골드**: 상점·성소·아카데미와 같이 천 단위 쉼표 (`5,000 G`, 웹 로비는 쉼표 없음). 아지트는 아래 단추 줄(출격) 위에서 끝나고 이름표가 아지트 밖으로 나가지 않음 (10자 이름이 출격 단추와 겹치던 것).
+- **전직 확인 창 등급**: 웹은 '등급 + 접미사'를 붙여 써서 영어·스페인어가 'BGrade'·'BGrado' → 접미사가 한중일 글자가 아니면 띄어 씀 (웹 번역 원본은 그대로).
+- **저장 파일**: `.tmp` 에 쓰고 `flush()` 한 뒤 이름 바꾸기 (fsync 는 OS 몫 — Godot FileAccess 로 할 수 있는 만큼).
+- **V8 라이선스**: `js.gd` 의 `v8_sort`(V8 builtins/array-sort.tq)·`frac_to_base36`/`rand36_4`(V8 DoubleToRadixCString) 이식 → 라이선스 화면에 V8 저작권 표시와 BSD-3-Clause 전문, 함수 위에 출처 주석.
+- **play 시험의 누르기**: 누르기·떼기를 같은 프레임에 넣음 (창이 OS 초점을 잃으면 Viewport 가 누르는 중인 단추를 버려 첫 누르기가 가끔 먹히지 않던 것 — 창 크기 문제가 아님). 실패하면 바로 끝냄.
+  공용 `tests/play_kit.gd`: 칸이 보이는지를 **논리 화면**(`root.get_visible_rect()`)으로 재고 HUD(`ui.over_hud`) 위의 칸은 카메라를 옮긴 뒤 누름
+  (예전엔 물리 크기 `root.size` 로 재서 1920 창에서 HUD 밑 칸을 눌러 '대상 고르기'가 풀리지 않는 일이 있었음), 화면 사진(frame_post_draw)·전투 로딩 뒤 첫 입력 대기에 시간 제한(넘으면 실패로 끝냄).
