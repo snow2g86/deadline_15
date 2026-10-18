@@ -1,31 +1,37 @@
-# 전투 황금 기록 (golden battle traces) — 2a
+# 전투 황금 기록 (golden battle traces)
 
-웹판 전투 규칙(`js/battle/*`, `js/skills/*`, `js/logic/*`)을 **화면 없이·결정적으로** 돌려 남긴 기록입니다.
-2b 단계(전투 규칙 GDScript 이식)는 같은 세이브·같은 시드·같은 아군 명령으로 이 기록을 **사건 하나, 난수 호출 하나까지** 똑같이 재현해야 합니다.
+**고정된 기준입니다 (2026-10-18~).** 웹판 전투 규칙을 화면 없이·결정적으로 돌려 남긴 마지막 정답 22개이고,
+Godot 전투 엔진(`scripts/logic/battle/`)은 같은 세이브·같은 시드·같은 아군 명령으로 이 기록을 **사건 하나, 난수 호출 하나까지** 똑같이 재현해야 합니다.
 
-- 시나리오 22개 (2b 뒤 `legacy_gear_s08` 추가 — 기존 21개 기록은 그대로, `--check` 로 확인).
-- 만드는 도구: `tools/battle-sim.js` (+ `tools/battle-sim/` 의 `env.js` · `rules-shim.js` · `policy.js` · `scenarios.js` · `coverage.js`)
-- 웹 파일은 vm 에 그대로 적재하고 바깥에서 감싸기만 합니다. 단 하나, 기록 중 찾은 웹 버그(전투 중 인벤토리 번호 어긋남)를 `js/battle/action.js` 에서 고쳤습니다 (아래 '고친 웹 버그').
-- npm 의존성 없음. 시나리오 21개 전체가 약 1~2초.
+- **데이터**: 기록은 그때 데이터에서만 맞으므로 늘 **기준 데이터 `godot/tests/baseline/data/`** 로 재생합니다 (`tests/baseline_data.gd`). `godot/data` 를 고쳐도 이 기록은 그대로입니다.
+- **잠금**: 파일마다 sha1 이 `godot/tests/baseline/LOCK.json` 에 있고 `tools/data_tool.gd`·`check_foundation` 이 확인합니다 (이 README 는 잠그지 않음).
+- **이 기록을 쓰는 시험**: `replay_golden`(규칙 · `--resume` 저장·복원) · `check_battle_api` · `check_battle_scene`(화면 입구) · `check_battle_ui` · `check_outer_4b1/4b2`(명령 재생) · 장면 직접 실행 `--golden 이름`.
+- **만든 도구(보관)**: `tools/legacy-web/battle-sim.js` (+ `battle-sim/` 의 `env.js` · `rules-shim.js` · `policy.js` · `scenarios.js` · `coverage.js`) — 웹 파일을 Node vm 에 그대로 적재해 만들었습니다.
+  기록 중 찾은 웹 버그 하나(전투 중 인벤토리 번호 어긋남)는 `js/battle/action.js` 에서 고친 뒤 만들었습니다 (아래 '고친 웹 버그').
+  웹판 파일이 남아 있는 동안은 `node tools/legacy-web/battle-sim.js --check` 로 웹 코드가 아직 같은 기록을 내는지, `--only 이름 --rng-log` 로 난수 위치를 볼 수 있습니다 (godot 쪽 기록은 덮어쓰지 않음).
 
-## 실행
-
-저장소 맨 위 폴더에서:
+## 실행 (Godot)
 
 ```bash
-node tools/battle-sim.js                    # 모든 시나리오 → godot/tests/golden/<이름>.json + index.json (내용이 같으면 다시 쓰지 않음)
-node tools/battle-sim.js --check            # 쓰지 않고 비교만. 바뀔 파일이 있으면 목록 출력 후 종료 코드 1 (커밋 전 점검)
-node tools/battle-sim.js --only boss_s10 --print   # 한 시나리오만 (+ 사건 종류 개수·끝 요약을 화면에)
-node tools/battle-sim.js --only gear_s15 --check   # 한 시나리오만 비교 (index.json 의 그 줄도 함께 확인)
-node tools/battle-sim.js --only abyss_s19 --rng-log [폴더]   # 2b 디버깅: 난수 호출마다 '번호<TAB>함수@파일:줄 < 바깥 함수…'
-                                                          #   기본 폴더 tools/_work/rng-log/ (git 제외). 기록 파일은 그대로
-node tools/battle-sim/coverage.js           # 기록에서 실제로 일어난 일 세기 (스킬·전술·환경 …, 안 쓴 능동 스킬 목록)
+G=/Applications/Godot.app/Contents/MacOS/Godot
+$G --headless --path godot --script res://tests/replay_golden.gd                          # 22개 비교 (기준 데이터)
+$G --headless --path godot --script res://tests/replay_golden.gd -- --resume              # 모든 입력 대기마다 저장·복원하며
+$G --headless --path godot --script res://tests/replay_golden.gd -- --only boss_s10 --rng-log   # 난수 호출마다 '번호<TAB>태그' → user://rng-log/
+$G --headless --path godot --script res://tests/replay_golden.gd -- --live                # 영향 보고: 지금 godot/data 로 (실패해도 이상한 게 아님)
+$G --headless --path godot --script res://tests/replay_golden.gd -- --record [--only 이름]   # Godot 엔진으로 기록 다시 쓰기 (아래)
 ```
 
-**웹 규칙(js/battle·js/skills·js/logic·data)을 고치면 기록이 바뀝니다.** 의도한 변경이면 다시 만들고(`node tools/battle-sim.js`) 2b 시험도 다시 맞춥니다.
-`--check` 가 실패하면 규칙이 (의도치 않게) 바뀐 것입니다.
+## 기록을 바꿔야 할 때
 
-결정성: 같은 코드에서 두 번 돌리면 모든 파일이 바이트 단위로 같습니다 (index.json 의 sha1 로 확인). 한 시나리오만 돌려도(`--only`) 전체 실행과 같은 결과입니다 (시나리오마다 새 vm).
+- **데이터만 바꿈**: 기록은 그대로 (기준 데이터로 재생하므로). 영향이 궁금하면 `--live`.
+- **Godot 전투 규칙을 일부러 바꿈** (버그 고침 등): `--record` → Godot 엔진이 기록된 세이브·시드·주입·명령으로 다시 돌려 같은 모양(한 줄에 사건 하나)으로 씁니다.
+  지금 기록과 같은 항목은 글자 그대로 두므로(비교에서 빼는 가상 시각·시계 기반 id 포함) 바뀐 사건만 diff 에 나옵니다. 아무것도 안 바꾸고 돌리면 22개 모두 '같음'.
+  → `git diff godot/tests/golden` 사람이 검토 → `tools/data_tool.gd -- --relock "이유"` → 커밋.
+- **기준 데이터를 지금 데이터로 옮김**: `tools/data_tool.gd -- --rebase "이유"` (복사 → `--record` → 잠금, 실패하면 되돌림). `--record --live` 는 기록과 기준 데이터가 어긋나므로 거부됩니다.
+- 기록된 명령이 더는 맞지 않으면(전투 흐름이 달라져 다른 유닛이 입력을 기다림) 그 시나리오는 쓰지 않고 실패 — 시나리오를 새로 짜야 합니다.
+  아군 시험 정책의 Godot 판은 아직 없으므로 `tools/legacy-web/battle-sim/policy.js`·`scenarios.js` 를 본보기로.
+
+아래 '시나리오'부터 끝까지는 **기록의 명세와 만든 과정**입니다 (기록이 기대는 웹 함수·실행 모델·형식). 도구 경로는 `tools/legacy-web/` 아래로 옮겨졌습니다.
 
 ## 파일
 
@@ -34,7 +40,7 @@ node tools/battle-sim/coverage.js           # 기록에서 실제로 일어난 �
 | `<시나리오>.json` | 기록 하나 (아래 형식) |
 | `index.json` | 시나리오 목록: `name, seed, stage, result, rounds, actions(행동 수), events(사건 수), rngCalls(난수 호출 수), sha1(파일)` |
 
-## 시나리오 (tools/battle-sim/scenarios.js)
+## 시나리오 (tools/legacy-web/battle-sim/scenarios.js)
 
 | 이름 | 스테이지 | 결과 | 확인하려는 것 |
 |---|---|---|---|
@@ -63,7 +69,7 @@ node tools/battle-sim/coverage.js           # 기록에서 실제로 일어난 �
 
 상태 주입(`inject`)은 일반 플레이로 만들 수 없거나 너무 드문 상태를 시험하려고 쓴 것이며 모두 `setup.inject` 에 남습니다 (balanced_s05·drill_s35·drill_s28·gate_breach_s01·edge_inject_s11).
 
-`node tools/battle-sim/coverage.js` 로 시나리오마다 실제로 일어난 일을 셀 수 있습니다. 12직업의 **모든 능동 스킬(기본 14 + 습득형 27 = 41개)을 아군이 한 번 이상 사용**합니다.
+`node tools/legacy-web/battle-sim/coverage.js` 로 시나리오마다 실제로 일어난 일을 셀 수 있습니다. 12직업의 **모든 능동 스킬(기본 14 + 습득형 27 = 41개)을 아군이 한 번 이상 사용**합니다.
 
 ## 실행 모델 (2b 가 똑같이 따라야 하는 것)
 
@@ -83,7 +89,7 @@ node tools/battle-sim/coverage.js           # 기록에서 실제로 일어난 �
 - 기록의 `virtualMs` 는 참고값입니다 (2b 가 맞출 필요 없음). 맞춰야 하는 것은 **사건 순서**입니다.
 - 실제 게임(연출 켬)에서는 `Fx.later`·`atkHitDelay` 가 수백 ms 지연되지만, 한 유닛의 처리 안에서 일어나는 일의 **순서**는 같습니다. 그 지연 동안 규칙에 영향을 주는 것은 화면 프레임에서 도는 행동 예고 계산뿐이며, 그 시점은 아래 '행동 예고 규칙'이 실제 게임의 프레임 동작을 따라 정합니다 (검수자가 브라우저 재생으로 확인한 규칙).
 
-### 화면 모듈에 섞인 규칙 (`tools/battle-sim/rules-shim.js`) ★
+### 화면 모듈에 섞인 규칙 (`tools/legacy-web/battle-sim/rules-shim.js`) ★
 
 연출을 끄면 함께 사라지는 규칙이 화면 모듈 안에 있습니다. 실제 게임과 같도록 시뮬레이터가 되살리며, **2b 는 이것들을 규칙으로 구현해야 합니다.**
 
@@ -127,7 +133,7 @@ AI 는 적마다 `_intent`(노릴 클랜원)를 `_tryAttack` 의 공격 대상 �
 `Math.random` 을 전투 시드(`scenario.seed`)의 mulberry32 로 바꿉니다. **`initBattle` 직전부터** 호출 수를 셉니다 (`events[i].rng`·`rngEnd` — 아래 '사건의 rng 의미', `setup.rngAfterInit`, `end.rngCalls`).
 가짜 세이브의 장비는 다른 시드(`seed ^ 0x5eed5eed`)로 만들고 세지 않습니다 — 결과가 `save` 에 그대로 있으니 2b 는 다시 만들 필요 없음.
 
-JS (tools/battle-sim/env.js):
+JS (tools/legacy-web/battle-sim/env.js):
 
 ```js
 function mulberry32(seed) {

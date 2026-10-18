@@ -1,0 +1,360 @@
+{
+  "format": 2,
+  "generator": "godot/tools/data_tool.gd",
+  "note": "자동 생성 — 직접 고치지 말 것. 원본은 이 폴더의 *.json (고친 뒤 data_tool --write 로 모양 맞춤 + 이 파일 다시 만듦, README '데이터 원본')",
+  "sources": {
+    "jab": [{"file": "jab.json", "sha1": "a025eee12321f439cb9c71bf28e8cb3416d8b734"}],
+    "constants": [{"file": "constants.json", "sha1": "0f7f5d6330c8baf843cd61bc84acf8a7e9d377a0"}],
+    "daily": [{"file": "daily.json", "sha1": "be8a636daca2c01ef0ad5cdb98c2b911187398b4"}],
+    "stages": [{"file": "stages.json", "sha1": "76fc3a7b49a17cd6e36f1f73a77f787d0415b0ab"}],
+    "synergy": [{"file": "synergy.json", "sha1": "7a77cc09ee720f5deb38df89a2f8aecd4784239a"}],
+    "hazards": [{"file": "hazards.json", "sha1": "dfeb7b9b71578a798d89149f21cbb5b894b1f411"}],
+    "tiles": [{"file": "tiles.json", "sha1": "0fa27ade208ee74c0ac76c153fb3e80900381680"}],
+    "props": [{"file": "props.json", "sha1": "033964bbd1fc0f8c0a9b058b8e0f0858d6cad7ef"}],
+    "equip": [{"file": "equip.json", "sha1": "502e3d2c26511373d21a01b9daae38761b6be6f8"}],
+    "gear": [{"file": "gear.json", "sha1": "3866752734ac7afe70ac29756bd8040018a247fc"}],
+    "skills": [{"file": "skills.json", "sha1": "cdc30b273619bd5bb9c7a3942e76f22680c83469"}],
+    "battle_constants": [
+      {"file": "battle_constants.json", "sha1": "415d5b4bcd97c8b2c98f26386dbfeb8104a28ad0"}
+    ],
+    "soul": [{"file": "soul.json", "sha1": "024645fc659fbcc0c76a14f1ce05b8d8219a8ba8"}],
+    "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
+    "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
+    "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}]
+  },
+  "modules": {
+    "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
+    "constants": {
+      "file": "constants.json",
+      "globals": {
+        "SAVE_KEY": {"type": "string", "count": null},
+        "ROSTER_KEY": {"type": "string", "count": null},
+        "PARTY_KEY": {"type": "string", "count": null},
+        "PARTIES_KEY": {"type": "string", "count": null},
+        "NAV_KEY": {"type": "string", "count": null},
+        "INVENTORY_KEY": {"type": "string", "count": null},
+        "SHOP_KEY": {"type": "string", "count": null},
+        "MIN_P": {"type": "number", "count": null},
+        "MAX_P": {"type": "number", "count": null},
+        "MAX_LEVEL": {"type": "number", "count": null},
+        "GRADE_LV_CAP": {"type": "object", "count": 4},
+        "MAX_SKILL_LV": {"type": "number", "count": null},
+        "ECON": {"type": "object", "count": 11},
+        "LEVEL_EXP": {"type": "array", "count": 3},
+        "KILL_EXP": {"type": "array", "count": 2},
+        "SOUL": {"type": "object", "count": 4},
+        "GRADE_ORDER": {"type": "array", "count": 4},
+        "GRADE_COLORS": {"type": "object", "count": 4},
+        "COMMANDER_CLS": {"type": "string", "count": null},
+        "COMMANDER_DEFAULT_NAME": {"type": "string", "count": null},
+        "ROLE_MAP": {"type": "object", "count": 13},
+        "CLASS_GROUP_MAP": {"type": "object", "count": 13},
+        "CLASS_GROUPS": {"type": "object", "count": 4}
+      }
+    },
+    "daily": {
+      "file": "daily.json",
+      "globals": {
+        "DAILY_KEY": {"type": "string", "count": null},
+        "DAILY": {"type": "object", "count": 5}
+      }
+    },
+    "stages": {
+      "file": "stages.json",
+      "globals": {
+        "EPISODES": {"type": "array", "count": 10},
+        "STAGES": {"type": "array", "count": 100},
+        "ENEMY_SM_BASE": {"type": "number", "count": null},
+        "ENEMY_SM_GROWTH": {"type": "number", "count": null},
+        "ENEMY_LV_PER_STAGE": {"type": "number", "count": null},
+        "ENEMY_BOSS_LV": {"type": "number", "count": null},
+        "ENEMY_SKILL_EVERY": {"type": "number", "count": null},
+        "ENEMY_HP_EXP": {"type": "number", "count": null},
+        "ENEMY_ATK_EXP": {"type": "number", "count": null},
+        "ENEMY_HP_GROWTH_MUL": {"type": "number", "count": null},
+        "ENEMY_DEF_GROWTH_MUL": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_MAX": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_BOSS": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_BASE": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_PER": {"type": "number", "count": null},
+        "STAGE_COMP_HP": {"type": "number", "count": null},
+        "STAGE_COMP_ATK": {"type": "number", "count": null},
+        "STAGE_MAX_WAVES": {"type": "number", "count": null},
+        "MAX_ENEMIES_ON_FIELD": {"type": "number", "count": null}
+      }
+    },
+    "synergy": {
+      "file": "synergy.json",
+      "globals": {
+        "SYNERGY_MONO": {"type": "object", "count": 12},
+        "SYNERGY_LEGION": {"type": "object", "count": 4},
+        "SYNERGY_TRIO": {"type": "object", "count": 12},
+        "SYNERGY_ROLE": {"type": "array", "count": 5}
+      }
+    },
+    "hazards": {
+      "file": "hazards.json",
+      "globals": {
+        "HAZARDS": {"type": "object", "count": 8},
+        "SAFE_ZONE": {"type": "object", "count": 5},
+        "ENCHANTS": {"type": "object", "count": 12},
+        "ENCHANT_FIELD": {"type": "object", "count": 2},
+        "ENCHANT_FEE": {"type": "number", "count": null},
+        "RUNE_GACHA_COST": {"type": "number", "count": null},
+        "RUNE_DROP_CHANCE": {"type": "number", "count": null},
+        "CHEST": {"type": "object", "count": 4}
+      }
+    },
+    "tiles": {
+      "file": "tiles.json",
+      "globals": {
+        "TI": {"type": "object", "count": 8},
+        "MAP_THEMES": {"type": "object", "count": 10}
+      }
+    },
+    "props": {
+      "file": "props.json",
+      "globals": {
+        "PROP_ART": {"type": "object", "count": 5},
+        "TILE_PROPS": {"type": "object", "count": 2},
+        "PROP_THEME_FILTER": {"type": "object", "count": 6}
+      }
+    },
+    "equip": {
+      "file": "equip.json",
+      "globals": {
+        "EQUIP_SLOTS": {"type": "array", "count": 8},
+        "EQUIP_SLOT_ICONS": {"type": "object", "count": 8},
+        "GACHA_COST_1": {"type": "number", "count": null},
+        "GACHA_COST_10": {"type": "number", "count": null},
+        "GACHA_MULTI_COUNT": {"type": "number", "count": null},
+        "RARITY": {"type": "object", "count": 5},
+        "GACHA_RATE": {"type": "object", "count": 5},
+        "GACHA_PITY_MAX": {"type": "number", "count": null},
+        "RARITY_MULT": {"type": "object", "count": 5},
+        "SELL_PRICE": {"type": "object", "count": 5},
+        "RARITY_ORDER": {"type": "array", "count": 5},
+        "ARMOR_TYPE": {"type": "object", "count": 4},
+        "CLASS_ARMOR": {"type": "object", "count": 12},
+        "ALL_CLASSES": {"type": "array", "count": 12},
+        "EQUIP_DB": {"type": "array", "count": 36},
+        "LEGACY_WEAPON": {"type": "object", "count": 9},
+        "EQUIP_SETS": {"type": "object", "count": 3},
+        "ENHANCE_MAX_LV": {"type": "number", "count": null},
+        "ENHANCE_RATES": {"type": "array", "count": 10},
+        "ENHANCE_SAFE_BELOW": {"type": "number", "count": null},
+        "ENHANCE_BREAK_CHANCE": {"type": "number", "count": null},
+        "ENHANCE_FAIL_BONUS": {"type": "number", "count": null},
+        "ENHANCE_FAIL_BONUS_MAX": {"type": "number", "count": null},
+        "ENHANCE_GOLD": {"type": "object", "count": 5},
+        "ENHANCE_STONES": {"type": "array", "count": 10},
+        "REPAIR_GOLD": {"type": "object", "count": 5},
+        "ENHANCE_STAT_PCT": {"type": "array", "count": 11},
+        "DISMANTLE_STONES": {"type": "object", "count": 5},
+        "EQUIP_EMOJI": {"type": "object", "count": 36},
+        "SIEGE_ITEMS": {"type": "array", "count": 3},
+        "BATTLE_POTIONS": {"type": "object", "count": 6},
+        "INV_KEY": {"type": "string", "count": null},
+        "PITY_KEY": {"type": "string", "count": null},
+        "MATS_KEY": {"type": "string", "count": null}
+      }
+    },
+    "gear": {
+      "file": "gear.json",
+      "globals": {
+        "GEAR_FX": {"type": "object", "count": 45},
+        "SUB_RANGE": {"type": "object", "count": 8},
+        "SUB_POOL": {"type": "object", "count": 4},
+        "SUB_ARMOR_EXTRA": {"type": "object", "count": 4},
+        "SUB_COUNT": {"type": "object", "count": 5},
+        "CLASS_OPTS": {"type": "object", "count": 12},
+        "UNIQUE_POOL": {"type": "array", "count": 12},
+        "LEGENDS": {"type": "object", "count": 19},
+        "LEGEND_SHARD_COST": {"type": "number", "count": null},
+        "CLASS_SETS": {"type": "object", "count": 12},
+        "SET_SLOTS": {"type": "array", "count": 3},
+        "RESONANCE_MUL": {"type": "number", "count": null},
+        "ENHANCE_OPT": {"type": "array", "count": 4},
+        "GEAR_DROP": {"type": "object", "count": 5},
+        "MATS_PRICE": {"type": "object", "count": 2}
+      }
+    },
+    "skills": {
+      "file": "skills.json",
+      "globals": {
+        "SKILLS": {"type": "object", "count": 13},
+        "LEARNABLE_SKILLS": {"type": "object", "count": 40},
+        "SKILL_SPRITE": {"type": "object", "count": 51},
+        "FURY_PASSIVES": {"type": "object", "count": 3}
+      }
+    },
+    "battle_constants": {
+      "file": "battle_constants.json",
+      "globals": {
+        "COLS": {"type": "number", "count": null},
+        "ROWS": {"type": "number", "count": null},
+        "TW": {"type": "number", "count": null},
+        "TH": {"type": "number", "count": null},
+        "MID_C": {"type": "number", "count": null},
+        "ZH": {"type": "number", "count": null},
+        "UI": {"type": "number", "count": null},
+        "UW": {"type": "number", "count": null},
+        "UH": {"type": "number", "count": null},
+        "UCX": {"type": "number", "count": null},
+        "UCY": {"type": "number", "count": null},
+        "UOY": {"type": "number", "count": null},
+        "DEPLOY": {"type": "array", "count": 10},
+        "FORM_COLS": {"type": "array", "count": 6},
+        "CLAB": {"type": "array", "count": 4},
+        "CARR": {"type": "array", "count": 4},
+        "ENEMY_TURN_PACE": {"type": "number", "count": null},
+        "AI_PROFILES": {"type": "object", "count": 12},
+        "AI_MISTAKE_CHANCE": {"type": "number", "count": null},
+        "GUARD_CLASSES": {"type": "array", "count": 1},
+        "COVER_IGNORE_CLASSES": {"type": "array", "count": 1},
+        "PROJECTILE_CLASSES": {"type": "array", "count": 7},
+        "VAULT_CLASSES": {"type": "array", "count": 2},
+        "VAULT_DIST": {"type": "number", "count": null},
+        "TACTIC": {"type": "object", "count": 9},
+        "TACTICS_ACT": {"type": "object", "count": 5},
+        "KNOCK_RESIST": {"type": "object", "count": 1},
+        "SUPPORT": {"type": "object", "count": 2},
+        "RES_LABEL": {"type": "object", "count": 3},
+        "RES_COLOR": {"type": "object", "count": 3}
+      }
+    },
+    "soul": {"file": "soul.json", "globals": {"SOUL_KEY": {"type": "string", "count": null}}},
+    "icons": {
+      "file": "icons.json",
+      "globals": {
+        "ITEM_SPRITE_COLS": {"type": "number", "count": null},
+        "ITEM_SPRITE_ROWS": {"type": "number", "count": null},
+        "ITEM_SPRITE": {"type": "object", "count": 198},
+        "EMOJI_ICON": {"type": "object", "count": 158},
+        "ICON_RARITY": {"type": "object", "count": 39}
+      }
+    },
+    "sprites": {
+      "file": "sprites.json",
+      "globals": {
+        "CHAR_SPRITES": {"type": "object", "count": 28},
+        "CUTOUT_RIGS": {"type": "object", "count": 24},
+        "CHAR_FIG": {"type": "object", "count": 26},
+        "FIG_H": {"type": "number", "count": null},
+        "FIG_FOOT": {"type": "number", "count": null},
+        "SPRITE_SHEETS": {"type": "object", "count": 50},
+        "ATK_MOTIONS": {"type": "object", "count": 13}
+      }
+    },
+    "ui": {"file": "ui.json", "globals": {"NAV_TABS": {"type": "array", "count": 5}}}
+  },
+  "lang": {
+    "langs": {
+      "ko": {
+        "file": "lang/ko.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "2c342fe972ccf5e7f503f926667620466b279702"
+      },
+      "en": {
+        "file": "lang/en.json",
+        "type": "object",
+        "count": 52,
+        "leaves": 2424,
+        "sha1": "77a17b22747518111f6371ec321426803bf0bb2f"
+      },
+      "es": {
+        "file": "lang/es.json",
+        "type": "object",
+        "count": 52,
+        "leaves": 2424,
+        "sha1": "c1764cfe1a6608de56c173f96126ee14ba677e68"
+      },
+      "ja": {
+        "file": "lang/ja.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "d0455767aeca1874bc584561ac29012c757a2d67"
+      },
+      "zh-CN": {
+        "file": "lang/zh-CN.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "de9be11ed608263fc1d335f05f33da0faba63880"
+      },
+      "zh-TW": {
+        "file": "lang/zh-TW.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "46c359be09c679b0ce33622f1f94c3bba619889e"
+      }
+    }
+  },
+  "story": {
+    "ko": {
+      "file": "story/ko.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "e900523106d02e37db48784c4d1d344bd47516a9"
+    },
+    "en": {
+      "file": "story/en.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "53772cf832f74ff0a56154e0ca00b1ae2d3e19ac"
+    },
+    "es": {
+      "file": "story/es.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "c4bcd8ca02284c2610818123c8d4ea0877e82543"
+    },
+    "ja": {
+      "file": "story/ja.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "64ba804c0b178f3ccfc2a1d11925f07351c101b2"
+    },
+    "zh-CN": {
+      "file": "story/zh-CN.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "982b7605f69f834c009f5f863506324730c1f2f5"
+    },
+    "zh-TW": {
+      "file": "story/zh-TW.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2600,
+      "sha1": "406823ab494c28828ea172ba4da5fb5c89887a69"
+    },
+    "sample": {
+      "file": "story/sample.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 1,
+      "leaves": 49,
+      "sha1": "50c50226d51edd2c7233ad4cfc82db55dcc1c47a"
+    }
+  },
+  "special_values": [
+    {"module": "tiles.json", "path": ["TI", "rock", "cost"], "value": "Infinity"},
+    {"module": "tiles.json", "path": ["TI", "water", "cost"], "value": "Infinity"},
+    {"module": "tiles.json", "path": ["TI", "wall", "cost"], "value": "Infinity"}
+  ]
+}

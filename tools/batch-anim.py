@@ -32,7 +32,7 @@ def note(msg):
 def padded_input(key):
     path = os.path.join(OUT, key + '_in.png')
     if os.path.exists(path): return path
-    im = Image.open(os.path.join(ROOT, 'image', 'character', key + '.png')).convert('RGBA')
+    im = Image.open(os.path.join(ROOT, 'godot', 'assets', 'image', 'character', key + '.png')).convert('RGBA')
     ch = im.crop(im.getbbox())
     S = 1024; bg = Image.new('RGBA', (S, S), (0, 255, 0, 255))
     h = int(S * 0.38); w = int(ch.width * h / ch.height)

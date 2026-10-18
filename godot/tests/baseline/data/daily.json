@@ -1,0 +1,49 @@
+{
+  "DAILY_KEY": "game_daily",
+  "DAILY": {
+    "perDay": 3,
+    "schedule": {
+      "0": "all",
+      "1": ["warrior", "knight"],
+      "2": ["archer", "lancer"],
+      "3": ["mage", "shaman"],
+      "4": ["priest", "summoner"],
+      "5": ["assassin", "brawler"],
+      "6": ["sapper", "novice"]
+    },
+    "tiers": [
+      {"key": "easy", "unlock": 0, "eq": 8, "frags": 3, "tot": 8, "map": "plains"},
+      {"key": "normal", "unlock": 20, "eq": 30, "frags": 5, "tot": 12, "map": "jungle"},
+      {"key": "hard", "unlock": 45, "eq": 55, "frags": 8, "tot": 16, "map": "canyon"},
+      {"key": "hell", "unlock": 75, "eq": 85, "frags": 12, "tot": 20, "map": "abyss"}
+    ],
+    "escort": {
+      "warrior": "knight",
+      "knight": "priest",
+      "archer": "lancer",
+      "lancer": "archer",
+      "mage": "knight",
+      "shaman": "warrior",
+      "priest": "warrior",
+      "summoner": "knight",
+      "assassin": "brawler",
+      "brawler": "assassin",
+      "sapper": "lancer",
+      "novice": "warrior"
+    },
+    "CLASSES": [
+      "warrior",
+      "knight",
+      "archer",
+      "lancer",
+      "mage",
+      "shaman",
+      "priest",
+      "summoner",
+      "assassin",
+      "brawler",
+      "sapper",
+      "novice"
+    ]
+  }
+}

@@ -6,6 +6,7 @@ extends SceneTree
 ##  2) command() 결과·검사 (방향 값, 대기 아님, 잘못된 번호)  3) bus_event 의 유닛이 그 시점 사본인지
 ##  4) plan_rule 이 AI_TURN·BATTLE_END 에서 건너뛰는지  5) 규칙 코드의 실수 리터럴이 정확히 컴파일되는지
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const DataDBScript := preload("res://scripts/core/data_db.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const NumParse := preload("res://scripts/core/num_parse.gd")
@@ -47,7 +48,7 @@ func _run() -> int:
 	if db == null:
 		own = DataDBScript.new()
 		db = own
-	db.call("load_all")
+	BaselineData.apply_db(db)   # 기준 데이터 (tests/baseline_data.gd)
 	_globals = Ctx.globals_from_db(db)
 	_test_purity()
 	_test_command()

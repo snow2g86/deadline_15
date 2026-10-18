@@ -3,7 +3,7 @@ extends SceneTree
 ##  로비 → 아래 탭 성소(부활 · 승급 탭) → 아래 탭 아카데미(전직 · 스킬북 탭) → 로비 → 도감(직업 상세 창 · 장비 탭) → 로비 → 가이드(탭) →
 ##  로비 → 톱니 → 설정 → 크레딧 → 설정 → 라이선스(전문 펼치기) → 설정 → 로비 → 스테이지 1-1 → 전투 한 판 → 로비
 ##   Godot --path godot --resolution 1280x720 --script res://tests/play_4b2.gd   [-- --size 1920x1080] → tests/screens/4b2_*.png
-##  저장은 user://test_play_4b2_save.json (진짜 세이브는 건드리지 않음). 실패하면 바로 끝냄. 끝에 PLAY_RESULT: OK|FAIL
+##  저장은 user://test_play_4b2_save.json (진짜 세이브는 건드리지 않음). 실패하면 바로 끝냄. 끝에 PLAY_RESULT: OK|WARN|FAIL (종료 코드 0·2·1, tests/play_kit.gd verdict)
 
 const OUT := "res://tests/screens/"
 const PlayKit := preload("res://tests/play_kit.gd")
@@ -346,14 +346,14 @@ func _main() -> void:
 	if _aborting:
 		return
 	print("PLAY_LOG: " + " | ".join(log_lines))
-	print("PLAY_RESULT: " + ("OK" if fails.is_empty() else "FAIL " + str(fails)))
+	var code := PlayKit.verdict(fails.is_empty(), hud_blocked, "" if fails.is_empty() else str(fails))
 	if current_scene != null:
 		current_scene.queue_free()
 	await _frames(2)
 	store.call("clear")
 	store.call("flush")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
-	quit(0 if fails.is_empty() else 1)
+	quit(code)
 
 
 func _char(uid: int) -> Dictionary:

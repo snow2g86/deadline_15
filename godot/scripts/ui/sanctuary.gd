@@ -138,8 +138,9 @@ func _render_promote() -> void:
 	if list_p.is_empty():
 		empty_state("⭐", t("sanctuary.no_promotable"))
 		return
+	var pc := Sanc.promote_ctx(c)   # 로스터·파티·저장 전투를 한 번만 읽어 모든 카드에 (카드마다 읽으면 60명에 0.6초 넘게 걸림)
 	for ch: Dictionary in list_p:
-		var st := Sanc.promote_state(c, ch)
+		var st := Sanc.promote_state(c, ch, pc)
 		var g := str(st["grade"])
 		var gc := game_card("Promote_%s" % num(ch["uid"]), Color(192 / 255.0, 132 / 255.0, 252 / 255.0, 0.25))
 		(gc[3] as HBoxContainer).add_child(portrait(ch, 44))

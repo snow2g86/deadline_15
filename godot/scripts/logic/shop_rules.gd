@@ -5,7 +5,7 @@ extends RefCounted
 ##   인벤토리에 넣는 물건 모양도 웹 그대로 (경험치 물약 {type:'potion', pid, potionId, exp, icon, quantity} …)
 ##  무작위: 웹과 같은 씨앗·같은 순서 (Math.random 호출 순서를 줄 단위로 맞춤). 웹의 `.sort(() => Math.random() - 0.5)` 는
 ##   V8 정렬의 비교 호출 순서까지 Js.v8_sort 로 재현하고, id 꼬리 `Math.random().toString(36).slice(2, 6)` 도 Js.rand36_4 로 같은 글.
-##   → tests/check_outer_4b1.gd 가 같은 씨앗·같은 시각으로 웹 코드(node tools/outer-4b1-expect.js)와 저장값을 바이트 단위로 비교.
+##   → tests/check_outer_4b1.gd 가 같은 씨앗·같은 시각으로 웹 코드(node tools/legacy-web/outer-4b1-expect.js)와 저장값을 바이트 단위로 비교.
 ##  용병 이름은 웹처럼 '지금 언어'의 character.names 에서 고른 글자를 저장하므로 names(배열)를 받는다.
 
 const Js := preload("res://scripts/logic/js.gd")

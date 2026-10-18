@@ -4,7 +4,7 @@
 사용: python3 tools/icon-catalog.py
 - docs/ICON_PROMPTS.md : 그림마다 파일 이름(키)과 생성 프롬프트 (Gemini 등에서 직접 생성)
 - js/common/emoji-icons.js 의 EMOJI_ICON 표 : 화면의 이모지 → 아이콘 키 (그림이 있는 것만 자동 교체)
-그림 넣는 법: image/icon/src/<키>.png|webp|jpg 로 저장 → python3 tools/import-icons.py
+그림 넣는 법: godot/assets/image/icon/src/<키>.png|webp|jpg 로 저장 → python3 tools/import-icons.py
 """
 import os, re, json
 
@@ -40,13 +40,13 @@ def prompt_of(key, subj):
     return STYLE + subj
 
 
-# 직업 아이콘(image/icon/jab/*.png)은 기존 직업 아이콘과 같은 엠블럼 화풍 — 금테 없음
+# 직업 아이콘(godot/assets/image/icon/jab/*.png)은 기존 직업 아이콘과 같은 엠블럼 화풍 — 금테 없음
 JAB_STYLE = ('Square fantasy RPG class emblem icon in the same style as the other class icons: glossy semi-realistic emblem art, '
              'thick dark outline, a single centered object on a glowing radial gradient background that fills the whole square, '
              'no border frame, no text, no letters, no watermark. Subject: ')
 
 # (키, 한국어 이름, 영어 주제, [이 그림으로 바꿀 이모지들])  — 그룹 순서 = 작업 우선순위
-#  키가 jab_ 로 시작하면 직업 아이콘: tools/import-icons.py 가 image/icon/jab/<직업>.png (64px)로 바로 교체
+#  키가 jab_ 로 시작하면 직업 아이콘: tools/import-icons.py 가 godot/assets/image/icon/jab/<직업>.png (64px)로 바로 교체
 GROUPS = [
  ('0. 직업 아이콘 (엠블럼 화풍 — 위 "직업 아이콘 스타일" 사용)', [
   ('jab_commander', '지휘관 직업 아이콘 (음표 없이)', "a short thick ornate field marshal's baton (a short cylindrical rod with gold end caps, clearly not a sword, no blade) lying across a rolled battle map with a red wax seal, "
@@ -275,12 +275,12 @@ KEEP_TEXT = '→ ★ ✕ ↩ ↩️ ✓ ⏸ ⏸️ ← ↑ ⬆ ✦ ✚ ⚑ ⏭ �
 def main():
     md = ['# 아이콘 일러스트 프롬프트', '',
           '> 생성: 아래 **스타일** + 각 줄의 **주제**를 이어 붙여 Firefly·Gemini 등에 넣는다 (1:1 정사각형). 등급 칸은 게임에서 기본으로 깔리는 테두리.',
-          '> 저장: `image/icon/src/<파일 이름>.png` (webp·jpg도 됨). 그다음 `python3 tools/import-icons.py` 를 실행하면 게임에 바로 적용된다.',
+          '> 저장: `godot/assets/image/icon/src/<파일 이름>.png` (webp·jpg도 됨). 그다음 `python3 tools/import-icons.py` 를 실행하면 게임에 바로 적용된다.',
           '> 화면의 이모지는 그림이 생긴 것만 자동으로 바뀌고, 없는 것은 이모지 그대로 남는다.', '',
           '## 아이템 그림 스타일', '', '아이템만 초록 단색 바탕에 그린다 (테두리·배경 없음). 등급 느낌은 게임이 등급 테두리를 겹쳐서 낸다: D 없음 · C 은장 · B 금장 · A 에메랄드 · S 루비.', '', '```', STYLE.strip(), '```', '',
           '## 등급 테두리 스타일 (frame_ 묶음만)', '', '```', FRAME_STYLE.strip(), '```', '',
           '## 직업 아이콘 스타일 (0번 묶음만)', '', '```', JAB_STYLE.strip(), '```', '']
-    have = set(os.path.splitext(f)[0] for f in os.listdir(os.path.join(ROOT, 'image/icon/item'))) if os.path.isdir(os.path.join(ROOT, 'image/icon/item')) else set()
+    have = set(os.path.splitext(f)[0] for f in os.listdir(os.path.join(ROOT, 'godot/assets/image/icon/item'))) if os.path.isdir(os.path.join(ROOT, 'godot/assets/image/icon/item')) else set()
     total = done = 0
     emap = {}
     for title, rows in GROUPS:

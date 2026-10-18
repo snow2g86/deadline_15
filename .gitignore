@@ -11,14 +11,14 @@ docs/.pdca-snapshots/
 # 모션 시험 제작 산출물 (3D 모델 등, 용량 큼)
 tools/_work/
 
-# 아이콘 일러스트 원본 (tools/import-icons.py 가 image/icon/item 으로 변환)
-image/icon/src/
-image/character/story/src/
+# 아이콘·초상화 일러스트 원본 (tools/import-icons.py · make-portrait.py 가 변환) — git 에 넣지 않음 (2026-10-18 image/ → godot/assets/image/ 로 옮김.
+#  Godot 이 읽지 않게 각 src/ 에 .gdignore 가 있음)
+godot/assets/image/icon/src/
+godot/assets/image/character/story/src/
 
-# Godot 이전 (godot/README.md) — 그림은 tools/sync-godot-assets.sh 로 복사하는 사본, .godot/ 는 편집기 캐시
-godot/assets/*
-# 글꼴은 사본이 아니라 원본이라 git 에 올림 (Noto Sans KR, OFL — godot/assets/fonts/OFL.txt)
-!godot/assets/fonts/
+# Godot (godot/README.md) — 그림 원본은 godot/assets/image/ (git 에 올림, *.import 옆파일도), 저장소 맨 위 image 는 웹판용 심볼릭 링크. .godot/ 는 편집기 캐시
+# 작업 중 미리보기 그림(*.prev.png)을 Godot 이 가져오며 만드는 옆파일은 올리지 않음
+godot/assets/image/**/*.prev.png.import
 # 3단계 전투 화면 시험이 남기는 화면 사진 (tests/check_battle_scene.gd, Movie Maker)
 godot/tests/screens/*
 !godot/tests/screens/.gdignore

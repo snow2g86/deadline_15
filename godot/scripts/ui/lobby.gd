@@ -116,6 +116,7 @@ func _build() -> void:
 	if not revived.is_empty():
 		get_tree().create_timer(1.2).timeout.connect(_alert_revived)
 	cta.grab_focus.call_deferred()
+	_data_warning()
 
 
 ## 전투 재개: Godot 저장이면 이어하기, 아니면 안내 + 포기 (같은 프레임 연타 → 한 번만)
@@ -187,6 +188,26 @@ func ask_abandon() -> void:
 		nm = t("daily.title") if has_t("daily.title") else ""
 	open_modal(_msg_label(t("gd.resume.abandon_confirm", {"stage": nm})), {"name": "AbandonConfirm", "title": t("gd.resume.abandon"),
 		"buttons": [{"text": t("gd.resume.abandon"), "cb": abandon_resume, "name": "Abandon"}, {"text": t("common.cancel"), "secondary": true, "name": "Close"}]})
+
+
+## (2026-10-18) 디버그 빌드: 데이터가 manifest 와 어긋나면(JSON 을 고치고 data_tool --write 를 잊음 등) 위쪽에 빨간 띠 — 개발자만 보는 글이라 번역하지 않음
+func _data_warning() -> void:
+	var db: Node = get_node_or_null("/root/DataDB")
+	if not OS.is_debug_build() or db == null or (db.get("errors") as PackedStringArray).is_empty():
+		return
+	var errs: PackedStringArray = db.get("errors")
+	var p := PanelContainer.new()
+	p.name = "DataWarning"
+	p.add_theme_stylebox_override("panel", OKit.box(Color(0.6, 0.05, 0.05, 0.92), Color("f87171"), 8, 2, 14, 8))
+	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	p.offset_top = 60
+	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := OKit.label(13, Color.WHITE, 700)
+	l.text = "[DEV] 데이터 오류 %d개%s — godot/data 를 고쳤다면 tools/data_tool.gd -- --write\n%s" % [errs.size(),
+		" · 이 실행에서는 전투 이어하기 안 함 (데이터 해시 무효)" if bool(db.get("sha_mismatch")) else "", errs[0].left(160)]
+	p.add_child(l)
+	body.add_child(p)
 
 
 ## (타이머) 저장값 점검 결과 알림 — 화면이 이미 바뀌었으면 연결이 저절로 끊김 (메서드 연결)

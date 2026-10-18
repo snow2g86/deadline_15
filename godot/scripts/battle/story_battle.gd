@@ -12,8 +12,9 @@ const Js := preload("res://scripts/logic/js.gd")
 const Num := preload("res://scripts/core/num.gd")
 
 const SEEN_KEY := "game_story_seen"
-const BATTLE_KINDS := ["start", "wave", "boss", "danger", "last"]
-const PRIORITY := {"start": 0, "boss": 1, "wave": 2, "danger": 3, "last": 4}
+## 전투 중 대사 종류 (웹에 있던 'last' — 마지막 적 하나 — 는 2026-10-18 사용자 요청으로 발동을 지웠고, 대본 6개 언어에서도 지움)
+const BATTLE_KINDS := ["start", "wave", "boss", "danger"]
+const PRIORITY := {"start": 0, "boss": 1, "wave": 2, "danger": 3}
 ## 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.png)
 const BOSS_ART := [10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 92, 93, 94, 95, 99, 100]
 
@@ -204,7 +205,6 @@ func scan(view: Dictionary) -> void:
 				vars["ally"] = str(view.get("name_of", {}).get(u2["id"], ""))
 				enqueue("danger")
 				break
-	# 마지막 적 하나 남았을 때 대사("last")는 2026-10-18 사용자 요청으로 뺌
 
 
 ## 쌓인 전투 대사 → 재생할 장면 목록 (StoryBattle.flush)

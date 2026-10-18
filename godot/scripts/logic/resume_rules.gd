@@ -23,6 +23,8 @@ const HEAD := "{\"format\":2,\"sum\":\""
 ## 엔진 save_state 에 꼭 있어야 하는 칸 (없으면 깨진 저장으로 봄)
 const STATE_KEYS := ["format", "units", "S", "fsm", "rng", "store", "await", "known", "drawn", "init_ter", "seq"]
 const STAMP_KEYS := ["saveFormat", "dataHash", "gameVersion"]
+## DataDB 가 읽은 파일 sha1 이 manifest 와 다르면(data_tool --write 를 잊음) 데이터 해시를 믿을 수 없음 → 이 값. 이 판에서는 이어하기를 하지 않음 ('old')
+const INVALID_HASH := "invalid:sha1-mismatch"
 
 ## 시험용: 지금 게임의 판(stamp)을 바꿔 '다른 버전' 을 흉내 (비어 있으면 진짜 값)
 static var stamp_override: Dictionary = {}
@@ -33,12 +35,14 @@ static func current_stamp() -> Dictionary:
 	if not stamp_override.is_empty():
 		return stamp_override.duplicate()
 	var man: Dictionary = {}
+	var bad := false
 	var ml := Engine.get_main_loop()
 	if ml is SceneTree and (ml as SceneTree).root != null:
 		var db: Node = (ml as SceneTree).root.get_node_or_null("DataDB")
 		if db != null and db.get("manifest") is Dictionary:
 			man = db.get("manifest")
-	return {"saveFormat": BattleEngine.SAVE_FORMAT, "dataHash": JsonExact.stringify(man.get("sources", {})).md5_text(),
+			bad = bool(db.get("sha_mismatch"))
+	return {"saveFormat": BattleEngine.SAVE_FORMAT, "dataHash": INVALID_HASH if bad else JsonExact.stringify(man.get("sources", {})).md5_text(),
 		"gameVersion": str(ProjectSettings.get_setting("application/config/version", ""))}
 
 
@@ -95,6 +99,8 @@ static func check(c: Object) -> Array:
 		return ["broken", null]
 	# 판 확인: 저장 형식 · 데이터 · 게임 버전이 하나라도 다르면 예전 판
 	var now := current_stamp()
+	if str(now["dataHash"]) == INVALID_HASH:
+		return ["old", null]   # 이 실행의 데이터가 manifest 와 어긋남 — 이어하지 않음 (같은 실행에서 저장한 전투도)
 	for k2: String in STAMP_KEYS:
 		if typeof(cfg.get(k2)) != TYPE_STRING or str(cfg[k2]) != str(now[k2]):
 			return ["old", null]

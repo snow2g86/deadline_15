@@ -1,8 +1,11 @@
 extends Node
-## DataDB — 웹 data/*.js 에서 변환한 게임 데이터 (res://data/*.json) 창구
+## DataDB — 게임 데이터 (res://data/*.json) 창구
 ##
-## JSON 은 tools/export-godot-data.js 가 만든다 (웹 data/*.js 가 원본 — 여기 JSON 을 직접 고치지 말 것).
-## 읽을 때 manifest.json 의 전역별 개수와 맞춰 보고, 어긋나면 push_error 로 알린다.
+## (2026-10-18~) **res://data/**/*.json 이 수치·대본·번역의 원본**입니다 (웹 data/*.js 는 동결 — 더 읽지 않음).
+##  손으로 고친 뒤 `Godot --headless --path godot --script res://tools/data_tool.gd -- --write` 로 모양을 맞추고 manifest.json 을 다시 만드세요.
+## 읽을 때 manifest.json 의 전역별 개수·값 개수·sha1 과 맞춰 보고, 어긋나면 push_error 로 알린다
+##  (sha1 이 다르면 = JSON 을 고치고 data_tool --write 를 잊음 → 전투 이어하기의 데이터 해시도 믿을 수 없으므로 오류).
+## 시험은 use_dir() 로 고정된 기준 데이터(res://tests/baseline/data/)를 읽을 수 있다 (tests/baseline_data.gd).
 ##
 ## 사용 예
 ##   DataDB.global("STAGES")             → Array (100개)
@@ -19,6 +22,13 @@ const MANIFEST_FILE := "manifest.json"
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 
+## 지금 읽은 폴더 (기본 res://data/, 시험의 기준 데이터면 res://tests/baseline/data/)
+var data_dir := DATA_DIR
+## use_dir 로 기준 데이터를 읽었는지
+var is_baseline := false
+## 파일 sha1 이 manifest 와 다름(JSON 을 고치고 data_tool --write 를 잊음) — 이 실행에서는 전투 이어하기의 데이터 해시를 믿을 수 없으므로
+##  resume_rules 가 저장 전투를 '이전 버전'으로 보냄. 디버그 빌드 로비는 경고를 띄움 (2026-10-18 검수)
+var sha_mismatch := false
 var manifest: Dictionary = {}
 ## 검증 중 생긴 오류 (비어 있으면 정상)
 var errors: PackedStringArray = PackedStringArray()
@@ -31,7 +41,40 @@ var _loaded := false
 
 
 func _ready() -> void:
+	# 데이터 도구(tools/data_tool.gd)는 manifest 가 오래된 상태에서 돌기도 하므로 미리 읽지 않음 (오류 소리 없게)
+	if OS.get_cmdline_args().has("res://tools/data_tool.gd"):
+		return
 	load_all()
+
+
+## 다른 폴더의 데이터로 바꿔 다시 읽음 (시험용: 기준 데이터). overlay_lang 이면 그 폴더에 없는 번역 키만 지금 데이터(res://data/lang)에서 더함
+##  — 기준 이후에 생긴 화면 글(gd.* 등)이 키 그대로 보이지 않게. 대본(story)은 기준 그대로.
+func use_dir(dir: String, overlay_lang: bool = false) -> bool:
+	data_dir = dir
+	is_baseline = dir != DATA_DIR
+	_loaded = false
+	_modules = {}
+	_global_index = {}
+	_langs = {}
+	_stories = {}
+	manifest = {}
+	var ok := load_all()
+	if overlay_lang and dir != DATA_DIR:
+		for code: String in _langs.keys():
+			var p := DATA_DIR + "lang/%s.json" % code
+			if FileAccess.file_exists(p):
+				var live: Variant = JsonExact.parse(FileAccess.get_file_as_string(p))
+				if live is Dictionary:
+					_merge_missing(_langs[code], JsonNorm.normalize(live))
+	return ok
+
+
+static func _merge_missing(dst: Dictionary, src: Dictionary) -> void:
+	for k: Variant in src.keys():
+		if not dst.has(k):
+			dst[k] = src[k]
+		elif dst[k] is Dictionary and src[k] is Dictionary:
+			_merge_missing(dst[k], src[k])
 
 
 ## 모든 JSON 을 읽고 검증한다 (여러 번 불러도 한 번만 읽음). 성공 여부 반환
@@ -40,9 +83,10 @@ func load_all() -> bool:
 		return errors.is_empty()
 	_loaded = true
 	errors.clear()
+	sha_mismatch = false
 	var m: Variant = _read_json(MANIFEST_FILE)
 	if typeof(m) != TYPE_DICTIONARY:
-		_fail("manifest.json 을 읽지 못했습니다 — node tools/export-godot-data.js 를 먼저 실행하세요")
+		_fail("manifest.json 을 읽지 못했습니다 (%s) — tools/data_tool.gd -- --write 로 만드세요" % data_dir)
 		return false
 	manifest = m
 	_load_modules()
@@ -116,7 +160,8 @@ func _load_modules() -> void:
 	for mod_name: String in mods.keys():
 		var info: Dictionary = mods[mod_name]
 		var file: String = info.get("file", mod_name + ".json")
-		var data: Variant = _read_json(file)
+		var srcs: Array = (manifest.get("sources", {}) as Dictionary).get(mod_name, [])
+		var data: Variant = _read_json(file, str((srcs[0] as Dictionary).get("sha1", "")) if not srcs.is_empty() and srcs[0] is Dictionary else "")
 		if typeof(data) != TYPE_DICTIONARY:
 			_fail("%s 를 읽지 못했습니다" % file)
 			continue
@@ -133,7 +178,7 @@ func _load_modules() -> void:
 			_global_index[g] = mod_name
 		for g: String in dict.keys():
 			if not globals.has(g):
-				_fail("%s: 전역 %s 가 manifest 에 없습니다 (변환을 다시 하세요)" % [file, g])
+				_fail("%s: 전역 %s 가 manifest 에 없습니다 (data_tool --write 를 돌리세요)" % [file, g])
 		_modules[mod_name] = dict
 
 
@@ -143,7 +188,7 @@ func _load_langs() -> void:
 		_fail("manifest 에 언어 팩 정보가 없습니다")
 	for code: String in langs.keys():
 		var info: Dictionary = langs[code]
-		var data: Variant = _read_json(String(info.get("file", "lang/%s.json" % code)))
+		var data: Variant = _read_json(String(info.get("file", "lang/%s.json" % code)), str(info.get("sha1", "")))
 		if typeof(data) != TYPE_DICTIONARY:
 			_fail("언어 팩 %s 를 읽지 못했습니다" % code)
 			continue
@@ -155,7 +200,7 @@ func _load_stories() -> void:
 	var stories: Dictionary = manifest.get("story", {})
 	for code: String in stories.keys():
 		var info: Dictionary = stories[code]
-		var data: Variant = _read_json(String(info.get("file", "story/%s.json" % code)))
+		var data: Variant = _read_json(String(info.get("file", "story/%s.json" % code)), str(info.get("sha1", "")))
 		if typeof(data) != TYPE_DICTIONARY:
 			_fail("스토리 %s 를 읽지 못했습니다" % code)
 			continue
@@ -166,7 +211,7 @@ func _load_stories() -> void:
 		_stories[code] = data
 
 
-## data 폴더에 manifest 에 없는 JSON 이 남아 있으면(옛 변환 결과 등) 알린다
+## data 폴더에 manifest 에 없는 JSON 이 있으면 (새 파일을 넣고 data_tool --write 를 잊음 등) 알린다
 func _check_unlisted_files() -> void:
 	var listed: Dictionary = {MANIFEST_FILE: true}
 	for mod_name: String in manifest.get("modules", {}).keys():
@@ -176,14 +221,13 @@ func _check_unlisted_files() -> void:
 	for code: String in manifest.get("story", {}).keys():
 		listed[String(manifest["story"][code].get("file", ""))] = true
 	for rel: String in _list_json(""):
-		# lang_extra/ 는 변환기 결과가 아니라 Godot 전용 번역 키 (I18n 이 직접 읽음)
-		if not listed.has(rel) and not rel.begins_with("lang_extra/"):
+		if not listed.has(rel):
 			_fail("manifest 에 없는 데이터 파일: %s" % rel)
 
 
 func _list_json(sub: String) -> PackedStringArray:
 	var out := PackedStringArray()
-	var dir := DirAccess.open(DATA_DIR + sub)
+	var dir := DirAccess.open(data_dir + sub)
 	if dir == null:
 		return out
 	for f: String in dir.get_files():
@@ -292,15 +336,29 @@ static func _step(node: Variant, key: Variant) -> Variant:
 	return null
 
 
-func _read_json(rel: String) -> Variant:
-	var path := DATA_DIR + rel
+func _read_json(rel: String, want_sha1: String = "") -> Variant:
+	var path := data_dir + rel
 	if not FileAccess.file_exists(path):
 		_fail("파일 없음: %s" % path)
 		return null
-	var r := JsonExact.parse_ex(FileAccess.get_file_as_string(path))   # 실수를 정확히 (json_exact.gd)
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if want_sha1 != "":
+		var h := HashingContext.new()
+		h.start(HashingContext.HASH_SHA1)
+		h.update(bytes)
+		if h.finish().hex_encode() != want_sha1:
+			sha_mismatch = true
+			if is_baseline:
+				_fail("%s 가 기준 manifest 의 sha1 과 다릅니다 — 기준 데이터는 손으로 고치지 않습니다. git 으로 되돌리거나, 기준을 일부러 옮기려면 tools/data_tool.gd -- --rebase \"이유\" (godot/README.md '기준을 다시 만들 때')" % path)
+			else:
+				_fail("%s 가 manifest 의 sha1 과 다릅니다 — 고친 뒤 tools/data_tool.gd -- --write 를 돌리세요" % path)
+	var text := bytes.get_string_from_utf8()
+	var r := JsonExact.parse_ex(text)   # 실수를 정확히 (json_exact.gd)
 	if not r[0]:
 		_fail("%s JSON 오류 %s" % [path, r[2]])
 		return null
+	if int(r[3]) != JsonExact.count_keys(r[1]):
+		_fail("%s: 같은 사전에 같은 키가 두 번 (%s) — 앞 값이 사라집니다. 하나로 정리한 뒤 data_tool --write" % [path, JsonExact.dup_key(text)])
 	return JsonNorm.normalize(r[1])
 
 

@@ -438,14 +438,15 @@ static func _soul(v: Variant) -> Variant:
 	return v
 
 
-## (4b-2) 전직 미리보기 보관함: 사전이 아니면 지움, 모양이 틀린 항목·직업만 뺌 (오래된 uid·레벨 변화 같은 '무효'는 academy_rules 가 쓸 때 정리)
+## (4b-2) 전직 미리보기 보관함: 사전이 아니면 지움, 모양이 틀린 항목·직업만 뺌 (없어진 uid·등급 변화 같은 '무효'는 academy_rules 가 쓸 때 정리)
+##  (2026-10-18) 항목 = {"cls": {직업: {pot, grade, cls}}} — 4b-2 판의 fp·능력치 칸은 있어도 되고 없어도 됨
 static func _class_preview(c: Object, v: Variant) -> Variant:
 	if not (v is Dictionary):
 		return null
 	var AR: GDScript = load("res://scripts/logic/academy_rules.gd")
 	for k: Variant in (v as Dictionary).keys():
 		var e: Variant = v[k]
-		if not str(k).is_valid_int() or not (e is Dictionary) or not (e.get("fp") is Dictionary) or not (e.get("cls") is Dictionary):
+		if not str(k).is_valid_int() or not (e is Dictionary) or not (e.get("cls") is Dictionary):
 			v.erase(k)
 			continue
 		for cl: Variant in (e["cls"] as Dictionary).keys():

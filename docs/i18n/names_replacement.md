@@ -6,7 +6,8 @@
   새 이름은 서양 판타지풍 지어낸 이름과 한국어 고유어/한자풍 이름을 섞음. 스토리 인물(리안·브람·세라·바크·카샤·오르딘·할바르)과 겹치지 않음.
   6개 언어 비속어 금칙 검사, 스토리·UI 문장에 쓰이는 일반 단어(겨울·새벽 등)와 겹치는 이름은 제외함.
 - 저장 호환: 저장 파일은 `nameId`(번호)만 저장하므로 번호는 그대로 두었다. 교체된 번호의 기존 클랜원은 다음 실행부터 새 이름으로 보인다(직접 지은 `customName`은 영향 없음).
-- Godot 쪽 `godot/data/lang/*.json` 은 웹 데이터에서 만들어지는 파일이라 이번에 손대지 않았다. `node tools/export-godot-data.js` 를 다시 돌리면 반영된다.
+- (당시 기록) Godot 쪽 `godot/data/lang/*.json` 은 웹 데이터에서 만들어지는 파일이라 이번에 손대지 않았다. (당시에는 웹 변환기로 반영했음 — 그 변환기는 더 쓰지 않음, 아래)
+  - (2026-10-18~) 이제 `godot/data/lang/*.json` 이 번역 원본이다 (웹 `data/language/` 는 동결, 변환기는 `tools/legacy-web/` 에 보관만). 이름을 다시 고치려면 `godot/data/lang/<언어>.json` 의 `character.names` 를 고친 뒤 `Godot --headless --path godot --script res://tools/data_tool.gd -- --write` (godot/README.md '데이터 원본').
 
 ## 검토했지만 유지한 이름 (흔한 실제 이름이라 유지)
 

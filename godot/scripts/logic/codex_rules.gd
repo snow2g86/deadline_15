@@ -1,7 +1,7 @@
 extends RefCounted
 ## 도감·가이드 내용 (4b-2) — 웹 compendium.html · guide.html 의 <script> (모든 표·카드를 게임 데이터에서 만듦)
 ##  화면 코드 없이 '블록' 사전 목록을 만든다. 화면(scripts/ui/codex_view.gd)이 그리고, 시험(tests/check_outer_4b2.gd)이
-##  tokens() 로 글 조각을 뽑아 웹 정답(node 로 웹 HTML 을 만들어 태그를 걷어낸 글 조각, tools/outer-4b2-expect.js)과 순서까지 비교한다.
+##  tokens() 로 글 조각을 뽑아 웹 정답(node 로 웹 HTML 을 만들어 태그를 걷어낸 글 조각, tools/legacy-web/outer-4b2-expect.js)과 순서까지 비교한다.
 ##
 ##  번역: t(k, p) 와 has(k) 를 받는다. 웹 tt(k, 대체) 는 t 가 키를 그대로 돌려주면(없는 키) 대체를 쓰는데, 여기서는 **있는 키만 조회**하고
 ##   없으면 바로 대체 (웹에서 gear.item.* 21개·maps.* 8개가 '없는 키 조회'로 키를 돌려받던 것 — 화면 글은 같음). 시험이 '없는 키 조회 0' 을 확인.

@@ -1,5175 +1,3926 @@
 {
- "EPISODES": [
-  {
-   "id": 1,
-   "stages": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10
-   ]
-  },
-  {
-   "id": 2,
-   "stages": [
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20
-   ]
-  },
-  {
-   "id": 3,
-   "stages": [
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30
-   ]
-  },
-  {
-   "id": 4,
-   "stages": [
-    31,
-    32,
-    33,
-    34,
-    35,
-    36,
-    37,
-    38,
-    39,
-    40
-   ]
-  },
-  {
-   "id": 5,
-   "stages": [
-    41,
-    42,
-    43,
-    44,
-    45,
-    46,
-    47,
-    48,
-    49,
-    50
-   ]
-  },
-  {
-   "id": 6,
-   "stages": [
-    51,
-    52,
-    53,
-    54,
-    55,
-    56,
-    57,
-    58,
-    59,
-    60
-   ]
-  },
-  {
-   "id": 7,
-   "stages": [
-    61,
-    62,
-    63,
-    64,
-    65,
-    66,
-    67,
-    68,
-    69,
-    70
-   ]
-  },
-  {
-   "id": 8,
-   "stages": [
-    71,
-    72,
-    73,
-    74,
-    75,
-    76,
-    77,
-    78,
-    79,
-    80
-   ]
-  },
-  {
-   "id": 9,
-   "stages": [
-    81,
-    82,
-    83,
-    84,
-    85,
-    86,
-    87,
-    88,
-    89,
-    90
-   ]
-  },
-  {
-   "id": 10,
-   "stages": [
-    91,
-    92,
-    93,
-    94,
-    95,
-    96,
-    97,
-    98,
-    99,
-    100
-   ]
-  }
- ],
- "STAGES": [
-  {
-   "id": 1,
-   "phase": 1,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 6,
-   "spw": 2,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "novice",
-    "novice",
-    "novice",
-    "novice",
-    "novice",
-    "novice"
-   ],
-   "sm": {
-    "hp": 0.6,
-    "atk": 0.6
-   },
-   "difficulty": 11,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "novice": 6
-   },
-   "recommendedClasses": [],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 2,
-   "phase": 1,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 8,
-   "spw": 3,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "novice",
-    "novice",
-    "novice",
-    "novice",
-    "warrior",
-    "warrior",
-    "novice",
-    "novice"
-   ],
-   "sm": {
-    "hp": 0.61,
-    "atk": 0.61
-   },
-   "difficulty": 15,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "novice": 6,
-    "warrior": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 3,
-   "phase": 1,
-   "style": "defense",
-   "mapType": "canyon",
-   "tot": 10,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "novice",
-    "warrior",
-    "novice",
-    "warrior",
-    "novice",
-    "warrior",
-    "novice",
-    "warrior",
-    "novice",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.62,
-    "atk": 0.62
-   },
-   "difficulty": 18,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "novice": 5,
-    "warrior": 5
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 4,
-   "phase": 1,
-   "style": "defense",
-   "mapType": "canyon",
-   "tot": 10,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "novice",
-    "warrior",
-    "warrior",
-    "novice",
-    "warrior",
-    "warrior",
-    "novice",
-    "warrior",
-    "assassin"
-   ],
-   "sm": {
-    "hp": 0.62,
-    "atk": 0.62
-   },
-   "difficulty": 18,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "warrior": 6,
-    "novice": 3,
-    "assassin": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 5,
-   "phase": 1,
-   "style": "defense",
-   "mapType": "jungle",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "assassin",
-    "novice",
-    "warrior",
-    "brawler",
-    "warrior",
-    "novice"
-   ],
-   "sm": {
-    "hp": 0.64,
-    "atk": 0.66
-   },
-   "difficulty": 20,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "warrior": 7,
-    "assassin": 1,
-    "novice": 2,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 6,
-   "phase": 1,
-   "style": "offense",
-   "mapType": "jungle",
-   "tot": 10,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "assassin",
-    "warrior",
-    "lancer",
-    "warrior",
-    "archer",
-    "warrior",
-    "novice",
-    "brawler",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.64,
-    "atk": 0.64
-   },
-   "difficulty": 20,
-   "recommendedLevel": 1,
-   "enemyComposition": {
-    "warrior": 5,
-    "assassin": 1,
-    "lancer": 1,
-    "archer": 1,
-    "novice": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 7,
-   "phase": 1,
-   "style": "offense",
-   "mapType": "desert",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "lancer",
-    "assassin",
-    "archer",
-    "brawler",
-    "warrior",
-    "brawler",
-    "assassin",
-    "archer",
-    "warrior",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 0.66,
-    "atk": 0.68
-   },
-   "difficulty": 21,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "warrior": 3,
-    "lancer": 1,
-    "assassin": 2,
-    "archer": 2,
-    "brawler": 3
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 8,
-   "phase": 1,
-   "style": "offense",
-   "mapType": "desert",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "assassin",
-    "warrior",
-    "lancer",
-    "warrior",
-    "archer",
-    "warrior",
-    "novice",
-    "brawler",
-    "warrior",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.67,
-    "atk": 0.69
-   },
-   "difficulty": 22,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "warrior": 6,
-    "assassin": 1,
-    "lancer": 1,
-    "archer": 1,
-    "novice": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 9,
-   "phase": 1,
-   "style": "offense",
-   "mapType": "volcano",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "lancer",
-    "assassin",
-    "brawler",
-    "warrior",
-    "archer",
-    "warrior",
-    "warrior",
-    "brawler",
-    "archer",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.68,
-    "atk": 0.75
-   },
-   "difficulty": 23,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "warrior": 5,
-    "lancer": 1,
-    "assassin": 1,
-    "brawler": 2,
-    "archer": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 10,
-   "phase": 1,
-   "style": "offense",
-   "mapType": "volcano",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "name": "산적 요새",
-   "story": "도적 우두머리를 쓰러뜨리고 산적단을 끝내라",
-   "boss": {
-    "cls": "warrior",
-    "name": "도적 우두머리"
-   },
-   "en": [
-    "lancer",
-    "lancer",
-    "brawler",
-    "summoner",
-    "archer",
-    "sapper",
-    "warrior",
-    "lancer",
-    "brawler",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.71,
-    "atk": 0.82
-   },
-   "difficulty": 40,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "lancer": 3,
-    "brawler": 2,
-    "summoner": 1,
-    "archer": 1,
-    "sapper": 1,
-    "warrior": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "assassin",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 11,
-   "phase": 2,
-   "style": "defense",
-   "mapType": "frozen",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "archer",
-    "archer",
-    "lancer",
-    "lancer",
-    "novice"
-   ],
-   "sm": {
-    "hp": 0.71,
-    "atk": 0.78
-   },
-   "difficulty": 25,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "archer": 2,
-    "lancer": 2,
-    "novice": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 12,
-   "phase": 2,
-   "style": "defense",
-   "mapType": "frozen",
-   "tot": 11,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "warrior",
-    "warrior",
-    "archer",
-    "archer",
-    "priest",
-    "priest"
-   ],
-   "sm": {
-    "hp": 0.73,
-    "atk": 0.85
-   },
-   "difficulty": 27,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "knight": 3,
-    "lancer": 2,
-    "warrior": 2,
-    "archer": 2,
-    "priest": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 13,
-   "phase": 2,
-   "style": "offense",
-   "mapType": "fortress",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "warrior",
-    "warrior",
-    "archer",
-    "sapper",
-    "sapper",
-    "priest"
-   ],
-   "sm": {
-    "hp": 0.73,
-    "atk": 0.82
-   },
-   "difficulty": 27,
-   "recommendedLevel": 2,
-   "enemyComposition": {
-    "knight": 4,
-    "lancer": 2,
-    "warrior": 2,
-    "archer": 1,
-    "sapper": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 14,
-   "phase": 2,
-   "style": "defense",
-   "mapType": "frozen",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "assassin",
-    "assassin",
-    "brawler",
-    "brawler",
-    "summoner",
-    "summoner",
-    "mage",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.75,
-    "atk": 0.89
-   },
-   "difficulty": 29,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "warrior": 4,
-    "assassin": 2,
-    "brawler": 2,
-    "summoner": 2,
-    "mage": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 15,
-   "phase": 2,
-   "style": "offense",
-   "mapType": "ruins",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "priest",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 0.77,
-    "atk": 0.9
-   },
-   "difficulty": 30,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "mage": 3,
-    "summoner": 2,
-    "priest": 1,
-    "knight": 2,
-    "warrior": 3,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 16,
-   "phase": 2,
-   "style": "mixed",
-   "mapType": "frozen",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "lancer",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "archer",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.79,
-    "atk": 0.97
-   },
-   "difficulty": 31,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "knight": 3,
-    "lancer": 3,
-    "warrior": 2,
-    "mage": 2,
-    "archer": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 17,
-   "phase": 2,
-   "style": "offense",
-   "mapType": "ruins",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "assassin",
-    "assassin",
-    "assassin",
-    "sapper",
-    "sapper",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "brawler",
-    "brawler",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.79,
-    "atk": 0.97
-   },
-   "difficulty": 32,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "assassin": 3,
-    "sapper": 2,
-    "mage": 2,
-    "summoner": 2,
-    "brawler": 2,
-    "warrior": 1
-   },
-   "recommendedClasses": [
-    "knight",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 18,
-   "phase": 2,
-   "style": "defense",
-   "mapType": "frozen",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "assassin",
-    "assassin",
-    "summoner",
-    "mage",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.81,
-    "atk": 1.03
-   },
-   "difficulty": 33,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "warrior": 5,
-    "knight": 2,
-    "assassin": 2,
-    "summoner": 1,
-    "mage": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "brawler"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 19,
-   "phase": 2,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 4,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "warrior",
-    "priest"
-   ],
-   "sm": {
-    "hp": 0.82,
-    "atk": 1.05
-   },
-   "difficulty": 34,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "knight": 4,
-    "lancer": 2,
-    "mage": 2,
-    "summoner": 2,
-    "warrior": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 20,
-   "phase": 2,
-   "style": "offense",
-   "mapType": "fortress",
-   "tot": 12,
-   "spw": 5,
-   "si": 2,
-   "name": "얼음 성채",
-   "story": "냉기 기사를 멈추고 산맥의 냉기를 걷어라",
-   "boss": {
-    "cls": "knight",
-    "name": "냉기 기사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "mage",
-    "mage",
-    "summoner",
-    "priest",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 0.84,
-    "atk": 1.11
-   },
-   "difficulty": 52,
-   "recommendedLevel": 3,
-   "enemyComposition": {
-    "knight": 4,
-    "lancer": 2,
-    "mage": 2,
-    "summoner": 1,
-    "priest": 1,
-    "warrior": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 21,
-   "phase": 3,
-   "style": "defense",
-   "mapType": "swamp",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "assassin",
-    "assassin",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "brawler",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.84,
-    "atk": 1.08
-   },
-   "difficulty": 38,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "warrior": 4,
-    "assassin": 2,
-    "summoner": 2,
-    "shaman": 2,
-    "brawler": 2,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 22,
-   "phase": 3,
-   "style": "defense",
-   "mapType": "swamp",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "summoner",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "mage",
-    "mage",
-    "assassin",
-    "assassin",
-    "warrior",
-    "warrior",
-    "priest",
-    "priest"
-   ],
-   "sm": {
-    "hp": 0.87,
-    "atk": 1.14
-   },
-   "difficulty": 39,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "summoner": 3,
-    "shaman": 2,
-    "mage": 2,
-    "assassin": 2,
-    "warrior": 2,
-    "priest": 2
-   },
-   "recommendedClasses": [
-    "assassin",
-    "warrior",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 23,
-   "phase": 3,
-   "style": "mixed",
-   "mapType": "jungle",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "assassin",
-    "assassin",
-    "assassin",
-    "sapper",
-    "sapper",
-    "summoner",
-    "summoner",
-    "mage",
-    "mage",
-    "warrior",
-    "warrior",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.88,
-    "atk": 1.16
-   },
-   "difficulty": 40,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "assassin": 3,
-    "sapper": 2,
-    "summoner": 2,
-    "mage": 2,
-    "warrior": 2,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "knight",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 24,
-   "phase": 3,
-   "style": "offense",
-   "mapType": "swamp",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "brawler",
-    "brawler",
-    "brawler",
-    "warrior",
-    "warrior",
-    "warrior",
-    "summoner",
-    "summoner",
-    "assassin",
-    "assassin",
-    "lancer",
-    "archer",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.9,
-    "atk": 1.22
-   },
-   "difficulty": 41,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "brawler": 3,
-    "warrior": 3,
-    "summoner": 2,
-    "assassin": 2,
-    "lancer": 1,
-    "archer": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 25,
-   "phase": 3,
-   "style": "offense",
-   "mapType": "ruins",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "priest"
-   ],
-   "sm": {
-    "hp": 0.91,
-    "atk": 1.24
-   },
-   "difficulty": 42,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "mage": 3,
-    "summoner": 3,
-    "shaman": 2,
-    "knight": 2,
-    "warrior": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "warrior"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 26,
-   "phase": 3,
-   "style": "defense",
-   "mapType": "swamp",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "summoner",
-    "summoner",
-    "summoner",
-    "summoner",
-    "brawler",
-    "brawler",
-    "assassin",
-    "assassin",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 0.93,
-    "atk": 1.3
-   },
-   "difficulty": 43,
-   "recommendedLevel": 4,
-   "enemyComposition": {
-    "summoner": 4,
-    "brawler": 2,
-    "assassin": 2,
-    "warrior": 2,
-    "mage": 2,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "warrior",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 27,
-   "phase": 3,
-   "style": "offense",
-   "mapType": "ruins",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "assassin",
-    "assassin",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "archer"
-   ],
-   "sm": {
-    "hp": 0.94,
-    "atk": 1.31
-   },
-   "difficulty": 44,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "assassin": 2,
-    "mage": 2,
-    "summoner": 2,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 28,
-   "phase": 3,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 13,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "summoner",
-    "sapper",
-    "sapper",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 0.96,
-    "atk": 1.38
-   },
-   "difficulty": 45,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "mage": 3,
-    "summoner": 3,
-    "sapper": 2,
-    "warrior": 2,
-    "knight": 2,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "warrior"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 29,
-   "phase": 3,
-   "style": "mixed",
-   "mapType": "swamp",
-   "tot": 13,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "summoner",
-    "summoner",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "mage",
-    "mage",
-    "mage",
-    "warrior",
-    "warrior",
-    "assassin",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 0.97,
-    "atk": 1.4
-   },
-   "difficulty": 48,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "summoner": 4,
-    "shaman": 2,
-    "mage": 3,
-    "warrior": 2,
-    "assassin": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "warrior",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 30,
-   "phase": 3,
-   "style": "offense",
-   "mapType": "ruins",
-   "tot": 12,
-   "spw": 6,
-   "si": 2,
-   "name": "습지의 제왕",
-   "story": "습지의 제왕을 쓰러뜨리고 저주를 끊어라",
-   "boss": {
-    "cls": "summoner",
-    "name": "습지의 제왕"
-   },
-   "en": [
-    "summoner",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "mage",
-    "mage",
-    "priest",
-    "knight",
-    "knight",
-    "warrior"
-   ],
-   "sm": {
-    "hp": 1.02,
-    "atk": 1.54
-   },
-   "difficulty": 65,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "summoner": 3,
-    "shaman": 2,
-    "mage": 2,
-    "priest": 1,
-    "knight": 2,
-    "warrior": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "warrior",
-    "knight"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 31,
-   "phase": 4,
-   "style": "defense",
-   "mapType": "fortress",
-   "tot": 14,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "lancer",
-    "lancer",
-    "lancer",
-    "archer",
-    "archer",
-    "mage",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.01,
-    "atk": 1.43
-   },
-   "difficulty": 48,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "lancer": 3,
-    "archer": 2,
-    "mage": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 32,
-   "phase": 4,
-   "style": "offense",
-   "mapType": "canyon",
-   "tot": 14,
-   "spw": 5,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "knight",
-    "assassin",
-    "assassin",
-    "lancer",
-    "lancer",
-    "mage",
-    "mage",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.03,
-    "atk": 1.5
-   },
-   "difficulty": 50,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "warrior": 4,
-    "knight": 3,
-    "assassin": 2,
-    "lancer": 2,
-    "mage": 2,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "brawler"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 33,
-   "phase": 4,
-   "style": "defense",
-   "mapType": "volcano",
-   "tot": 14,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "sapper",
-    "sapper",
-    "warrior",
-    "warrior",
-    "warrior",
-    "brawler",
-    "brawler",
-    "archer",
-    "archer",
-    "knight"
-   ],
-   "sm": {
-    "hp": 1.04,
-    "atk": 1.51
-   },
-   "difficulty": 53,
-   "recommendedLevel": 5,
-   "enemyComposition": {
-    "mage": 4,
-    "sapper": 2,
-    "warrior": 3,
-    "brawler": 2,
-    "archer": 2,
-    "knight": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 34,
-   "phase": 4,
-   "style": "offense",
-   "mapType": "volcano",
-   "tot": 14,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "shaman",
-    "shaman",
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.06,
-    "atk": 1.58
-   },
-   "difficulty": 54,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "mage": 4,
-    "summoner": 2,
-    "shaman": 2,
-    "warrior": 3,
-    "knight": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 35,
-   "phase": 4,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 14,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "lancer",
-    "lancer",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "archer",
-    "archer",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.07,
-    "atk": 1.59
-   },
-   "difficulty": 55,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "knight": 4,
-    "lancer": 2,
-    "warrior": 3,
-    "mage": 2,
-    "archer": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 36,
-   "phase": 4,
-   "style": "offense",
-   "mapType": "volcano",
-   "tot": 14,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "sapper",
-    "sapper",
-    "brawler",
-    "summoner"
-   ],
-   "sm": {
-    "hp": 1.09,
-    "atk": 1.66
-   },
-   "difficulty": 56,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "mage": 4,
-    "knight": 3,
-    "warrior": 3,
-    "sapper": 2,
-    "brawler": 1,
-    "summoner": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 37,
-   "phase": 4,
-   "style": "defense",
-   "mapType": "volcano",
-   "tot": 14,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "assassin",
-    "assassin",
-    "summoner",
-    "archer",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.11,
-    "atk": 1.69
-   },
-   "difficulty": 57,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "mage": 4,
-    "warrior": 3,
-    "knight": 2,
-    "assassin": 2,
-    "summoner": 1,
-    "archer": 2
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 38,
-   "phase": 4,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 15,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "lancer",
-    "lancer",
-    "mage",
-    "mage",
-    "mage",
-    "archer",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.12,
-    "atk": 1.69
-   },
-   "difficulty": 58,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 4,
-    "lancer": 2,
-    "mage": 3,
-    "archer": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 39,
-   "phase": 4,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 15,
-   "spw": 7,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "sapper",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.13,
-    "atk": 1.69
-   },
-   "difficulty": 61,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "mage": 5,
-    "summoner": 2,
-    "knight": 3,
-    "warrior": 3,
-    "sapper": 2
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "mage"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 40,
-   "phase": 4,
-   "style": "offense",
-   "mapType": "volcano",
-   "tot": 12,
-   "spw": 7,
-   "si": 2,
-   "name": "화염 황제",
-   "story": "화염 황제를 쓰러뜨리고 밀약의 진실을 밝혀라",
-   "boss": {
-    "cls": "mage",
-    "name": "화염 황제"
-   },
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "sapper",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.19,
-    "atk": 2
-   },
-   "difficulty": 78,
-   "recommendedLevel": 6,
-   "enemyComposition": {
-    "mage": 3,
-    "summoner": 2,
-    "knight": 2,
-    "warrior": 2,
-    "sapper": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "warrior"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 41,
-   "phase": 5,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 15,
-   "spw": 6,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "assassin",
-    "assassin",
-    "lancer"
-   ],
-   "sm": {
-    "hp": 1.16,
-    "atk": 1.79
-   },
-   "difficulty": 61,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "assassin": 2,
-    "lancer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 42,
-   "phase": 5,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 15,
-   "spw": 7,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "assassin",
-    "assassin",
-    "assassin",
-    "mage",
-    "mage",
-    "lancer",
-    "lancer",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.19,
-    "atk": 1.87
-   },
-   "difficulty": 64,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "assassin": 3,
-    "mage": 2,
-    "lancer": 2,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 43,
-   "phase": 5,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 15,
-   "spw": 7,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "summoner",
-    "summoner",
-    "summoner",
-    "mage",
-    "mage",
-    "brawler",
-    "brawler",
-    "knight",
-    "knight",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.19,
-    "atk": 1.89
-   },
-   "difficulty": 65,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "warrior": 5,
-    "summoner": 3,
-    "mage": 2,
-    "brawler": 2,
-    "knight": 2,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 44,
-   "phase": 5,
-   "style": "offense",
-   "mapType": "fortress",
-   "tot": 15,
-   "spw": 7,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "mage",
-    "mage",
-    "mage",
-    "warrior",
-    "warrior",
-    "warrior",
-    "summoner",
-    "summoner",
-    "summoner",
-    "lancer",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.21,
-    "atk": 1.95
-   },
-   "difficulty": 67,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "knight": 4,
-    "mage": 3,
-    "warrior": 3,
-    "summoner": 3,
-    "lancer": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "assassin"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 45,
-   "phase": 5,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 7,
-   "si": 2,
-   "name": "심연의 기사",
-   "story": "열쇠를 노리는 심연의 기사를 쓰러뜨려라",
-   "boss": {
-    "cls": "knight",
-    "name": "심연의 기사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer"
-   ],
-   "sm": {
-    "hp": 1.27,
-    "atk": 2.27
-   },
-   "difficulty": 84,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 2,
-    "mage": 1,
-    "summoner": 2,
-    "lancer": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.focus_boss"
-   ]
-  },
-  {
-   "id": 46,
-   "phase": 5,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 7,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "summoner",
-    "summoner",
-    "summoner",
-    "summoner",
-    "mage",
-    "mage",
-    "mage",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "sapper",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.23,
-    "atk": 2
-   },
-   "difficulty": 69,
-   "recommendedLevel": 7,
-   "enemyComposition": {
-    "summoner": 4,
-    "mage": 3,
-    "knight": 3,
-    "warrior": 3,
-    "sapper": 2,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "warrior",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 47,
-   "phase": 5,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 8,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "summoner",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "sapper",
-    "sapper",
-    "shaman",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 1.23,
-    "atk": 2.02
-   },
-   "difficulty": 71,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "mage": 5,
-    "summoner": 3,
-    "knight": 2,
-    "warrior": 2,
-    "sapper": 2,
-    "shaman": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "assassin",
-    "archer",
-    "warrior"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 48,
-   "phase": 5,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 8,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.25,
-    "atk": 2.1
-   },
-   "difficulty": 73,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "knight": 5,
-    "warrior": 4,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 49,
-   "phase": 5,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 8,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "assassin",
-    "brawler",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 1.26,
-    "atk": 2.12
-   },
-   "difficulty": 74,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "warrior": 5,
-    "knight": 4,
-    "mage": 2,
-    "summoner": 2,
-    "assassin": 1,
-    "brawler": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "brawler"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 50,
-   "phase": 5,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 9,
-   "si": 2,
-   "name": "심연의 바닥",
-   "story": "심연의 전사를 쓰러뜨리고 브람이 연 길을 지켜라",
-   "boss": {
-    "cls": "warrior",
-    "name": "심연의 전사"
-   },
-   "en": [
-    "warrior",
-    "warrior",
-    "warrior",
-    "knight",
-    "knight",
-    "knight",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer"
-   ],
-   "sm": {
-    "hp": 1.34,
-    "atk": 2.64
-   },
-   "difficulty": 94,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "warrior": 3,
-    "knight": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "archer",
-    "brawler"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 51,
-   "phase": 6,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 8,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "sapper",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.31,
-    "atk": 2.34
-   },
-   "difficulty": 77,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "sapper": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 52,
-   "phase": 6,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 8,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.32,
-    "atk": 2.4
-   },
-   "difficulty": 78,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 53,
-   "phase": 6,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.34,
-    "atk": 2.51
-   },
-   "difficulty": 81,
-   "recommendedLevel": 8,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 54,
-   "phase": 6,
-   "style": "mixed",
-   "mapType": "volcano",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest",
-    "sapper",
-    "shaman",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.35,
-    "atk": 2.57
-   },
-   "difficulty": 82,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1,
-    "sapper": 1,
-    "shaman": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 55,
-   "phase": 6,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.37,
-    "atk": 2.66
-   },
-   "difficulty": 84,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 56,
-   "phase": 6,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.39,
-    "atk": 2.68
-   },
-   "difficulty": 85,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 57,
-   "phase": 6,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.4,
-    "atk": 2.79
-   },
-   "difficulty": 86,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 58,
-   "phase": 6,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.4,
-    "atk": 2.81
-   },
-   "difficulty": 87,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 59,
-   "phase": 6,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest",
-    "brawler",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.42,
-    "atk": 2.9
-   },
-   "difficulty": 90,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1,
-    "brawler": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 60,
-   "phase": 6,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 10,
-   "si": 2,
-   "name": "옥문의 수호자",
-   "story": "지옥문을 지키는 옥문의 수호자와 맞서라",
-   "boss": {
-    "cls": "knight",
-    "name": "옥문의 수호자"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "sapper",
-    "archer"
-   ],
-   "sm": {
-    "hp": 1.5,
-    "atk": 3.48
-   },
-   "difficulty": 100,
-   "recommendedLevel": 9,
-   "enemyComposition": {
-    "knight": 2,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 1,
-    "sapper": 1,
-    "archer": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 61,
-   "phase": 7,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.45,
-    "atk": 3.04
-   },
-   "difficulty": 91,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 62,
-   "phase": 7,
-   "style": "offense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.47,
-    "atk": 3.13
-   },
-   "difficulty": 92,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 63,
-   "phase": 7,
-   "style": "mixed",
-   "mapType": "jungle",
-   "tot": 16,
-   "spw": 9,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.49,
-    "atk": 3.2
-   },
-   "difficulty": 93,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 3,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 64,
-   "phase": 7,
-   "style": "defense",
-   "mapType": "swamp",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.51,
-    "atk": 3.32
-   },
-   "difficulty": 97,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 65,
-   "phase": 7,
-   "style": "offense",
-   "mapType": "canyon",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.53,
-    "atk": 3.42
-   },
-   "difficulty": 98,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 66,
-   "phase": 7,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.53,
-    "atk": 3.44
-   },
-   "difficulty": 99,
-   "recommendedLevel": 10,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 67,
-   "phase": 7,
-   "style": "defense",
-   "mapType": "ruins",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.55,
-    "atk": 3.56
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 68,
-   "phase": 7,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.56,
-    "atk": 3.66
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 69,
-   "phase": 7,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.58,
-    "atk": 3.73
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 70,
-   "phase": 7,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 11,
-   "si": 2,
-   "name": "악마의 법사",
-   "story": "기억으로 마음을 흔드는 악마의 법사를 쓰러뜨려라",
-   "boss": {
-    "cls": "mage",
-    "name": "악마의 법사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 1.67,
-    "atk": 4.46
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 2,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 2,
-    "assassin": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 71,
-   "phase": 8,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 1.61,
-    "atk": 3.86
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 72,
-   "phase": 8,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 1.63,
-    "atk": 3.98
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 73,
-   "phase": 8,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 10,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 1.65,
-    "atk": 4.09
-   },
-   "difficulty": 100,
-   "recommendedLevel": 11,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance"
-   ]
-  },
-  {
-   "id": 74,
-   "phase": 8,
-   "style": "defense",
-   "mapType": "ruins",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.66,
-    "atk": 4.14
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 75,
-   "phase": 8,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.67,
-    "atk": 4.21
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 76,
-   "phase": 8,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.68,
-    "atk": 4.29
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 77,
-   "phase": 8,
-   "style": "defense",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.69,
-    "atk": 4.26
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 78,
-   "phase": 8,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.7,
-    "atk": 4.34
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 79,
-   "phase": 8,
-   "style": "mixed",
-   "mapType": "ruins",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.72,
-    "atk": 4.47
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 80,
-   "phase": 8,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 12,
-   "si": 2,
-   "name": "신의 소환사",
-   "story": "신을 부르려는 오르딘을 막아라",
-   "boss": {
-    "cls": "summoner",
-    "name": "신의 소환사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin"
-   ],
-   "sm": {
-    "hp": 1.82,
-    "atk": 5.4
-   },
-   "difficulty": 100,
-   "recommendedLevel": 12,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 2
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 81,
-   "phase": 9,
-   "style": "defense",
-   "mapType": "plains",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.75,
-    "atk": 4.63
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 3,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 82,
-   "phase": 9,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.77,
-    "atk": 4.71
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 83,
-   "phase": 9,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 11,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.78,
-    "atk": 4.79
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 84,
-   "phase": 9,
-   "style": "defense",
-   "mapType": "swamp",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.8,
-    "atk": 4.87
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 85,
-   "phase": 9,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.81,
-    "atk": 4.98
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 86,
-   "phase": 9,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.83,
-    "atk": 5.03
-   },
-   "difficulty": 100,
-   "recommendedLevel": 13,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 87,
-   "phase": 9,
-   "style": "defense",
-   "mapType": "ruins",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.84,
-    "atk": 5.14
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 88,
-   "phase": 9,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 13,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.85,
-    "atk": 5.22
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 3,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 89,
-   "phase": 9,
-   "style": "mixed",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 13,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.88,
-    "atk": 5.42
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 90,
-   "phase": 9,
-   "style": "offense",
-   "mapType": "plains",
-   "tot": 12,
-   "spw": 13,
-   "si": 2,
-   "name": "전쟁의 전사",
-   "story": "솔빛 마을 앞에서 마계 대장군을 쓰러뜨려라",
-   "boss": {
-    "cls": "warrior",
-    "name": "전쟁의 전사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 1.98,
-    "atk": 6.52
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 91,
-   "phase": 10,
-   "style": "defense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 12,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 1.92,
-    "atk": 5.62
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 92,
-   "phase": 10,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 12,
-   "si": 2,
-   "name": "최후의 기사",
-   "story": "인간이었던 기사와 정정당당히 겨뤄라",
-   "boss": {
-    "cls": "knight",
-    "name": "최후의 기사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 2.03,
-    "atk": 6.75
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 1,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 93,
-   "phase": 10,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 13,
-   "si": 2,
-   "name": "최후의 마술사",
-   "story": "모든 것을 계산하는 마술사를 꺾어라",
-   "boss": {
-    "cls": "mage",
-    "name": "최후의 마술사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 2.04,
-    "atk": 6.88
-   },
-   "difficulty": 100,
-   "recommendedLevel": 14,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 1,
-    "summoner": 2,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.focus_boss"
-   ]
-  },
-  {
-   "id": 94,
-   "phase": 10,
-   "style": "defense",
-   "mapType": "fortress",
-   "tot": 12,
-   "spw": 13,
-   "si": 2,
-   "name": "최후의 소환사",
-   "story": "끝없는 군세를 성벽에서 버텨라",
-   "boss": {
-    "cls": "summoner",
-    "name": "최후의 소환사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 2.06,
-    "atk": 7.02
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 95,
-   "phase": 10,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 13,
-   "si": 2,
-   "name": "금지된 기사",
-   "story": "인간이 되고 싶었던 기사에게 답을 보여라",
-   "boss": {
-    "cls": "knight",
-    "name": "금지된 기사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest"
-   ],
-   "sm": {
-    "hp": 2.08,
-    "atk": 7.15
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 96,
-   "phase": 10,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 14,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 2,
-    "atk": 6.19
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 4,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.use_aoe"
-   ]
-  },
-  {
-   "id": 97,
-   "phase": 10,
-   "style": "defense",
-   "mapType": "fortress",
-   "tot": 16,
-   "spw": 14,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "assassin",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 2.04,
-    "atk": 6.53
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 2,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.defend_gate",
-    "strategy_tips.use_terrain"
-   ]
-  },
-  {
-   "id": 98,
-   "phase": 10,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 16,
-   "spw": 14,
-   "si": 2,
-   "boss": null,
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "priest",
-    "sapper",
-    "shaman"
-   ],
-   "sm": {
-    "hp": 2.05,
-    "atk": 6.68
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 3,
-    "mage": 2,
-    "summoner": 2,
-    "lancer": 2,
-    "assassin": 1,
-    "priest": 1,
-    "sapper": 1,
-    "shaman": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  },
-  {
-   "id": 99,
-   "phase": 10,
-   "style": "mixed",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 15,
-   "si": 2,
-   "name": "군주의 방패",
-   "story": "옥좌를 지키는 마계의 전사를 부숴라",
-   "boss": {
-    "cls": "warrior",
-    "name": "마계의 전사"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "summoner",
-    "lancer",
-    "lancer",
-    "assassin",
-    "sapper"
-   ],
-   "sm": {
-    "hp": 2.18,
-    "atk": 8.04
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 3,
-    "warrior": 2,
-    "mage": 1,
-    "summoner": 1,
-    "lancer": 2,
-    "assassin": 1,
-    "sapper": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.mixed_balance",
-    "strategy_tips.focus_boss"
-   ]
-  },
-  {
-   "id": 100,
-   "phase": 10,
-   "style": "offense",
-   "mapType": "abyss",
-   "tot": 12,
-   "spw": 15,
-   "si": 2,
-   "name": "마계 군주",
-   "story": "모두의 손으로 마계 군주의 문을 잠가라",
-   "boss": {
-    "cls": "warrior",
-    "name": "마계 군주"
-   },
-   "en": [
-    "knight",
-    "knight",
-    "warrior",
-    "warrior",
-    "mage",
-    "mage",
-    "summoner",
-    "lancer",
-    "assassin",
-    "priest",
-    "brawler"
-   ],
-   "sm": {
-    "hp": 2.2,
-    "atk": 8.27
-   },
-   "difficulty": 100,
-   "recommendedLevel": 15,
-   "enemyComposition": {
-    "knight": 2,
-    "warrior": 2,
-    "mage": 2,
-    "summoner": 1,
-    "lancer": 1,
-    "assassin": 1,
-    "priest": 1,
-    "brawler": 1
-   },
-   "recommendedClasses": [
-    "mage",
-    "brawler",
-    "archer"
-   ],
-   "strategyTips": [
-    "strategy_tips.offense_quick",
-    "strategy_tips.use_range"
-   ]
-  }
- ],
- "ENEMY_SM_BASE": 0.6,
- "ENEMY_SM_GROWTH": 1.0127,
- "ENEMY_LV_PER_STAGE": 0.22,
- "ENEMY_BOSS_LV": 3,
- "ENEMY_SKILL_EVERY": 11,
- "ENEMY_HP_EXP": 0.6,
- "ENEMY_ATK_EXP": 1.15,
- "ENEMY_HP_GROWTH_MUL": 0.65,
- "ENEMY_DEF_GROWTH_MUL": 0.6,
- "STAGE_TOT_CAP_MAX": 16,
- "STAGE_TOT_CAP_BOSS": 12,
- "STAGE_TOT_CAP_BASE": 10,
- "STAGE_TOT_CAP_PER": 0.12,
- "STAGE_COMP_HP": 0.15,
- "STAGE_COMP_ATK": 0.55,
- "STAGE_MAX_WAVES": 3,
- "MAX_ENEMIES_ON_FIELD": 14
+  "EPISODES": [
+    {"id": 1, "stages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+    {"id": 2, "stages": [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]},
+    {"id": 3, "stages": [21, 22, 23, 24, 25, 26, 27, 28, 29, 30]},
+    {"id": 4, "stages": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40]},
+    {"id": 5, "stages": [41, 42, 43, 44, 45, 46, 47, 48, 49, 50]},
+    {"id": 6, "stages": [51, 52, 53, 54, 55, 56, 57, 58, 59, 60]},
+    {"id": 7, "stages": [61, 62, 63, 64, 65, 66, 67, 68, 69, 70]},
+    {"id": 8, "stages": [71, 72, 73, 74, 75, 76, 77, 78, 79, 80]},
+    {"id": 9, "stages": [81, 82, 83, 84, 85, 86, 87, 88, 89, 90]},
+    {"id": 10, "stages": [91, 92, 93, 94, 95, 96, 97, 98, 99, 100]}
+  ],
+  "STAGES": [
+    {
+      "id": 1,
+      "phase": 1,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 6,
+      "spw": 2,
+      "si": 2,
+      "boss": null,
+      "en": ["novice", "novice", "novice", "novice", "novice", "novice"],
+      "sm": {"hp": 0.6, "atk": 0.6},
+      "difficulty": 11,
+      "recommendedLevel": 1,
+      "enemyComposition": {"novice": 6},
+      "recommendedClasses": [],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 2,
+      "phase": 1,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 8,
+      "spw": 3,
+      "si": 2,
+      "boss": null,
+      "en": ["novice", "novice", "novice", "novice", "warrior", "warrior", "novice", "novice"],
+      "sm": {"hp": 0.61, "atk": 0.61},
+      "difficulty": 15,
+      "recommendedLevel": 1,
+      "enemyComposition": {"novice": 6, "warrior": 2},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 3,
+      "phase": 1,
+      "style": "defense",
+      "mapType": "canyon",
+      "tot": 10,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "novice",
+        "warrior",
+        "novice",
+        "warrior",
+        "novice",
+        "warrior",
+        "novice",
+        "warrior",
+        "novice",
+        "warrior"
+      ],
+      "sm": {"hp": 0.62, "atk": 0.62},
+      "difficulty": 18,
+      "recommendedLevel": 1,
+      "enemyComposition": {"novice": 5, "warrior": 5},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 4,
+      "phase": 1,
+      "style": "defense",
+      "mapType": "canyon",
+      "tot": 10,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "novice",
+        "warrior",
+        "warrior",
+        "novice",
+        "warrior",
+        "warrior",
+        "novice",
+        "warrior",
+        "assassin"
+      ],
+      "sm": {"hp": 0.62, "atk": 0.62},
+      "difficulty": 18,
+      "recommendedLevel": 1,
+      "enemyComposition": {"warrior": 6, "novice": 3, "assassin": 1},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 5,
+      "phase": 1,
+      "style": "defense",
+      "mapType": "jungle",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "assassin",
+        "novice",
+        "warrior",
+        "brawler",
+        "warrior",
+        "novice"
+      ],
+      "sm": {"hp": 0.64, "atk": 0.66},
+      "difficulty": 20,
+      "recommendedLevel": 1,
+      "enemyComposition": {"warrior": 7, "assassin": 1, "novice": 2, "brawler": 1},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 6,
+      "phase": 1,
+      "style": "offense",
+      "mapType": "jungle",
+      "tot": 10,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "assassin",
+        "warrior",
+        "lancer",
+        "warrior",
+        "archer",
+        "warrior",
+        "novice",
+        "brawler",
+        "warrior"
+      ],
+      "sm": {"hp": 0.64, "atk": 0.64},
+      "difficulty": 20,
+      "recommendedLevel": 1,
+      "enemyComposition": {
+        "warrior": 5,
+        "assassin": 1,
+        "lancer": 1,
+        "archer": 1,
+        "novice": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "archer", "knight"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 7,
+      "phase": 1,
+      "style": "offense",
+      "mapType": "desert",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "lancer",
+        "assassin",
+        "archer",
+        "brawler",
+        "warrior",
+        "brawler",
+        "assassin",
+        "archer",
+        "warrior",
+        "brawler"
+      ],
+      "sm": {"hp": 0.66, "atk": 0.68},
+      "difficulty": 21,
+      "recommendedLevel": 2,
+      "enemyComposition": {"warrior": 3, "lancer": 1, "assassin": 2, "archer": 2, "brawler": 3},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 8,
+      "phase": 1,
+      "style": "offense",
+      "mapType": "desert",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "assassin",
+        "warrior",
+        "lancer",
+        "warrior",
+        "archer",
+        "warrior",
+        "novice",
+        "brawler",
+        "warrior",
+        "warrior"
+      ],
+      "sm": {"hp": 0.67, "atk": 0.69},
+      "difficulty": 22,
+      "recommendedLevel": 2,
+      "enemyComposition": {
+        "warrior": 6,
+        "assassin": 1,
+        "lancer": 1,
+        "archer": 1,
+        "novice": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "archer", "knight"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 9,
+      "phase": 1,
+      "style": "offense",
+      "mapType": "volcano",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "lancer",
+        "assassin",
+        "brawler",
+        "warrior",
+        "archer",
+        "warrior",
+        "warrior",
+        "brawler",
+        "archer",
+        "warrior"
+      ],
+      "sm": {"hp": 0.68, "atk": 0.75},
+      "difficulty": 23,
+      "recommendedLevel": 2,
+      "enemyComposition": {"warrior": 5, "lancer": 1, "assassin": 1, "brawler": 2, "archer": 2},
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 10,
+      "phase": 1,
+      "style": "offense",
+      "mapType": "volcano",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "name": "산적 요새",
+      "story": "도적 우두머리를 쓰러뜨리고 산적단을 끝내라",
+      "boss": {"cls": "warrior", "name": "도적 우두머리"},
+      "en": [
+        "lancer",
+        "lancer",
+        "brawler",
+        "summoner",
+        "archer",
+        "sapper",
+        "warrior",
+        "lancer",
+        "brawler",
+        "warrior"
+      ],
+      "sm": {"hp": 0.71, "atk": 0.82},
+      "difficulty": 40,
+      "recommendedLevel": 2,
+      "enemyComposition": {
+        "lancer": 3,
+        "brawler": 2,
+        "summoner": 1,
+        "archer": 1,
+        "sapper": 1,
+        "warrior": 2
+      },
+      "recommendedClasses": ["mage", "assassin", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 11,
+      "phase": 2,
+      "style": "defense",
+      "mapType": "frozen",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "archer",
+        "archer",
+        "lancer",
+        "lancer",
+        "novice"
+      ],
+      "sm": {"hp": 0.71, "atk": 0.78},
+      "difficulty": 25,
+      "recommendedLevel": 2,
+      "enemyComposition": {"knight": 3, "warrior": 3, "archer": 2, "lancer": 2, "novice": 1},
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 12,
+      "phase": 2,
+      "style": "defense",
+      "mapType": "frozen",
+      "tot": 11,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "warrior",
+        "warrior",
+        "archer",
+        "archer",
+        "priest",
+        "priest"
+      ],
+      "sm": {"hp": 0.73, "atk": 0.85},
+      "difficulty": 27,
+      "recommendedLevel": 2,
+      "enemyComposition": {"knight": 3, "lancer": 2, "warrior": 2, "archer": 2, "priest": 2},
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 13,
+      "phase": 2,
+      "style": "offense",
+      "mapType": "fortress",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "warrior",
+        "warrior",
+        "archer",
+        "sapper",
+        "sapper",
+        "priest"
+      ],
+      "sm": {"hp": 0.73, "atk": 0.82},
+      "difficulty": 27,
+      "recommendedLevel": 2,
+      "enemyComposition": {
+        "knight": 4,
+        "lancer": 2,
+        "warrior": 2,
+        "archer": 1,
+        "sapper": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 14,
+      "phase": 2,
+      "style": "defense",
+      "mapType": "frozen",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "assassin",
+        "assassin",
+        "brawler",
+        "brawler",
+        "summoner",
+        "summoner",
+        "mage",
+        "archer"
+      ],
+      "sm": {"hp": 0.75, "atk": 0.89},
+      "difficulty": 29,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "warrior": 4,
+        "assassin": 2,
+        "brawler": 2,
+        "summoner": 2,
+        "mage": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "archer", "knight"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 15,
+      "phase": 2,
+      "style": "offense",
+      "mapType": "ruins",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "priest",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "shaman"
+      ],
+      "sm": {"hp": 0.77, "atk": 0.9},
+      "difficulty": 30,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "mage": 3,
+        "summoner": 2,
+        "priest": 1,
+        "knight": 2,
+        "warrior": 3,
+        "shaman": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 16,
+      "phase": 2,
+      "style": "mixed",
+      "mapType": "frozen",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "lancer",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "archer",
+        "archer"
+      ],
+      "sm": {"hp": 0.79, "atk": 0.97},
+      "difficulty": 31,
+      "recommendedLevel": 3,
+      "enemyComposition": {"knight": 3, "lancer": 3, "warrior": 2, "mage": 2, "archer": 2},
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 17,
+      "phase": 2,
+      "style": "offense",
+      "mapType": "ruins",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "assassin",
+        "assassin",
+        "assassin",
+        "sapper",
+        "sapper",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "brawler",
+        "brawler",
+        "warrior"
+      ],
+      "sm": {"hp": 0.79, "atk": 0.97},
+      "difficulty": 32,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "assassin": 3,
+        "sapper": 2,
+        "mage": 2,
+        "summoner": 2,
+        "brawler": 2,
+        "warrior": 1
+      },
+      "recommendedClasses": ["knight", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 18,
+      "phase": 2,
+      "style": "defense",
+      "mapType": "frozen",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "assassin",
+        "assassin",
+        "summoner",
+        "mage",
+        "archer"
+      ],
+      "sm": {"hp": 0.81, "atk": 1.03},
+      "difficulty": 33,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "warrior": 5,
+        "knight": 2,
+        "assassin": 2,
+        "summoner": 1,
+        "mage": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "archer", "brawler"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 19,
+      "phase": 2,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 4,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "warrior",
+        "priest"
+      ],
+      "sm": {"hp": 0.82, "atk": 1.05},
+      "difficulty": 34,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "knight": 4,
+        "lancer": 2,
+        "mage": 2,
+        "summoner": 2,
+        "warrior": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 20,
+      "phase": 2,
+      "style": "offense",
+      "mapType": "fortress",
+      "tot": 12,
+      "spw": 5,
+      "si": 2,
+      "name": "얼음 성채",
+      "story": "냉기 기사를 멈추고 산맥의 냉기를 걷어라",
+      "boss": {"cls": "knight", "name": "냉기 기사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "mage",
+        "mage",
+        "summoner",
+        "priest",
+        "warrior"
+      ],
+      "sm": {"hp": 0.84, "atk": 1.11},
+      "difficulty": 52,
+      "recommendedLevel": 3,
+      "enemyComposition": {
+        "knight": 4,
+        "lancer": 2,
+        "mage": 2,
+        "summoner": 1,
+        "priest": 1,
+        "warrior": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 21,
+      "phase": 3,
+      "style": "defense",
+      "mapType": "swamp",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "assassin",
+        "assassin",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "brawler",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 0.84, "atk": 1.08},
+      "difficulty": 38,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "warrior": 4,
+        "assassin": 2,
+        "summoner": 2,
+        "shaman": 2,
+        "brawler": 2,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "archer", "knight"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 22,
+      "phase": 3,
+      "style": "defense",
+      "mapType": "swamp",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "summoner",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "mage",
+        "mage",
+        "assassin",
+        "assassin",
+        "warrior",
+        "warrior",
+        "priest",
+        "priest"
+      ],
+      "sm": {"hp": 0.87, "atk": 1.14},
+      "difficulty": 39,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "summoner": 3,
+        "shaman": 2,
+        "mage": 2,
+        "assassin": 2,
+        "warrior": 2,
+        "priest": 2
+      },
+      "recommendedClasses": ["assassin", "warrior", "knight"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 23,
+      "phase": 3,
+      "style": "mixed",
+      "mapType": "jungle",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "assassin",
+        "assassin",
+        "assassin",
+        "sapper",
+        "sapper",
+        "summoner",
+        "summoner",
+        "mage",
+        "mage",
+        "warrior",
+        "warrior",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 0.88, "atk": 1.16},
+      "difficulty": 40,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "assassin": 3,
+        "sapper": 2,
+        "summoner": 2,
+        "mage": 2,
+        "warrior": 2,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["knight", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 24,
+      "phase": 3,
+      "style": "offense",
+      "mapType": "swamp",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "brawler",
+        "brawler",
+        "brawler",
+        "warrior",
+        "warrior",
+        "warrior",
+        "summoner",
+        "summoner",
+        "assassin",
+        "assassin",
+        "lancer",
+        "archer",
+        "archer"
+      ],
+      "sm": {"hp": 0.9, "atk": 1.22},
+      "difficulty": 41,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "brawler": 3,
+        "warrior": 3,
+        "summoner": 2,
+        "assassin": 2,
+        "lancer": 1,
+        "archer": 2
+      },
+      "recommendedClasses": ["mage", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 25,
+      "phase": 3,
+      "style": "offense",
+      "mapType": "ruins",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "priest"
+      ],
+      "sm": {"hp": 0.91, "atk": 1.24},
+      "difficulty": 42,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "mage": 3,
+        "summoner": 3,
+        "shaman": 2,
+        "knight": 2,
+        "warrior": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "warrior"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 26,
+      "phase": 3,
+      "style": "defense",
+      "mapType": "swamp",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "summoner",
+        "summoner",
+        "summoner",
+        "summoner",
+        "brawler",
+        "brawler",
+        "assassin",
+        "assassin",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "shaman"
+      ],
+      "sm": {"hp": 0.93, "atk": 1.3},
+      "difficulty": 43,
+      "recommendedLevel": 4,
+      "enemyComposition": {
+        "summoner": 4,
+        "brawler": 2,
+        "assassin": 2,
+        "warrior": 2,
+        "mage": 2,
+        "shaman": 1
+      },
+      "recommendedClasses": ["assassin", "warrior", "mage"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 27,
+      "phase": 3,
+      "style": "offense",
+      "mapType": "ruins",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "assassin",
+        "assassin",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "archer"
+      ],
+      "sm": {"hp": 0.94, "atk": 1.31},
+      "difficulty": 44,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "assassin": 2,
+        "mage": 2,
+        "summoner": 2,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 28,
+      "phase": 3,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 13,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "summoner",
+        "sapper",
+        "sapper",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "shaman"
+      ],
+      "sm": {"hp": 0.96, "atk": 1.38},
+      "difficulty": 45,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "mage": 3,
+        "summoner": 3,
+        "sapper": 2,
+        "warrior": 2,
+        "knight": 2,
+        "shaman": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "warrior"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 29,
+      "phase": 3,
+      "style": "mixed",
+      "mapType": "swamp",
+      "tot": 13,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "summoner",
+        "summoner",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "mage",
+        "mage",
+        "mage",
+        "warrior",
+        "warrior",
+        "assassin",
+        "brawler"
+      ],
+      "sm": {"hp": 0.97, "atk": 1.4},
+      "difficulty": 48,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "summoner": 4,
+        "shaman": 2,
+        "mage": 3,
+        "warrior": 2,
+        "assassin": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["assassin", "warrior", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 30,
+      "phase": 3,
+      "style": "offense",
+      "mapType": "ruins",
+      "tot": 12,
+      "spw": 6,
+      "si": 2,
+      "name": "습지의 제왕",
+      "story": "습지의 제왕을 쓰러뜨리고 저주를 끊어라",
+      "boss": {"cls": "summoner", "name": "습지의 제왕"},
+      "en": [
+        "summoner",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "mage",
+        "mage",
+        "priest",
+        "knight",
+        "knight",
+        "warrior"
+      ],
+      "sm": {"hp": 1.02, "atk": 1.54},
+      "difficulty": 65,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "summoner": 3,
+        "shaman": 2,
+        "mage": 2,
+        "priest": 1,
+        "knight": 2,
+        "warrior": 1
+      },
+      "recommendedClasses": ["assassin", "warrior", "knight"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 31,
+      "phase": 4,
+      "style": "defense",
+      "mapType": "fortress",
+      "tot": 14,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "lancer",
+        "lancer",
+        "lancer",
+        "archer",
+        "archer",
+        "mage",
+        "priest"
+      ],
+      "sm": {"hp": 1.01, "atk": 1.43},
+      "difficulty": 48,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "lancer": 3,
+        "archer": 2,
+        "mage": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 32,
+      "phase": 4,
+      "style": "offense",
+      "mapType": "canyon",
+      "tot": 14,
+      "spw": 5,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "knight",
+        "assassin",
+        "assassin",
+        "lancer",
+        "lancer",
+        "mage",
+        "mage",
+        "archer"
+      ],
+      "sm": {"hp": 1.03, "atk": 1.5},
+      "difficulty": 50,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "warrior": 4,
+        "knight": 3,
+        "assassin": 2,
+        "lancer": 2,
+        "mage": 2,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "archer", "brawler"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 33,
+      "phase": 4,
+      "style": "defense",
+      "mapType": "volcano",
+      "tot": 14,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "sapper",
+        "sapper",
+        "warrior",
+        "warrior",
+        "warrior",
+        "brawler",
+        "brawler",
+        "archer",
+        "archer",
+        "knight"
+      ],
+      "sm": {"hp": 1.04, "atk": 1.51},
+      "difficulty": 53,
+      "recommendedLevel": 5,
+      "enemyComposition": {
+        "mage": 4,
+        "sapper": 2,
+        "warrior": 3,
+        "brawler": 2,
+        "archer": 2,
+        "knight": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 34,
+      "phase": 4,
+      "style": "offense",
+      "mapType": "volcano",
+      "tot": 14,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "shaman",
+        "shaman",
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "priest"
+      ],
+      "sm": {"hp": 1.06, "atk": 1.58},
+      "difficulty": 54,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "mage": 4,
+        "summoner": 2,
+        "shaman": 2,
+        "warrior": 3,
+        "knight": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 35,
+      "phase": 4,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 14,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "lancer",
+        "lancer",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "archer",
+        "archer",
+        "priest"
+      ],
+      "sm": {"hp": 1.07, "atk": 1.59},
+      "difficulty": 55,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "knight": 4,
+        "lancer": 2,
+        "warrior": 3,
+        "mage": 2,
+        "archer": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 36,
+      "phase": 4,
+      "style": "offense",
+      "mapType": "volcano",
+      "tot": 14,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "sapper",
+        "sapper",
+        "brawler",
+        "summoner"
+      ],
+      "sm": {"hp": 1.09, "atk": 1.66},
+      "difficulty": 56,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "mage": 4,
+        "knight": 3,
+        "warrior": 3,
+        "sapper": 2,
+        "brawler": 1,
+        "summoner": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 37,
+      "phase": 4,
+      "style": "defense",
+      "mapType": "volcano",
+      "tot": 14,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "assassin",
+        "assassin",
+        "summoner",
+        "archer",
+        "archer"
+      ],
+      "sm": {"hp": 1.11, "atk": 1.69},
+      "difficulty": 57,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "mage": 4,
+        "warrior": 3,
+        "knight": 2,
+        "assassin": 2,
+        "summoner": 1,
+        "archer": 2
+      },
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 38,
+      "phase": 4,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 15,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "lancer",
+        "lancer",
+        "mage",
+        "mage",
+        "mage",
+        "archer",
+        "priest"
+      ],
+      "sm": {"hp": 1.12, "atk": 1.69},
+      "difficulty": 58,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 4,
+        "lancer": 2,
+        "mage": 3,
+        "archer": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 39,
+      "phase": 4,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 15,
+      "spw": 7,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "sapper",
+        "sapper"
+      ],
+      "sm": {"hp": 1.13, "atk": 1.69},
+      "difficulty": 61,
+      "recommendedLevel": 6,
+      "enemyComposition": {"mage": 5, "summoner": 2, "knight": 3, "warrior": 3, "sapper": 2},
+      "recommendedClasses": ["assassin", "archer", "mage"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 40,
+      "phase": 4,
+      "style": "offense",
+      "mapType": "volcano",
+      "tot": 12,
+      "spw": 7,
+      "si": 2,
+      "name": "화염 황제",
+      "story": "화염 황제를 쓰러뜨리고 밀약의 진실을 밝혀라",
+      "boss": {"cls": "mage", "name": "화염 황제"},
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "sapper",
+        "priest"
+      ],
+      "sm": {"hp": 1.19, "atk": 2},
+      "difficulty": 78,
+      "recommendedLevel": 6,
+      "enemyComposition": {
+        "mage": 3,
+        "summoner": 2,
+        "knight": 2,
+        "warrior": 2,
+        "sapper": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "warrior"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 41,
+      "phase": 5,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 15,
+      "spw": 6,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "assassin",
+        "assassin",
+        "lancer"
+      ],
+      "sm": {"hp": 1.16, "atk": 1.79},
+      "difficulty": 61,
+      "recommendedLevel": 7,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "assassin": 2,
+        "lancer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 42,
+      "phase": 5,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 15,
+      "spw": 7,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "assassin",
+        "assassin",
+        "assassin",
+        "mage",
+        "mage",
+        "lancer",
+        "lancer",
+        "archer"
+      ],
+      "sm": {"hp": 1.19, "atk": 1.87},
+      "difficulty": 64,
+      "recommendedLevel": 7,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "assassin": 3,
+        "mage": 2,
+        "lancer": 2,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 43,
+      "phase": 5,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 15,
+      "spw": 7,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "summoner",
+        "summoner",
+        "summoner",
+        "mage",
+        "mage",
+        "brawler",
+        "brawler",
+        "knight",
+        "knight",
+        "shaman"
+      ],
+      "sm": {"hp": 1.19, "atk": 1.89},
+      "difficulty": 65,
+      "recommendedLevel": 7,
+      "enemyComposition": {
+        "warrior": 5,
+        "summoner": 3,
+        "mage": 2,
+        "brawler": 2,
+        "knight": 2,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "archer", "assassin"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 44,
+      "phase": 5,
+      "style": "offense",
+      "mapType": "fortress",
+      "tot": 15,
+      "spw": 7,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "mage",
+        "mage",
+        "mage",
+        "warrior",
+        "warrior",
+        "warrior",
+        "summoner",
+        "summoner",
+        "summoner",
+        "lancer",
+        "priest"
+      ],
+      "sm": {"hp": 1.21, "atk": 1.95},
+      "difficulty": 67,
+      "recommendedLevel": 7,
+      "enemyComposition": {
+        "knight": 4,
+        "mage": 3,
+        "warrior": 3,
+        "summoner": 3,
+        "lancer": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "assassin"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 45,
+      "phase": 5,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 7,
+      "si": 2,
+      "name": "심연의 기사",
+      "story": "열쇠를 노리는 심연의 기사를 쓰러뜨려라",
+      "boss": {"cls": "knight", "name": "심연의 기사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer"
+      ],
+      "sm": {"hp": 1.27, "atk": 2.27},
+      "difficulty": 84,
+      "recommendedLevel": 7,
+      "enemyComposition": {"knight": 4, "warrior": 2, "mage": 1, "summoner": 2, "lancer": 2},
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.focus_boss"]
+    },
+    {
+      "id": 46,
+      "phase": 5,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 7,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "summoner",
+        "summoner",
+        "summoner",
+        "summoner",
+        "mage",
+        "mage",
+        "mage",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "sapper",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.23, "atk": 2},
+      "difficulty": 69,
+      "recommendedLevel": 7,
+      "enemyComposition": {
+        "summoner": 4,
+        "mage": 3,
+        "knight": 3,
+        "warrior": 3,
+        "sapper": 2,
+        "shaman": 1
+      },
+      "recommendedClasses": ["assassin", "warrior", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 47,
+      "phase": 5,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 8,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "summoner",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "sapper",
+        "sapper",
+        "shaman",
+        "brawler"
+      ],
+      "sm": {"hp": 1.23, "atk": 2.02},
+      "difficulty": 71,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "mage": 5,
+        "summoner": 3,
+        "knight": 2,
+        "warrior": 2,
+        "sapper": 2,
+        "shaman": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["assassin", "archer", "warrior"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 48,
+      "phase": 5,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 8,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "priest"
+      ],
+      "sm": {"hp": 1.25, "atk": 2.1},
+      "difficulty": 73,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "knight": 5,
+        "warrior": 4,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 49,
+      "phase": 5,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 8,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "assassin",
+        "brawler",
+        "brawler"
+      ],
+      "sm": {"hp": 1.26, "atk": 2.12},
+      "difficulty": 74,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "warrior": 5,
+        "knight": 4,
+        "mage": 2,
+        "summoner": 2,
+        "assassin": 1,
+        "brawler": 2
+      },
+      "recommendedClasses": ["mage", "archer", "brawler"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 50,
+      "phase": 5,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 9,
+      "si": 2,
+      "name": "심연의 바닥",
+      "story": "심연의 전사를 쓰러뜨리고 브람이 연 길을 지켜라",
+      "boss": {"cls": "warrior", "name": "심연의 전사"},
+      "en": [
+        "warrior",
+        "warrior",
+        "warrior",
+        "knight",
+        "knight",
+        "knight",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer"
+      ],
+      "sm": {"hp": 1.34, "atk": 2.64},
+      "difficulty": 94,
+      "recommendedLevel": 8,
+      "enemyComposition": {"warrior": 3, "knight": 3, "mage": 2, "summoner": 2, "lancer": 1},
+      "recommendedClasses": ["mage", "archer", "brawler"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 51,
+      "phase": 6,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 8,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "sapper",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.31, "atk": 2.34},
+      "difficulty": 77,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "sapper": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 52,
+      "phase": 6,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 8,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.32, "atk": 2.4},
+      "difficulty": 78,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 53,
+      "phase": 6,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.34, "atk": 2.51},
+      "difficulty": 81,
+      "recommendedLevel": 8,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 54,
+      "phase": 6,
+      "style": "mixed",
+      "mapType": "volcano",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest",
+        "sapper",
+        "shaman",
+        "archer"
+      ],
+      "sm": {"hp": 1.35, "atk": 2.57},
+      "difficulty": 82,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1,
+        "sapper": 1,
+        "shaman": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 55,
+      "phase": 6,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.37, "atk": 2.66},
+      "difficulty": 84,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 56,
+      "phase": 6,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.39, "atk": 2.68},
+      "difficulty": 85,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 57,
+      "phase": 6,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.4, "atk": 2.79},
+      "difficulty": 86,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 58,
+      "phase": 6,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.4, "atk": 2.81},
+      "difficulty": 87,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 59,
+      "phase": 6,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest",
+        "brawler",
+        "archer"
+      ],
+      "sm": {"hp": 1.42, "atk": 2.9},
+      "difficulty": 90,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1,
+        "brawler": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 60,
+      "phase": 6,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 10,
+      "si": 2,
+      "name": "옥문의 수호자",
+      "story": "지옥문을 지키는 옥문의 수호자와 맞서라",
+      "boss": {"cls": "knight", "name": "옥문의 수호자"},
+      "en": [
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "sapper",
+        "archer"
+      ],
+      "sm": {"hp": 1.5, "atk": 3.48},
+      "difficulty": 100,
+      "recommendedLevel": 9,
+      "enemyComposition": {
+        "knight": 2,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 1,
+        "sapper": 1,
+        "archer": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 61,
+      "phase": 7,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.45, "atk": 3.04},
+      "difficulty": 91,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 62,
+      "phase": 7,
+      "style": "offense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.47, "atk": 3.13},
+      "difficulty": 92,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 63,
+      "phase": 7,
+      "style": "mixed",
+      "mapType": "jungle",
+      "tot": 16,
+      "spw": 9,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.49, "atk": 3.2},
+      "difficulty": 93,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 3,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 64,
+      "phase": 7,
+      "style": "defense",
+      "mapType": "swamp",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.51, "atk": 3.32},
+      "difficulty": 97,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 65,
+      "phase": 7,
+      "style": "offense",
+      "mapType": "canyon",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler",
+        "shaman"
+      ],
+      "sm": {"hp": 1.53, "atk": 3.42},
+      "difficulty": 98,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 66,
+      "phase": 7,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler",
+        "shaman"
+      ],
+      "sm": {"hp": 1.53, "atk": 3.44},
+      "difficulty": 99,
+      "recommendedLevel": 10,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 67,
+      "phase": 7,
+      "style": "defense",
+      "mapType": "ruins",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.55, "atk": 3.56},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 68,
+      "phase": 7,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.56, "atk": 3.66},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 69,
+      "phase": 7,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 1.58, "atk": 3.73},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 70,
+      "phase": 7,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 11,
+      "si": 2,
+      "name": "악마의 법사",
+      "story": "기억으로 마음을 흔드는 악마의 법사를 쓰러뜨려라",
+      "boss": {"cls": "mage", "name": "악마의 법사"},
+      "en": [
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "brawler"
+      ],
+      "sm": {"hp": 1.67, "atk": 4.46},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 2,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 2,
+        "assassin": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 71,
+      "phase": 8,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler"
+      ],
+      "sm": {"hp": 1.61, "atk": 3.86},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 72,
+      "phase": 8,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "shaman"
+      ],
+      "sm": {"hp": 1.63, "atk": 3.98},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 73,
+      "phase": 8,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 10,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler"
+      ],
+      "sm": {"hp": 1.65, "atk": 4.09},
+      "difficulty": 100,
+      "recommendedLevel": 11,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance"]
+    },
+    {
+      "id": 74,
+      "phase": 8,
+      "style": "defense",
+      "mapType": "ruins",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.66, "atk": 4.14},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 75,
+      "phase": 8,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.67, "atk": 4.21},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 76,
+      "phase": 8,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.68, "atk": 4.29},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 77,
+      "phase": 8,
+      "style": "defense",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.69, "atk": 4.26},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 78,
+      "phase": 8,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.7, "atk": 4.34},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 79,
+      "phase": 8,
+      "style": "mixed",
+      "mapType": "ruins",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.72, "atk": 4.47},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 80,
+      "phase": 8,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 12,
+      "si": 2,
+      "name": "신의 소환사",
+      "story": "신을 부르려는 오르딘을 막아라",
+      "boss": {"cls": "summoner", "name": "신의 소환사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin"
+      ],
+      "sm": {"hp": 1.82, "atk": 5.4},
+      "difficulty": 100,
+      "recommendedLevel": 12,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 2
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 81,
+      "phase": 9,
+      "style": "defense",
+      "mapType": "plains",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.75, "atk": 4.63},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 3,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 82,
+      "phase": 9,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.77, "atk": 4.71},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 83,
+      "phase": 9,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 11,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.78, "atk": 4.79},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 84,
+      "phase": 9,
+      "style": "defense",
+      "mapType": "swamp",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.8, "atk": 4.87},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 85,
+      "phase": 9,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.81, "atk": 4.98},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 86,
+      "phase": 9,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.83, "atk": 5.03},
+      "difficulty": 100,
+      "recommendedLevel": 13,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 87,
+      "phase": 9,
+      "style": "defense",
+      "mapType": "ruins",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.84, "atk": 5.14},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 88,
+      "phase": 9,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 13,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.85, "atk": 5.22},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 3,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 89,
+      "phase": 9,
+      "style": "mixed",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 13,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.88, "atk": 5.42},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 90,
+      "phase": 9,
+      "style": "offense",
+      "mapType": "plains",
+      "tot": 12,
+      "spw": 13,
+      "si": 2,
+      "name": "전쟁의 전사",
+      "story": "솔빛 마을 앞에서 마계 대장군을 쓰러뜨려라",
+      "boss": {"cls": "warrior", "name": "전쟁의 전사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 1.98, "atk": 6.52},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 91,
+      "phase": 10,
+      "style": "defense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 12,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 1.92, "atk": 5.62},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 92,
+      "phase": 10,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 12,
+      "si": 2,
+      "name": "최후의 기사",
+      "story": "인간이었던 기사와 정정당당히 겨뤄라",
+      "boss": {"cls": "knight", "name": "최후의 기사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 2.03, "atk": 6.75},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 1,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 93,
+      "phase": 10,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 13,
+      "si": 2,
+      "name": "최후의 마술사",
+      "story": "모든 것을 계산하는 마술사를 꺾어라",
+      "boss": {"cls": "mage", "name": "최후의 마술사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 2.04, "atk": 6.88},
+      "difficulty": 100,
+      "recommendedLevel": 14,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 1,
+        "summoner": 2,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.focus_boss"]
+    },
+    {
+      "id": 94,
+      "phase": 10,
+      "style": "defense",
+      "mapType": "fortress",
+      "tot": 12,
+      "spw": 13,
+      "si": 2,
+      "name": "최후의 소환사",
+      "story": "끝없는 군세를 성벽에서 버텨라",
+      "boss": {"cls": "summoner", "name": "최후의 소환사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 2.06, "atk": 7.02},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 95,
+      "phase": 10,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 13,
+      "si": 2,
+      "name": "금지된 기사",
+      "story": "인간이 되고 싶었던 기사에게 답을 보여라",
+      "boss": {"cls": "knight", "name": "금지된 기사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest"
+      ],
+      "sm": {"hp": 2.08, "atk": 7.15},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 96,
+      "phase": 10,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 14,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 2, "atk": 6.19},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 4,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.use_aoe"]
+    },
+    {
+      "id": 97,
+      "phase": 10,
+      "style": "defense",
+      "mapType": "fortress",
+      "tot": 16,
+      "spw": 14,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "assassin",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 2.04, "atk": 6.53},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 2,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.defend_gate", "strategy_tips.use_terrain"]
+    },
+    {
+      "id": 98,
+      "phase": 10,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 16,
+      "spw": 14,
+      "si": 2,
+      "boss": null,
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "priest",
+        "sapper",
+        "shaman"
+      ],
+      "sm": {"hp": 2.05, "atk": 6.68},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 3,
+        "mage": 2,
+        "summoner": 2,
+        "lancer": 2,
+        "assassin": 1,
+        "priest": 1,
+        "sapper": 1,
+        "shaman": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    },
+    {
+      "id": 99,
+      "phase": 10,
+      "style": "mixed",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 15,
+      "si": 2,
+      "name": "군주의 방패",
+      "story": "옥좌를 지키는 마계의 전사를 부숴라",
+      "boss": {"cls": "warrior", "name": "마계의 전사"},
+      "en": [
+        "knight",
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "summoner",
+        "lancer",
+        "lancer",
+        "assassin",
+        "sapper"
+      ],
+      "sm": {"hp": 2.18, "atk": 8.04},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 3,
+        "warrior": 2,
+        "mage": 1,
+        "summoner": 1,
+        "lancer": 2,
+        "assassin": 1,
+        "sapper": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.mixed_balance", "strategy_tips.focus_boss"]
+    },
+    {
+      "id": 100,
+      "phase": 10,
+      "style": "offense",
+      "mapType": "abyss",
+      "tot": 12,
+      "spw": 15,
+      "si": 2,
+      "name": "마계 군주",
+      "story": "모두의 손으로 마계 군주의 문을 잠가라",
+      "boss": {"cls": "warrior", "name": "마계 군주"},
+      "en": [
+        "knight",
+        "knight",
+        "warrior",
+        "warrior",
+        "mage",
+        "mage",
+        "summoner",
+        "lancer",
+        "assassin",
+        "priest",
+        "brawler"
+      ],
+      "sm": {"hp": 2.2, "atk": 8.27},
+      "difficulty": 100,
+      "recommendedLevel": 15,
+      "enemyComposition": {
+        "knight": 2,
+        "warrior": 2,
+        "mage": 2,
+        "summoner": 1,
+        "lancer": 1,
+        "assassin": 1,
+        "priest": 1,
+        "brawler": 1
+      },
+      "recommendedClasses": ["mage", "brawler", "archer"],
+      "strategyTips": ["strategy_tips.offense_quick", "strategy_tips.use_range"]
+    }
+  ],
+  "ENEMY_SM_BASE": 0.6,
+  "ENEMY_SM_GROWTH": 1.0127,
+  "ENEMY_LV_PER_STAGE": 0.22,
+  "ENEMY_BOSS_LV": 3,
+  "ENEMY_SKILL_EVERY": 11,
+  "ENEMY_HP_EXP": 0.6,
+  "ENEMY_ATK_EXP": 1.15,
+  "ENEMY_HP_GROWTH_MUL": 0.65,
+  "ENEMY_DEF_GROWTH_MUL": 0.6,
+  "STAGE_TOT_CAP_MAX": 16,
+  "STAGE_TOT_CAP_BOSS": 12,
+  "STAGE_TOT_CAP_BASE": 10,
+  "STAGE_TOT_CAP_PER": 0.12,
+  "STAGE_COMP_HP": 0.15,
+  "STAGE_COMP_ATK": 0.55,
+  "STAGE_MAX_WAVES": 3,
+  "MAX_ENEMIES_ON_FIELD": 14
 }

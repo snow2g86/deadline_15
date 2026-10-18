@@ -13,6 +13,7 @@ const JsonExact := preload("res://scripts/core/json_exact.gd")
 const NumParse := preload("res://scripts/core/num_parse.gd")
 const NumFmt := preload("res://scripts/core/num.gd")
 const FontsT := preload("res://scripts/core/fonts.gd")
+const DF := preload("res://tools/data_format.gd")
 const LANGS: PackedStringArray = ["ko", "en", "es", "ja", "zh-CN", "zh-TW"]
 
 var Store: StoreScript
@@ -49,6 +50,7 @@ func _run() -> void:
 	I18n.reload()
 
 	_test_data()
+	_test_source()
 	_test_i18n()
 	_test_store()
 	_test_numbers()
@@ -60,6 +62,122 @@ func _run() -> void:
 	Store.use_path(real_path)
 	I18n.reload()
 	_finish()
+
+
+# ── 데이터 원본 (2026-10-18~ godot/data 가 원본) ──
+
+func _test_source() -> void:
+	print("[데이터 원본]")
+	var r := DF.run(DF.DATA_DIR, false)
+	_check(r["ok"] and (r["changed"] as Array).is_empty(), "godot/data %d개 파일이 정해진 모양 + manifest 최신 (data_tool --check) %s" % [r["files"], str(r["changed"]) + str(r["errors"])])
+	var rb := DF.run(DF.BASELINE_DIR, false)
+	_check(rb["ok"] and (rb["changed"] as Array).is_empty(), "기준 데이터 tests/baseline/data %d개 파일 모양·manifest 맞음" % rb["files"])
+	var lk := DF.lock_check()
+	_check(lk["ok"], "기준 잠금 LOCK.json = golden·fixtures·baseline/data 파일 (%d개) %s" % [DF.lock_scan().size(), str((lk["errors"] as Array).slice(0, 3))])
+	var man: Dictionary = JsonExact.parse(FileAccess.get_file_as_string("res://data/manifest.json"))
+	_check(str(man.get("generator", "")) == "godot/tools/data_tool.gd" and int(man.get("format", 0)) == 2, "manifest 는 data_tool 이 만든 형식 2 (웹 변환기 아님)")
+	# 정해진 모양이 값을 바꾸지 않음: 모든 파일을 다시 읽어 canon → parse → 같은 글 (멱등) + 실수 비트 그대로
+	var stable := true
+	for rel: String in ["stages.json", "jab.json", "battle_constants.json", "lang/ko.json", "story/ja.json"]:
+		var t := FileAccess.get_file_as_string("res://data/" + rel)
+		var t2 := DF.canon(JsonExact.parse(t))
+		stable = stable and t == t2
+	_check(stable, "정해진 모양은 멱등 (읽고 다시 써도 같은 글)")
+	_check(DataDB.data_dir == "res://data/" and not DataDB.is_baseline and not DataDB.sha_mismatch,
+		"게임 DataDB 는 지금 데이터 res://data/ (기준 사본 아님 · sha1 어긋남 없음) — %s" % DataDB.data_dir)
+	_test_bad_inputs()
+	var RR: GDScript = load("res://scripts/logic/resume_rules.gd")
+	var h0 := str(RR.call("current_stamp")["dataHash"])
+	DataDB.sha_mismatch = true
+	var h1 := str(RR.call("current_stamp")["dataHash"])
+	DataDB.sha_mismatch = false
+	_check(h0.length() == 32 and h1 == str(RR.get("INVALID_HASH")), "sha1 이 어긋난 실행에서는 이어하기 데이터 해시가 무효 (%s → %s)" % [h0.left(8), h1])
+	var n_last := 0
+	for code: String in ["ko", "en", "es", "ja", "zh-CN", "zh-TW", "sample"]:
+		var sts: Dictionary = DataDB.story(code).get("stages", {})
+		for sid: Variant in sts.keys():
+			var b: Variant = (sts[sid] as Dictionary).get("battle")
+			if b is Dictionary and (b as Dictionary).has("last"):
+				n_last += 1
+	_check(n_last == 0, "대본에 쓰이지 않는 'last'(마지막 적) 대사 없음 — 7개 대본 (%d)" % n_last)
+	var odd := [0.1 + 0.2]
+	for ns: String in ["1.3599999999999999", "5e-324", "1.7976931348623157e+308", "123456789012345680000", "-0.000001", "0.07"]:
+		odd.append(JsonExact.parse_number(ns))   # GDScript 17자리 실수 리터럴은 정확하지 않아 문자열에서
+	var back: Array = JsonExact.parse(DF.canon({"v": odd}))["v"]
+	var bits_ok := true
+	for i in odd.size():
+		bits_ok = bits_ok and PackedFloat64Array([odd[i]]).to_byte_array() == PackedFloat64Array([back[i]]).to_byte_array()
+	_check(bits_ok, "정해진 모양으로 쓰고 읽은 실수가 비트 단위로 같음 %s" % DF.canon(odd).strip_edges())
+
+
+## (2026-10-18 검수) 나쁜 입력: 고친 바이트 → sha1 오류 · 1e999 → --write 가 아무것도 쓰지 않고 실패 · 중복 키 → 점검·쓰기·DataDB 모두 오류
+func _test_bad_inputs() -> void:
+	var tmp := "user://test_datatool/"
+	# 1) 바이트 하나 고침 (data_tool 을 안 돌림) → DataDB sha1 오류 · sha_mismatch
+	_copy_data(tmp)
+	var jab := FileAccess.get_file_as_string(tmp + "jab.json")
+	_put(tmp + "jab.json", jab.replace("\"atk\": 25", "\"atk\": 26"))
+	var db := DataDBScript.new()
+	db.use_dir(tmp)
+	var sha_err := false
+	for e: String in db.errors:
+		sha_err = sha_err or (e.contains("jab.json") and e.contains("sha1"))
+	_check(sha_err and db.sha_mismatch and jab.contains("\"atk\": 25"), "JSON 을 고치고 --write 를 잊으면 DataDB 가 sha1 오류 · sha_mismatch (이어하기 해시 무효)")
+	db.free()
+	# 2) 1e999 (읽으면 무한) → --write 도 실패 · 아무 파일도 안 바뀜
+	_copy_data(tmp)
+	var bad := jab.replace("\"resRec\": 0", "\"resRec\": 1e999")
+	_put(tmp + "jab.json", bad)
+	var man0 := FileAccess.get_file_as_string(tmp + "manifest.json")
+	var r := DF.run(tmp, true)
+	var num_err := false
+	for e2: String in r["errors"]:
+		num_err = num_err or e2.contains("쓸 수 없는 숫자")
+	_check(not r["ok"] and num_err and FileAccess.get_file_as_string(tmp + "jab.json") == bad and FileAccess.get_file_as_string(tmp + "manifest.json") == man0,
+		"1e999 → data_tool --write 가 실패 (오류: %s) · 어떤 파일도 쓰지 않음" % str(r["errors"]).left(90))
+	var ce: Array = []
+	DF.canon({"a": [1, INF]}, ce)
+	_check(ce.size() == 1 and str(ce[0]).begins_with("a[1]"), "canon: NaN·무한 실수는 경로와 함께 오류 (%s)" % str(ce))
+	# 3) 같은 사전에 같은 키 두 번 → 점검·쓰기·DataDB 모두 오류
+	_copy_data(tmp)
+	var ui := FileAccess.get_file_as_string(tmp + "ui.json")
+	var dup := ui.substr(0, 2) + "  \"NAV_TABS\": 1,\n" + ui.substr(2)   # 맨 위 "{\n" 바로 뒤에 같은 전역 이름
+	_put(tmp + "ui.json", dup)
+	var rc := DF.run(tmp, false)
+	var rw := DF.run(tmp, true)
+	var db2 := DataDBScript.new()
+	db2.use_dir(tmp)
+	var dup_db := false
+	for e3: String in db2.errors:
+		dup_db = dup_db or e3.contains("같은 키가 두 번")
+	db2.free()
+	_check(not rc["ok"] and not rw["ok"] and str(rc["errors"]).contains("NAV_TABS") and FileAccess.get_file_as_string(tmp + "ui.json") == dup and dup_db,
+		"중복 키 → 점검·--write 실패 (쓰지 않음) · DataDB 오류 (%s)" % str(rc["errors"]).left(90))
+	_rm_dir(tmp)
+
+
+func _copy_data(dst: String) -> void:
+	_rm_dir(dst)
+	for rel: String in ["", "lang/", "story/"]:
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dst + rel))
+		for f: String in DirAccess.get_files_at("res://data/" + rel):
+			if f.get_extension() == "json":
+				_put(dst + rel + f, FileAccess.get_file_as_string("res://data/" + rel + f))
+
+
+func _put(path: String, text: String) -> void:
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(text)
+	f.close()
+
+
+func _rm_dir(dir: String) -> void:
+	if not DirAccess.dir_exists_absolute(dir):
+		return
+	for rel: String in ["lang/", "story/", ""]:
+		for f: String in DirAccess.get_files_at(dir + rel):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + rel + f))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + rel))
 
 
 # ── 데이터 ──
@@ -231,7 +349,7 @@ func _test_i18n() -> void:
 	Store.remove("game_settings")
 
 
-## ja·zh-CN·zh-TW: 웹 언어 팩 키가 ko 와 같음 (빠짐·남음 0), 자리표시자 같음, lang_extra 키는 6개 언어 모두 같음, 글꼴 사슬
+## ja·zh-CN·zh-TW: 언어 팩 키가 ko 와 같음 (빠짐·남음 0), 자리표시자 같음, gd.* 키는 6개 언어 모두 같음, 글꼴 사슬
 func _test_i18n_new_langs() -> void:
 	var ko_leaves := {}
 	_leaves(DataDB.lang("ko"), "", ko_leaves)
@@ -252,14 +370,14 @@ func _test_i18n_new_langs() -> void:
 				extra.append(k)
 		_check(miss.is_empty() and extra.is_empty(), "%s: 웹 언어 팩 키 %d개가 ko 와 같음 (빠짐 %d · 남음 %d %s)" % [code, lv.size(), miss.size(), extra.size(), str(miss.slice(0, 3) + extra.slice(0, 3))])
 		_check(ph_bad.is_empty(), "%s: 자리표시자 {..} 가 ko 와 같음 %s" % [code, str(ph_bad.slice(0, 5))])
-	# Godot 전용 키 (lang_extra) — 6개 언어 모두 같은 키
+	# Godot 화면 글 (gd.* — 2026-10-18 lang_extra 를 언어 팩 안 "gd" 로 합침) — 6개 언어 모두 같은 키
+	_check(not DirAccess.dir_exists_absolute("res://data/lang_extra"), "data/lang_extra 폴더 없음 (gd.* 는 data/lang/<언어>.json 안)")
 	var extra_keys := {}
 	for code: String in LANGS:
-		var f := "res://data/lang_extra/%s.json" % code
-		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(f)) if FileAccess.file_exists(f) else null
+		var d: Variant = DataDB.lang(code).get("gd")
 		var lv2 := {}
 		if d is Dictionary:
-			_leaves(d, "", lv2)
+			_leaves(d, "gd", lv2)
 		extra_keys[code] = lv2
 	var base: Dictionary = extra_keys["ko"]
 	for code: String in LANGS:
@@ -271,7 +389,7 @@ func _test_i18n_new_langs() -> void:
 				same = false
 			elif _ph_set(ph, str(base[k])) != _ph_set(ph, str(other[k])):
 				ph_bad2.append(k)
-		_check(same and base.size() > 50 and ph_bad2.is_empty(), "lang_extra %s: gd.* 키 %d개 ko 와 같음, 자리표시자 같음 %s" % [code, other.size(), str(ph_bad2)])
+		_check(same and base.size() > 50 and ph_bad2.is_empty(), "lang/%s.json gd.*: 키 %d개 ko 와 같음, 자리표시자 같음 %s" % [code, other.size(), str(ph_bad2)])
 	# 견본 문자열 (웹 팩 + Godot 전용)
 	var samples := {
 		"ja": {"nav.sortie": "出撃", "battle.surrender": "降伏", "gd.result.retry": "再挑戦", "settings.language_ja": "日本語 (Japanese)"},

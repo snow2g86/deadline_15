@@ -12,6 +12,7 @@ extends SceneTree
 ##  (3b) HUD·연출·스토리 대사를 모두 켠 채 재생: 스토리는 story=auto (대사를 프레임마다 저절로 넘김 — 재생을 붙잡는 경로를 그대로 지남).
 ##       끝나면 결과 화면이 떠야 하고(이긴 판은 클랜원 경험치 줄), 재생한 스토리 장면 수를 출력 (보스전 등에서 0 이면 실패)
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
 const BattleScene := preload("res://scripts/battle/battle_scene.gd")
 const SCENE := "res://scenes/battle/battle.tscn"
@@ -30,6 +31,7 @@ const SMOKE_STAGES := [1, 3, 6, 7, 10, 11, 14, 17, 19, 21, 24, 27, 30, 33, 40, 5
 
 
 func _initialize() -> void:
+	BaselineData.apply(self)   # 황금 기록 = 기준 데이터로 (tests/baseline_data.gd, -- --live 면 지금 데이터)
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
 		if args[i] == "--only" and i + 1 < args.size():

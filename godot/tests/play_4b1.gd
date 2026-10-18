@@ -3,7 +3,7 @@ extends SceneTree
 ##  로비 → 아래 탭 상점(용병 모집 · 물약 사기 · 1회 뽑기) → 편성(장비 끼우기 · 강화 · 소모품) → 스테이지 1-1 → 전투(몇 번 행동)
 ##  → 설정 '나가기' → 로비 '전투 재개' → 끝까지 → 로비
 ##   Godot --path godot --resolution 1280x720 --script res://tests/play_4b1.gd   [-- --size 1920x1080] → tests/screens/4b1_*.png
-##  저장은 user://test_play_4b1_save.json (진짜 세이브는 건드리지 않음). 끝에 PLAY_RESULT: OK|FAIL
+##  저장은 user://test_play_4b1_save.json (진짜 세이브는 건드리지 않음). 끝에 PLAY_RESULT: OK|WARN|FAIL (종료 코드 0·2·1, tests/play_kit.gd verdict)
 
 const OUT := "res://tests/screens/"
 const PlayKit := preload("res://tests/play_kit.gd")
@@ -328,14 +328,14 @@ func _main() -> void:
 	if _aborting:
 		return
 	print("PLAY_LOG: " + " | ".join(log_lines))
-	print("PLAY_RESULT: " + ("OK" if fails.is_empty() else "FAIL " + str(fails)))
+	var code := PlayKit.verdict(fails.is_empty(), hud_blocked, "" if fails.is_empty() else str(fails))
 	if current_scene != null:
 		current_scene.queue_free()
 	await _frames(2)
 	store.call("clear")
 	store.call("flush")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
-	quit(0 if fails.is_empty() else 1)
+	quit(code)
 
 
 # ═══════════ 전투 (play_4a 와 같은 간단한 규칙, 실행은 진짜 입력) ═══════════

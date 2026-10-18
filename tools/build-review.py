@@ -27,7 +27,7 @@ def conv(item):
     if os.path.exists(dst + '.json') and os.path.getmtime(dst + '.json') > os.path.getmtime(src): return name, True
     n, a, b, extra = SPEC[motion]
     r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'video-to-sheet.py'), src, dst, '--frames', str(n), '--height', '160',
-                        '--start', str(a), '--end', str(b), '--char', os.path.join(ROOT, 'image', 'character', key + '.png')] + extra,
+                        '--start', str(a), '--end', str(b), '--char', os.path.join(ROOT, 'godot', 'assets', 'image', 'character', key + '.png')] + extra,
                        capture_output=True, text=True)
     return name, r.returncode == 0
 

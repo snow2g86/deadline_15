@@ -3,6 +3,7 @@ extends SceneTree
 ##   Godot --headless --path godot --script res://tests/check_battle_ui.gd
 ##  Godot 오류(push_error·스크립트 오류)는 Logger 로 세어 0 이어야 통과. 저장은 user://test_battle_ui_save.json (진짜 세이브는 건드리지 않음)
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const BattleScene := preload("res://scripts/battle/battle_scene.gd")
 const PixelFx := preload("res://scripts/battle/pixel_fx.gd")
 const JsonX := preload("res://scripts/core/json_exact.gd")
@@ -28,6 +29,7 @@ class ErrCounter extends Logger:
 
 
 func _initialize() -> void:
+	BaselineData.apply(self)   # 황금 기록·기준 데이터 (tests/baseline_data.gd)
 	_counter = ErrCounter.new()
 	OS.add_logger(_counter)
 	_main.call_deferred()

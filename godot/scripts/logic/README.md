@@ -12,7 +12,7 @@
 | 웹 | GDScript | 내용 |
 |---|---|---|
 | (Math.round·toFixed·sort·참거짓) | `js.gd` | JS 의미 그대로 계산: `round_js`(.5 → +∞), `to_fixed_num`(정확한 10진 반올림·동점은 큰 쪽), `stable_sort`, `v8_sort`(V8 TimSort 전체 — 비교 호출 순서까지), `truthy`(빈 배열·사전도 참), `deep`(JSON 복사), `mh` |
-| `tools/battle-sim/env.js` mulberry32 | `rng.gd` | `next(tag)` = Math.random(), `calls` = 호출 수, `log_enabled` 면 호출마다 태그 기록 |
+| `tools/legacy-web/battle-sim/env.js` mulberry32 | `rng.gd` | `next(tag)` = Math.random(), `calls` = 호출 수, `log_enabled` 면 호출마다 태그 기록 |
 | (전역 데이터·Math.random·localStorage·Date) | `ctx.gd` | 규칙 공통 환경: `D`(웹 전역 이름 → 값), `rng`, `store`, 가상 시계 `now_ms` |
 | `js/common/store.js` (localStorage) | `save_store.gd` | 키 → JSON 값. 꺼낼 때·넣을 때 복사 (웹의 JSON 문자열 저장과 같은 의미), 숫자 키 규칙은 `core/json_norm.gd` |
 | `js/common/storage.js` · `character.js` · `soul.js`, `equip.js` 인벤토리·Mats | `profile.gd` | 세이브·골드·별점·로스터(`get_roster` 보정 포함)·`gain_exp`·사망 표시·영혼석·재료 |
@@ -153,11 +153,12 @@ Store·DataDB·시험·전투 저장이 모두 이것으로 통일되어 있습�
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/replay_golden.gd
 #  -- --only boss_s10,gear_s15   일부만
 #  -- --external                 input_provider 없이 command() 입구로 재생 (3단계 API 시험)
-#  -- --rng-log                  user://rng-log/<이름>.txt 에 '번호<TAB>웹 함수' → node tools/battle-sim.js --only <이름> --rng-log 와 나란히 비교
+#  -- --rng-log                  user://rng-log/<이름>.txt 에 '번호<TAB>웹 함수' → node tools/legacy-web/battle-sim.js --only <이름> --rng-log 와 나란히 비교
 #  -- --resume [N]               command() 로 재생하며 N번째 입력 대기마다 저장 → 새 엔진에 복원 → 이어서 (기본 1 = 모든 입력 대기)
 # 엔진 API 시험 (조회 순수성·command 결과·bus_event 사본·plan_rule·실수 리터럴, 약 17초)
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_api.gd
 ```
 
 불일치가 나면 사건 번호·종류·난수 번호, 첫 차이의 경로(예: `events[197].dmg: 30 ≠ 31`), 바로 앞 사건 3개, 기대/실제 전체를 출력합니다.
-웹 규칙을 바꿔 황금 기록을 다시 만들었다면(`node tools/battle-sim.js`) 이 시험이 바뀐 곳을 가리킵니다.
+(2026-10-18~) 황금 기록은 웹판 코드로 만든 **고정된 기준**이고, 기준 데이터(`tests/baseline/data`)로 재생합니다. GDScript 규칙을 일부러 바꿔 기록이 달라지면
+`replay_golden.gd -- --record` 로 Godot 엔진이 다시 쓰고 사람이 diff 를 검토합니다 (godot/README.md '기준을 다시 만들 때'). 웹 도구는 `tools/legacy-web/` 에 보관만.

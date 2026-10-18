@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""개발용: gen-props.py 결과(크로마키 바탕) → 게임용 맵 오브젝트 그림 image/map/<이름>.png
+"""개발용: gen-props.py 결과(크로마키 바탕) → 게임용 맵 오브젝트 그림 godot/assets/image/map/<이름>.png
 
 사용: python3 tools/make-props.py <이름>=<시드> [...]   예: tree_a=1 rock_a=2 rock_b=rock_a:1 (다른 이름의 후보)
 - 바탕(초록 또는 자홍)과 그 색이 섞인 그림자를 투명으로, 가장 큰 덩어리만 남김
@@ -10,7 +10,7 @@ from collections import deque
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC, OUT = os.path.join(ROOT, 'tools/_work/props'), os.path.join(ROOT, 'image/map')
+SRC, OUT = os.path.join(ROOT, 'tools/_work/props'), os.path.join(ROOT, 'godot/assets/image/map')
 # 화면 표시 높이(CSS px) — data/props.js PROP_ART 와 맞출 것
 # rock_a·rock_b·mound 는 게임에서 안 씀 (2026-10-13 언덕·바위 그림 대체 취소)
 HEIGHT = {'tree_a': 41, 'tree_b': 58, 'pine': 48, 'rock_a': 80, 'rock_b': 80, 'mound': 66, 'grass': 16, 'stones': 12}

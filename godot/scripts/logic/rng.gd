@@ -1,7 +1,7 @@
 extends RefCounted
-## 전투 난수: mulberry32 (tools/battle-sim/env.js 와 비트까지 같음 — tests/golden/README.md 의 명세)
+## 전투 난수: mulberry32 (tools/legacy-web/battle-sim/env.js 와 비트까지 같음 — tests/golden/README.md 의 명세)
 ##  웹의 Math.random() 자리를 모두 이것으로 바꾼다. calls = 지금까지 부른 횟수 (황금 기록의 rng/rngEnd 와 비교)
-##  log_enabled 면 호출마다 '번호<TAB>태그' 를 남긴다 (node tools/battle-sim.js --rng-log 와 맞춰 보며 어긋난 곳 찾기)
+##  log_enabled 면 호출마다 '번호<TAB>태그' 를 남긴다 (node tools/legacy-web/battle-sim.js --rng-log 와 맞춰 보며 어긋난 곳 찾기)
 
 const M32 := 0xFFFFFFFF
 

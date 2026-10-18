@@ -215,11 +215,11 @@ func _main() -> void:
 	print("PLAY_LOG: " + " | ".join(log_lines))
 	var clear_n: int = (store.call("get_json", "game_save", {}) as Dictionary).get("cleared", []).size()
 	var ok := stuck == 0 and _scene_is("ui/lobby.gd") and not timed_out
-	print("PLAY_RESULT: %s (멈춤 %d · 클리어 %d)" % ["OK" if ok else "FAIL", stuck, clear_n])
+	var code := PlayKit.verdict(ok, hud_blocked, "(멈춤 %d · 클리어 %d)" % [stuck, clear_n])
 	store.call("clear")
 	store.call("flush")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
-	quit(0 if ok else 1)
+	quit(code)
 
 
 # ═══════════ 전투: 진짜 입력으로 한 판 ═══════════

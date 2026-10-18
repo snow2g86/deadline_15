@@ -1,914 +1,424 @@
 {
- "EQUIP_SLOTS": [
-  "weapon",
-  "offhand",
-  "helmet",
-  "armor",
-  "boots",
-  "necklace",
-  "earring",
-  "ring"
- ],
- "EQUIP_SLOT_ICONS": {
-  "weapon": "🗡️",
-  "offhand": "🛡️",
-  "helmet": "🪖",
-  "armor": "🥋",
-  "boots": "👢",
-  "necklace": "📿",
-  "earring": "✨",
-  "ring": "💍"
- },
- "GACHA_COST_1": 400,
- "GACHA_COST_10": 3600,
- "GACHA_MULTI_COUNT": 11,
- "RARITY": {
-  "common": {
-   "tier": 0,
-   "grade": "D",
-   "color": "#9ca3af"
+  "EQUIP_SLOTS": ["weapon", "offhand", "helmet", "armor", "boots", "necklace", "earring", "ring"],
+  "EQUIP_SLOT_ICONS": {
+    "weapon": "🗡️",
+    "offhand": "🛡️",
+    "helmet": "🪖",
+    "armor": "🥋",
+    "boots": "👢",
+    "necklace": "📿",
+    "earring": "✨",
+    "ring": "💍"
   },
-  "uncommon": {
-   "tier": 1,
-   "grade": "C",
-   "color": "#4ade80"
+  "GACHA_COST_1": 400,
+  "GACHA_COST_10": 3600,
+  "GACHA_MULTI_COUNT": 11,
+  "RARITY": {
+    "common": {"tier": 0, "grade": "D", "color": "#9ca3af"},
+    "uncommon": {"tier": 1, "grade": "C", "color": "#4ade80"},
+    "rare": {"tier": 2, "grade": "B", "color": "#60a5fa"},
+    "epic": {"tier": 3, "grade": "A", "color": "#a78bfa"},
+    "legendary": {"tier": 4, "grade": "S", "color": "#f0c040"}
   },
-  "rare": {
-   "tier": 2,
-   "grade": "B",
-   "color": "#60a5fa"
+  "GACHA_RATE": {
+    "common": 0.6,
+    "uncommon": 0.35,
+    "rare": 0.045,
+    "epic": 0.0045,
+    "legendary": 0.0005
   },
-  "epic": {
-   "tier": 3,
-   "grade": "A",
-   "color": "#a78bfa"
+  "GACHA_PITY_MAX": 100,
+  "RARITY_MULT": {"common": 1, "uncommon": 1.3, "rare": 1.6, "epic": 2, "legendary": 2.5},
+  "SELL_PRICE": {"common": 30, "uncommon": 60, "rare": 120, "epic": 250, "legendary": 500},
+  "RARITY_ORDER": ["common", "uncommon", "rare", "epic", "legendary"],
+  "ARMOR_TYPE": {
+    "plate": ["knight", "warrior", "lancer"],
+    "chain": ["knight", "warrior", "lancer", "sapper", "priest", "archer", "novice"],
+    "leather": ["warrior", "assassin", "archer", "brawler", "sapper", "novice"],
+    "cloth": ["mage", "summoner", "shaman", "priest"]
   },
-  "legendary": {
-   "tier": 4,
-   "grade": "S",
-   "color": "#f0c040"
-  }
- },
- "GACHA_RATE": {
-  "common": 0.6,
-  "uncommon": 0.35,
-  "rare": 0.045,
-  "epic": 0.0045,
-  "legendary": 0.0005
- },
- "GACHA_PITY_MAX": 100,
- "RARITY_MULT": {
-  "common": 1,
-  "uncommon": 1.3,
-  "rare": 1.6,
-  "epic": 2,
-  "legendary": 2.5
- },
- "SELL_PRICE": {
-  "common": 30,
-  "uncommon": 60,
-  "rare": 120,
-  "epic": 250,
-  "legendary": 500
- },
- "RARITY_ORDER": [
-  "common",
-  "uncommon",
-  "rare",
-  "epic",
-  "legendary"
- ],
- "ARMOR_TYPE": {
-  "plate": [
-   "knight",
-   "warrior",
-   "lancer"
-  ],
-  "chain": [
-   "knight",
-   "warrior",
-   "lancer",
-   "sapper",
-   "priest",
-   "archer",
-   "novice"
-  ],
-  "leather": [
-   "warrior",
-   "assassin",
-   "archer",
-   "brawler",
-   "sapper",
-   "novice"
-  ],
-  "cloth": [
-   "mage",
-   "summoner",
-   "shaman",
-   "priest"
-  ]
- },
- "CLASS_ARMOR": {
-  "warrior": "plate",
-  "knight": "plate",
-  "lancer": "plate",
-  "sapper": "chain",
-  "priest": "cloth",
-  "archer": "leather",
-  "novice": "leather",
-  "assassin": "leather",
-  "brawler": "leather",
-  "mage": "cloth",
-  "summoner": "cloth",
-  "shaman": "cloth"
- },
- "ALL_CLASSES": [
-  "warrior",
-  "knight",
-  "assassin",
-  "mage",
-  "archer",
-  "priest",
-  "novice",
-  "summoner",
-  "shaman",
-  "brawler",
-  "lancer",
-  "sapper"
- ],
- "EQUIP_DB": [
-  {
-   "baseId": "wpn_warrior",
-   "slot": "weapon",
-   "hand": "2h",
-   "stats": {
-    "atk": [
-     6,
-     10
-    ]
-   },
-   "clsRestrict": [
-    "warrior"
-   ]
+  "CLASS_ARMOR": {
+    "warrior": "plate",
+    "knight": "plate",
+    "lancer": "plate",
+    "sapper": "chain",
+    "priest": "cloth",
+    "archer": "leather",
+    "novice": "leather",
+    "assassin": "leather",
+    "brawler": "leather",
+    "mage": "cloth",
+    "summoner": "cloth",
+    "shaman": "cloth"
   },
-  {
-   "baseId": "wpn_knight",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     3,
-     6
-    ],
-    "hp": [
-     6,
-     14
-    ]
-   },
-   "clsRestrict": [
-    "knight"
-   ]
-  },
-  {
-   "baseId": "wpn_assassin",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     5,
-     9
-    ]
-   },
-   "clsRestrict": [
-    "assassin"
-   ]
-  },
-  {
-   "baseId": "wpn_mage",
-   "slot": "weapon",
-   "hand": "2h",
-   "stats": {
-    "atk": [
-     5,
-     9
-    ]
-   },
-   "clsRestrict": [
-    "mage"
-   ]
-  },
-  {
-   "baseId": "wpn_archer",
-   "slot": "weapon",
-   "hand": "2h",
-   "stats": {
-    "atk": [
-     5,
-     9
-    ]
-   },
-   "clsRestrict": [
-    "archer"
-   ]
-  },
-  {
-   "baseId": "wpn_priest",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     3,
-     6
-    ],
-    "hp": [
-     4,
-     10
-    ]
-   },
-   "clsRestrict": [
-    "priest"
-   ]
-  },
-  {
-   "baseId": "wpn_novice",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     3,
-     6
-    ],
-    "def": [
-     1,
-     2
-    ]
-   },
-   "clsRestrict": [
-    "novice"
-   ]
-  },
-  {
-   "baseId": "wpn_summoner",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     5,
-     8
-    ]
-   },
-   "clsRestrict": [
-    "summoner"
-   ]
-  },
-  {
-   "baseId": "wpn_shaman",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     4,
-     8
-    ]
-   },
-   "clsRestrict": [
-    "shaman"
-   ]
-  },
-  {
-   "baseId": "wpn_brawler",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     5,
-     8
-    ],
-    "def": [
-     1,
-     2
-    ]
-   },
-   "clsRestrict": [
-    "brawler"
-   ]
-  },
-  {
-   "baseId": "wpn_lancer",
-   "slot": "weapon",
-   "hand": "2h",
-   "stats": {
-    "atk": [
-     5,
-     8
-    ],
-    "hp": [
-     4,
-     10
-    ]
-   },
-   "clsRestrict": [
-    "lancer"
-   ]
-  },
-  {
-   "baseId": "wpn_sapper",
-   "slot": "weapon",
-   "hand": "1h",
-   "stats": {
-    "atk": [
-     4,
-     8
-    ],
-    "def": [
-     1,
-     3
-    ]
-   },
-   "clsRestrict": [
-    "sapper"
-   ]
-  },
-  {
-   "baseId": "shield",
-   "slot": "offhand",
-   "stats": {
-    "def": [
-     2,
-     5
-    ],
-    "hp": [
-     5,
-     15
-    ]
-   },
-   "clsRestrict": [
+  "ALL_CLASSES": [
     "warrior",
     "knight",
-    "lancer",
-    "novice"
-   ]
-  },
-  {
-   "baseId": "tome",
-   "slot": "offhand",
-   "stats": {
-    "atk": [
-     1,
-     3
-    ],
-    "hp": [
-     3,
-     8
-    ]
-   },
-   "clsRestrict": [
+    "assassin",
     "mage",
+    "archer",
+    "priest",
+    "novice",
     "summoner",
     "shaman",
-    "priest"
-   ]
-  },
-  {
-   "baseId": "buckler",
-   "slot": "offhand",
-   "stats": {
-    "def": [
-     1,
-     3
-    ]
-   },
-   "clsRestrict": [
-    "assassin",
     "brawler",
-    "sapper",
-    "archer"
-   ]
+    "lancer",
+    "sapper"
+  ],
+  "EQUIP_DB": [
+    {
+      "baseId": "wpn_warrior",
+      "slot": "weapon",
+      "hand": "2h",
+      "stats": {"atk": [6, 10]},
+      "clsRestrict": ["warrior"]
+    },
+    {
+      "baseId": "wpn_knight",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [3, 6], "hp": [6, 14]},
+      "clsRestrict": ["knight"]
+    },
+    {
+      "baseId": "wpn_assassin",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [5, 9]},
+      "clsRestrict": ["assassin"]
+    },
+    {
+      "baseId": "wpn_mage",
+      "slot": "weapon",
+      "hand": "2h",
+      "stats": {"atk": [5, 9]},
+      "clsRestrict": ["mage"]
+    },
+    {
+      "baseId": "wpn_archer",
+      "slot": "weapon",
+      "hand": "2h",
+      "stats": {"atk": [5, 9]},
+      "clsRestrict": ["archer"]
+    },
+    {
+      "baseId": "wpn_priest",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [3, 6], "hp": [4, 10]},
+      "clsRestrict": ["priest"]
+    },
+    {
+      "baseId": "wpn_novice",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [3, 6], "def": [1, 2]},
+      "clsRestrict": ["novice"]
+    },
+    {
+      "baseId": "wpn_summoner",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [5, 8]},
+      "clsRestrict": ["summoner"]
+    },
+    {
+      "baseId": "wpn_shaman",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [4, 8]},
+      "clsRestrict": ["shaman"]
+    },
+    {
+      "baseId": "wpn_brawler",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [5, 8], "def": [1, 2]},
+      "clsRestrict": ["brawler"]
+    },
+    {
+      "baseId": "wpn_lancer",
+      "slot": "weapon",
+      "hand": "2h",
+      "stats": {"atk": [5, 8], "hp": [4, 10]},
+      "clsRestrict": ["lancer"]
+    },
+    {
+      "baseId": "wpn_sapper",
+      "slot": "weapon",
+      "hand": "1h",
+      "stats": {"atk": [4, 8], "def": [1, 3]},
+      "clsRestrict": ["sapper"]
+    },
+    {
+      "baseId": "shield",
+      "slot": "offhand",
+      "stats": {"def": [2, 5], "hp": [5, 15]},
+      "clsRestrict": ["warrior", "knight", "lancer", "novice"]
+    },
+    {
+      "baseId": "tome",
+      "slot": "offhand",
+      "stats": {"atk": [1, 3], "hp": [3, 8]},
+      "clsRestrict": ["mage", "summoner", "shaman", "priest"]
+    },
+    {
+      "baseId": "buckler",
+      "slot": "offhand",
+      "stats": {"def": [1, 3]},
+      "clsRestrict": ["assassin", "brawler", "sapper", "archer"]
+    },
+    {
+      "baseId": "plate_helm",
+      "slot": "helmet",
+      "armorType": "plate",
+      "stats": {"def": [2, 4], "hp": [5, 10]}
+    },
+    {
+      "baseId": "chain_helm",
+      "slot": "helmet",
+      "armorType": "chain",
+      "stats": {"def": [1, 3], "hp": [4, 9]}
+    },
+    {
+      "baseId": "leather_cap",
+      "slot": "helmet",
+      "armorType": "leather",
+      "stats": {"def": [1, 2], "hp": [3, 8]}
+    },
+    {
+      "baseId": "cloth_hood",
+      "slot": "helmet",
+      "armorType": "cloth",
+      "stats": {"atk": [1, 3], "hp": [3, 8]}
+    },
+    {
+      "baseId": "plate_armor",
+      "slot": "armor",
+      "armorType": "plate",
+      "stats": {"def": [4, 8], "hp": [10, 25]}
+    },
+    {
+      "baseId": "chain_armor",
+      "slot": "armor",
+      "armorType": "chain",
+      "stats": {"def": [3, 6], "hp": [8, 20]}
+    },
+    {
+      "baseId": "leather_armor",
+      "slot": "armor",
+      "armorType": "leather",
+      "stats": {"def": [2, 4], "hp": [5, 15]}
+    },
+    {
+      "baseId": "cloth_robe",
+      "slot": "armor",
+      "armorType": "cloth",
+      "stats": {"atk": [2, 5], "hp": [5, 12]}
+    },
+    {
+      "baseId": "plate_boots",
+      "slot": "boots",
+      "armorType": "plate",
+      "stats": {"def": [1, 3], "hp": [3, 8]}
+    },
+    {
+      "baseId": "chain_boots",
+      "slot": "boots",
+      "armorType": "chain",
+      "stats": {"def": [1, 2], "hp": [3, 6]}
+    },
+    {
+      "baseId": "leather_boots",
+      "slot": "boots",
+      "armorType": "leather",
+      "stats": {"def": [1, 2], "hp": [2, 5]}
+    },
+    {
+      "baseId": "cloth_shoes",
+      "slot": "boots",
+      "armorType": "cloth",
+      "stats": {"atk": [1, 2], "hp": [2, 5]}
+    },
+    {"baseId": "necklace_power", "slot": "necklace", "stats": {"atk": [2, 5]}, "setId": "power"},
+    {
+      "baseId": "necklace_guard",
+      "slot": "necklace",
+      "stats": {"def": [2, 4], "hp": [3, 8]},
+      "setId": "guard"
+    },
+    {"baseId": "necklace_swift", "slot": "necklace", "stats": {"atk": [1, 3]}, "setId": "swift"},
+    {"baseId": "earring_power", "slot": "earring", "stats": {"atk": [1, 4]}, "setId": "power"},
+    {
+      "baseId": "earring_guard",
+      "slot": "earring",
+      "stats": {"def": [1, 3], "hp": [2, 6]},
+      "setId": "guard"
+    },
+    {"baseId": "earring_swift", "slot": "earring", "stats": {"hp": [2, 5]}, "setId": "swift"},
+    {"baseId": "ring_power", "slot": "ring", "stats": {"atk": [2, 5]}, "setId": "power"},
+    {"baseId": "ring_guard", "slot": "ring", "stats": {"def": [2, 4]}, "setId": "guard"},
+    {"baseId": "ring_swift", "slot": "ring", "stats": {"atk": [1, 3]}, "setId": "swift"}
+  ],
+  "LEGACY_WEAPON": {
+    "sword_1h": "wpn_knight",
+    "dagger": "wpn_assassin",
+    "mace": "wpn_priest",
+    "wand": "wpn_summoner",
+    "fists": "wpn_brawler",
+    "greatsword": "wpn_warrior",
+    "bow": "wpn_archer",
+    "staff": "wpn_mage",
+    "spear": "wpn_lancer"
   },
-  {
-   "baseId": "plate_helm",
-   "slot": "helmet",
-   "armorType": "plate",
-   "stats": {
-    "def": [
-     2,
-     4
-    ],
-    "hp": [
-     5,
-     10
-    ]
-   }
+  "EQUIP_SETS": {
+    "power": {"2": {"atk": 5}, "3": {"atk": 10, "hp": 15}},
+    "guard": {"2": {"def": 4, "hp": 10}, "3": {"def": 8, "hp": 25}},
+    "swift": {"2": {"move": 1}, "3": {"move": 1, "atk": 5}}
   },
-  {
-   "baseId": "chain_helm",
-   "slot": "helmet",
-   "armorType": "chain",
-   "stats": {
-    "def": [
-     1,
-     3
-    ],
-    "hp": [
-     4,
-     9
-    ]
-   }
+  "ENHANCE_MAX_LV": 10,
+  "ENHANCE_RATES": [1, 0.9, 0.8, 0.7, 0.55, 0.45, 0.35, 0.25, 0.15, 0.1],
+  "ENHANCE_SAFE_BELOW": 3,
+  "ENHANCE_BREAK_CHANCE": 0.005,
+  "ENHANCE_FAIL_BONUS": 3,
+  "ENHANCE_FAIL_BONUS_MAX": 15,
+  "ENHANCE_GOLD": {"common": 40, "uncommon": 70, "rare": 120, "epic": 250, "legendary": 500},
+  "ENHANCE_STONES": [1, 1, 1, 2, 2, 2, 4, 4, 4, 4],
+  "REPAIR_GOLD": {"common": 100, "uncommon": 200, "rare": 500, "epic": 1200, "legendary": 3000},
+  "ENHANCE_STAT_PCT": [0, 10, 20, 30, 40, 55, 70, 90, 110, 130, 160],
+  "DISMANTLE_STONES": {"common": 1, "uncommon": 2, "rare": 4, "epic": 8, "legendary": 20},
+  "EQUIP_EMOJI": {
+    "wpn_warrior": "⚔️",
+    "wpn_knight": "🗡️",
+    "wpn_assassin": "🔪",
+    "wpn_mage": "🪄",
+    "wpn_archer": "🏹",
+    "wpn_priest": "✝️",
+    "wpn_novice": "🗡️",
+    "wpn_summoner": "🔮",
+    "wpn_shaman": "🪬",
+    "wpn_brawler": "👊",
+    "wpn_lancer": "🔱",
+    "wpn_sapper": "🔨",
+    "shield": "🛡️",
+    "tome": "📖",
+    "buckler": "🎯",
+    "plate_helm": "⛑️",
+    "chain_helm": "🪖",
+    "leather_cap": "👒",
+    "cloth_hood": "🧢",
+    "plate_armor": "🏰",
+    "chain_armor": "⛓️",
+    "leather_armor": "🧥",
+    "cloth_robe": "👘",
+    "plate_boots": "👢",
+    "chain_boots": "🥾",
+    "leather_boots": "🥾",
+    "cloth_shoes": "👟",
+    "necklace_power": "💎",
+    "necklace_guard": "🔗",
+    "necklace_swift": "🌪️",
+    "earring_power": "💫",
+    "earring_guard": "⭐",
+    "earring_swift": "✨",
+    "ring_power": "💠",
+    "ring_guard": "🔷",
+    "ring_swift": "🔹"
   },
-  {
-   "baseId": "leather_cap",
-   "slot": "helmet",
-   "armorType": "leather",
-   "stats": {
-    "def": [
-     1,
-     2
-    ],
-    "hp": [
-     3,
-     8
-    ]
-   }
+  "SIEGE_ITEMS": [
+    {
+      "id": "siege_ladder",
+      "icon": "🪜",
+      "cost": 100,
+      "targetType": "wall_rock",
+      "range": 1,
+      "effect": "climb",
+      "weight": 40
+    },
+    {
+      "id": "siege_bomb",
+      "icon": "💣",
+      "cost": 200,
+      "targetType": "wall_rock",
+      "range": 3,
+      "effect": "destroy",
+      "weight": 35
+    },
+    {
+      "id": "siege_bridge",
+      "icon": "🌉",
+      "cost": 150,
+      "targetType": "water",
+      "range": 3,
+      "effect": "bridge",
+      "weight": 25
+    }
+  ],
+  "BATTLE_POTIONS": {
+    "potion_heal": {
+      "id": "potion_heal",
+      "icon": "💊",
+      "name": "potion_heal",
+      "type": "heal",
+      "value": 50,
+      "range": 1,
+      "actionCost": 1
+    },
+    "potion_resource": {
+      "id": "potion_resource",
+      "icon": "⚡",
+      "name": "potion_resource",
+      "type": "resource",
+      "value": 30,
+      "range": 1,
+      "actionCost": 1
+    },
+    "potion_atk_buff": {
+      "id": "potion_atk_buff",
+      "icon": "🔥",
+      "name": "potion_atk_buff",
+      "type": "buff",
+      "stat": "atk",
+      "value": 30,
+      "duration": 3,
+      "range": 1,
+      "actionCost": 1
+    },
+    "potion_def_buff": {
+      "id": "potion_def_buff",
+      "icon": "🛡️",
+      "name": "potion_def_buff",
+      "type": "buff",
+      "stat": "def",
+      "value": 30,
+      "duration": 3,
+      "range": 1,
+      "actionCost": 1
+    },
+    "potion_atk_debuff": {
+      "id": "potion_atk_debuff",
+      "icon": "💢",
+      "name": "potion_atk_debuff",
+      "type": "debuff",
+      "stat": "atk",
+      "value": -25,
+      "duration": 3,
+      "range": 2,
+      "actionCost": 1
+    },
+    "potion_def_debuff": {
+      "id": "potion_def_debuff",
+      "icon": "❄️",
+      "name": "potion_def_debuff",
+      "type": "debuff",
+      "stat": "def",
+      "value": -25,
+      "duration": 3,
+      "range": 2,
+      "actionCost": 1
+    }
   },
-  {
-   "baseId": "cloth_hood",
-   "slot": "helmet",
-   "armorType": "cloth",
-   "stats": {
-    "atk": [
-     1,
-     3
-    ],
-    "hp": [
-     3,
-     8
-    ]
-   }
-  },
-  {
-   "baseId": "plate_armor",
-   "slot": "armor",
-   "armorType": "plate",
-   "stats": {
-    "def": [
-     4,
-     8
-    ],
-    "hp": [
-     10,
-     25
-    ]
-   }
-  },
-  {
-   "baseId": "chain_armor",
-   "slot": "armor",
-   "armorType": "chain",
-   "stats": {
-    "def": [
-     3,
-     6
-    ],
-    "hp": [
-     8,
-     20
-    ]
-   }
-  },
-  {
-   "baseId": "leather_armor",
-   "slot": "armor",
-   "armorType": "leather",
-   "stats": {
-    "def": [
-     2,
-     4
-    ],
-    "hp": [
-     5,
-     15
-    ]
-   }
-  },
-  {
-   "baseId": "cloth_robe",
-   "slot": "armor",
-   "armorType": "cloth",
-   "stats": {
-    "atk": [
-     2,
-     5
-    ],
-    "hp": [
-     5,
-     12
-    ]
-   }
-  },
-  {
-   "baseId": "plate_boots",
-   "slot": "boots",
-   "armorType": "plate",
-   "stats": {
-    "def": [
-     1,
-     3
-    ],
-    "hp": [
-     3,
-     8
-    ]
-   }
-  },
-  {
-   "baseId": "chain_boots",
-   "slot": "boots",
-   "armorType": "chain",
-   "stats": {
-    "def": [
-     1,
-     2
-    ],
-    "hp": [
-     3,
-     6
-    ]
-   }
-  },
-  {
-   "baseId": "leather_boots",
-   "slot": "boots",
-   "armorType": "leather",
-   "stats": {
-    "def": [
-     1,
-     2
-    ],
-    "hp": [
-     2,
-     5
-    ]
-   }
-  },
-  {
-   "baseId": "cloth_shoes",
-   "slot": "boots",
-   "armorType": "cloth",
-   "stats": {
-    "atk": [
-     1,
-     2
-    ],
-    "hp": [
-     2,
-     5
-    ]
-   }
-  },
-  {
-   "baseId": "necklace_power",
-   "slot": "necklace",
-   "stats": {
-    "atk": [
-     2,
-     5
-    ]
-   },
-   "setId": "power"
-  },
-  {
-   "baseId": "necklace_guard",
-   "slot": "necklace",
-   "stats": {
-    "def": [
-     2,
-     4
-    ],
-    "hp": [
-     3,
-     8
-    ]
-   },
-   "setId": "guard"
-  },
-  {
-   "baseId": "necklace_swift",
-   "slot": "necklace",
-   "stats": {
-    "atk": [
-     1,
-     3
-    ]
-   },
-   "setId": "swift"
-  },
-  {
-   "baseId": "earring_power",
-   "slot": "earring",
-   "stats": {
-    "atk": [
-     1,
-     4
-    ]
-   },
-   "setId": "power"
-  },
-  {
-   "baseId": "earring_guard",
-   "slot": "earring",
-   "stats": {
-    "def": [
-     1,
-     3
-    ],
-    "hp": [
-     2,
-     6
-    ]
-   },
-   "setId": "guard"
-  },
-  {
-   "baseId": "earring_swift",
-   "slot": "earring",
-   "stats": {
-    "hp": [
-     2,
-     5
-    ]
-   },
-   "setId": "swift"
-  },
-  {
-   "baseId": "ring_power",
-   "slot": "ring",
-   "stats": {
-    "atk": [
-     2,
-     5
-    ]
-   },
-   "setId": "power"
-  },
-  {
-   "baseId": "ring_guard",
-   "slot": "ring",
-   "stats": {
-    "def": [
-     2,
-     4
-    ]
-   },
-   "setId": "guard"
-  },
-  {
-   "baseId": "ring_swift",
-   "slot": "ring",
-   "stats": {
-    "atk": [
-     1,
-     3
-    ]
-   },
-   "setId": "swift"
-  }
- ],
- "LEGACY_WEAPON": {
-  "sword_1h": "wpn_knight",
-  "dagger": "wpn_assassin",
-  "mace": "wpn_priest",
-  "wand": "wpn_summoner",
-  "fists": "wpn_brawler",
-  "greatsword": "wpn_warrior",
-  "bow": "wpn_archer",
-  "staff": "wpn_mage",
-  "spear": "wpn_lancer"
- },
- "EQUIP_SETS": {
-  "power": {
-   "2": {
-    "atk": 5
-   },
-   "3": {
-    "atk": 10,
-    "hp": 15
-   }
-  },
-  "guard": {
-   "2": {
-    "def": 4,
-    "hp": 10
-   },
-   "3": {
-    "def": 8,
-    "hp": 25
-   }
-  },
-  "swift": {
-   "2": {
-    "move": 1
-   },
-   "3": {
-    "move": 1,
-    "atk": 5
-   }
-  }
- },
- "ENHANCE_MAX_LV": 10,
- "ENHANCE_RATES": [
-  1,
-  0.9,
-  0.8,
-  0.7,
-  0.55,
-  0.45,
-  0.35,
-  0.25,
-  0.15,
-  0.1
- ],
- "ENHANCE_SAFE_BELOW": 3,
- "ENHANCE_BREAK_CHANCE": 0.005,
- "ENHANCE_FAIL_BONUS": 3,
- "ENHANCE_FAIL_BONUS_MAX": 15,
- "ENHANCE_GOLD": {
-  "common": 40,
-  "uncommon": 70,
-  "rare": 120,
-  "epic": 250,
-  "legendary": 500
- },
- "ENHANCE_STONES": [
-  1,
-  1,
-  1,
-  2,
-  2,
-  2,
-  4,
-  4,
-  4,
-  4
- ],
- "REPAIR_GOLD": {
-  "common": 100,
-  "uncommon": 200,
-  "rare": 500,
-  "epic": 1200,
-  "legendary": 3000
- },
- "ENHANCE_STAT_PCT": [
-  0,
-  10,
-  20,
-  30,
-  40,
-  55,
-  70,
-  90,
-  110,
-  130,
-  160
- ],
- "DISMANTLE_STONES": {
-  "common": 1,
-  "uncommon": 2,
-  "rare": 4,
-  "epic": 8,
-  "legendary": 20
- },
- "EQUIP_EMOJI": {
-  "wpn_warrior": "⚔️",
-  "wpn_knight": "🗡️",
-  "wpn_assassin": "🔪",
-  "wpn_mage": "🪄",
-  "wpn_archer": "🏹",
-  "wpn_priest": "✝️",
-  "wpn_novice": "🗡️",
-  "wpn_summoner": "🔮",
-  "wpn_shaman": "🪬",
-  "wpn_brawler": "👊",
-  "wpn_lancer": "🔱",
-  "wpn_sapper": "🔨",
-  "shield": "🛡️",
-  "tome": "📖",
-  "buckler": "🎯",
-  "plate_helm": "⛑️",
-  "chain_helm": "🪖",
-  "leather_cap": "👒",
-  "cloth_hood": "🧢",
-  "plate_armor": "🏰",
-  "chain_armor": "⛓️",
-  "leather_armor": "🧥",
-  "cloth_robe": "👘",
-  "plate_boots": "👢",
-  "chain_boots": "🥾",
-  "leather_boots": "🥾",
-  "cloth_shoes": "👟",
-  "necklace_power": "💎",
-  "necklace_guard": "🔗",
-  "necklace_swift": "🌪️",
-  "earring_power": "💫",
-  "earring_guard": "⭐",
-  "earring_swift": "✨",
-  "ring_power": "💠",
-  "ring_guard": "🔷",
-  "ring_swift": "🔹"
- },
- "SIEGE_ITEMS": [
-  {
-   "id": "siege_ladder",
-   "icon": "🪜",
-   "cost": 100,
-   "targetType": "wall_rock",
-   "range": 1,
-   "effect": "climb",
-   "weight": 40
-  },
-  {
-   "id": "siege_bomb",
-   "icon": "💣",
-   "cost": 200,
-   "targetType": "wall_rock",
-   "range": 3,
-   "effect": "destroy",
-   "weight": 35
-  },
-  {
-   "id": "siege_bridge",
-   "icon": "🌉",
-   "cost": 150,
-   "targetType": "water",
-   "range": 3,
-   "effect": "bridge",
-   "weight": 25
-  }
- ],
- "BATTLE_POTIONS": {
-  "potion_heal": {
-   "id": "potion_heal",
-   "icon": "💊",
-   "name": "potion_heal",
-   "type": "heal",
-   "value": 50,
-   "range": 1,
-   "actionCost": 1
-  },
-  "potion_resource": {
-   "id": "potion_resource",
-   "icon": "⚡",
-   "name": "potion_resource",
-   "type": "resource",
-   "value": 30,
-   "range": 1,
-   "actionCost": 1
-  },
-  "potion_atk_buff": {
-   "id": "potion_atk_buff",
-   "icon": "🔥",
-   "name": "potion_atk_buff",
-   "type": "buff",
-   "stat": "atk",
-   "value": 30,
-   "duration": 3,
-   "range": 1,
-   "actionCost": 1
-  },
-  "potion_def_buff": {
-   "id": "potion_def_buff",
-   "icon": "🛡️",
-   "name": "potion_def_buff",
-   "type": "buff",
-   "stat": "def",
-   "value": 30,
-   "duration": 3,
-   "range": 1,
-   "actionCost": 1
-  },
-  "potion_atk_debuff": {
-   "id": "potion_atk_debuff",
-   "icon": "💢",
-   "name": "potion_atk_debuff",
-   "type": "debuff",
-   "stat": "atk",
-   "value": -25,
-   "duration": 3,
-   "range": 2,
-   "actionCost": 1
-  },
-  "potion_def_debuff": {
-   "id": "potion_def_debuff",
-   "icon": "❄️",
-   "name": "potion_def_debuff",
-   "type": "debuff",
-   "stat": "def",
-   "value": -25,
-   "duration": 3,
-   "range": 2,
-   "actionCost": 1
-  }
- },
- "INV_KEY": "game_inventory",
- "PITY_KEY": "game_gacha_pity",
- "MATS_KEY": "game_mats"
+  "INV_KEY": "game_inventory",
+  "PITY_KEY": "game_gacha_pity",
+  "MATS_KEY": "game_mats"
 }

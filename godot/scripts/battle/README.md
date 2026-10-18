@@ -134,10 +134,10 @@ UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
   전사자, 클랜원마다 +EXP·다음 레벨까지 막대·레벨 업. 내용만 스크롤되고 단추 줄은 늘 보임. 장비 이름·등급은 순수 조회 `eng.q.gear_drop_items(전투 시작 eid)`. 단추: 로비로(지금은 시작 화면) · 다시 도전 · 다음 스테이지. 언어를 바꾸면 다시 그림.
 - 로딩: 스테이지 이름 · 금빛 막대 · 팁(`battle.loading_tips` 중 하나, 화면 난수). 끝나면 스테이지 소개(EP.x-y + 이름) 잠깐.
 
-## 번역 (Godot 전용 키)
+## 번역 (Godot 화면 글 gd.*)
 
-웹 언어 팩(`data/lang/*.json`, 변환기 결과)은 고치지 않습니다. 웹에 없는 키는 `data/lang_extra/{ko,en,es,ja,zh-CN,zh-TW}.json` 의 `gd.*` 에 두고 (6개 언어 같은 키 — `check_foundation` 이 검사),
-I18n 이 언어를 읽을 때 **웹에 없는 키만** 깊게 더합니다 (`scripts/core/i18n.gd _with_extra`). DataDB 의 '목록에 없는 파일' 검사와 변환기 `--check` 는 `lang_extra/` 를 건너뜁니다.
+(2026-10-18~) 언어 팩 `data/lang/{ko,en,es,ja,zh-CN,zh-TW}.json` 이 원본이고, Godot 화면 글은 그 안의 `"gd"` 아래 `gd.*` 키입니다
+(예전 `data/lang_extra/` 를 합침 — 6개 언어 같은 키, `check_foundation` 이 검사). 고친 뒤 `tools/data_tool.gd -- --write` (godot/README.md '데이터 원본').
 `gd.fail.*`(명령 실패 안내) · `gd.buff.*`(버프 이름) · `gd.tip.*`(툴팁) · `gd.ai.*`(AI 성향) · `gd.settings.*` · `gd.result.retry`.
 언어가 바뀌면(`I18n.language_changed`) 윗줄·행동 순서·카드·메뉴·공격 예상·방향 고르기·팝업·설정·결과를 바로 다시 그립니다.
 

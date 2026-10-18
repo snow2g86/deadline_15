@@ -1,6 +1,6 @@
 extends RefCounted
 ## 클랜원 행동 — 웹 js/battle/action.js (ActionManager: 선택·cellCk 상태 기계·이동·공격·회복·스킬·물약·공성·밀치기·방향 고르기·이동 취소)
-##  + 시험 정책(tools/battle-sim/policy.js)의 exec: 명령 하나를 화면 버튼과 같은 입구로 실행 (exec_cmd)
+##  + 시험 정책(tools/legacy-web/battle-sim/policy.js)의 exec: 명령 하나를 화면 버튼과 같은 입구로 실행 (exec_cmd)
 ##  웹의 setTimeout 은 E.later (가상 시계 대기열). E = battle_engine.gd
 
 const Js := preload("res://scripts/logic/js.gd")

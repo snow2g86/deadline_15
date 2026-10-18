@@ -1,146 +1,45 @@
 {
- "HAZARDS": {
-  "volcano": {
-   "id": "burn",
-   "icon": "🔥",
-   "enchant": "fire",
-   "dot": 0.035,
-   "safe": true
+  "HAZARDS": {
+    "volcano": {"id": "burn", "icon": "🔥", "enchant": "fire", "dot": 0.035, "safe": true},
+    "abyss": {"id": "hellfire", "icon": "☄️", "enchant": "fire", "dot": 0.03, "safe": true},
+    "desert": {"id": "heat", "icon": "☀️", "enchant": "heat", "move": -1},
+    "canyon": {"id": "gale", "icon": "🌪️", "enchant": "wind", "range": -1},
+    "jungle": {"id": "venom", "icon": "🦟", "enchant": "poison", "dot": 0.03},
+    "swamp": {"id": "miasma", "icon": "☠️", "enchant": "poison", "dot": 0.04},
+    "frozen": {"id": "frost", "icon": "❄️", "enchant": "cold", "def": 0.75},
+    "ruins": {"id": "curse", "icon": "🕯️", "enchant": "curse", "heal": 0.5}
   },
-  "abyss": {
-   "id": "hellfire",
-   "icon": "☄️",
-   "enchant": "fire",
-   "dot": 0.03,
-   "safe": true
+  "SAFE_ZONE": {"zones": 2, "size": 2, "rows": [3, 10], "icon": "❄️", "every": 3},
+  "ENCHANTS": {
+    "fire": {"icon": "🔥", "cat": "def"},
+    "heat": {"icon": "☀️", "cat": "def"},
+    "wind": {"icon": "🌪️", "cat": "def"},
+    "poison": {"icon": "🧪", "cat": "def"},
+    "cold": {"icon": "❄️", "cat": "def"},
+    "curse": {"icon": "✨", "cat": "def"},
+    "flame": {"icon": "🔥", "cat": "atk", "burn": 0.15, "turns": 2},
+    "frost": {"icon": "🧊", "cat": "atk", "freeze": 0.2},
+    "venom": {"icon": "🐍", "cat": "atk", "poison": 0.1, "turns": 3},
+    "thunder": {"icon": "⚡", "cat": "atk", "dmg": 0.15},
+    "vamp": {"icon": "🩸", "cat": "atk", "drain": 0.15},
+    "sunder": {"icon": "🔨", "cat": "atk", "pierce": 0.3}
   },
-  "desert": {
-   "id": "heat",
-   "icon": "☀️",
-   "enchant": "heat",
-   "move": -1
-  },
-  "canyon": {
-   "id": "gale",
-   "icon": "🌪️",
-   "enchant": "wind",
-   "range": -1
-  },
-  "jungle": {
-   "id": "venom",
-   "icon": "🦟",
-   "enchant": "poison",
-   "dot": 0.03
-  },
-  "swamp": {
-   "id": "miasma",
-   "icon": "☠️",
-   "enchant": "poison",
-   "dot": 0.04
-  },
-  "frozen": {
-   "id": "frost",
-   "icon": "❄️",
-   "enchant": "cold",
-   "def": 0.75
-  },
-  "ruins": {
-   "id": "curse",
-   "icon": "🕯️",
-   "enchant": "curse",
-   "heal": 0.5
+  "ENCHANT_FIELD": {"def": "enchant", "atk": "enchantAtk"},
+  "ENCHANT_FEE": 100,
+  "RUNE_GACHA_COST": 300,
+  "RUNE_DROP_CHANCE": 0.2,
+  "CHEST": {
+    "min": 1,
+    "max": 2,
+    "rows": [3, 9],
+    "odds": {
+      "gold": 0.32,
+      "potion": 0.17,
+      "rune": 0.15,
+      "equip": 0.13,
+      "stone": 0.11,
+      "protect": 0.02,
+      "soul": 0.1
+    }
   }
- },
- "SAFE_ZONE": {
-  "zones": 2,
-  "size": 2,
-  "rows": [
-   3,
-   10
-  ],
-  "icon": "❄️",
-  "every": 3
- },
- "ENCHANTS": {
-  "fire": {
-   "icon": "🔥",
-   "cat": "def"
-  },
-  "heat": {
-   "icon": "☀️",
-   "cat": "def"
-  },
-  "wind": {
-   "icon": "🌪️",
-   "cat": "def"
-  },
-  "poison": {
-   "icon": "🧪",
-   "cat": "def"
-  },
-  "cold": {
-   "icon": "❄️",
-   "cat": "def"
-  },
-  "curse": {
-   "icon": "✨",
-   "cat": "def"
-  },
-  "flame": {
-   "icon": "🔥",
-   "cat": "atk",
-   "burn": 0.15,
-   "turns": 2
-  },
-  "frost": {
-   "icon": "🧊",
-   "cat": "atk",
-   "freeze": 0.2
-  },
-  "venom": {
-   "icon": "🐍",
-   "cat": "atk",
-   "poison": 0.1,
-   "turns": 3
-  },
-  "thunder": {
-   "icon": "⚡",
-   "cat": "atk",
-   "dmg": 0.15
-  },
-  "vamp": {
-   "icon": "🩸",
-   "cat": "atk",
-   "drain": 0.15
-  },
-  "sunder": {
-   "icon": "🔨",
-   "cat": "atk",
-   "pierce": 0.3
-  }
- },
- "ENCHANT_FIELD": {
-  "def": "enchant",
-  "atk": "enchantAtk"
- },
- "ENCHANT_FEE": 100,
- "RUNE_GACHA_COST": 300,
- "RUNE_DROP_CHANCE": 0.2,
- "CHEST": {
-  "min": 1,
-  "max": 2,
-  "rows": [
-   3,
-   9
-  ],
-  "odds": {
-   "gold": 0.32,
-   "potion": 0.17,
-   "rune": 0.15,
-   "equip": 0.13,
-   "stone": 0.11,
-   "protect": 0.02,
-   "soul": 0.1
-  }
- }
 }

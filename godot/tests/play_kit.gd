@@ -5,6 +5,8 @@ extends RefCounted
 ##    화살표 키(진짜 입력, key 는 키를 누르는 코루틴 Callable)로 카메라를 옮김 → [칸 화면 좌표, 누를 수 있는지]
 ##    (예전에는 Vector2(root.size) = 물리 크기로 재서 1920×1080 창에서 '가운데'가 논리 화면 밖까지 넓어져, HUD 밑의 칸을 눌러
 ##     '대상 고르기'가 풀리지 않는 일이 있었음)
+##  - verdict(ok, hud_blocked, 덧붙일 글): 끝 줄 PLAY_RESULT 를 찍고 종료 코드를 돌려줌 (2026-10-18)
+##    OK(0) · WARN(2: 실패는 없지만 HUD 에 가려 칸을 못 누르고 Esc 로 넘긴 일이 있음 — 진짜 입력 경로가 덜 확인됨) · FAIL(1)
 
 
 static func post_draw(tree: SceneTree, secs: float = 3.0) -> bool:
@@ -48,3 +50,16 @@ static func ensure_visible(tree: SceneTree, bt: Node, x: int, y: int, key: Calla
 			await tree.process_frame
 	p = cell_screen(bt, x, y)
 	return [p, r.has_point(p) and not bt.ui.over_hud(p)]
+
+
+static func verdict(ok: bool, hud_blocked: int, extra: String = "") -> int:
+	var tail := (" " + extra) if extra != "" else ""
+	if not ok:
+		print("PLAY_RESULT: FAIL%s (HUD 가림 %d번)" % [tail, hud_blocked])
+		return 1
+	if hud_blocked > 0:
+		print("PLAY_WARN: HUD 에 가려 칸을 누르지 못하고 Esc 로 넘김 %d번" % hud_blocked)
+		print("PLAY_RESULT: WARN (HUD 가림 %d번)%s" % [hud_blocked, tail])
+		return 2
+	print("PLAY_RESULT: OK (HUD 가림 0)%s" % tail)
+	return 0

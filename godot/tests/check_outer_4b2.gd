@@ -2,18 +2,19 @@ extends SceneTree
 ## 4b-2 시험 — 성소 · 아카데미 · 도감 · 가이드 · 크레딧 · 라이선스 · '준비 중' 없애기 · 4b-1 남은 것(이어하기 판 확인 · 포기 · V8 정렬)
 ##   Godot --headless --path godot --script res://tests/check_outer_4b2.gd   [-- --only rules,codex,v8,resume,screens,clicks,weird,lang,nosoon]
 ##  1) rules  : 성소(목록·부활·무료 부활·영혼석·승급·마법부여·개명)·아카데미(전직·스킬북)를 웹 코드 정답과 비교
-##              (tests/fixtures/outer_4b2_web.json ← node tools/outer-4b2-expect.js, 같은 mulberry32 씨앗·시각 → 저장값·난수 호출 수까지).
+##              (tests/fixtures/outer_4b2_web.json ← 웹 코드로 만든 고정 기준 (보관: tools/legacy-web/outer-4b2-expect.js) · 기준 데이터 tests/baseline/data, 같은 mulberry32 씨앗·시각 → 저장값·난수 호출 수까지).
 ##              웹과 다르게 한 곳(활성 파티 제물 제외 · 제물 장비 빼기 · 전직 미리보기 = 결과)은 정답을 그만큼 고쳐 비교
 ##  2) codex  : 도감 4탭(장비 거르기 8개 · 직업 상세 12개)·가이드 7탭의 글 조각이 웹 HTML 글 조각과 순서까지 같음 (ko · en, 진짜 언어 팩) · 없는 키 조회 0
 ##  3) v8     : Js.v8_sort = node(V8) Array.prototype.sort (64~700개 · 난수/일관 비교 함수 · 비교 호출 수)
 ##  4) resume : 이어하기 저장 판 확인(저장 형식·데이터 해시·게임 버전·state.format) · md5(cfg 포함) · 엔진 load_state 거절 · 전투 장면 방어 · 로비 안내·포기 흐름
 ##  5) screens: 진짜 장면 — 로비 → 성소 → 아카데미 → 도감 → 가이드 → 설정 → 크레딧 → 라이선스, 단추로 부활·승급·개명·마법부여·전직·스킬북·검색·상세 창·링크·키보드
 ##  6) clicks : 같은 프레임 연타 (진짜 입력 push_input) — 부활·무료 부활·합치기·승급·개명·마법부여·전직·스킬북·포기가 한 번만
-##  7) weird  : 이상한 세이브 → 새 화면·창 모두 스크립트 오류 0, 정상 세이브는 다듬기에서 바이트 그대로 · 웹 왕복(--roundtrip)
+##  7) weird  : 이상한 세이브 → 새 화면·창 모두 스크립트 오류 0, 정상 세이브는 다듬기에서 바이트 그대로
 ##  8) lang   : 6개 언어 × 1280×720 · 1920×1080 × 새 화면·창 — 넘침 0 · 두부 0
 ##  9) nosoon : '준비 중' 안내가 남지 않음 (로비·아래 탭·설정이 모두 진짜 화면으로)
 ##  Godot 오류(Logger 로 셈) 0 이어야 통과. 저장은 user://test_outer_4b2_save.json (진짜 세이브는 건드리지 않음)
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const JsonX := preload("res://scripts/core/json_exact.gd")
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
 const FontsT := preload("res://scripts/core/fonts.gd")
@@ -98,6 +99,7 @@ func _main() -> void:
 	var oi := args.find("--only")
 	if oi >= 0 and oi + 1 < args.size():
 		_only = Array(args[oi + 1].split(","))
+	BaselineData.apply(self)   # 웹 정답 = 기준 데이터로 (tests/baseline_data.gd, -- --live 면 지금 데이터)
 	store = root.get_node("Store")
 	i18n = root.get_node("I18n")
 	router = root.get_node("Router")
@@ -133,7 +135,7 @@ func _main() -> void:
 		print("── 6) 같은 프레임 연타 ──")
 		await _clicks()
 	if _want("weird"):
-		print("── 7) 이상한 세이브 · 왕복 ──")
+		print("── 7) 이상한 세이브 ──")
 		await _weird()
 	if _want("lang"):
 		print("── 8) 6개 언어 넘침·두부 ──")
@@ -141,6 +143,9 @@ func _main() -> void:
 	if _want("nosoon"):
 		print("── 9) '준비 중' 없음 ──")
 		_nosoon()
+	if _want("perf"):
+		print("── 10) 성소 승급 탭 성능 (클랜원 60명 + 저장 전투) ──")
+		await _perf()
 	if current_scene != null:
 		change_scene_to_file("res://scenes/boot.tscn")
 		await _frames(3)
@@ -490,7 +495,7 @@ func _rules_academy() -> void:
 		if _same(Acad.preview_kept(c, Profile.get_char(c, 6), "archer"), pv):
 			same_n += 1
 	var kept: Variant = c.store.get_json(Acad.PREVIEW_KEY)
-	_check(same_n == 5 and c.rng.calls == calls1 and kept is Dictionary and (kept as Dictionary).has("6") and _same(kept["6"]["cls"]["archer"], pv),
+	_check(same_n == 5 and c.rng.calls == calls1 and kept is Dictionary and (kept as Dictionary).has("6") and _same(kept["6"]["cls"]["archer"], {"pot": pv["pot"], "grade": pv["grade"], "cls": "archer"}),
 		"전직 미리보기 보관 (gd_class_preview): 5번 다시 열어도 같은 값 · 난수 0번 더")
 	var pvm := Acad.preview_kept(c, Profile.get_char(c, 6), "mage")
 	_check(not pvm.is_empty() and c.rng.calls > calls1 and _same(Acad.preview_kept(c, Profile.get_char(c, 6), "archer"), pv), "다른 직업은 따로 한 번 굴림 · 궁수 값은 그대로")
@@ -531,26 +536,68 @@ func _rules_academy() -> void:
 	_check(Acad.usable_scrolls(c2).is_empty() and str(N["card"]).contains("academy.buy_scroll") and _same(N["hrefs"], ["shop.html?tab=scroll"]), "전직서 없음 → '전직서 구매' → 상점 전직서 탭 (웹 shop.html?tab=scroll)")
 
 
-## 미리보기 무효 규칙: 레벨·잠재력이 바뀌면 다시 굴림, 클랜원이 없어지거나 노비스가 아니면 항목 지움, 이상한 값은 sanitize
+## 미리보기 무효 규칙 (2026-10-18): 등급이 바뀔 때만 다시 굴림 — 레벨 업·죽음·부활은 같은 잠재력·등급, 능력치는 지금 레벨로.
+##  클랜원이 없어지거나 노비스가 아니면 항목 지움 (죽은 클랜원 항목은 남김), 이상한 값은 sanitize
 func _rules_preview_invalid() -> void:
 	var c := _mem_ctx(fx["academy"][0]["store"], 77)
+	var set_ch := func(uid: int, f: Callable) -> void:
+		var rr := Profile.get_roster(c)
+		for ch: Dictionary in rr["chars"]:
+			if int(ch["uid"]) == uid:
+				f.call(ch)
+		Profile.save_roster(c, rr)
 	var a := Acad.preview_kept(c, Profile.get_char(c, 8), "archer")
-	var r := Profile.get_roster(c)
-	for ch: Dictionary in r["chars"]:
-		if int(ch["uid"]) == 8:
-			ch["lv"] = 16
-	Profile.save_roster(c, r)
+	var lv0 := Js.num(Profile.get_char(c, 8)["lv"])
+	var calls0: int = c.rng.calls
+	# 레벨 업 → 같은 잠재력·등급, 능력치는 새 레벨로
+	set_ch.call(8, func(ch: Dictionary) -> void: ch["lv"] = lv0 + 3.0)
 	var b := Acad.preview_kept(c, Profile.get_char(c, 8), "archer")
-	var kept: Dictionary = c.store.get_json(Acad.PREVIEW_KEY)
-	var ok1: bool = not _same(a, b) and int(kept["8"]["fp"]["lv"]) == 16
+	var want_b := Acad.with_stats(c, Profile.get_char(c, 8), {"pot": a["pot"], "grade": a["grade"], "cls": "archer"})
+	_check(_same(b["pot"], a["pot"]) and b["grade"] == a["grade"] and _same(b, want_b) and float(b["hp"]) > float(a["hp"]) and c.rng.calls == calls0,
+		"전직 미리보기: 레벨 업 전후 같은 잠재력·등급 (다시 굴리지 않음 · 난수 0번) · 능력치는 새 레벨로 (HP %s → %s)" % [str(a["hp"]), str(b["hp"])])
+	# 죽음 → 다른 노비스 미리보기를 열어 정리가 돌아도 → 부활 뒤 같은 값
+	set_ch.call(8, func(ch: Dictionary) -> void: ch["dead"] = true)
 	Acad.preview_kept(c, Profile.get_char(c, 6), "mage")
-	r = Profile.get_roster(c)
+	var kept_dead: Dictionary = c.store.get_json(Acad.PREVIEW_KEY)
+	var calls1: int = c.rng.calls
+	set_ch.call(8, func(ch: Dictionary) -> void: ch["dead"] = false)
+	var d2 := Acad.preview_kept(c, Profile.get_char(c, 8), "archer")
+	_check(kept_dead.has("8") and _same(d2, b) and c.rng.calls == calls1,
+		"전직 미리보기: 죽음·부활 전후 같은 잠재력·등급 (죽은 동안 다른 노비스 창을 열어도 항목이 남음 · 난수 0번)")
+	# 실행: 보관한 잠재력 그대로, 능력치는 실행 때 레벨로 (확인 창을 연 뒤 레벨이 바뀌어도)
+	var cx := _mem_ctx(fx["academy"][0]["store"], 78)
+	var pa := Acad.preview_kept(cx, Profile.get_char(cx, 8), "archer")
+	var rx := Profile.get_roster(cx)
+	for ch: Dictionary in rx["chars"]:
+		if int(ch["uid"]) == 8:
+			ch["lv"] = Js.num(ch["lv"]) + 2.0
+	Profile.save_roster(cx, rx)
+	var inv := Profile.load_inventory(cx)
+	inv.append({"type": "scroll", "scrollCls": "archer"})
+	Profile.save_inventory(cx, inv)
+	var want_x := Acad.with_stats(cx, Profile.get_char(cx, 8), {"pot": pa["pot"], "grade": pa["grade"], "cls": "archer"})
+	var rr2 := Acad.change_class(cx, 8, pa, inv.size() - 1)
+	var after: Dictionary = Profile.get_char(cx, 8)
+	_check(bool(rr2["ok"]) and after["cls"] == "archer" and _same(after["pot"], pa["pot"]) and float(after["hp"]) == float(want_x["hp"]) and float(after["atk"]) == float(want_x["atk"]) and float(after["def"]) == float(want_x["def"]),
+		"전직 실행: 보관한 잠재력 그대로 · 능력치는 실행 때 레벨로 다시 계산 (HP %s)" % str(after["hp"]))
+	# 등급이 바뀌면(승급) 그 직업 미리보기를 새로 굴림
+	var g0 := str(b["grade"])
+	var gr: Dictionary = D["JAB"]["novice"]["growth"]
+	var gi := 1 if g0 != "S" else 0
+	var new_pot := {"hp": gr["hp"][gi], "atk": gr["atk"][gi], "def": gr["def"][gi], "actionRec": 0.1}
+	var set_pot := func(ch: Dictionary) -> void: ch["pot"] = new_pot
+	set_ch.call(8, set_pot)
+	var calls2: int = c.rng.calls
+	var e2 := Acad.preview_kept(c, Profile.get_char(c, 8), "archer")
+	_check(str(e2["grade"]) != g0 and str(e2["grade"]) == Profile.pot_grade(c, Profile.get_char(c, 8)) and c.rng.calls > calls2,
+		"전직 미리보기: 잠재력 등급이 바뀌면(%s → %s) 새로 굴림" % [g0, str(e2["grade"])])
+	# 클랜원이 없어지면 항목 지움
+	var r := Profile.get_roster(c)
 	r["chars"] = (r["chars"] as Array).filter(func(x: Dictionary) -> bool: return int(x["uid"]) != 8)
 	Profile.save_roster(c, r)
 	Acad.preview_kept(c, Profile.get_char(c, 6), "mage")
-	kept = c.store.get_json(Acad.PREVIEW_KEY)
-	var ok2: bool = not kept.has("8") and kept.has("6")
-	_check(ok1 and ok2, "미리보기 무효: 레벨이 바뀌면 다시 굴림 · 클랜원이 없어지면 항목 지움")
+	var kept: Dictionary = c.store.get_json(Acad.PREVIEW_KEY)
+	_check(not kept.has("8") and kept.has("6"), "미리보기 무효: 클랜원이 없어지면 항목 지움 (다른 클랜원 항목은 그대로)")
 	# 이상한 값 → sanitize
 	var bad_cases: Array = ["5", "[1]", JsonX.stringify({"x": 1, "6": {"fp": 3}, "8": {"fp": {"lv": 15}, "cls": {"archer": {"hp": "x"}, "nope": {}, "mage": {"hp": 1, "atk": 2, "def": 3, "move": 3, "range": 4, "pot": {"hp": 1, "atk": 1, "def": 1}, "grade": "S", "cls": "mage"}}}})]
 	var san_ok := true
@@ -885,6 +932,73 @@ func _key(k: Key, unicode: int = 0) -> void:
 	await process_frame
 
 
+## (2026-10-18) 승급 탭: 카드마다 로스터·gd_battle 을 다시 읽어 60명에 0.59~0.87초 걸리던 것 → promote_ctx 한 번 (목표 0.15초 이하)
+func _perf() -> void:
+	router.set("dry_run", false)
+	_make_gd()
+	var gd := str(store.call("get_str", ResumeRules.KEY))
+	_base_save()
+	store.call("set_str", ResumeRules.KEY, gd)
+	var r: Dictionary = store.call("get_json", "game_roster")
+	var JAB: Dictionary = D["JAB"]
+	var classes := ["warrior", "knight", "archer", "mage", "priest", "lancer", "assassin", "brawler", "shaman", "summoner", "sapper", "novice"]
+	var uid := 200
+	var need := 60 - Sanc.alive(_rc()).size()   # 살아 있는 클랜원 60명 (지휘관 빼고)
+	while uid < 200 + need:
+		var cl: String = classes[uid % classes.size()]
+		var g: Dictionary = JAB[cl]["growth"]
+		var f: float = [0.1, 0.4, 0.7, 0.5][uid % 4]
+		r["chars"].append({"uid": uid, "cls": cl, "nameId": uid % 500, "lv": 5 + uid % 20, "exp": 0, "dead": false, "hp": 150, "atk": 30, "def": 12, "move": 3, "range": 1,
+			"pot": {"hp": g["hp"][0] + (g["hp"][1] - g["hp"][0]) * f, "atk": g["atk"][0] + (g["atk"][1] - g["atk"][0]) * f, "def": g["def"][0] + (g["def"][1] - g["def"][0]) * f, "actionRec": 0.1},
+			"actionRec": 1.1, "gender": "m", "skillLv": {}})
+		uid += 1
+	store.call("set_json", "game_roster", r)
+	var rc := _rc()
+	var members := Sanc.alive(rc).size()
+	var promo := Sanc.promotable(rc)
+	# 규칙만: 예전 방식(카드마다 promote_state → 로스터·파티·gd_battle 다시 읽음) vs promote_ctx 한 번
+	var t0 := Time.get_ticks_usec()
+	var old_states: Array = []
+	for ch: Dictionary in promo:
+		old_states.append(Sanc.promote_state(rc, ch))
+	var t_old := (Time.get_ticks_usec() - t0) / 1000.0
+	t0 = Time.get_ticks_usec()
+	var pc := Sanc.promote_ctx(rc)
+	var new_states: Array = []
+	for ch2: Dictionary in promo:
+		new_states.append(Sanc.promote_state(rc, ch2, pc))
+	var t_new := (Time.get_ticks_usec() - t0) / 1000.0
+	_check(_same(old_states, new_states), "promote_ctx 를 함께 써도 카드 상태가 같음 (%d장)" % promo.size())
+	router.call("go", "sanctuary")
+	await _wait_scene("ui/sanctuary.gd")
+	var sa: Node = _scene()
+	await _frames(3)
+	var times: Array = []
+	var cold := 0.0
+	for i in 4:
+		sa.switch_tab("resurrect")
+		await _frames(2)
+		var t1 := Time.get_ticks_usec()
+		sa.switch_tab("promote")
+		var ms := (Time.get_ticks_usec() - t1) / 1000.0
+		if i == 0:
+			cold = ms   # 처음 한 번은 직업 초상화 그림(962×1087)을 처음 읽는 시간이 들어감 — 어느 화면이든 그 그림을 처음 보일 때 한 번
+		else:
+			times.append(ms)
+		await _frames(2)
+	times.sort()
+	var cards := 0
+	for n: Node in sa.find_children("Promote_*", "", true, false):
+		cards += 1
+	var worst: float = times[times.size() - 1]
+	_stats["perf.promote_ms"] = [snappedf(times[0], 0.1), snappedf(times[1], 0.1), snappedf(worst, 0.1)]
+	_stats["perf.promote_cold_ms"] = snappedf(cold, 0.1)
+	_check(members >= 60 and cards == promo.size() and worst <= 150.0 and cold <= 400.0,
+		"성소 승급 탭 그리기 (클랜원 %d명 · 카드 %d장 · 저장 전투 %d자): %s ms (목표 150 이하) · 처음 한 번(초상화 그림 처음 읽기 포함) %.1f ms · 규칙만 예전 %.1f ms → %.1f ms" % [members, cards, gd.length(), str(_stats["perf.promote_ms"]), cold, t_old, t_new])
+	router.call("go", "lobby")
+	await _wait_scene("ui/lobby.gd")
+
+
 func _base_save() -> void:
 	store.call("clear")
 	var st: Dictionary = fx["sanctuary"][0]["store"]
@@ -1073,7 +1187,7 @@ func _screens() -> void:
 	store.call("use_path", SAVE)
 	var pv_reload := Acad.preview_kept(_rc(), Profile.get_char(_rc(), 8), "mage")
 	var out: Array = []
-	OS.execute(OS.get_executable_path(), ["--headless", "--path", ProjectSettings.globalize_path("res://"), "--script", "res://tests/aux_class_preview.gd", "--", SAVE, "8", "mage"], out, true)
+	OS.execute(OS.get_executable_path(), ["--headless", "--path", ProjectSettings.globalize_path("res://"), "--script", "res://tests/aux_class_preview.gd", "--", SAVE, "8", "mage"] + (["--live"] if BaselineData.wants_live() else []), out, true)
 	var line := ""
 	for ln: String in str(out[0]).split("\n"):
 		if ln.begins_with("PV: "):
@@ -1516,7 +1630,7 @@ func _clicks_more() -> void:
 	await _wait_scene("ui/lobby.gd")
 
 
-# ═══════════ 7) 이상한 세이브 · 왕복 ═══════════
+# ═══════════ 7) 이상한 세이브 ═══════════
 
 var _rng := RandomNumberGenerator.new()
 
@@ -1692,23 +1806,9 @@ func _try(raw: Dictionary) -> Array:
 	return [_counter.errors.size() - e0, fails]
 
 
-func _roundtrip(what: String) -> void:
-	var raw: Dictionary = {}
-	for k: String in store.call("keys"):
-		raw[k] = store.call("get_str", k)
-	var path := ProjectSettings.globalize_path("user://test_4b2_roundtrip.json")
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	f.store_string(JsonX.stringify(raw))
-	f.close()
-	var tool := ProjectSettings.globalize_path("res://").path_join("../tools/outer-4b2-expect.js").simplify_path()
-	var out: Array = []
-	var code := OS.execute("node", [tool, "--roundtrip", path], out, true)
-	DirAccess.remove_absolute(path)
-	var res: Variant = JsonX.parse(str(out[0]).strip_edges().get_slice("\n", str(out[0]).strip_edges().get_slice_count("\n") - 1)) if not out.is_empty() else null
-	var ok: bool = code == 0 and res is Dictionary and bool(res.get("ok", false))
-	if not ok:
-		print("    왕복 %s: %s" % [what, str(out).substr(0, 400)])
-	_check(ok, "Godot → 웹 왕복 (%s): 웹 성소 4탭·제물 창·개명 창·아카데미 2탭·전직서 창·스킬북 창·로비 점검 %s개 오류 0" % [what, str(int(res.get("checks", 0))) if res is Dictionary else "?"])
+
+## (2026-10-18) Godot → 웹 왕복 시험(node 로 웹 코드를 돌림)은 뺐음 — 웹판 폐기 · 웹 세이브 가져오기 안 만듦 (사용자 결정).
+##  보관된 도구: tools/legacy-web/outer-4b2-expect.js --roundtrip <세이브 덤프>
 
 
 func _weird() -> void:
@@ -1730,19 +1830,6 @@ func _weird() -> void:
 			same = false
 			print("    정상 세이브가 바뀜: %s" % k3)
 	_check(same and ch.is_empty(), "정상 세이브(성소 뒤 · 무료 부활 시각 · 영혼석 · 룬 · 전직서 · 스킬북)는 다듬기에서 한 바이트도 안 바뀜 (%s)" % str(ch))
-	# 왕복: 성소·아카데미에서 바꾼 세이브를 웹이 읽음
-	_base_save()
-	var c := _rc()
-	Sanc.revive(c, 31)
-	Sanc.ad_revive(c, 7)
-	Sanc.soul_combine(c, "mage")
-	Sanc.promote(c, 12, [11, 13])
-	Sanc.rune_apply(c, fx["sanctuary"][0]["store"]["game_inventory"][0]["eid"], "fire")
-	Sanc.rename(c, 1, "새 이름")
-	var pv := Acad.preview(c, Profile.get_char(c, 6), "archer")
-	Acad.change_class(c, 6, pv, Acad.usable_scrolls(c)[0]["idx"])
-	Acad.use_book(c, _book_idx(c, "mage_freeze"), 4, {"id": "mage_freeze", "cls": "mage"})
-	_roundtrip("성소·아카데미 뒤")
 	# 손으로 만든 이상한 값
 	var base: Dictionary = fx["sanctuary"][0]["store"]
 	var cases: Array = [
@@ -2057,8 +2144,8 @@ func _nosoon() -> void:
 	_check(hits.is_empty(), "화면 코드에 '준비 중' 알림(coming_soon) 없음 %s" % str(hits))
 	var extra_ok := true
 	for lang: String in LANGS:
-		var d: Variant = JsonX.parse(FileAccess.get_file_as_string("res://data/lang_extra/%s.json" % lang))
-		if d is Dictionary and (d["gd"] as Dictionary).has("outer"):
+		var d: Variant = JsonX.parse(FileAccess.get_file_as_string("res://data/lang/%s.json" % lang))
+		if d is Dictionary and (d.get("gd", {}) as Dictionary).has("outer"):
 			extra_ok = false
 	_check(extra_ok, "번역에 gd.outer.coming_soon 없음 (6개 언어)")
 	var R: Dictionary = router.get("SCREENS")

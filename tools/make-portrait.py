@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""개발용: 스토리 초상화 원본 → image/character/story/<키>.png (962×1087, 투명 배경)
+"""개발용: 스토리 초상화 원본 → godot/assets/image/character/story/<키>.png (962×1087, 투명 배경)
 
 사용: python3 tools/make-portrait.py
-- image/character/story/src/<키>.jpg|png 의 크로마키 바탕을 tools/make-icon.py 로 지우고
+- godot/assets/image/character/story/src/<키>.jpg|png 의 크로마키 바탕을 tools/make-icon.py 로 지우고
 - 다른 캐릭터 그림과 같은 자리에 맞춤: 인물 높이 900px, 가운데, 발끝 y=1030 (지휘관 그림과 같음)
 - 발밑에 남은 바탕색 그림자는 지우고, 왼쪽을 보는 원본(FLIP)은 뒤집음
 - 원본이 더 새로울 때만 다시 만듦
@@ -11,7 +11,7 @@ import os, glob, subprocess, sys, tempfile
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC, DST = os.path.join(ROOT, 'image/character/story/src'), os.path.join(ROOT, 'image/character/story')
+SRC, DST = os.path.join(ROOT, 'godot/assets/image/character/story/src'), os.path.join(ROOT, 'godot/assets/image/character/story')
 W, H, FIG_H, FOOT = 962, 1087, 900, 1030
 # 원본이 왼쪽을 보는 그림은 뒤집어서 오른쪽을 보게 (게임 그림은 모두 오른쪽을 봄)
 FLIP = {'commander_m', 'bram', 'sera', 'kasha', 'ordin', 'boss_10', 'boss_20', 'boss_80'}

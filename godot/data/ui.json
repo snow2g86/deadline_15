@@ -1,49 +1,33 @@
 {
- "NAV_TABS": [
-  {
-   "tab": "stage",
-   "i18n": "nav.stage",
-   "fallback": "스테이지",
-   "href": "stage-select.html",
-   "pages": [
-    "stage-select"
-   ]
-  },
-  {
-   "tab": "party",
-   "i18n": "nav.party",
-   "fallback": "파티",
-   "href": "party-select.html",
-   "pages": [
-    "party-select"
-   ]
-  },
-  {
-   "tab": "sanctuary",
-   "i18n": "nav.sanctuary",
-   "fallback": "성소",
-   "href": "sanctuary.html",
-   "pages": [
-    "sanctuary"
-   ]
-  },
-  {
-   "tab": "academy",
-   "i18n": "nav.academy",
-   "fallback": "아카데미",
-   "href": "academy.html",
-   "pages": [
-    "academy"
-   ]
-  },
-  {
-   "tab": "shop",
-   "i18n": "nav.shop",
-   "fallback": "상점",
-   "href": "shop.html",
-   "pages": [
-    "shop"
-   ]
-  }
- ]
+  "NAV_TABS": [
+    {
+      "tab": "stage",
+      "i18n": "nav.stage",
+      "fallback": "스테이지",
+      "href": "stage-select.html",
+      "pages": ["stage-select"]
+    },
+    {
+      "tab": "party",
+      "i18n": "nav.party",
+      "fallback": "파티",
+      "href": "party-select.html",
+      "pages": ["party-select"]
+    },
+    {
+      "tab": "sanctuary",
+      "i18n": "nav.sanctuary",
+      "fallback": "성소",
+      "href": "sanctuary.html",
+      "pages": ["sanctuary"]
+    },
+    {
+      "tab": "academy",
+      "i18n": "nav.academy",
+      "fallback": "아카데미",
+      "href": "academy.html",
+      "pages": ["academy"]
+    },
+    {"tab": "shop", "i18n": "nav.shop", "fallback": "상점", "href": "shop.html", "pages": ["shop"]}
+  ]
 }

@@ -1,5 +1,9 @@
 # 🎮 DEADLINE 15
 
+> **⚠️ 웹판은 동결되었습니다 (2026-10-18).** 게임은 Godot 4 판(`godot/`)으로 옮겼고, **수치·대본·번역의 원본은 `godot/data/`** 입니다
+> (`godot/README.md` '데이터 원본'). 이 저장소 맨 위의 HTML/CSS/JS·`data/`·`js/` 는 더 고치지 않으며(`data/FROZEN.md`), 폐기 시점은 따로 정합니다.
+> 아래 설명은 웹판 기준입니다.
+
 > 턴 기반 방어 전략 RPG | Turn-based Defense Strategy RPG
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-blue?style=flat-square)](https://deadline-15.pages.dev/)

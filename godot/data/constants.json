@@ -1,138 +1,75 @@
 {
- "SAVE_KEY": "game_save",
- "ROSTER_KEY": "game_roster",
- "PARTY_KEY": "game_party",
- "PARTIES_KEY": "game_parties",
- "NAV_KEY": "game_nav",
- "INVENTORY_KEY": "game_inventory",
- "SHOP_KEY": "game_shop",
- "MIN_P": 5,
- "MAX_P": 5,
- "MAX_LEVEL": 15,
- "GRADE_LV_CAP": {
-  "C": 15,
-  "B": 20,
-  "A": 25,
-  "S": 30
- },
- "MAX_SKILL_LV": 10,
- "ECON": {
-  "win": [
-   20,
-   8
-  ],
-  "firstClear": [
-   100,
-   5
-  ],
-  "star": [
-   30,
-   3
-  ],
-  "practiceMul": 0.6,
-  "revive": [
-   30,
-   15
-  ],
-  "merc": {
-   "S": 1500,
-   "A": 1150,
-   "B": 850,
-   "C": 650
+  "SAVE_KEY": "game_save",
+  "ROSTER_KEY": "game_roster",
+  "PARTY_KEY": "game_party",
+  "PARTIES_KEY": "game_parties",
+  "NAV_KEY": "game_nav",
+  "INVENTORY_KEY": "game_inventory",
+  "SHOP_KEY": "game_shop",
+  "MIN_P": 5,
+  "MAX_P": 5,
+  "MAX_LEVEL": 15,
+  "GRADE_LV_CAP": {"C": 15, "B": 20, "A": 25, "S": 30},
+  "MAX_SKILL_LV": 10,
+  "ECON": {
+    "win": [20, 8],
+    "firstClear": [100, 5],
+    "star": [30, 3],
+    "practiceMul": 0.6,
+    "revive": [30, 15],
+    "merc": {"S": 1500, "A": 1150, "B": 850, "C": 650},
+    "bookMul": 1.5,
+    "scroll": 700,
+    "battlePotion": 200,
+    "soulStone": 3000,
+    "freeUnitStages": [2, 4, 6, 8]
   },
-  "bookMul": 1.5,
-  "scroll": 700,
-  "battlePotion": 200,
-  "soulStone": 3000,
-  "freeUnitStages": [
-   2,
-   4,
-   6,
-   8
-  ]
- },
- "LEVEL_EXP": [
-  180,
-  70,
-  20
- ],
- "KILL_EXP": [
-  5,
-  2
- ],
- "SOUL": {
-  "fragsPerStone": 10,
-  "promote": {
-   "B": 1,
-   "A": 2
+  "LEVEL_EXP": [180, 70, 20],
+  "KILL_EXP": [5, 2],
+  "SOUL": {
+    "fragsPerStone": 10,
+    "promote": {"B": 1, "A": 2},
+    "bossFirstStone": 1,
+    "bossRepeatFrags": 2
   },
-  "bossFirstStone": 1,
-  "bossRepeatFrags": 2
- },
- "GRADE_ORDER": [
-  "C",
-  "B",
-  "A",
-  "S"
- ],
- "GRADE_COLORS": {
-  "S": "#f0c040",
-  "A": "#60a5fa",
-  "B": "#4ade80",
-  "C": "#9ca3af"
- },
- "COMMANDER_CLS": "commander",
- "COMMANDER_DEFAULT_NAME": "리안",
- "ROLE_MAP": {
-  "commander": "ranged",
-  "warrior": "melee",
-  "knight": "melee",
-  "assassin": "melee",
-  "novice": "melee",
-  "brawler": "melee",
-  "lancer": "melee",
-  "sapper": "melee",
-  "mage": "ranged",
-  "archer": "ranged",
-  "summoner": "ranged",
-  "shaman": "ranged",
-  "priest": "healer"
- },
- "CLASS_GROUP_MAP": {
-  "commander": "support",
-  "novice": "beginner",
-  "warrior": "melee",
-  "knight": "melee",
-  "assassin": "melee",
-  "brawler": "melee",
-  "lancer": "melee",
-  "archer": "ranged",
-  "mage": "ranged",
-  "summoner": "ranged",
-  "shaman": "ranged",
-  "priest": "support",
-  "sapper": "support"
- },
- "CLASS_GROUPS": {
-  "beginner": {
-   "key": "beginner",
-   "label": "group.beginner",
-   "icon": "🎓"
+  "GRADE_ORDER": ["C", "B", "A", "S"],
+  "GRADE_COLORS": {"S": "#f0c040", "A": "#60a5fa", "B": "#4ade80", "C": "#9ca3af"},
+  "COMMANDER_CLS": "commander",
+  "COMMANDER_DEFAULT_NAME": "리안",
+  "ROLE_MAP": {
+    "commander": "ranged",
+    "warrior": "melee",
+    "knight": "melee",
+    "assassin": "melee",
+    "novice": "melee",
+    "brawler": "melee",
+    "lancer": "melee",
+    "sapper": "melee",
+    "mage": "ranged",
+    "archer": "ranged",
+    "summoner": "ranged",
+    "shaman": "ranged",
+    "priest": "healer"
   },
-  "melee": {
-   "key": "melee",
-   "label": "group.melee",
-   "icon": "⚔️"
+  "CLASS_GROUP_MAP": {
+    "commander": "support",
+    "novice": "beginner",
+    "warrior": "melee",
+    "knight": "melee",
+    "assassin": "melee",
+    "brawler": "melee",
+    "lancer": "melee",
+    "archer": "ranged",
+    "mage": "ranged",
+    "summoner": "ranged",
+    "shaman": "ranged",
+    "priest": "support",
+    "sapper": "support"
   },
-  "ranged": {
-   "key": "ranged",
-   "label": "group.ranged",
-   "icon": "🏹"
-  },
-  "support": {
-   "key": "support",
-   "label": "group.support",
-   "icon": "✨"
+  "CLASS_GROUPS": {
+    "beginner": {"key": "beginner", "label": "group.beginner", "icon": "🎓"},
+    "melee": {"key": "melee", "label": "group.melee", "icon": "⚔️"},
+    "ranged": {"key": "ranged", "label": "group.ranged", "icon": "🏹"},
+    "support": {"key": "support", "label": "group.support", "icon": "✨"}
   }
- }
 }

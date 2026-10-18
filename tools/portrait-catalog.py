@@ -2,7 +2,7 @@
 """개발용: 스토리 등장인물 초상화 프롬프트 (docs/CAST.md 의 특성을 그림으로)
 
 사용: python3 tools/portrait-catalog.py  → 키와 프롬프트를 출력
-그림 넣는 법: image/character/story/src/<키>.jpg 로 저장 → python3 tools/make-portrait.py
+그림 넣는 법: godot/assets/image/character/story/src/<키>.jpg 로 저장 → python3 tools/make-portrait.py
 """
 # 게임의 다른 캐릭터 그림과 같은 픽셀 화풍 (큰 머리 · 작은 몸, 진한 외곽선), 전신, 오른쪽을 봄
 STYLE = ('Pixel art fantasy RPG character sprite, 16-bit SNES style, cute chibi proportions about three heads tall, '

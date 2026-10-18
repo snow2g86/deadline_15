@@ -261,25 +261,40 @@ static func promotable(c: Object) -> Array:
 	return out
 
 
-## 제물 후보 (같은 직업 · 자신 아님 · 활성 파티에 없음 · 중단된 저장 전투에 나가 있지 않음 · 점수 > 0)
-static func sacrifices(c: Object, target: Dictionary) -> Array:
-	var tg := Profile.pot_grade(c, target)
-	var party := PartyRules.get_active_party(c) + ResumeRules.battle_uids(c)
+## 승급 탭을 한 번 그릴 때 함께 쓰는 값 — 로스터·활성 파티·저장 전투(gd_battle, 큰 JSON)·영혼석을 **한 번만** 읽음 (2026-10-18 성능:
+##  카드마다 다시 읽어 클랜원 60명에 0.6~0.9초 걸리던 것). 저장소가 바뀌면(승급·제물) 새로 만들 것
+static func promote_ctx(c: Object) -> Dictionary:
+	var al := alive(c)
+	var grades := {}
+	for ch: Dictionary in al:
+		grades[int(ch["uid"])] = Profile.pot_grade(c, ch)
+	return {"alive": al, "grades": grades, "party": PartyRules.get_active_party(c) + ResumeRules.battle_uids(c), "soul": _soul(c)}
+
+
+## 제물 후보 (같은 직업 · 자신 아님 · 활성 파티에 없음 · 중단된 저장 전투에 나가 있지 않음 · 점수 > 0). pc = promote_ctx (없으면 새로 읽음)
+static func sacrifices(c: Object, target: Dictionary, pc: Dictionary = {}) -> Array:
+	if pc.is_empty():
+		pc = promote_ctx(c)
+	var grades: Dictionary = pc["grades"]
+	var tg := str(grades[int(target["uid"])]) if grades.has(int(target["uid"])) else Profile.pot_grade(c, target)
+	var party: Array = pc["party"]
 	var out: Array = []
-	for ch: Dictionary in alive(c):
+	for ch: Dictionary in pc["alive"]:
 		if Js.same(ch["uid"], target["uid"]) or not Js.same(ch["cls"], target["cls"]) or Js.index_of(party, ch["uid"]) >= 0:
 			continue
-		if sacrifice_points(c, Profile.pot_grade(c, ch), tg) > 0:
+		if sacrifice_points(c, str(grades[int(ch["uid"])]), tg) > 0:
 			out.append(ch)
 	return out
 
 
-## 카드 상태: { grade, sacrifices(수), soul_need, soul_have, can }
-static func promote_state(c: Object, ch: Dictionary) -> Dictionary:
-	var g := Profile.pot_grade(c, ch)
+## 카드 상태: { grade, sacrifices(수), soul_need, soul_have, can }. 여러 카드를 그릴 때는 pc(promote_ctx) 하나를 함께 넘길 것
+static func promote_state(c: Object, ch: Dictionary, pc: Dictionary = {}) -> Dictionary:
+	if pc.is_empty():
+		pc = promote_ctx(c)
+	var g: String = pc["grades"].get(int(ch["uid"]), Profile.pot_grade(c, ch))
 	var need := soul_need(c, g)
-	var have := soul_stones(c, str(ch["cls"]))
-	var n := sacrifices(c, ch).size()
+	var have := Js.num(pc["soul"]["stones"].get(str(ch["cls"])))
+	var n := sacrifices(c, ch, pc).size()
 	return {"grade": g, "sacrifices": n, "soul_need": need, "soul_have": have, "can": n > 0 and have >= need}
 
 

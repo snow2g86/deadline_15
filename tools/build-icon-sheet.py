@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""개발용: image/icon/item/*.png (256px 일러스트) → 아이템 아이콘 시트 image/icon/item-sprite.webp + js 좌표표
+"""개발용: godot/assets/image/icon/item/*.png (256px 일러스트) → 아이템 아이콘 시트 godot/assets/image/icon/item-sprite.webp + js 좌표표
 
 사용: python3 tools/build-icon-sheet.py
 - 64px 칸, 가로 8칸. 파일 이름(확장자 제외)이 아이콘 키 (예: siege_ladder, rune_fire, legend_blood_oath)
-- 좌표표는 js/common/item-icons.js 의 ITEM_SPRITE 로 다시 씀 (itemIcon(key, size, 대체이모지)가 사용)
+- 좌표표는 godot/data/icons.json 의 ITEM_SPRITE_COLS·ROWS·ITEM_SPRITE (데이터 원본 — 뒤에 data_tool --write) 와
+  동결된 웹판용 js/common/item-icons.js 에 함께 씀
 """
 import os, glob, math
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, 'image/icon/item')
-OUT = os.path.join(ROOT, 'image/icon/item-sprite.webp')
+SRC = os.path.join(ROOT, 'godot/assets/image/icon/item')
+OUT = os.path.join(ROOT, 'godot/assets/image/icon/item-sprite.webp')
 JS = os.path.join(ROOT, 'js/common/item-icons.js')
 CELL, COLS = 64, 8
 
@@ -53,4 +54,13 @@ function itemIcon(key, size, fallback, rarity) {
 }
 """ % (COLS, rows, entries)
 open(JS, 'w').write(js)
+import json
+GD = os.path.join(ROOT, 'godot/data/icons.json')
+d = json.load(open(GD, encoding='utf-8'))
+d['ITEM_SPRITE_COLS'], d['ITEM_SPRITE_ROWS'] = COLS, rows
+d['ITEM_SPRITE'] = {k: [x, y] for k, (x, y) in pos.items()}
+with open(GD, 'w', encoding='utf-8') as f:
+    json.dump(d, f, ensure_ascii=False, indent=2)
+    f.write('\n')
+print('godot/data/icons.json 갱신 → Godot --headless --path godot --script res://tools/data_tool.gd -- --write')
 print('sheet', OUT, sheet.size, len(files), 'icons')

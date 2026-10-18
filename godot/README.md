@@ -1,21 +1,23 @@
-# DEADLINE 15 — Godot 4 판 (이전 작업 중)
+# DEADLINE 15 — Godot 4 판
 
-웹판(HTML/CSS/JS)을 Godot 4.5 로 옮기는 프로젝트입니다. 지금은 **1단계(기초)**: 데이터 변환, 그림 복사, 저장·번역·데이터 창구, 시작 화면, 시험까지.
+웹판(HTML/CSS/JS)을 Godot 4.5 로 옮긴 판입니다. 1~4단계(기초 · 전투 규칙 · 전투 화면 · 바깥 화면) 완료, 다음은 5단계(소리 · 해상도 · 내보내기).
+
+> **웹판은 동결되었습니다 (2026-10-18).** 수치·대본·번역의 원본은 **`godot/data/`** 입니다. 웹 `data/*.js`·`js/*` 는 더 읽지 않으며
+> 거기를 고쳐도 이 판에는 반영되지 않습니다 (`data/FROZEN.md`). 웹 파일의 폐기 시점은 사용자가 정합니다. 웹 세이브 가져오기는 만들지 않습니다.
 
 ## 원칙
 
-- **수치·대본·번역의 원본은 웹 `data/*.js`** 입니다. Godot 은 변환기가 만든 `godot/data/*.json` 만 읽습니다.
-  JSON 을 직접 고치지 말고, 웹 파일을 고친 뒤 변환기를 다시 돌리세요.
-- **그림은 git 에 두 벌 올리지 않습니다.** 웹 `image/` 를 `godot/assets/image/` 로 복사해 쓰고, 이 폴더는 `.gitignore` 대상입니다.
-  (Godot 이 만드는 `*.import` 옆파일도 사본 쪽에만 생겨 웹 `image/` 는 깨끗하게 유지됩니다.)
-- 데이터·규칙(`scripts/core`, `scripts/logic`)과 화면(`scripts/ui`, `scenes`)을 나눕니다. 전투 규칙은 다음 단계에서 화면과 무관한 GDScript 로 옮깁니다.
+- **수치·대본·번역의 원본은 `godot/data/**/*.json`** (손으로 고침 — 아래 '데이터 원본'). 고친 뒤 `tools/data_tool.gd -- --write` 로 모양을 맞추고 manifest 를 다시 만듭니다.
+- **기준(황금 기록·웹 정답)은 고정**되어 있고, 그때 데이터의 사본(`tests/baseline/data/`)으로 비교합니다 (아래 '기준').
+- **그림 원본은 `godot/assets/image/`** (git 에 올림, `*.import` 옆파일 포함 — 2026-10-18 웹 `image/` 를 `git mv` 로 옮김). 저장소 맨 위 `image` 는 웹판용 심볼릭 링크 (아래 '그림').
+- 데이터·규칙(`scripts/core`, `scripts/logic`)과 화면(`scripts/ui`, `scenes`)을 나눕니다.
 
 ## 폴더
 
 ```
 godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
-  icon.png             임시 앱 아이콘 (웹 image/icon/jab/knight.png 사본)
+  icon.png             임시 앱 아이콘 (assets/image/icon/jab/knight.png 사본)
   scenes/boot.tscn     시작 화면 (메인 씬) — 잠깐 제목을 보여 주고 로비로 (Router). 개발용: -- --dev (예전 시작 화면 + 전투 시험 실행기), -- --screen <이름>, -- --save <경로>
   scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings, 4b-1: shop, 4b-2: sanctuary · academy · compendium · guide · credits · licenses (scripts/ui/*.gd)
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
@@ -34,80 +36,155 @@ godot/
                        progress_rules(해금·별·요일 던전) · settings_rules(설정 키, 전투 설정 창과 공용) · store_ctx.gd(진짜 Store 를 규칙 저장소 모양으로)
                        4b-1: equip_rules(장비·강화·수리·분해·아이템 탭·Gear 표시) · shop_rules(상점 생성·갱신·사기·뽑기) · resume_rules(전투 이어하기 저장 gd_battle)
                        4b-2: sanctuary_rules(부활·무료 부활·영혼석·승급·개명·마법부여) · academy_rules(전직·스킬북) · codex_rules(도감·가이드 내용 블록)
-  data/                변환된 JSON (git 에 올림)
-    *.json             모듈별 전역 (stages.json 의 STAGES 등)
+  data/                **데이터 원본** (git 에 올림, 손으로 고침 — '데이터 원본')
+    *.json             모듈별 전역 (stages.json 의 STAGES 등 — 웹 전역 이름 그대로)
                        화면 쪽 표: icons.json(ITEM_SPRITE·EMOJI_ICON·ICON_RARITY) · sprites.json(CHAR_SPRITES·CUTOUT_RIGS·
                        CHAR_FIG·SPRITE_SHEETS·ATK_MOTIONS) · ui.json(NAV_TABS) · soul.json(SOUL_KEY)
-    lang/{ko,en,es,ja,zh-CN,zh-TW}.json   언어 팩 (언어 목록 = 웹 js/common/i18n.js _I18N_LANGS)
-    lang_extra/<언어>.json   Godot 전용 번역 키 (gd.* — 손으로 관리, 6개 언어 같은 키. 웹 팩에 없는 키만 I18n 이 더함, 변환기·DataDB 검사는 건너뜀.
-                       ja·zh 는 docs/i18n/glossary.*.md 용어)
+    lang/{ko,en,es,ja,zh-CN,zh-TW}.json   언어 팩 — Godot 화면 글 gd.* 도 이 안의 "gd" 아래 (예전 lang_extra 를 합침).
+                       6개 언어 같은 키 (check_foundation). ja·zh 는 docs/i18n/glossary.*.md 용어
     story/{ko,en,es,ja,zh-CN,zh-TW,sample}.json   스토리 대본
-    manifest.json      전역별 개수·원본 sha1·경고·특수값 위치 (DataDB 가 검증에 사용)
-  assets/image/        웹 image/ 사본 (git 제외)
+    manifest.json      자동 생성 (data_tool) — 파일별 전역 개수·값 개수·sha1·특수값 위치 (DataDB 가 읽을 때 검증)
+  tools/data_tool.gd   데이터 도구 CLI: 점검(--check) · 모양 맞춤 + manifest(--write) · 기준 잠금(--relock). 규칙은 tools/data_format.gd
+  assets/image/        그림 원본 (git 에 올림 · *.import 포함). icon/src · character/story/src 는 일러스트 원본(git 제외 · .gdignore 로 Godot 도 안 읽음)
   assets/fonts/        Noto Sans KR·JP·SC·TC (가변 굵기, OFL — OFL.txt 하나가 넷 모두의 라이선스, 같은 글). git 에 올림 (약 50MB).
                        project.godot 기본 글꼴은 KR, 실행 중에는 scripts/core/fonts.gd 가 언어별 사슬로 바꿈 (아래 '글꼴')
-  tests/check_foundation.gd   머리 없는 시험 (6개 언어: 팩·대본·lang_extra 키 맞춤, 언어 감지, 글꼴 사슬)
+  tests/check_foundation.gd   머리 없는 시험 (6개 언어: 팩·대본·gd.* 키 맞춤 · 데이터 원본 모양·manifest·기준 잠금, 언어 감지, 글꼴 사슬)
   tests/check_glyphs.gd        6개 언어 데이터의 모든 글자가 글꼴 사슬에 있는지 + 한자·가나가 그 언어 글꼴로 그려지는지 (두부 0)
   tests/shots_lang6.gd         ja·zh-CN·zh-TW 전투 HUD·설정·대사 화면 사진 (창 모드 → tests/screens/lang6_godot_*.png)
-  tests/golden/        전투 황금 기록 (node tools/battle-sim.js 로 생성 — 2b 규칙 이식의 기준, tests/golden/README.md)
+  tests/golden/        전투 황금 기록 (웹 코드로 만든 고정 기준 — 보관: tools/legacy-web/battle-sim.js, tests/golden/README.md)
+  tests/baseline/      기준 데이터 data/ (2026-10-18 옮긴 시점 godot/data 사본 — 기준 시험이 읽음) · LOCK.json (golden·fixtures·baseline sha1 잠금)
+  tests/baseline_data.gd  기준 시험이 기준 데이터를 읽게 (-- --live 면 지금 데이터)
   tests/replay_golden.gd   2b 시험: 황금 기록 22개를 GDScript 규칙으로 재생해 사건·난수까지 비교
   tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
   tests/check_battle_scene.gd  3a·3b: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 (HUD·연출·스토리 켬) → 결과가 같은지
   tests/check_battle_ui.gd     3b: UI 연기 시험 (모든 패널·팝업·툴팁·결과·스토리·언어 바꾸기, Godot 오류 0)
   tests/perf_battle_scene.gd   창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340·HUD·연출·회전)
-  tests/check_outer_4a.gd      4a: 규칙을 웹 정답(tests/fixtures/outer_4a_web.json ← node tools/outer-4a-expect.js)과 비교 · 편성 저장 · 설정 키 ·
+  tests/check_outer_4a.gd      4a: 규칙을 웹 정답(tests/fixtures/outer_4a_web.json — 고정 기준, 보관: tools/legacy-web/outer-4a-expect.js)과 비교 · 편성 저장 · 설정 키 ·
                                진짜 장면 흐름 · 6개 언어 넘침·두부 · 창 크기
   tests/play_4a.gd · shots_4a.gd  4a 실제 창 한 판(진짜 입력, '대상 고르기' 멈춤을 세어 PLAY_RESULT) · 화면 사진 (tests/screens/4a_*.png)
-  tests/check_outer_4b1.gd     4b-1: 상점·장비·강화·아이템 규칙을 웹 정답(tests/fixtures/outer_4b1_web.json ← node tools/outer-4b1-expect.js, 같은 씨앗·시각)과 비교 ·
-                               이어하기(끊고 이어도 같은 결과) · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 6개 언어 넘침·두부 · 웹 왕복(--roundtrip)
+  tests/check_outer_4b1.gd     4b-1: 상점·장비·강화·아이템 규칙을 웹 정답(tests/fixtures/outer_4b1_web.json — 고정 기준, 같은 씨앗·시각)과 비교 ·
+                               이어하기(끊고 이어도 같은 결과) · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 6개 언어 넘침·두부
   tests/play_4b1.gd            4b-1 실제 창: 로비 → 상점 → 편성(장비·강화) → 전투 → 나가기 → 전투 재개 → 끝 (tests/screens/4b1_*.png, -- --size 1920x1080)
-  tests/check_outer_4b2.gd     4b-2: 성소·아카데미 규칙을 웹 정답(tests/fixtures/outer_4b2_web.json ← node tools/outer-4b2-expect.js)과 비교 · 도감·가이드 글 조각 = 웹 HTML ·
-                               V8 정렬(64개 이상) · 이어하기 판 확인·포기 · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 웹 왕복 · 6개 언어 넘침·두부 · '준비 중' 없음
+  tests/check_outer_4b2.gd     4b-2: 성소·아카데미 규칙을 웹 정답(tests/fixtures/outer_4b2_web.json — 고정 기준)과 비교 · 도감·가이드 글 조각 = 웹 HTML ·
+                               V8 정렬(64개 이상) · 이어하기 판 확인·포기 · 진짜 장면 · 같은 프레임 연타 · 이상한 세이브 · 6개 언어 넘침·두부 · '준비 중' 없음
   tests/play_kit.gd            실제 창 시험 공용 (논리 화면 기준 칸 보이기 · HUD 피하기 · 그리기 기다림 시간 제한)
   tests/aux_class_preview.gd   check_outer_4b2 보조 (다른 프로세스에서 전직 미리보기 보관값 읽기)
   tests/play_4b2.gd            4b-2 실제 창: 로비 → 성소 → 아카데미 → 도감 → 가이드 → 설정 → 크레딧 → 라이선스 → 로비 → 전투 한 판 (tests/screens/4b2_*.png, -- --size 1920x1080)
   tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
-## 처음 한 번 / 웹 데이터가 바뀔 때마다
+## 데이터 원본 (2026-10-18~)
 
-저장소 맨 위 폴더에서:
+`godot/data/` 의 JSON 이 원본입니다. 웹 `data/*.js` → JSON 변환기는 없어졌습니다 (`tools/legacy-web/` 에 보관만, godot/data 를 덮어쓰지 않음).
 
-```bash
-# 1) 웹 데이터 → JSON (Node 만 있으면 됨, npm 설치 없음)
-node tools/export-godot-data.js
+| 파일 | 내용 | 맨 위 키 |
+|---|---|---|
+| `data/<모듈>.json` (16개) | 수치 표 — 웹 전역 이름 그대로 (`stages.json` → `EPISODES`·`STAGES`·…, `jab.json` → `JAB`, `tiles.json` → `TI` …) | 전역 이름 |
+| `data/lang/<언어>.json` (6개) | 번역. 점 키 `battle.surrender` = `{"battle": {"surrender": …}}`. Godot 화면 글은 `"gd"` 아래 | 영역 이름 |
+| `data/story/<언어>.json` (+ `sample`) | 대본 `cast` · `episodes` · `stages.<번호>.{pre,post,battle.{start,wave,boss,danger}}` | `cast`·`episodes`·`stages` |
+| `data/manifest.json` | **자동 생성** — 고치지 말 것 | |
 
-# 2) 그림 복사 (rsync; 원본·작업 폴더 */src/, *.prev.png 제외, 지운 그림은 사본에서도 지움)
-bash tools/sync-godot-assets.sh            # --dry-run 으로 미리보기 가능
+**고치는 법**
 
-# 3) Godot 첫 가져오기 (그림 .import 생성, 약 10~20초)
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --import
-```
+1. JSON 을 편집기로 고칩니다 (키 순서는 파일 순서 그대로 쓰임 — 정렬하지 않음). 새 모듈은 `data/` 에 새 `*.json`, 새 언어는 `lang/`·`story/` 에.
+2. 저장소 맨 위에서:
+   ```bash
+   /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tools/data_tool.gd -- --write
+   ```
+   모양을 정해진 대로 맞추고(아래) `manifest.json` 을 다시 만듭니다. 1초 안팎.
+3. 커밋 전 점검 (= 예전 `export-godot-data.js --check`) — 쓰지 않고, 다르면 파일 목록 + 종료 코드 1:
+   ```bash
+   /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tools/data_tool.gd
+   ```
+   끝 줄 `DATA_TOOL: OK`. `check_foundation` 도 같은 점검을 합니다.
 
-변환기는 같은 원본이면 같은 결과를 내고, 내용이 같으면 파일을 다시 쓰지 않습니다 (`기록 0개, 변경 없음 24개`).
+- **잊으면**: DataDB 가 읽을 때 파일 sha1 이 manifest 와 다르면 오류를 냅니다 (`... manifest 의 sha1 과 다릅니다 — data_tool --write`).
+  값만 고치고 개수가 그대로여도 잡힙니다. 그 실행에서는 전투 이어하기의 데이터 해시를 무효로 해 저장 전투를 '이전 버전'으로 보내고(이어하지 않음),
+  디버그 빌드 로비 위쪽에 빨간 `[DEV] 데이터 오류` 띠가 뜹니다.
+- **안 받는 입력** (점검·`--write` 모두 오류, 종료 코드 1, **오류가 하나라도 있으면 어떤 파일도 쓰지 않음**): JSON 문법 오류 · 같은 사전에 같은 키 두 번
+  (Godot JSON 은 앞 값을 조용히 버리므로 — DataDB 도 오류) · `1e999` 처럼 읽으면 무한이 되는 숫자 · 맨 위가 사전이 아닌 파일 · 전역 이름이 두 모듈에 겹침.
+- **정해진 모양** (`tools/data_format.gd`): 들여쓰기 2칸, 배열·사전을 한 줄로 썼을 때 100자 이하면 한 줄(`", "` · `": "`), 넘으면 칸마다 한 줄.
+  파일 끝 줄바꿈 하나. 같은 내용이면 늘 같은 글 → diff 에는 고친 줄만 나옵니다 (대사 한 줄 = 한 줄, 그림 행 한 줄 = 한 줄).
+- **숫자**: JS 와 같은 가장 짧은 왕복 표기로 씁니다 (`56`, `0.30000000000000004`). 읽기는 `JsonExact`(정확한 10진 → double)라
+  모양을 바꿔도 값은 비트 단위로 같습니다. 정수·실수 구분은 파일이 아니라 `json_norm.gd` 의 `INT_KEYS` 가 정합니다 (아래 '주의').
+  17자리 실수도 그대로 쓰면 됩니다 (`1.2200000000000002`).
+- **특수값**: `Infinity`·`-Infinity`·`NaN` 은 모듈 JSON 에 **문자열** `"Infinity"` 로 씁니다 (예: `TI.rock.cost`). data_tool 이 찾아 manifest.special_values 에 적고 DataDB 가 INF 로 되돌립니다.
+  (그래서 모듈 데이터에서 글자 그대로의 "Infinity" 문자열은 쓸 수 없습니다. 번역·대본은 해당 없음.)
+- **lang 과 lang_extra 를 합친 이유**: 웹 팩이 원본이 아니게 되어 '웹 키 우선, 없는 키만 더함' 규칙이 의미가 없어짐 · 번역하는 사람이 언어마다 파일 하나만 보면 됨 ·
+  DataDB 의 개수·sha1 검증과 check_glyphs 가 화면 글까지 한 번에 덮음. 겹치는 키는 없었고(웹 팩에 `gd` 없음) 합친 뒤 I18n 결과가 같음을 확인.
 
-**커밋 전 점검**: 웹 `data/*.js` 등을 고치고 변환을 잊지 않았는지 확인합니다. 파일은 쓰지 않고, 바뀔 파일이 있으면 목록을 출력하고 종료 코드 1.
+## 기준 (golden · fixtures) — 고정
 
-```bash
-node tools/export-godot-data.js --check
-```
-끝에 출력되는 **경고**는 JSON 으로 옮길 수 없는 값(데이터 안의 함수)이며, 그 부분은 GDScript 로 다시 구현해야 합니다.
+황금 기록(`tests/golden/` 22개)과 웹 정답(`tests/fixtures/outer_4a/4b1/4b2_web.json`)은 **웹판 코드로 만든 마지막 정답**이라 이제 다시 만들 수 없습니다.
+이 정답은 그때 데이터에서만 맞으므로, 기준과 비교하는 시험은 **그때 데이터의 사본 `tests/baseline/data/`** 를 읽습니다 (`tests/baseline_data.gd`).
 
-### 변환 방식
+- 기준 데이터 시험: `replay_golden` · `check_battle_api` · `check_battle_scene` · `check_battle_ui` · `check_outer_4a/4b1/4b2` (+ 보조 `aux_class_preview`).
+  번역은 기준 사본 위에 **지금 데이터에만 있는 키**를 더해 읽습니다 (기준 뒤에 생긴 gd.* 화면 글이 키 그대로 보이지 않게). 대본은 기준 그대로.
+- 지금 데이터 시험: `check_foundation` · `check_glyphs` · `perf_battle_scene` · `shots_*` · `play_*` (실제 창), 게임 자체.
+- 그래서 **godot/data 를 고쳐도(밸런스·대사·번역) 기준 시험은 깨지지 않고, 규칙 코드가 바뀌었는지만** 계속 확인합니다.
+- `-- --live`: 기준 시험을 지금 데이터로 돌림 — 데이터를 바꾼 뒤 기준과 얼마나 달라졌는지 보는 **영향 보고**용 (실패해도 이상한 게 아님).
+- **잠금**: `tests/baseline/LOCK.json` 에 golden·fixtures·baseline/data 파일마다 sha1. `data_tool`(과 check_foundation)이 지금 파일과 같은지 확인 — 기준이 몰래 바뀌지 않게.
+  (README.md 같은 설명 글은 잠그지 않음)
+- 옮긴 시점 확인: 보관된 웹 도구의 `--check` 4개가 웹 코드로 다시 돌려 golden·fixtures 와 같음, 웹 변환기의 결과 = `tests/baseline/data` (29개 파일, 값·키 순서).
 
-- 각 페이지의 `<script>` 순서를 읽어(기준 `battle.html`, 거기 없는 `js/common/nav.js` 등은 다른 페이지 순서로 끼워 넣음), 데이터 파일과 바로 뒤의 `js/logic/*.js` 를 그 순서대로 Node `vm` 안에서 실행합니다.
-  그래서 `js/logic/stages.js` 가 적재 때 덧붙이는 `sm`·`difficulty`·`recommendedClasses` 같은 **가공 후 값**이 그대로 들어갑니다.
-- 모듈 목록은 `tools/export-godot-data.js` 의 `MODULES` 입니다. 새 `data/*.js` 를 만들면 여기에 추가하세요 (빠지면 경고가 뜹니다).
-  로직이 섞인 화면 파일(`js/sprites.js`, `js/battle/rig.js`, `js/battle/motion.js`, `js/common/nav.js`)은 `pick` 으로 표 이름만 꺼내고,
-  적재에 필요한 화면 전역(`VFX`)은 `stub` 으로 빈 객체를 넣어 둡니다. `MutationObserver` 같은 브라우저 기능도 빈 흉내입니다.
-- 언어 팩은 `js/common/i18n.js` 의 `_LANG_PARTS` 순서로 합칩니다 (웹과 같은 결과).
-- `Infinity` (예: `TI.rock.cost`) 는 JSON 에 없어 문자열로 쓰고 `manifest.special_values` 에 남기며, DataDB 가 읽을 때 `INF` 로 되돌립니다.
-- 함수만 모인 계산용 객체(`Gear`, `Hazard`, `Synergy` …)는 데이터가 아니라서 `manifest.skipped_logic` 에 이름만 남깁니다.
+## 기준을 다시 만들 때 (절차)
+
+| 바꾼 것 | 기준 | 할 일 |
+|---|---|---|
+| **데이터만** (godot/data — 밸런스·대사·번역) | 그대로 | `data_tool --write` → 시험. 영향이 궁금하면 `replay_golden.gd -- --live` (기준 사본은 건드리지 않음) |
+| **전투 규칙 GDScript** 를 일부러 바꿈 (버그 고침 등) → `replay_golden` 이 어긋남 | 황금 기록 | 아래 1~5 |
+| **바깥 화면 규칙** 을 일부러 바꿈 → `check_outer_*` 의 웹 정답 항목이 어긋남 | 웹 정답 | 그 항목의 기대값을 손으로 고치거나 시험에서 '웹과 다른 점'으로 바꿈 (정답을 만든 웹 코드는 없음) → 4~5 |
+| **데이터 모양**(키 이름·구조)을 바꿔 기준 사본을 새 코드가 못 읽음 | 기준 데이터 | 같은 변환을 `tests/baseline/data` 에도 적용 (값은 그대로) → `data_tool --write` 대신 손으로 모양 확인 → `replay_golden` 전부 PASS 확인 → 4~5 |
+| **기준 데이터를 지금 데이터로 옮김** (큰 밸런스 개편 뒤 영향 보고 대신 새 기준으로 삼기로 함) | 기준 데이터 + 황금 기록 | 아래 '기준 데이터 옮기기' |
+
+황금 기록 다시 쓰기:
+
+1. `Godot --headless --path godot --script res://tests/replay_golden.gd -- --record [--only 이름,이름]`
+   — Godot 엔진이 기록된 세이브·시드·주입·아군 명령으로 다시 돌려 같은 모양(한 줄에 사건 하나)으로 씀. 같은 항목은 글자 그대로 두어 **바뀐 곳만** diff 에 나옴
+   (아무것도 안 바꾸고 돌리면 22개 모두 '같음', 파일 변화 0 — 확인함). 늘 기준 데이터로 돌립니다 — `--record --live` 는 거부
+   (지금 데이터로 기록하면 golden 과 tests/baseline/data 가 서로 어긋나므로. 지금 데이터를 기준으로 삼으려면 아래 '기준 데이터 옮기기').
+2. 기록된 명령이 더는 맞지 않으면(데이터·규칙 때문에 전투 흐름이 달라져 다른 유닛이 입력을 기다림) 그 시나리오는 쓰지 않고 실패 —
+   시나리오를 새로 짜야 합니다 (`tools/legacy-web/battle-sim/scenarios.js`·`policy.js` 참고. 시험 정책의 Godot 판은 아직 없음).
+3. `git diff --stat godot/tests/golden` · `git diff godot/tests/golden/<이름>.json` 으로 **사람이 검토** (바뀐 사건·결과·보상이 의도와 맞는지).
+4. `Godot --headless --path godot --script res://tools/data_tool.gd -- --relock "이유"` — LOCK.json 다시 씀 (이유가 LOCK.json 에 남음).
+5. 시험 전부 → 커밋 (커밋 글에 이유).
+
+기준 데이터 옮기기 (지금 `godot/data` 를 새 기준으로):
+
+| 차례 | 하는 일 | 명령 |
+|---|---|---|
+| 0 | 지금 데이터가 정해진 모양 · 오류 0 | `data_tool` (OK 여야 함) |
+| 1 | `godot/data` → `tests/baseline/data` 복사 (지움 + 복사) | ┐ |
+| 2 | 황금 기록을 새 기준 데이터로 다시 씀 (`replay_golden -- --record`) — 실패하면 1·2 를 모두 되돌리고 멈춤 | ├ `data_tool -- --rebase "이유"` 한 번에 |
+| 3 | 잠금 다시 씀 (이유: `rebase: …`) | ┘ |
+| 4 | `git diff --stat godot/tests` · 바뀐 황금 기록 검토 | 사람 |
+| 5 | `check_outer_4a/4b1/4b2` — 웹 정답은 다시 계산할 수 없으므로, 새 데이터 때문에 바뀐 항목은 기대값을 손으로 고치고 이유를 시험 글에 남김 → `--relock "이유"` | 사람 |
+| 6 | 시험 전부 → 커밋 | |
+
+## 전투 이어하기와 데이터 해시
+
+`gd_battle.cfg.dataHash` = manifest.sources(모듈 JSON 파일마다 sha1) 의 md5 — 번역·대본은 넣지 않음 (`resume_rules.gd`).
+- 이전 전에는 sources 가 웹 `data/*.js` 의 sha1 이었고, 이제는 `godot/data/<모듈>.json` 의 sha1 입니다. 그래서 **이전 전에 저장된 Godot 전투는 값이 같아도 '이전 버전'** 으로 보여 이어하지 못하고 포기 안내가 나옵니다 (한 번만).
+  출시 전이라 괜찮다고 판단 (디렉터 결정 '버전이 다르면 포기 안내'와 같은 길, 오류 없음 — 시험 check_outer_4b2 '이어하기 판 확인').
+- 앞으로는 모듈 JSON 을 고치면(`data_tool --write` 로 sha1 이 바뀌면) 저장 전투가 '이전 버전'이 됩니다. 번역·대본만 고치면 그대로 이어집니다. 모양만 다시 맞추는 것은 글이 같아 해시도 같습니다.
+
+## 그림
+
+**원본은 `godot/assets/image/`** 입니다 (2026-10-18 `git mv image godot/assets/image` — 이력 그대로, 그림 2,791개 약 70MB + Godot `*.import` 2,790개).
+- 저장소 맨 위 `image` 는 `godot/assets/image` 를 가리키는 **상대 경로 심볼릭 링크** — 웹판(동결)이 폐기 전까지 그대로 열리게. 웹을 지울 때 함께 지우면 됩니다.
+- 예전 `tools/sync-godot-assets.sh`(웹 image/ → 사본 복사)는 지웠습니다. 소리 등 다른 자원 폴더는 웹판에 없었습니다 (배경음은 합성).
+- 일러스트 원본 `assets/image/icon/src/`(199개 · 약 161MB) · `assets/image/character/story/src/`(23개 · 약 16MB)는 git 에 넣지 않고(.gitignore),
+  각 폴더의 `.gdignore` 로 Godot 도 가져오지 않습니다. **디스크에만 있으므로 따로 백업**하세요.
+- 작업 중 미리보기 `*.prev.png` 는 Godot 이 가져오며 옆파일을 만들지만 그 `.import` 는 올리지 않습니다 (.gitignore).
+- 그림 도구(`tools/import-icons.py` · `make-portrait.py` · `make-back.py` · `make-props.py` · `build-icon-sheet.py` …)도 새 경로를 씁니다.
+- 새 그림을 넣거나 처음 받은 저장소: `Godot --headless --path godot --editor --quit` 로 가져오기 (`.godot/` 없이 처음부터 약 13초 · 5,592개 · 113MB 캐시,
+  M3 Max 측정. 처음 열 때 글꼴을 아직 못 읽었다는 오류 4줄은 가져오기 전이라 나오는 것 — 한 번 뒤로는 없음). 바뀐 것만 다시 가져오기는 `--import` (약 5초).
 
 ## 내보내기(export) 설정
 
 `data/*.json` 은 Godot 리소스가 아니라 `FileAccess` 로 읽는 일반 파일입니다. 내보내기 프리셋을 만들 때
-**Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/lang_extra/*, data/story/*` 처럼 하위 폴더 포함).
+**Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/story/*` 처럼 하위 폴더 포함).
+**`tests/*`·`tools/*` 는 Exclude filter 에** 넣으세요 (기준 데이터·황금 기록 약 13MB — 게임에는 필요 없음).
 빠지면 내보낸 게임에서 DataDB 가 "manifest.json 을 읽지 못했습니다" 오류를 냅니다.
 (4b-2) 라이선스 화면이 글꼴 라이선스 전문을 읽으므로 **`assets/fonts/OFL.txt` 도 같은 칸에 넣으세요** (빠지면 OFL 전문 펼치기 단추가 나오지 않음).
 게임 버전은 `project.godot` 의 `application/config/version` — 전투 이어하기 저장이 이 값을 기록하므로 출시 때마다 올리세요 (다르면 예전 저장 전투는 '이전 버전' 안내 + 포기).
@@ -173,7 +250,7 @@ I18n.t_raw("battle.loading_tips")                 # 웹 t() 와 똑같이: 배�
 I18n.set_language("ja")          # game_settings.language 에 저장 + 글꼴 사슬 바꿈 + language_changed 신호 (I18n.LANGS 6개)
 # 언어 고르기(웹 i18n.js 와 같음): 저장된 game_settings.language → 없으면 OS 언어 감지(I18n.detect_lang).
 #   ko·en·es·ja·zh(Hans/CN/SG→zh-CN, Hant/TW/HK/MO→zh-TW) 외의 언어(fr·de·pt 등)나 빈 값은 en
-I18n.t("gd.fail.move_failed")     # Godot 전용 키 (data/lang_extra — 웹 팩에 없는 키만 더해짐)
+I18n.t("gd.fail.move_failed")     # Godot 화면 글 (data/lang/<언어>.json 의 "gd" 아래)
 
 # 저장 (웹 Store 와 같은 키 이름, 값은 문자열)
 Store.set_json("game_settings", {"language": "ko"})
@@ -253,7 +330,7 @@ Store.get_json("game_roster", {})
 ## 4b-1 — 편성 화면의 장비·소모품·강화 탭 · 상점 · 전투 이어하기
 
 규칙은 `scripts/logic/equip_rules.gd` · `shop_rules.gd` · `resume_rules.gd`, 화면은 `scripts/ui/party_gear_tabs.gd` · `shop.gd`.
-웹 정답 비교: `node tools/outer-4b1-expect.js` → `tests/fixtures/outer_4b1_web.json` → `tests/check_outer_4b1.gd` (같은 mulberry32 씨앗·같은 시각으로 웹 코드와 저장값·난수 호출 수까지).
+웹 정답 비교 (고정 기준, 보관: `tools/legacy-web/outer-4b1-expect.js`): `tests/fixtures/outer_4b1_web.json` → `tests/check_outer_4b1.gd` (같은 mulberry32 씨앗·같은 시각으로 웹 코드와 저장값·난수 호출 수까지).
 
 - **무작위 (상점·뽑기·강화)**: 웹과 같은 씨앗·같은 순서. `Math.random` 호출 순서를 줄 단위로 맞췄고, 웹의 `.sort(() => Math.random() - 0.5)` 는
   V8 정렬(TimSort: 64개 미만은 run 세기 + 이진 삽입)의 비교 호출 순서까지 `Js.v8_sort` 로, id 꼬리 `Math.random().toString(36).slice(2, 6)` 은
@@ -287,7 +364,7 @@ Store.get_json("game_roster", {})
 ## 4b-2 — 성소 · 아카데미 · 도감 · 가이드 · 크레딧 · 라이선스 · 4b-1 검수 남은 것
 
 규칙은 `scripts/logic/sanctuary_rules.gd` · `academy_rules.gd` · `codex_rules.gd`, 화면은 `scripts/ui/sanctuary.gd` · `academy.gd` · `compendium.gd` · `guide.gd` · `credits.gd` · `licenses.gd`.
-웹 정답 비교: `node tools/outer-4b2-expect.js` → `tests/fixtures/outer_4b2_web.json` → `tests/check_outer_4b2.gd`
+웹 정답 비교 (고정 기준, 보관: `tools/legacy-web/outer-4b2-expect.js`): `tests/fixtures/outer_4b2_web.json` → `tests/check_outer_4b2.gd`
 (성소·아카데미: 같은 mulberry32 씨앗·시각으로 화면 단추 차례대로 → 저장소 전체·난수 호출 수, 도감·가이드: 진짜 언어 팩 ko·en 으로 웹 HTML 을 만들어 태그를 걷어낸 글 조각 6천여 개를 순서까지).
 
 - **'준비 중' 없음**: 로비 도감·가이드, 아래 탭 성소·아카데미, 설정 라이선스·Credits 가 모두 진짜 화면. `gd.outer.coming_soon` 키와 `coming_soon()` 을 지움.
@@ -301,8 +378,9 @@ Store.get_json("game_roster", {})
   - 부활: 웹은 페이지를 연 때의 골드(`_gold`)로 계산하고 없는 클랜원이어도 골드를 씀 → Godot 은 누를 때의 저장 골드, 없는 클랜원이면 쓰지 않음.
   - 아카데미 전직: 웹 확인 창은 열 때마다 잠재력을 굴려 '전직 후 예상 스탯'을 보이고 실행 때 또 굴려 실제 능력치가 달라짐(창을 닫았다 열어 '다시 뽑기' 가능) →
     Godot 은 (디렉터 결정) **클랜원 + 대상 직업마다 한 번만 굴려 Store 에 보관**하고 그 값 그대로 전직 (예상 = 결과, 창을 다시 열거나 게임을 다시 켜도 같은 값).
-    - 키 `gd_class_preview` (Godot 전용, 웹은 무시) = `{ "<uid>": { "fp": { "lv": 레벨, "pot": 잠재력 }, "cls": { "<직업>": { "hp", "atk", "def", "move", "range", "pot", "grade", "cls" } } } }`
-    - 무효 규칙 (`academy_rules.gd` 가 읽을 때 정리): uid 가 없거나 · 죽었거나 · 노비스가 아니면 항목 지움 / 레벨이나 잠재력(fp)이 바뀌면(레벨 업·승급) 그 클랜원 미리보기 모두 버리고 새로 굴림 /
+    - 키 `gd_class_preview` (Godot 전용, 웹은 무시) = `{ "<uid>": { "cls": { "<직업>": { "pot": 굴린 잠재력, "grade": 굴린 때 등급, "cls" } } } }` (2026-10-18: 굴린 잠재력만 보관 — 능력치는 볼 때·실행할 때 **지금 레벨**로 다시 계산. 4b-2 판의 fp·능력치 칸이 든 값도 그대로 읽음)
+    - 무효 규칙 (2026-10-18 디렉터 결정, `academy_rules.gd` 가 읽을 때 정리): **잠재력 등급이 굴린 때와 다를 때(승급)만** 그 직업 미리보기를 새로 굴림 — 잠재력 굴림은 등급에만 달리고 레벨과 무관하므로 레벨 업·죽음·부활로는 다시 굴리지 않음 (예전 fp 규칙은 레벨 업으로, 다른 노비스 창을 열 때의 정리는 죽은 클랜원 항목을 지워 부활 뒤 다시 굴리는 길이 있었음) /
+      uid 가 로스터에 없거나(승급 제물 — uid 는 다시 쓰지 않음) 노비스가 아니면 항목 지움, **죽은 클랜원 항목은 남김** / 전직을 실행하면 그 클랜원 항목 지움 / 키가 비면 키 지움 (시험: 레벨 업·죽음·부활 전후 같은 잠재력·등급, 실행 때 레벨로 다시 계산, 등급이 바뀌면 새로 굴림)
       전직을 실행하면 그 클랜원 항목 지움 / 키가 비면 키 지움
     - 이상한 값: `save_sanitize.gd` 가 사전이 아니면 지우고, 모양이 틀린 항목·직업(숫자 칸·잠재력·등급·모르는 직업)만 뺌. 정상 값은 그대로
     승급 확인 창은 웹처럼 '~' 예상치(실행 때 다시 굴림)를 그대로 둠 — 글에 '~' 가 있어 예상치임이 드러나 있으므로.
@@ -329,3 +407,13 @@ Store.get_json("game_roster", {})
 - **play 시험의 누르기**: 누르기·떼기를 같은 프레임에 넣음 (창이 OS 초점을 잃으면 Viewport 가 누르는 중인 단추를 버려 첫 누르기가 가끔 먹히지 않던 것 — 창 크기 문제가 아님). 실패하면 바로 끝냄.
   공용 `tests/play_kit.gd`: 칸이 보이는지를 **논리 화면**(`root.get_visible_rect()`)으로 재고 HUD(`ui.over_hud`) 위의 칸은 카메라를 옮긴 뒤 누름
   (예전엔 물리 크기 `root.size` 로 재서 1920 창에서 HUD 밑 칸을 눌러 '대상 고르기'가 풀리지 않는 일이 있었음), 화면 사진(frame_post_draw)·전투 로딩 뒤 첫 입력 대기에 시간 제한(넘으면 실패로 끝냄).
+
+## 2026-10-18 — 데이터 원본 이전 · 4b-2 검수 남은 것
+
+- 데이터 원본 이전 · 기준 고정 · 웹 도구 보관: 위 '데이터 원본' · '기준' · '기준을 다시 만들 때' · `tools/legacy-web/README.md`. 웹 왕복 시험(check_outer_4b1·4b2 의 `--roundtrip`)은 웹 세이브 가져오기를 만들지 않기로 해서 뺌.
+- **전직 미리보기**: 위 4b-2 의 `gd_class_preview` (무효는 등급 변화만, 능력치는 실행 때 레벨로).
+- **성소 승급 탭 성능**: 카드마다 로스터·활성 파티·gd_battle(큰 JSON)을 다시 읽던 것 → `Sanc.promote_ctx(c)` 한 번 읽어 모든 카드에 (`promote_state(c, ch, pc)`).
+  시험 `check_outer_4b2 -- --only perf`: 클랜원 60명 + 실제 저장 전투로 승급 탭 그리기 시간 (목표 150ms 이하).
+- **'last' 대사**: 발동을 지운 '마지막 적 하나' 대사를 6개 언어 대본 + sample 에서 지움 (각 88개, sample 1개), `story_battle.gd` BATTLE_KINDS·PRIORITY 에서도 뺌.
+  기준 데이터의 대본에는 남아 있음 (기준은 고치지 않음 — 코드가 'last' 를 모르므로 쓰이지 않음).
+- **play 시험 결과**: `PlayKit.verdict` — HUD 에 가려 칸을 못 누르고 Esc 로 넘긴 횟수(hud_blocked)가 0 이 아니면 `PLAY_WARN` + `PLAY_RESULT: WARN (HUD 가림 n번)`, 종료 코드 2 (실패는 1, 통과 0).

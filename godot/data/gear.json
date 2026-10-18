@@ -1,998 +1,238 @@
 {
- "GEAR_FX": {
-  "hp_pct": {
-   "u": "pct"
+  "GEAR_FX": {
+    "hp_pct": {"u": "pct"},
+    "atk_pct": {"u": "pct"},
+    "def_pct": {"u": "pct"},
+    "speed": {"u": "dec"},
+    "res_rec": {"u": "int"},
+    "res_rec_pct": {"u": "pct"},
+    "move": {"u": "int", "noScale": 1},
+    "range": {"u": "int", "noScale": 1},
+    "crit": {"u": "pct"},
+    "knock_res": {"u": "pct"},
+    "hazard_res": {"u": "pct"},
+    "kill_heal": {"u": "pct"},
+    "kill_ap": {"u": "int", "noScale": 1},
+    "desperate": {"u": "pct"},
+    "first_crit": {"u": "pct"},
+    "start_shield": {"u": "pct"},
+    "regen": {"u": "pct"},
+    "counter_up": {"u": "pct"},
+    "charge": {"u": "pct"},
+    "guard_aura": {"u": "pct"},
+    "focus": {"u": "pct"},
+    "knock_immune": {"u": "flag", "noScale": 1},
+    "cleanse": {"u": "pct"},
+    "intercept_red": {"u": "pct"},
+    "intercept_fury": {"u": "int", "noScale": 1},
+    "fury_gain": {"u": "int", "noScale": 1},
+    "backstab": {"u": "pct"},
+    "heal_pct": {"u": "pct"},
+    "heal_cleanse": {"u": "pct"},
+    "exp_pct": {"u": "pct"},
+    "summon_pct": {"u": "pct"},
+    "summon_turns": {"u": "int", "noScale": 1},
+    "debuff_pct": {"u": "pct"},
+    "debuff_turns": {"u": "int", "noScale": 1},
+    "combo": {"u": "pct"},
+    "blast": {"u": "pct"},
+    "pierce_line": {"u": "pct"},
+    "stack_atk": {"u": "pct"},
+    "mana_free": {"u": "pct"},
+    "party_atk": {"u": "pct"},
+    "last_stand": {"u": "pct"},
+    "start_ap": {"u": "flag", "noScale": 1},
+    "immune_fire": {"u": "flag", "noScale": 1},
+    "immune_heat": {"u": "flag", "noScale": 1},
+    "dmg_red": {"u": "pct"}
   },
-  "atk_pct": {
-   "u": "pct"
+  "SUB_RANGE": {
+    "hp_pct": [3, 6],
+    "atk_pct": [3, 6],
+    "def_pct": [3, 6],
+    "speed": [0.03, 0.06],
+    "res_rec": [1, 3],
+    "crit": [3, 6],
+    "knock_res": [8, 15],
+    "hazard_res": [15, 30]
   },
-  "def_pct": {
-   "u": "pct"
+  "SUB_POOL": {
+    "weapon": ["atk_pct", "crit", "speed", "res_rec", "hp_pct"],
+    "offhand": ["hp_pct", "def_pct", "res_rec", "crit"],
+    "armor": ["hp_pct", "def_pct", "knock_res", "hazard_res"],
+    "acc": ["hp_pct", "atk_pct", "def_pct", "speed", "res_rec", "crit", "knock_res", "hazard_res"]
   },
-  "speed": {
-   "u": "dec"
+  "SUB_ARMOR_EXTRA": {
+    "leather": ["speed"],
+    "cloth": ["res_rec", "atk_pct"],
+    "chain": ["atk_pct"],
+    "plate": []
   },
-  "res_rec": {
-   "u": "int"
-  },
-  "res_rec_pct": {
-   "u": "pct"
-  },
-  "move": {
-   "u": "int",
-   "noScale": 1
-  },
-  "range": {
-   "u": "int",
-   "noScale": 1
-  },
-  "crit": {
-   "u": "pct"
-  },
-  "knock_res": {
-   "u": "pct"
-  },
-  "hazard_res": {
-   "u": "pct"
-  },
-  "kill_heal": {
-   "u": "pct"
-  },
-  "kill_ap": {
-   "u": "int",
-   "noScale": 1
-  },
-  "desperate": {
-   "u": "pct"
-  },
-  "first_crit": {
-   "u": "pct"
-  },
-  "start_shield": {
-   "u": "pct"
-  },
-  "regen": {
-   "u": "pct"
-  },
-  "counter_up": {
-   "u": "pct"
-  },
-  "charge": {
-   "u": "pct"
-  },
-  "guard_aura": {
-   "u": "pct"
-  },
-  "focus": {
-   "u": "pct"
-  },
-  "knock_immune": {
-   "u": "flag",
-   "noScale": 1
-  },
-  "cleanse": {
-   "u": "pct"
-  },
-  "intercept_red": {
-   "u": "pct"
-  },
-  "intercept_fury": {
-   "u": "int",
-   "noScale": 1
-  },
-  "fury_gain": {
-   "u": "int",
-   "noScale": 1
-  },
-  "backstab": {
-   "u": "pct"
-  },
-  "heal_pct": {
-   "u": "pct"
-  },
-  "heal_cleanse": {
-   "u": "pct"
-  },
-  "exp_pct": {
-   "u": "pct"
-  },
-  "summon_pct": {
-   "u": "pct"
-  },
-  "summon_turns": {
-   "u": "int",
-   "noScale": 1
-  },
-  "debuff_pct": {
-   "u": "pct"
-  },
-  "debuff_turns": {
-   "u": "int",
-   "noScale": 1
-  },
-  "combo": {
-   "u": "pct"
-  },
-  "blast": {
-   "u": "pct"
-  },
-  "pierce_line": {
-   "u": "pct"
-  },
-  "stack_atk": {
-   "u": "pct"
-  },
-  "mana_free": {
-   "u": "pct"
-  },
-  "party_atk": {
-   "u": "pct"
-  },
-  "last_stand": {
-   "u": "pct"
-  },
-  "start_ap": {
-   "u": "flag",
-   "noScale": 1
-  },
-  "immune_fire": {
-   "u": "flag",
-   "noScale": 1
-  },
-  "immune_heat": {
-   "u": "flag",
-   "noScale": 1
-  },
-  "dmg_red": {
-   "u": "pct"
-  }
- },
- "SUB_RANGE": {
-  "hp_pct": [
-   3,
-   6
-  ],
-  "atk_pct": [
-   3,
-   6
-  ],
-  "def_pct": [
-   3,
-   6
-  ],
-  "speed": [
-   0.03,
-   0.06
-  ],
-  "res_rec": [
-   1,
-   3
-  ],
-  "crit": [
-   3,
-   6
-  ],
-  "knock_res": [
-   8,
-   15
-  ],
-  "hazard_res": [
-   15,
-   30
-  ]
- },
- "SUB_POOL": {
-  "weapon": [
-   "atk_pct",
-   "crit",
-   "speed",
-   "res_rec",
-   "hp_pct"
-  ],
-  "offhand": [
-   "hp_pct",
-   "def_pct",
-   "res_rec",
-   "crit"
-  ],
-  "armor": [
-   "hp_pct",
-   "def_pct",
-   "knock_res",
-   "hazard_res"
-  ],
-  "acc": [
-   "hp_pct",
-   "atk_pct",
-   "def_pct",
-   "speed",
-   "res_rec",
-   "crit",
-   "knock_res",
-   "hazard_res"
-  ]
- },
- "SUB_ARMOR_EXTRA": {
-  "leather": [
-   "speed"
-  ],
-  "cloth": [
-   "res_rec",
-   "atk_pct"
-  ],
-  "chain": [
-   "atk_pct"
-  ],
-  "plate": []
- },
- "SUB_COUNT": {
-  "common": 0,
-  "uncommon": 1,
-  "rare": 2,
-  "epic": 2,
-  "legendary": 2
- },
- "CLASS_OPTS": {
-  "warrior": [
-   {
-    "id": "fury_gain",
-    "r": [
-     1,
-     1
-    ]
-   },
-   {
-    "id": "desperate",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "kill_heal",
-    "r": [
-     5,
-     8
-    ]
-   }
-  ],
-  "knight": [
-   {
-    "id": "intercept_red",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "knock_res",
-    "r": [
-     15,
-     25
-    ]
-   },
-   {
-    "id": "guard_aura",
-    "r": [
-     5,
-     10
-    ]
-   }
-  ],
-  "assassin": [
-   {
-    "id": "backstab",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "kill_ap",
-    "r": [
-     1,
-     1
-    ]
-   },
-   {
-    "id": "crit",
-    "r": [
-     5,
-     10
-    ]
-   }
-  ],
-  "mage": [
-   {
-    "id": "res_rec",
-    "r": [
-     2,
-     4
-    ]
-   },
-   {
-    "id": "crit",
-    "r": [
-     5,
-     10
-    ]
-   },
-   {
-    "id": "atk_pct",
-    "r": [
-     5,
-     10
-    ]
-   }
-  ],
-  "archer": [
-   {
-    "id": "range",
-    "r": [
-     1,
-     1
+  "SUB_COUNT": {"common": 0, "uncommon": 1, "rare": 2, "epic": 2, "legendary": 2},
+  "CLASS_OPTS": {
+    "warrior": [
+      {"id": "fury_gain", "r": [1, 1]},
+      {"id": "desperate", "r": [10, 20]},
+      {"id": "kill_heal", "r": [5, 8]}
     ],
-    "w": 0.25
-   },
-   {
-    "id": "crit",
-    "r": [
-     5,
-     10
+    "knight": [
+      {"id": "intercept_red", "r": [10, 20]},
+      {"id": "knock_res", "r": [15, 25]},
+      {"id": "guard_aura", "r": [5, 10]}
+    ],
+    "assassin": [
+      {"id": "backstab", "r": [10, 20]},
+      {"id": "kill_ap", "r": [1, 1]},
+      {"id": "crit", "r": [5, 10]}
+    ],
+    "mage": [
+      {"id": "res_rec", "r": [2, 4]},
+      {"id": "crit", "r": [5, 10]},
+      {"id": "atk_pct", "r": [5, 10]}
+    ],
+    "archer": [
+      {"id": "range", "r": [1, 1], "w": 0.25},
+      {"id": "crit", "r": [5, 10]},
+      {"id": "atk_pct", "r": [5, 10]}
+    ],
+    "priest": [
+      {"id": "heal_pct", "r": [10, 20]},
+      {"id": "heal_cleanse", "r": [20, 40]},
+      {"id": "regen", "r": [2, 3]}
+    ],
+    "novice": [
+      {"id": "exp_pct", "r": [10, 20]},
+      {"id": "hp_pct", "r": [5, 10]},
+      {"id": "def_pct", "r": [5, 10]}
+    ],
+    "summoner": [
+      {"id": "summon_pct", "r": [10, 20]},
+      {"id": "res_rec", "r": [2, 4]},
+      {"id": "speed", "r": [0.05, 0.1]}
+    ],
+    "shaman": [
+      {"id": "debuff_pct", "r": [10, 20]},
+      {"id": "res_rec", "r": [2, 4]},
+      {"id": "cleanse", "r": [20, 30]}
+    ],
+    "brawler": [
+      {"id": "combo", "r": [5, 10]},
+      {"id": "counter_up", "r": [15, 25]},
+      {"id": "speed", "r": [0.05, 0.1]}
+    ],
+    "lancer": [
+      {"id": "charge", "r": [10, 20]},
+      {"id": "hp_pct", "r": [5, 10]},
+      {"id": "knock_res", "r": [15, 25]}
+    ],
+    "sapper": [
+      {"id": "blast", "r": [10, 20]},
+      {"id": "def_pct", "r": [5, 10]},
+      {"id": "crit", "r": [5, 10]}
     ]
-   },
-   {
-    "id": "atk_pct",
-    "r": [
-     5,
-     10
-    ]
-   }
+  },
+  "UNIQUE_POOL": [
+    {"id": "kill_heal", "r": [8, 12]},
+    {"id": "kill_ap", "r": [1, 1]},
+    {"id": "desperate", "r": [25, 35]},
+    {"id": "first_crit", "r": [50, 50]},
+    {"id": "start_shield", "r": [12, 18]},
+    {"id": "regen", "r": [3, 5]},
+    {"id": "counter_up", "r": [30, 50]},
+    {"id": "charge", "r": [15, 25]},
+    {"id": "guard_aura", "r": [8, 12]},
+    {"id": "focus", "r": [25, 35]},
+    {"id": "knock_immune", "r": [1, 1]},
+    {"id": "cleanse", "r": [25, 35]}
   ],
-  "priest": [
-   {
-    "id": "heal_pct",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "heal_cleanse",
-    "r": [
-     20,
-     40
-    ]
-   },
-   {
-    "id": "regen",
-    "r": [
-     2,
-     3
-    ]
-   }
+  "LEGENDS": {
+    "blood_oath": {"tpl": "wpn_warrior", "fx": {"stack_atk": 5, "kill_heal": 10}},
+    "unyielding": {"tpl": "wpn_knight", "fx": {"intercept_red": 40, "intercept_fury": 1}},
+    "shadow_fang": {"tpl": "wpn_assassin", "fx": {"backstab": 50, "kill_ap": 2}},
+    "starfall": {"tpl": "wpn_mage", "fx": {"mana_free": 30}},
+    "whisper": {"tpl": "wpn_archer", "fx": {"range": 1, "first_crit": 50}},
+    "dawn": {"tpl": "wpn_priest", "fx": {"heal_pct": 30, "heal_cleanse": 100}},
+    "first_blade": {
+      "tpl": "wpn_novice",
+      "fx": {"exp_pct": 50, "hp_pct": 10, "atk_pct": 10, "def_pct": 10}
+    },
+    "pact_orb": {"tpl": "wpn_summoner", "fx": {"summon_pct": 30, "summon_turns": 1}},
+    "dead_totem": {"tpl": "wpn_shaman", "fx": {"debuff_pct": 20, "debuff_turns": 1}},
+    "iron_fist": {"tpl": "wpn_brawler", "fx": {"combo": 20}},
+    "piercing_lance": {"tpl": "wpn_lancer", "fx": {"pierce_line": 50}},
+    "demolisher": {"tpl": "wpn_sapper", "fx": {"blast": 30}},
+    "dragon_scale": {"tpl": "plate_armor", "fx": {"immune_fire": 1, "def_pct": 20}},
+    "warden_chain": {"tpl": "chain_armor", "fx": {"guard_aura": 15}},
+    "windwalk": {"tpl": "leather_boots", "fx": {"move": 1, "immune_heat": 1}},
+    "sage_robe": {"tpl": "cloth_robe", "fx": {"res_rec_pct": 50}},
+    "king_seal": {"tpl": "ring_power", "fx": {"party_atk": 5}},
+    "saint_tear": {"tpl": "necklace_guard", "fx": {"last_stand": 30}},
+    "time_earring": {"tpl": "earring_swift", "fx": {"start_ap": 1}}
+  },
+  "LEGEND_SHARD_COST": 5,
+  "CLASS_SETS": {
+    "warrior": {"2": {"atk_pct": 10}, "3": {"desperate": 25, "kill_heal": 8}},
+    "knight": {"2": {"def_pct": 15}, "3": {"knock_immune": 1, "intercept_red": 20}},
+    "assassin": {"2": {"speed": 0.1}, "3": {"backstab": 25, "kill_ap": 1}},
+    "mage": {"2": {"res_rec": 4}, "3": {"crit": 15, "atk_pct": 10}},
+    "archer": {"2": {"crit": 10}, "3": {"range": 1, "atk_pct": 5}},
+    "priest": {"2": {"heal_pct": 15}, "3": {"heal_cleanse": 50, "hp_pct": 10}},
+    "novice": {"2": {"hp_pct": 10}, "3": {"exp_pct": 30, "atk_pct": 8}},
+    "summoner": {"2": {"res_rec": 3}, "3": {"summon_pct": 25}},
+    "shaman": {"2": {"res_rec": 3}, "3": {"debuff_pct": 20, "cleanse": 30}},
+    "brawler": {"2": {"speed": 0.1}, "3": {"combo": 10, "counter_up": 30}},
+    "lancer": {"2": {"hp_pct": 10}, "3": {"charge": 25, "knock_res": 30}},
+    "sapper": {"2": {"def_pct": 10}, "3": {"blast": 20}}
+  },
+  "SET_SLOTS": ["helmet", "armor", "boots"],
+  "RESONANCE_MUL": 1.2,
+  "ENHANCE_OPT": [
+    {
+      "upTo": 3,
+      "chance": 0.25,
+      "pool": {"hp_pct": [2, 4], "atk_pct": [2, 4], "def_pct": [2, 4], "res_rec": [1, 2]}
+    },
+    {
+      "upTo": 6,
+      "chance": 0.4,
+      "pool": {
+        "hp_pct": [3, 6],
+        "atk_pct": [3, 6],
+        "def_pct": [3, 6],
+        "res_rec": [2, 3],
+        "speed": [0.03, 0.05],
+        "crit": [3, 6],
+        "knock_res": [10, 20],
+        "hazard_res": [15, 30]
+      }
+    },
+    {
+      "upTo": 9,
+      "chance": 0.6,
+      "pool": {
+        "hp_pct": [5, 10],
+        "atk_pct": [5, 10],
+        "def_pct": [5, 10],
+        "res_rec": [3, 5],
+        "speed": [0.05, 0.08],
+        "crit": [6, 10],
+        "knock_res": [20, 30],
+        "hazard_res": [30, 50],
+        "move": [1, 1, 0.3],
+        "range": [1, 1, 0.2],
+        "kill_heal": [5, 8],
+        "regen": [2, 3],
+        "counter_up": [15, 25]
+      }
+    },
+    {"upTo": 10, "chance": 1, "unique": true}
   ],
-  "novice": [
-   {
-    "id": "exp_pct",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "hp_pct",
-    "r": [
-     5,
-     10
-    ]
-   },
-   {
-    "id": "def_pct",
-    "r": [
-     5,
-     10
-    ]
-   }
-  ],
-  "summoner": [
-   {
-    "id": "summon_pct",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "res_rec",
-    "r": [
-     2,
-     4
-    ]
-   },
-   {
-    "id": "speed",
-    "r": [
-     0.05,
-     0.1
-    ]
-   }
-  ],
-  "shaman": [
-   {
-    "id": "debuff_pct",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "res_rec",
-    "r": [
-     2,
-     4
-    ]
-   },
-   {
-    "id": "cleanse",
-    "r": [
-     20,
-     30
-    ]
-   }
-  ],
-  "brawler": [
-   {
-    "id": "combo",
-    "r": [
-     5,
-     10
-    ]
-   },
-   {
-    "id": "counter_up",
-    "r": [
-     15,
-     25
-    ]
-   },
-   {
-    "id": "speed",
-    "r": [
-     0.05,
-     0.1
-    ]
-   }
-  ],
-  "lancer": [
-   {
-    "id": "charge",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "hp_pct",
-    "r": [
-     5,
-     10
-    ]
-   },
-   {
-    "id": "knock_res",
-    "r": [
-     15,
-     25
-    ]
-   }
-  ],
-  "sapper": [
-   {
-    "id": "blast",
-    "r": [
-     10,
-     20
-    ]
-   },
-   {
-    "id": "def_pct",
-    "r": [
-     5,
-     10
-    ]
-   },
-   {
-    "id": "crit",
-    "r": [
-     5,
-     10
-    ]
-   }
-  ]
- },
- "UNIQUE_POOL": [
-  {
-   "id": "kill_heal",
-   "r": [
-    8,
-    12
-   ]
+  "GEAR_DROP": {
+    "bossLegend": {"first": 0.15, "repeat": 0.05},
+    "dailyLegendHell": 0.03,
+    "dailySet": {"easy": 0, "normal": 0.1, "hard": 0.18, "hell": 0.3},
+    "dailyStones": {"easy": 2, "normal": 3, "hard": 5, "hell": 8},
+    "setRarity": {"normal": "rare", "hard": "rare", "hell": "epic"}
   },
-  {
-   "id": "kill_ap",
-   "r": [
-    1,
-    1
-   ]
-  },
-  {
-   "id": "desperate",
-   "r": [
-    25,
-    35
-   ]
-  },
-  {
-   "id": "first_crit",
-   "r": [
-    50,
-    50
-   ]
-  },
-  {
-   "id": "start_shield",
-   "r": [
-    12,
-    18
-   ]
-  },
-  {
-   "id": "regen",
-   "r": [
-    3,
-    5
-   ]
-  },
-  {
-   "id": "counter_up",
-   "r": [
-    30,
-    50
-   ]
-  },
-  {
-   "id": "charge",
-   "r": [
-    15,
-    25
-   ]
-  },
-  {
-   "id": "guard_aura",
-   "r": [
-    8,
-    12
-   ]
-  },
-  {
-   "id": "focus",
-   "r": [
-    25,
-    35
-   ]
-  },
-  {
-   "id": "knock_immune",
-   "r": [
-    1,
-    1
-   ]
-  },
-  {
-   "id": "cleanse",
-   "r": [
-    25,
-    35
-   ]
-  }
- ],
- "LEGENDS": {
-  "blood_oath": {
-   "tpl": "wpn_warrior",
-   "fx": {
-    "stack_atk": 5,
-    "kill_heal": 10
-   }
-  },
-  "unyielding": {
-   "tpl": "wpn_knight",
-   "fx": {
-    "intercept_red": 40,
-    "intercept_fury": 1
-   }
-  },
-  "shadow_fang": {
-   "tpl": "wpn_assassin",
-   "fx": {
-    "backstab": 50,
-    "kill_ap": 2
-   }
-  },
-  "starfall": {
-   "tpl": "wpn_mage",
-   "fx": {
-    "mana_free": 30
-   }
-  },
-  "whisper": {
-   "tpl": "wpn_archer",
-   "fx": {
-    "range": 1,
-    "first_crit": 50
-   }
-  },
-  "dawn": {
-   "tpl": "wpn_priest",
-   "fx": {
-    "heal_pct": 30,
-    "heal_cleanse": 100
-   }
-  },
-  "first_blade": {
-   "tpl": "wpn_novice",
-   "fx": {
-    "exp_pct": 50,
-    "hp_pct": 10,
-    "atk_pct": 10,
-    "def_pct": 10
-   }
-  },
-  "pact_orb": {
-   "tpl": "wpn_summoner",
-   "fx": {
-    "summon_pct": 30,
-    "summon_turns": 1
-   }
-  },
-  "dead_totem": {
-   "tpl": "wpn_shaman",
-   "fx": {
-    "debuff_pct": 20,
-    "debuff_turns": 1
-   }
-  },
-  "iron_fist": {
-   "tpl": "wpn_brawler",
-   "fx": {
-    "combo": 20
-   }
-  },
-  "piercing_lance": {
-   "tpl": "wpn_lancer",
-   "fx": {
-    "pierce_line": 50
-   }
-  },
-  "demolisher": {
-   "tpl": "wpn_sapper",
-   "fx": {
-    "blast": 30
-   }
-  },
-  "dragon_scale": {
-   "tpl": "plate_armor",
-   "fx": {
-    "immune_fire": 1,
-    "def_pct": 20
-   }
-  },
-  "warden_chain": {
-   "tpl": "chain_armor",
-   "fx": {
-    "guard_aura": 15
-   }
-  },
-  "windwalk": {
-   "tpl": "leather_boots",
-   "fx": {
-    "move": 1,
-    "immune_heat": 1
-   }
-  },
-  "sage_robe": {
-   "tpl": "cloth_robe",
-   "fx": {
-    "res_rec_pct": 50
-   }
-  },
-  "king_seal": {
-   "tpl": "ring_power",
-   "fx": {
-    "party_atk": 5
-   }
-  },
-  "saint_tear": {
-   "tpl": "necklace_guard",
-   "fx": {
-    "last_stand": 30
-   }
-  },
-  "time_earring": {
-   "tpl": "earring_swift",
-   "fx": {
-    "start_ap": 1
-   }
-  }
- },
- "LEGEND_SHARD_COST": 5,
- "CLASS_SETS": {
-  "warrior": {
-   "2": {
-    "atk_pct": 10
-   },
-   "3": {
-    "desperate": 25,
-    "kill_heal": 8
-   }
-  },
-  "knight": {
-   "2": {
-    "def_pct": 15
-   },
-   "3": {
-    "knock_immune": 1,
-    "intercept_red": 20
-   }
-  },
-  "assassin": {
-   "2": {
-    "speed": 0.1
-   },
-   "3": {
-    "backstab": 25,
-    "kill_ap": 1
-   }
-  },
-  "mage": {
-   "2": {
-    "res_rec": 4
-   },
-   "3": {
-    "crit": 15,
-    "atk_pct": 10
-   }
-  },
-  "archer": {
-   "2": {
-    "crit": 10
-   },
-   "3": {
-    "range": 1,
-    "atk_pct": 5
-   }
-  },
-  "priest": {
-   "2": {
-    "heal_pct": 15
-   },
-   "3": {
-    "heal_cleanse": 50,
-    "hp_pct": 10
-   }
-  },
-  "novice": {
-   "2": {
-    "hp_pct": 10
-   },
-   "3": {
-    "exp_pct": 30,
-    "atk_pct": 8
-   }
-  },
-  "summoner": {
-   "2": {
-    "res_rec": 3
-   },
-   "3": {
-    "summon_pct": 25
-   }
-  },
-  "shaman": {
-   "2": {
-    "res_rec": 3
-   },
-   "3": {
-    "debuff_pct": 20,
-    "cleanse": 30
-   }
-  },
-  "brawler": {
-   "2": {
-    "speed": 0.1
-   },
-   "3": {
-    "combo": 10,
-    "counter_up": 30
-   }
-  },
-  "lancer": {
-   "2": {
-    "hp_pct": 10
-   },
-   "3": {
-    "charge": 25,
-    "knock_res": 30
-   }
-  },
-  "sapper": {
-   "2": {
-    "def_pct": 10
-   },
-   "3": {
-    "blast": 20
-   }
-  }
- },
- "SET_SLOTS": [
-  "helmet",
-  "armor",
-  "boots"
- ],
- "RESONANCE_MUL": 1.2,
- "ENHANCE_OPT": [
-  {
-   "upTo": 3,
-   "chance": 0.25,
-   "pool": {
-    "hp_pct": [
-     2,
-     4
-    ],
-    "atk_pct": [
-     2,
-     4
-    ],
-    "def_pct": [
-     2,
-     4
-    ],
-    "res_rec": [
-     1,
-     2
-    ]
-   }
-  },
-  {
-   "upTo": 6,
-   "chance": 0.4,
-   "pool": {
-    "hp_pct": [
-     3,
-     6
-    ],
-    "atk_pct": [
-     3,
-     6
-    ],
-    "def_pct": [
-     3,
-     6
-    ],
-    "res_rec": [
-     2,
-     3
-    ],
-    "speed": [
-     0.03,
-     0.05
-    ],
-    "crit": [
-     3,
-     6
-    ],
-    "knock_res": [
-     10,
-     20
-    ],
-    "hazard_res": [
-     15,
-     30
-    ]
-   }
-  },
-  {
-   "upTo": 9,
-   "chance": 0.6,
-   "pool": {
-    "hp_pct": [
-     5,
-     10
-    ],
-    "atk_pct": [
-     5,
-     10
-    ],
-    "def_pct": [
-     5,
-     10
-    ],
-    "res_rec": [
-     3,
-     5
-    ],
-    "speed": [
-     0.05,
-     0.08
-    ],
-    "crit": [
-     6,
-     10
-    ],
-    "knock_res": [
-     20,
-     30
-    ],
-    "hazard_res": [
-     30,
-     50
-    ],
-    "move": [
-     1,
-     1,
-     0.3
-    ],
-    "range": [
-     1,
-     1,
-     0.2
-    ],
-    "kill_heal": [
-     5,
-     8
-    ],
-    "regen": [
-     2,
-     3
-    ],
-    "counter_up": [
-     15,
-     25
-    ]
-   }
-  },
-  {
-   "upTo": 10,
-   "chance": 1,
-   "unique": true
-  }
- ],
- "GEAR_DROP": {
-  "bossLegend": {
-   "first": 0.15,
-   "repeat": 0.05
-  },
-  "dailyLegendHell": 0.03,
-  "dailySet": {
-   "easy": 0,
-   "normal": 0.1,
-   "hard": 0.18,
-   "hell": 0.3
-  },
-  "dailyStones": {
-   "easy": 2,
-   "normal": 3,
-   "hard": 5,
-   "hell": 8
-  },
-  "setRarity": {
-   "normal": "rare",
-   "hard": "rare",
-   "hell": "epic"
-  }
- },
- "MATS_PRICE": {
-  "stone": 200,
-  "protect": 1500
- }
+  "MATS_PRICE": {"stone": 200, "protect": 1500}
 }

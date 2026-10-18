@@ -1,7 +1,7 @@
 extends SceneTree
 ## 글자 시험 — 6개 언어의 모든 글자가 그 언어 글꼴 사슬(scripts/core/fonts.gd)에 있는지 (두부 □ 없음)
 ##   Godot --headless --path godot --script res://tests/check_glyphs.gd
-##  1) 언어 팩(data/lang) + Godot 전용 키(lang_extra) + 대본(data/story)의 모든 문자열 글자 → Font.has_char (사슬 어딘가에)
+##  1) 언어 팩(data/lang — 화면 글 gd.* 포함) + 대본(data/story)의 모든 문자열 글자 → Font.has_char (사슬 어딘가에)
 ##     그림 문자(이모지·기호 U+2190~2BFF·U+1F000~1FAFF·변형 선택자·ZWJ)는 빼고 셈 — 화면은 이모지를 아이콘 그림으로 바꾸거나 지움
 ##  2) 한자·가나는 사슬 맨 앞(그 언어) 글꼴에 있어야 함 → 통합 한자 글자 모양이 그 언어 것 (ja 直·骨 / zh-CN 简体 / zh-TW 繁體)
 ##  3) 견본 문장(대본·UI)을 실제로 모양 잡기(TextLine)해서 모든 글리프가 우리 사슬의 글꼴에서 왔는지(시스템 대체 글꼴·빈 글리프 0)
@@ -44,7 +44,7 @@ func _run() -> void:
 		print("[%s] 사슬 %s" % [lang, Fonts.chain_keys(lang)])
 		var chars := {}
 		var texts: Array[String] = []
-		for path: String in ["res://data/lang/%s.json" % lang, "res://data/lang_extra/%s.json" % lang, "res://data/story/%s.json" % lang]:
+		for path: String in ["res://data/lang/%s.json" % lang, "res://data/story/%s.json" % lang]:
 			var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 			_check(d is Dictionary, "%s 읽음" % path)
 			if d is Dictionary and (d as Dictionary).has("settings"):

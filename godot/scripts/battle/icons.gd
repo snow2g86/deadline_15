@@ -19,6 +19,7 @@ var EMOJI_ICON: Dictionary = {}
 var ICON_RARITY: Dictionary = {}
 var _cache: Dictionary = {}       # 키 → Texture2D | null
 var _emoji_keys: Array = []        # 긴 것부터 (변형 선택자 FE0F 붙은 것 먼저 — 웹 _regex 와 같은 순서)
+var _by_first: Dictionary = {}     # 첫 글자 코드 → 그 글자로 시작하는 _emoji_keys (같은 순서) — split 이 글자마다 모든 키를 대 보지 않게 (2026-10-18 성능)
 
 
 ## 장면마다 새로 만들 필요 없음 — 데이터 사전이 같으면 하나를 같이 씀
@@ -40,6 +41,11 @@ func _init(p_D: Dictionary) -> void:
 		if ITEM_SPRITE.has(str(EMOJI_ICON[e])):
 			_emoji_keys.append(e)
 	_emoji_keys.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+	for e2: String in _emoji_keys:
+		var k := e2.unicode_at(0)
+		if not _by_first.has(k):
+			_by_first[k] = []
+		(_by_first[k] as Array).append(e2)
 
 
 static func _load(path: String) -> Texture2D:
@@ -143,10 +149,12 @@ func split(text: String) -> Array:
 	var n := text.length()
 	while i < n:
 		var hit := ""
-		for e: String in _emoji_keys:
-			if e.length() <= n - i and text.substr(i, e.length()) == e:
-				hit = e
-				break
+		var bucket: Variant = _by_first.get(text.unicode_at(i))
+		if bucket != null:
+			for e: String in bucket:
+				if e.length() <= n - i and text.substr(i, e.length()) == e:
+					hit = e
+					break
 		if hit != "":
 			if buf != "":
 				out.append(buf)

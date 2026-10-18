@@ -3,7 +3,7 @@ extends SceneTree
 ##   Godot --headless --path godot --script res://tests/check_outer_4b1.gd   [-- --only rules,resume,screens,clicks,weird,lang]
 ##  1) rules   : 상점(새로 만들기·1시간 갱신·사기 전부·골드 부족)·장비(끼우기·빼기·판매·목록 순서·단추·옵션 줄·더 좋은 장비 표시)·
 ##               강화(목록·확인 창 숫자·강화 여러 번·파손·수리·분해)·아이템 탭(묶음·물약 사용)을 웹 코드의 정답과 비교
-##               (tests/fixtures/outer_4b1_web.json ← node tools/outer-4b1-expect.js, 같은 씨앗·같은 시각 → 저장값·난수 호출 수까지)
+##               (tests/fixtures/outer_4b1_web.json — 웹 코드로 만든 고정 기준, 기준 데이터 tests/baseline/data 로 비교. 같은 씨앗·같은 시각 → 저장값·난수 호출 수까지)
 ##  2) resume  : 전투 이어하기 — 저장 → 새 장면에서 불러오기 → 끝까지가 끊지 않은 것과 같은 결과(저장소·결과), 나가기·재개 단추, 웹 game_battle 안내·포기
 ##  3) screens : 진짜 장면 — 상점 사기·편성 장비 끼우기·강화·물약·판매가 저장에 반영, 아래 탭 상점, 키보드
 ##  4) clicks  : 같은 프레임 연타 (진짜 입력 push_input) — 사기·강화·끼우기·판매·분해·수리·물약·뽑기·재개가 한 번만
@@ -11,6 +11,7 @@ extends SceneTree
 ##  6) lang    : 6개 언어 × 새 화면·창 (1280×720 · 1920×1080) — 넘침 0 · 두부 0
 ##  Godot 오류(Logger 로 셈) 0 이어야 통과. 저장은 user://test_outer_4b1_save.json (진짜 세이브는 건드리지 않음)
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const JsonX := preload("res://scripts/core/json_exact.gd")
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
 const FontsT := preload("res://scripts/core/fonts.gd")
@@ -93,6 +94,7 @@ func _main() -> void:
 	var oi := args.find("--only")
 	if oi >= 0 and oi + 1 < args.size():
 		_only = Array(args[oi + 1].split(","))
+	BaselineData.apply(self)   # 웹 정답 = 기준 데이터로 (tests/baseline_data.gd, -- --live 면 지금 데이터)
 	store = root.get_node("Store")
 	i18n = root.get_node("I18n")
 	router = root.get_node("Router")
@@ -109,7 +111,7 @@ func _main() -> void:
 		return
 	fx = p
 	NOW = float(fx["now"])
-	var ko: Variant = JsonX.parse(FileAccess.get_file_as_string("res://data/lang/ko.json"))
+	var ko: Variant = root.get_node("DataDB").call("lang", "ko")   # 기준 데이터의 이름 목록 (웹 정답과 같은 때)
 	names_ko = ko["character"]["names"]
 	if _want("rules"):
 		print("── 1) 규칙 ↔ 웹 정답 ──")
@@ -898,8 +900,6 @@ func _screens() -> void:
 	_check(exp_m1 == exp_m0 - 1 and Js.num(Profile.get_char(_rc(), 3).get("exp")) == 150.0, "물약 쓰기 → 물약 -1 · 클랜원 경험치 +150")
 	ps.close_all_modals()
 	_check(store.call("get_str", "ps_active_tab") == "item", "마지막 탭 기억 (ps_active_tab)")
-	# 웹 → Godot → 웹: Godot 이 쓴 세이브(상점·인벤토리·장비·강화·물약)를 웹 코드가 읽고 화면 함수를 모두 돌려도 오류 없음
-	_roundtrip("상점·편성 뒤")
 	# 로비 전투 재개: 웹 game_battle → 안내 + 포기
 	store.call("set_json", "game_battle", {"stage": {"id": 7, "name": "숲"}, "party": [1, 2, 3, 4, 5], "ter": [[]]})
 	router.call("go", "lobby")
@@ -922,7 +922,6 @@ func _screens() -> void:
 	(r[1] as Node).leave_battle()
 	(r[1] as Node).queue_free()
 	await _frames(2)
-	_roundtrip("전투 중 나간 뒤 (gd_battle 있음)")
 	router.set("dry_run", false)
 	router.call("go", "lobby")
 	await _wait_scene("ui/lobby.gd")
@@ -949,25 +948,8 @@ func _screens() -> void:
 	_stat("screens.checks", 30)
 
 
-## Store 원본(키 → 문자열)을 파일로 → node tools/outer-4b1-expect.js --roundtrip
-func _roundtrip(what: String) -> void:
-	var raw: Dictionary = {}
-	for k: String in store.call("keys"):
-		raw[k] = store.call("get_str", k)
-	var path := ProjectSettings.globalize_path("user://test_4b1_roundtrip.json")
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	f.store_string(JsonX.stringify(raw))
-	f.close()
-	var tool := ProjectSettings.globalize_path("res://").path_join("../tools/outer-4b1-expect.js").simplify_path()
-	var out: Array = []
-	var code := OS.execute("node", [tool, "--roundtrip", path], out, true)
-	DirAccess.remove_absolute(path)
-	var res: Variant = JsonX.parse(str(out[0]).strip_edges().get_slice("\n", str(out[0]).strip_edges().get_slice_count("\n") - 1)) if not out.is_empty() else null
-	var ok: bool = code == 0 and res is Dictionary and bool(res.get("ok", false))
-	if not ok:
-		print("    왕복 %s: %s" % [what, str(out).substr(0, 400)])
-	_check(ok, "웹 → Godot → 웹 왕복 (%s): 웹 상점·편성·장비 창·강화·아이템·로비 점검 %s개 오류 0" % [what, str(int(res.get("checks", 0))) if res is Dictionary else "?"])
-
+## (2026-10-18) 웹 → Godot → 웹 왕복 시험(node 로 웹 코드를 돌림)은 뺐음 — 웹판 폐기 · 웹 세이브 가져오기 안 만듦 (사용자 결정).
+##  보관된 도구: tools/legacy-web/outer-4b1-expect.js --roundtrip <세이브 덤프>
 
 # ═══════════ 4) 같은 프레임 연타 (진짜 입력) ═══════════
 

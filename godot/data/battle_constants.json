@@ -1,229 +1,162 @@
 {
- "COLS": 8,
- "ROWS": 15,
- "TW": 48,
- "TH": 24,
- "MID_C": 4,
- "ZH": 10,
- "UI": 52,
- "UW": 64,
- "UH": 78,
- "UCX": 32,
- "UCY": 30,
- "UOY": 40,
- "DEPLOY": [
-  {
-   "x": 3,
-   "y": 12
+  "COLS": 8,
+  "ROWS": 15,
+  "TW": 48,
+  "TH": 24,
+  "MID_C": 4,
+  "ZH": 10,
+  "UI": 52,
+  "UW": 64,
+  "UH": 78,
+  "UCX": 32,
+  "UCY": 30,
+  "UOY": 40,
+  "DEPLOY": [
+    {"x": 3, "y": 12},
+    {"x": 4, "y": 12},
+    {"x": 2, "y": 12},
+    {"x": 5, "y": 12},
+    {"x": 3, "y": 11},
+    {"x": 4, "y": 11},
+    {"x": 2, "y": 11},
+    {"x": 5, "y": 11},
+    {"x": 1, "y": 12},
+    {"x": 6, "y": 12}
+  ],
+  "FORM_COLS": [3, 4, 2, 5, 1, 6],
+  "CLAB": ["N", "E", "S", "W"],
+  "CARR": ["▲", "▶", "▼", "◀"],
+  "ENEMY_TURN_PACE": 0.6,
+  "AI_PROFILES": {
+    "warrior": {
+      "style": "aggressive",
+      "targetPriority": "low_hp",
+      "advanceBonus": 10,
+      "retreatThreshold": 0.2,
+      "skillUseProbability": 0.7
+    },
+    "assassin": {
+      "style": "aggressive",
+      "targetPriority": "low_hp",
+      "advanceBonus": 15,
+      "retreatThreshold": 0.25,
+      "skillUseProbability": 0.8
+    },
+    "brawler": {
+      "style": "aggressive",
+      "targetPriority": "random_weak",
+      "advanceBonus": 12,
+      "retreatThreshold": 0.15,
+      "skillUseProbability": 0.6
+    },
+    "mage": {
+      "style": "aggressive",
+      "targetPriority": "cluster",
+      "advanceBonus": 5,
+      "retreatThreshold": 0.4,
+      "skillUseProbability": 0.75,
+      "keepDistance": true
+    },
+    "sapper": {
+      "style": "aggressive",
+      "targetPriority": "nearest",
+      "advanceBonus": 8,
+      "retreatThreshold": 0.3,
+      "skillUseProbability": 0.9,
+      "trapPlacement": true
+    },
+    "knight": {
+      "style": "defensive",
+      "targetPriority": "nearest_threat",
+      "advanceBonus": -5,
+      "retreatThreshold": 0.1,
+      "skillUseProbability": 0.5,
+      "guardMode": true
+    },
+    "lancer": {
+      "style": "defensive",
+      "targetPriority": "nearest_threat",
+      "advanceBonus": -3,
+      "retreatThreshold": 0.15,
+      "skillUseProbability": 0.65,
+      "guardMode": true
+    },
+    "priest": {
+      "style": "support",
+      "targetPriority": "never",
+      "advanceBonus": -10,
+      "retreatThreshold": 0.5,
+      "skillUseProbability": 0,
+      "keepDistance": true,
+      "avoidCombat": true
+    },
+    "shaman": {
+      "style": "support",
+      "targetPriority": "random",
+      "advanceBonus": -8,
+      "retreatThreshold": 0.45,
+      "skillUseProbability": 0,
+      "keepDistance": true,
+      "avoidCombat": true
+    },
+    "novice": {
+      "style": "balanced",
+      "targetPriority": "nearest",
+      "advanceBonus": 0,
+      "retreatThreshold": 0.3,
+      "skillUseProbability": 0.4
+    },
+    "archer": {
+      "style": "balanced",
+      "targetPriority": "low_hp",
+      "advanceBonus": 2,
+      "retreatThreshold": 0.35,
+      "skillUseProbability": 0.5,
+      "keepDistance": true
+    },
+    "summoner": {
+      "style": "balanced",
+      "targetPriority": "random",
+      "advanceBonus": 0,
+      "retreatThreshold": 0.4,
+      "skillUseProbability": 0,
+      "keepDistance": true
+    }
   },
-  {
-   "x": 4,
-   "y": 12
+  "AI_MISTAKE_CHANCE": 0.3,
+  "GUARD_CLASSES": ["knight"],
+  "COVER_IGNORE_CLASSES": ["assassin"],
+  "PROJECTILE_CLASSES": [
+    "archer",
+    "mage",
+    "commander",
+    "priest",
+    "summoner",
+    "shaman",
+    "summon_spirit"
+  ],
+  "VAULT_CLASSES": ["archer", "assassin"],
+  "VAULT_DIST": 2,
+  "TACTIC": {
+    "back": 0.3,
+    "side": 0.15,
+    "pincer": 0.2,
+    "high": 0.15,
+    "highRange": 1,
+    "forestEvade": 0.15,
+    "cap": 0.4,
+    "shallowVuln": 0.2,
+    "lavaBurn": 0.06
   },
-  {
-   "x": 2,
-   "y": 12
+  "TACTICS_ACT": {
+    "shoveCollide": 0.5,
+    "shoveUnit": 0.3,
+    "defendDef": 1.5,
+    "overwatchMul": 0.8,
+    "interceptMul": 0.5
   },
-  {
-   "x": 5,
-   "y": 12
-  },
-  {
-   "x": 3,
-   "y": 11
-  },
-  {
-   "x": 4,
-   "y": 11
-  },
-  {
-   "x": 2,
-   "y": 11
-  },
-  {
-   "x": 5,
-   "y": 11
-  },
-  {
-   "x": 1,
-   "y": 12
-  },
-  {
-   "x": 6,
-   "y": 12
-  }
- ],
- "FORM_COLS": [
-  3,
-  4,
-  2,
-  5,
-  1,
-  6
- ],
- "CLAB": [
-  "N",
-  "E",
-  "S",
-  "W"
- ],
- "CARR": [
-  "▲",
-  "▶",
-  "▼",
-  "◀"
- ],
- "ENEMY_TURN_PACE": 0.6,
- "AI_PROFILES": {
-  "warrior": {
-   "style": "aggressive",
-   "targetPriority": "low_hp",
-   "advanceBonus": 10,
-   "retreatThreshold": 0.2,
-   "skillUseProbability": 0.7
-  },
-  "assassin": {
-   "style": "aggressive",
-   "targetPriority": "low_hp",
-   "advanceBonus": 15,
-   "retreatThreshold": 0.25,
-   "skillUseProbability": 0.8
-  },
-  "brawler": {
-   "style": "aggressive",
-   "targetPriority": "random_weak",
-   "advanceBonus": 12,
-   "retreatThreshold": 0.15,
-   "skillUseProbability": 0.6
-  },
-  "mage": {
-   "style": "aggressive",
-   "targetPriority": "cluster",
-   "advanceBonus": 5,
-   "retreatThreshold": 0.4,
-   "skillUseProbability": 0.75,
-   "keepDistance": true
-  },
-  "sapper": {
-   "style": "aggressive",
-   "targetPriority": "nearest",
-   "advanceBonus": 8,
-   "retreatThreshold": 0.3,
-   "skillUseProbability": 0.9,
-   "trapPlacement": true
-  },
-  "knight": {
-   "style": "defensive",
-   "targetPriority": "nearest_threat",
-   "advanceBonus": -5,
-   "retreatThreshold": 0.1,
-   "skillUseProbability": 0.5,
-   "guardMode": true
-  },
-  "lancer": {
-   "style": "defensive",
-   "targetPriority": "nearest_threat",
-   "advanceBonus": -3,
-   "retreatThreshold": 0.15,
-   "skillUseProbability": 0.65,
-   "guardMode": true
-  },
-  "priest": {
-   "style": "support",
-   "targetPriority": "never",
-   "advanceBonus": -10,
-   "retreatThreshold": 0.5,
-   "skillUseProbability": 0,
-   "keepDistance": true,
-   "avoidCombat": true
-  },
-  "shaman": {
-   "style": "support",
-   "targetPriority": "random",
-   "advanceBonus": -8,
-   "retreatThreshold": 0.45,
-   "skillUseProbability": 0,
-   "keepDistance": true,
-   "avoidCombat": true
-  },
-  "novice": {
-   "style": "balanced",
-   "targetPriority": "nearest",
-   "advanceBonus": 0,
-   "retreatThreshold": 0.3,
-   "skillUseProbability": 0.4
-  },
-  "archer": {
-   "style": "balanced",
-   "targetPriority": "low_hp",
-   "advanceBonus": 2,
-   "retreatThreshold": 0.35,
-   "skillUseProbability": 0.5,
-   "keepDistance": true
-  },
-  "summoner": {
-   "style": "balanced",
-   "targetPriority": "random",
-   "advanceBonus": 0,
-   "retreatThreshold": 0.4,
-   "skillUseProbability": 0,
-   "keepDistance": true
-  }
- },
- "AI_MISTAKE_CHANCE": 0.3,
- "GUARD_CLASSES": [
-  "knight"
- ],
- "COVER_IGNORE_CLASSES": [
-  "assassin"
- ],
- "PROJECTILE_CLASSES": [
-  "archer",
-  "mage",
-  "commander",
-  "priest",
-  "summoner",
-  "shaman",
-  "summon_spirit"
- ],
- "VAULT_CLASSES": [
-  "archer",
-  "assassin"
- ],
- "VAULT_DIST": 2,
- "TACTIC": {
-  "back": 0.3,
-  "side": 0.15,
-  "pincer": 0.2,
-  "high": 0.15,
-  "highRange": 1,
-  "forestEvade": 0.15,
-  "cap": 0.4,
-  "shallowVuln": 0.2,
-  "lavaBurn": 0.06
- },
- "TACTICS_ACT": {
-  "shoveCollide": 0.5,
-  "shoveUnit": 0.3,
-  "defendDef": 1.5,
-  "overwatchMul": 0.8,
-  "interceptMul": 0.5
- },
- "KNOCK_RESIST": {
-  "knight": 0.7
- },
- "SUPPORT": {
-  "chance": 0.4,
-  "mul": 0.5
- },
- "RES_LABEL": {
-  "mana": "MP",
-  "energy": "EP",
-  "fury": "FP"
- },
- "RES_COLOR": {
-  "mana": "#4488ff",
-  "energy": "#f0c040",
-  "fury": "#ff6644"
- }
+  "KNOCK_RESIST": {"knight": 0.7},
+  "SUPPORT": {"chance": 0.4, "mul": 0.5},
+  "RES_LABEL": {"mana": "MP", "energy": "EP", "fury": "FP"},
+  "RES_COLOR": {"mana": "#4488ff", "energy": "#f0c040", "fury": "#ff6644"}
 }

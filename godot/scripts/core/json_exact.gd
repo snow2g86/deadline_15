@@ -6,7 +6,9 @@ extends RefCounted
 ##  웹(JS)이 쓴 JSON 과 비트 단위로 같은 값을 주고받는다. Store·DataDB·시험·전투 저장이 모두 이것을 쓴다.
 ##
 ##  parse(text)        → Variant (실패하면 null) — 숫자는 float (Godot JSON 과 같은 모델), 정확히 반올림
-##  parse_ex(text)     → [ok: bool, value, 오류 메시지]
+##  parse_ex(text)     → [ok: bool, value, 오류 메시지, 글에 적힌 사전 키 수]
+##  (2026-10-18) 같은 사전에 같은 키가 두 번 있으면 Godot JSON 은 앞 값을 조용히 버림 → parse_ex 는 키 수를 함께 돌려주고,
+##   count_keys(value) 보다 많으면 중복이 있다는 뜻 (dup_key(text) 로 어느 키인지). DataDB·data_tool 이 이것으로 오류를 냄
 ##  stringify(v, indent = "", sort_keys = false) → String
 ##  parse_number(s)    → float (JSON 숫자 문자열 하나)
 
@@ -22,8 +24,8 @@ static func _init_static() -> void:
 	if _re != null:
 		return
 	_re = RegEx.new()
-	# 문자열 토큰(건너뜀) 또는 숫자 토큰
-	_re.compile("\"(?:[^\"\\\\]|\\\\.)*\"|-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?")
+	# 문자열 토큰(건너뜀 — 뒤에 ':' 가 오면 사전 키로 셈) 또는 숫자 토큰
+	_re.compile("\"(?:[^\"\\\\]|\\\\.)*\"(\\s*:)?|-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?")
 
 
 # ═══════════ 읽기 ═══════════
@@ -39,9 +41,12 @@ static func parse_ex(text: String) -> Array:
 	var parts := PackedStringArray()
 	var last := 0
 	var changed := false
+	var nkeys := 0
 	for m: RegExMatch in _re.search_all(text):
 		var tok := m.get_string()
 		if tok.unicode_at(0) == 34:   # '"'
+			if m.get_string(1) != "":
+				nkeys += 1
 			continue
 		if not _needs_exact(tok):
 			continue
@@ -55,11 +60,11 @@ static func parse_ex(text: String) -> Array:
 		src = "".join(parts)
 	var json := JSON.new()
 	if json.parse(src) != OK:
-		return [false, null, "%d행: %s" % [json.get_error_line(), json.get_error_message()]]
+		return [false, null, "%d행: %s" % [json.get_error_line(), json.get_error_message()], nkeys]
 	var v: Variant = json.data
 	if changed:
 		v = _restore(v)
-	return [true, v, ""]
+	return [true, v, "", nkeys]
 
 
 static func _needs_exact(tok: String) -> bool:
@@ -91,6 +96,50 @@ static func _restore(v: Variant) -> Variant:
 					d[k] = _restore(d[k])
 			return d
 	return v
+
+
+## 읽은 값 안의 사전 키 수 (parse_ex 의 4번째 값과 같으면 중복 키 없음)
+static func count_keys(v: Variant) -> int:
+	if v is Dictionary:
+		var n := (v as Dictionary).size()
+		for x: Variant in (v as Dictionary).values():
+			if x is Dictionary or x is Array:
+				n += count_keys(x)
+		return n
+	if v is Array:
+		var n2 := 0
+		for x2: Variant in v:
+			if x2 is Dictionary or x2 is Array:
+				n2 += count_keys(x2)
+		return n2
+	return 0
+
+
+## 첫 중복 키 → "N행: 키 \"이름\"" (없으면 "") — 느린 길, 중복이 있다고 알았을 때만
+static func dup_key(text: String) -> String:
+	var re := RegEx.create_from_string("\"(?:[^\"\\\\]|\\\\.)*\"|[{}\\[\\],]")
+	var stack: Array = []   # [사전이면 키 집합 · 배열이면 null, 키를 기다리는지]
+	for m: RegExMatch in re.search_all(text):
+		var tok := m.get_string()
+		match tok:
+			"{":
+				stack.append([{}, true])
+			"[":
+				stack.append([null, false])
+			"}", "]":
+				if not stack.is_empty():
+					stack.pop_back()
+			",":
+				if not stack.is_empty() and stack[-1][0] != null:
+					stack[-1][1] = true
+			_:
+				if not stack.is_empty() and stack[-1][0] != null and stack[-1][1]:
+					stack[-1][1] = false
+					var keys: Dictionary = stack[-1][0]
+					if keys.has(tok):
+						return "%d행: 키 %s" % [text.substr(0, m.get_start()).count("\n") + 1, tok]
+					keys[tok] = true
+	return ""
 
 
 ## 10진 숫자 문자열 → 가장 가까운 double (num_parse.gd)

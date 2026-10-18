@@ -1,7 +1,7 @@
 extends SceneTree
 ## 4a 시험 — 바깥 화면(로비 · 스테이지 선택 · 편성 · 설정 · 스토리)과 흐름
 ##   Godot --headless --path godot --script res://tests/check_outer_4a.gd   [-- --only rules,flow,lang,sizes,party,lobby,settings]
-##  1) rules   : 해금·별·요일 던전·출격 판단·파티 저장·저장값 점검을 웹 코드의 정답(tests/fixtures/outer_4a_web.json — node tools/outer-4a-expect.js)과 비교
+##  1) rules   : 해금·별·요일 던전·출격 판단·파티 저장·저장값 점검을 웹 코드의 정답(tests/fixtures/outer_4a_web.json — 웹 코드로 만든 고정 기준, 보관: tools/legacy-web/outer-4a-expect.js · 기준 데이터 tests/baseline/data)과 비교
 ##  2) party   : 편성 저장·불러오기 (칸 배치·옮기기·빼기·활성 파티·죽은 클랜원·지휘관 빼기·필터·정렬)
 ##  3) lobby   : 첫 실행 클랜원·지휘관 설정·자동 부활·성별 보정·아지트
 ##  4) settings: 설정 저장 키 (바깥 설정 = 전투 설정 창), 언어는 고를 때만 저장
@@ -12,6 +12,7 @@ extends SceneTree
 ##  7) sizes   : 창 크기 1280×720 · 1920×1080 · 1024×600 · 800×1000(좁은 창) · 480×900(휴대폰 폭) — 주요 단추가 화면 안 · 넘침 0
 ##  Godot 오류(Logger 로 셈) 0 이어야 통과. 저장은 user://test_outer_4a_save.json (진짜 세이브는 건드리지 않음)
 
+const BaselineData := preload("res://tests/baseline_data.gd")
 const JsonX := preload("res://scripts/core/json_exact.gd")
 const JsonNorm := preload("res://scripts/core/json_norm.gd")
 const FontsT := preload("res://scripts/core/fonts.gd")
@@ -88,6 +89,7 @@ func _main() -> void:
 	var oi := args.find("--only")
 	if oi >= 0 and oi + 1 < args.size():
 		_only = Array(args[oi + 1].split(","))
+	BaselineData.apply(self)   # 웹 정답 = 기준 데이터로 (tests/baseline_data.gd, -- --live 면 지금 데이터)
 	store = root.get_node("Store")
 	i18n = root.get_node("I18n")
 	router = root.get_node("Router")

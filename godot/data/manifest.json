@@ -1,1287 +1,360 @@
 {
- "format": 1,
- "generator": "tools/export-godot-data.js",
- "note": "자동 생성 파일 — 직접 고치지 말고 웹 data/*.js 를 고친 뒤 다시 변환",
- "sources": {
-  "jab": [
-   {
-    "file": "data/jab.js",
-    "sha1": "cf0e9754a1bd5251deb8839b0563ddf018648012"
-   }
-  ],
-  "constants": [
-   {
-    "file": "js/common/constants.js",
-    "sha1": "37dde737ce9431d18572042fb524010c9276e5b3"
-   }
-  ],
-  "daily": [
-   {
-    "file": "js/common/daily.js",
-    "sha1": "909e36ff8fe118e2469d3334607e4ab296cd325f"
-   }
-  ],
-  "stages": [
-   {
-    "file": "data/stages.js",
-    "sha1": "e8457d9498276c688fd5dda8587808869b199b29"
-   },
-   {
-    "file": "js/logic/stages.js",
-    "sha1": "3d68fce4bd6d5bb848932eb5e352bf655fdcf334"
-   }
-  ],
-  "synergy": [
-   {
-    "file": "data/synergy.js",
-    "sha1": "02fbdc4d70142dd7dba243de363278888c142cd9"
-   },
-   {
-    "file": "js/logic/synergy.js",
-    "sha1": "541f7eaf28dcb294d951d1537bafac07e9fb4311"
-   }
-  ],
-  "hazards": [
-   {
-    "file": "data/hazards.js",
-    "sha1": "578011e1d0f74ed02cfd359ea2638d4c648fca51"
-   },
-   {
-    "file": "js/logic/hazards.js",
-    "sha1": "0ebd9a75fd683bbd1f6d30063229e5173c1ad800"
-   }
-  ],
-  "tiles": [
-   {
-    "file": "data/tiles.js",
-    "sha1": "cbf082a4d1dc11f38a5c8e59bc8413118f93f51b"
-   },
-   {
-    "file": "js/logic/tiles.js",
-    "sha1": "ffeba9c17f7c853be2755d2dfc326794b1c6aafe"
-   }
-  ],
-  "props": [
-   {
-    "file": "data/props.js",
-    "sha1": "31c92c7d39be5c500249620ff676bb2f184db57e"
-   }
-  ],
-  "equip": [
-   {
-    "file": "data/equip.js",
-    "sha1": "7f5dd66aedd627c97606dce68c9ed6760d973d1d"
-   },
-   {
-    "file": "js/logic/equip.js",
-    "sha1": "b11532bf3933e942286ed5e1e58d49f5004a7639"
-   }
-  ],
-  "gear": [
-   {
-    "file": "data/gear.js",
-    "sha1": "63fc11de8519a7547297e82ddcec2549012b1449"
-   },
-   {
-    "file": "js/logic/gear.js",
-    "sha1": "f155c911b1358dd4cca83ecc7c6fecb274b3559a"
-   }
-  ],
-  "skills": [
-   {
-    "file": "js/skills.js",
-    "sha1": "7e78be4291a891db6c273bd0976be92c9e055ed6"
-   },
-   {
-    "file": "js/skills/_common.js",
-    "sha1": "014160a1cd6b68f6a36dadb876dd00b2c4afbb27"
-   }
-  ],
-  "battle_constants": [
-   {
-    "file": "js/battle/constants.js",
-    "sha1": "f00853b3d46c7ee887bb52a78606956195f7e54c"
-   }
-  ],
-  "soul": [
-   {
-    "file": "js/common/soul.js",
-    "sha1": "49c062021faacdf04f9ae229978b1836e8e6e7b9"
-   }
-  ],
-  "icons": [
-   {
-    "file": "js/common/item-icons.js",
-    "sha1": "4a4f520da622fe29acfb17cf015fc99a4b9543cd"
-   },
-   {
-    "file": "js/common/emoji-icons.js",
-    "sha1": "05f42603538096618d215cce473c6a7b58b46860"
-   }
-  ],
-  "sprites": [
-   {
-    "file": "js/sprites.js",
-    "sha1": "89c4ac549739900af9076632005c3a83f2f45a6a"
-   },
-   {
-    "file": "js/battle/rig.js",
-    "sha1": "f803ea60a3198efe6fdb8d337233a175bee6f82e"
-   },
-   {
-    "file": "js/battle/motion.js",
-    "sha1": "0744dccd834ca664e3cf3682480b5ff783411566"
-   }
-  ],
-  "ui": [
-   {
-    "file": "js/common/nav.js",
-    "sha1": "d29c0a4b92d787704f82c4a1e9221f9c63efd462"
-   }
+  "format": 2,
+  "generator": "godot/tools/data_tool.gd",
+  "note": "자동 생성 — 직접 고치지 말 것. 원본은 이 폴더의 *.json (고친 뒤 data_tool --write 로 모양 맞춤 + 이 파일 다시 만듦, README '데이터 원본')",
+  "sources": {
+    "jab": [{"file": "jab.json", "sha1": "a025eee12321f439cb9c71bf28e8cb3416d8b734"}],
+    "constants": [{"file": "constants.json", "sha1": "0f7f5d6330c8baf843cd61bc84acf8a7e9d377a0"}],
+    "daily": [{"file": "daily.json", "sha1": "be8a636daca2c01ef0ad5cdb98c2b911187398b4"}],
+    "stages": [{"file": "stages.json", "sha1": "76fc3a7b49a17cd6e36f1f73a77f787d0415b0ab"}],
+    "synergy": [{"file": "synergy.json", "sha1": "7a77cc09ee720f5deb38df89a2f8aecd4784239a"}],
+    "hazards": [{"file": "hazards.json", "sha1": "dfeb7b9b71578a798d89149f21cbb5b894b1f411"}],
+    "tiles": [{"file": "tiles.json", "sha1": "0fa27ade208ee74c0ac76c153fb3e80900381680"}],
+    "props": [{"file": "props.json", "sha1": "033964bbd1fc0f8c0a9b058b8e0f0858d6cad7ef"}],
+    "equip": [{"file": "equip.json", "sha1": "502e3d2c26511373d21a01b9daae38761b6be6f8"}],
+    "gear": [{"file": "gear.json", "sha1": "3866752734ac7afe70ac29756bd8040018a247fc"}],
+    "skills": [{"file": "skills.json", "sha1": "cdc30b273619bd5bb9c7a3942e76f22680c83469"}],
+    "battle_constants": [
+      {"file": "battle_constants.json", "sha1": "415d5b4bcd97c8b2c98f26386dbfeb8104a28ad0"}
+    ],
+    "soul": [{"file": "soul.json", "sha1": "024645fc659fbcc0c76a14f1ce05b8d8219a8ba8"}],
+    "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
+    "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
+    "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}]
+  },
+  "modules": {
+    "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
+    "constants": {
+      "file": "constants.json",
+      "globals": {
+        "SAVE_KEY": {"type": "string", "count": null},
+        "ROSTER_KEY": {"type": "string", "count": null},
+        "PARTY_KEY": {"type": "string", "count": null},
+        "PARTIES_KEY": {"type": "string", "count": null},
+        "NAV_KEY": {"type": "string", "count": null},
+        "INVENTORY_KEY": {"type": "string", "count": null},
+        "SHOP_KEY": {"type": "string", "count": null},
+        "MIN_P": {"type": "number", "count": null},
+        "MAX_P": {"type": "number", "count": null},
+        "MAX_LEVEL": {"type": "number", "count": null},
+        "GRADE_LV_CAP": {"type": "object", "count": 4},
+        "MAX_SKILL_LV": {"type": "number", "count": null},
+        "ECON": {"type": "object", "count": 11},
+        "LEVEL_EXP": {"type": "array", "count": 3},
+        "KILL_EXP": {"type": "array", "count": 2},
+        "SOUL": {"type": "object", "count": 4},
+        "GRADE_ORDER": {"type": "array", "count": 4},
+        "GRADE_COLORS": {"type": "object", "count": 4},
+        "COMMANDER_CLS": {"type": "string", "count": null},
+        "COMMANDER_DEFAULT_NAME": {"type": "string", "count": null},
+        "ROLE_MAP": {"type": "object", "count": 13},
+        "CLASS_GROUP_MAP": {"type": "object", "count": 13},
+        "CLASS_GROUPS": {"type": "object", "count": 4}
+      }
+    },
+    "daily": {
+      "file": "daily.json",
+      "globals": {
+        "DAILY_KEY": {"type": "string", "count": null},
+        "DAILY": {"type": "object", "count": 5}
+      }
+    },
+    "stages": {
+      "file": "stages.json",
+      "globals": {
+        "EPISODES": {"type": "array", "count": 10},
+        "STAGES": {"type": "array", "count": 100},
+        "ENEMY_SM_BASE": {"type": "number", "count": null},
+        "ENEMY_SM_GROWTH": {"type": "number", "count": null},
+        "ENEMY_LV_PER_STAGE": {"type": "number", "count": null},
+        "ENEMY_BOSS_LV": {"type": "number", "count": null},
+        "ENEMY_SKILL_EVERY": {"type": "number", "count": null},
+        "ENEMY_HP_EXP": {"type": "number", "count": null},
+        "ENEMY_ATK_EXP": {"type": "number", "count": null},
+        "ENEMY_HP_GROWTH_MUL": {"type": "number", "count": null},
+        "ENEMY_DEF_GROWTH_MUL": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_MAX": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_BOSS": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_BASE": {"type": "number", "count": null},
+        "STAGE_TOT_CAP_PER": {"type": "number", "count": null},
+        "STAGE_COMP_HP": {"type": "number", "count": null},
+        "STAGE_COMP_ATK": {"type": "number", "count": null},
+        "STAGE_MAX_WAVES": {"type": "number", "count": null},
+        "MAX_ENEMIES_ON_FIELD": {"type": "number", "count": null}
+      }
+    },
+    "synergy": {
+      "file": "synergy.json",
+      "globals": {
+        "SYNERGY_MONO": {"type": "object", "count": 12},
+        "SYNERGY_LEGION": {"type": "object", "count": 4},
+        "SYNERGY_TRIO": {"type": "object", "count": 12},
+        "SYNERGY_ROLE": {"type": "array", "count": 5}
+      }
+    },
+    "hazards": {
+      "file": "hazards.json",
+      "globals": {
+        "HAZARDS": {"type": "object", "count": 8},
+        "SAFE_ZONE": {"type": "object", "count": 5},
+        "ENCHANTS": {"type": "object", "count": 12},
+        "ENCHANT_FIELD": {"type": "object", "count": 2},
+        "ENCHANT_FEE": {"type": "number", "count": null},
+        "RUNE_GACHA_COST": {"type": "number", "count": null},
+        "RUNE_DROP_CHANCE": {"type": "number", "count": null},
+        "CHEST": {"type": "object", "count": 4}
+      }
+    },
+    "tiles": {
+      "file": "tiles.json",
+      "globals": {
+        "TI": {"type": "object", "count": 8},
+        "MAP_THEMES": {"type": "object", "count": 10}
+      }
+    },
+    "props": {
+      "file": "props.json",
+      "globals": {
+        "PROP_ART": {"type": "object", "count": 5},
+        "TILE_PROPS": {"type": "object", "count": 2},
+        "PROP_THEME_FILTER": {"type": "object", "count": 6}
+      }
+    },
+    "equip": {
+      "file": "equip.json",
+      "globals": {
+        "EQUIP_SLOTS": {"type": "array", "count": 8},
+        "EQUIP_SLOT_ICONS": {"type": "object", "count": 8},
+        "GACHA_COST_1": {"type": "number", "count": null},
+        "GACHA_COST_10": {"type": "number", "count": null},
+        "GACHA_MULTI_COUNT": {"type": "number", "count": null},
+        "RARITY": {"type": "object", "count": 5},
+        "GACHA_RATE": {"type": "object", "count": 5},
+        "GACHA_PITY_MAX": {"type": "number", "count": null},
+        "RARITY_MULT": {"type": "object", "count": 5},
+        "SELL_PRICE": {"type": "object", "count": 5},
+        "RARITY_ORDER": {"type": "array", "count": 5},
+        "ARMOR_TYPE": {"type": "object", "count": 4},
+        "CLASS_ARMOR": {"type": "object", "count": 12},
+        "ALL_CLASSES": {"type": "array", "count": 12},
+        "EQUIP_DB": {"type": "array", "count": 36},
+        "LEGACY_WEAPON": {"type": "object", "count": 9},
+        "EQUIP_SETS": {"type": "object", "count": 3},
+        "ENHANCE_MAX_LV": {"type": "number", "count": null},
+        "ENHANCE_RATES": {"type": "array", "count": 10},
+        "ENHANCE_SAFE_BELOW": {"type": "number", "count": null},
+        "ENHANCE_BREAK_CHANCE": {"type": "number", "count": null},
+        "ENHANCE_FAIL_BONUS": {"type": "number", "count": null},
+        "ENHANCE_FAIL_BONUS_MAX": {"type": "number", "count": null},
+        "ENHANCE_GOLD": {"type": "object", "count": 5},
+        "ENHANCE_STONES": {"type": "array", "count": 10},
+        "REPAIR_GOLD": {"type": "object", "count": 5},
+        "ENHANCE_STAT_PCT": {"type": "array", "count": 11},
+        "DISMANTLE_STONES": {"type": "object", "count": 5},
+        "EQUIP_EMOJI": {"type": "object", "count": 36},
+        "SIEGE_ITEMS": {"type": "array", "count": 3},
+        "BATTLE_POTIONS": {"type": "object", "count": 6},
+        "INV_KEY": {"type": "string", "count": null},
+        "PITY_KEY": {"type": "string", "count": null},
+        "MATS_KEY": {"type": "string", "count": null}
+      }
+    },
+    "gear": {
+      "file": "gear.json",
+      "globals": {
+        "GEAR_FX": {"type": "object", "count": 45},
+        "SUB_RANGE": {"type": "object", "count": 8},
+        "SUB_POOL": {"type": "object", "count": 4},
+        "SUB_ARMOR_EXTRA": {"type": "object", "count": 4},
+        "SUB_COUNT": {"type": "object", "count": 5},
+        "CLASS_OPTS": {"type": "object", "count": 12},
+        "UNIQUE_POOL": {"type": "array", "count": 12},
+        "LEGENDS": {"type": "object", "count": 19},
+        "LEGEND_SHARD_COST": {"type": "number", "count": null},
+        "CLASS_SETS": {"type": "object", "count": 12},
+        "SET_SLOTS": {"type": "array", "count": 3},
+        "RESONANCE_MUL": {"type": "number", "count": null},
+        "ENHANCE_OPT": {"type": "array", "count": 4},
+        "GEAR_DROP": {"type": "object", "count": 5},
+        "MATS_PRICE": {"type": "object", "count": 2}
+      }
+    },
+    "skills": {
+      "file": "skills.json",
+      "globals": {
+        "SKILLS": {"type": "object", "count": 13},
+        "LEARNABLE_SKILLS": {"type": "object", "count": 40},
+        "SKILL_SPRITE": {"type": "object", "count": 51},
+        "FURY_PASSIVES": {"type": "object", "count": 3}
+      }
+    },
+    "battle_constants": {
+      "file": "battle_constants.json",
+      "globals": {
+        "COLS": {"type": "number", "count": null},
+        "ROWS": {"type": "number", "count": null},
+        "TW": {"type": "number", "count": null},
+        "TH": {"type": "number", "count": null},
+        "MID_C": {"type": "number", "count": null},
+        "ZH": {"type": "number", "count": null},
+        "UI": {"type": "number", "count": null},
+        "UW": {"type": "number", "count": null},
+        "UH": {"type": "number", "count": null},
+        "UCX": {"type": "number", "count": null},
+        "UCY": {"type": "number", "count": null},
+        "UOY": {"type": "number", "count": null},
+        "DEPLOY": {"type": "array", "count": 10},
+        "FORM_COLS": {"type": "array", "count": 6},
+        "CLAB": {"type": "array", "count": 4},
+        "CARR": {"type": "array", "count": 4},
+        "ENEMY_TURN_PACE": {"type": "number", "count": null},
+        "AI_PROFILES": {"type": "object", "count": 12},
+        "AI_MISTAKE_CHANCE": {"type": "number", "count": null},
+        "GUARD_CLASSES": {"type": "array", "count": 1},
+        "COVER_IGNORE_CLASSES": {"type": "array", "count": 1},
+        "PROJECTILE_CLASSES": {"type": "array", "count": 7},
+        "VAULT_CLASSES": {"type": "array", "count": 2},
+        "VAULT_DIST": {"type": "number", "count": null},
+        "TACTIC": {"type": "object", "count": 9},
+        "TACTICS_ACT": {"type": "object", "count": 5},
+        "KNOCK_RESIST": {"type": "object", "count": 1},
+        "SUPPORT": {"type": "object", "count": 2},
+        "RES_LABEL": {"type": "object", "count": 3},
+        "RES_COLOR": {"type": "object", "count": 3}
+      }
+    },
+    "soul": {"file": "soul.json", "globals": {"SOUL_KEY": {"type": "string", "count": null}}},
+    "icons": {
+      "file": "icons.json",
+      "globals": {
+        "ITEM_SPRITE_COLS": {"type": "number", "count": null},
+        "ITEM_SPRITE_ROWS": {"type": "number", "count": null},
+        "ITEM_SPRITE": {"type": "object", "count": 198},
+        "EMOJI_ICON": {"type": "object", "count": 158},
+        "ICON_RARITY": {"type": "object", "count": 39}
+      }
+    },
+    "sprites": {
+      "file": "sprites.json",
+      "globals": {
+        "CHAR_SPRITES": {"type": "object", "count": 28},
+        "CUTOUT_RIGS": {"type": "object", "count": 24},
+        "CHAR_FIG": {"type": "object", "count": 26},
+        "FIG_H": {"type": "number", "count": null},
+        "FIG_FOOT": {"type": "number", "count": null},
+        "SPRITE_SHEETS": {"type": "object", "count": 50},
+        "ATK_MOTIONS": {"type": "object", "count": 13}
+      }
+    },
+    "ui": {"file": "ui.json", "globals": {"NAV_TABS": {"type": "array", "count": 5}}}
+  },
+  "lang": {
+    "langs": {
+      "ko": {
+        "file": "lang/ko.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "2c342fe972ccf5e7f503f926667620466b279702"
+      },
+      "en": {
+        "file": "lang/en.json",
+        "type": "object",
+        "count": 52,
+        "leaves": 2424,
+        "sha1": "77a17b22747518111f6371ec321426803bf0bb2f"
+      },
+      "es": {
+        "file": "lang/es.json",
+        "type": "object",
+        "count": 52,
+        "leaves": 2424,
+        "sha1": "c1764cfe1a6608de56c173f96126ee14ba677e68"
+      },
+      "ja": {
+        "file": "lang/ja.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "d0455767aeca1874bc584561ac29012c757a2d67"
+      },
+      "zh-CN": {
+        "file": "lang/zh-CN.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "de9be11ed608263fc1d335f05f33da0faba63880"
+      },
+      "zh-TW": {
+        "file": "lang/zh-TW.json",
+        "type": "object",
+        "count": 51,
+        "leaves": 2417,
+        "sha1": "46c359be09c679b0ce33622f1f94c3bba619889e"
+      }
+    }
+  },
+  "story": {
+    "ko": {
+      "file": "story/ko.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "d270c91a9956cace1613e049483a6e2c696d4512"
+    },
+    "en": {
+      "file": "story/en.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "b18e6ddaaf145ed3a5f438f5d9f85a5564bec569"
+    },
+    "es": {
+      "file": "story/es.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "d828e0cd4efa74f0497d2188bfe932c69cff259d"
+    },
+    "ja": {
+      "file": "story/ja.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "a170db666211cc0863a2931f0575479cd60dc423"
+    },
+    "zh-CN": {
+      "file": "story/zh-CN.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "3416bb4f79f1481b1367a38955beba94832d5ee0"
+    },
+    "zh-TW": {
+      "file": "story/zh-TW.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 10,
+      "leaves": 2424,
+      "sha1": "9de4f1a1cc86e055d4d5435c376783fad096802b"
+    },
+    "sample": {
+      "file": "story/sample.json",
+      "type": "object",
+      "count": 3,
+      "episodes": 1,
+      "leaves": 47,
+      "sha1": "80bc18198852778966622663a8f42848c1ee006b"
+    }
+  },
+  "special_values": [
+    {"module": "tiles.json", "path": ["TI", "rock", "cost"], "value": "Infinity"},
+    {"module": "tiles.json", "path": ["TI", "water", "cost"], "value": "Infinity"},
+    {"module": "tiles.json", "path": ["TI", "wall", "cost"], "value": "Infinity"}
   ]
- },
- "modules": {
-  "jab": {
-   "file": "jab.json",
-   "globals": {
-    "JAB": {
-     "type": "object",
-     "count": 15
-    }
-   }
-  },
-  "constants": {
-   "file": "constants.json",
-   "globals": {
-    "SAVE_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "ROSTER_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "PARTY_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "PARTIES_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "NAV_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "INVENTORY_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "SHOP_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "MIN_P": {
-     "type": "number",
-     "count": null
-    },
-    "MAX_P": {
-     "type": "number",
-     "count": null
-    },
-    "MAX_LEVEL": {
-     "type": "number",
-     "count": null
-    },
-    "GRADE_LV_CAP": {
-     "type": "object",
-     "count": 4
-    },
-    "MAX_SKILL_LV": {
-     "type": "number",
-     "count": null
-    },
-    "ECON": {
-     "type": "object",
-     "count": 11
-    },
-    "LEVEL_EXP": {
-     "type": "array",
-     "count": 3
-    },
-    "KILL_EXP": {
-     "type": "array",
-     "count": 2
-    },
-    "SOUL": {
-     "type": "object",
-     "count": 4
-    },
-    "GRADE_ORDER": {
-     "type": "array",
-     "count": 4
-    },
-    "GRADE_COLORS": {
-     "type": "object",
-     "count": 4
-    },
-    "COMMANDER_CLS": {
-     "type": "string",
-     "count": null
-    },
-    "COMMANDER_DEFAULT_NAME": {
-     "type": "string",
-     "count": null
-    },
-    "ROLE_MAP": {
-     "type": "object",
-     "count": 13
-    },
-    "CLASS_GROUP_MAP": {
-     "type": "object",
-     "count": 13
-    },
-    "CLASS_GROUPS": {
-     "type": "object",
-     "count": 4
-    }
-   }
-  },
-  "daily": {
-   "file": "daily.json",
-   "globals": {
-    "DAILY_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "DAILY": {
-     "type": "object",
-     "count": 5
-    }
-   }
-  },
-  "stages": {
-   "file": "stages.json",
-   "globals": {
-    "EPISODES": {
-     "type": "array",
-     "count": 10
-    },
-    "STAGES": {
-     "type": "array",
-     "count": 100
-    },
-    "ENEMY_SM_BASE": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_SM_GROWTH": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_LV_PER_STAGE": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_BOSS_LV": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_SKILL_EVERY": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_HP_EXP": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_ATK_EXP": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_HP_GROWTH_MUL": {
-     "type": "number",
-     "count": null
-    },
-    "ENEMY_DEF_GROWTH_MUL": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_TOT_CAP_MAX": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_TOT_CAP_BOSS": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_TOT_CAP_BASE": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_TOT_CAP_PER": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_COMP_HP": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_COMP_ATK": {
-     "type": "number",
-     "count": null
-    },
-    "STAGE_MAX_WAVES": {
-     "type": "number",
-     "count": null
-    },
-    "MAX_ENEMIES_ON_FIELD": {
-     "type": "number",
-     "count": null
-    }
-   }
-  },
-  "synergy": {
-   "file": "synergy.json",
-   "globals": {
-    "SYNERGY_MONO": {
-     "type": "object",
-     "count": 12
-    },
-    "SYNERGY_LEGION": {
-     "type": "object",
-     "count": 4
-    },
-    "SYNERGY_TRIO": {
-     "type": "object",
-     "count": 12
-    },
-    "SYNERGY_ROLE": {
-     "type": "array",
-     "count": 5
-    }
-   }
-  },
-  "hazards": {
-   "file": "hazards.json",
-   "globals": {
-    "HAZARDS": {
-     "type": "object",
-     "count": 8
-    },
-    "SAFE_ZONE": {
-     "type": "object",
-     "count": 5
-    },
-    "ENCHANTS": {
-     "type": "object",
-     "count": 12
-    },
-    "ENCHANT_FIELD": {
-     "type": "object",
-     "count": 2
-    },
-    "ENCHANT_FEE": {
-     "type": "number",
-     "count": null
-    },
-    "RUNE_GACHA_COST": {
-     "type": "number",
-     "count": null
-    },
-    "RUNE_DROP_CHANCE": {
-     "type": "number",
-     "count": null
-    },
-    "CHEST": {
-     "type": "object",
-     "count": 4
-    }
-   }
-  },
-  "tiles": {
-   "file": "tiles.json",
-   "globals": {
-    "TI": {
-     "type": "object",
-     "count": 8
-    },
-    "MAP_THEMES": {
-     "type": "object",
-     "count": 10
-    }
-   }
-  },
-  "props": {
-   "file": "props.json",
-   "globals": {
-    "PROP_ART": {
-     "type": "object",
-     "count": 5
-    },
-    "TILE_PROPS": {
-     "type": "object",
-     "count": 2
-    },
-    "PROP_THEME_FILTER": {
-     "type": "object",
-     "count": 6
-    }
-   }
-  },
-  "equip": {
-   "file": "equip.json",
-   "globals": {
-    "EQUIP_SLOTS": {
-     "type": "array",
-     "count": 8
-    },
-    "EQUIP_SLOT_ICONS": {
-     "type": "object",
-     "count": 8
-    },
-    "GACHA_COST_1": {
-     "type": "number",
-     "count": null
-    },
-    "GACHA_COST_10": {
-     "type": "number",
-     "count": null
-    },
-    "GACHA_MULTI_COUNT": {
-     "type": "number",
-     "count": null
-    },
-    "RARITY": {
-     "type": "object",
-     "count": 5
-    },
-    "GACHA_RATE": {
-     "type": "object",
-     "count": 5
-    },
-    "GACHA_PITY_MAX": {
-     "type": "number",
-     "count": null
-    },
-    "RARITY_MULT": {
-     "type": "object",
-     "count": 5
-    },
-    "SELL_PRICE": {
-     "type": "object",
-     "count": 5
-    },
-    "RARITY_ORDER": {
-     "type": "array",
-     "count": 5
-    },
-    "ARMOR_TYPE": {
-     "type": "object",
-     "count": 4
-    },
-    "CLASS_ARMOR": {
-     "type": "object",
-     "count": 12
-    },
-    "ALL_CLASSES": {
-     "type": "array",
-     "count": 12
-    },
-    "EQUIP_DB": {
-     "type": "array",
-     "count": 36
-    },
-    "LEGACY_WEAPON": {
-     "type": "object",
-     "count": 9
-    },
-    "EQUIP_SETS": {
-     "type": "object",
-     "count": 3
-    },
-    "ENHANCE_MAX_LV": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_RATES": {
-     "type": "array",
-     "count": 10
-    },
-    "ENHANCE_SAFE_BELOW": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_BREAK_CHANCE": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_FAIL_BONUS": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_FAIL_BONUS_MAX": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_GOLD": {
-     "type": "object",
-     "count": 5
-    },
-    "ENHANCE_STONES": {
-     "type": "array",
-     "count": 10
-    },
-    "REPAIR_GOLD": {
-     "type": "object",
-     "count": 5
-    },
-    "ENHANCE_STAT_PCT": {
-     "type": "array",
-     "count": 11
-    },
-    "DISMANTLE_STONES": {
-     "type": "object",
-     "count": 5
-    },
-    "EQUIP_EMOJI": {
-     "type": "object",
-     "count": 36
-    },
-    "SIEGE_ITEMS": {
-     "type": "array",
-     "count": 3
-    },
-    "BATTLE_POTIONS": {
-     "type": "object",
-     "count": 6
-    },
-    "INV_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "PITY_KEY": {
-     "type": "string",
-     "count": null
-    },
-    "MATS_KEY": {
-     "type": "string",
-     "count": null
-    }
-   }
-  },
-  "gear": {
-   "file": "gear.json",
-   "globals": {
-    "GEAR_FX": {
-     "type": "object",
-     "count": 45
-    },
-    "SUB_RANGE": {
-     "type": "object",
-     "count": 8
-    },
-    "SUB_POOL": {
-     "type": "object",
-     "count": 4
-    },
-    "SUB_ARMOR_EXTRA": {
-     "type": "object",
-     "count": 4
-    },
-    "SUB_COUNT": {
-     "type": "object",
-     "count": 5
-    },
-    "CLASS_OPTS": {
-     "type": "object",
-     "count": 12
-    },
-    "UNIQUE_POOL": {
-     "type": "array",
-     "count": 12
-    },
-    "LEGENDS": {
-     "type": "object",
-     "count": 19
-    },
-    "LEGEND_SHARD_COST": {
-     "type": "number",
-     "count": null
-    },
-    "CLASS_SETS": {
-     "type": "object",
-     "count": 12
-    },
-    "SET_SLOTS": {
-     "type": "array",
-     "count": 3
-    },
-    "RESONANCE_MUL": {
-     "type": "number",
-     "count": null
-    },
-    "ENHANCE_OPT": {
-     "type": "array",
-     "count": 4
-    },
-    "GEAR_DROP": {
-     "type": "object",
-     "count": 5
-    },
-    "MATS_PRICE": {
-     "type": "object",
-     "count": 2
-    }
-   }
-  },
-  "skills": {
-   "file": "skills.json",
-   "globals": {
-    "SKILLS": {
-     "type": "object",
-     "count": 13
-    },
-    "LEARNABLE_SKILLS": {
-     "type": "object",
-     "count": 40
-    },
-    "SKILL_SPRITE": {
-     "type": "object",
-     "count": 51
-    },
-    "FURY_PASSIVES": {
-     "type": "object",
-     "count": 3
-    }
-   }
-  },
-  "battle_constants": {
-   "file": "battle_constants.json",
-   "globals": {
-    "COLS": {
-     "type": "number",
-     "count": null
-    },
-    "ROWS": {
-     "type": "number",
-     "count": null
-    },
-    "TW": {
-     "type": "number",
-     "count": null
-    },
-    "TH": {
-     "type": "number",
-     "count": null
-    },
-    "MID_C": {
-     "type": "number",
-     "count": null
-    },
-    "ZH": {
-     "type": "number",
-     "count": null
-    },
-    "UI": {
-     "type": "number",
-     "count": null
-    },
-    "UW": {
-     "type": "number",
-     "count": null
-    },
-    "UH": {
-     "type": "number",
-     "count": null
-    },
-    "UCX": {
-     "type": "number",
-     "count": null
-    },
-    "UCY": {
-     "type": "number",
-     "count": null
-    },
-    "UOY": {
-     "type": "number",
-     "count": null
-    },
-    "DEPLOY": {
-     "type": "array",
-     "count": 10
-    },
-    "FORM_COLS": {
-     "type": "array",
-     "count": 6
-    },
-    "CLAB": {
-     "type": "array",
-     "count": 4
-    },
-    "CARR": {
-     "type": "array",
-     "count": 4
-    },
-    "ENEMY_TURN_PACE": {
-     "type": "number",
-     "count": null
-    },
-    "AI_PROFILES": {
-     "type": "object",
-     "count": 12
-    },
-    "AI_MISTAKE_CHANCE": {
-     "type": "number",
-     "count": null
-    },
-    "GUARD_CLASSES": {
-     "type": "array",
-     "count": 1
-    },
-    "COVER_IGNORE_CLASSES": {
-     "type": "array",
-     "count": 1
-    },
-    "PROJECTILE_CLASSES": {
-     "type": "array",
-     "count": 7
-    },
-    "VAULT_CLASSES": {
-     "type": "array",
-     "count": 2
-    },
-    "VAULT_DIST": {
-     "type": "number",
-     "count": null
-    },
-    "TACTIC": {
-     "type": "object",
-     "count": 9
-    },
-    "TACTICS_ACT": {
-     "type": "object",
-     "count": 5
-    },
-    "KNOCK_RESIST": {
-     "type": "object",
-     "count": 1
-    },
-    "SUPPORT": {
-     "type": "object",
-     "count": 2
-    },
-    "RES_LABEL": {
-     "type": "object",
-     "count": 3
-    },
-    "RES_COLOR": {
-     "type": "object",
-     "count": 3
-    }
-   }
-  },
-  "soul": {
-   "file": "soul.json",
-   "globals": {
-    "SOUL_KEY": {
-     "type": "string",
-     "count": null
-    }
-   }
-  },
-  "icons": {
-   "file": "icons.json",
-   "globals": {
-    "ITEM_SPRITE_COLS": {
-     "type": "number",
-     "count": null
-    },
-    "ITEM_SPRITE_ROWS": {
-     "type": "number",
-     "count": null
-    },
-    "ITEM_SPRITE": {
-     "type": "object",
-     "count": 198
-    },
-    "EMOJI_ICON": {
-     "type": "object",
-     "count": 158
-    },
-    "ICON_RARITY": {
-     "type": "object",
-     "count": 39
-    }
-   }
-  },
-  "sprites": {
-   "file": "sprites.json",
-   "globals": {
-    "CHAR_SPRITES": {
-     "type": "object",
-     "count": 28
-    },
-    "CUTOUT_RIGS": {
-     "type": "object",
-     "count": 24
-    },
-    "CHAR_FIG": {
-     "type": "object",
-     "count": 26
-    },
-    "FIG_H": {
-     "type": "number",
-     "count": null
-    },
-    "FIG_FOOT": {
-     "type": "number",
-     "count": null
-    },
-    "SPRITE_SHEETS": {
-     "type": "object",
-     "count": 50
-    },
-    "ATK_MOTIONS": {
-     "type": "object",
-     "count": 13
-    }
-   }
-  },
-  "ui": {
-   "file": "ui.json",
-   "globals": {
-    "NAV_TABS": {
-     "type": "array",
-     "count": 5
-    }
-   }
-  }
- },
- "lang": {
-  "parts": [
-   "common",
-   "battle",
-   "stages",
-   "classes",
-   "skills",
-   "items",
-   "ui",
-   "character",
-   "gear",
-   "codex"
-  ],
-  "langs": {
-   "ko": {
-    "file": "lang/ko.json",
-    "type": "object",
-    "count": 50,
-    "leaves": 2326,
-    "sources": [
-     {
-      "file": "data/language/ko/common.js",
-      "sha1": "b0715e289cdb608929731d225ba0acf41534056d"
-     },
-     {
-      "file": "data/language/ko/battle.js",
-      "sha1": "6bdc1dee0f2a1c9c85920c87c53290c2e52ec9ef"
-     },
-     {
-      "file": "data/language/ko/stages.js",
-      "sha1": "c5f7777ffda03c75d385b6c93db354f4d6f6db6f"
-     },
-     {
-      "file": "data/language/ko/classes.js",
-      "sha1": "d836b1911448e7bf524ca3aa3d5d2dadd1915375"
-     },
-     {
-      "file": "data/language/ko/skills.js",
-      "sha1": "61e9ce474ef79644644d7cf7820138fb8acec55f"
-     },
-     {
-      "file": "data/language/ko/items.js",
-      "sha1": "9812fa52520afe54576ab25e10c6694812d356aa"
-     },
-     {
-      "file": "data/language/ko/ui.js",
-      "sha1": "cf38d3e884b5448a787fef1bc8a0f995fb11ed5a"
-     },
-     {
-      "file": "data/language/ko/character.js",
-      "sha1": "933f99a8670acba9c0a6bb1c5097f14a40faa7ca"
-     },
-     {
-      "file": "data/language/ko/gear.js",
-      "sha1": "cd67701d2d69aed2c72b150d47c2bcb5702ce774"
-     },
-     {
-      "file": "data/language/ko/codex.js",
-      "sha1": "c00363bfae2944ec0a708d0216ef71bdc79d1654"
-     }
-    ]
-   },
-   "en": {
-    "file": "lang/en.json",
-    "type": "object",
-    "count": 51,
-    "leaves": 2333,
-    "sources": [
-     {
-      "file": "data/language/en/common.js",
-      "sha1": "8bf60c9d6e23a6efbab7ce6c4b7c1ad52672f709"
-     },
-     {
-      "file": "data/language/en/battle.js",
-      "sha1": "cca4db8afbfe5e72553dac96e7d8de35189d949c"
-     },
-     {
-      "file": "data/language/en/stages.js",
-      "sha1": "e07c81b9dd787603db1ee584b25e74613d18233c"
-     },
-     {
-      "file": "data/language/en/classes.js",
-      "sha1": "13f687d306f1ed3ff77cbdbc79b0ce777e6a716e"
-     },
-     {
-      "file": "data/language/en/skills.js",
-      "sha1": "8c712c44d80f72e5df9d37079cdb3ad806e9f6c4"
-     },
-     {
-      "file": "data/language/en/items.js",
-      "sha1": "e4275e12b4f047b27ee9c032d17d014139d77138"
-     },
-     {
-      "file": "data/language/en/ui.js",
-      "sha1": "6dafaf2bcc4110b0c3594957891545d5c749ebdb"
-     },
-     {
-      "file": "data/language/en/character.js",
-      "sha1": "1f912adf15e36004a98a81cb5c8213001e2d9906"
-     },
-     {
-      "file": "data/language/en/gear.js",
-      "sha1": "7a2e8c68603b0d856ab72b2c66086b532a8d8580"
-     },
-     {
-      "file": "data/language/en/codex.js",
-      "sha1": "5609af1242694cab648e368e1a2bebfda45da5f6"
-     }
-    ]
-   },
-   "es": {
-    "file": "lang/es.json",
-    "type": "object",
-    "count": 51,
-    "leaves": 2333,
-    "sources": [
-     {
-      "file": "data/language/es/common.js",
-      "sha1": "4203fdc51a973a722180e9d66bdb9c933a76b981"
-     },
-     {
-      "file": "data/language/es/battle.js",
-      "sha1": "570080f0cc860b137c50adf2373c7a20f8c1d80a"
-     },
-     {
-      "file": "data/language/es/stages.js",
-      "sha1": "bc26d89e3489b98180089a3a41d8665df576eae8"
-     },
-     {
-      "file": "data/language/es/classes.js",
-      "sha1": "84c1696c03a42dbadc3760883807c806e2bc252f"
-     },
-     {
-      "file": "data/language/es/skills.js",
-      "sha1": "319ba45dfcd6dc6d754d8969c368b00738e37272"
-     },
-     {
-      "file": "data/language/es/items.js",
-      "sha1": "592d4f666e97b286e31977772acfa3d40c594da0"
-     },
-     {
-      "file": "data/language/es/ui.js",
-      "sha1": "00a163c7c4eede7a67b047a8530773b386951576"
-     },
-     {
-      "file": "data/language/es/character.js",
-      "sha1": "14c7052370685cdd751d0efdb4e1290d8a95f7e4"
-     },
-     {
-      "file": "data/language/es/gear.js",
-      "sha1": "970c9ecff4c288afc966aa23eaf141b9a0ad82ad"
-     },
-     {
-      "file": "data/language/es/codex.js",
-      "sha1": "8ddb4c46cf4ca9a11418830f85473b4a57824017"
-     }
-    ]
-   },
-   "ja": {
-    "file": "lang/ja.json",
-    "type": "object",
-    "count": 50,
-    "leaves": 2326,
-    "sources": [
-     {
-      "file": "data/language/ja/common.js",
-      "sha1": "04fbf144e12891af6a8e5e1ab47715764c4fc2f7"
-     },
-     {
-      "file": "data/language/ja/battle.js",
-      "sha1": "ed315cac2d2b7ff3e5a8de085efcea5ccea33748"
-     },
-     {
-      "file": "data/language/ja/stages.js",
-      "sha1": "1ed43c476d720d34005bbce79a0d1e334920f0df"
-     },
-     {
-      "file": "data/language/ja/classes.js",
-      "sha1": "2d5421bcd814e8e9ac9e932cbb9fb1ec37484f4d"
-     },
-     {
-      "file": "data/language/ja/skills.js",
-      "sha1": "bb06ba666597035507441fce324db808b04a7c7b"
-     },
-     {
-      "file": "data/language/ja/items.js",
-      "sha1": "2e3519d3ab501d506f215b9a8d1ca78c38cc0d21"
-     },
-     {
-      "file": "data/language/ja/ui.js",
-      "sha1": "194d5df92cdd1586e746aa5cc1e30d94de0f885e"
-     },
-     {
-      "file": "data/language/ja/character.js",
-      "sha1": "9057b5afa84298aff1b0f29b94007691eb844549"
-     },
-     {
-      "file": "data/language/ja/gear.js",
-      "sha1": "8697dd4011be2cd464008ebe32ecad3667d1f796"
-     },
-     {
-      "file": "data/language/ja/codex.js",
-      "sha1": "47a449270a34c5c6eadce3e6bdb03c0031ce1ae3"
-     }
-    ]
-   },
-   "zh-CN": {
-    "file": "lang/zh-CN.json",
-    "type": "object",
-    "count": 50,
-    "leaves": 2326,
-    "sources": [
-     {
-      "file": "data/language/zh-CN/common.js",
-      "sha1": "5d5a0f542ed336cc2c3eae3fd02dafd8aae3570f"
-     },
-     {
-      "file": "data/language/zh-CN/battle.js",
-      "sha1": "7ee41ac1e109d742dba9e7280a5fefcc299c2383"
-     },
-     {
-      "file": "data/language/zh-CN/stages.js",
-      "sha1": "1258a5a04aac22819e4f469cb96419e467edd655"
-     },
-     {
-      "file": "data/language/zh-CN/classes.js",
-      "sha1": "b305ed90008899db57322f0f879012176cacea9f"
-     },
-     {
-      "file": "data/language/zh-CN/skills.js",
-      "sha1": "a6e79a246b129ded47ec9e5a3fd90d4595a4452a"
-     },
-     {
-      "file": "data/language/zh-CN/items.js",
-      "sha1": "527e43a3a3f332f3d750e71a07c3063a6401f62d"
-     },
-     {
-      "file": "data/language/zh-CN/ui.js",
-      "sha1": "ca0e96d371859de727104561c00761c7fa7eb8f9"
-     },
-     {
-      "file": "data/language/zh-CN/character.js",
-      "sha1": "dc88d7fdfb490790f967edc31c176546d53d8d16"
-     },
-     {
-      "file": "data/language/zh-CN/gear.js",
-      "sha1": "55c636b17b4760c386a9f2c2d2a62daecfbbf404"
-     },
-     {
-      "file": "data/language/zh-CN/codex.js",
-      "sha1": "e0912c20fd5df89b9858cbb4b7f06d9ad1eeb45d"
-     }
-    ]
-   },
-   "zh-TW": {
-    "file": "lang/zh-TW.json",
-    "type": "object",
-    "count": 50,
-    "leaves": 2326,
-    "sources": [
-     {
-      "file": "data/language/zh-TW/common.js",
-      "sha1": "468b4cb88e0f1576c3e1f70565e057748a9faed1"
-     },
-     {
-      "file": "data/language/zh-TW/battle.js",
-      "sha1": "6aa2736c874d3f3981a02bae95dd3554308287ca"
-     },
-     {
-      "file": "data/language/zh-TW/stages.js",
-      "sha1": "4d253b18748b10b067405ee2033136967c6f67d1"
-     },
-     {
-      "file": "data/language/zh-TW/classes.js",
-      "sha1": "e7e131959a96fcb2ac47071628f6bbf87d366a41"
-     },
-     {
-      "file": "data/language/zh-TW/skills.js",
-      "sha1": "133f1a5b2ea85653636fc1e618313cb735f84e6d"
-     },
-     {
-      "file": "data/language/zh-TW/items.js",
-      "sha1": "18efa085692116353f65c027cc07f68996740b44"
-     },
-     {
-      "file": "data/language/zh-TW/ui.js",
-      "sha1": "a2ffee8275faa820ea7e686defc3e0e9d40c8619"
-     },
-     {
-      "file": "data/language/zh-TW/character.js",
-      "sha1": "8111eb6bf219f7d30a9b48227617705cbd23cd7a"
-     },
-     {
-      "file": "data/language/zh-TW/gear.js",
-      "sha1": "88d23d1f0f8376a4105c79bee7bbe514ec3b425a"
-     },
-     {
-      "file": "data/language/zh-TW/codex.js",
-      "sha1": "456e3e3f3b1bec5f91681579eb95dac6ba01772c"
-     }
-    ]
-   }
-  }
- },
- "story": {
-  "ko": {
-   "file": "story/ko.json",
-   "global": "STORY_KO",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "5868f918664a87a0a32eef0defb5307019b911d9"
-  },
-  "en": {
-   "file": "story/en.json",
-   "global": "STORY_EN",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "38abf9928bdfa4f317c83e975f485f4e9bc96bb2"
-  },
-  "es": {
-   "file": "story/es.json",
-   "global": "STORY_ES",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "8816b06cdfdd669f4aa149beab1f4089bbbae2e1"
-  },
-  "ja": {
-   "file": "story/ja.json",
-   "global": "STORY_JA",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "291676a4d83ff703bfa7ff562d7683eae900fdc1"
-  },
-  "zh-CN": {
-   "file": "story/zh-CN.json",
-   "global": "STORY_ZH-CN",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "381c9ab59614369c79d5a64dc4568f403d66bc44"
-  },
-  "zh-TW": {
-   "file": "story/zh-TW.json",
-   "global": "STORY_ZH-TW",
-   "type": "object",
-   "count": 3,
-   "episodes": 10,
-   "leaves": 2600,
-   "sha1": "6f0e2be63688de69e873ce1ec4cc834ebbca0f31"
-  },
-  "sample": {
-   "file": "story/sample.json",
-   "global": "STORY_KO",
-   "type": "object",
-   "count": 3,
-   "episodes": 1,
-   "leaves": 49,
-   "sha1": "6235677cc66aa5f155ffcfe8fc3125876cac5332"
-  }
- },
- "special_values": [
-  {
-   "module": "tiles.json",
-   "path": [
-    "TI",
-    "rock",
-    "cost"
-   ],
-   "value": "Infinity"
-  },
-  {
-   "module": "tiles.json",
-   "path": [
-    "TI",
-    "water",
-    "cost"
-   ],
-   "value": "Infinity"
-  },
-  {
-   "module": "tiles.json",
-   "path": [
-    "TI",
-    "wall",
-    "cost"
-   ],
-   "value": "Infinity"
-  }
- ],
- "skipped_logic": [
-  "daily.Daily",
-  "synergy.Synergy",
-  "hazards.Rune",
-  "hazards.Hazard",
-  "hazards.EnchantFX",
-  "hazards.Chest",
-  "equip.Mats",
-  "gear.Gear",
-  "gear.GearFX",
-  "icons.EmojiIcons"
- ],
- "warnings": [
-  "synergy.json: SYNERGY_ROLE[0].test 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "synergy.json: SYNERGY_ROLE[1].test 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "synergy.json: SYNERGY_ROLE[2].test 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "synergy.json: SYNERGY_ROLE[3].test 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "synergy.json: SYNERGY_ROLE[4].test 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "skills.json: FURY_PASSIVES.warrior.trigger 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "skills.json: FURY_PASSIVES.knight.trigger 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)",
-  "skills.json: FURY_PASSIVES.lancer.trigger 는 함수라 JSON 에서 뺐음 (GDScript 로 다시 구현 필요)"
- ],
- "notes": [
-  "sprites: 적재용 빈 흉내 전역 VFX (내보내지 않음)",
-  "equip: _eidCounter 는 '_' 로 시작하는 내부 상태라 제외",
-  "soul: pick 에 없어 내보내지 않은 전역 — Soul",
-  "sprites: pick 에 없어 내보내지 않은 전역 — _MS, _BASE_SHADOW, _RIG_PRESETS, _RIG_EASE, Rig"
- ]
 }
