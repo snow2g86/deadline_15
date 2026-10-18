@@ -2532,7 +2532,19 @@
       "leave": "Salir",
       "leave_tip": "Guarda la batalla y vuelve al vestíbulo — continúa con 'Reanudar batalla'",
       "leave_confirm": "Se guardará la batalla y volverás al vestíbulo.\nUsa 'Reanudar batalla' para continuar desde este turno.",
-      "leave_pending": "Se guardará y saldrá al terminar la animación"
+      "leave_pending": "Se guardará y saldrá al terminar la animación",
+      "display": "Pantalla",
+      "window_mode": "Modo de pantalla",
+      "windowed": "Ventana",
+      "fullscreen": "Pantalla completa",
+      "fullscreen_tip": "Cambiar a pantalla completa: Alt+Enter (macOS: Cmd+Ctrl+F)",
+      "window_size": "Tamaño de ventana",
+      "window_size_tip": "Disponible en modo ventana. También puedes arrastrar el borde.",
+      "bg_audio": "Sonido en segundo plano",
+      "bg_audio_tip": "Mantén, baja o silencia el sonido cuando la ventana pierde el foco",
+      "bg_play": "Igual",
+      "bg_lower": "Bajar",
+      "bg_mute": "Silenciar"
     },
     "result": {"retry": "Reintentar"},
     "resume": {

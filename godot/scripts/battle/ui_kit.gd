@@ -312,3 +312,8 @@ class VecIcon extends Control:
 				draw_line(P.call(14, 11), P.call(14, 17), col, w, true)
 			"play":
 				draw_colored_polygon(PackedVector2Array([P.call(6, 4), P.call(20, 12), P.call(6, 20)]), col)
+			# (5단계) 화면 설정 — 같은 선 그림 모양의 모니터 (rect 2 3 20 14 · 받침)
+			"monitor":
+				draw_polyline(PackedVector2Array([P.call(2, 3), P.call(22, 3), P.call(22, 17), P.call(2, 17), P.call(2, 3)]), col, w, true)
+				draw_line(P.call(8, 21), P.call(16, 21), col, w, true)
+				draw_line(P.call(12, 17), P.call(12, 21), col, w, true)

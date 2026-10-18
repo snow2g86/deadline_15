@@ -2488,7 +2488,19 @@
       "leave": "나가기",
       "leave_tip": "전투를 저장하고 로비로 — 로비의 '전투 재개'로 이어 합니다",
       "leave_confirm": "전투를 저장하고 로비로 나갑니다.\n로비의 '전투 재개'로 이 차례부터 이어 할 수 있습니다.",
-      "leave_pending": "연출이 끝나면 저장하고 나갑니다"
+      "leave_pending": "연출이 끝나면 저장하고 나갑니다",
+      "display": "화면",
+      "window_mode": "화면 모드",
+      "windowed": "창 모드",
+      "fullscreen": "전체 화면",
+      "fullscreen_tip": "전체 화면 전환: Alt+Enter (macOS: Cmd+Ctrl+F)",
+      "window_size": "창 크기",
+      "window_size_tip": "창 모드에서 바꿀 수 있습니다. 창 가장자리를 끌어도 됩니다",
+      "bg_audio": "창이 뒤에 있을 때 소리",
+      "bg_audio_tip": "게임 창이 초점을 잃었을 때 소리를 그대로 두거나 줄이거나 끕니다",
+      "bg_play": "그대로",
+      "bg_lower": "줄이기",
+      "bg_mute": "끄기"
     },
     "result": {"retry": "다시 도전"},
     "resume": {

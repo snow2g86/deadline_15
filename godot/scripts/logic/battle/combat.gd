@@ -286,6 +286,7 @@ func apply_dmg_to_ally(tgt: Dictionary, dmg: float) -> Dictionary:
 		actual["_tenacityUsed"] = true
 		actual["_tenacityDef"] = true
 	if actual != tgt and actual["hp"] <= 0:
+		E.sfx("death")   # 웹 _common.js applyDmg: ctx.sfxDeath()
 		E.gu.rm_dead()
 		E.fx_redraw_units()   # Fx.later(() => ctx.rUnits(), 500) — 연출을 끄면 즉시
 	return actual

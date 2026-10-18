@@ -2529,7 +2529,19 @@
       "leave": "Leave",
       "leave_tip": "Save the battle and return to the lobby — continue with 'Resume Battle' in the lobby",
       "leave_confirm": "Save the battle and return to the lobby.\nUse 'Resume Battle' in the lobby to continue from this turn.",
-      "leave_pending": "Will save and leave after the animation"
+      "leave_pending": "Will save and leave after the animation",
+      "display": "Display",
+      "window_mode": "Display Mode",
+      "windowed": "Windowed",
+      "fullscreen": "Fullscreen",
+      "fullscreen_tip": "Toggle fullscreen: Alt+Enter (macOS: Cmd+Ctrl+F)",
+      "window_size": "Window Size",
+      "window_size_tip": "Available in windowed mode. You can also drag the window edge.",
+      "bg_audio": "Sound in background",
+      "bg_audio_tip": "Keep, lower or mute the sound when the game window loses focus",
+      "bg_play": "Keep",
+      "bg_lower": "Lower",
+      "bg_mute": "Mute"
     },
     "result": {"retry": "Retry"},
     "resume": {

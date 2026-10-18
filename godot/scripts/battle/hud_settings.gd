@@ -1,6 +1,6 @@
 extends Control
-## 설정 — 웹 #settings-btn · #settings-panel (render.js toggleSettings·syncSettingsUI·surrender): 배경음·효과음(켜기·음량 — 소리는 5단계,
-##  지금은 값만 저장), 게임 속도(1x·2x·4x), 움직임 줄이기, 언어(바로 바뀜), 닫기, 항복(확인 창)
+## 설정 — 웹 #settings-btn · #settings-panel (render.js toggleSettings·syncSettingsUI·surrender): 배경음·효과음(켜기·음량 — 저장하면 Sound 오토로드가
+##  Store 변경을 받아 버스에 바로 반영), 게임 속도(1x·2x·4x), 움직임 줄이기, 언어(바로 바뀜), 닫기, 항복(확인 창)
 ##  값은 Store game_settings 에 웹과 같은 키(bgmOn·bgmVol·sfxOn·sfxVol·language)로, Godot 전용은 playSpeed·reduceMotion
 ##  읽기·쓰기 규칙은 바깥 설정 화면과 같은 scripts/logic/settings_rules.gd
 

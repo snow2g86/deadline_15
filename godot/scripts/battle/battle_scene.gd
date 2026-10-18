@@ -104,6 +104,14 @@ var _rc: Object = null   # ResumeRules 용 ctx (진짜 Store)
 var _save_in: Dictionary = {}
 var _inv_eids0: Dictionary = {}
 var _db: Node
+## (5단계) 소리 — Sound 오토로드 (없으면 소리 없이). 아군 차례가 시작되면 메뉴가 뜰 때 'select' (웹 selU)
+var sound: Node
+var _select_sfx := false
+var _end_sfx := false
+## 창 닫기 때 저장한 횟수 (시험용)
+var close_saves := 0
+## 시험용 (cfg.log_events): 엔진이 낸 사건 [종류, 이름, 자료, 그때 actCount] — tests/check_pc5.gd 가 소리 규칙을 맞춰 봄
+var ev_log: Array = []
 
 ## 화면 상태
 var units: Dictionary = {}    # id → UnitView
@@ -161,6 +169,7 @@ func _svc(n: String) -> Node:
 func _ready() -> void:
 	i18n = _svc("I18n")
 	store = _svc("Store")
+	sound = _svc("Sound")
 	var db: Node = _svc("DataDB")
 	if db == null:
 		push_error("battle_scene: DataDB 오토로드가 없습니다")
@@ -227,6 +236,9 @@ func _ready() -> void:
 	_eng_status = eng.run()
 	if i18n != null and i18n.has_signal("language_changed"):
 		i18n.connect("language_changed", _on_language)
+	# (5단계) 배경음: 이어하기는 웹 resumeBattle 처럼 바로, 새 전투는 로딩이 끝난 뒤 (_after_loading — 웹 _showLoading().then(bgmStart))
+	if resumed:
+		_bgm_start()
 	_start_loading()
 
 
@@ -505,6 +517,8 @@ func _loading_tick(delta: float) -> void:
 
 
 func _after_loading() -> void:
+	if not resumed:
+		_bgm_start()
 	var st: Variant = eng.S["cStage"]
 	if speed > 0.0 and st != null:
 		var title: Array = info.stage_title(st)
@@ -615,12 +629,16 @@ func _on_bus(name: String, data: Dictionary) -> void:
 		return
 	if name == "unit_attacked":
 		data["_tactic"] = _tactic_of(data)
+	if bool(cfg.get("log_events", false)):
+		ev_log.append(["bus", name, data, int(eng.S.get("actCount", 0))])
 	_evq.append(["bus", name, data, _snap_engine() if SNAP_BUS.has(name) else null])
 
 
 func _on_fx(kind: String, data: Dictionary) -> void:
 	if not _listening:
 		return
+	if bool(cfg.get("log_events", false)):
+		ev_log.append(["fx", kind, data, int(eng.S.get("actCount", 0))])
 	_evq.append(["fx", kind, data, _snap_engine() if SNAP_FX.has(kind) else null])
 
 
@@ -706,6 +724,7 @@ func _play(item: Array) -> float:
 	var sn: Variant = item[3]
 	if kind == "fx":
 		return _play_fx(name, d, sn)
+	_play_sound(name, d, sn)
 	match name:
 		"turn_start":
 			_apply_snap(sn)
@@ -822,6 +841,13 @@ func _play(item: Array) -> float:
 
 func _play_fx(kind: String, d: Dictionary, sn: Variant) -> float:
 	match kind:
+		"sfx":
+			# (5단계) 규칙 코드 안의 웹 Audio 호출 자리 (스킬의 G.sfxAtk/sfxKill/sfxDeath/sfxHeal/sfxMove/sfxUIClick/sfxExplosion)
+			if str(d["n"]) == "atk":
+				_sfx_atk(str(d.get("cls", "")))
+			else:
+				_sfx(str(d["n"]))
+			return 0.0
 		"face":
 			var uv: UnitView = units.get(int(d["id"]))
 			if uv != null:
@@ -855,6 +881,7 @@ func _play_fx(kind: String, d: Dictionary, sn: Variant) -> float:
 			return 0.0
 		"chest_open":
 			_apply_snap(sn)
+			_sfx("heal")   # 웹 VFX unit_moved: 상자 열림 글자와 함께 Audio.sfxHeal
 			fx.float_text(int(d["x"]), int(d["y"]), "🎁 " + _t("chest." + str(d.get("kind", ""))), "heal")
 			fx.burst(iso.foot(int(d["x"]), int(d["y"])) + Vector2(0, -24), {"count": 14, "colors": ["#fde68a", "#facc15", "#ffffff"], "shape": "star", "speed": 2.5, "spread": 10, "decay": 0.03, "size": 3})
 			return 0.25
@@ -957,6 +984,8 @@ func _ev_attacked(d: Dictionary) -> float:
 		_schedule(hit_in, func() -> void: pfx.shoot(cls, ap.x + dir.x * 18.0, ap.y + dir.y * 18.0 - up, tp.x - dir.x * 8.0, tp.y - dir.y * 8.0, fl * 1000.0))
 	var land := hit_in + fl
 	_hit_at[tid] = _clock + land
+	if not splash and not Js.truthy(d.get("_sfx_done")):
+		_peek_same_hit(d, land)
 	var dmg := _num(d.get("damage", 0))
 	var tac: Variant = d.get("_tactic")
 	_schedule(land, func() -> void:
@@ -1462,6 +1491,9 @@ func _enter_menu() -> void:
 		map.set_threat(eng.q.threat_cells())
 	mode = "menu"
 	_show_main_menu(u)
+	if _select_sfx:
+		_select_sfx = false
+		_sfx("select")   # 웹 ActionManager.selU 끝의 Fx.sfx('Select')
 	ui.show_hint(fail_hint)   # 방금 명령이 진짜 실패했으면 메뉴로 돌아와도 안내를 남김 (다음 조작 때 지움)
 	_autosave()
 	input_ready.emit(int(u["id"]))
@@ -1866,6 +1898,15 @@ func _send(cmd: Dictionary) -> void:
 	#  (엔진 cmd.ok 는 행동 직후 ha 기준이라, 공격이 회피되면 실제로는 행동했어도 ok=false 가 됨 — 엔진은 그대로 둠)
 	var before := _act_state(u)
 	last_result = eng.command(cmd)
+	if bool(last_result.get("ok", false)):
+		match str(cmd.get("op", "")):
+			"move":
+				_sfx("move")      # 웹 doMv: Fx.sfx('Move')
+			"wait", "defend", "overwatch":
+				_sfx("wait")      # 웹 actWait (방어 태세·경계도 actWait 로 끝남): Fx.sfx('Wait')
+			"undo":
+				_sfx("uiclick")   # 웹 actCancel 이동 되돌리기: Fx.sfx('UIClick')
+				_select_sfx = true   # 웹은 되돌린 뒤 클랜원을 다시 눌러 고름(selU → Select) — Godot 은 메뉴가 바로 다시 뜨므로 그때
 	var after_u: Variant = eng.awaiting_unit()
 	var really_failed: bool = not last_result["ok"] and after_u != null and int(after_u["id"]) == int(u["id"]) and _act_state(after_u) == before
 	_clear_target()
@@ -2010,6 +2051,9 @@ func _finish() -> void:
 	_over = true
 	mode = "over"
 	result = eng.finish(_eng_status)
+	# 항복은 남은 연출(battle_end 포함)을 건너뛰므로 여기서 (웹 render.js surrender → battle_end 알림 → 패배 효과음)
+	if eng.ended:
+		_end_sound(result.get("result") == "win")
 	ui.hide_menu()
 	ui.info.hide_tip()
 	ui.info.hide_popup()
@@ -2218,6 +2262,9 @@ func _go_back() -> void:
 
 
 func _exit_tree() -> void:
+	# (5단계) 장면을 떠나면 배경음을 바로 끊음 (웹의 페이지 이동 — Router 를 거치지 않는 시험·다시 하기 대비)
+	if sound != null and sound.call("bgm_wanted") == "battle":
+		sound.call("stop_bgm", false)
 	# 엔진 내부 순환 참조 정리 (결과·기록은 이미 꺼내 둠)
 	if eng != null:
 		if eng.bus_event.is_connected(_on_bus):
@@ -2346,6 +2393,7 @@ func _on_unit_nav_click(id: int) -> void:
 	tw.tween_property(cam, "position", uv.position + Vector2(0, -20), 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	if mode == "menu" and id == awaiting_unit_id():
 		_show_main_menu(eng.awaiting_unit())
+		_sfx("select")   # 웹 render.js 카드 누르기 → ActionManager.selU
 
 
 func _on_nav_hover(id: int) -> void:
@@ -2492,9 +2540,15 @@ func _click(p: Vector2) -> void:
 				ui_click_cell(c.x, c.y)
 			else:
 				ui_cancel()
+				if _hover_target(p) == "u:%d" % awaiting_unit_id():
+					_sfx("select")   # 웹 action.js:159 대상 고르는 중 자기 클랜원 누르기 → selU
 		_:
 			# 적을 누르면 정보 팝업 (웹 showEnemyPopup)
 			var hk := _hover_target(p)
+			if mode == "menu" and hk == "u:%d" % awaiting_unit_id():
+				_show_main_menu(eng.awaiting_unit())
+				_sfx("select")   # 웹 action.js:148·154 메뉴 상태에서 자기 클랜원 다시 누르기 → selU
+				return
 			if hk.begins_with("u:"):
 				var uv: UnitView = units.get(hk.substr(2).to_int())
 				if uv != null and uv.d.get("team") == "enemy":
@@ -2564,3 +2618,141 @@ func _num(v: Variant) -> String:
 	if typeof(v) == TYPE_INT or typeof(v) == TYPE_FLOAT:
 		return Num.fmt(float(v))
 	return str(v)
+
+
+# ═══════════ 소리 (5단계) ═══════════
+#  웹 js/battle/audio.js 의 구독(Audio._subscribe) + VFX 구독 안의 Audio 호출 + 행동 코드의 Fx.sfx 를 재생 시점에 맞춰 냄.
+#  웹은 사건이 나는 순간 소리를 내므로(타격 연출보다 먼저), 일반 공격에서 같은 순간 웹이 함께 내던 소리(튀김 피해·처치)는
+#  본 공격 소리와 함께 냄 (_peek_same_hit). 그 밖의 소리는 Godot 재생 대기열에서 그 사건을 재생할 때.
+
+func _sfx(n: String) -> void:
+	if sound != null:
+		sound.call("sfx", n)
+
+
+func _sfx_atk(cls: String) -> void:
+	if sound != null:
+		sound.call("sfx_atk", cls)
+
+
+## 전투 끝 (웹 Audio battle_end 구독: 승리·패배 효과음 + bgmStop) — 한 번만
+func _end_sound(win: bool) -> void:
+	if _end_sfx:
+		return
+	_end_sfx = true
+	_sfx("victory" if win else "defeat")
+	if sound != null:
+		sound.call("stop_bgm", true)
+
+
+func _bgm_start() -> void:
+	if sound != null and not _over and speed > 0.0:
+		sound.call("play_bgm", "battle")
+
+
+## bus 사건 재생 때 소리 (웹 Audio._subscribe · VFX 구독)
+func _play_sound(name: String, d: Dictionary, sn: Variant) -> void:
+	if Js.truthy(d.get("_sfx_done")):
+		return
+	match name:
+		"unit_attacked":
+			var a: Dictionary = d["attacker"]
+			_sfx_atk(str(a.get("cls", "")))
+			# 같은 순간의 튀김·처치 소리는 _ev_attacked 가 타격 시점을 안 뒤 (_peek_same_hit)
+		"unit_killed":
+			_sfx("kill")
+		"unit_healed":
+			_sfx("heal")
+		"wave_spawn":
+			# 웹: 첫 배치(initBattle 의 spawnWave)는 Audio.init 전이라 소리 없음
+			if typeof(sn) == TYPE_DICTIONARY and int(sn.get("act", 0)) > 0:
+				_sfx("wave")
+		"battle_end":
+			_end_sound(bool(d.get("win", false)))
+		"skill_used":
+			# 웹 VFX: caster 가 있는 알림(적 AI 의 무장해제·화염구)만 Audio.sfxAtk(caster.cls)
+			if typeof(d.get("caster")) == TYPE_DICTIONARY:
+				_sfx_atk(str(d["caster"].get("cls", "")))
+		"gate_attacked":
+			if typeof(d.get("unit")) == TYPE_DICTIONARY:
+				_sfx_atk(str(d["unit"].get("cls", "")))
+		"gate_destroyed":
+			_sfx("kill")
+		"turn_start":
+			var u: Variant = d.get("unit")
+			if typeof(u) == TYPE_DICTIONARY and u.get("team") == "ally" and str(d.get("phase", "player")) == "player":
+				_select_sfx = true
+
+
+## 공격과 같은 묶음의 튀김 피해·처치 소리 (웹이 그 알림을 내는 시점대로):
+##  - 튀김 피해(마법사)와 그 처치: 본 공격과 같은 순간 (웹 action.js·ai.js 모두 동기로 알림)
+##  - 본 대상 처치: 아군 행동(웹 action.js attack)은 휘두를 때 함께 / 적 AI 공격(ai.js — camera_focus 뒤의 공격)은 맞는 순간 + 0.12초
+##    (`left = hd + 120`) / 경계 사격(ai.js _overwatch — 지금 차례가 아닌 유닛의 공격)은 max(0.55, 맞는 순간 + 0.15)초
+##  - 반격·지원·창벽·범위(isAoE)·전사 강타의 처치: 같은 순간 (웹도 동기)
+##  다음 본 공격·이동·차례 전까지만 봄. 그 밖(지원 공격 뒤의 처치 등)은 대기열에서 그 사건을 재생할 때.
+func _peek_same_hit(d: Dictionary, land: float) -> void:
+	var aid := int(d["attacker"]["id"])
+	var tid := int(d["target"]["id"])
+	var delay := 0.0
+	var plain := not (Js.truthy(d.get("isCounter")) or Js.truthy(d.get("counter")) or Js.truthy(d.get("isSupport"))
+		or Js.truthy(d.get("isSpearwall")) or Js.truthy(d.get("isAoE")))
+	if plain:
+		if aid != cur_id:
+			delay = maxf(0.55, land + 0.15)
+		elif view_phase == "enemy" and _ai_focused(tid):
+			delay = land + 0.12
+	var i := _qi + 1
+	while i < _evq.size():
+		var it: Array = _evq[i]
+		var nm: String = it[1]
+		var dd: Dictionary = it[2]
+		if it[0] == "fx" and (nm == "attack" or nm == "move"):
+			break
+		if it[0] == "bus":
+			if nm == "turn_start" or nm == "turn_end" or nm == "unit_moved" or nm == "battle_end":
+				break
+			if nm == "unit_attacked":
+				if not Js.truthy(dd.get("isSplash")) or int(dd["attacker"]["id"]) != aid:
+					break
+				_sfx_atk(str(dd["attacker"].get("cls", "")))
+				dd["_sfx_done"] = true
+			elif nm == "unit_killed":
+				var k: Variant = dd.get("killer")
+				if typeof(k) == TYPE_DICTIONARY and int(k["id"]) == aid:
+					dd["_sfx_done"] = true
+					if delay > 0.0 and int(dd["target"]["id"]) == tid:
+						_schedule(delay, func() -> void: _sfx("kill"))
+					else:
+						_sfx("kill")
+		i += 1
+
+
+## 적 AI 의 일반 공격인가 (웹 AI 공격 함수는 공격 전에 camera_focus 를 냄 — 전사 강타는 내지 않음)
+func _ai_focused(tid: int) -> bool:
+	var i := _qi - 1
+	while i >= 0:
+		var it: Array = _evq[i]
+		if it[0] == "bus":
+			if it[1] == "turn_start":
+				return false
+			if it[1] == "camera_focus" and typeof(it[2].get("unit")) == TYPE_DICTIONARY and int(it[2]["unit"]["id"]) == tid:
+				return true
+		i -= 1
+	return false
+
+
+## (5단계 PC) 창 닫기: 실제 세이브 전투면 지금 엔진 상태(입력 대기)를 이어하기로 저장하고 바로 디스크에 씀
+##  (입력을 기다릴 때마다 자동 저장하지만, 적 차례 연출 중에 닫으면 그 뒤 진행이 빠지므로 — 엔진은 이미 다음 입력 대기까지 진행해 있음)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_on_close()
+
+
+func save_on_close() -> bool:
+	if eng == null or not _is_store() or _over or _rc == null or eng.ended or not eng.can_save():
+		return false
+	_autosave()
+	close_saves += 1
+	if store != null:
+		store.call("flush")
+	return true

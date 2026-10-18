@@ -1,0 +1,120 @@
+<!doctype html><html><head><meta charset="utf-8"><title>bake</title></head><body>
+<script>
+// 웹판 js/battle/audio.js 를 그대로 불러 Chrome WebAudio 로 굽는 페이지 (DEADLINE 15 5단계)
+var GameStore = { _sett: { sfxOn: true, sfxVol: 0.7, bgmOn: true, bgmVol: 1.0 } };
+var EventBus = { on() {} };
+</script>
+<script src="/audio.js"></script>
+<script>
+const SR = 44100;
+const SFX = ['Select','Move','UIClick','Wait','AtkWarrior','AtkKnight','AtkAssassin','AtkMage','AtkArcher','AtkPriest',
+  'AtkNovice','AtkBrawler','AtkLancer','AtkSapper','AtkSummoner','AtkShaman','Heal','Death','Explosion','Wave','Victory','Defeat','Kill'];
+const log = (s) => fetch('/log', { method: 'POST', body: String(s) });
+const post = (name, buf) => fetch('/save?name=' + encodeURIComponent(name), { method: 'POST', body: buf });
+
+function wav16(f32, sr) {
+  const n = f32.length, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  let clip = 0;
+  for (let i = 0; i < n; i++) {
+    let s = f32[i]; if (s > 1 || s < -1) clip++;
+    s = Math.max(-1, Math.min(1, s));
+    // TPDF 디더 (16비트 양자화 잡음을 고르게)
+    const d = (Math.random() - Math.random()) / 32768;
+    v.setInt16(44 + i * 2, Math.max(-32768, Math.min(32767, Math.round((s + d) * 32767))), true);
+  }
+  return { b, clip };
+}
+const peak = (a) => { let p = 0; for (let i = 0; i < a.length; i++) p = Math.max(p, Math.abs(a[i])); return p; };
+
+// 시간을 속이는 컨텍스트 (bgm 의 미리 예약 루프가 offline 렌더 전체를 한 번에 예약하게)
+function fakeTime(real) {
+  const st = { t: 0 };
+  const p = new Proxy(real, { get(tg, k) {
+    if (k === 'currentTime') return st.t;
+    const v = Reflect.get(tg, k, tg); return typeof v === 'function' ? v.bind(tg) : v; } });
+  return { p, st };
+}
+
+async function bakeSfx() {
+  for (const n of SFX) {
+    const ctx = new OfflineAudioContext(1, SR * 1.4, SR);
+    Audio._actx = ctx; Audio._sfxGainNode = null;
+    Audio['sfx' + n]();
+    const buf = await ctx.startRendering();
+    const d = buf.getChannelData(0);
+    let end = d.length - 1; while (end > 0 && Math.abs(d[end]) < 1e-4) end--;
+    const out = d.slice(0, Math.min(d.length, end + Math.round(SR * 0.01)));
+    const { b, clip } = wav16(out, SR);
+    await post('sfx_' + n.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase() + '.wav', b);
+    await log(`sfx ${n}: ${(out.length / SR).toFixed(3)}s peak ${peak(out).toFixed(4)} clip ${clip}`);
+  }
+}
+
+async function bakeBgm() {
+  const eighth = 60 / 130 / 2, T = 512 * eighth, LEN = 0.05 + 2 * T + 0.3;
+  const real = new OfflineAudioContext(1, Math.ceil(SR * LEN), SR);
+  const f = fakeTime(real);
+  Audio._actx = f.p; Audio._sfxGainNode = null; Audio._bgm = null;
+  f.st.t = 0; Audio.bgmStart();
+  f.st.t = LEN;
+  await new Promise(r => setTimeout(r, 300));
+  clearTimeout(Audio._bgm.timer); Audio._bgm = null;
+  await log('bgm scheduled, rendering ' + LEN.toFixed(2) + 's'); const t0 = performance.now();
+  const buf = await real.startRendering();
+  await log('bgm rendered in ' + ((performance.now() - t0) / 1000).toFixed(1) + 's');
+  const d = buf.getChannelData(0);
+  const s0 = Math.round((0.05 + T) * SR), n = Math.round(T * SR);
+  const loop = d.slice(s0, s0 + n);
+  const { b, clip } = wav16(loop, SR);
+  await post('bgm_battle.wav', b);
+  // 첫 주기(무음에서 시작)도 비교용으로
+  const first = d.slice(0, Math.round((0.05 + T) * SR));
+  await post('bgm_first_cycle.wav', wav16(first, SR).b);
+  // 이음매 확인: 루프 끝 → 처음 (둘째 주기 끝 = 셋째 주기 시작 직전, 첫째 주기 끝과 같은 모양이어야)
+  await log(`bgm: T=${T.toFixed(6)}s samples=${n} peak ${peak(loop).toFixed(4)} clip ${clip}`);
+}
+
+(async () => {
+  try {
+    const mode = new URLSearchParams(location.search).get('mode') || 'bake';
+    if (mode === 'bake') { await bakeSfx(); await bakeBgm(); }
+    else if (mode === 'bgm') { await bakeBgm(); }
+    else if (mode === 'capture') { await captureRealtime(); }
+  } catch (e) { await log('ERR ' + e + ' ' + e.stack); }
+  await fetch('/done', { method: 'POST' });
+})();
+
+// 실시간 캡처: 웹 코드가 실제 AudioContext 에서 자기 타이머로 돌 때의 출력을 녹음 (기본 음량 bgmVol 0.5 · sfxVol 0.7)
+async function captureRealtime() {
+  GameStore._sett.bgmVol = 0.5; GameStore._sett.sfxVol = 0.7;
+  const ctx = new AudioContext({ sampleRate: SR });
+  await ctx.resume();
+  const code = `class R extends AudioWorkletProcessor { process(i){ const c=i[0][0]; if(c) this.port.postMessage(c.slice(0)); return true; } } registerProcessor('rec', R);`;
+  await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([code], { type: 'application/javascript' })));
+  const rec = new AudioWorkletNode(ctx, 'rec', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1, channelCountMode: 'explicit' });
+  const mute = ctx.createGain(); mute.gain.value = 0; rec.connect(mute); mute.connect(ctx.destination);
+  const sum = ctx.createGain(); sum.connect(rec);
+  // 웹 코드의 destination 연결을 녹음 노드로 돌림
+  const oc = AudioNode.prototype.connect;
+  AudioNode.prototype.connect = function (dst, ...a) { return oc.call(this, dst === ctx.destination ? sum : dst, ...a); };
+  const chunks = []; let on = false;
+  rec.port.onmessage = (e) => { if (on) chunks.push(e.data); };
+  Audio._actx = ctx; Audio._sfxGainNode = null; Audio._bgm = null;
+  const take = async (name, secs, fn) => {
+    chunks.length = 0; on = true; fn();
+    await new Promise(r => setTimeout(r, secs * 1000));
+    on = false;
+    const n = chunks.reduce((a, c) => a + c.length, 0), out = new Float32Array(n);
+    let o = 0; for (const c of chunks) { out.set(c, o); o += c.length; }
+    await post(name, wav16(out, SR).b);
+    await log(`capture ${name}: ${(n / SR).toFixed(2)}s peak ${peak(out).toFixed(4)}`);
+  };
+  await take('web_bgm_12s.wav', 12, () => Audio.bgmStart());
+  Audio.bgmStop(); await new Promise(r => setTimeout(r, 900));
+  for (const s of ['AtkMage', 'AtkKnight', 'Victory', 'Heal', 'Kill']) await take('web_sfx_' + s + '.wav', 1.3, () => Audio['sfx' + s]());
+}
+</script></body></html>

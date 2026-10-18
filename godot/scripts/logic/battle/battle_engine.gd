@@ -564,6 +564,12 @@ func fx(kind: String, data: Dictionary = {}) -> void:
 	fx_event.emit(kind, data)
 
 
+## (5단계) 효과음 힌트 — 웹 규칙 코드 안의 Audio 호출(스킬의 G.sfxAtk/sfxKill/sfxDeath/sfxHeal/sfxMove …) 자리.
+##  소리만: fx_event "sfx" {n, cls} — 기록(rec)·순수 조회·규칙과 무관. 화면(battle_scene)이 Sound 로 냄
+func sfx(name: String, cls: String = "") -> void:
+	fx("sfx", {"n": name, "cls": cls})
+
+
 ## Fx.float — 'messages.*' 글자는 규칙 결과를 알려 주므로 기록 (선택 안내 messages.select_* 제외)
 func fx_float(x: int, y: int, text: String) -> void:
 	if _pure > 0:

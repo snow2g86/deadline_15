@@ -67,3 +67,26 @@ static func save_from(store: Object, s: Dictionary) -> void:
 	for k: String in s.keys():
 		d[k] = s[k]
 	store.call("set_json", KEY, d)
+
+
+## (5단계 PC) 창이 뒤에 있을 때 소리 — game_settings.bgAudio: "play"(그대로) · "lower"(줄이기, 기본) · "mute"(끄기). 소리 반영은 Sound 오토로드.
+##  DEFAULTS 에 넣지 않음: 웹 키·4a 키를 다루는 load_settings·save_from 은 그대로 두고, 사용자가 고를 때만 저장 (language 와 같은 방식)
+const BG_AUDIO_MODES := ["play", "lower", "mute"]
+const BG_AUDIO_DEFAULT := "lower"
+
+
+static func bg_audio(store: Object) -> String:
+	if store == null:
+		return BG_AUDIO_DEFAULT
+	var d: Variant = store.call("get_json", KEY, {})
+	var v: Variant = (d as Dictionary).get("bgAudio") if d is Dictionary else null
+	return str(v) if typeof(v) == TYPE_STRING and BG_AUDIO_MODES.has(v) else BG_AUDIO_DEFAULT
+
+
+static func set_bg_audio(store: Object, v: String) -> void:
+	if store == null or not BG_AUDIO_MODES.has(v):
+		return
+	var cur: Variant = store.call("get_json", KEY, {})
+	var d: Dictionary = cur if cur is Dictionary else {}
+	d["bgAudio"] = v
+	store.call("set_json", KEY, d)

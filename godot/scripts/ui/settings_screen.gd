@@ -6,6 +6,8 @@ extends "res://scripts/ui/screen_base.gd"
 ##  언어: 전투 설정 창과 같은 6개 단추(그 언어 이름·글꼴), 바로 바뀜 (웹은 고른 뒤 페이지 새로고침)
 ##  초기화: 확인 → Store 전부 지움 → 시작 화면부터 (웹: index.html 로 — 첫 실행처럼 클랜원·지휘관 설정)
 ##  라이선스·Credits → licenses · credits 화면 (4b-2). 뒤로: 열기 전 화면 (웹은 늘 로비 — 보고서 '갈림길')
+##  (5단계 PC — Platform.is_pc() 일 때만) 창이 뒤에 있을 때 소리(그대로·줄이기·끄기 → game_settings.bgAudio, Sound 가 반영),
+##   화면: 창 모드 / 전체 화면 · 창 크기(창 모드일 때, 모니터에 들어가는 크기만) → Store gd_display (Display 오토로드)
 
 const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
 const Fonts := preload("res://scripts/core/fonts.gd")
@@ -13,6 +15,7 @@ const I18nT := preload("res://scripts/core/i18n.gd")
 
 var s: Dictionary = {}
 var _box: VBoxContainer
+var _disp_box: VBoxContainer
 var _resetting := false
 
 
@@ -38,6 +41,9 @@ func go_back() -> void:
 
 func _build() -> void:
 	s = SettingsRules.load_settings(store)
+	var dp := _svc("Display")
+	if dp != null and not dp.is_connected("changed", _on_display_changed):
+		dp.connect("changed", _on_display_changed)
 	var sc := ScrollContainer.new()
 	sc.name = "Scroll"
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -68,6 +74,8 @@ func _refresh() -> void:
 	_slider_row(t("settings.volume"), "bgmVol")
 	_toggle_row("sound", t("settings.sfx"), "sfxOn")
 	_slider_row(t("settings.volume"), "sfxVol")
+	if _is_pc():
+		_bg_audio_row()
 	_box.add_child(OKit.divider(0.06))
 	# 게임 속도 (전투 설정 창과 같은 1x·2x·4x)
 	var sr := OKit.hbox(8)
@@ -90,6 +98,12 @@ func _refresh() -> void:
 	var rm := _toggle_row("eye", t("gd.settings.reduce_motion"), "reduceMotion")
 	rm.tooltip_text = t("gd.settings.reduce_motion_tip")
 	_box.add_child(OKit.divider(0.06))
+	if _is_pc():
+		_disp_box = OKit.vbox(10)
+		_disp_box.name = "DisplayBox"
+		_box.add_child(_disp_box)
+		_build_display()
+		_box.add_child(OKit.divider(0.06))
 	# 언어 (6개 — 그 언어 이름, 그 언어 글꼴)
 	var lr := OKit.hbox(8)
 	_box.add_child(lr)
@@ -199,6 +213,105 @@ func _slider_row(label: String, key: String) -> void:
 	sl.value_changed.connect(func(x: float) -> void:
 		v.text = str(int(x))
 		set_value(key, x / 100.0, false))
+
+
+# ── (5단계 PC) 창이 뒤에 있을 때 소리 · 화면 ──
+
+func _is_pc() -> bool:
+	var pf := _svc("Platform")
+	return pf != null and bool(pf.call("is_pc"))
+
+
+## 고르기 단추 줄 (게임 속도 단추와 같은 모양): [[값, 글], …]
+func _choice_buttons(parent: Control, prefix: String, opts: Array, cur: Variant, pick: Callable, enabled: bool = true) -> void:
+	for o: Array in opts:
+		var b := OKit.ghost_button(str(o[1]), 13)
+		b.name = prefix + str(o[0]).replace("x", "_")
+		b.custom_minimum_size = Vector2(52, 32)
+		if o[0] == cur:
+			b.add_theme_stylebox_override("normal", OKit.box(Color(OKit.GOLD, 0.25), OKit.GOLD, 6, 1, 10, 6))
+		b.disabled = not enabled
+		if not enabled:
+			b.modulate.a = 0.45
+		var v: Variant = o[0]
+		b.pressed.connect(func() -> void: pick.call(v))
+		parent.add_child(b)
+
+
+func _bg_audio_row() -> void:
+	var r := OKit.hbox(8)
+	r.name = "BgAudioRow"
+	_box.add_child(r)
+	r.add_child(OKit.vec_icon("sound", 16, OKit.GOLD))
+	var l := OKit.label(14, OKit.TEXT, 700)
+	l.text = t("gd.settings.bg_audio")
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.add_child(l)
+	r.tooltip_text = t("gd.settings.bg_audio_tip")
+	var opts: Array = []
+	for m: String in SettingsRules.BG_AUDIO_MODES:
+		opts.append([m, t("gd.settings.bg_" + m)])
+	_choice_buttons(r, "BgAudio_", opts, SettingsRules.bg_audio(store), func(v: Variant) -> void:
+		SettingsRules.set_bg_audio(store, str(v))
+		_refresh())
+
+
+func _build_display() -> void:
+	if _disp_box == null:
+		return
+	for ch: Node in _disp_box.get_children():
+		_disp_box.remove_child(ch)
+		ch.queue_free()
+	var dp := _svc("Display")
+	if dp == null:
+		return
+	var fs := bool(dp.call("is_fullscreen"))
+	var mr := OKit.hbox(8)
+	mr.name = "ModeRow"
+	_disp_box.add_child(mr)
+	mr.add_child(OKit.vec_icon("monitor", 16, OKit.GOLD))
+	var ml := OKit.label(14, OKit.TEXT, 700)
+	ml.text = t("gd.settings.window_mode")
+	ml.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mr.add_child(ml)
+	mr.tooltip_text = t("gd.settings.fullscreen_tip")
+	_choice_buttons(mr, "Mode_", [["windowed", t("gd.settings.windowed")], ["fullscreen", t("gd.settings.fullscreen")]], dp.call("mode"),
+		func(v: Variant) -> void: dp.call("set_mode", str(v)))
+	var sr := OKit.hbox(8)
+	sr.name = "SizeRow"
+	_disp_box.add_child(sr)
+	var sl := OKit.label(13, OKit.TEXT, 700)
+	sl.text = t("gd.settings.window_size")
+	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sr.add_child(sl)
+	sr.tooltip_text = t("gd.settings.window_size_tip")
+	var cur: Vector2i = dp.call("window_logical_size")
+	var cv := OKit.label(12, OKit.DIM, 600)
+	cv.name = "CurSize"
+	cv.text = "%d×%d" % [cur.x, cur.y]
+	sr.add_child(cv)
+	var g := GridContainer.new()
+	g.name = "SizeGrid"
+	g.columns = 3
+	g.add_theme_constant_override("h_separation", 6)
+	g.add_theme_constant_override("v_separation", 6)
+	_disp_box.add_child(g)
+	var opts: Array = []
+	for z: Vector2i in dp.call("available_sizes"):
+		opts.append(["%dx%d" % [z.x, z.y], "%d×%d" % [z.x, z.y]])
+	var pick := func(v: Variant) -> void:
+		var p := str(v).split("x")
+		dp.call("set_window_size", Vector2i(int(p[0]), int(p[1])))
+		_build_display.call_deferred()
+	_choice_buttons(g, "Size_", opts, "%dx%d" % [cur.x, cur.y], pick, not fs)
+	for b: Node in g.get_children():
+		(b as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		(b as Control).tooltip_text = t("gd.settings.window_size_tip")
+
+
+func _on_display_changed() -> void:
+	if is_inside_tree() and _disp_box != null:
+		_build_display.call_deferred()
 
 
 ## 값 하나 바꾸고 저장 (전투 설정 창과 같은 규칙)

@@ -7,6 +7,7 @@ extends Control
 ##   --screen <이름>        바로 그 화면으로 (lobby · stage_select · party_select · settings)
 ##   --save <경로>          다른 저장 파일 사용 (예: user://dev_save.json — 진짜 세이브를 건드리지 않고 시험)
 ##   --lang <코드>          이번 실행만 언어 (저장하지 않음)
+##  (5단계) 출시 빌드(디버그가 아닌 빌드)에서는 --dev · --save · --screen 을 받지 않음 (Platform 의 --store 와 같은 정책)
 
 const DevLauncher := preload("res://scripts/ui/dev_launcher.gd")
 const OKit := preload("res://scripts/ui/outer_kit.gd")
@@ -19,7 +20,7 @@ var _t := 0.0
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var args := OS.get_cmdline_user_args()
+	var args := OS.get_cmdline_user_args() if OS.is_debug_build() else PackedStringArray()
 	var i18n: Node = get_node_or_null("/root/I18n")
 	var store: Node = get_node_or_null("/root/Store")
 	var save_i := args.find("--save")

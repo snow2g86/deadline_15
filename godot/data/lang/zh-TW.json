@@ -2488,7 +2488,19 @@
       "leave": "離開",
       "leave_tip": "儲存戰鬥並返回大廳 — 在大廳點「繼續戰鬥」接著打",
       "leave_confirm": "將儲存戰鬥並返回大廳。\n在大廳點「繼續戰鬥」可從本回合繼續。",
-      "leave_pending": "動畫結束後儲存並離開"
+      "leave_pending": "動畫結束後儲存並離開",
+      "display": "顯示",
+      "window_mode": "顯示模式",
+      "windowed": "視窗",
+      "fullscreen": "全螢幕",
+      "fullscreen_tip": "切換全螢幕：Alt+Enter（macOS：Cmd+Ctrl+F）",
+      "window_size": "視窗大小",
+      "window_size_tip": "視窗模式下可更改，也可以拖曳視窗邊緣",
+      "bg_audio": "背景時的聲音",
+      "bg_audio_tip": "遊戲視窗失去焦點時，聲音保持、降低或靜音",
+      "bg_play": "保持",
+      "bg_lower": "降低",
+      "bg_mute": "靜音"
     },
     "result": {"retry": "重新挑戰"},
     "resume": {

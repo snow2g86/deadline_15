@@ -1,0 +1,8 @@
+{
+"boss_s10": {"atk_archer":10,"atk_brawler":2,"atk_knight":9,"atk_lancer":7,"atk_mage":3,"atk_priest":2,"atk_summoner":3,"atk_warrior":2,"death":1,"heal":3,"kill":11,"move":17,"select":36,"uiclick":1,"victory":1,"wait":15,"wave":2},
+"knights_s11": {"atk_archer":20,"atk_knight":26,"atk_lancer":13,"atk_warrior":2,"death":3,"heal":4,"kill":11,"move":19,"select":73,"victory":1,"wait":36,"wave":2},
+"mono_archer_s07": {"atk_archer":18,"atk_brawler":2,"atk_lancer":1,"kill":12,"move":11,"select":20,"victory":1,"wait":5,"wave":2},
+"assassins_s06": {"atk_assassin":13,"atk_brawler":1,"atk_priest":2,"atk_warrior":2,"death":9,"heal":5,"kill":10,"move":14,"select":42,"victory":1,"wait":21,"wave":2},
+"siege_items_s13": {"atk_archer":1,"atk_knight":17,"atk_lancer":1,"atk_priest":2,"atk_sapper":14,"atk_warrior":2,"death":1,"explosion":1,"heal":3,"kill":12,"move":20,"select":38,"uiclick":7,"victory":1,"wait":9,"wave":2},
+"loss_s30": {"atk_mage":1,"atk_novice":5,"atk_summoner":9,"defeat":1,"kill":5,"move":13,"select":18,"wait":12,"wave":1}
+}

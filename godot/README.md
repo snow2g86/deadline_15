@@ -1,6 +1,6 @@
 # DEADLINE 15 — Godot 4 판
 
-웹판(HTML/CSS/JS)을 Godot 4.5 로 옮긴 판입니다. 1~4단계(기초 · 전투 규칙 · 전투 화면 · 바깥 화면) 완료, 다음은 5단계(소리 · 해상도 · 내보내기).
+웹판(HTML/CSS/JS)을 Godot 4.5 로 옮긴 판입니다. 1~4단계(기초 · 전투 규칙 · 전투 화면 · 바깥 화면)와 5단계(PC 출시 준비: 소리 · 화면 모드 · 내보내기 · 플랫폼 구분) 완료. 다음은 결제(스토브 SDK) · 6단계(모바일).
 
 > **웹판은 동결되었습니다 (2026-10-18).** 수치·대본·번역의 원본은 **`godot/data/`** 입니다. 웹 `data/*.js`·`js/*` 는 더 읽지 않으며
 > 거기를 고쳐도 이 판에는 반영되지 않습니다 (`data/FROZEN.md`). 웹 파일의 폐기 시점은 사용자가 정합니다. 웹 세이브 가져오기는 만들지 않습니다.
@@ -17,7 +17,10 @@
 ```
 godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
-  icon.png             임시 앱 아이콘 (assets/image/icon/jab/knight.png 사본)
+  icon.png             앱 아이콘 1024×1024 (5단계: assets/image/character/story/commander_m.png 지휘관 상반신을 잘라 키움 — 새 그림 아님, 전용 아이콘은 남은 일)
+  export_presets.cfg   내보내기 프리셋 Windows (STOVE) · macOS (STOVE) — 아래 '5단계' · 결과물은 build/ (git 제외, .gdignore)
+  default_bus_layout.tres  오디오 버스 Master · BGM · SFX
+  assets/audio/        소리 (5단계: 웹 합성 소리를 구운 wav — tools/legacy-web/audio-bake/README.md)
   scenes/boot.tscn     시작 화면 (메인 씬) — 잠깐 제목을 보여 주고 로비로 (Router). 개발용: -- --dev (예전 시작 화면 + 전투 시험 실행기), -- --screen <이름>, -- --save <경로>
   scenes/outer/        4a 바깥 화면: lobby · stage_select · party_select · settings, 4b-1: shop, 4b-2: sanctuary · academy · compendium · guide · credits · licenses (scripts/ui/*.gd)
   scenes/battle/battle.tscn   전투 장면 (3b: HUD·연출·결과·스토리 — scripts/battle/README.md)
@@ -25,6 +28,7 @@ godot/
   scripts/logic/       전투·성장 규칙 — 화면 코드 없이 (2b: 웹 전투 규칙 이식, scripts/logic/README.md)
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
+  scripts/core/sound.gd · display.gd · platform.gd  (5단계) 오토로드 Sound(배경음·효과음·버스) · Display(창 모드·크기) · Platform(가게·기기 구분)
   scripts/core/router.gd  오토로드 Router — 화면 전환 한 곳 (go · back · launch_battle), Esc·마우스 뒤로 단추 → 화면의 on_back()
   scripts/ui/          바깥 화면 (4a): screen_base.gd(윗줄·아래 탭·창·알림 공통) · outer_kit.gd(부품) · lobby · stage_select · party_select ·
                        settings_screen · flow.gd(game_nav → 전투 설정, 이어하기 설정) · boot.gd · dev_launcher.gd
@@ -70,6 +74,8 @@ godot/
   tests/play_kit.gd            실제 창 시험 공용 (논리 화면 기준 칸 보이기 · HUD 피하기 · 그리기 기다림 시간 제한)
   tests/aux_class_preview.gd   check_outer_4b2 보조 (다른 프로세스에서 전직 미리보기 보관값 읽기)
   tests/play_4b2.gd            4b-2 실제 창: 로비 → 성소 → 아카데미 → 도감 → 가이드 → 설정 → 크레딧 → 라이선스 → 로비 → 전투 한 판 (tests/screens/4b2_*.png, -- --size 1920x1080)
+  tests/check_pc5.gd           5단계: 소리 파일·버스·설정 저장/복원·장면별 배경음·효과음 규칙(엔진 사건 → 소리 수)·화면 설정·플랫폼·창 닫기 저장·6개 언어 넘침·내보내기 설정/pck
+  tests/play_pc5.gd            5단계 실제 창: 창 크기 단추·최소 크기·Alt+Enter·Cmd+Ctrl+F·다른 배율 모니터·다음 실행 복원(-- --verify) (tests/screens/pc5_*.png)
   tests/shots_3b.gd            3b 화면 사진 (창 모드 → tests/screens/3b_*.png, git 제외)
 ```
 
@@ -181,6 +187,8 @@ godot/
   M3 Max 측정. 처음 열 때 글꼴을 아직 못 읽었다는 오류 4줄은 가져오기 전이라 나오는 것 — 한 번 뒤로는 없음). 바뀐 것만 다시 가져오기는 `--import` (약 5초).
 
 ## 내보내기(export) 설정
+
+(5단계) 프리셋은 `export_presets.cfg` 에 있습니다 — 아래 '5단계 — 내보내기'. 아래는 그 프리셋이 지키는 조건입니다.
 
 `data/*.json` 은 Godot 리소스가 아니라 `FileAccess` 로 읽는 일반 파일입니다. 내보내기 프리셋을 만들 때
 **Resources → Filters to export non-resource files (include_filter) 에 `data/*` 를 꼭 넣으세요** (`data/*, data/lang/*, data/story/*` 처럼 하위 폴더 포함).
@@ -324,7 +332,7 @@ Store.get_json("game_roster", {})
 - **아이콘**: 시트에 그림이 없는 🔒·ℹ️ 는 선 그림.
 
 ### 남은 일
-- (4b-2 에서 성소·아카데미·도감·가이드·라이선스·Credits 완료 — 아래 '4b-2') 소리는 5단계.
+- (4b-2 에서 성소·아카데미·도감·가이드·라이선스·Credits 완료 — 아래 '4b-2') 소리는 5단계에서 완료 (아래 '5단계').
 - 좁은 창(480×900 등 휴대폰 폭) 모바일 배치는 PC 출시 뒤로 미룸. 지금은 canvas_items·expand 늘이기라 논리 폭이 늘 1280 이상이어서 깨지지 않지만 작게 보임.
 
 ## 4b-1 — 편성 화면의 장비·소모품·강화 탭 · 상점 · 전투 이어하기
@@ -417,3 +425,156 @@ Store.get_json("game_roster", {})
 - **'last' 대사**: 발동을 지운 '마지막 적 하나' 대사를 6개 언어 대본 + sample 에서 지움 (각 88개, sample 1개), `story_battle.gd` BATTLE_KINDS·PRIORITY 에서도 뺌.
   기준 데이터의 대본에는 남아 있음 (기준은 고치지 않음 — 코드가 'last' 를 모르므로 쓰이지 않음).
 - **play 시험 결과**: `PlayKit.verdict` — HUD 에 가려 칸을 못 누르고 Esc 로 넘긴 횟수(hud_blocked)가 0 이 아니면 `PLAY_WARN` + `PLAY_RESULT: WARN (HUD 가림 n번)`, 종료 코드 2 (실패는 1, 통과 0).
+
+## 5단계 — PC 출시 준비 (2026-10-18)
+
+PC 판은 **스토브(STOVE) 인디**로 먼저 냅니다. 스팀 설정은 아직 없습니다. 결제(스토브 SDK)·광고는 다음 단계입니다.
+
+### 소리 (`scripts/core/sound.gd`, 오토로드 Sound)
+
+- **방식: 미리 구운 파일** (`assets/audio/` — 효과음 23개 + 전투 배경음 1개). 웹 `js/battle/audio.js` 를 Chrome WebAudio(OfflineAudioContext) 로 그대로 돌려 구웠습니다.
+  실시간 합성(AudioStreamGenerator)을 쓰지 않은 이유: 웹 배경음은 Chrome 의 압축기(DynamicsCompressor)·필터를 거치므로 같은 엔진으로 구워야 소리가 같고,
+  배경음 한 주기에 발음 약 1만 개라 GDScript 로 매 샘플 합성하면 CPU 를 많이 씀 (모바일 6단계도 고려). 굽기·비교 방법과 결과: `tools/legacy-web/audio-bake/README.md`.
+- 배경음은 130 BPM 8분음표 512개 = 118.15초가 한 주기, 가져오기에서 앞으로 반복(`edit/loop_mode=2`, QOA 압축). 끝 → 처음이 이어지게 둘째 주기를 잘라 씀.
+- **버스**: Master ─ BGM(배경음) · SFX(효과음). BGM 음량 = `bgmVol`(구울 때 웹 master 0.16 포함), SFX 음량 = `sfxVol / 0.7`(웹 기본값으로 구움), 끄면 음소거.
+  Master 는 창이 뒤로 갔을 때만 씀.
+- **장면 규칙 (웹 그대로)** — 웹에서 소리가 나는 곳은 전투 페이지뿐입니다.
+  | 때 | 소리 |
+  |---|---|
+  | 바깥 화면 11개 (로비·상점·설정 …) | 없음 (웹도 없음 — 로비 곡·보스 곡은 웹에 없음) |
+  | 새 전투 | 로딩이 끝나면 전투 배경음 (웹 `_showLoading().then(bgmStart)`) |
+  | 이어하기 | 들어오자마자 (웹 `resumeBattle` 은 로딩을 닫기 전에 `bgmStart`) |
+  | 웨이브·보스 | 곡은 그대로 (웨이브 효과음만) |
+  | 전투 끝 | 승리 `victory` / 패배·항복 `defeat` + 배경음 0.6초 줄이며 멈춤 (웹 `bgmStop`) |
+  | 화면을 떠남 | 배경음·효과음 바로 끊음 (웹 페이지 이동) |
+  | 설정에서 배경음 끄기 / 켜기 | 0.6초 줄이며 멈춤 / 전투 중이면 처음부터 (웹 `setBGMOn`) |
+- **효과음 시점 (웹 그대로)**: 웹 `Audio` 구독(공격 = 공격자 직업 소리 · 처치 · 회복 · 웨이브(첫 배치 제외) · 끝) + VFX 구독(보물상자 → 회복, 성문 공격/파괴, 적 AI 스킬)
+  + 행동 코드의 `Fx.sfx`(아군 차례 메뉴 `select` · 이동 `move` · 대기/방어/경계 `wait` · 이동 취소 `uiclick`)
+  + **스킬 코드 안의 `G.sfx*`** — 엔진이 그 자리에서 소리 힌트 `fx_event "sfx"` 를 냄(`battle_engine.sfx()`, `battle_skills._sfx/_sfx_kill`, `combat.gd` 대신 맞은 클랜원 쓰러짐).
+  힌트는 소리만 — 기록(rec)·순수 조회·규칙에 들어가지 않아 황금 기록은 그대로입니다.
+  웹은 사건이 나는 순간 소리를 내므로 처치 소리를 웹이 알림을 내는 시점에 맞춥니다 (`_peek_same_hit`):
+  아군 일반 공격은 휘두를 때 함께(웹 action.js 는 동기로 알림), 적 AI 공격은 맞는 순간 + 0.12초(ai.js `hd + 120`), 경계 사격은 max(0.55, 맞는 순간 + 0.15)초(ai.js `_overwatch`),
+  튀김 피해·반격·지원·창벽·범위 공격·전사 강타는 같은 순간. 그 밖에는 Godot 재생 대기열에서 그 사건을 재생할 때.
+  - 남은 차이: 적 AI 공격인지는 그 앞의 `camera_focus` 알림으로 가립니다 (엔진 알림에 표시를 더하면 황금 기록이 바뀌므로). 지원 공격이 끼거나 반격으로 공격자가 쓰러진 처치는
+    대기열 재생 시점 — 웹과 최대 수백 ms 다를 수 있음. 웹 아군 공격의 '반격으로 공격자 쓰러짐' 처치음은 웹이 휘두를 때(반격 전에) 내는데 Godot 은 반격 뒤.
+  - `select`: 웹은 차례가 오면·자기 클랜원을 다시 누르면(action.js 148·154·159, 카드 누르기) 냄 → Godot 도 같은 자리 + 이동 취소 뒤 메뉴가 다시 뜰 때
+    (웹은 취소하면 메뉴가 닫혀 다시 눌러야 하므로 그때 Select — Godot 은 메뉴가 바로 뜸).
+- **효과음 수 시험**: `tools/legacy-web/audio-bake/sfx-count.js` 가 황금 기록 시나리오 6개를 웹 전투 코드로 다시 돌리며 웹 코드의 소리 자리(audio.js 구독·sfxAtk 표, vfx.js 의 Audio 호출,
+  Fx.sfx, 스킬의 G.sfx*)를 그대로 살려 센 표 `tests/pc5_fixtures/sfx_web.json` 과 Godot 이 실제로 낸 소리 수를 비교 (check_pc5 '4) sfx'). select 는 웹 시험 정책의 누르기 횟수에 달려 범위로만 봄.
+- 웹과 다른 점 (웹 버그): 웹은 일부 소리(마법사·궁수 공격의 휘는 음, 쓰러짐)가 효과음 음량·끄기를 거치지 않고, 전투 중 배경음 밀대를 움직이면 배율이 0.16 → 0.12 로 바뀜.
+  Godot 은 모두 버스를 거침 (기본 음량에서는 웹과 같은 소리).
+- **창 초점 (PC)**: 창이 뒤로 가면 `bgAudio` 대로 — 그대로(1) · **줄이기(0.25, 기본)** · 끄기(0), 0.25초에 걸쳐. 설정 화면 '창이 뒤에 있을 때 소리'.
+
+### 화면 (`scripts/core/display.gd`, 오토로드 Display)
+
+- 설정 화면(PC 만): **화면 모드** 창 모드 / 전체 화면, **창 크기**(창 모드일 때) — 그 모니터 작업 영역에 들어가는 1024×576 · 1280×720 · 1366×768 · 1600×900 · 1920×1080 · 2560×1440 · 3200×1800 · 3840×2160.
+  창 가장자리를 끌어 바꾼 크기도 저장. 전체 화면 = `Window.MODE_FULLSCREEN` (Windows: 테두리 없는 전체 화면 창, macOS: 시스템 전체 화면 공간).
+- 단축키: **Alt+Enter** (모든 OS), macOS **Cmd+Ctrl+F** (시스템 메뉴가 먼저 받으면 macOS 가 바꾸고 Display 는 모드만 따라감). 초록 단추로 바꿔도 따라감.
+- **크기는 논리 단위** = macOS 포인트 / Windows 픽셀 (`Display.scale_of`).
+  - macOS 의 Godot 은 **모든 모니터**의 좌표·크기와 창 크기를 '포인트 × 가장 큰 배율(`screen_get_max_scale`)' 단위로 다룹니다
+    (`platform/macos/display_server_macos.mm`). 그래서 모니터별 배율(`screen_get_scale`)이 아니라 max_scale 로 나눕니다.
+    예: 맥북 레티나(2) + 외부 1080p(1) → 두 모니터 모두 ÷2 (외부 1080p 의 1920×1080 포인트가 Godot 에서는 3840×2160).
+    (5단계 검수에서 고침: 처음에는 모니터별 배율을 써서 외부 1080p 에서 크기 단추가 2560×1440 까지 보이고 '1280×720' 이 실제 640×360, 최소 크기도 절반이었음)
+  - Windows·Linux(X11): Godot 단위 = 실제 픽셀, `screen_get_scale` 은 1 (Godot 문서: macOS·Wayland·모바일·웹만 구현) → 논리 = 픽셀.
+    Windows 의 125·150% 배율은 반영하지 않음 (픽셀 기준 — 보통의 PC 게임과 같음, Windows 에서 확인 필요). Linux 는 출시 대상이 아님.
+  - 레티나에서 '1280×720' 은 Godot 2560×1440 단위 창 = 일반 모니터의 1280×720 과 같은 실제 크기 (예전에는 레티나에서 640×360 포인트로 작게 떴음).
+- **최소 창 크기 1024×576** (논리, `Window.min_size` = × scale_of). macOS 는 모니터 사이를 옮겨도 단위가 같아 창의 포인트 크기가 그대로입니다.
+  모니터를 꽂거나 빼 max_scale 이 바뀌면 최소 크기를 다시 계산하고 논리 크기를 지킴.
+  확인(play_pc5): 창의 실제 크기를 Godot 계산과 따로 — macOS 가 알려 주는 모니터 포인트(NSScreen, osascript) × 창이 모니터에서 차지하는 비율로 재서
+  레티나·외부 1080p 모두 1600×900·1280×720·최소 1024×576 포인트, 외부 1080p 의 가장 큰 크기 단추 1600×900 (작업 영역 1920×1080 포인트 안).
+- **전체 화면 요청이 무시되면** 창 모드로 되돌리고 저장값도 windowed 로 (`Display.fs_step` · `really_fullscreen`): 요청 뒤 4초 안에 창이 그 모니터 작업 영역을
+  **0.5초 연속** 덮으면 유지, 아니면 되돌림. macOS 는 앞에 없는 창의 요청 직후 한 프레임만 작업 영역 크기를 알려 주고 원래 크기로 돌아올 수 있어
+  '한 프레임이라도 참'으로 끝내지 않음 (재검수에서 고침). Alt+Enter · Cmd+Ctrl+F · 설정 단추 · 저장값 복원 · macOS 초록 단추/시스템 메뉴(크기 바뀜 알림) 모두 같은 판정.
+  시험: check_pc5 가 프레임 순서를 넣어 '한 프레임만 큼 → 4초 뒤 되돌림', '0.7초 뒤부터 계속 큼 → 유지', '자꾸 작아짐 → 되돌림'을 확인,
+  play_pc5 가 Finder 를 앞으로 보낸(open -a) 창과 앞에 있는 창 모두에서 판정 시간이 지난 뒤 저장값 = 실제인지 확인. 노치 맥북의 전체 화면은 메뉴 막대 줄을 뺀 영역이라 '작업 영역 이상'으로 판단.
+- **처음 실행**: 그 모니터 작업 영역의 80% 안에 드는 가장 큰 목록 크기 (1366×768 노트북 → 1024×576, 1080p → 1366×768, 맥북 레티나 → 1366×768, 4K → 2560×1440), 가운데.
+- **다음 실행 복원**: 크기·위치·모드. 저장한 위치가 지금 어느 모니터에도 걸치지 않으면(모니터를 뺐음) 창이 뜬 모니터 가운데로, 모니터보다 크면 비율을 지켜 줄임.
+- 늘이기는 그대로 `canvas_items` + `expand` (논리 화면 1280×720 기준 — 모바일 배치는 6단계).
+- 개발용 명령줄(`--dev` · `--save` · `--screen` · `--lang`, Platform 의 `--store`)은 **디버그 빌드에서만** 받습니다 (출시 빌드는 무시).
+- `--script` 로 도는 시험(play_4a 등)은 창을 시험이 정하므로 Display 가 저장값을 읽지도 쓰지도 않습니다(`managed = false`). Display 를 시험할 때는 `manage()` (play_pc5).
+  머리 없는 실행은 창을 건드리지 않음 (계산 함수만).
+- 창 제목 `DEADLINE 15`. 시작할 때 Godot 로고 대신 게임 바탕색(#0a0e1a) 빈 화면(`boot_splash/show_image=false`, 기본 지우기 색도 같음) → 제목 화면 0.6초 → 로비.
+
+### 새 설정 키 (Store)
+
+| 키 | 형식 | 이상한 값 |
+|---|---|---|
+| `game_settings.bgAudio` | `"play"` · `"lower"`(기본) · `"mute"` — 고를 때만 저장 (`SettingsRules.bg_audio/set_bg_audio`) | 모르는 값·글자가 아님 → `"lower"` |
+| `gd_display` (Godot 전용, 웹 없음) | `{"mode": "windowed"\|"fullscreen", "w": 1600, "h": 900, "x": 3840, "y": 122}` — w·h 는 창 모드 논리 크기, x·y 는 Godot 화면 좌표(픽셀) | `Display.sanitize`: 모드는 둘 중 하나가 아니면 windowed, 크기는 정수만 · 1024×576 ~ 16384, 위치는 둘 다 정수일 때만 |
+| 소리 키 (`bgmOn`·`bgmVol`·`sfxOn`·`sfxVol`, 웹과 같음) | 그대로 | `Sound.sanitize`: bool 이 아니면 기본, 숫자가 아니면 기본(0.5·0.7), 0~1 로 자름 |
+
+'모든 데이터 초기화'는 두 키도 지웁니다 (지금 창은 그대로, 다음 실행은 처음 크기).
+
+### 플랫폼 구분 (`scripts/core/platform.gd`, 오토로드 Platform)
+
+- `Platform.store()` = `"stove"` · `"steam"` · `"google"` · `"apple"` · `"dev"` — **내보내기 프리셋의 기능 태그**(custom_features)로 정함. 태그가 없으면(편집기·명령줄·시험) `"dev"`.
+  디버그 실행에서는 `-- --store stove` 로 바꿔 볼 수 있음 (시험: `override_store()`).
+- `is_pc()`(기능 태그 pc) · `is_mobile()` · `has_ads()` · `has_iap()` · `is_release_build()`(template).
+- **상점 광고 카드**(`shop.gd _ad_card`): `has_ads()` 가 거짓이면(stove·steam) 6개 탭 모두에서 숨김. dev 는 웹 화면 그대로 보임(기존 시험·사진과 같게).
+  **결제 카드 4개는 그대로**('추후 오픈 예정' — 결제 연동은 다음 단계). 성소의 무료 부활(웹 '광고 보기' 자리)은 광고 없이 30분마다라 그대로.
+- 스팀 판을 만들 때: 프리셋을 복사해 `custom_features="steam"` 으로 (사용자가 말할 때까지 만들지 않음).
+
+### 전투 중 창 닫기
+
+입력을 기다릴 때마다 자동 저장(4b-1)에 더해, **창을 닫으면(WM_CLOSE_REQUEST)** 실제 세이브 전투는 그 순간 엔진 상태(엔진은 연출과 상관없이 이미 다음 입력 대기까지 진행해 있음)를
+`gd_battle` 로 저장하고 바로 디스크에 씀 (`battle_scene.save_on_close`). 다음 실행 로비의 '전투 재개'로 이어 함. 끝난 전투는 저장하지 않음.
+Store 는 오토로드 순서상 닫기 알림을 먼저 받아 쓰므로, 뒤에 쓰는 쪽(전투·Display)이 `Store.flush()` 를 한 번 더 부름.
+
+### 세이브 위치 (`user://`)
+
+| 실행 | 위치 |
+|---|---|
+| 편집기·명령줄(`Godot --path godot`) — **지금 개발 세이브** | macOS `~/Library/Application Support/Godot/app_userdata/DEADLINE 15/` (바뀌지 않음) |
+| 내보낸 빌드 macOS | `~/Library/Application Support/DEADLINE 15/` |
+| 내보낸 빌드 Windows | `%APPDATA%\DEADLINE 15\` (`C:\Users\<이름>\AppData\Roaming\DEADLINE 15\`) |
+
+- `project.godot`: `config/use_custom_user_dir=false` + `config/use_custom_user_dir.template=true` + `config/custom_user_dir_name="DEADLINE 15"` —
+  기능 태그 template(내보낸 빌드)에서만 게임 전용 폴더. 그래서 **개발 세이브와 출시 빌드 세이브는 서로 다른 파일**이고, 출시 빌드를 처음 켜면 새 게임입니다
+  (개발 세이브를 옮기려면 `save.json` 을 위 폴더로 복사). 내보낸 빌드는 같은 폴더의 `logs/godot.log` 에 기록을 남김.
+- 확인: 임시 HOME 으로 내보낸 macOS 앱을 실행 → `$HOME/Library/Application Support/DEADLINE 15/save.json` 생성 (2026-10-18).
+
+- 시험을 돌리면 Godot 이 스크립트마다 `*.gd.uid` 를 만듭니다 — 지우지 말고 커밋에 넣으세요 (5단계 검수 결정).
+
+### 5단계 — 내보내기
+
+| 프리셋 | 결과물 | 내용 |
+|---|---|---|
+| Windows (STOVE) | `build/windows/DEADLINE 15.exe` + `.pck` | x86_64, 기능 태그 stove, 회사 show4you · 제품 DEADLINE 15 · 파일/제품 버전 빈칸 = `config/version`, 아이콘 icon.png, 서명 안 함 |
+| macOS (STOVE) | `build/macos/DEADLINE 15.zip` (안에 `DEADLINE 15.app`) | universal(x86_64 + arm64), 번들 ID `xyz.show4you.deadline15`, 버전 빈칸 = `config/version`, 분류 Games, 서명 = 내장 ad-hoc(로컬 실행만), 공증 안 함 |
+
+```bash
+HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --export-release "macOS (STOVE)" "build/macos/DEADLINE 15.zip"
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --export-release "Windows (STOVE)" "build/windows/DEADLINE 15.exe"
+```
+
+- 거르기: 넣기 `data/*, data/lang/*, data/story/*, assets/fonts/*.txt`(OFL), 빼기 `tests/*, tools/*, build/*, *.md, *.prev.png`(작업 중 미리보기). 그림 원본 src 는 `.gdignore` 라 Godot 이 모름.
+  check_pc5 는 build/ 의 pck(맥은 zip 안)가 **소스보다 오래되었으면 실패** (scripts·scenes·data·assets·project.godot·export_presets.cfg 의 수정 시각 비교 — build/ 가 없으면 건너뜀).
+  확인(2026-10-18, 검수 뒤 마지막 내보내기): 두 pck 모두 파일 5,877개, `tests/`·`tools/`·`tests/baseline`·src·`*.prev.png` 없음, `data/*`·`OFL.txt`·소리 있음 (check_pc5 '9) export' 가 build/ 의 pck 를 직접 읽어 확인).
+  (pck 안에 `res://tests/...` 글자가 보이는 것은 uid 캐시의 경로 문자열일 뿐 파일은 없음)
+- 크기: pck 106MB (글꼴 47MB · 그림 · 소리 2.6MB), Windows exe 97MB, macOS zip 167MB.
+- `rendering/textures/vram_compression/import_etc2_astc=true` — macOS universal·arm64 내보내기의 필수 조건 (그림은 모두 무손실이라 다시 가져온 것 없음).
+- 버전 올리기: `project.godot` 의 `application/config/version` 하나만 (두 프리셋이 빈칸이라 이 값을 씀). 전투 이어하기 저장도 이 값을 봄.
+
+**코드 서명 · 공증 (사용자 계정·인증서가 필요해 하지 않음 — 절차만)**
+
+- macOS (배포용):
+  1. Apple Developer Program 가입 → Xcode/키체인에서 **Developer ID Application** 인증서 만들기 (+ 앱 전용 암호 또는 App Store Connect API 키).
+  2. 프리셋 macOS: `codesign/codesign=3`(Xcode codesign) 또는 `2`(rcodesign), `codesign/identity="Developer ID Application: … (TEAMID)"`, `codesign/apple_team_id`.
+     Hardened Runtime 은 Godot 기본으로 켜짐. 필요한 entitlement 없음(마이크·카메라 안 씀).
+  3. `notarization/notarization=1`(notarytool) + Apple ID·앱 전용 암호(또는 API 키) → 내보내기가 공증 요청. 끝나면 `xcrun stapler staple "DEADLINE 15.app"`.
+  4. 확인: `spctl -a -vv "DEADLINE 15.app"` → `source=Notarized Developer ID`.
+  지금의 ad-hoc 서명은 이 맥에서만 바로 열림 — 다른 맥에서 받은 zip 은 Gatekeeper 가 막음(오른쪽 클릭 → 열기 필요).
+- Windows:
+  1. 코드 서명 인증서(OV 또는 EV — EV 는 SmartScreen 평판이 바로 쌓임) 구입, Windows SDK 의 `signtool` 준비 (맥에서는 `osslsigncode`).
+  2. 프리셋 Windows: `codesign/enable=true`, `codesign/identity_type`·`codesign/identity`(인증서 파일 또는 지문)·`codesign/password`, 타임스탬프 서버 그대로.
+     또는 내보낸 뒤 `signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f cert.pfx "DEADLINE 15.exe"`.
+  3. 서명하지 않으면 SmartScreen '알 수 없는 게시자' 경고가 뜸. 스토브 런처로 받으면 덜하지만 서명을 권장.
+- 스토브: 빌드 업로드·런처 연동·결제 SDK 는 다음 단계 (스토브 인디 개발자 계정 필요).
+
+### 남은 일 (5단계 뒤)
+
+- 전용 앱 아이콘 (지금은 지휘관 그림을 잘라 키운 것 — 작은 크기(16·32px)에서는 얼굴만 보임).
+- Windows 빌드는 이 맥에서 실행해 보지 못함 (wine 없음) — Windows PC 에서 실행·세이브 위치·Alt+Enter·배율 125/150% 확인 필요.
+- 전체 화면: play_pc5 가 실제 창에서 확인(pc5_03_fullscreen.png). 단, 시험 창이 앞에 없으면 macOS 가 전체 화면으로 바꾸지 않아 '되돌림' 길로 가고 경고를 남김.
+- 서명·공증 (위 절차), 스토브 결제 SDK·광고(모바일), 스팀 프리셋 (사용자가 말할 때).
+- 언어별 창 제목·macOS 메뉴 이름 현지화 (지금은 DEADLINE 15 그대로).

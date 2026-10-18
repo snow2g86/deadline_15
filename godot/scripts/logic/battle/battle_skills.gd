@@ -94,6 +94,19 @@ func _rm_dead() -> void:
 
 
 ## _skillDone — 차례 끝 (Fx.later 즉시) + 기록 skill_fx
+## (5단계) 효과음 힌트 — 웹 스킬 코드의 G.sfxAtk(u.cls)·sfxHeal·sfxMove·sfxUIClick·sfxExplosion 자리.
+##  소리만 (E.sfx → fx_event "sfx": 기록·순수 조회·규칙과 무관 — 황금 기록 그대로)
+func _sfx(n: String, u: Dictionary = {}) -> void:
+	E.sfx(n, str(u.get("cls", "")))
+
+
+## 웹: if (tgt.hp <= 0) { G.sfxKill(); G.sfxDeath(); … }
+func _sfx_kill(t: Dictionary) -> void:
+	if t["hp"] <= 0:
+		E.sfx("kill")
+		E.sfx("death")
+
+
 func _skill_done(u: Dictionary, opts: Dictionary = {}) -> void:
 	if _skill_before_valid():
 		var b: Dictionary = E._skill_before
@@ -366,6 +379,8 @@ func _x_warrior_powersmash(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> v
 		return
 	var dmg := maxf(1.0, Js.round_js(u["atk"] * 1.5 * _sk_mul(u, "warrior_powersmash")) - tgt["def"])
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	E.fx_attack(u, tgt)
 	_float(u["x"], u["y"], "skills.warrior_powersmash")
 	E.proc_fury(u, tgt)
@@ -384,8 +399,10 @@ func _x_warrior_cleave(u: Dictionary, _tx: int, _ty: int, _sk: Dictionary) -> vo
 		var tgt: Variant = _enemy_at(px, py)
 		if tgt != null:
 			tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.2, "warrior_cleave", tgt))
+			_sfx_kill(tgt)
 			if tgt["hp"] <= 0:
 				_rm_dead()
+	_sfx("atk", u)
 	_exp(u, "attack")
 	_float(u["x"], u["y"], "messages.warrior_cleave")
 	E.proc_fury(u, u)
@@ -414,8 +431,11 @@ func _x_warrior_assault(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 		var e: Variant = _enemy_at(px, py)
 		if e != null:
 			e["hp"] = maxf(0.0, e["hp"] - _dmg_sub(u, 0.8, "warrior_assault", e))
+			_sfx_kill(e)
 			if e["hp"] <= 0:
 				_rm_dead()
+	_sfx("atk", u)
+	_sfx("explosion")
 	_exp(u, "attack")
 	_float(u["x"], u["y"], "messages.warrior_assault")
 	E.proc_fury(u, u)
@@ -431,6 +451,8 @@ func _x_warrior_criticalstrike(u: Dictionary, tx: int, ty: int, sk: Dictionary) 
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
 	tgt["_bleedTurns"] = 3.0
 	tgt["_bleedDmg"] = maxf(1.0, Js.round_js(u["atk"] * 0.2))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	E.fx_attack(u, tgt)
 	_float(tgt["x"], tgt["y"], "messages.warrior_bleed")
 	_float(u["x"], u["y"], "messages.warrior_criticalstrike")
@@ -457,6 +479,7 @@ func _x_knight_switch(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	ally["y"] = oy
 	E.fx("move", {"id": u["id"], "x": u["x"], "y": u["y"]})
 	E.fx("move", {"id": ally["id"], "x": ally["x"], "y": ally["y"]})
+	_sfx("move")
 	_float(u["x"], u["y"], "messages.knight_switch")
 	E.proc_fury(u, u)
 	_skill_done(u)
@@ -471,6 +494,8 @@ func _x_knight_charge(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	var dmg := _dmg_sub(u, 0.8, "knight_charge", tgt)
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
 	tgt["stunned"] = maxf(Js.num(tgt.get("stunned")), 1.0)
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	E.fx_attack(u, tgt)
 	_float(tgt["x"], tgt["y"], "messages.stunned")
 	E.proc_fury(u, tgt)
@@ -490,6 +515,7 @@ func _x_knight_sacrifice(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> voi
 	ally["_sacrificeKnight"] = u["id"]
 	u["_sacrificeDmgCount"] = 2.0
 	u["_sacrificeTarget"] = ally["id"]
+	_sfx("heal")
 	_float(u["x"], u["y"], "messages.knight_sacrifice")
 	_float(ally["x"], ally["y"], "messages.knight_sacrifice_protect")
 	E.proc_fury(u, u)
@@ -513,6 +539,7 @@ func _x_knight_capture(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	enemy["x"] = adj["x"]
 	enemy["y"] = adj["y"]
 	E.fx("move", {"id": enemy["id"], "x": enemy["x"], "y": enemy["y"]})
+	_sfx("atk", u)
 	_float(u["x"], u["y"], "messages.knight_capture")
 	_float(enemy["x"], enemy["y"], "messages.knight_captured")
 	E.proc_fury(u, u)
@@ -529,10 +556,12 @@ func _x_assassin_assassinate(u: Dictionary, _tx: int, _ty: int, sk: Dictionary) 
 		return
 	var dmg := maxf(1.0, Js.round_js(u["atk"] * 5.0 * _sk_mul(u, "assassin_assassinate")) - tgt["def"])
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
+	_sfx("atk", u)
 	_float(u["x"], u["y"], "messages.assassin_assassinate")
 	var adj: Variant = E.am.find_adj(u["x"], u["y"], u)
 	if adj != null:
 		E.fx_move_unit(u, adj["x"], adj["y"])
+	_sfx_kill(tgt)   # 웹 assassin.js: 공격음 → 옆 칸으로 이동 → 처치음
 	_exp(u, "attack")
 	_skill_done(u, {"rmDead": true, "chkEnd": true})
 
@@ -554,6 +583,8 @@ func _x_assassin_ambush(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 	u["mo"] = true
 	var dmg := maxf(1.0, u["atk"] * 2.0 - tgt["def"])
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.assassin_raid")
 	if tgt["hp"] <= 0:
 		u["res"] = minf(u["maxRes"], u["res"] + 20.0)
@@ -565,6 +596,7 @@ func _x_assassin_ambush(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 func _x_assassin_smoke(u: Dictionary, _tx: int, _ty: int, sk: Dictionary) -> void:
 	E.buff_apply(u, {"type": "stealth", "duration": _rng(sk, "smokeTurns", 2.0), "icon": "🌫️", "source": "assassin_smoke"})
 	u["stealthBroken"] = false
+	_sfx("move")
 	_float(u["x"], u["y"], "messages.assassin_smoke")
 	_skill_done(u)
 
@@ -587,6 +619,8 @@ func _x_mage_fireburst(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	for tgt2: Dictionary in hit:
 		tgt2["hp"] = maxf(0.0, tgt2["hp"] - _dmg_sub(u, 1.2, "mage_fireburst", tgt2))
+		_sfx_kill(tgt2)
+	_sfx("atk", u)
 	_float(u["x"], u["y"], "messages.mage_fireball")
 	_exp(u, "attack")
 	_skill_done(u, {"rmDead": true, "chkEnd": true})
@@ -599,6 +633,8 @@ func _x_mage_freeze(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.2, "mage_freeze", tgt))
 	tgt["frozen"] = maxf(Js.num(tgt.get("frozen")), 2.0)
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(tgt["x"], tgt["y"], "messages.frozen")
 	_float(u["x"], u["y"], "messages.mage_freeze")
 	if tgt["hp"] <= 0:
@@ -613,6 +649,7 @@ func _x_mage_grandwall(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	S["ter"][ty][tx] = "wall"
 	E.magic_walls.append({"x": tx, "y": ty})
+	_sfx("uiclick")
 	_float(tx, ty, "messages.mage_grandwall")
 	_exp(u, "attack")
 	_skill_done(u, {"rTer": true})
@@ -626,6 +663,7 @@ func _x_archer_dash(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	E.fx_move_unit(u, tx, ty)
 	u["mo"] = true
+	_sfx("move")
 	_float(u["x"], u["y"], "messages.archer_leap")
 	_exp(u, "move")
 	_skill_done(u)
@@ -641,6 +679,8 @@ func _x_archer_snipe(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		_skill_refund(u, sk)
 		return
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.5, "archer_snipe", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.archer_snipe")
 	if tgt["hp"] <= 0:
 		_rm_dead()
@@ -660,6 +700,8 @@ func _x_archer_rapidfire(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> voi
 		if tgt["hp"] <= 0:
 			break
 		tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 0.8, "archer_rapidfire", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.archer_rapidfire")
 	if tgt["hp"] <= 0:
 		_rm_dead()
@@ -677,8 +719,10 @@ func _x_archer_steelrain(u: Dictionary, tx: int, ty: int, _sk: Dictionary) -> vo
 			var tgt: Variant = _enemy_at(px, py)
 			if tgt != null:
 				tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.0, "archer_steelrain", tgt))
+				_sfx_kill(tgt)
 				if tgt["hp"] <= 0:
 					_rm_dead()
+	_sfx("atk", u)
 	_exp(u, "attack")
 	_float(u["x"], u["y"], "messages.archer_steelrain")
 	_skill_done(u, {"chkEnd": true})
@@ -701,6 +745,7 @@ func _x_priest_massheal(u: Dictionary, _tx: int, _ty: int, sk: Dictionary) -> vo
 	for t: Dictionary in targets:
 		var heal := minf(t["mhp"] - t["hp"], amt)
 		t["hp"] = t["hp"] + heal
+	_sfx("heal")
 	_float(u["x"], u["y"], "messages.priest_mass_heal")
 	_exp(u, "heal")
 	_skill_done(u)
@@ -713,6 +758,7 @@ func _x_priest_purify(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	for k: String in ["stunned", "frozen", "disarmed", "_bleedTurns", "_bleedDmg", "_rootedTurns"]:
 		tgt[k] = 0.0
+	_sfx("heal")
 	_float(tgt["x"], tgt["y"], "messages.priest_purify")
 	_float(u["x"], u["y"], "messages.priest_purify_cast")
 	_exp(u, "heal")
@@ -734,6 +780,7 @@ func _x_priest_sanctuary(u: Dictionary, _tx: int, _ty: int, sk: Dictionary) -> v
 	for t: Dictionary in targets:
 		t["_sanctuaryTurns"] = 4.0
 		t["_sanctuaryHeal"] = amt
+	_sfx("heal")
 	_float(u["x"], u["y"], "messages.priest_sanctuary")
 	_exp(u, "heal")
 	_skill_done(u)
@@ -748,6 +795,8 @@ func _x_novice_throw(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		_skill_refund(u, sk)
 		return
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 0.8, "novice_throw", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "skills.novice_throw")
 	if tgt["hp"] <= 0:
 		_rm_dead()
@@ -764,6 +813,7 @@ func _x_novice_firstaid(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 	var pct := _rng(sk, "aidPct", 15.0)
 	var heal := minf(v["mhp"] - v["hp"], maxf(1.0, Js.round_js(v["mhp"] * pct / 100.0 * _sk_mul(u, "novice_firstaid"))))
 	v["hp"] = v["hp"] + heal
+	_sfx("heal")
 	_float(u["x"], u["y"], "messages.novice_firstaid")
 	_exp(u, "heal")
 	_skill_done(u)
@@ -783,6 +833,8 @@ func _x_novice_tackle(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		E.fx_move_unit(u, adj["x"], adj["y"])
 		u["mo"] = true
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 0.9, "novice_tackle", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.novice_tackle")
 	if tgt["hp"] <= 0:
 		_rm_dead()
@@ -835,6 +887,7 @@ func _summon(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	}
 	S["nid"] = int(S["nid"]) + 1
 	(S["units"] as Array).append(summon)
+	_sfx("heal")
 	_float(tx, ty, "messages.sapper_summon")
 	_exp(u, "attack")
 	_skill_done(u)
@@ -859,6 +912,7 @@ func _x_summoner_empower(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> voi
 		return
 	s["_empowerTurns"] = 3.0
 	s["_empowerMul"] = 1.5
+	_sfx("heal")
 	_float(s["x"], s["y"], "messages.summoner_empower")
 	_exp(u, "attack")
 	_skill_done(u)
@@ -879,6 +933,9 @@ func _x_summoner_soulburst(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> v
 			var tgt: Variant = _enemy_at(px, py)
 			if tgt != null:
 				tgt["hp"] = maxf(0.0, tgt["hp"] - maxf(1.0, burst - tgt["def"]))
+				_sfx_kill(tgt)
+	_sfx("atk", u)
+	_sfx("explosion")
 	_float(s["x"], s["y"], "messages.summoner_soulburst")
 	var left: Array = []
 	for v: Dictionary in S["units"]:
@@ -899,6 +956,7 @@ func _x_shaman_curse(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	tgt["_cursed"] = true
 	tgt["_curseAtk"] = u["atk"]
 	tgt["_curseDmgCount"] = 0.0
+	_sfx("atk", u)
 	_float(tgt["x"], tgt["y"], "messages.shaman_curse")
 	_float(u["x"], u["y"], "messages.shaman_curse")
 	_exp(u, "attack")
@@ -915,6 +973,7 @@ func _x_shaman_exalt(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		_skill_refund(u, sk)
 		return
 	(tgt["buffs"] as Array).append({"type": "atk_up", "duration": 999.0, "value": 10.0, "source": "shaman_exalt", "_attackCount": 2.0})
+	_sfx("heal")
 	_float(tgt["x"], tgt["y"], "messages.shaman_exalt")
 	_float(u["x"], u["y"], "messages.shaman_exalt")
 	_exp(u, "heal")
@@ -923,6 +982,7 @@ func _x_shaman_exalt(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 
 func _x_shaman_poisonmist(u: Dictionary, tx: int, ty: int, _sk: Dictionary) -> void:
 	(S["poisonMists"] as Array).append({"cx": tx, "cy": ty, "atk": u["atk"], "turns": 3.0, "team": "ally"})
+	_sfx("atk", u)
 	_float(tx, ty, "messages.shaman_poisonmist")
 	_exp(u, "attack")
 	_skill_done(u)
@@ -935,6 +995,8 @@ func _x_shaman_spiritsurge(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> v
 		return
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.0, "shaman_spiritsurge", tgt))
 	tgt["_rootedTurns"] = 1.0
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(tgt["x"], tgt["y"], "messages.rooted")
 	_float(u["x"], u["y"], "messages.shaman_spiritsurge")
 	_exp(u, "attack")
@@ -949,6 +1011,7 @@ func _x_brawler_disarm(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		_skill_refund(u, sk)
 		return
 	tgt["disarmed"] = 3.0
+	_sfx("atk", u)
 	_float(tgt["x"], tgt["y"], "messages.brawler_disarm")
 	_float(tgt["x"], tgt["y"], "messages.atk_reduced")
 	_exp(u, "attack")
@@ -964,6 +1027,8 @@ func _x_brawler_flurry(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		if tgt["hp"] <= 0:
 			break
 		tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 0.6, "brawler_flurry", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.brawler_flurry")
 	_exp(u, "attack")
 	_skill_done(u, {"rmDead": true, "chkEnd": true})
@@ -976,6 +1041,8 @@ func _x_brawler_crush(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	var dmg := maxf(1.0, Js.round_js(u["atk"] * 1.0 * _sk_mul(u, "brawler_crush")))
 	tgt["hp"] = maxf(0.0, tgt["hp"] - dmg)
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.brawler_crush")
 	_exp(u, "attack")
 	_skill_done(u, {"rmDead": true, "chkEnd": true})
@@ -1006,6 +1073,8 @@ func _x_lancer_pierce(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 		return
 	for t: Dictionary in hit:
 		t["hp"] = maxf(0.0, t["hp"] - _dmg_sub(u, 1.0, "lancer_pierce", t))
+		_sfx_kill(t)
+	_sfx("atk", u)
 	_float(u["x"], u["y"], "messages.lancer_pierce")
 	E.proc_fury(u, hit[0])
 	_exp(u, "attack")
@@ -1026,6 +1095,8 @@ func _x_lancer_charge(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	u["mo"] = true
 	E.fx("move", {"id": u["id"], "x": u["x"], "y": u["y"]})
 	tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 1.2, "lancer_charge", tgt))
+	_sfx("atk", u)
+	_sfx_kill(tgt)
 	_float(u["x"], u["y"], "messages.lancer_charge")
 	E.proc_fury(u, tgt)
 	_exp(u, "attack")
@@ -1044,6 +1115,7 @@ func _x_lancer_phalanx(u: Dictionary, _tx: int, _ty: int, sk: Dictionary) -> voi
 	for a: Dictionary in allies:
 		a["_phalanxTurns"] = 2.0
 		a["_phalanxDef"] = 5.0
+	_sfx("heal")
 	_float(u["x"], u["y"], "messages.lancer_phalanx")
 	E.proc_fury(u, u)
 	_exp(u, "attack")
@@ -1059,6 +1131,7 @@ func _x_sapper_trap(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	var trap_dmg := Js.round_js(u["atk"] * 2.0)
 	var enh: bool = Js.num(u["skillLv"].get("sapper_enhancedtrap")) >= 1
 	(S["traps"] as Array).append({"x": tx, "y": ty, "team": u["team"], "dmg": Js.round_js(trap_dmg * 1.3) if enh else trap_dmg, "stun": 3.0 if enh else 2.0})
+	_sfx("uiclick")
 	_float(tx, ty, "messages.trap_installed")
 	_exp(u, "attack")
 	_skill_done(u, {"rTer": true})
@@ -1069,6 +1142,7 @@ func _x_sapper_excavate(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 		_skill_refund(u, sk)
 		return
 	S["ter"][ty][tx] = "plain"
+	_sfx("atk", u)
 	_float(tx, ty, "messages.sapper_excavate")
 	_exp(u, "attack")
 	_skill_done(u, {"rTer": true})
@@ -1092,11 +1166,14 @@ func _x_sapper_detonate(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void
 		var tgt: Variant = _enemy_at(px, py)
 		if tgt != null:
 			tgt["hp"] = maxf(0.0, tgt["hp"] - maxf(1.0, burst - tgt["def"]))
+			_sfx_kill(tgt)
 	var left: Array = []
 	for tr2: Dictionary in S["traps"]:
 		if tr2 != trap:
 			left.append(tr2)
 	S["traps"] = left
+	_sfx("atk", u)
+	_sfx("explosion")
 	_float(tx, ty, "messages.sapper_detonate")
 	_exp(u, "attack")
 	_skill_done(u, {"rmDead": true, "chkEnd": true})

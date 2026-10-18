@@ -2488,7 +2488,19 @@
       "leave": "退出",
       "leave_tip": "戦闘を保存してロビーへ — ロビーの「戦闘再開」で続きから",
       "leave_confirm": "戦闘を保存してロビーに戻ります。\nロビーの「戦闘再開」でこのターンから続けられます。",
-      "leave_pending": "演出が終わったら保存して退出します"
+      "leave_pending": "演出が終わったら保存して退出します",
+      "display": "画面",
+      "window_mode": "表示モード",
+      "windowed": "ウィンドウ",
+      "fullscreen": "フルスクリーン",
+      "fullscreen_tip": "フルスクリーン切り替え: Alt+Enter（macOS: Cmd+Ctrl+F）",
+      "window_size": "ウィンドウサイズ",
+      "window_size_tip": "ウィンドウモードで変更できます。ウィンドウの端をドラッグしても変えられます",
+      "bg_audio": "バックグラウンド時の音",
+      "bg_audio_tip": "ゲームウィンドウが非アクティブのとき、音をそのまま・小さく・消音にします",
+      "bg_play": "そのまま",
+      "bg_lower": "小さく",
+      "bg_mute": "消音"
     },
     "result": {"retry": "再挑戦"},
     "resume": {

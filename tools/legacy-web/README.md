@@ -30,3 +30,7 @@ node tools/legacy-web/battle-sim.js --check          # 웹 코드가 아직 고�
 node tools/legacy-web/battle-sim.js --only boss_s10 --rng-log
 node tools/legacy-web/outer-4b2-expect.js --check
 ```
+
+## audio-bake (2026-10-18, 5단계)
+
+웹 `js/battle/audio.js` 를 Chrome WebAudio 로 그대로 돌려 Godot 소리 파일(`godot/assets/audio/`)을 굽고, 웹 실시간 출력과 Godot 출력을 녹음해 비교하는 도구 — `audio-bake/README.md`.

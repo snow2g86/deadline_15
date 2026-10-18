@@ -16,6 +16,11 @@ config/version="0.4.2"
 run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.png"
+config/use_custom_user_dir=false
+config/use_custom_user_dir.template=true
+config/custom_user_dir_name="DEADLINE 15"
+boot_splash/bg_color=Color(0.0392157, 0.054902, 0.101961, 1)
+boot_splash/show_image=false
 
 [autoload]
 
@@ -23,6 +28,9 @@ Store="*res://scripts/core/store.gd"
 DataDB="*res://scripts/core/data_db.gd"
 I18n="*res://scripts/core/i18n.gd"
 Router="*res://scripts/core/router.gd"
+Platform="*res://scripts/core/platform.gd"
+Sound="*res://scripts/core/sound.gd"
+Display="*res://scripts/core/display.gd"
 
 [display]
 
@@ -31,6 +39,10 @@ window/size/viewport_height=720
 window/size/resizable=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
 
 [filesystem]
 
@@ -45,3 +57,5 @@ theme/custom_font="res://assets/fonts/NotoSansKR-VariableFont_wght.ttf"
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.0392157, 0.054902, 0.101961, 1)

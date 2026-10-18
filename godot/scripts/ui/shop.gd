@@ -5,6 +5,7 @@ extends "res://scripts/ui/screen_base.gd"
 ##   소모품: 광고 + 룬 뽑기 + 경험치 물약 3 · 전투 물약 6 · 공성 아이템 3 (사도 사라지지 않음)
 ##   장비: 광고 + 천장 막대 + 확률표 + 1회 · 10+1회 뽑기 + 강화 재료(강화석 · 보호 주문서) + 전설 교환
 ##   스킬: 광고 + 영혼석 3 · 스킬북 6,  전직서: 광고 + 전직서 6,  골드: 광고 + 결제 꾸러미 4 (웹도 '추후 오픈 예정')
+##  (5단계) 광고 카드는 Platform.has_ads() 일 때만 — PC 가게판(stove·steam)은 광고가 없어 숨김. 결제 카드 4개는 그대로 (결제 연동은 다음 단계)
 ##  규칙은 scripts/logic/shop_rules.gd (웹과 같은 난수 순서·저장 형식). 사기는 웹과 같이 확인 창(용병·룬·뽑기·재료는 바로).
 ##  자원이 오가는 단추는 같은 프레임 연타를 막음 (act_once). 다른 화면에서 {tab: "scroll"} 처럼 탭을 정해 들어올 수 있음 (웹 shop.html?tab=)
 
@@ -207,7 +208,8 @@ func render() -> void:
 
 func _full(ctl: Control) -> void:
 	_grid = null
-	list.add_child(ctl)
+	if ctl != null:
+		list.add_child(ctl)
 
 
 func _half(ctl: Control) -> void:
@@ -262,7 +264,11 @@ func _icon_box(ctl: Control) -> CenterContainer:
 	return cc
 
 
+## 광고 카드 (광고가 없는 판이면 null — _full 이 건너뜀)
 func _ad_card(key: String, key2: String = "") -> Control:
+	var pf := get_node_or_null("/root/Platform")
+	if pf != null and not bool(pf.call("has_ads")):
+		return null
 	var p := _card(LIST_W, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.25))
 	p.name = "AdCard"
 	var h := OKit.hbox(12)

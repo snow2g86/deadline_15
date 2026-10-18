@@ -2488,7 +2488,19 @@
       "leave": "离开",
       "leave_tip": "保存战斗并返回大厅 — 在大厅点「继续战斗」接着打",
       "leave_confirm": "将保存战斗并返回大厅。\n在大厅点「继续战斗」可从本回合继续。",
-      "leave_pending": "动画结束后保存并离开"
+      "leave_pending": "动画结束后保存并离开",
+      "display": "显示",
+      "window_mode": "显示模式",
+      "windowed": "窗口",
+      "fullscreen": "全屏",
+      "fullscreen_tip": "切换全屏：Alt+Enter（macOS：Cmd+Ctrl+F）",
+      "window_size": "窗口大小",
+      "window_size_tip": "窗口模式下可更改，也可以拖动窗口边缘",
+      "bg_audio": "后台时的声音",
+      "bg_audio_tip": "游戏窗口失去焦点时，声音保持、降低或静音",
+      "bg_play": "保持",
+      "bg_lower": "降低",
+      "bg_mute": "静音"
     },
     "result": {"retry": "重新挑战"},
     "resume": {
