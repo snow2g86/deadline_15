@@ -45,6 +45,7 @@
   "IAP_SERVER": {
     "dev": {"url": "fake://local", "timeout": 10},
     "stage": {"url": "", "timeout": 10},
-    "prod": {"url": "", "timeout": 10}
+    "prod": {"url": "", "timeout": 10},
+    "local": {"url": "http://127.0.0.1:8951", "timeout": 10, "env": "dev"}
   }
 }

@@ -1,0 +1,94 @@
+// DEADLINE 15 결제 확인 서버 (Cloudflare Workers + D1) — 약속은 docs/server/api.md
+//  맨 위 = dev (로컬 `npm run dev`, 원격 리소스 없음, 포트 8951). stage · prod 는 아래 env 에.
+//  비밀값은 여기에 쓰지 않음: `wrangler secret put <이름> --env <stage|prod>` · 로컬은 .dev.vars (git 제외, .dev.vars.example 참고)
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "deadline15-iap-dev",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-12",
+  "observability": { "enabled": true },
+  // dev 는 공개 주소를 만들지 않음 (가짜 가게는 로컬 주소에서만 켜지지만, 혹시 배포해도 열리지 않게)
+  "workers_dev": false,
+  "vars": {
+    "ENV": "dev",
+    "STORES": "dev,stove",
+    "DEV_STORE": "1",
+    "GOOGLE_PACKAGE_NAME": "xyz.show4you.deadline15",
+    "GOOGLE_ALLOW_TEST_PURCHASES": "1",
+    "APPLE_BUNDLE_ID": "xyz.show4you.deadline15",
+    "APPLE_ENVIRONMENTS": "Sandbox",
+    "APPLE_ROOT_SHA256": "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "deadline15-iap-dev",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Workers Rate Limiting (period 은 10 또는 60초). 로컬 시험은 요청이 많아 dev 는 크게.
+  "ratelimits": [
+    { "name": "RL_INSTALL", "namespace_id": "1501", "simple": { "limit": 6000, "period": 60 } },
+    { "name": "RL_IP", "namespace_id": "1502", "simple": { "limit": 20000, "period": 60 } }
+  ],
+  "triggers": { "crons": [] },
+  "env": {
+    "stage": {
+      "name": "deadline15-iap-stage",
+      "workers_dev": true,
+      "vars": {
+        "ENV": "stage",
+        "STORES": "stove,google,apple",
+        "DEV_STORE": "0",
+        "GOOGLE_PACKAGE_NAME": "xyz.show4you.deadline15",
+        "GOOGLE_ALLOW_TEST_PURCHASES": "1",
+        "APPLE_BUNDLE_ID": "xyz.show4you.deadline15",
+        "APPLE_ENVIRONMENTS": "Sandbox",
+        "APPLE_ROOT_SHA256": "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "deadline15-iap-stage",
+          "database_id": "REPLACE_WITH_STAGE_DATABASE_ID",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "ratelimits": [
+        { "name": "RL_INSTALL", "namespace_id": "2501", "simple": { "limit": 60, "period": 60 } },
+        { "name": "RL_IP", "namespace_id": "2502", "simple": { "limit": 600, "period": 60 } }
+      ],
+      // 환불 수집 (Google Voided Purchases) · 오래된 기록 정리 — 30분마다
+      "triggers": { "crons": ["*/30 * * * *"] }
+    },
+    "prod": {
+      "name": "deadline15-iap",
+      "workers_dev": true,
+      "vars": {
+        "ENV": "prod",
+        "STORES": "stove,google,apple",
+        "DEV_STORE": "0",
+        "GOOGLE_PACKAGE_NAME": "xyz.show4you.deadline15",
+        "GOOGLE_ALLOW_TEST_PURCHASES": "0",
+        "APPLE_BUNDLE_ID": "xyz.show4you.deadline15",
+        // App Review 는 출시 빌드로 Sandbox 결제를 함 (Apple 권장: 운영 서버도 Sandbox 영수증을 받음)
+        "APPLE_ENVIRONMENTS": "Production,Sandbox",
+        "APPLE_ROOT_SHA256": "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "deadline15-iap-prod",
+          "database_id": "REPLACE_WITH_PROD_DATABASE_ID",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "ratelimits": [
+        { "name": "RL_INSTALL", "namespace_id": "3501", "simple": { "limit": 60, "period": 60 } },
+        { "name": "RL_IP", "namespace_id": "3502", "simple": { "limit": 600, "period": 60 } }
+      ],
+      "triggers": { "crons": ["*/30 * * * *"] }
+    }
+  }
+}

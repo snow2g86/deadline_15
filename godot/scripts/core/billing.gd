@@ -22,7 +22,8 @@ extends Node
 ##   7) 서버 consume → 백엔드 finish(tx) → 둘 다 되면 기록 st 를 done 으로 (안 되면 granted 로 남아 다음 restore 때 다시)
 ##  환불: 서버 환불 목록(GET /v1/refunds)에 나온 주문은 IapRules.revoke (골드 0 바닥). 전투 중에는 하지 않음 (같은 덮어쓰기 위험).
 ##
-##  디버그 빌드만: 명령줄 -- --iap <시나리오> (backend_fake.gd 의 SCENARIOS) · -- --iap-env dev|stage|prod. 출시 빌드는 무시하고 가짜 가게를 만들지 않음.
+##  디버그 빌드만: 명령줄 -- --iap <시나리오> (backend_fake.gd 의 SCENARIOS) · -- --iap-env dev|stage|prod|local · -- --iap-server <주소>. 출시 빌드는 무시하고 가짜 가게를 만들지 않음.
+##   local = 로컬 결제 확인 서버 (server/ 의 wrangler dev, 포트 8951 — 가짜 가게 영수증을 진짜 Worker 가 확인)
 
 const Ctx := preload("res://scripts/logic/ctx.gd")
 const StoreCtx := preload("res://scripts/logic/store_ctx.gd")
@@ -30,6 +31,7 @@ const IapRules := preload("res://scripts/logic/iap_rules.gd")
 const Verifier := preload("res://scripts/core/billing/verifier.gd")
 const BackendNone := preload("res://scripts/core/billing/backend_none.gd")
 const BackendFake := preload("res://scripts/core/billing/backend_fake.gd")
+const FakeFiles := preload("res://scripts/core/billing/fake_files.gd")
 const BackendStove := preload("res://scripts/core/billing/backend_stove.gd")
 const BackendGoogle := preload("res://scripts/core/billing/backend_google.gd")
 const BackendApple := preload("res://scripts/core/billing/backend_apple.gd")
@@ -48,6 +50,8 @@ const REFUND_GAP_MS := 60000
 var backend: Node = null
 var verifier: Verifier
 var env := "dev"
+## (디버그) 서버 주소 바꾸기 — -- --iap-server http://127.0.0.1:8951 (check_iap -- --server 가 씀). 출시 빌드는 무시
+var server_override := ""
 var scenario := ""
 ## 시험용 세기
 var stats: Dictionary = {"grants": 0, "dups": 0, "deferred": 0, "verify_fail": 0, "revokes": 0, "finished": 0}
@@ -74,8 +78,11 @@ func _ready() -> void:
 		scenario = args[i + 1]
 	env = "dev" if OS.is_debug_build() else "prod"
 	var e := args.find("--iap-env")
-	if e >= 0 and e + 1 < args.size() and ["dev", "stage", "prod"].has(args[e + 1]):
+	if e >= 0 and e + 1 < args.size() and ["dev", "stage", "prod", "local"].has(args[e + 1]):
 		env = args[e + 1]
+	var u := args.find("--iap-server")
+	if u >= 0 and u + 1 < args.size():
+		server_override = args[u + 1]
 	verifier = Verifier.new()
 	verifier.name = "Verifier"
 	add_child(verifier)
@@ -139,9 +146,13 @@ func _ensure_backend() -> void:
 		set_scenario(scenario)
 	_prices = {}
 	var cfgs: Variant = _D().get("IAP_SERVER")
-	var cfg: Dictionary = cfgs.get(env, {}) if cfgs is Dictionary else {}
+	var cfg: Dictionary = (cfgs.get(env, {}) as Dictionary).duplicate() if cfgs is Dictionary and cfgs.get(env) is Dictionary else {}
+	if OS.is_debug_build() and server_override != "":
+		cfg["url"] = server_override
 	var ver := str(ProjectSettings.get_setting("application/config/version", "0"))
 	verifier.configure(env, cfg, IapRules.products(_ctx()), "deadline15/%s (%s; %s)" % [ver, s, OS.get_name()])
+	# (디버그 · 가짜 가게 + 로컬 서버) 가짜 가게 장부를 서버에도 비춤 — fake_files.gd remote
+	FakeFiles.remote = str(cfg.get("url", "")) if OS.is_debug_build() and backend is BackendFake and str(cfg.get("url", "")).begins_with("http") else ""
 
 
 ## (디버그) 가짜 가게 시나리오 바꾸기 — 출시 빌드에서는 아무것도 안 함

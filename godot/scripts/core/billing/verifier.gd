@@ -4,6 +4,7 @@ extends Node
 ##  영수증을 가게에 확인하는 일(Google 서비스 계정 키 · Apple App Store Server API 키 · STOVE 결제 확인 키)은 서버만 한다.
 ##
 ##  주소는 data/iap.json 의 IAP_SERVER[env].url — env 는 dev · stage · prod (Billing 이 정함: 디버그 빌드 dev, 출시 빌드 prod).
+##   디버그 빌드는 local(로컬 wrangler dev, server/ — 요청의 env 는 IAP_SERVER.local.env = "dev")도 고를 수 있음.
 ##   "fake://…" 이면 가짜 서버(fake_server.gd, 같은 약속의 GDScript 흉내, 디버그 빌드만), "https://…" 이면 HTTPRequest, "" 이면 '설정 안 됨'(네트워크 오류처럼 다룸).
 ##
 ##  돌려주는 값 (Billing 이 읽음):
@@ -32,13 +33,15 @@ var debug_hook: Callable = Callable()
 
 
 func configure(env_: String, cfg: Dictionary, products: Array, tag: String) -> void:
-	env = env_
+	env = str(cfg.get("env", env_))   # IAP_SERVER.local 은 dev 서버를 로컬에서 띄운 것이라 요청의 env 는 "dev" (api.md 1)
 	base_url = str(cfg.get("url", ""))
 	timeout = float(cfg.get("timeout", 10))
 	client_tag = tag
 	fake = FakeServer.new(products) if base_url.begins_with("fake://") and OS.is_debug_build() else null
 	if base_url.begins_with("fake://") and fake == null:
 		base_url = ""   # 출시 빌드는 가짜 서버를 쓰지 않음
+	if base_url.begins_with("http://") and not OS.is_debug_build():
+		base_url = ""   # 출시 빌드는 https 만 (로컬 서버 http://127.0.0.1 은 디버그 빌드만)
 
 
 func _headers(iid: String) -> Dictionary:
@@ -63,6 +66,11 @@ func _call(method: String, path: String, query: Dictionary, body: Dictionary, ii
 	if base_url == "":
 		await get_tree().process_frame
 		return {"net": false, "status": 0, "body": {}, "code": "not_configured"}
+	if OS.is_debug_build() and (net_down or net_fail_left > 0):
+		# (디버그) 진짜 서버를 붙여도 네트워크 실패 흉내는 같게 (check_iap -- --server)
+		await get_tree().process_frame
+		net_fail_left = maxi(0, net_fail_left - 1)
+		return {"net": false, "status": 0, "body": {}, "code": "network"}
 	var url := base_url.trim_suffix("/") + path
 	if not query.is_empty():
 		var parts: Array = []
@@ -84,6 +92,8 @@ func _call(method: String, path: String, query: Dictionary, body: Dictionary, ii
 	if int(res[0]) != HTTPRequest.RESULT_SUCCESS:
 		return {"net": false, "status": 0, "body": {}, "code": "network"}
 	var parsed: Variant = JSON.parse_string((res[3] as PackedByteArray).get_string_from_utf8())
+	if OS.is_debug_build() and debug_hook.is_valid():
+		debug_hook.call(path)
 	return {"net": true, "status": int(res[1]), "body": parsed if parsed is Dictionary else {}}
 
 

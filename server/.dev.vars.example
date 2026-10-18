@@ -1,0 +1,17 @@
+# 로컬 wrangler dev 용 비밀값 (이 파일을 .dev.vars 로 복사해서 채움 — .dev.vars 는 git 에 넣지 않음)
+# 배포 환경에는 `npx wrangler secret put <이름> --env stage|prod` 로 넣음. 값은 절대 커밋하지 말 것.
+#
+# dev(가짜 가게)만 쓸 때는 아무것도 없어도 됨.
+#
+# Google Play: Android Publisher API 서비스 계정 JSON (한 줄로)
+# GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","client_email":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","token_uri":"https://oauth2.googleapis.com/token"}
+#
+# App Store Server API (선택 — 없으면 JWS 서명 확인만 함)
+# APPLE_API_KEY_P8="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+# APPLE_KEY_ID=ABCDE12345
+# APPLE_ISSUER_ID=00000000-0000-0000-0000-000000000000
+#
+# STOVE (결제 확인 API — 확인 필요, 지금은 501)
+# STOVE_API_KEY=
+# STOVE 회원 번호 HMAC 키 (서버가 만든 무작위 값, 예: openssl rand -hex 32)
+# STOVE_ACCT_KEY=

@@ -1,7 +1,7 @@
 # DEADLINE 15 결제 확인 서버 — API 약속 (v1)
 
-게임(Godot)과 결제 확인 서버 사이의 약속입니다. 서버는 **Cloudflare Workers + D1** 로 다음 작업에서 만듭니다.
-이 문서가 기준이고, 게임 쪽 구현은 이미 이 약속을 따릅니다.
+게임(Godot)과 결제 확인 서버 사이의 약속입니다. 서버는 **Cloudflare Workers + D1** (`server/`, 결제층 B — 배포 절차는 `server/README.md`).
+이 문서가 기준이고, 게임 쪽 구현 · 가짜 서버 · 진짜 서버가 모두 이 약속을 따릅니다 (`godot/tests/check_iap_parity.gd` 가 가짜 ↔ 진짜 응답을 비교).
 
 | 쪽 | 파일 |
 |---|---|
@@ -10,7 +10,8 @@
 | 지급 순서 | `godot/scripts/core/billing.gd` (오토로드 `Billing`) |
 | 지급 기록 | `godot/scripts/logic/iap_rules.gd` (세이브 키 `game_iap`) |
 | 서버 주소 | `godot/data/iap.json` 의 `IAP_SERVER.{dev,stage,prod}.url` |
-| 시험 | `godot/tests/check_iap.gd` (가짜 서버로 모든 경우) |
+| 진짜 서버 | `server/` (Cloudflare Workers + D1, `src/purchases.ts` 판단 순서) |
+| 시험 | `godot/tests/check_iap.gd` (가짜 서버로 모든 경우, `-- --server http://127.0.0.1:8951` 이면 로컬 Worker 로) · `godot/tests/check_iap_parity.gd` · `server/test/` (vitest) |
 
 ---
 
@@ -21,8 +22,14 @@
 | `dev` | 디버그 빌드 기본 | `fake://local` → 가짜 서버 (네트워크 없음) | 가짜 가게 (`store: "dev"`) |
 | `stage` | 디버그 빌드 + `-- --iap-env stage` | (서버를 만들면 채움, 예: `https://iap-stage.<도메인>`) | STOVE 샌드박스 · Google 라이선스 시험 · Apple Sandbox |
 | `prod` | 출시 빌드 | (서버를 만들면 채움, 예: `https://iap.<도메인>`) | 실제 결제 |
+| `local` | 디버그 빌드 + `-- --iap-env local` | `http://127.0.0.1:8951` — 로컬 `wrangler dev` (server/, 서버 env 는 dev 라 요청의 `env` 도 `"dev"`: `IAP_SERVER.local.env`) | 가짜 가게 (`store: "dev"`) |
 
-- 주소가 `""` 이면 게임은 '네트워크 오류'처럼 다룹니다 (지급하지 않고 미처리로 남김). 출시 빌드는 `fake://` 를 쓰지 않습니다.
+- 주소가 `""` 이면 게임은 '네트워크 오류'처럼 다룹니다 (지급하지 않고 미처리로 남김). 출시 빌드는 `fake://` · `http://` 를 쓰지 않습니다 (`https://` 만).
+- 가짜 가게(`store: "dev"`)는 서버가 dev 환경 · `DEV_STORE=1` · 로컬 주소(127.0.0.1 · localhost)로 받은 요청에서만 받습니다. stage · prod 는 `400 bad_store`.
+  로컬 서버는 게임의 가짜 가게 장부를 `PUT /v1/dev/ledger` 로 받아 대기 · 환불 · finish · 상품 · 구매 시각을 압니다 (dev 도구 `/v1/dev/*` 는 같은 조건에서만, 그 밖에는 404).
+  '로컬'은 주소 이름이 루프백이고 **실제 연결 주소(`CF-Connecting-IP`)도 루프백**일 때. 상태를 바꾸는 dev 도구는 JSON 본문 + `Content-Type: application/json` 필수.
+  dev 서버가 받는 가게는 `dev` · `stove`(STOVE 는 `501 not_implemented` — 가짜 서버도 같음).
+  가짜 가게 영수증의 `oid`·`spid`·`sig` 는 글, `acct` 는 글 또는 없음(""), 장부의 상품과 영수증 상품이 다르면 `422 invalid_receipt`.
 - 서버는 요청의 `env` 와 자기 환경이 다르면 `400 env_mismatch` 를 돌려줍니다 (샌드박스 영수증이 운영 서버에 들어오지 않게).
 - 경로는 `/v1/...`. 응답에 필드를 **더하는 것**은 같은 판(v1) 안에서 해도 됩니다 — 게임은 모르는 필드를 무시합니다. 뜻을 바꾸거나 빼면 `/v2`.
 
@@ -46,7 +53,8 @@
 | Google Play | Android Publisher API 서비스 계정 JSON |
 | App Store | App Store Server API 키(.p8) · Key ID · Issuer ID (JWS 확인 자체는 Apple 루트 인증서로 — 키 불필요) |
 
-남용 막기: 설치 식별자 + IP 별 요청 수 제한 (예: 분당 60회, 넘으면 `429 rate_limited`).
+남용 막기: 설치 식별자 + IP 별 요청 수 제한 (설치 식별자 분당 60회 · IP 분당 600회, IPv6 는 /64 묶음, 넘으면 `429 rate_limited` + `Retry-After: 60`).
+IP 제한은 설치 식별자 검사보다 먼저 합니다 (모양이 틀린 요청도 셈 — 그래서 429 가 401 보다 먼저 나올 수 있음).
 
 ### 2.1 계정 값 — 서버는 클라이언트가 보낸 값을 믿지 않음
 
@@ -75,6 +83,7 @@
 200 {"ok": true, "time": 1792300000000, "env": "prod"}
 ```
 `time` = 서버 시각(ms). (나중에 광고 하루 횟수의 시계 확인에 쓸 수 있음.)
+health 는 설치 식별자 · `env` 쿼리가 없어도 됩니다 (IP 별 요청 수 제한만).
 
 ### 3.2 `POST /v1/purchases/verify` — 영수증 확인
 
@@ -98,10 +107,12 @@
 |---|---|---|
 | 0 | 요청 형이 틀림 · env 다름 · 상품 모름 · 영수증 가짜/불일치 | `400` / `422` (아래 오류 표) |
 | 1 | 이 주문이 이미 **consumed** | `200 status: consumed` — 누가 물어도 (주인이 아니어도) |
-| 2 | 가게 확인 결과 환불·취소됨, 또는 서버 기록이 refunded | `422 refunded` (verify 전에 환불된 주문 포함 — 주인 기록을 만들지 않음) |
+| 0b | 보관 기간(5년)이 지나 지운 주문 (묘비 `purged_orders` 에 `SHA-256("<store>\n<order_id>")`) | `200 status: consumed` |
+| 1 | (보충) consume 된 뒤 환불 기록이 붙은 주문 (`status = refunded` 이고 `consumed_at` 있음) 도 consumed | `200 status: consumed` |
+| 2 | 가게 확인 결과 환불·취소됨, 또는 서버 기록이 refunded (refunds 표에 있음) | `422 refunded` (verify 전에 환불된 주문 포함 — 주인 기록을 만들지 않음). 이미 주인 기록이 있는 주문을 가게가 환불이라 하면 서버가 그 자리에서 환불을 기록 (`source: verify`) → 주인의 환불 목록에 나옴 |
 | 3 | 가게 확인 결과 결제 대기 | `200 status: pending` (주인 기록을 만들지 않음) |
 | 4 | 다른 `install_id` 가 주인 (claim) | 아래 순서로: ① 가게 쪽에서 이미 소모·확인됨(Google `consumptionState=1` 또는 `acknowledgementState=1`, Apple 은 해당 없음 — **확인 필요**, STOVE 는 소모 개념 없음) → `403 already_delivered` (원래 주인이 이미 받음) ② 이 주문이 이미 한 번 재claim 됨 → `403 reclaim_limit` (주문당 **1번**) ③ 주인의 `claimed_at` 으로부터 **24시간 안** → `403 order_claimed` ④ 그 밖 → 주인을 요청한 설치로 바꾸고 `reclaimed_from`·`reclaimed_at`·`reclaims` 를 기록, `200 valid` (`reclaimed: true`) — 재설치 복구 |
-| 5 | 그 밖 | `200 status: valid` (처음이면 주인 기록 `INSERT`, `first: true`) |
+| 5 | 그 밖 | `200 status: valid` (처음이면 주인 기록 `INSERT`, `first: true`) — 처음 보는 주문인데 가게의 구매 시각이 5년보다 오래되면 `422 invalid_receipt` |
 
 ```json
 200 {"ok": true, "status": "valid", "order_id": "GPA.3312-...", "product_id": "gold_1200", "gold": 1200, "first": true}
@@ -123,6 +134,7 @@
 | 422 | `invalid_receipt` · `unknown_product` · `product_mismatch` · `refunded` | 가짜·틀린 영수증, 환불된 주문 | invalid |
 | 429 | `rate_limited` | 요청 과다 | **다시 시도** (미처리로 남김) |
 | 5xx | `store_unavailable` · `internal` | 가게 API·서버 장애 | **다시 시도** |
+| 501 | `not_implemented` | 이 가게의 확인을 서버가 아직 못 함 (지금 STOVE — 4 의 '확인 필요') | **다시 시도** (5xx — 지급 없이 미처리로 남음) |
 | (없음) | 네트워크 실패·시간 초과 | | **다시 시도** |
 
 #### 두 설치가 같은 주문을 받는 경우 (24시간 재claim 의 경합)
@@ -149,7 +161,7 @@ STOVE 는 소모 API 가 없으므로 이 기록이 서버 쪽 재지급 방지�
 | 400 | `bad_request` · `env_mismatch` | | 다음 restore 때 다시 |
 | 403 | `order_claimed` | 요청한 설치가 주인이 아님 (다른 설치가 claim) | **자기 지급을 회수** (위 경합) |
 | 404 | `unknown_order` | verify 전 | 다음 restore 때 다시 |
-| 409 | `refunded` | 환불된 주문 — 소모하지 않음 | 기록은 `granted` 로 남고, 환불 목록에서 회수됨 |
+| 409 | `refunded` | 환불된 주문 — 소모하지 않음 (이미 consumed 였다가 환불돼도) | 기록은 `granted` 로 남고, 환불 목록에서 회수됨 |
 
 실패하면 게임의 기록은 `st: "granted"` 로 남고, 다음 `restore` 때 consume 만 다시 합니다 (골드는 다시 주지 않음).
 
@@ -168,6 +180,14 @@ STOVE 는 소모 API 가 없으므로 이 기록이 서버 쪽 재지급 방지�
 - 같은 주문이 다시 와도 게임은 두 번 회수하지 않음 (`revoked` 기록).
 - 게임은 결제 기록이 하나도 없으면 부르지 않고, 성공한 뒤 60초 안에는 다시 부르지 않음 (상점 진입·결제 직후 등 강제 때 제외).
 - verify 전에 환불된 주문은 주인이 없으므로 목록에 나오지 않음 (게임도 지급한 적이 없음).
+
+### 3.4b `POST /v1/webhooks/apple` — App Store Server Notifications V2 (게임은 부르지 않음)
+
+Apple 이 보내는 `{"signedPayload": "<JWS>"}`. 서버는 JWS(와 안의 `signedTransactionInfo`)를 4 의 App Store 줄과 같은 방법으로 확인하고,
+`REFUND` · `REVOKE` 면 `refunds` 에 기록 (`source: apple_notif`).
+`REFUND_REVERSED` 면 그 환불 기록을 지우고 주문 상태를 되돌림 (consume 됐으면 consumed, 아니면 verified). **게임이 이미 회수한 골드는 돌려주지 않음** (정책 — 필요하면 고객 문의로 보상).
+`CONSUMPTION_REQUEST`(Apple 의 환불 심사용 소비 정보 요청)는 응답하지 않고 받기만. 그 밖의 알림도 `200 {"ok": true}` 로 받기만. 서명이 틀리면 `422 invalid_receipt`, 번들이 다르면 422, 환경이 다르면 `400 env_mismatch`.
+설치 식별자 · `env` 는 받지 않음 (IP 별 요청 수 제한만).
 
 ### 3.5 재시도 간격 (게임)
 
@@ -188,9 +208,9 @@ STOVE 는 소모 API 가 없으므로 이 기록이 서버 쪽 재지급 방지�
 
 | 가게 | `order_id` | `receipt` | 서버 확인 | 환불 알기 |
 |---|---|---|---|---|
-| STOVE (PC, Windows 64비트) | 결제 **TID** | TID (+ SDK 결제 결과 원본) | STOVE 서버 API 로 TID 조회 → 상태·아이템 id·회원 번호 — **API 이름·인증 방식 확인 필요** (STOVE 개발자 센터 문서) | 환불 내역 조회 API 또는 알림 — **확인 필요** |
+| STOVE (PC, Windows 64비트) | 결제 **TID** | TID (+ SDK 결제 결과 원본) | STOVE 서버 API 로 TID 조회 → 상태·아이템 id·회원 번호 — **API 이름·인증 방식 확인 필요** (STOVE 개발자 센터 문서 — 2026-10 studio-docs 가 developers-beta.onstove.com 으로 옮겨져 확정 못 함). 서버는 지금 `501 not_implemented` | 환불 내역 조회 API 또는 알림 — **확인 필요** |
 | Google Play | `orderId` (`GPA.…`) — 없으면(시험 결제) `purchaseToken` | `purchaseToken` | Android Publisher `purchases.products.get(packageName, productId, token)`: `purchaseState` 0=구매 1=취소 2=대기, `consumptionState`, `acknowledgementState`, `orderId`, `obfuscatedExternalAccountId` | **Voided Purchases API** (`purchases.voidedpurchases.list`, Cron 주기 조회) + **RTDN**(Pub/Sub, 일회성 상품 `ONE_TIME_PRODUCT_CANCELED`/voided 알림 — 종류 확인 필요) |
-| App Store (StoreKit 2) | `transactionId` | `signedTransaction` (JWS) | JWS 서명을 x5c 사슬로 Apple Root CA G3 까지 확인 → `bundleId`·`productId`·`transactionId`·`environment`·`appAccountToken`·`revocationDate` (필요하면 App Store Server API `Get Transaction Info` 로 다시) | **App Store Server Notifications V2** `REFUND` (+ `REVOKE`) 웹훅, 놓친 것은 `Get Refund History` API |
+| App Store (StoreKit 2) | `transactionId` | `signedTransaction` (JWS) | **기준: JWS 서명을 x5c 사슬로 Apple Root CA G3(SHA-256 고정값)까지 확인** (Apple 확장 OID · 유효 기간 · ES256) → `bundleId`·`productId`·`transactionId`·`environment`(서버가 받는 목록 `APPLE_ENVIRONMENTS`, 아니면 `400 env_mismatch`)·`type`(Consumable)·`appAccountToken`·`revocationDate`. `.p8` 키가 설정되면 App Store Server API `Get Transaction Info` 로 한 번 더 (환불 여부 최신화) | **App Store Server Notifications V2** `REFUND` (+ `REVOKE`) 웹훅, 놓친 것은 `Get Refund History` API |
 | dev (가짜) | `FAKE.<초>.<번호>` | `{"oid","spid","acct","sig"}` 가짜 서명 JSON | 가짜 서버가 가짜 가게 장부로 확인 | 가짜 장부의 `refunded` |
 
 ## 5. D1 표 (안)
@@ -232,7 +252,11 @@ CREATE TABLE refunds (
 - `verify`: `INSERT ... ON CONFLICT(store, order_id) DO NOTHING` 후 다시 읽어 판단 순서(3.2)대로. 동시에 두 번 와도 주인은 하나.
   재claim 도 `UPDATE ... SET install_id=?, claimed_at=?, reclaims=reclaims+1, reclaimed_from=install_id, reclaimed_at=? WHERE ... AND install_id=<옛 주인> AND status='verified' AND reclaims=0 AND claimed_at <= now-86400000` 로 원자적 (가게 소모 상태 확인은 그 전에).
 - 환불 목록: `refunds JOIN orders USING(store, order_id) WHERE orders.install_id = ? AND refunds.seq > ?` — 주인의 iid 로만.
-- 환불 수집: Workers Cron Trigger 로 Google Voided Purchases · STOVE 환불 내역을 주기 조회, Apple/Google 알림은 웹훅 → `refunds` 에 `INSERT OR IGNORE`, `orders.status = 'refunded'` (이미 consumed 여도 기록 — 판단 순서상 verify 는 consumed 를 먼저 답함).
+- 환불 수집: Workers Cron Trigger 로 Google Voided Purchases · STOVE 환불 내역을 주기 조회, Apple/Google 알림은 웹훅 → `refunds` 에 `INSERT OR IGNORE`, `orders.status = 'refunded'` (이미 consumed 여도 기록, `consumed_at` 은 남김 — 판단 순서상 verify 는 consumed 를 먼저 답함).
+- 첫 주인 INSERT 는 `INSERT … SELECT … WHERE NOT EXISTS (refunds …) AND NOT EXISTS (purged_orders …) ON CONFLICT DO NOTHING` — verify 와 환불 기록 사이 경합이 없음.
+- 보관 기간이 지난 주문은 지우면서 묘비(`purged_orders.key_sha`)를 같은 batch 에 남김 (0003).
+- 실제 표: `server/migrations/0001_init.sql` (위 표 + `status` CHECK · `orders(store, receipt_sha)` 색인(Google 시험 결제처럼 order_id 가 purchaseToken 인 주문을 Voided 목록과 맞춤) · `cursors(name, value, updated_at)` (Cron 진행 위치)).
+  dev 전용: `0002_dev_store.sql` (`dev_ledger` 가짜 가게 장부 · `dev_meta` 시험 시계).
 
 ## 6. 게임의 지급 순서 (요약 — 자세히는 `billing.gd` 머리말)
 

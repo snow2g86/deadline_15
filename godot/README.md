@@ -628,6 +628,31 @@ HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godo
   - 그 밖(en·es·ja·zh-CN·zh-TW): 환불은 구매한 스토어의 환불 정책 · 가격·세금은 스토어 표시 기준 · 미성년자 법정대리인
   - 언어 ≠ 거주 국가 (한국 사용자가 영어로 두면 7일 문구가 안 보임) — 스토어 지역으로 나눌지 법무 확인.
 
+## 결제층 B — 결제 확인 서버 (Cloudflare Workers + D1, 2026-10-18 — 배포 전)
+
+서버는 저장소의 `server/` (설명 · 배포 절차 · 비용 · 운영 점검은 `server/README.md`). 게임 쪽은 약속(`docs/server/api.md`)을 바꾸지 않고 연결만 더함.
+
+| 파일 | 바뀐 것 |
+|---|---|
+| `data/iap.json` | `IAP_SERVER.local = {url: "http://127.0.0.1:8951", timeout: 10, env: "dev"}` — 로컬 `wrangler dev` (서버 env 가 dev 라 요청의 env 도 dev) |
+| `scripts/core/billing.gd` | 디버그 빌드 `-- --iap-env local` · `-- --iap-server <주소>`(`server_override`). 가짜 가게 + http 주소면 `fake_files.remote` 를 켬 |
+| `scripts/core/billing/verifier.gd` | `IAP_SERVER[env].env` 가 있으면 그 이름을 보냄 · 출시 빌드는 `http://` 를 쓰지 않음(https 만) · 디버그의 네트워크 실패 흉내(`net_down`·`net_fail_left`)와 `debug_hook` 이 진짜 HTTP 길에서도 같게 |
+| `scripts/core/billing/fake_files.gd` | `remote` 가 있으면 가게 장부를 서버 `/v1/dev/ledger` 에도 비추고, 서버 상태는 파일 대신 `/v1/dev/state` · 초기화는 `/v1/dev/reset` |
+| `scripts/core/billing/dev_remote.gd` | (새 파일) 그 일을 하는 작은 동기 HTTP (디버그 · dev 가게 전용) |
+| `scripts/core/billing/fake_server.gd` | 진짜 서버와 같게: consume 은 가게 장부가 환불이면 `409 refunded` · 길이 상한(400 `… too long`) · 같은 주문을 다른 상품으로 다시 보내면 `422 product_mismatch` · 영수증 필드는 글만(acct 는 없으면 "") · 장부 상품 ≠ 영수증 상품 422 · 5년보다 오래된 구매 422 · 커서·limit 은 15자리까지 · dev 서버가 받는 가게 dev·stove(STOVE 501) · 시험 훅 `force_429` |
+| `tests/check_iap.gd` | `-- --server http://127.0.0.1:8951` 이면 모든 시나리오를 진짜 로컬 Worker 로 (재claim 시계는 `/v1/dev/clock`, 앱 죽음 보조 프로세스에도 같은 서버). `6e) errors`: 429(verify · consume) · 501(STOVE) → 지급 없이 다시 시도 |
+| `tests/iap_remote.gd` · `tests/check_iap_parity.gd` | (새 파일) 가짜 서버와 같은 모양으로 Worker 를 부르는 보조 · 가짜 ↔ 진짜 응답 비교 (요청 59개 — 429 · 501 · 길이 상한 · 상품 대조 포함) |
+
+```bash
+cd server && npm ci && npm run migrate:local && npm run dev     # 127.0.0.1:8951 (계정 필요 없음)
+HOME=<임시> Godot --headless --path godot --script res://tests/check_iap.gd -- --server http://127.0.0.1:8951
+HOME=<임시> Godot --headless --path godot --script res://tests/check_iap_parity.gd -- --server http://127.0.0.1:8951
+Godot --path godot -- --iap-env local                                                   # 디버그 빌드 게임을 로컬 서버로
+```
+
+- 배포하면 `IAP_SERVER.stage/prod.url` 에 `https://…` 를 넣고 `data_tool --write` → 시험 → 다시 내보내기.
+- STOVE 확인은 서버가 아직 `501 not_implemented` (게임은 5xx → 지급 없이 미처리로 남김).
+
 ### 모바일·STOVE 작업에서 할 일 (결제층 A 에서 넘김)
 
 - **iid 를 앱 밖에 보존**: Android Block Store · iOS Keychain · STOVE 클라우드 세이브 → `Billing.set_iid_store(load_fn, save_fn)` 에 연결.

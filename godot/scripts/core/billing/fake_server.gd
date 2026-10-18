@@ -49,7 +49,11 @@ func _product(pid: String) -> Variant:
 ## 요청 하나 → {status:int, body:Dictionary}
 func handle(method: String, path: String, query: Dictionary, headers: Dictionary, body: Dictionary) -> Dictionary:
 	if path == "/v1/health" and method == "GET":
-		return _ok({"time": floorf(Time.get_unix_time_from_system() * 1000.0), "env": "dev"})
+		return _ok({"time": _now(), "env": "dev"})
+	if force_429 > 0:
+		# (시험 훅) 요청 수 제한 — 진짜 서버는 IP 제한을 설치 식별자 검사보다 먼저 함
+		force_429 -= 1
+		return _err(429, "rate_limited", "too many requests")
 	if not _is_iid(headers.get("X-D15-Install", "")):
 		return _err(401, "no_install_id", "X-D15-Install header missing or malformed")
 	match [method, path]:
@@ -67,6 +71,12 @@ const RECLAIM_MS := 86400000.0
 const RECLAIM_MAX := 1
 ## 시험용 시계 밀기 (ms)
 var clock_offset_ms := 0.0
+## (시험 훅) 다음 n 번의 게임 요청을 429 rate_limited 로 (진짜 로컬 서버는 POST /v1/dev/force429)
+var force_429 := 0
+## 진짜 서버(server/src/purchases.ts)와 같은 길이 상한 · 받는 가게 · 보관 기간
+const MAX_LEN := {"store": 16, "product_id": 64, "store_product_id": 128, "order_id": 512, "receipt": 12288}
+const STORES := ["dev", "stove"]
+const RETENTION_MS := 5.0 * 365.0 * 86400000.0
 
 
 func _now() -> float:
@@ -83,28 +93,37 @@ func _verify(headers: Dictionary, b: Dictionary) -> Dictionary:
 	for k: String in ["store", "product_id", "store_product_id", "order_id", "receipt"]:
 		if typeof(b.get(k)) != TYPE_STRING or str(b[k]) == "":
 			return _err(400, "bad_request", "missing " + k)
+		if str(b[k]).length() > int(MAX_LEN[k]):
+			return _err(400, "bad_request", k + " too long")
 	if not _env_ok(b):
 		return _err(400, "env_mismatch", "this server is the dev environment")
-	if str(b["store"]) != "dev":
+	if not STORES.has(str(b["store"])):
 		return _err(400, "bad_store", "this server only accepts the fake store")
 	var p: Variant = _product(str(b["product_id"]))
 	if p == null:
 		return _err(422, "unknown_product", "unknown product_id")
-	if str(p["id"]) != str(b["store_product_id"]):   # dev 가게 상품 id = 게임 안 id
+	var want_spid := str(p["stove_item"]) if str(b["store"]) == "stove" else str(p["id"])   # dev 가게 상품 id = 게임 안 id
+	if want_spid != str(b["store_product_id"]):
 		return _err(422, "product_mismatch", "store_product_id does not match product_id")
+	if str(b["store"]) == "stove":
+		return _err(501, "not_implemented", "STOVE purchase verification is not implemented yet")
 	# 가게에 영수증 확인 (진짜: STOVE 결제 조회 · Google purchases.products.get · Apple JWS — 비밀 키는 서버에만).
 	#  계정 값은 **확인된 영수증의 것만** (클라이언트가 보낸 account_id 는 읽지 않음)
 	var r: Variant = JSON.parse_string(str(b["receipt"]))
 	var oid := str(b["order_id"])
 	var spid := str(b["store_product_id"])
-	if not (r is Dictionary) or str(r.get("oid", "")) != oid or str(r.get("spid", "")) != spid \
-			or str(r.get("sig", "")) != Files.sig(FakeBackend.FAKE_SIGNER, oid, spid + "|" + str(r.get("acct", ""))):
+	# 글이 아닌 값은 받지 않음 (acct 는 없으면 "") — 진짜 서버와 같음
+	if not (r is Dictionary) or typeof(r.get("oid")) != TYPE_STRING or typeof(r.get("spid")) != TYPE_STRING or typeof(r.get("sig")) != TYPE_STRING \
+			or (r.has("acct") and typeof(r["acct"]) != TYPE_STRING) or str(r["oid"]) != oid or str(r["spid"]) != spid \
+			or str(r["sig"]) != Files.sig(FakeBackend.FAKE_SIGNER, oid, spid + "|" + str(r.get("acct", ""))):
 		return _err(422, "invalid_receipt", "receipt signature check failed")
 	var acct := str(r.get("acct", ""))
 	var L := Files.read(Files.STORE_FILE, {"orders": {}})
 	var so: Variant = (L["orders"] as Dictionary).get(oid)
 	if not (so is Dictionary):
 		return _err(422, "invalid_receipt", "the store does not know this order")
+	if str(so.get("spid", "")) != spid:
+		return _err(422, "invalid_receipt", "the store order is for another product")
 	var S := _state()
 	var key := "dev:" + oid
 	var have: Variant = (S["orders"] as Dictionary).get(key)
@@ -120,6 +139,8 @@ func _verify(headers: Dictionary, b: Dictionary) -> Dictionary:
 	if str(so.get("state")) == "pending":
 		out["status"] = "pending"
 		return _ok(out)
+	if have is Dictionary and str(have["product_id"]) != str(p["id"]):
+		return _err(422, "product_mismatch", "this order was verified for another product")
 	# 3) claim — 처음 확인받은 설치가 주인. 다른 설치는 아래를 모두 만족할 때만 넘겨받음 (재설치 복구):
 	#   - 가게 쪽에서 아직 소모되지 않음 (Google consumptionState=1 · acknowledgementState=1 이면 원래 주인이 이미 받음 → 403 already_delivered)
 	#     가짜 가게는 장부의 finished(가게 finish = Google consume)가 그 표시
@@ -149,6 +170,9 @@ func _verify(headers: Dictionary, b: Dictionary) -> Dictionary:
 		out["status"] = "valid"
 		out["first"] = false
 		return _ok(out)
+	# 처음 보는 주문인데 구매가 보관 기간(5년)보다 오래됨 → 거절
+	if float(so.get("at", 0)) > 0.0 and _now() - float(so["at"]) > RETENTION_MS:
+		return _err(422, "invalid_receipt", "receipt is older than the retention period")
 	S["orders"][key] = {"product_id": str(p["id"]), "gold": float(p["gold"]), "install_id": iid, "account_id": acct, "st": "verified",
 		"verified_at": _now(), "claimed_at": _now()}
 	Files.write(Files.SERVER_FILE, S)
@@ -162,6 +186,8 @@ func _consume(headers: Dictionary, b: Dictionary) -> Dictionary:
 	var iid := str(headers["X-D15-Install"])
 	if typeof(b.get("store")) != TYPE_STRING or typeof(b.get("order_id")) != TYPE_STRING:
 		return _err(400, "bad_request", "store and order_id are required")
+	if str(b["store"]).length() > int(MAX_LEN["store"]) or str(b["order_id"]).length() > int(MAX_LEN["order_id"]):
+		return _err(400, "bad_request", "store or order_id too long")
 	if not _env_ok(b):
 		return _err(400, "env_mismatch", "this server is the dev environment")
 	var S := _state()
@@ -171,7 +197,9 @@ func _consume(headers: Dictionary, b: Dictionary) -> Dictionary:
 		return _err(404, "unknown_order", "verify first")
 	if str(have["install_id"]) != iid:
 		return _err(403, "order_claimed", "order belongs to another install")
-	if str(have["st"]) == "refunded":
+	# 환불: 서버 기록 또는 가게 장부 (진짜 서버는 환불 수집이 orders.status 를 refunded 로 바꿈 — 이미 consumed 여도. api.md 5)
+	var so: Variant = (Files.read(Files.STORE_FILE, {"orders": {}})["orders"] as Dictionary).get(str(b["order_id"])) if str(b["store"]) == "dev" else null
+	if str(have["st"]) == "refunded" or (so is Dictionary and bool(so.get("refunded", false))):
 		return _err(409, "refunded", "refunded order cannot be consumed")
 	if str(have["st"]) != "consumed":
 		have["st"] = "consumed"
@@ -185,8 +213,11 @@ func _refunds(headers: Dictionary, q: Dictionary) -> Dictionary:
 	var iid := str(headers["X-D15-Install"])
 	if str(q.get("env", "")) != "dev":
 		return _err(400, "env_mismatch", "this server is the dev environment")
-	var since := int(str(q.get("cursor", "0"))) if str(q.get("cursor", "")).is_valid_int() else 0
-	var limit := clampi(int(str(q.get("limit", "100"))) if str(q.get("limit", "")).is_valid_int() else 100, 1, 100)
+	# 숫자가 아니거나 16자 넘는 커서·limit 은 기본값 (진짜 서버와 같음)
+	var cq := str(q.get("cursor", ""))
+	var lq := str(q.get("limit", ""))
+	var since := int(cq) if cq.length() <= 15 and cq.is_valid_int() else 0
+	var limit := clampi(int(lq) if lq.length() <= 15 and lq.is_valid_int() else 100, 1, 100)
 	var S := _state()
 	var L := Files.read(Files.STORE_FILE, {"orders": {}})
 	var rows: Array = []

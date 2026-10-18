@@ -21,7 +21,7 @@
     "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
     "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
     "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}],
-    "iap": [{"file": "iap.json", "sha1": "d1761950fa0f0d0ea5a87bd4545f3c64ed2656f4"}]
+    "iap": [{"file": "iap.json", "sha1": "9e14bce8a88e61f1281dabdf5bae1a22c17b2418"}]
   },
   "modules": {
     "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
@@ -253,7 +253,7 @@
       "globals": {
         "IAP_PRODUCTS": {"type": "array", "count": 4},
         "AD_REWARD": {"type": "object", "count": 2},
-        "IAP_SERVER": {"type": "object", "count": 3}
+        "IAP_SERVER": {"type": "object", "count": 4}
       }
     }
   },

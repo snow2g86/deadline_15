@@ -12,10 +12,12 @@ extends SceneTree
 ##  6b) sortie : 서버 응답 프레임에 출격(store_save 사본 직후) → 지급 미룸 · 환불 목록 응답 프레임에 출격 → 회수 미룸 (전투 결과를 덮어쓰지 않음)
 ##  6c) claim  : 재설치 재claim 24시간·1번·가게 소모 규칙 · 주인을 잃은 설치의 회수 · consumed 우선 · 공격자 iid + 피해자 account_id 거부 · env
 ##  6d) misc   : iid(Crypto) · 초기화 때 game_iap 보존 · 진행 중 창 탈출구 · restore 가 먼저 지급한 구매 = '지급 완료' · 카드 그림 · 해시 · 허용 목록
+##  6e) errors : 서버 429 rate_limited(verify · consume) · 501 not_implemented(STOVE) → 지급 없이 다시 시도 (가짜 서버 force_429 · 로컬 Worker /v1/dev/force429)
 ##  7) tap      : 상점 화면 진짜 입력(push_input) 같은 프레임 두 번 — 확인 창 1개 · 주문 1개 · 결과 창 1개, 결제 카드 숨김/꺼짐(steam·stove)
 ##  8) ads      : 하루 3회(전체 합계) · 날짜 바뀜 · 시계 되돌림 · 가짜 광고 끝까지/중간 닫기 · PC(stove)는 광고 카드 없음 · google 은 꺼진 카드
 ##  9) odds     : 확률표 = 데이터에서 계산한 값 (등급 합 100%) · 규칙 함수로 뽑아 본 빈도와 맞음 · 창의 글 = 표 · docs/store 6개 파일이 최신
 ## 10) lang     : 6개 언어 × 1280×720 · 1024×576 — 결제 카드·확인 창·진행 창·결과 창 9가지·광고 카드·가짜 광고·확률 창(상점·강화 탭) 넘침 0 · 두부 0
+##  -- --server http://127.0.0.1:8951 : 가짜 서버 대신 진짜 로컬 Worker (server/ 에서 `npm run dev`) 로 같은 시험을 모두 돌림 (결제층 B)
 ##  Godot 오류(Logger 로 셈) 0 이어야 통과. 저장은 user://test_iap_save.json, 가짜 가게·서버는 user://fake_iap/ (끝나면 지움)
 
 const BaselineData := preload("res://tests/baseline_data.gd")
@@ -52,6 +54,9 @@ var ads
 var db: Node
 var _only: Array = []
 var _stats: Dictionary = {}
+## -- --server <주소>: 진짜 로컬 Worker 로 (비어 있으면 가짜 서버)
+var _server_url := ""
+const Remote := preload("res://tests/iap_remote.gd")
 
 
 class ErrCounter extends Logger:
@@ -111,6 +116,9 @@ func _main() -> void:
 	var oi := args.find("--only")
 	if oi >= 0 and oi + 1 < args.size():
 		_only = Array(args[oi + 1].split(","))
+	var si := args.find("--server")
+	if si >= 0 and si + 1 < args.size():
+		_server_url = args[si + 1]
 	BaselineData.apply(self)   # 전투 시험(황금 기록 세이브)용 기준 데이터 — iap 모듈은 기준 뒤에 생겨 지금 데이터에서 덧붙음 (DataDB._overlay_new_modules)
 	store = root.get_node("Store")
 	i18n = root.get_node("I18n")
@@ -121,8 +129,20 @@ func _main() -> void:
 	db = root.get_node("DataDB")
 	store.call("use_path", SAVE)
 	store.call("clear")
-	Files.reset()
+	if _server_url != "":
+		# 결제층 B: 가짜 서버(fake_server.gd) 대신 진짜 로컬 Worker (server/ 의 wrangler dev). 가짜 가게 장부는 /v1/dev/ledger 로 비춤
+		billing.set("server_override", _server_url)
+		billing.set("env", "local")
+		billing.set("_store_name", "")
+		var h := Remote.new(_server_url).handle("GET", "/v1/health", {}, {}, {})
+		if int(h["status"]) != 200 or str(h["body"].get("env", "")) != "dev":
+			print("RESULT: FAIL (로컬 서버 %s 가 답하지 않음 — server/ 에서 npm run dev)" % _server_url)
+			quit(1)
+			return
+		print("── 서버: 진짜 로컬 Worker %s (env %s) ──" % [_server_url, str(h["body"]["env"])])
 	platform.call("override_store", "dev")
+	billing.call("_ensure_backend")
+	Files.reset()
 	i18n.call("_apply", "ko")
 	root.size = Vector2i(1280, 720)
 	billing.set_scenario("success")
@@ -130,7 +150,7 @@ func _main() -> void:
 	ads.fake_secs = 0.15
 	for sec: Array in [["data", "1) 데이터"], ["rules", "2) 지급·회수 규칙"], ["sanitize", "3) 세이브 다듬기"], ["flow", "4) 가짜 시나리오"],
 			["crash", "5) 앱이 죽었을 때 복구 (다른 프로세스)"], ["durable", "5b) 저장 폴더 쓰기 금지 — 디스크에 남기 전에는 '끝'을 알리지 않음"],
-			["battle", "6) 전투 중 미루기"], ["sortie", "6b) 출격 직전 같은 프레임 · 환불 경로"], ["claim", "6c) 재설치 재claim 24시간·1번·가게 소모 규칙 · 보안"], ["misc", "6d) 초기화 보존 · 탈출구 · 그 밖"], ["tap", "7) 상점 화면 · 같은 프레임 연타"],
+			["battle", "6) 전투 중 미루기"], ["sortie", "6b) 출격 직전 같은 프레임 · 환불 경로"], ["claim", "6c) 재설치 재claim 24시간·1번·가게 소모 규칙 · 보안"], ["misc", "6d) 초기화 보존 · 탈출구 · 그 밖"], ["errors", "6e) 서버 429 · 501 → 지급 없이 다시 시도"], ["tap", "7) 상점 화면 · 같은 프레임 연타"],
 			["ads", "8) 보상형 광고"], ["odds", "9) 확률표"], ["lang", "10) 6개 언어 넘침·두부"]]:
 		if not _want(sec[0]):
 			continue
@@ -507,6 +527,8 @@ func _t_crash() -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 		var out: Array = []
 		var args := ["--headless", "--path", ProjectSettings.globalize_path("res://"), "--script", "res://tests/aux_iap_crash.gd", "--", "--iap", sc, "--save", CRASH_SAVE, "--gold", "1000"]
+		if _server_url != "":
+			args += ["--iap-env", "local", "--iap-server", _server_url]
 		var code := OS.execute(OS.get_executable_path(), args, out, true)
 		var txt := "\n".join(out)
 		var alive := txt.contains("AUX_IAP: ALIVE")
@@ -867,7 +889,7 @@ func _store_battle_cfg_keep() -> Dictionary:
 func _t_claim() -> void:
 	_fresh(1000.0)
 	billing.set_scenario("success")
-	var fake = billing.verifier.fake
+	var fake = billing.verifier.fake if _server_url == "" else Remote.new(_server_url)
 	var r := await _buy_wait("gold_1200")
 	var oid := str(r.get("order_id", ""))
 	var iid_a := str((store.call("get_json", IapRules.KEY) as Dictionary)["iid"])
@@ -985,6 +1007,45 @@ func _t_claim() -> void:
 	fake.clock_offset_ms = 0.0
 	fake.clock_offset_ms = 0.0
 	_stat("claim.b_save_gold", b_save["game_save"])
+
+
+# ═══════════ 6e) 서버 429 · 501 ═══════════
+
+## 가짜 서버 또는 (-- --server) 로컬 Worker 의 시험 훅
+func _srv() -> Variant:
+	return billing.verifier.fake if _server_url == "" else Remote.new(_server_url)
+
+
+func _t_errors() -> void:
+	# 429 rate_limited: 구매 확인이 요청 과다로 거절 → 지급 없음 · 가게에 미처리로 남음 → 다음 restore 에서 한 번 지급
+	_fresh(1000.0)
+	billing.set_scenario("success")
+	var srv = _srv()
+	srv.force_429 = 1
+	var r := await _buy_wait("gold_500")
+	var unfin := 0
+	for o: Dictionary in _ledger()["orders"].values():
+		if not bool(o["finished"]):
+			unfin += 1
+	_check(r.get("status") == "verify_failed" and str(r.get("code")) == "rate_limited" and _gold() == 1000.0 and _orders().is_empty() and unfin == 1,
+		"429 rate_limited → verify_failed (다시 시도) · 지급 0 · 가게 미처리 (%s)" % str(r))
+	await _restore()
+	_check(_gold() == 1500.0 and _orders().size() == 1 and str(_orders().values()[0]["st"]) == "done" and int(billing.stats["grants"]) == 1, "제한이 풀린 뒤 restore → +500 한 번 · done")
+	# 429 가 consume 에서 나면: 기록 granted 로 남았다가 다음에 done (골드 한 번)
+	_fresh(1000.0)
+	var cut := func(_i: String, _g: float, _o: String) -> void: _srv().force_429 = 1
+	billing.granted.connect(cut, CONNECT_ONE_SHOT)
+	r = await _buy_wait("gold_500")
+	var st1 := str(_orders().values()[0]["st"]) if _orders().size() == 1 else "?"
+	await _restore()
+	var st2 := str(_orders().values()[0]["st"]) if _orders().size() == 1 else "?"
+	_check(r.get("status") == "granted" and st1 == "granted" and st2 == "done" and _gold() == 1500.0, "consume 이 429 → granted 로 남음 → 다음 restore 에서 done (골드 한 번)")
+	# 501 not_implemented (STOVE 확인 미구현): 5xx 라 '다시 시도' — 지급하지 않음
+	var iid := str((store.call("get_json", IapRules.KEY) as Dictionary)["iid"])
+	var v: Dictionary = await billing.verifier.verify({"store": "stove", "pid": "gold_500", "spid": "gold_500", "order_id": "T123", "receipt": "T123"}, iid)
+	_check(str(v.get("status")) == "error" and str(v.get("code")) == "not_implemented", "STOVE verify → 501 not_implemented → status error (다시 시도, 지급 없음) %s" % str(v))
+	var c: Dictionary = await billing.verifier.consume({"store": "stove", "order_id": "T123"}, iid)
+	_check(not bool(c.get("ok", true)) and str(c.get("code")) == "unknown_order", "verify 를 못 받은 STOVE 주문 consume → 404 unknown_order (기록 없음)")
 
 
 # ═══════════ 6d) 그 밖 ═══════════
