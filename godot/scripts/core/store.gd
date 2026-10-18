@@ -54,7 +54,27 @@ func flush() -> bool:
 	if not _dirty or _loaded_path == "":
 		return true
 	_dirty = false
-	return _write(_loaded_path)
+	if not _write(_loaded_path):
+		# (결제층 A 검수) 쓰기에 실패하면 다시 '쓸 것 있음'으로 — 다음 flush 가 아무것도 안 쓰고 true 를 돌려주는 거짓 성공을 막음
+		_dirty = true
+		return false
+	written_gen += 1
+	return true
+
+
+## (결제층 A) 성공한 디스크 쓰기 횟수 (시험·확인용)
+var written_gen := 0
+
+
+## (결제층 A) 디스크의 저장 파일에서 키 하나를 직접 읽음 (메모리가 아니라 실제로 남은 값 — 결제 '처리 끝'을 알리기 전 확인용). 없거나 못 읽으면 null
+func disk_get_json(key: String) -> Variant:
+	if _loaded_path == "" or not FileAccess.file_exists(_loaded_path):
+		return null
+	var pr := JsonExact.parse_ex(FileAccess.get_file_as_string(_loaded_path))
+	if not pr[0] or typeof(pr[1]) != TYPE_DICTIONARY or not (pr[1] as Dictionary).has(key):
+		return null
+	var r := JsonExact.parse_ex(_js_string(pr[1][key]))
+	return JsonNorm.normalize_store(key, r[1]) if r[0] else null
 
 
 ## 저장 파일을 다른 경로로 바꾸고 그 파일을 다시 읽는다 (이전 경로에 남은 변경은 먼저 쓴다)
@@ -175,7 +195,19 @@ func _mark_dirty() -> void:
 		flush.call_deferred()
 
 
+## (결제층 A 시험 훅, 디버그 빌드만) true 면 쓰기를 하지 않고 '성공'이라고 답함 — 메모리와 디스크가 어긋나는 상황(쓰기가 사라진 디스크)을 만들 때
+var debug_fake_write_ok := false
+
+
+## 메모리 전체를 다시 써야 한다고 표시 (디스크가 메모리와 다를 때 — Billing._durable)
+func touch() -> void:
+	_ensure_loaded()
+	_mark_dirty()
+
+
 func _write(path: String) -> bool:
+	if debug_fake_write_ok and OS.is_debug_build():
+		return true
 	var tmp := path + ".tmp"
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:

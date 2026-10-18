@@ -12,11 +12,15 @@ extends RefCounted
 ##   (4b-1) 상점(game_shop): 사전이 아니거나 items 가 배열이 아니면 지움(들어가면 새로 만듦), 모르는 물건·형이 틀린 물건은 뺌, ts 가 숫자가 아니면 0(→ 갱신)
 ##          재료(game_mats): 숫자가 아닌 값은 뺌 · 천장(game_gacha_pity): 숫자가 아니면 지움 · 편성 탭(ps_active_tab): 모르는 탭이면 지움
 ##          인벤토리: 장비의 옵션(subs·eOpts·fx·cOpt)·직업 제한·장착자·전설·세트·강화 보정 형 정리, 물약·전투 물약·공성·룬·전직서는 모르는 종류면 뺌
+##   (결제층 A) 결제 기록(game_iap): 형이 틀린 주문 항목만 뺌 — 기록 전체는 절대 지우지 않음 (뺀 것·깨진 원본은 game_iap_bak 에 쌓고 읽을 수 있는 iid·주문은 건짐).
+##          광고 횟수(game_ads): 형이 틀리면 기본값 (scripts/logic/ad_rules.gd)
 ##  빈 문자열 원본("")은 없는 것으로 (웹 !raw)
 
 const Js := preload("res://scripts/logic/js.gd")
 const PartyRules := preload("res://scripts/logic/party_rules.gd")
 const JsonExact := preload("res://scripts/core/json_exact.gd")
+const IapRules := preload("res://scripts/logic/iap_rules.gd")
+const AdRules := preload("res://scripts/logic/ad_rules.gd")
 
 const NUM_FIELDS := ["exp", "hp", "atk", "def", "move", "range"]
 
@@ -49,12 +53,15 @@ static func _put(c: Object, key: String, before: Variant, after: Variant) -> boo
 ## 모두 다듬기 → 바뀐 키 목록
 static func sanitize(c: Object) -> Array:
 	var changed: Array = []
+	# (결제층 A) 결제 기록: 형이 틀린 항목만 빼고, 뺀 것·깨진 원본은 game_iap_bak 에 쌓음 (iap_rules.gd sanitize_store)
+	if IapRules.sanitize_store(c, c.date_now()):
+		changed.append(IapRules.KEY)
 	var tab: Variant = c.store.get_str("ps_active_tab")
 	if tab != null and not ["party", "equip", "item", "enhance"].has(str(tab)):
 		c.store.remove("ps_active_tab")
 		changed.append("ps_active_tab")
 	for k: String in ["game_roster", "game_parties", "game_save", "game_inventory", "game_daily", "game_story_seen", "game_settings", "game_nav", "game_soul", "game_party", "game_cleared",
-			"game_shop", "game_mats", "game_gacha_pity", "gd_class_preview"]:
+			"game_shop", "game_mats", "game_gacha_pity", "gd_class_preview", AdRules.KEY]:
 		var r := _raw(c, k)
 		if not r[0]:
 			continue
@@ -103,6 +110,8 @@ static func sanitize(c: Object) -> Array:
 				after = v if _is_num(v) else null
 			"gd_class_preview":
 				after = _class_preview(c, v)
+			"game_ads":
+				after = AdRules.sanitize_value(v)
 		if after == null:
 			c.store.remove(k)
 			changed.append(k)

@@ -1,0 +1,50 @@
+{
+  "IAP_PRODUCTS": [
+    {
+      "id": "gold_500",
+      "gold": 500,
+      "label": "shop.gold_iap_500",
+      "krw": 1200,
+      "fallback_price": "₩1,200",
+      "google": "gold_500",
+      "apple": "xyz.show4you.deadline15.gold_500",
+      "stove_item": "gold_500"
+    },
+    {
+      "id": "gold_1200",
+      "gold": 1200,
+      "label": "shop.gold_iap_1200",
+      "krw": 2500,
+      "fallback_price": "₩2,500",
+      "google": "gold_1200",
+      "apple": "xyz.show4you.deadline15.gold_1200",
+      "stove_item": "gold_1200"
+    },
+    {
+      "id": "gold_3000",
+      "gold": 3000,
+      "label": "shop.gold_iap_3000",
+      "krw": 6500,
+      "fallback_price": "₩6,500",
+      "google": "gold_3000",
+      "apple": "xyz.show4you.deadline15.gold_3000",
+      "stove_item": "gold_3000"
+    },
+    {
+      "id": "gold_6500",
+      "gold": 6500,
+      "label": "shop.gold_iap_6500",
+      "krw": 12000,
+      "fallback_price": "₩12,000",
+      "google": "gold_6500",
+      "apple": "xyz.show4you.deadline15.gold_6500",
+      "stove_item": "gold_6500"
+    }
+  ],
+  "AD_REWARD": {"gold": 100, "daily": 3},
+  "IAP_SERVER": {
+    "dev": {"url": "fake://local", "timeout": 10},
+    "stage": {"url": "", "timeout": 10},
+    "prod": {"url": "", "timeout": 10}
+  }
+}

@@ -167,6 +167,9 @@ func _svc(n: String) -> Node:
 
 
 func _ready() -> void:
+	# (결제층 A) 전투 중 표시 — Billing 은 이 무리에 장면이 있으면 결제 지급·환불 회수를 미룸
+	#  (_write_back 이 전투가 끝날 때 game_save 를 전투 시작 때 값 + 보상으로 덮어써, 전투 중에 Store 에 더한 골드가 사라지므로)
+	add_to_group("battle_scene")
 	i18n = _svc("I18n")
 	store = _svc("Store")
 	sound = _svc("Sound")

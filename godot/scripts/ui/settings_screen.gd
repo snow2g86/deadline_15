@@ -336,7 +336,16 @@ func reset_all() -> void:
 	if _resetting:
 		return
 	_resetting = true
+	# (결제층 A) 결제 기록(설치 식별자 · 주문 · 환불 커서)과 그 보관함은 지우지 않음 — 지우면 미처리 주문이 다시 지급되거나(중복)
+	#  설치 식별자가 바뀌어 서버가 주문을 막음. 화면 문구는 그대로 ('모든 데이터' = 게임 진행)
+	var keep: Dictionary = {}
+	for k: String in ["game_iap", "game_iap_bak"]:
+		var v: Variant = store.call("get_str", k)
+		if v != null:
+			keep[k] = v
 	store.call("clear")
+	for k2: String in keep.keys():
+		store.call("set_str", k2, keep[k2])
 	store.call("flush")
 	i18n.call("reload")
 	router.set("history", [])

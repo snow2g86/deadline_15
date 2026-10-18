@@ -8,7 +8,8 @@ extends Node
 ##  is_mobile(): Android·iOS — 기본 기능 태그 "mobile"
 ##  has_ads(): 광고 카드(상점 '광고 보고 받기')를 보일지. PC 가게판(stove·steam)은 광고가 없으므로 false.
 ##             dev 는 웹판과 같은 화면을 시험하도록 true (기존 시험·화면 사진이 웹 화면과 같게)
-##  has_iap(): 결제 카드 — 지금은 모든 판에서 보임 (결제 연동은 다음 단계, 카드는 '추후 오픈 예정' 그대로)
+##  has_iap(): (예전 뜻 그대로 true — 5단계 시험이 고정) 결제 카드를 실제로 보일지·누를 수 있을지는 Billing.is_supported() · is_available()
+##             (결제층 A: steam·출시 빌드 dev 는 결제 길이 없어 카드 숨김, stove·google·apple 은 SDK 를 붙이기 전이라 꺼진 카드)
 ##
 ##  시험·개발: 명령줄 `-- --store stove` (디버그 실행에서만) 또는 override_store("stove") 로 바꿀 수 있음.
 
@@ -17,6 +18,7 @@ const STORES := ["stove", "steam", "google", "apple", "dev"]
 const PC_STORES := ["stove", "steam"]
 
 var _override := ""
+var _os_override := ""
 
 
 func _ready() -> void:
@@ -24,6 +26,9 @@ func _ready() -> void:
 	var i := args.find("--store")
 	if i >= 0 and i + 1 < args.size() and OS.is_debug_build():
 		override_store(args[i + 1])
+	var j := args.find("--os")
+	if j >= 0 and j + 1 < args.size() and OS.is_debug_build():
+		override_os(args[j + 1])
 
 
 ## 기능 태그로 가게 이름 (여러 개면 STORES 순서의 앞 것)
@@ -70,3 +75,13 @@ func has_iap() -> bool:
 ## 내보낸 빌드인가 (편집기·명령줄 실행이 아님)
 func is_release_build() -> bool:
 	return OS.has_feature("template")
+
+
+## (결제층 A) 운영체제 이름 (OS.get_name — "Windows" · "macOS" …). 시험·개발은 override_os("Windows") 또는 -- --os Windows (디버그만)
+##  STOVE 결제 SDK 는 Windows 64비트 DLL 이라 STOVE 맥 판에는 결제 길이 없음 (backend_stove.is_supported)
+func os_name() -> String:
+	return _os_override if _os_override != "" else OS.get_name()
+
+
+func override_os(name: String) -> void:
+	_os_override = name if OS.is_debug_build() else ""

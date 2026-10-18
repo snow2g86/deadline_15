@@ -14,6 +14,7 @@ const Profile := preload("res://scripts/logic/profile.gd")
 const PartyRules := preload("res://scripts/logic/party_rules.gd")
 const Gear := preload("res://scripts/logic/gear.gd")
 const ItemView := preload("res://scripts/ui/item_view.gd")
+const OddsView := preload("res://scripts/ui/odds_view.gd")
 
 const MODAL_W := 1060.0
 const INV_CARD_W := 300.0
@@ -723,8 +724,21 @@ func render_enhance() -> void:
 	_clear(enh_list)
 	var mats := _cl("🔩 " + t("gear.mats", {"stone": num(EquipRules.mats_get(c, "stone")), "protect": num(EquipRules.mats_get(c, "protect")), "shard": num(EquipRules.mats_get(c, "shard"))}), 13, OKit.GOLD, 800)
 	mats.name = "Mats"
-	mats.custom_minimum_size = Vector2(500, 0)
-	enh_list.add_child(mats)
+	mats.custom_minimum_size = Vector2(380, 0)
+	mats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# (결제층 A) 확률 정보 단추 — 강화 성공·파손 확률표 (scripts/ui/odds_view.gd)
+	var mrow := OKit.hbox(8)
+	mrow.name = "MatsRow"
+	mrow.custom_minimum_size = Vector2(500, 0)
+	mrow.add_child(mats)
+	var ob := OKit.ghost_button(t("gd.odds.btn"), 11)
+	ob.name = "OddsBtn"
+	ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ob.pressed.connect(func() -> void:
+		if scr.act_once():
+			OddsView.open(scr))
+	mrow.add_child(ob)
+	enh_list.add_child(mrow)
 	var hint := _cl(t("gear.enh_list_hint"), 10, OKit.DIM, 500)
 	hint.custom_minimum_size = Vector2(500, 0)
 	enh_list.add_child(hint)

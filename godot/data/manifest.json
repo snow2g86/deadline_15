@@ -20,7 +20,8 @@
     "soul": [{"file": "soul.json", "sha1": "024645fc659fbcc0c76a14f1ce05b8d8219a8ba8"}],
     "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
     "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
-    "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}]
+    "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}],
+    "iap": [{"file": "iap.json", "sha1": "d1761950fa0f0d0ea5a87bd4545f3c64ed2656f4"}]
   },
   "modules": {
     "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
@@ -246,7 +247,15 @@
         "ATK_MOTIONS": {"type": "object", "count": 13}
       }
     },
-    "ui": {"file": "ui.json", "globals": {"NAV_TABS": {"type": "array", "count": 5}}}
+    "ui": {"file": "ui.json", "globals": {"NAV_TABS": {"type": "array", "count": 5}}},
+    "iap": {
+      "file": "iap.json",
+      "globals": {
+        "IAP_PRODUCTS": {"type": "array", "count": 4},
+        "AD_REWARD": {"type": "object", "count": 2},
+        "IAP_SERVER": {"type": "object", "count": 3}
+      }
+    }
   },
   "lang": {
     "langs": {
@@ -254,43 +263,43 @@
         "file": "lang/ko.json",
         "type": "object",
         "count": 51,
-        "leaves": 2429,
-        "sha1": "4c794b4628b78aa16056e7857f4582efedeb0caa"
+        "leaves": 2497,
+        "sha1": "670383eb6b040fb227d785727cbcf49d3886562e"
       },
       "en": {
         "file": "lang/en.json",
         "type": "object",
         "count": 52,
-        "leaves": 2436,
-        "sha1": "b6547fc8e21253c8f9192dc24098bdfd5193cd5f"
+        "leaves": 2504,
+        "sha1": "153f56f6723ae65cb97de50f2791816018997103"
       },
       "es": {
         "file": "lang/es.json",
         "type": "object",
         "count": 52,
-        "leaves": 2436,
-        "sha1": "182bb6464fd158dbe191bbb15ffd450372fdde94"
+        "leaves": 2504,
+        "sha1": "fa59f0a537a27255691d80bcfe03e4d02daebfc2"
       },
       "ja": {
         "file": "lang/ja.json",
         "type": "object",
         "count": 51,
-        "leaves": 2429,
-        "sha1": "9b908101ce288a8140b6cbe5803730c54b3101b7"
+        "leaves": 2497,
+        "sha1": "cf810bf240b28f7249ab4ca7a82490a2fe2d479f"
       },
       "zh-CN": {
         "file": "lang/zh-CN.json",
         "type": "object",
         "count": 51,
-        "leaves": 2429,
-        "sha1": "125efdb74d73ba6bd4a3911ec1209cc907b831f6"
+        "leaves": 2497,
+        "sha1": "2312415729e407311efe1477b931d498f209724b"
       },
       "zh-TW": {
         "file": "lang/zh-TW.json",
         "type": "object",
         "count": 51,
-        "leaves": 2429,
-        "sha1": "6fefb741e95b6b9c84ee1333205b000de48b35f8"
+        "leaves": 2497,
+        "sha1": "eba9a3f1ecbdf1eef7735135c5ee813567cd54bc"
       }
     }
   },

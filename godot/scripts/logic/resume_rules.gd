@@ -26,6 +26,9 @@ const STAMP_KEYS := ["saveFormat", "dataHash", "gameVersion"]
 ## DataDB 가 읽은 파일 sha1 이 manifest 와 다르면(data_tool --write 를 잊음) 데이터 해시를 믿을 수 없음 → 이 값. 이 판에서는 이어하기를 하지 않음 ('old')
 const INVALID_HASH := "invalid:sha1-mismatch"
 
+## (결제층 A) 데이터 해시에서 뺄 모듈 — 전투와 무관 (iap.json: 결제 상품·가격·서버 주소·광고 보상). 바꿔도 저장 전투를 '이전 버전'으로 보내지 않음
+const HASH_EXCLUDE := ["iap"]
+
 ## 시험용: 지금 게임의 판(stamp)을 바꿔 '다른 버전' 을 흉내 (비어 있으면 진짜 값)
 static var stamp_override: Dictionary = {}
 
@@ -42,7 +45,10 @@ static func current_stamp() -> Dictionary:
 		if db != null and db.get("manifest") is Dictionary:
 			man = db.get("manifest")
 			bad = bool(db.get("sha_mismatch"))
-	return {"saveFormat": BattleEngine.SAVE_FORMAT, "dataHash": INVALID_HASH if bad else JsonExact.stringify(man.get("sources", {})).md5_text(),
+	var src: Dictionary = (man.get("sources", {}) as Dictionary).duplicate()
+	for k: String in HASH_EXCLUDE:
+		src.erase(k)
+	return {"saveFormat": BattleEngine.SAVE_FORMAT, "dataHash": INVALID_HASH if bad else JsonExact.stringify(src).md5_text(),
 		"gameVersion": str(ProjectSettings.get_setting("application/config/version", ""))}
 
 

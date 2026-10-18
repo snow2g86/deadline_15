@@ -31,9 +31,17 @@ const TABS := ["mercenary", "consumable", "equip", "skill", "scroll", "gold"]
 ## 탭 → 보이는 물건 종류 (scroll 탭은 따로, equip·gold 탭은 물건 목록 없음)
 const TAB_TYPES := {"mercenary": ["char"], "consumable": ["potion", "battle_potion", "siege"], "skill": ["soulstone", "skillbook"], "scroll": ["scroll"]}
 const TIMER_HIDDEN := ["consumable", "gold"]
-## 골드 탭 (웹도 결제 없음 — 모두 '추후 오픈 예정')
-const GOLD_PACKAGES := [{"gold": 500, "price": "$0.99", "key": "gold_iap_500"}, {"gold": 1200, "price": "$1.99", "key": "gold_iap_1200"},
-	{"gold": 3000, "price": "$4.99", "key": "gold_iap_3000"}, {"gold": 6500, "price": "$9.99", "key": "gold_iap_6500"}]
+## 골드 탭 결제 꾸러미 — (결제층 A) 데이터 data/iap.json 의 IAP_PRODUCTS 에서 읽음 (예전 상수 GOLD_PACKAGES 를 옮김).
+##  [{id, gold, key(번역 키 'shop.' 뒤), price(가게 가격을 못 받았을 때의 글), krw}] — 상품·가격 규칙은 scripts/logic/iap_rules.gd
+static func gold_packages(c: Object) -> Array:
+	var out: Array = []
+	var P: Variant = c.D.get("IAP_PRODUCTS")
+	if not (P is Array):
+		return out
+	for p: Variant in P:
+		if p is Dictionary:
+			out.append({"id": str(p["id"]), "gold": float(p["gold"]), "key": str(p["label"]).trim_prefix("shop."), "price": str(p.get("fallback_price", "")), "krw": float(p.get("krw", 0))})
+	return out
 
 
 static func _cmp_random(c: Object) -> Callable:

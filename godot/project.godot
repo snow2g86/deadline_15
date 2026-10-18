@@ -29,6 +29,8 @@ DataDB="*res://scripts/core/data_db.gd"
 I18n="*res://scripts/core/i18n.gd"
 Router="*res://scripts/core/router.gd"
 Platform="*res://scripts/core/platform.gd"
+Billing="*res://scripts/core/billing.gd"
+Ads="*res://scripts/core/ads.gd"
 Sound="*res://scripts/core/sound.gd"
 Display="*res://scripts/core/display.gd"
 

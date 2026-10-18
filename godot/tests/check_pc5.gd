@@ -680,6 +680,7 @@ func _platform() -> void:
 	store.call("set_json", "game_save", {"gold": 50000.0, "cleared": [1, 2, 3]})
 	for st2: String in ["stove", "dev"]:
 		platform.call("override_store", st2)
+		platform.call("override_os", "Windows")   # (결제층 A) 결제 카드는 STOVE Windows 판 기준 (맥 판은 결제 길이 없어 숨김 — check_iap)
 		router.call("go", "shop")
 		await _until(func() -> bool: return _screen_is("ui/shop.gd"), 5.0)
 		await _frames(3)
@@ -701,6 +702,7 @@ func _platform() -> void:
 		router.call("go", "lobby")
 		await _frames(4)
 	platform.call("override_store", "")
+	platform.call("override_os", "")
 	store.call("clear")
 
 

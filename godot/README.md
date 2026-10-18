@@ -578,3 +578,58 @@ HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godo
 - 전체 화면: play_pc5 가 실제 창에서 확인(pc5_03_fullscreen.png). 단, 시험 창이 앞에 없으면 macOS 가 전체 화면으로 바꾸지 않아 '되돌림' 길로 가고 경고를 남김.
 - 서명·공증 (위 절차), 스토브 결제 SDK·광고(모바일), 스팀 프리셋 (사용자가 말할 때).
 - 언어별 창 제목·macOS 메뉴 이름 현지화 (지금은 DEADLINE 15 그대로).
+
+## 결제층 A — 게임 쪽 공통 결제·광고 층 (2026-10-18, 가짜 가게·가짜 서버)
+
+실제 스토어 SDK(STOVE·Google·Apple)와 서버(Cloudflare Workers + D1)는 다음 작업. 이번에는 같은 약속을 따르는 가짜로 끝까지 동작·시험.
+
+| 파일 | 하는 일 |
+|---|---|
+| `data/iap.json` | `IAP_PRODUCTS` (gold_500/1200/3000/6500 · 원화 1,200/2,500/6,500/12,000 · Google = STOVE = 게임 id · Apple `xyz.show4you.deadline15.gold_<양>`) · `AD_REWARD {gold:100, daily:3}` · `IAP_SERVER {dev, stage, prod}` |
+| `scripts/logic/iap_rules.gd` | 지급 기록 `game_iap = {v, iid(설치 식별자), orders{"<store>:<order>": {pid, gold, at, st}}, rf(환불 커서)}` · `grant`(중복 {dup}) · `revoke`(0 바닥) · sanitize |
+| `scripts/logic/ad_rules.gd` | 광고 하루 횟수 `game_ads = {v, day, n}` — 기기 로컬 날짜, 날짜는 앞으로만 (시계 되돌림은 새 날로 보지 않음) |
+| `scripts/logic/odds_rules.gd` | 확률표 (장비 뽑기 · 룬 뽑기 · 강화) — 데이터에서 계산 |
+| `scripts/core/billing.gd` (오토로드 `Billing`) | `products()` · `buy(id)` · `restore()` · `busy()` · `is_supported()` · `is_available()` · 신호 `purchase_finished` · `granted` · `revoked` · `products_updated` — **지급 순서는 파일 머리말** |
+| `scripts/core/billing/` | `backend_base` · `backend_none`(steam) · `backend_fake`(dev 디버그) · `backend_stove/google/apple`(빈 틀) · `verifier.gd`(서버 클라이언트) · `fake_server.gd`(같은 약속의 가짜 서버) · `fake_files.gd` |
+| `scripts/core/ads.gd` (오토로드 `Ads`) | `show_rewarded(placement)` · 신호 `rewarded` · `closed` · `failed` · 가짜 광고 화면 (dev 디버그) |
+| `scripts/ui/odds_view.gd` | '확률 정보' 창 (상점 장비·소모품 탭, 편성 강화 탭) |
+| `tools/odds_export.gd` | 같은 표를 `docs/store/probabilities.{ko,en,ja,zh-CN,zh-TW,es}.md` 로 (`-- --check` 는 낡았는지만) |
+| `docs/server/api.md` | 게임 ↔ 서버 API 약속 (엔드포인트 · JSON · 오류 코드 · 인증 · 가게별 영수증 · D1 표) |
+
+- 가짜 시나리오 (디버그 빌드만, 출시 빌드는 무시): `-- --iap success|cancel|pending|fail|net_fail|crash_before_grant|crash_after_grant|refund`, 서버 환경 `-- --iap-env dev|stage|prod`.
+- 기준 데이터 시험: `iap` 모듈은 기준 뒤에 생겨 `DataDB.use_dir(기준, overlay)` 가 지금 데이터에서 덧붙임 (`_overlay_new_modules` — 번역 덧붙임과 같은 원칙). 기준 사본·잠금은 그대로.
+- 전투 중 지급·회수는 미룸: `battle_scene._write_back` 이 전투가 끝날 때 `game_save` 를 덮어써 전투 중에 더한 골드가 사라지는 것을 `check_iap '6) battle'` 이 재현·확인. 전투 장면은 `battle_scene` 무리에 들어감.
+- 시험: `tests/check_iap.gd` (머리 없는) · `tests/play_iap.gd` (실제 창, `caffeinate -d Godot --path godot --resolution 1280x720 --script res://tests/play_iap.gd` → `tests/screens/iapA_*.png`) · 보조 `tests/aux_iap_crash.gd`.
+
+### 결제층 A 검수 반영 (2026-10-18)
+
+- **저장 확인**: `Store.flush()` 는 쓰기에 실패하면 다시 '쓸 것 있음'으로 둠 (다음 flush 의 거짓 성공 없음). Billing 은 서버 consume·가게 finish 전에 **저장 파일을 다시 읽어**
+  주문 기록이 디스크에 있는지 확인 (`Store.disk_get_json`). 메모리에만 있는 지급은 '이미 받은 주문'으로 치지 않음 — `check_iap '5b) durable'`(저장 폴더 chmod 555).
+- **전투 판정** `Billing.in_battle()`: battle_scene 무리 · `BattleScene.pending` 이 비어 있지 않음(출격·이어하기·다시 하기/다음 스테이지·개발 실행기가 store_save 사본을 만든 직후) ·
+  `Router.current == "battle"` 중 하나. 지급과 환불 회수 둘 다 — `check_iap '6b) sortie'` (서버 응답 프레임에 출격).
+- **재설치 복구**: 서버의 재claim 규칙 (재검수 뒤 24시간·1번) (api.md 3.2 판단 순서 consumed > refunded > claim > valid). 주인을 잃은 설치는 consume 이 `order_claimed` → 자기 지급 회수.
+  '모든 데이터 초기화'는 `game_iap`·`game_iap_bak` 을 지우지 않음. sanitize 는 깨진 기록에서 iid·주문을 건지고, 뺀 원본은 `game_iap_bak`(최근 20개)에 쌓음.
+- **계정 값**: 서버는 클라이언트 account_id 를 믿지 않음 (가게 확인 결과만, 권한은 iid↔주문 연결로만). Google·Apple 구매 토큰 = SHA-256(iid) 앞 32자.
+- **STOVE 맥 판**은 결제 길이 없어 카드를 숨김 (SDK 가 Windows DLL). 시험은 `Platform.override_os("Windows")` · 명령줄 `-- --os Windows` (디버그만).
+- 이어하기 데이터 해시는 `iap` 모듈을 뺌 (`ResumeRules.HASH_EXCLUDE`). 기준 덧붙이기는 허용 목록 `DataDB.OVERLAY_MODULES = ["iap"]`.
+- 광고 시계: 저장된 날이 기기 날짜보다 2일 넘게 앞서면 기기 날짜로 다시 맞춤.
+- **법무 확인 대상**: 구매 확인 창의 법정 안내 — 재검수 뒤 게임 언어별로 나눔 (아래 '재검수 반영').
+
+### 결제층 A 재검수 반영 (2026-10-18)
+
+- 재claim: **24시간 · 주문당 1번 · 가게에서 이미 소모(Google consumptionState/acknowledgementState=1)면 거절**, 재claim 은 서버 기록(`reclaimed_from`·`reclaimed_at`·`reclaims`)에 남김 (api.md 3.2).
+  주인을 잃었을 때의 회수(`_lost_claim`)도 전투 중이면 미룸.
+- 광고 시계: 시계를 고친 것으로 보고 날짜를 다시 맞출 때 그날은 **다 쓴 것(3회)**. 다녀간 날의 횟수는 `game_ads.seen`(최근 14일)에 남겨, 시계를 앞뒤로 오가도 같은 날을 두 번 새로 받지 못함.
+- 진행 중 창 '닫기' → `Billing.release_busy()` (다른 상품은 살 수 있음), 그 상품 카드는 '처리 중'으로 막힘 (`Billing.purchase_pending`).
+- 디스크 재확인: flush 는 성공인데 디스크에 기록이 없으면 메모리를 한 번 더 씀(`Store.touch`). 시험 훅 `Store.debug_fake_write_ok` (디버그만).
+- 잘린 `game_iap`: 번호만 남은 주문은 `{st:"done", lost:true}` 로 남겨 다시 지급하지 않음 (api.md 3.6).
+- **법정 문구는 게임 언어로 나눔** (`shop.gd notice_keys`) — 법무 확인 대상:
+  - ko: 7일 이내 청약철회(사용한 재화 등 제한) · 청약철회·환불은 구매한 스토어 고객센터 · 부가세 포함 · 미성년자 법정대리인
+  - 그 밖(en·es·ja·zh-CN·zh-TW): 환불은 구매한 스토어의 환불 정책 · 가격·세금은 스토어 표시 기준 · 미성년자 법정대리인
+  - 언어 ≠ 거주 국가 (한국 사용자가 영어로 두면 7일 문구가 안 보임) — 스토어 지역으로 나눌지 법무 확인.
+
+### 모바일·STOVE 작업에서 할 일 (결제층 A 에서 넘김)
+
+- **iid 를 앱 밖에 보존**: Android Block Store · iOS Keychain · STOVE 클라우드 세이브 → `Billing.set_iid_store(load_fn, save_fn)` 에 연결.
+- STOVE 요청자 확인(로그인 토큰으로 '요청자 = 구매자' 증명) — **확인 필요**.
+- 백엔드 채우기(backend_stove/google/apple), 서버 재시도 지수 백오프, AdMob 서버 측 보상 확인.

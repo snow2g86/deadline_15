@@ -511,6 +511,7 @@ func _msg_label(msg: String) -> Label:
 
 func toast(msg: String, kind: String = "") -> void:
 	if _toast != null and is_instance_valid(_toast):
+		_toast.name = "ToastOld"   # 새 알림이 'Toast' 이름을 갖게 (같은 이름이면 자동 이름으로 바뀜)
 		_toast.queue_free()
 	var p := PanelContainer.new()
 	p.name = "Toast"

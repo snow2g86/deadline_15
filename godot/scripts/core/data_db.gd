@@ -60,12 +60,57 @@ func use_dir(dir: String, overlay_lang: bool = false) -> bool:
 	manifest = {}
 	var ok := load_all()
 	if overlay_lang and dir != DATA_DIR:
+		ok = _overlay_new_modules() and ok
 		for code: String in _langs.keys():
 			var p := DATA_DIR + "lang/%s.json" % code
 			if FileAccess.file_exists(p):
 				var live: Variant = JsonExact.parse(FileAccess.get_file_as_string(p))
 				if live is Dictionary:
 					_merge_missing(_langs[code], JsonNorm.normalize(live))
+	return ok
+
+
+## (결제층 A) 기준 뒤에 생긴 모듈(기준 manifest 에 없는 것 — 예: iap.json 의 IAP_PRODUCTS·AD_REWARD)은 지금 데이터에서 더함.
+##  번역 덮어 읽기와 같은 원칙: 기준에 있는 것은 그대로, 기준에 없고 OVERLAY_MODULES 에 있는 것만 지금 데이터 (지금 manifest 의 sha1·개수로 검증).
+##  기준 manifest(이어하기 데이터 해시의 재료)는 바꾸지 않음. 전역 이름이 기준 것과 겹치면 오류
+## 덧붙여도 되는 모듈 (허용 목록 — 전투 규칙에 쓰이지 않는 것만)
+const OVERLAY_MODULES := ["iap"]
+
+
+func _overlay_new_modules() -> bool:
+	var keep_dir := data_dir
+	var keep_base := is_baseline
+	var live_m: Variant = null
+	data_dir = DATA_DIR
+	is_baseline = false
+	live_m = _read_json(MANIFEST_FILE)
+	var ok := true
+	if live_m is Dictionary:
+		var mods: Dictionary = (live_m as Dictionary).get("modules", {})
+		var specials: Array = (live_m as Dictionary).get("special_values", [])
+		for mod_name: String in mods.keys():
+			if _modules.has(mod_name) or not OVERLAY_MODULES.has(mod_name):
+				continue
+			var info: Dictionary = mods[mod_name]
+			var file: String = info.get("file", mod_name + ".json")
+			var srcs: Array = ((live_m as Dictionary).get("sources", {}) as Dictionary).get(mod_name, [])
+			var data: Variant = _read_json(file, str((srcs[0] as Dictionary).get("sha1", "")) if not srcs.is_empty() and srcs[0] is Dictionary else "")
+			if typeof(data) != TYPE_DICTIONARY:
+				ok = false
+				continue
+			var dict: Dictionary = data
+			_restore_specials(file, dict, specials)
+			var globals: Dictionary = info.get("globals", {})
+			for g: String in globals.keys():
+				if not dict.has(g) or _global_index.has(g):
+					_fail("%s: 덧붙일 전역 %s 가 없거나 기준과 겹칩니다" % [file, g])
+					ok = false
+					continue
+				_verify(file + ":" + g, dict[g], globals[g])
+				_global_index[g] = mod_name
+			_modules[mod_name] = dict
+	data_dir = keep_dir
+	is_baseline = keep_base
 	return ok
 
 

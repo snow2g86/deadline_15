@@ -5,7 +5,10 @@ extends "res://scripts/ui/screen_base.gd"
 ##   소모품: 광고 + 룬 뽑기 + 경험치 물약 3 · 전투 물약 6 · 공성 아이템 3 (사도 사라지지 않음)
 ##   장비: 광고 + 천장 막대 + 확률표 + 1회 · 10+1회 뽑기 + 강화 재료(강화석 · 보호 주문서) + 전설 교환
 ##   스킬: 광고 + 영혼석 3 · 스킬북 6,  전직서: 광고 + 전직서 6,  골드: 광고 + 결제 꾸러미 4 (웹도 '추후 오픈 예정')
-##  (5단계) 광고 카드는 Platform.has_ads() 일 때만 — PC 가게판(stove·steam)은 광고가 없어 숨김. 결제 카드 4개는 그대로 (결제 연동은 다음 단계)
+##  (5단계) 광고 카드는 Platform.has_ads() 일 때만 — PC 가게판(stove·steam)은 광고가 없어 숨김.
+##  (결제층 A) 결제 카드: 상품·가격은 Billing.products() (가게 가격 글, 못 받으면 data 의 fallback_price). 결제 길이 없는 판(steam·출시 빌드 dev)은 숨김,
+##   길은 있는데 SDK 가 아직이면(지금의 stove·google·apple 빈 틀) 꺼진 단추. 누르면 구매 확인 창(청약철회·미성년자 안내) → 진행 중 창 → 결과 알림.
+##   광고 카드: 탭마다 한 장(웹 배치 그대로) — 보상은 모두 골드, 하루 횟수는 전체 합계 (Ads · ad_rules.gd). '확률 정보' 단추(장비·소모품 탭) → odds_view.gd
 ##  규칙은 scripts/logic/shop_rules.gd (웹과 같은 난수 순서·저장 형식). 사기는 웹과 같이 확인 창(용병·룬·뽑기·재료는 바로).
 ##  자원이 오가는 단추는 같은 프레임 연타를 막음 (act_once). 다른 화면에서 {tab: "scroll"} 처럼 탭을 정해 들어올 수 있음 (웹 shop.html?tab=)
 
@@ -13,6 +16,7 @@ const ShopRules := preload("res://scripts/logic/shop_rules.gd")
 const EquipRules := preload("res://scripts/logic/equip_rules.gd")
 const Profile := preload("res://scripts/logic/profile.gd")
 const ItemView := preload("res://scripts/ui/item_view.gd")
+const OddsView := preload("res://scripts/ui/odds_view.gd")
 
 const LIST_W := 600.0
 const HALF_W := 295.0
@@ -31,6 +35,14 @@ var list_scroll: ScrollContainer
 var _grid: GridContainer
 var _tick := 0.0
 var names: Array = []
+var odds_btn: Button
+var billing: Node
+var ads: Node
+## 결제 진행 중 창 (Billing.purchase_finished 가 오면 닫음)
+var _pay_modal: Control = null
+var _paying := ""
+## 진행 중 창에 '닫기'가 나오기까지 (초) — 시험은 짧게
+var progress_escape_secs := 30.0
 
 
 func page_id() -> String:
@@ -104,6 +116,11 @@ func _build() -> void:
 	timer_lbl.name = "Timer"
 	timer_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	ir.add_child(timer_lbl)
+	odds_btn = OKit.ghost_button("", 11)
+	odds_btn.name = "OddsBtn"
+	odds_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	odds_btn.pressed.connect(open_odds)
+	ir.add_child(odds_btn)
 	list_scroll = ScrollContainer.new()
 	list_scroll.name = "ListScroll"
 	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -118,6 +135,32 @@ func _build() -> void:
 	list = OKit.vbox(10)
 	list.name = "List"
 	lw.add_child(list)
+	billing = _svc("Billing")
+	ads = _svc("Ads")
+	if billing != null:
+		billing.connect("granted", _on_granted)
+		billing.connect("revoked", _on_revoked)
+		billing.connect("products_updated", _on_products)
+		billing.connect("purchase_finished", _on_purchase_finished)
+		# 상점 진입: 미처리 거래 다시 처리 · 환불 조회 · 가게 가격
+		billing.call("restore")
+		billing.call("refresh_products")
+	if ads != null:
+		ads.connect("rewarded", _on_ad_rewarded)
+		ads.connect("closed", _on_ad_closed)
+		ads.connect("failed", _on_ad_failed)
+
+
+func _exit_tree() -> void:
+	super._exit_tree()
+	for pair: Array in [[billing, ["granted", _on_granted], ["revoked", _on_revoked], ["products_updated", _on_products], ["purchase_finished", _on_purchase_finished]],
+			[ads, ["rewarded", _on_ad_rewarded], ["closed", _on_ad_closed], ["failed", _on_ad_failed]]]:
+		var n: Node = pair[0]
+		if n == null:
+			continue
+		for sc: Array in pair.slice(1):
+			if n.is_connected(sc[0], sc[1]):
+				n.disconnect(sc[0], sc[1])
 
 
 func _refresh() -> void:
@@ -130,6 +173,7 @@ func _refresh() -> void:
 		b.add_theme_color_override("font_color", Color.WHITE if on else OKit.DIM)
 		b.add_theme_color_override("font_focus_color", Color.WHITE if on else OKit.TEXT)
 		b.add_theme_color_override("font_hover_color", OKit.TEXT)
+	odds_btn.text = t("gd.odds.btn")
 	render()
 
 
@@ -164,6 +208,7 @@ func render() -> void:
 		ch.queue_free()
 	_grid = null
 	info_title.text = t("shop.subtitle_" + cur_tab)
+	odds_btn.visible = cur_tab == "equip" or cur_tab == "consumable"
 	_update_timer()
 	var gold := ShopRules.gold(c)
 	match cur_tab:
@@ -172,14 +217,16 @@ func render() -> void:
 			return
 		"gold":
 			_full(_ad_card("shop.gold_ad_title", "shop.gold_ad_desc"))
-			var gg := GridContainer.new()
-			gg.name = "IapGrid"
-			gg.columns = 2
-			gg.add_theme_constant_override("h_separation", 10)
-			gg.add_theme_constant_override("v_separation", 10)
-			for pk: Dictionary in ShopRules.GOLD_PACKAGES:
-				gg.add_child(_iap_card(pk))
-			list.add_child(gg)
+			# 결제 길이 없는 판(steam · 출시 빌드 dev)은 결제 카드를 숨김
+			if billing != null and bool(billing.call("is_supported")):
+				var gg := GridContainer.new()
+				gg.name = "IapGrid"
+				gg.columns = 2
+				gg.add_theme_constant_override("h_separation", 10)
+				gg.add_theme_constant_override("v_separation", 10)
+				for pk: Dictionary in billing.call("products"):
+					gg.add_child(_iap_card(pk))
+				list.add_child(gg)
 			return
 	var ad_key := {"mercenary": "shop.ad_merc_desc", "consumable": "shop.ad_item_desc", "skill": "shop.ad_skill_desc", "scroll": "shop.ad_scroll_desc"}
 	_full(_ad_card(ad_key[cur_tab]))
@@ -264,11 +311,14 @@ func _icon_box(ctl: Control) -> CenterContainer:
 	return cc
 
 
-## 광고 카드 (광고가 없는 판이면 null — _full 이 건너뜀)
+## 광고 카드 (광고가 없는 판이면 null — _full 이 건너뜀). (결제층 A) 보상은 탭과 상관없이 골드 — 하루 횟수는 전체 합계.
+##  광고를 띄울 수 있으면(dev 가짜 광고) '광고 보기 (+100G)' + 오늘 남은 횟수, 아직 SDK 가 없으면(google·apple 빈 틀) 예전처럼 꺼진 '추후 개발' 단추
 func _ad_card(key: String, key2: String = "") -> Control:
 	var pf := get_node_or_null("/root/Platform")
 	if pf != null and not bool(pf.call("has_ads")):
 		return null
+	if ads != null:
+		return _gold_ad_card()
 	var p := _card(LIST_W, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.25))
 	p.name = "AdCard"
 	var h := OKit.hbox(12)
@@ -286,6 +336,49 @@ func _ad_card(key: String, key2: String = "") -> Control:
 	b.name = "AdBtn"
 	b.disabled = true
 	b.modulate.a = 0.5
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(b)
+	return p
+
+
+func _gold_ad_card() -> Control:
+	var p := _card(LIST_W, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.25))
+	p.name = "AdCard"
+	var h := OKit.hbox(12)
+	p.add_child(h)
+	var ad_tex := emoji_tex("🎬")
+	if ad_tex != null:
+		h.add_child(OKit.tex_rect(ad_tex, Vector2(28, 28)))
+	var gold := int(float(ads.call("reward_gold")))
+	var mx := int(ads.call("daily_max"))
+	var left := int(ads.call("left_today"))
+	var tv := OKit.vbox(2)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(tv)
+	var l := OKit.label(12, OKit.TEXT, 900)
+	l.name = "AdText"
+	l.text = t("gd.ads.card", {"gold": gold, "max": mx})
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(320, 0)
+	tv.add_child(l)
+	var avail := bool(ads.call("is_available"))
+	if avail:
+		var ll := OKit.label(10, Color("60a5fa"), 700)
+		ll.name = "AdLeft"
+		ll.text = t("gd.ads.left", {"n": left, "max": mx})
+		tv.add_child(ll)
+	var b: Button
+	if not avail:
+		b = OKit.ghost_button(t("common.coming_soon"), 11)
+		b.disabled = true
+		b.modulate.a = 0.5
+	elif left <= 0:
+		b = OKit.ghost_button(t("gd.ads.none_left"), 11)
+		b.disabled = true
+		b.modulate.a = 0.5
+	else:
+		b = _buy_btn(t("gd.ads.btn", {"gold": gold}), true, false, Color("2563eb"), watch_ad, "AdWatch")
+	b.name = "AdBtn"
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(b)
 	return p
@@ -490,15 +583,28 @@ func _rune_card(gold: float) -> Control:
 
 func _iap_card(pk: Dictionary) -> Control:
 	var p := _card(HALF_W, Color(240 / 255.0, 192 / 255.0, 64 / 255.0, 0.2))
-	p.modulate.a = 0.6
+	p.name = "Iap_" + str(pk["id"])
 	var v := OKit.vbox(4)
 	p.add_child(v)
 	var amt := float(pk["gold"])
-	var e := "💰" if amt >= 6500.0 else ("🏆" if amt >= 3000.0 else ("💎" if amt >= 1200.0 else "🪙"))
-	v.add_child(_icon_box(OKit.tex_rect(emoji_tex(e), Vector2(36, 36))))
-	v.add_child(_center_label(t("shop." + str(pk["key"])), 14, OKit.GOLD, 900, HALF_W - 28))
-	v.add_child(_center_label(str(pk["price"]), 12, OKit.TEXT, 700, HALF_W - 28))
-	v.add_child(_center_label(t("shop.gold_iap_coming"), 10, OKit.DIM, 600, HALF_W - 28))
+	# 양마다 다른 기존 그림 (💰·🪙 는 같은 그림이라 가장 작은 꾸러미는 골드 배지의 금화 그림)
+	var tex: Texture2D = emoji_tex("💰") if amt >= 6500.0 else (emoji_tex("🏆") if amt >= 3000.0 else (emoji_tex("💎") if amt >= 1200.0 else icons.call("image", "icon/64x64/fc131.png")))
+	var ic := OKit.tex_rect(tex, Vector2(36, 36))
+	ic.name = "IapIcon"
+	v.add_child(_icon_box(ic))
+	v.add_child(_center_label(t(str(pk["key"])), 14, OKit.GOLD, 900, HALF_W - 28))
+	var pl := _center_label(str(pk["price"]), 12, OKit.TEXT, 700, HALF_W - 28)
+	pl.name = "Price"
+	v.add_child(pl)
+	var avail := billing != null and bool(billing.call("is_available"))
+	var bz := billing != null and bool(billing.call("busy"))
+	var pend := billing != null and bool(billing.call("purchase_pending", str(pk["id"])))
+	var b := _buy_btn(t("gd.iap.processing_short") if pend else t("gd.iap.buy"), avail and not bz and not pend, false, Color("d97706"), buy_iap.bind(str(pk["id"])), "Buy")
+	v.add_child(_icon_box(b))
+	if not avail:
+		var nl := _center_label(t("gd.iap.unavailable_short"), 10, OKit.DIM, 600, HALF_W - 28)
+		nl.name = "Unavailable"
+		v.add_child(nl)
 	return p
 
 
@@ -751,3 +857,187 @@ func show_gacha_results(results: Array) -> void:
 	gc.add_child(g)
 	open_modal(gc, {"name": "GachaModal", "title": t("shop.gacha_results"), "width": 820.0 if results.size() > 1 else 320.0,
 		"buttons": [{"text": t("common.confirm"), "name": "Ok"}]})
+
+
+# ═══════════ 결제 (결제층 A) ═══════════
+
+func _iap_product(id: String) -> Dictionary:
+	if billing == null:
+		return {}
+	for p: Dictionary in billing.call("products"):
+		if str(p["id"]) == id:
+			return p
+	return {}
+
+
+## 결제 카드 '구매' → 구매 확인 창 (상품 · 가격 · 청약철회/미성년자 안내)
+func buy_iap(id: String) -> void:
+	if not act_once():
+		return
+	if billing == null or bool(billing.call("busy")) or _paying != "":
+		return
+	if not bool(billing.call("is_available")):
+		alert(t("gd.iap.unavailable"))
+		return
+	var p := _iap_product(id)
+	if p.is_empty():
+		return
+	var v := OKit.vbox(10)
+	v.name = "IapConfirm"
+	var nm := _center_label(t(str(p["key"])), 18, OKit.GOLD, 900, 380)
+	nm.name = "Product"
+	v.add_child(nm)
+	var pr := _center_label(str(p["price"]), 16, Color.WHITE, 800, 380)
+	pr.name = "Price"
+	v.add_child(pr)
+	var nb := PanelContainer.new()
+	nb.name = "Notice"
+	nb.add_theme_stylebox_override("panel", OKit.box(Color(1, 1, 1, 0.03), Color(1, 1, 1, 0.08), 8, 1, 12, 10))
+	var nv := OKit.vbox(5)
+	nb.add_child(nv)
+	for k: String in notice_keys(str(i18n.get("current_lang")) if i18n != null else "ko"):
+		var l := OKit.label(10, OKit.DIM2, 500)
+		l.name = k.get_slice(".", 2)
+		l.text = "· " + t(k)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size = Vector2(356, 0)
+		nv.add_child(l)
+	v.add_child(nb)
+	open_modal(v, {"name": "IapConfirmModal", "title": t("gd.iap.confirm_title"), "title_size": 22, "width": 468.0,
+		"buttons": [{"text": t("gd.iap.buy"), "cb": func() -> void: _start_iap(id), "name": "Yes"}, {"text": t("common.cancel"), "secondary": true, "name": "No"}]})
+
+
+## 구매 확인 창의 법정 안내 (재검수 디렉터 결정 — 지역은 게임 언어로 단순하게, 법무 확인 대상: README)
+##  ko: 7일 청약철회(사용한 재화 등 제한) · 청약철회·환불은 구매한 스토어 고객센터 · 부가세 포함 · 미성년자
+##  그 밖: 환불은 스토어 정책 · 가격·세금은 스토어 표시 기준 · 미성년자
+static func notice_keys(lang: String) -> Array:
+	if lang == "ko":
+		return ["gd.iap.notice_withdraw", "gd.iap.notice_refund_store", "gd.iap.notice_vat", "gd.iap.notice_minor"]
+	return ["gd.iap.notice_refund_policy", "gd.iap.notice_price_store", "gd.iap.notice_minor"]
+
+
+func _start_iap(id: String) -> void:
+	if billing == null or _paying != "":
+		return
+	if not bool(billing.call("buy", id)):
+		alert(t("gd.iap.unavailable"))
+		return
+	_paying = id
+	var v := OKit.vbox(12)
+	var l := _msg_label(t("gd.iap.processing"))
+	l.name = "Processing"
+	v.add_child(l)
+	var m := open_modal(v, {"name": "IapProgress", "no_esc": true, "close_on_bg": false})
+	_pay_modal = m
+	render()
+	# 가게·서버가 응답하지 않을 때의 탈출구: progress_escape_secs 뒤 안내 + '닫기' (닫아도 구매는 미처리로 남고 restore 가 처리)
+	get_tree().create_timer(progress_escape_secs).timeout.connect(func() -> void:
+		if not is_instance_valid(m) or m.is_queued_for_deletion() or _pay_modal != m:
+			return
+		var nl := _msg_label(t("gd.iap.escape_note"))
+		nl.name = "EscapeNote"
+		nl.add_theme_font_size_override("font_size", 12)
+		nl.add_theme_color_override("font_color", OKit.DIM2)
+		nl.custom_minimum_size = Vector2(320, 0)
+		v.add_child(nl)
+		var cb := OKit.modal_button("", true)
+		set_button_text(cb, t("common.close"), 18)
+		cb.name = "EscapeClose"
+		cb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		cb.pressed.connect(func() -> void:
+			_paying = ""   # 결과가 나중에 오면 알림 띠로 (granted_toast)
+			_pay_modal = null
+			billing.call("release_busy")   # 다른 상품은 살 수 있게 (이 상품 카드는 '처리 중')
+			_close_modal_node(m, false)
+			render())
+		v.add_child(cb)
+		_fit_modal(m))
+
+
+func _on_purchase_finished(id: String, r: Dictionary) -> void:
+	if _pay_modal != null and is_instance_valid(_pay_modal):
+		_close_modal_node(_pay_modal, false)
+	_pay_modal = null
+	var mine := _paying == id
+	_paying = ""
+	refresh_gold()
+	render()
+	if not mine:
+		return
+	var p := _iap_product(id)
+	var st := str(r.get("status", ""))
+	var msg := ""
+	match st:
+		"granted":
+			msg = t("gd.iap.done", {"gold": grouped(float(r.get("gold", 0))), "name": t(str(p.get("key", "")))})
+		"dup":
+			msg = t("gd.iap.dup")
+		"cancelled":
+			msg = t("gd.iap.cancelled")
+		"pending":
+			msg = t("gd.iap.pending")
+		"verify_failed":
+			msg = t("gd.iap.retry_later")
+		"save_failed":
+			msg = t("gd.iap.save_failed")
+		"deferred":
+			msg = t("gd.iap.deferred")
+		"invalid":
+			msg = t("gd.iap.invalid", {"code": str(r.get("code", ""))})
+		_:
+			msg = t("gd.iap.failed", {"code": str(r.get("code", st))})
+	var a := alert(msg)
+	a.set_meta("iap_status", st)
+
+
+func _on_granted(id: String, gold: float, _oid: String) -> void:
+	refresh_gold()
+	render()
+	# 내 구매 결과는 결과 창이 알림 — 다시 처리(대기 승인·앱 복구, 진행 중인 구매를 restore 가 먼저 처리한 경우 포함)로 들어온 지급은 알림 띠로도
+	if _paying != id or (billing != null and bool(billing.call("is_restoring"))):
+		toast(t("gd.iap.granted_toast", {"gold": grouped(gold)}), "ok")
+
+
+func _on_revoked(_id: String, taken: float, _oid: String) -> void:
+	refresh_gold()
+	render()
+	toast(t("gd.iap.revoked_toast", {"gold": grouped(taken)}), "warn")
+
+
+func _on_products() -> void:
+	if cur_tab == "gold" and _paying == "":
+		render()
+
+
+# ── 광고 ──
+
+func watch_ad() -> void:
+	if not act_once():
+		return
+	if ads == null or bool(ads.call("showing")):
+		return
+	ads.call("show_rewarded", "shop_" + cur_tab)
+
+
+func _on_ad_rewarded(_pl: String, gold: float) -> void:
+	refresh_gold()
+	render()
+	alert(t("gd.ads.rewarded", {"gold": grouped(gold)}))
+
+
+func _on_ad_closed(_pl: String) -> void:
+	render()
+	toast(t("gd.ads.closed"))
+
+
+func _on_ad_failed(_pl: String, code: String) -> void:
+	render()
+	toast(t("gd.ads.limit" if code == "limit" else "gd.ads.failed"), "warn")
+
+
+# ── 확률 정보 ──
+
+func open_odds() -> void:
+	if not act_once():
+		return
+	OddsView.open(self)
