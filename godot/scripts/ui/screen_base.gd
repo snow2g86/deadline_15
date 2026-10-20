@@ -36,6 +36,8 @@ var body: Control
 var bottom_nav: PanelContainer
 var _tabs: Dictionary = {}   # tab → {btn, icon, label}
 var layer: Control           # 창·알림 (맨 위)
+var frame: VBoxContainer     # 윗줄·본문·아래 탭 (6a: 안전 영역 안)
+var mobile: Node             # (6a) 오토로드 Mobile
 var _modals: Array = []      # [{root, on_close}]
 var _toast: PanelContainer
 
@@ -91,6 +93,11 @@ func busy() -> bool:
 	return false
 
 
+## (6a) busy() 중 안드로이드 뒤로 단추 (스토리 넘기기 등)
+func busy_back() -> void:
+	pass
+
+
 # ── 준비 ──
 
 func _svc(n: String) -> Node:
@@ -109,17 +116,68 @@ func _ready() -> void:
 	sanitized = SaveSanitize.sanitize(c)
 	icons = Icons.get_for(D)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mobile = _svc("Mobile")
 	_build_chrome()
 	_build()
 	_refresh_chrome()
 	_refresh()
 	if i18n != null:
 		i18n.connect("language_changed", _on_language)
+	# (6a) 노치·홈 바 안전 영역 (PC 는 여백 0 — 그대로)
+	if mobile != null:
+		mobile.connect("layout_changed", _apply_safe)
+		_apply_safe()
+
+
+## (6a) 윗줄·본문·아래 탭과 창 가운데 상자를 안전 영역 안으로 (바탕은 화면 끝까지)
+func _apply_safe() -> void:
+	if mobile == null:
+		return
+	mobile.call("fit_safe", frame)
+	for m: Dictionary in _modals:
+		var cc: Node = (m["root"] as Node).get_node_or_null("Center")
+		if cc != null:
+			mobile.call("fit_safe", cc)
+	safe_changed()
+
+
+## (6a) 안전 영역·배율이 바뀜 (화면이 필요하면 다시 배치)
+func safe_changed() -> void:
+	pass
+
+
+## (6a) 모바일 배치인가 (휴대폰·태블릿·흉내)
+func is_mobile_ui() -> bool:
+	var pf := _svc("Platform")
+	return pf != null and bool(pf.call("is_mobile"))
+
+
+## (6a) 모바일에서 본문 세로가 모자라면(논리 높이 480) 세로 열 전체를 스크롤 안에 넣음 — PC 는 그대로
+func mobile_scroll(col: Control) -> ScrollContainer:
+	if not is_mobile_ui() or col == null or col.get_parent() == null:
+		return null
+	var sc := ScrollContainer.new()
+	sc.name = "MobileScroll"
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.mouse_filter = Control.MOUSE_FILTER_PASS
+	var p := col.get_parent()
+	var idx := col.get_index()
+	p.remove_child(col)
+	p.add_child(sc)
+	p.move_child(sc, idx)
+	sc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	sc.add_child(col)
+	col.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	return sc
 
 
 func _exit_tree() -> void:
 	if i18n != null and i18n.is_connected("language_changed", _on_language):
 		i18n.disconnect("language_changed", _on_language)
+	if mobile != null and mobile.is_connected("layout_changed", _apply_safe):
+		mobile.disconnect("layout_changed", _apply_safe)
 
 
 func _on_language(_lang: String) -> void:
@@ -159,6 +217,7 @@ func _build_chrome() -> void:
 	add_child(bg)
 	var col := VBoxContainer.new()
 	col.name = "Frame"
+	frame = col
 	col.add_theme_constant_override("separation", 0)
 	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -310,6 +369,9 @@ func _on_tab(key: String) -> void:
 ## 뒤로 단추 · Esc · 마우스 뒤로 단추 (Router 가 부름): 열린 창 먼저 닫고, 없으면 go_back
 func on_back() -> void:
 	if busy():
+		# (6a) 안드로이드 뒤로 단추: 스토리 재생 중이면 Esc 처럼 넘기기 (PC 의 Esc 는 스토리 창이 직접 받음 — 여기 오지 않음)
+		if router != null and str(router.get("back_source")) == "system":
+			busy_back()
 		return
 	if not _modals.is_empty():
 		if not bool(_modals.back().get("no_esc", false)):
@@ -317,6 +379,13 @@ func on_back() -> void:
 		return
 	if has_back():
 		go_back()
+	elif router != null and str(router.get("back_source")) == "system":
+		root_back()
+
+
+## (6a) 뒤로 갈 곳이 없는 화면(로비)에서 안드로이드 뒤로 단추 — 로비가 종료 확인. PC 의 Esc 는 여기 오지 않음
+func root_back() -> void:
+	pass
 
 
 # ── 창 (웹 #modal-overlay > #modal-box) ──
@@ -346,9 +415,12 @@ func open_modal(content: Control, opts: Dictionary = {}) -> Control:
 					return
 				_close_modal_node(ov, true))
 	var cc := CenterContainer.new()
+	cc.name = "Center"
 	cc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	cc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ov.add_child(cc)
+	if mobile != null:
+		mobile.call("fit_safe", cc)
 	var panel := PanelContainer.new()
 	panel.name = "Box"
 	var sb: StyleBox = opts.get("box", null)
@@ -364,6 +436,9 @@ func open_modal(content: Control, opts: Dictionary = {}) -> Control:
 	panel.add_child(v)
 	var w := float(opts.get("width", 420.0))
 	var vs := get_viewport_rect().size
+	if mobile != null:
+		vs = (mobile.call("safe_rect") as Rect2).size
+		w = minf(w, vs.x - 16.0)   # (6a) 좁은 휴대폰 화면 안으로 (PC 1280 에서는 어느 창도 이보다 좁음 — 그대로)
 	var max_h := vs.y * 0.85 - 64.0
 	if str(opts.get("title", "")) != "":
 		var tl := OKit.label(int(opts.get("title_size", 26)), OKit.GOLD, 900)
@@ -507,6 +582,11 @@ func _msg_label(msg: String) -> Label:
 	return l
 
 
+## 알림의 세로 자리 (기본: 화면 아래에서 124) — 로비는 아래 단추 줄과 겹치지 않게 덮어씀
+func toast_y(vs: Vector2, _h: float) -> float:
+	return vs.y - 84.0 - 40.0
+
+
 # ── 알림 (웹 .toast: 아래 가운데, 3초 뒤 사라짐) ──
 
 func toast(msg: String, kind: String = "") -> void:
@@ -535,7 +615,7 @@ func toast(msg: String, kind: String = "") -> void:
 	_toast = p
 	p.reset_size()
 	var vs := get_viewport_rect().size
-	p.position = Vector2((vs.x - p.get_combined_minimum_size().x) * 0.5, vs.y - 84.0 - 40.0)
+	p.position = Vector2((vs.x - p.get_combined_minimum_size().x) * 0.5, toast_y(vs, p.get_combined_minimum_size().y))
 	var tw := p.create_tween()
 	tw.tween_interval(3.0)
 	tw.tween_property(p, "modulate:a", 0.0, 0.5)

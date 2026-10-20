@@ -2502,7 +2502,14 @@
       "bg_lower": "降低",
       "bg_mute": "静音"
     },
-    "result": {"retry": "重新挑战"},
+    "result": {
+      "retry": "重新挑战",
+      "base_reward": "基础奖励",
+      "total_gold": "合计",
+      "star_kept": "已获得",
+      "battle_detail": "📈 击败{kills}名 · 击败EXP {exp}（{survivors}人分摊）",
+      "chest_gold": "宝箱"
+    },
     "resume": {
       "web_notice": "这场战斗是在网页版开始的，无法在这里继续。\n{stage}\n放弃将删除保存的战斗（成员和金币保留）。",
       "broken": "无法读取保存的战斗，不能继续。\n放弃将删除保存的战斗（成员和金币保留）。",
@@ -2594,6 +2601,9 @@
       "enh_opt": "强化词条：成功时附加新词条的概率",
       "doc_title": "DEADLINE 15 概率说明",
       "doc_note": "本文件由游戏数据自动生成（游戏版本 {ver}），内容与游戏内商店、强化界面中的“概率说明”相同。"
-    }
+    },
+    "mobile": {"quit_confirm": "要退出游戏吗？"},
+    "fx": {"buff_end": "增益结束"},
+    "stat": {"hp": "生命", "atk": "攻击", "def": "防御", "ar": "行动速度"}
   }
 }

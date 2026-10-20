@@ -2546,7 +2546,14 @@
       "bg_lower": "Bajar",
       "bg_mute": "Silenciar"
     },
-    "result": {"retry": "Reintentar"},
+    "result": {
+      "retry": "Reintentar",
+      "base_reward": "Recompensa base",
+      "total_gold": "Total",
+      "star_kept": "ya obtenida",
+      "battle_detail": "📈 Derrotados {kills} · EXP por derrotas {exp} (repartida entre {survivors})",
+      "chest_gold": "Cofre del tesoro"
+    },
     "resume": {
       "web_notice": "Esta batalla empezó en la versión web y no se puede reanudar aquí.\n{stage}\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
       "broken": "No se puede leer la batalla guardada, así que no se puede reanudar.\nAl abandonarla se borra la batalla guardada (miembros y oro se mantienen).",
@@ -2638,6 +2645,9 @@
       "enh_opt": "Opción extra: probabilidad de que se añada una opción nueva al tener éxito",
       "doc_title": "Probabilidades de DEADLINE 15",
       "doc_note": "Generado automáticamente a partir de los datos del juego (versión {ver}). Mismo contenido que «Probabilidades» en la tienda y la pantalla de mejora del juego."
-    }
+    },
+    "mobile": {"quit_confirm": "¿Salir del juego?"},
+    "fx": {"buff_end": "Efecto terminado"},
+    "stat": {"hp": "Vida", "atk": "Ataq.", "def": "Def.", "ar": "Vel."}
   }
 }

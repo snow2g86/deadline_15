@@ -953,7 +953,8 @@ func _export() -> void:
 	_check(cf.load("res://export_presets.cfg") == OK, "export_presets.cfg 읽기")
 	var presets: Dictionary = {}
 	for sec: String in cf.get_sections():
-		if sec.begins_with("preset.") and not sec.ends_with(".options"):
+		# PC 프리셋만 (6a 의 Android·iOS 프리셋은 tests/check_mobile6a.gd 가 봄)
+		if sec.begins_with("preset.") and not sec.ends_with(".options") and ["Windows Desktop", "macOS"].has(str(cf.get_value(sec, "platform"))):
 			presets[str(cf.get_value(sec, "platform"))] = sec
 	_check(presets.has("Windows Desktop") and presets.has("macOS"), "프리셋: Windows Desktop · macOS %s" % str(presets.keys()))
 	for plat: String in presets.keys():
@@ -997,7 +998,7 @@ func _export() -> void:
 		var need := {"data/manifest.json": false, "data/lang/ko.json": false, "data/story/ko.json": false, "assets/fonts/OFL.txt": false, "assets/audio/bgm_battle.wav.import": false}
 		for p: String in lst:
 			var q := p.trim_prefix("res://")
-			if q.begins_with("tests/") or q.begins_with("tools/") or q.begins_with("build/") or q.contains("baseline") or q.ends_with(".md") or q.contains("/src/"):
+			if q.begins_with("tests/") or q.begins_with("tools/") or q.begins_with("build/") or q.begins_with("dev/") or q.begins_with("assets/pilot/") or q.begins_with("android/") or q.contains("baseline") or q.ends_with(".md") or q.contains("/src/"):
 				bad.append(q)
 			if need.has(q):
 				need[q] = true

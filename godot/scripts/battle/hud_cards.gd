@@ -35,6 +35,7 @@ func setup(p_icons: Object) -> void:
 	name = "ClanCards"
 	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	offset_top = -130
+	grow_vertical = Control.GROW_DIRECTION_BEGIN   # (6a) 내용이 130 보다 크면(모바일 글자) 위로 자람 — 화면 아래로 잘리지 않게
 	var sb := StyleBoxEmpty.new()
 	sb.content_margin_left = 10
 	sb.content_margin_right = 10

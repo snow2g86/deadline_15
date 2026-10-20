@@ -24,3 +24,8 @@ godot/tests/screens/*
 !godot/tests/screens/.gdignore
 godot/.godot/
 godot/export/
+# 5단계 내보내기 결과 (export_presets.cfg 의 build/…)
+godot/build/*
+!godot/build/.gdignore
+# 6a 안드로이드 Gradle 빌드 틀 (tools/android_build_template.sh 로 다시 만듦 — godot-lib aar 약 200MB) · 디버그 키스토어 (로컬 전용)
+godot/android/

@@ -108,13 +108,26 @@ func launch_battle(cfg: Dictionary) -> void:
 	go("battle", {}, false)
 
 
-## 지금 화면에 뒤로 가기를 요청 (Esc · 마우스 뒤로 단추 · 시험)
-func request_back() -> bool:
+## (6a) 지금 뒤로 가기가 안드로이드 뒤로 단추에서 왔는가 (화면이 on_back 안에서 봄 — 로비의 종료 확인 등)
+var back_source := ""
+
+
+## 지금 화면에 뒤로 가기를 요청 (Esc · 마우스 뒤로 단추 · 시험 · (6a) 안드로이드 뒤로 단추 = system)
+##  system 이면: on_back 이 있는 화면은 Esc 와 같게(back_source = "system"), 없는 화면(전투)은 on_system_back
+func request_back(system: bool = false) -> bool:
 	var s: Node = get_tree().current_scene
-	if s != null and s.has_method("on_back"):
+	if s == null:
+		return false
+	back_source = "system" if system else ""
+	var done := false
+	if s.has_method("on_back"):
 		s.call("on_back")
-		return true
-	return false
+		done = true
+	elif system and s.has_method("on_system_back"):
+		s.call("on_system_back")
+		done = true
+	back_source = ""
+	return done
 
 
 func _unhandled_input(ev: InputEvent) -> void:

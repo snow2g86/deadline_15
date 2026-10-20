@@ -111,6 +111,9 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 
 	top = HudTop.new()
 	top.setup(icons)
+	var pf := get_node_or_null("/root/Platform")
+	if pf != null and bool(pf.call("is_mobile")):
+		top.compact()   # (6a)
 	top.threat_pressed.connect(func() -> void: threat_pressed.emit())
 	top.rotate_pressed.connect(func(d: int) -> void: rotate_pressed.emit(d))
 	top.speed_pressed.connect(func() -> void: speed_pressed.emit())
@@ -583,4 +586,5 @@ func show_result(m: Dictionary) -> void:
 	info.hide_tip()
 	info.hide_popup()
 	result_view.reduce_motion = reduce_motion
+	top.ti_box.visible = false   # (6a QA) 결과가 떴으면 윗줄의 '적군 턴' 표시도 숨김 (다음 전투는 장면을 새로 만듦)
 	result_view.show_result(m)

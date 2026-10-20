@@ -51,6 +51,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_store = get_node_or_null("/root/Store")
 	active = DisplayServer.get_name() != "headless" and OS.has_feature("pc") and not OS.has_feature("web")
+	# (6a) 모바일 흉내(-- --mobile) 중에는 PC 창 저장값을 읽지도 쓰지도 않음 — 창 크기는 Mobile 이 기기 비율로 정함
+	var pf := get_node_or_null("/root/Platform")
+	if pf != null and str(pf.get("mobile_emu")) != "":
+		active = false
 	cfg = sanitize(_store.call("get_json", KEY, {}) if _store != null else {})
 	if not active:
 		return

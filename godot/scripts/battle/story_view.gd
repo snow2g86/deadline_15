@@ -86,6 +86,7 @@ func setup() -> void:
 		var c := Control.new()
 		c.clip_contents = true
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		c.set_meta("overflow_ok", true)   # 초상화는 대사 상자 위로 솟음 (디자인)
 		scene_box.add_child(c)
 		var img := TextureRect.new()
 		img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -101,6 +102,9 @@ func setup() -> void:
 		pts[side] = {"box": c, "img": img, "mat": mat, "key": "", "speaking": false, "enter": 9.0, "show": false}
 	box = PanelContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 대사가 길어 상자가 정한 높이보다 크면 위로 자람 (아래 카드·화면 밖으로 내려가지 않게) — 정한 칸 밖으로 나오는 것은 허용
+	box.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	box.set_meta("overflow_ok", true)
 	scene_box.add_child(box)
 	var bm := MarginContainer.new()
 	bm.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -113,6 +117,7 @@ func setup() -> void:
 	next_lbl.text = "▼"
 	scene_box.add_child(next_lbl)
 	name_tag = PanelContainer.new()
+	name_tag.set_meta("overflow_ok", true)   # 이름표는 상자 윗변에 걸침 (디자인)
 	name_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	scene_box.add_child(name_tag)
 	name_lbl = Kit.label(14, Color("1a1206"), 900)
@@ -161,15 +166,25 @@ func play(lines: Array, opts: Dictionary) -> void:
 
 
 func _layout() -> void:
-	var vs := get_viewport_rect().size
+	var vs := size if size.x > 0.0 else get_viewport_rect().size
+	# (6a) 노치·홈 바 안전 영역 (이 층 좌표) — 바깥 화면은 화면 전체 층이므로 여기서 비킴. PC 는 여백 0 (그대로)
+	var ox := 0.0
+	var mob := get_node_or_null("/root/Mobile")
+	if mob != null:
+		var g: Rect2 = mob.call("safe_rect")
+		var area := Rect2(g.position - global_position, g.size).intersection(Rect2(Vector2.ZERO, vs))
+		ox = area.position.x
+		vs = Vector2(area.end.x, area.end.y)
+		title_lbl.position = Vector2(ox + 26.0, area.position.y + 14.0)
+	vs.x -= ox
 	var w := minf(640.0 if battle_mode else 820.0, vs.x - 24.0)
 	var bottom := 140.0 if battle_mode else 14.0
 	var bh := 84.0 if battle_mode else 112.0
-	scene_box.position = Vector2((vs.x - w) / 2.0, vs.y - bottom - bh)
+	scene_box.position = Vector2(ox + (vs.x - w) / 2.0, vs.y - bottom - bh)
 	scene_box.size = Vector2(w, bh)
 	box.position = Vector2.ZERO
+	box.custom_minimum_size = Vector2(w, bh)   # 최소 크기를 먼저 (앞 장면의 큰 최소 크기에 크기가 막히지 않게)
 	box.size = Vector2(w, bh)
-	box.custom_minimum_size = Vector2(w, bh)
 	(box.get_child(0) as MarginContainer).add_theme_constant_override("margin_left", 18 if battle_mode else 22)
 	(box.get_child(0) as MarginContainer).add_theme_constant_override("margin_right", 18 if battle_mode else 22)
 	(box.get_child(0) as MarginContainer).add_theme_constant_override("margin_top", 22 if battle_mode else 26)
@@ -191,7 +206,11 @@ func _layout() -> void:
 		mat.set_shader_parameter("mask_v1", (1.0 * ph + 0.06 * ph) / ih)
 	skip_btn.reset_size()
 	# 전투 대사는 맵·윗줄이 비치므로 윗줄 아래에 (전투 전·후 장면은 웹처럼 맨 위)
-	skip_btn.position = Vector2(vs.x - skip_btn.get_combined_minimum_size().x - 16.0, 70.0 if battle_mode else 12.0)
+	if battle_mode:
+		# (6a QA) 전투 대사의 건너뛰기: 오른쪽 위에 두면 행동 순서 패널(오른쪽, 윗줄 아래)을 덮으므로 윗줄 아래 가운데에 (왼쪽 미니맵·오른쪽 순서 패널 사이)
+		skip_btn.position = Vector2(ox + (vs.x - skip_btn.get_combined_minimum_size().x) * 0.5, 66.0)
+	else:
+		skip_btn.position = Vector2(ox + vs.x - skip_btn.get_combined_minimum_size().x - 16.0, 12.0)
 	next_lbl.position = Vector2(w - 26.0, bh - 22.0)
 
 

@@ -2502,7 +2502,14 @@
       "bg_lower": "降低",
       "bg_mute": "靜音"
     },
-    "result": {"retry": "重新挑戰"},
+    "result": {
+      "retry": "重新挑戰",
+      "base_reward": "基本獎勵",
+      "total_gold": "合計",
+      "star_kept": "已獲得",
+      "battle_detail": "📈 擊倒 {kills} 名 · 擊倒 EXP {exp}（{survivors} 名分攤）",
+      "chest_gold": "寶箱"
+    },
     "resume": {
       "web_notice": "這場戰鬥是在網頁版開始的，無法在這裡繼續。\n{stage}\n放棄將刪除儲存的戰鬥（成員與金幣保留）。",
       "broken": "無法讀取儲存的戰鬥，不能繼續。\n放棄將刪除儲存的戰鬥（成員與金幣保留）。",
@@ -2594,6 +2601,9 @@
       "enh_opt": "強化詞綴：成功時附加新詞綴的機率",
       "doc_title": "DEADLINE 15 機率說明",
       "doc_note": "本文件由遊戲資料自動產生（遊戲版本 {ver}），內容與遊戲內商店、強化畫面中的「機率說明」相同。"
-    }
+    },
+    "mobile": {"quit_confirm": "要結束遊戲嗎？"},
+    "fx": {"buff_end": "增益結束"},
+    "stat": {"hp": "生命", "atk": "攻擊", "def": "防禦", "ar": "行動速度"}
   }
 }

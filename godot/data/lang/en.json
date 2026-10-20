@@ -2543,7 +2543,14 @@
       "bg_lower": "Lower",
       "bg_mute": "Mute"
     },
-    "result": {"retry": "Retry"},
+    "result": {
+      "retry": "Retry",
+      "base_reward": "Base reward",
+      "total_gold": "Total",
+      "star_kept": "earned before",
+      "battle_detail": "📈 Killed {kills} · Kill EXP {exp} (split among {survivors})",
+      "chest_gold": "Treasure chest"
+    },
     "resume": {
       "web_notice": "This battle was started in the web version and can't be resumed here.\n{stage}\nAbandoning deletes the saved battle (clan members and gold stay).",
       "broken": "The saved battle can't be read, so it can't be resumed.\nAbandoning deletes the saved battle (clan members and gold stay).",
@@ -2635,6 +2642,9 @@
       "enh_opt": "Bonus option: chance that a new option is added on success",
       "doc_title": "DEADLINE 15 Drop Rates",
       "doc_note": "Generated automatically from the game data (game version {ver}). Same content as \"Drop Rates\" in the in-game shop and enhancement screens."
-    }
+    },
+    "mobile": {"quit_confirm": "Quit the game?"},
+    "fx": {"buff_end": "Buff ended"},
+    "stat": {"hp": "HP", "atk": "ATK", "def": "DEF", "ar": "AR"}
   }
 }

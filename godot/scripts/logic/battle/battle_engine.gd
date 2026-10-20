@@ -571,12 +571,15 @@ func sfx(name: String, cls: String = "") -> void:
 
 
 ## Fx.float — 'messages.*' 글자는 규칙 결과를 알려 주므로 기록 (선택 안내 messages.select_* 제외)
-func fx_float(x: int, y: int, text: String) -> void:
+func fx_float(x: int, y: int, text: String, params: Dictionary = {}) -> void:
 	if _pure > 0:
 		return
 	if text.begins_with("messages.") and not text.begins_with("messages.select_"):
-		rec("float", {"x": x, "y": y, "key": text.substr(9)})
-	fx("float", {"x": x, "y": y, "text": text})
+		rec("float", {"x": x, "y": y, "key": text.substr(9)})   # 기록(황금 기록)에는 자리·키만 — params 는 화면 글자용
+	var d := {"x": x, "y": y, "text": text}
+	if not params.is_empty():
+		d["p"] = params   # (6a QA) 번역 자리표시자 값 ({name} · {n} · {hits}) — 화면이 번역할 때 씀
+	fx("float", d)
 
 
 ## 2) VFX.faceDir — dx,dy 가 둘 다 0 이면 그대로 (정규화하지 않음)

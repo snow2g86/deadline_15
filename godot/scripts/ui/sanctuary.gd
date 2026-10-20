@@ -427,7 +427,8 @@ func open_rename(uid: Variant) -> void:
 	v.add_child(rename_input)
 	rename_dialog = open_modal(v, {"name": "RenameModal", "title": t("sanctuary.rename_title"),
 		"buttons": [{"text": t("common.cancel"), "secondary": true, "name": "Cancel"}, {"text": t("common.confirm"), "name": "Confirm", "cb": rename_done}]})
-	rename_input.grab_focus.call_deferred()
+	if not is_mobile_ui():   # (6a) 휴대폰은 창이 열리자마자 키보드가 화면을 덮지 않게 — 누르면 입력
+		rename_input.grab_focus.call_deferred()
 
 
 func rename_done() -> void:

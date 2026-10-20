@@ -55,6 +55,10 @@ func busy() -> bool:
 	return story_view != null and bool(story_view.get("active"))
 
 
+func busy_back() -> void:
+	story_view.call("skip")
+
+
 func go_back() -> void:
 	if view_mode == "stages":
 		view_mode = "episodes"

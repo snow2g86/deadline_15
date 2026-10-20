@@ -82,6 +82,8 @@ func _build() -> void:
 	_make_rules()
 	view = CodexView.new(self)
 	view.width = WRAP_W - PAD * 2.0
+	if is_mobile_ui():
+		view.min_scale = 1.6   # (6a)
 	view.on_link = _on_link
 	var keys := tabs()
 	cur_tab = keys[0]

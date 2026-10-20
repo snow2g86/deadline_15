@@ -220,6 +220,10 @@ func render_equip_modal() -> void:
 	var left := OKit.vbox(10)
 	left.name = "Left"
 	left.custom_minimum_size = Vector2(330, 0)
+	if scr.is_mobile_ui():
+		# (6a) 좁은 휴대폰 창: 왼쪽 칸·간격을 조금 줄여 창이 안전 영역 안에 들어가게
+		left.custom_minimum_size.x = 300
+		lay.add_theme_constant_override("separation", 10)
 	lay.add_child(left)
 	# 누구 (이름 · 직업)
 	var who := OKit.hbox(8)
@@ -301,6 +305,9 @@ func render_equip_modal() -> void:
 		fb.name = "InvFilter_" + str(f[0])
 		fb.text = t(str(f[1]))
 		fb.add_theme_font_size_override("font_size", 11)
+		if scr.is_mobile_ui():
+			fb.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS   # (6a) 좁은 창: 긴 이름(스페인어 등)은 말줄임
+			fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fb.add_theme_color_override("font_color", OKit.GOLD if on else OKit.DIM2)
 		fb.add_theme_color_override("font_hover_color", OKit.TEXT)
 		fb.add_theme_color_override("font_focus_color", OKit.TEXT)
@@ -315,12 +322,54 @@ func render_equip_modal() -> void:
 	var g := GridContainer.new()
 	g.name = "InvList"
 	g.columns = 2
+	if scr.is_mobile_ui() and scr.get_viewport_rect().size.x < 1200.0:
+		g.columns = 1   # (6a) 휴대폰 논리 폭(약 1070)에는 카드 두 줄이 안 들어감 — 한 줄로 (스크롤)
 	g.add_theme_constant_override("h_separation", 10)
 	g.add_theme_constant_override("v_separation", 10)
 	right.add_child(g)
 	for m: Dictionary in rows:
 		g.add_child(_inv_card(ch, m))
+	_pin_equip_columns.call_deferred(lay, left, right, g)
 	scr._fit_modal.call_deferred(equip_modal)
+
+
+## (6a QA) 장비 창: 왼쪽(장착 칸·능력치·세트·효과)은 고정하고 오른쪽 인벤토리 목록만 스크롤. 창 전체가 아니라 두 칸이 각자 스크롤 안에 있어
+##  높이가 모자라면(휴대폰) 왼쪽도 따로 스크롤. 높이 = 왼쪽 내용 높이(창이 허용하는 만큼까지)
+func _pin_equip_columns(lay: Control, left: Control, right: Control, grid: Control) -> void:
+	if not is_instance_valid(lay) or not is_instance_valid(left) or not is_instance_valid(right) or not is_instance_valid(grid) or equip_modal == null:
+		return
+	var avail := 400.0
+	for m: Dictionary in scr._modals:
+		if m["root"] == equip_modal:
+			avail = float(m["max_h"])
+	var left_h := left.get_combined_minimum_size().y
+	var h := clampf(left_h, 220.0, maxf(220.0, avail))
+	var ls := ScrollContainer.new()
+	ls.name = "LeftScroll"
+	ls.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ls.custom_minimum_size = Vector2(left.get_combined_minimum_size().x + (10 if left_h > h else 0), h)
+	var idx := left.get_index()
+	lay.remove_child(left)
+	lay.add_child(ls)
+	lay.move_child(ls, idx)
+	ls.add_child(left)
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var head_h := 0.0
+	for k: Node in right.get_children():
+		if k != grid and k is Control and (k as Control).visible:
+			head_h += (k as Control).get_combined_minimum_size().y + 8.0
+	var gs := ScrollContainer.new()
+	gs.name = "InvScroll"
+	gs.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	gs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gs.custom_minimum_size = Vector2(0, maxf(120.0, h - head_h))
+	var gi := grid.get_index()
+	right.remove_child(grid)
+	right.add_child(gs)
+	right.move_child(gs, gi)
+	gs.add_child(grid)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scr._fit_modal(equip_modal)
 
 
 func _section(title: String) -> PanelContainer:

@@ -154,7 +154,11 @@ func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_APPLICATION_FOCUS_OUT:
 			set_focused(false)
-		NOTIFICATION_APPLICATION_FOCUS_IN:
+		NOTIFICATION_APPLICATION_PAUSED:
+			# (6a) 앱이 멈추기 전에 바로 (줄이는 0.25초를 기다리지 않음)
+			_focused = false
+			_apply_focus(false)
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED:
 			set_focused(true)
 
 
@@ -169,6 +173,10 @@ func set_focused(on: bool) -> void:
 func focus_gain() -> float:
 	if _focused:
 		return 1.0
+	# (6a) 모바일: 백그라운드(다른 앱·홈·잠금)에서는 늘 끔 — 설정 '창이 뒤에 있을 때 소리'는 PC 만 (모바일 설정 화면에 없음)
+	var pf := get_node_or_null("/root/Platform")
+	if pf != null and bool(pf.call("is_mobile")):
+		return 0.0
 	match str(settings.get("bgAudio", "lower")):
 		"play":
 			return 1.0

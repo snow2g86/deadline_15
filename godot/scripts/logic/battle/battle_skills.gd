@@ -73,8 +73,8 @@ func _enemy_at(x: int, y: int) -> Variant:
 	return _find(func(v: Dictionary) -> bool: return v["hp"] > 0 and v["x"] == x and v["y"] == y and v["team"] == "enemy")
 
 
-func _float(x: int, y: int, key: String) -> void:
-	E.fx_float(x, y, key)
+func _float(x: int, y: int, key: String, params: Dictionary = {}) -> void:
+	E.fx_float(x, y, key, params)
 
 
 func _rng(sk: Dictionary, key: String, dflt: float) -> float:
@@ -702,7 +702,7 @@ func _x_archer_rapidfire(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> voi
 		tgt["hp"] = maxf(0.0, tgt["hp"] - _dmg_sub(u, 0.8, "archer_rapidfire", tgt))
 	_sfx("atk", u)
 	_sfx_kill(tgt)
-	_float(u["x"], u["y"], "messages.archer_rapidfire")
+	_float(u["x"], u["y"], "messages.archer_rapidfire", {"hits": hits})
 	if tgt["hp"] <= 0:
 		_rm_dead()
 	_exp(u, "attack")
@@ -888,7 +888,7 @@ func _summon(u: Dictionary, tx: int, ty: int, sk: Dictionary) -> void:
 	S["nid"] = int(S["nid"]) + 1
 	(S["units"] as Array).append(summon)
 	_sfx("heal")
-	_float(tx, ty, "messages.sapper_summon")
+	_float(tx, ty, "messages.sapper_summon", {"name": cls})   # 화면이 'classes.<cls>' 로 번역 (웹: t('classes.' + summonCls))
 	_exp(u, "attack")
 	_skill_done(u)
 

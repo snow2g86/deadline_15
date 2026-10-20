@@ -143,6 +143,7 @@ var face_opts: Array = []
 var last_result: Dictionary = {}
 ## 진짜 실패한 명령의 안내 (메뉴로 돌아와도 보이고, 다음 조작 때 지움)
 var fail_hint := ""
+const Mobile_ := preload("res://scripts/core/mobile.gd")
 var _drag_from := Vector2.ZERO
 var _dragging := false
 var _press := false
@@ -152,6 +153,21 @@ var _hover_key := ""
 var _hover_t := 0.0
 var _hover_pos := Vector2.ZERO
 var _nav_hover := -1
+## (6a) 터치: 끌기 문턱(이번 누르기) · 손가락들 · 두 손가락 확대 · 길게 누르기 (scripts/core/mobile.gd)
+var _slop := 6.0
+var _touches: Dictionary = {}     # 번호 → 화면 좌표
+var _pinch := false
+var _pinch_d0 := 1.0
+var _pinch_z0 := 1.0
+var _pinch_anchor := Vector2.ZERO  # 두 손가락 가운데 아래의 전장 좌표 (그 점이 손가락 가운데에 머물게)
+var _touch_press := false
+var _long_t := 0.0
+var _long_fired := false
+## 시험·확인: 백그라운드 저장 수 · 길게 누르기 수 · 확대 수
+var bg_saves := 0
+var float_log: Array = []
+var long_presses := 0
+var pinches := 0
 
 ## 자동 진행 (Movie Maker 화면 확인용: 황금 기록 명령을 사람이 누르듯 천천히)
 var _auto_cmds: Array = []
@@ -370,6 +386,13 @@ func _build_world() -> void:
 	ui.reduce_motion = reduce_motion
 	add_child(ui)
 	ui.setup(i18n, icons, store)
+	# (6a) HUD 를 노치·홈 바 안전 영역 안으로 (맵은 화면 끝까지, PC 는 여백 0)
+	var mob := get_node_or_null("/root/Mobile")
+	if mob != null:
+		mob.call("fit_safe", ui.root)
+		mob.connect("layout_changed", func() -> void:
+			if ui != null and is_instance_valid(ui.root):
+				mob.call("fit_safe", ui.root))
 	ui.action_pressed.connect(func(op: String) -> void: ui_action(op))
 	ui.skill_pressed.connect(func(idx: int) -> void: ui_pick_skill(idx))
 	ui.item_pressed.connect(func(k: String, idx: int) -> void: ui_pick_item(k, idx))
@@ -706,6 +729,7 @@ func _process(delta: float) -> void:
 		_hud_dirty = false
 		_refresh_hud()
 	_update_shake(delta)
+	_update_long_press(delta)
 	_update_hover(delta)
 	if ui != null and cam != null:
 		var vs := get_viewport().get_visible_rect().size / cam.zoom
@@ -877,7 +901,11 @@ func _play_fx(kind: String, d: Dictionary, sn: Variant) -> float:
 			var tx := str(d["text"])
 			if not tx.begins_with("messages.select_"):
 				var crit := tx == "messages.critical_hit"
-				fx.float_text(int(d["x"]), int(d["y"]), _tr_float(tx), "crit" if crit else "info")
+				var shown_txt := _tr_float(tx, d.get("p", {}))
+				float_log.append(shown_txt)   # 시험: 화면에 실제로 뜬 글자
+				if float_log.size() > 300:
+					float_log.pop_front()
+				fx.float_text(int(d["x"]), int(d["y"]), shown_txt, "crit" if crit else "info")
 				if crit:
 					screen_shake(true)
 					ui.big_flash(Color(250 / 255.0, 204 / 255.0, 21 / 255.0, 0.22), 0.4)
@@ -2114,17 +2142,31 @@ func _result_model() -> Dictionary:
 		m["notes"] = notes
 	var sr: Variant = S.get("_starResult")
 	if win and typeof(sr) == TYPE_DICTIONARY:
-		m["stars"] = {"merged": sr["merged"], "newly": sr["newly"], "flags": sr["flags"],
+		m["stars"] = {"merged": sr["merged"], "newly": sr["newly"], "flags": sr["flags"], "kept_text": _t("gd.result.star_kept"),
 			"conds": [_t("stars.cond_clear"), _t("stars.cond_nodeath"), "%s (%s)" % [_t("stars.cond_turns", {"n": sr["limit"]}), _t("battle.turn_n", {"n": sr["turn"]})]]}
 	var rw: Array = m["rewards"]
+	# (6a QA) 골드 줄: 기본 보상 · 새 별 보상 · 첫 클리어 보너스 · 보물상자 · 합계 — 합계 = 실제 골드 증가 (줄이 둘 이상일 때만 합계를 보임).
+	#  보물상자는 전투 중에 바로 저장되므로 패배·항복에서도 얻은 만큼 보임. 예전에는 '보상' 줄이 첫 클리어 보너스를 이미 포함하는데(_baseReward + _bonusReward) 보너스가 한 줄 더 나왔음
+	var g_base := Js.num(S.get("_baseReward")) if win else 0.0
+	var g_star := Js.num(sr.get("bonus")) if (win and typeof(sr) == TYPE_DICTIONARY) else 0.0
+	var g_fc := Js.num(S.get("_firstClearBonus")) if win else 0.0
+	var g_chest := Js.num(S.get("_chestGold"))
+	var g_lines := 0
+	if g_base > 0.0:
+		rw.append({"tex": icons.item("gold"), "label": _t("gd.result.base_reward"), "value": "+%s G" % _num(g_base)})
+		g_lines += 1
+	if g_star > 0.0:
+		rw.append({"tex": _e("⭐"), "label": _t("stars.bonus"), "value": "+%s G" % _num(g_star)})
+		g_lines += 1
+	if g_fc > 0.0:
+		rw.append({"tex": _e("🎉"), "label": _t("messages.first_clear_bonus"), "value": "+%s G" % _num(g_fc)})
+		g_lines += 1
+	if g_chest > 0.0:
+		rw.append({"tex": _e("🎁"), "label": _t("gd.result.chest_gold"), "value": "+%s G" % _num(g_chest)})
+		g_lines += 1
+	if g_lines > 1:
+		rw.append({"tex": icons.item("gold"), "label": _t("gd.result.total_gold"), "value": "+%s G" % _num(g_base + g_star + g_fc + g_chest), "legend": true})
 	if win:
-		if typeof(sr) == TYPE_DICTIONARY and Js.num(sr.get("bonus")) > 0.0:
-			rw.append({"tex": _e("⭐"), "label": _t("stars.bonus"), "value": "+%s G" % _num(sr["bonus"])})
-		var actual := Js.num(S.get("_baseReward")) + Js.num(S.get("_bonusReward"))
-		if actual > 0.0:
-			rw.append({"tex": icons.item("gold"), "label": _t("messages.reward"), "value": "+%s G" % _num(actual)})
-		if Js.num(S.get("_firstClearBonus")) > 0.0:
-			rw.append({"tex": _e("🎉"), "label": _t("messages.first_clear_bonus"), "value": "+%s G" % _num(S["_firstClearBonus"])})
 		var fcu: Variant = S.get("_firstClearUnit")
 		if typeof(fcu) == TYPE_DICTIONARY:
 			rw.append({"tex": icons.char_tex(str(fcu["cls"]), str(fcu.get("gender", "m")), sdb), "portrait": true, "label": _t("messages.first_clear_unit", {"cls": _t("classes." + str(fcu["cls"]))}), "value": ""})
@@ -2143,7 +2185,7 @@ func _result_model() -> Dictionary:
 		m["fallen"] = _t("results.fallen", {"n": dead})
 	var er: Array = S.get("_expResults", []) if typeof(S.get("_expResults")) == TYPE_ARRAY else []
 	if not er.is_empty():
-		m["detail"] = _t("results.battle_detail", {"kills": Js.num(S.get("_deadEnemyCount")), "exp": Js.num(S.get("_totalExp")), "survivors": er.size()})
+		m["detail"] = _t("gd.result.battle_detail", {"kills": Js.num(S.get("_deadEnemyCount")), "exp": Js.num(S.get("_totalExp")), "survivors": er.size()})
 		var roster: Variant = eng.c.store.get_json("game_roster")
 		var chars: Array = roster.get("chars", []) if typeof(roster) == TYPE_DICTIONARY else []
 		for r: Dictionary in er:
@@ -2427,6 +2469,13 @@ func _input(ev: InputEvent) -> void:
 func _unhandled_input(ev: InputEvent) -> void:
 	if eng == null or ui == null:
 		return
+	# (6a) 손가락: 두 손가락 확대·이동 (PC 마우스에는 오지 않는 사건)
+	if ev is InputEventScreenTouch or ev is InputEventScreenDrag:
+		_touch_input(ev)
+		return
+	# 두 손가락 중에는 첫 손가락이 흉내 낸 마우스(누르기·끌기·떼기)를 무시 — 떼어도 칸이 눌리지 않게
+	if (_pinch or _touches.size() >= 2) and ev.device == InputEvent.DEVICE_ID_EMULATION and (ev is InputEventMouseButton or ev is InputEventMouseMotion):
+		return
 	if ev is InputEventMouseButton:
 		var mb := ev as InputEventMouseButton
 		if _hold > 0 or ui.result_view.visible:
@@ -2446,16 +2495,25 @@ func _unhandled_input(ev: InputEvent) -> void:
 				_dragging = false
 				_drag_from = mb.position
 				_cam_from = cam.position
+				# (6a) 터치면 실제 2mm (PC 마우스는 그대로 6) · 길게 누르기 준비 · 지난 정보 툴팁 지움
+				_touch_press = Mobile_.is_touch_event(mb)
+				_slop = _mobile_slop(mb)
+				_long_t = 0.0
+				_long_fired = false
+				if _touch_press:
+					_hover_key = ""
+					ui.info.hide_tip()
 			else:
-				if _press and not _dragging:
+				if _press and not _dragging and not _long_fired:
 					_click(_to_world(mb.position))
 				_press = false
 				_dragging = false
+				_touch_press = false
 		elif mb.button_index == MOUSE_BUTTON_RIGHT and mb.pressed:
 			ui_cancel()
 	elif ev is InputEventMouseMotion:
 		var mm := ev as InputEventMouseMotion
-		if _press and (mm.position - _drag_from).length() > 6.0:
+		if _press and (mm.position - _drag_from).length() > _slop:
 			_dragging = true
 		if _dragging or (mm.button_mask & MOUSE_BUTTON_MASK_MIDDLE):
 			if mm.button_mask & MOUSE_BUTTON_MASK_MIDDLE and not _press:
@@ -2468,6 +2526,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 			if h != fx.picker_hover:
 				fx.picker_hover = h
 				fx.queue_redraw()
+		if Mobile_.is_touch_event(mm):
+			return   # (6a) 손가락에는 호버가 없음 — 정보는 길게 누르기로
 		var hk := _hover_target(_to_world(mm.position)) if not _dragging else ""
 		if hk != _hover_key:
 			_hover_key = hk
@@ -2482,6 +2542,68 @@ func _unhandled_input(ev: InputEvent) -> void:
 				ui.settings.close()
 			return
 		_key((ev as InputEventKey).keycode)
+
+
+## (6a) 끌기 문턱 (Mobile 오토로드 — 시험에서 없으면 PC 값)
+func _mobile_slop(ev: InputEvent) -> float:
+	var mob := get_node_or_null("/root/Mobile")
+	return float(mob.call("slop_for", ev)) if mob != null else 6.0
+
+
+## (6a) 두 손가락: 벌리고 오므려 확대·축소 (휠과 같은 0.6~3.0), 가운데를 옮기면 화면 이동. 한 손가락은 흉내 마우스가 맡음 (끌기 · 탭)
+func _touch_input(ev: InputEvent) -> void:
+	if ev is InputEventScreenTouch:
+		var st := ev as InputEventScreenTouch
+		if st.pressed:
+			_touches[st.index] = st.position
+			if _touches.size() >= 2 and not _pinch and _hold == 0 and not ui.result_view.visible:
+				_pinch = true
+				pinches += 1
+				_press = false
+				_dragging = false
+				_long_t = 0.0
+				ui.info.hide_tip()
+				var ab := _two_touches()
+				_pinch_d0 = maxf(1.0, ab[0].distance_to(ab[1]))
+				_pinch_z0 = cam.zoom.x
+				_pinch_anchor = _to_world((ab[0] + ab[1]) * 0.5)
+		else:
+			_touches.erase(st.index)
+			# 손을 다 뗄 때까지 확대 상태 (남은 손가락으로 칸이 눌리지 않게)
+			if _touches.is_empty():
+				_pinch = false
+	elif ev is InputEventScreenDrag:
+		var sd := ev as InputEventScreenDrag
+		_touches[sd.index] = sd.position
+		if _pinch and _touches.size() >= 2:
+			var ab2 := _two_touches()
+			var d := maxf(1.0, ab2[0].distance_to(ab2[1]))
+			var z := clampf(_pinch_z0 * d / _pinch_d0, 0.6, 3.0)
+			cam.zoom = Vector2(z, z)
+			cam.force_update_scroll()
+			cam.position += _pinch_anchor - _to_world((ab2[0] + ab2[1]) * 0.5)
+			cam.force_update_scroll()
+			_clamp_cam()
+
+
+func _two_touches() -> Array:
+	var ks := _touches.keys()
+	ks.sort()
+	return [_touches[ks[0]], _touches[ks[1]]]
+
+
+## (6a) 길게 누르기 (손가락으로 맵을 0.5초 움직이지 않고 누름) → 그 유닛·칸 정보 툴팁 (PC 의 마우스 올려 두기와 같은 내용). 떼어도 칸은 눌리지 않음
+func _update_long_press(delta: float) -> void:
+	if not _touch_press or not _press or _dragging or _long_fired or _pinch:
+		return
+	_long_t += delta
+	if _long_t < 0.5:
+		return
+	_long_fired = true
+	long_presses += 1
+	_hover_pos = _drag_from
+	_hover_key = _hover_target(_to_world(_drag_from))
+	_hover_t = 1.0
 
 
 ## 화면(뷰포트) 좌표 → 전장 좌표 (카메라 이동·확대 반영)
@@ -2611,9 +2733,15 @@ func _t(key: String, p: Dictionary = {}) -> String:
 
 
 ## 엔진 Fx.float 글자: 번역 키면 번역, 숫자 등은 그대로
-func _tr_float(s: String) -> String:
+func _tr_float(s: String, p: Dictionary = {}) -> String:
+	if s == "messages.buff_end" and i18n != null and not i18n.has_key(s):
+		return _t("gd.fx.buff_end")   # 웹은 번역이 없으면 한국어 '버프 해제' — 언어별로
 	if i18n != null and s.contains(".") and not s.contains(" ") and i18n.has_key(s):
-		return i18n.t(s)
+		var pp := p.duplicate()
+		if pp.has("name"):   # 소환수 이름 (classes.summon_spirit 이 없으면 summon_types.*)
+			var cn := str(pp["name"])
+			pp["name"] = _t("classes." + cn) if i18n.has_key("classes." + cn) else (_t("summon_types." + cn) if i18n.has_key("summon_types." + cn) else cn)
+		return i18n.t(s, pp)
 	return s
 
 
@@ -2749,6 +2877,32 @@ func _ai_focused(tid: int) -> bool:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_on_close()
+	elif what == NOTIFICATION_APPLICATION_PAUSED:
+		# (6a) 모바일이 백그라운드로 감 (PC 에는 오지 않음) — 창 닫기와 같이 이어하기 저장 + 디스크에 씀 (돌아오지 못하고 죽을 수 있으므로)
+		if save_on_close():
+			bg_saves += 1
+
+
+## (6a) 안드로이드 뒤로 단추: Esc 와 같은 취소 (스토리는 넘기기, 설정 창은 닫기, 정보 창 닫기, 고르던 것 취소/되돌리기) —
+##  취소할 것이 없으면 전투 설정 창(나가기·항복이 있는 곳)을 엶. 결과 화면·로딩 중에는 무시
+func on_system_back() -> void:
+	if ui == null or eng == null:
+		return
+	if ui.story != null and ui.story.active:
+		ui.story.skip()
+		return
+	if ui.result_view.visible or _loading_on:
+		return
+	if ui.settings.is_open():
+		ui.settings.close()
+		return
+	if ui.info.popup.visible:
+		ui.info.hide_popup()
+		return
+	if _hold > 0:
+		return
+	if not ui_cancel():
+		ui.settings.open()
 
 
 func save_on_close() -> bool:

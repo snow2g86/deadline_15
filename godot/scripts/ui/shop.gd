@@ -423,7 +423,7 @@ func _char_card(idx: int, it: Dictionary, gold: float) -> Control:
 	sg.columns = 2
 	sg.add_theme_constant_override("h_separation", 14)
 	var pot: Dictionary = it["pot"]
-	for row: Array in [["HP : ", jab["base"]["hp"], pot.get("hp")], ["ATK:", jab["base"]["atk"], pot.get("atk")], ["DEF:", jab["base"]["def"], pot.get("def")], ["AR:", jab["actionRec"], pot.get("actionRec")]]:
+	for row: Array in [[t("gd.stat.hp") + " ", jab["base"]["hp"], pot.get("hp")], [t("gd.stat.atk") + " ", jab["base"]["atk"], pot.get("atk")], [t("gd.stat.def") + " ", jab["base"]["def"], pot.get("def")], [t("gd.stat.ar") + " ", jab["actionRec"], pot.get("actionRec")]]:
 		var h := OKit.hbox(2)
 		var a := OKit.label(11, Color.WHITE, 700)
 		a.text = "%s%s" % [row[0], num(row[1])]

@@ -1,6 +1,6 @@
 # DEADLINE 15 — Godot 4 판
 
-웹판(HTML/CSS/JS)을 Godot 4.5 로 옮긴 판입니다. 1~4단계(기초 · 전투 규칙 · 전투 화면 · 바깥 화면)와 5단계(PC 출시 준비: 소리 · 화면 모드 · 내보내기 · 플랫폼 구분) 완료. 다음은 결제(스토브 SDK) · 6단계(모바일).
+웹판(HTML/CSS/JS)을 Godot 4.5 로 옮긴 판입니다. 1~4단계(기초 · 전투 규칙 · 전투 화면 · 바깥 화면)와 5단계(PC 출시 준비: 소리 · 화면 모드 · 내보내기 · 플랫폼 구분) · 결제층 A·B · 6a(모바일 화면·터치·내보내기) 완료. 다음은 6b(결제·광고 플러그인).
 
 > **웹판은 동결되었습니다 (2026-10-18).** 수치·대본·번역의 원본은 **`godot/data/`** 입니다. 웹 `data/*.js`·`js/*` 는 더 읽지 않으며
 > 거기를 고쳐도 이 판에는 반영되지 않습니다 (`data/FROZEN.md`). 웹 파일의 폐기 시점은 사용자가 정합니다. 웹 세이브 가져오기는 만들지 않습니다.
@@ -29,6 +29,10 @@ godot/
   scripts/logic/battle/  전투 엔진 (battle_engine.gd: 명령 입력·진행·신호)
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
   scripts/core/sound.gd · display.gd · platform.gd  (5단계) 오토로드 Sound(배경음·효과음·버스) · Display(창 모드·크기) · Platform(가게·기기 구분)
+  scripts/core/mobile.gd  (6a) 오토로드 Mobile — 모바일 배율 · 안전 영역 · 뒤로 단추 · 길게 누르기 · 목록 끌기 (아래 '6a')
+  assets/app_icon/     (6a) 모바일 아이콘·시작 화면 (tools/make_mobile_icons.py 가 icon.png 로 만듦)
+  android/             (6a, git 제외) Gradle 빌드 틀 + 디버그 키스토어 — tools/android_build_template.sh 로 만듦
+  tests/check_mobile6a.gd  (6a) 모바일 흉내 시험 (배치 4기기×6언어 · 터치 · 뒤로 · 백그라운드 · 설정 · 프리셋)
   scripts/core/router.gd  오토로드 Router — 화면 전환 한 곳 (go · back · launch_battle), Esc·마우스 뒤로 단추 → 화면의 on_back()
   scripts/ui/          바깥 화면 (4a): screen_base.gd(윗줄·아래 탭·창·알림 공통) · outer_kit.gd(부품) · lobby · stage_select · party_select ·
                        settings_screen · flow.gd(game_nav → 전투 설정, 이어하기 설정) · boot.gd · dev_launcher.gd
@@ -333,7 +337,7 @@ Store.get_json("game_roster", {})
 
 ### 남은 일
 - (4b-2 에서 성소·아카데미·도감·가이드·라이선스·Credits 완료 — 아래 '4b-2') 소리는 5단계에서 완료 (아래 '5단계').
-- 좁은 창(480×900 등 휴대폰 폭) 모바일 배치는 PC 출시 뒤로 미룸. 지금은 canvas_items·expand 늘이기라 논리 폭이 늘 1280 이상이어서 깨지지 않지만 작게 보임.
+- 좁은 창(480×900 등 휴대폰 폭) 모바일 배치 → 6a (아래 '6a' — 가로 고정, 배율·안전 영역).
 
 ## 4b-1 — 편성 화면의 장비·소모품·강화 탭 · 상점 · 전투 이어하기
 
@@ -658,3 +662,147 @@ Godot --path godot -- --iap-env local                                           
 - **iid 를 앱 밖에 보존**: Android Block Store · iOS Keychain · STOVE 클라우드 세이브 → `Billing.set_iid_store(load_fn, save_fn)` 에 연결.
 - STOVE 요청자 확인(로그인 토큰으로 '요청자 = 구매자' 증명) — **확인 필요**.
 - 백엔드 채우기(backend_stove/google/apple), 서버 재시도 지수 백오프, AdMob 서버 측 보상 확인.
+
+## 6a — 모바일(안드로이드·iOS) 화면·터치·내보내기 (2026-10-18)
+
+가로 고정(양쪽 가로 = `sensor_landscape`, 안드로이드 `userLandscape`), PC 배치를 그대로 쓰고 휴대폰에서만 크게. 결제·광고 플러그인은 6b.
+
+### 판정 (`Platform`)
+
+- `is_mobile()` = 기능 태그 `mobile` · `google` · `apple` 또는 OS 이름 `Android`·`iOS` 중 하나 (+ 흉내). 가게를 `-- --store dev` 로 바꿔도 실제 휴대폰이면 모바일.
+  `is_pc()` 는 흉내 중 거짓 (설정 화면의 PC 항목이 숨음). `is_touch()` = 모바일 또는 터치 화면.
+- **개발용 흉내** (디버그 빌드만): `Godot --path godot -- --mobile [pixel8|iphone|ipad|low]` — 창을 그 기기 비율로 열고(모니터의 85% 안),
+  그 기기의 dpi·노치 여백으로 배율·안전 영역을 계산. PC 창 저장값(`gd_display`)은 읽지도 쓰지도 않음. 시험은 `Platform.emulate_mobile(true, 기기)`.
+  기기 표: `Mobile.DEVICES` (2400×1080 420dpi 왼쪽 여백 136px · 2778×1284 458dpi 좌우 141px + 아래 63px · 2732×2048 264dpi 아래 40px · 1600×720 270dpi 왼쪽 80px).
+
+### 배율 (`scripts/core/mobile.gd`, 오토로드 `Mobile`)
+
+- 늘이기는 PC 와 같은 `canvas_items` + `expand`. 모바일에서만 `root.content_scale_factor` 를 키워 **논리 1단위 = 실제 0.136mm** 가 되게:
+  `f = clamp(0.136mm ÷ (25.4/dpi × min(가로/1280, 세로/720)), 1, min(1.6, 논리 화면이 1024×480 아래로 안 가는 값))`.
+  → 글자 14 ≈ 1.9mm(12pt), 단추 51 ≈ 6.9mm(44pt). 결과: 2400×1080 → 1.50(논리 1067×480) · 2778×1284 → 1.375(1133×524) · 1600×720 → 1.45(1106×498) · 2732×2048 태블릿 → 1.0(1280×960).
+  dpi 를 모르면 400 으로 봄. 작은 16:9 폰(1334×750)은 논리 폭 1024 를 지키려고 1.25 에서 멈춤 (조금 작게).
+- **글자·단추 최소 크기** (모바일만, 화면 부품 — 맵 Node2D 아래 글자는 빼고): 트리에 들어올 때와 크기가 바뀔 때 글자(Label·Button·LineEdit·RichText) < 12pt 면 키우고,
+  누르는 것(BaseButton·LineEdit·Slider)의 최소 크기를 44pt 로 (`Mobile.min_font()` · `min_target()`). `OKit.set_content` 단추도 이 바닥을 지킴. PC 는 손대지 않음.
+- 그 때문에 좁아진 화면은 크기·간격만 맞춤 (모바일에서만): 로비(아지트를 본문 높이에 맞추고 도감·출격·가이드를 오른쪽에 세로로), 편성(본문 전체 스크롤),
+  장비 창(왼쪽 칸 300·인벤토리 한 줄), 도감 칸 열 수(칸 최소 폭 ×1.6), 전투 윗줄(양쪽 최소 폭 해제·칩 줄 가로 스크롤), 전투 설정 창(내용 스크롤),
+  창 폭은 안전 영역 − 16 까지, 장비 거르기 단추 말줄임, 이름 입력 칸은 창이 열려도 키보드를 바로 띄우지 않음.
+- PC 와 같은 동작인데 고친 것 (모바일과 상관없이 PC 에도 적용 — 화면은 같음): 전투 대사 상자는 최소 크기를 먼저 정함(앞 장면의 큰 최소 크기에 막히던 것) · 대사가 길면 위로 자람 ·
+  속도 단추 글자·클랜원 카드는 내용이 커지면 위로 자람 (PC 크기에서는 변화 없음).
+
+### 안전 영역 (노치·홈 바)
+
+- `DisplayServer.get_display_safe_area()` → 논리 여백 `Mobile.safe_margins()`. 바깥 화면은 윗줄·본문·아래 탭(`Frame`)과 창 가운데 상자를, 전투는 HUD 층(`ui.root`)을,
+  스토리 창은 제목·건너뛰기·대사 상자를 그 안에. 바탕·맵은 화면 끝까지. 툴팁·적 정보·결과 창·설정 창도 안전 영역 좌표로 자리 잡음.
+- 안드로이드(에뮬레이터 Pixel 8 API 35)는 Godot 창이 펀치홀 쪽까지 그려지고 안전 영역이 왼쪽 132px 로 옴 — 확인함.
+
+### 터치
+
+| 조작 | 동작 |
+|---|---|
+| 전투 맵 한 손가락 끌기 | 카메라 이동 (PC 마우스 끌기와 같음). 문턱: **실제 2mm** (`Mobile.TOUCH_SLOP_MM` — Pixel 기준 논리 14.7), PC 마우스는 그대로 6 |
+| 전투 맵 탭 | 칸·유닛 고르기 (문턱 아래 흔들림은 탭) |
+| 두 손가락 벌리기·오므리기 | 확대·축소 (휠과 같은 0.6~3.0), 두 손가락 가운데를 옮기면 화면 이동. 손을 다 뗄 때까지 탭으로 치지 않음 |
+| 전투 맵 길게 누르기 (0.5초) | 그 유닛·칸 정보 툴팁 (PC 마우스 올려 두기와 같은 내용). 떼어도 탭이 아님, 다음 누르기에 지움 |
+| 단추 길게 누르기 | 그 단추의 툴팁(`tooltip_text`)을 손가락 위에 3초 — 떼어도 단추는 안 눌림 (PC 호버 툴팁 대신) |
+| 목록 위 끌기 | ScrollContainer 안 단추·글 칸 위에서 시작해도 목록이 밀림 (Godot 기본은 단추가 누르기를 가져가 안 밀림). 끌면 누르던 단추는 안 눌림 |
+| 마우스 오른쪽(취소) | 행동 메뉴의 '이동 되돌리기'·'취소' 줄, 대상 밖 탭(PC 와 같음), 안드로이드 뒤로 단추 |
+
+- `input_devices/pointing/emulate_mouse_from_touch` = 기본 켬(터치가 마우스로도 옴), `emulate_touch_from_mouse` = 기본 끔 — **PC 마우스 동작은 그대로**.
+  손가락에서 온 마우스 사건은 `device == DEVICE_ID_EMULATION` 으로 가림.
+
+### 뒤로 가기 (안드로이드)
+
+- `application/config/quit_on_go_back=false` → `NOTIFICATION_WM_GO_BACK_REQUEST` → `Mobile.system_back()` → `Router.request_back(true)`.
+- 바깥 화면: Esc 와 같음(창 먼저 닫고 → 이전 화면), 스토리 재생 중이면 넘기기. **로비**(돌아갈 곳 없음): '게임을 종료할까요?' 확인(`gd.mobile.quit_confirm`) → 확인이면 저장 후 종료.
+  PC 의 Esc 는 로비에서 그대로 아무것도 안 함.
+- 전투(`battle_scene.on_system_back`): 스토리 넘기기 → 설정 창 닫기 → 적 정보 닫기 → 고르던 것 취소/이동 되돌리기(Esc 와 같음) → 취소할 것이 없으면 전투 설정 창(나가기·항복). 결과·로딩 중엔 무시.
+
+### 앱 생명주기
+
+- 백그라운드(`NOTIFICATION_APPLICATION_PAUSED`): Store 디스크에 씀(원래 있던 것) · 실제 세이브 전투면 이어하기 저장 + 디스크(`battle_scene.save_on_close` — PC 창 닫기와 같은 길) ·
+  소리 바로 끔. 모바일은 초점을 잃어도(알림창 등) 끔 — 설정 '창이 뒤에 있을 때 소리'는 PC 만.
+- 돌아옴(`RESUMED`·`FOCUS_IN`): 소리 원래대로, Billing 의 미처리 확인(`restore`, 원래 있던 것).
+- 에뮬레이터 확인: 전투 중 홈 → 프로세스 죽임(`am kill`) → 다시 켜면 로비 '전투 재개' → 같은 자리(이동한 클랜원)에서 이어짐.
+
+### 설정 화면
+
+모바일(흉내 포함)에서는 화면 모드·창 크기·'창이 뒤에 있을 때 소리'가 없음 (바깥 설정·전투 설정 창 모두 — 원래 `is_pc()` 조건, 흉내도 is_pc 거짓).
+
+### 내보내기 (`export_presets.cfg`)
+
+| 프리셋 | 결과물 | 내용 |
+|---|---|---|
+| Android (Google Play) | `build/android/DEADLINE15.aab` | **Gradle 빌드**, 형식 AAB, 기능 태그 `google`, 패키지 `xyz.show4you.deadline15`, minSdk 24 · **targetSdk 36**(2026 Play 요구), arm64-v8a + armeabi-v7a, 권한 인터넷만, 적응형 아이콘, 몰입 모드, 백업 끔 |
+| Android (Google Play) APK | `build/android/DEADLINE15.apk` | 위와 같고 형식만 APK (Godot 은 한 프리셋에 형식 하나 — 시험이 두 프리셋이 같은지 확인) |
+| iOS (App Store) | `build/ios/` Xcode 프로젝트 (`export_project_only`) | 번들 ID 같음, 기능 태그 `apple`, iOS 15.0+, iPhone·iPad, 버전 빈칸 = config/version, **팀 ID 비움**, 아이콘 1024 · 시작 화면 그림 |
+
+- 거르기는 PC 와 같음 (+ `android/*`). 버전: versionName 빈칸 = `config/version`, **versionCode = 주×10000 + 부×100 + 수** (0.4.2 → 402) — 버전을 올리면 프리셋 두 개의 `version/code` 도 올릴 것 (check_mobile6a 가 확인).
+- **Gradle 빌드를 쓰는 이유**: AAB 는 Gradle 빌드에서만 나오고, targetSdk 36 과 6b 의 결제·광고 플러그인(aar)도 Gradle 빌드가 필요.
+  Godot 4.5.1 원본 틀(Gradle 8.11.1 · AGP 8.6.1 · NDK 28.1 …)은 이 맥에 없어 다운로드가 필요하므로, **`tools/android_build_template.sh` 가 이 맥의 `~/.gradle` 캐시에 있는 판으로 고쳐 설치**
+  (Gradle 8.14.3 · AGP 8.11.0 · compile/target 36 · build-tools 36 · NDK 27.1 · fragment 1.8.9 · splashscreen 1.2.0 · core-ktx 1.16.0, 다운로드 0).
+  다운로드가 허용되면 `PATCH=0 bash godot/tools/android_build_template.sh` 로 원본 틀을 써도 됨. `godot/android/` 는 git 제외 (aar 200MB).
+- 내보내기 명령 (임시 HOME 이면 `GRADLE_USER_HOME=~/.gradle` 와 `ANDROID_HOME`·`JAVA_HOME`(JDK 17) 을 넘길 것):
+  ```bash
+  bash godot/tools/android_build_template.sh          # 처음 한 번 (godot/android/ 만듦 + 디버그 키스토어)
+  python3 godot/tools/make_mobile_icons.py            # 아이콘을 다시 만들 때만
+  Godot --headless --path godot --export-debug   "Android (Google Play) APK" build/android/DEADLINE15-debug.apk
+  Godot --headless --path godot --export-release "Android (Google Play)"     build/android/DEADLINE15.aab     # 출시 키스토어 필요 (아래)
+  Godot --headless --path godot --export-debug   "iOS (App Store)"           build/ios/DEADLINE15.ipa         # 팀 ID 필요 (아래)
+  ```
+- 크기: **디버그 APK 269MB**(두 아키텍처, 디버그 템플릿 — 내보내기 폴더의 `DEADLINE15-debug.apk`) · **출시 AAB 157MB**(출시 템플릿, 디버그 키로 서명해 시험한 것 — Play 가 설치 때 기기에 맞는 아키텍처만 내려 줌) — 대부분 libgodot(×2 아키텍처) · 글꼴 47MB · 그림.
+
+### 서명 — 사용자가 할 일
+
+- **안드로이드 업로드 키** (만들지 않았음): `keytool -genkeypair -v -keystore deadline15-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000` →
+  안전한 곳에 보관(분실하면 Play 고객센터에 키 재설정 요청) → 프리셋 `keystore/release`·`release_user`·`release_password` 에 넣거나(git 에 비밀번호를 올리지 말 것)
+  환경 변수 `GODOT_ANDROID_KEYSTORE_RELEASE_PATH` · `_USER` · `_PASSWORD` 로 넘김. **Play 앱 서명**(Google 이 앱 서명 키를 보관)을 켜고 업로드 키로 서명한 AAB 를 올림.
+- 디버그 키스토어는 `godot/android/keystore/debug.keystore` (android / androiddebugkey / android, git 제외, 스크립트가 만듦).
+- **iOS**: Apple Developer Program → 프리셋 `application/app_store_team_id` 에 팀 ID → 내보낸 Xcode 프로젝트를 Xcode 에서 열어 Signing(자동 서명) → Archive → App Store Connect.
+  시험할 때는 임시 팀 ID 로 내보낸 뒤 `DEVELOPMENT_TEAM = ""` 로 되돌려 `xcodebuild ... -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO` 로 빌드함 (시뮬레이터용 빌드 성공).
+
+### 실행 확인 (2026-10-18)
+
+- 안드로이드 에뮬레이터(Pixel_8_API_35, 2400×1080 420dpi, arm64 디버그 APK, `--esa command_line_params "--,--store,dev"` 로 가짜 가게):
+  지휘관 설정(목록 끌기) → 로비 → 뒤로 단추(종료 확인) → 스테이지 → 스토리(뒤로 = 넘기기) → 전투(메뉴 · 이동 탭 · 맵 끌기 · 길게 누르기 정보) → 홈 → 프로세스 죽임 → 다시 켜기 → 전투 재개 →
+  설정 창 스크롤 → 항복 → 결과 → 로비 → 상점 골드 → 가짜 결제 확인 → 500 골드 지급. 사진 `tests/screens/m6a_emu_*.png`. 두 손가락 확대는 adb 로 넣을 수 없어 머리 없는 시험으로만 확인.
+- iOS: Xcode 프로젝트 내보내기 · 시뮬레이터용 빌드 성공. **실행은 못 함** — Godot 4.5.1 공식 iOS 템플릿의 시뮬레이터 라이브러리가 x86_64 뿐이라 Apple Silicon 시뮬레이터에서 돌리려면 Rosetta 가 필요(이 맥에 없음, 설치 = 다운로드).
+  iOS 26 시뮬레이터는 x86_64 앱을 아예 받지 않음.
+
+### 6a 남은 일
+
+- iOS 실제 실행 (Rosetta 설치 후 iOS 18 시뮬레이터, 또는 실제 기기·arm64 시뮬레이터 템플릿) · ⚑ ↩ 기호가 iOS 시스템 글꼴로 그려지는지.
+- 전투 화면은 휴대폰 논리 높이 480 에서 윗줄 58 + 카드 약 158 이라 맵이 좁음 — 카드 줄 접기 같은 장치는 사용자 결정 후.
+- 단추가 아닌 누르는 부품(전투 카드·행동 순서 줄 등 PanelContainer + gui_input)은 44pt 검사 대상이 아님 (카드는 충분히 큼, 순서 줄 높이 약 40 → 5.4mm).
+- 손가락으로 누른 단추가 호버 모양으로 남는 것(마우스 흉내의 성질), 지휘관 이름 칸 위에서 끌기를 시작하면 키보드가 뜰 수 있음.
+- 모바일 메모리: 글꼴 4개(약 80MB)를 시작할 때 모두 읽음 (README '글꼴' 남은 과제 그대로).
+
+### 6a 검수·QA 수정 (2026-10-20)
+
+- **안전 영역 감시**: 가로 ↔ 역가로(180° 회전)는 창 크기가 같아 `size_changed` 가 안 오므로, `Mobile` 이 0.5초마다 (안전 영역 · `screen_get_orientation` · 창 크기) 서명을 비교해 달라졌을 때만 `apply()` (돌아올 때·창 크기 알림에서도 바로 확인). 시험: `Mobile.inset_override` 로 여백을 주입 (check_qa6a '4) safe').
+- **프리셋**: Android `package/app_category` 0(접근성) → **2(게임)**, 적응형 전경은 안전 영역(가운데 66%) 안에 들어가게 **60%** 로 줄이고 테마 아이콘(monochrome)은 같은 그림의 윤곽(흰색)으로,
+  5개 프리셋 모두 `exclude_filter` 에 **`dev/*` · `assets/pilot/*`** (다른 작업의 시범 파일이 빌드에 안 들어감 — check_mobile6a 가 확인, 내보낸 APK·pck 목록으로도 확인).
+- **iOS Info.plist 의 빈 사용 설명 키** (카메라·사진·마이크): Godot 4.5.1 은 프리셋이 비어 있어도 키를 늘 써 넣음(프리셋 옵션으로는 못 지움) →
+  내보낸 뒤 **`bash godot/tools/ios_fix_plist.sh godot/build/ios`** 로 지움 (내보낼 때마다, Xcode 에서 열기 전에).
+- **앱 크기 안내** (지금은 코드 그대로): 디버그 APK 269MB · 출시 AAB 157MB 중 `armeabi-v7a`(약 83MB: libgodot 75 + libc++ 1)를 빼면(프리셋 `architectures/armeabi-v7a=false`, 2026 Play 는 64비트만 필수) APK 가 약 83MB 줄고,
+  글꼴(Noto KR·JP·SC·TC 47MB)을 쓰는 글자만 남긴 부분 집합으로 줄이면 약 30MB 가 더 줄어듦 — 두 가지 모두 출시 때 결정.
+- **QA 에서 나온 것 (PC·모바일 공통)**: 소환사 `{name}` 소환 글자(엔진 `fx_float` 에 `params` — 기록(golden)에는 안 들어가고 화면 글자에만, 같은 꼴이던 저주 `{n}`·연속 사격 `{hits}`도) ·
+  결과 창 골드 줄을 기본 / 새 별 / 첫 클리어 / 합계로 나눔 (합계 = 줄 합 — 상자 골드는 전투 중에 따로 더해짐) · 한국어 조사(`scripts/core/josa.gd`, `I18n.t` 가 ko 일 때만) ·
+  처치 EXP 글(`gd.result.battle_detail` — '총 N EXP' 가 아니라 '처치 EXP N (M명이 나눠 받음)') · 결과가 뜨면 윗줄 턴 표시 숨김 · 별 '이번 판 ✓/✕' 와 '기존 기록 ★' 구분 ·
+  로비 알림이 아래 단추 줄을 안 덮음 · 장비 창 왼쪽 고정 + 목록만 스크롤 · 능력치 이름 통일(`gd.stat.*`) · `messages.buff_end` 번역(`gd.fx.buff_end`).
+- 시험: `tests/check_qa6a.gd` (조사 · 글자 자리표시자 · 결과 창 · 안전 영역 감시 · 겹침 · 장비 창 · 능력치 이름).
+
+### 6a 재검수 반영 (2026-10-20)
+
+- **✕ 포기 단추 (모바일)**: 이어하기 단추가 본문 맨 위라 '위쪽 바깥'에 두면 윗줄 밑으로 잘렸음 → 모바일은 **이어하기 단추 오른쪽 옆 같은 줄**(`ResumeRow`), PC 는 그대로(단추 위쪽 바깥). 열이 넓어지면 아이폰·태블릿 등에서 오른쪽 안전 영역을 넘던 것도 `popups.minimum_size_changed` 로 다시 맞춤.
+  시험(check_qa6a '5) layout')은 '화면 안'만이 아니라 **다른 부품(윗줄·창)에 가려지는지**(그 자리에서 가장 위의 부품이 이 단추인가) · 안전 영역 밖 · 부모 잘림 영역 밖까지 봄 — PC + 모바일 4기기 × 6개 언어.
+- **한국어 조사 규칙** (`scripts/core/josa.gd` 머리말과 같은 표 — 단순한 규칙, 완벽하지 않음):
+  | 앞 말 | 받침 판정 |
+  |---|---|
+  | 한글 | 마지막 글자 그대로 (없음 / 있음 / ㄹ) |
+  | 숫자 | 읽는 소리 0 영·1 일(ㄹ)·2 이·3 삼·4 사·5 오·6 육·7 칠(ㄹ)·8 팔(ㄹ)·9 구. 두 자리 이상은 끝자리 (11·21 → 일 → ㄹ, 12 → 이). 끝이 0 이면 십·백·천·만 → 받침(ㄹ 아님) |
+  | 영문 한 글자 | 글자 이름: L 엘 · R 알 → ㄹ, M 엠 · N 엔 → 받침, 나머지 없음 |
+  | 영문 낱말 | 마지막 글자: l r → ㄹ, m n b k p d t g → 받침, 나머지(모음 · s z x f v c j h w y q) → 없음. 'Jane'(제인)처럼 소리 안 나는 e 는 틀림(한계) |
+  ㄹ 받침은 이(가)·은(는)·을(를)·와(과) 에서는 '받침 있음', (으)로 에서만 '로'. 시험은 `I18n` 에 심은 합성 문구로 ko 에만 적용되고 en·es·ja·zh 에는 적용되지 않음을 확인.
+- **결과 창 합계**: 보물상자에서 얻은 골드(`S._chestGold` — `chest_open` 이 더함, 전투 중 바로 저장되므로 패배·항복에서도)를 '보물상자' 줄로 넣고 합계에 포함 →
+  **보상 줄 합 = 실제 골드 증가**가 모든 경우(첫 클리어 · 다시 클리어 · 새 별 · 연습 · 패배, 상자를 연 판 balanced_s05·boss_s10 포함)에서 같음 (시험이 같아야 통과).
+- 시험 보강: float 시험이 실제 전투(legion5_s09 소환 · swamp_s21 저주 · boss_s10 연속 사격)를 끝까지 몰아 엔진의 `p` 와 화면에 실제로 뜬 글자(`float_log`)를 확인 — `d["p"] = params` 를 지우면 실패.

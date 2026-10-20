@@ -422,6 +422,7 @@ func chest_open(chest: Dictionary, opener: Dictionary) -> Dictionary:
 	if r < acc:
 		var g := Js.round_js((40.0 + lv * 8.0) * (0.8 + c.rand("Chest.gold") * 0.4))
 		S["gold"] = float(S["gold"]) + g
+		S["_chestGold"] = Js.num(S.get("_chestGold")) + g   # (6a QA) 결과 창 '보물상자' 줄 — 결과 창 골드 합계 = 실제 증가
 		Profile.save_gold(c, S["gold"])
 		return {"kind": "gold"}
 	acc = float(o["gold"]) + float(o["potion"])
@@ -472,7 +473,7 @@ func curse_move_tick(u: Dictionary) -> void:
 	var dmg := maxf(1.0, Js.round_js(u["mhp"] * 0.05))
 	u["hp"] = maxf(1.0, u["hp"] - dmg)
 	u["_curseDmgCount"] = Js.num(u.get("_curseDmgCount")) + 1.0
-	E.fx_float(u["x"], u["y"], "messages.curse_tick")
+	E.fx_float(u["x"], u["y"], "messages.curse_tick", {"n": u["_curseDmgCount"]})
 	if float(u["_curseDmgCount"]) >= 5.0:
 		u["_cursed"] = false
 		u["_curseAtk"] = 0.0

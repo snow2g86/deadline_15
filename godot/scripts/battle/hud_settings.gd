@@ -29,6 +29,8 @@ var panel: PanelContainer
 var confirm: PanelContainer
 var confirm_wrap: CenterContainer   # 확인 창은 화면 가운데 고정 (줄바꿈 글자 높이가 정해지기 전 위치 계산 문제 없음)
 var _box: VBoxContainer
+## (6a) 모바일: 창 내용이 화면(논리 높이 480)보다 길면 스크롤 (PC 는 null — 그대로)
+var _scroll: ScrollContainer
 var s := SettingsRules.defaults()
 var allow_leave := false
 var _confirm_kind := "surrender"
@@ -83,7 +85,16 @@ func setup(p_store: Node, p_i18n: Node) -> void:
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 12)
 	_box.custom_minimum_size = Vector2(300, 0)
-	panel.add_child(_box)
+	var pf := (Engine.get_main_loop() as SceneTree).root.get_node_or_null("Platform")
+	if pf != null and bool(pf.call("is_mobile")):
+		_scroll = ScrollContainer.new()
+		_scroll.name = "Scroll"
+		_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		panel.add_child(_scroll)
+		_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_scroll.add_child(_box)
+	else:
+		panel.add_child(_box)
 	confirm = PanelContainer.new()
 	confirm.name = "SurrenderConfirm"
 	confirm.add_theme_stylebox_override("panel", Kit.box(Kit.PANEL, Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.55), 12, 2, 22, 18))
@@ -151,8 +162,11 @@ func open() -> void:
 ## 설정 창 자리: 톱니 단추 오른쪽, 아래를 단추에 맞춤 — 글자 높이가 정해진 다음 프레임에 다시 맞추고 화면 안으로
 func _place_panel() -> void:
 	for i in 2:
+		var vs := size if size.x > 0.0 else get_viewport_rect().size   # (6a) 안전 영역 안 (PC 는 화면 전체와 같음)
+		if _scroll != null:
+			var bm := _box.get_combined_minimum_size()
+			_scroll.custom_minimum_size = Vector2(bm.x, minf(bm.y, vs.y - 16.0 - 34.0))
 		panel.reset_size()
-		var vs := get_viewport_rect().size
 		var sz := panel.get_combined_minimum_size()
 		panel.size = sz
 		panel.position = Vector2(clampf(64.0, 8.0, maxf(8.0, vs.x - sz.x - 8.0)), clampf(btn.position.y + 44.0 - sz.y, 8.0, maxf(8.0, vs.y - sz.y - 8.0)))

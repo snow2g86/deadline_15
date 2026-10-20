@@ -197,7 +197,8 @@ static func set_content(b: Control, c: Control, pad: Vector4 = Vector4.ZERO) -> 
 		if not is_instance_valid(b) or not is_instance_valid(c):
 			return
 		var m := c.get_combined_minimum_size()
-		var want := Vector2(maxf(base.x, m.x + pad.x + pad.z), maxf(base.y, m.y + pad.y + pad.w))
+		var fl := float(b.get_meta("m6a_floor", 0.0))   # (6a) 모바일 터치 최소 (Mobile 이 정함, PC 는 0)
+		var want := Vector2(maxf(maxf(base.x, m.x + pad.x + pad.z), fl), maxf(maxf(base.y, m.y + pad.y + pad.w), fl))
 		if b.custom_minimum_size != want:
 			b.custom_minimum_size = want
 		c.position = Vector2(pad.x, pad.y)

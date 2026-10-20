@@ -156,6 +156,7 @@ func _build() -> void:
 	start_btn.custom_minimum_size = Vector2(150, 48)
 	start_btn.pressed.connect(confirm_start)
 	sw.add_child(start_btn)
+	mobile_scroll(col)   # (6a) 휴대폰: 골드·탭·칸·출격이 세로로 넘치면 본문 전체를 스크롤
 	# 저장된 탭으로 엶 (웹 Store ps_active_tab — 출격 단추는 파티 탭에서만)
 	var saved: Variant = store.call("get_str", PartyRules.ACTIVE_TAB_KEY)
 	for pt2: Array in PAGE_TABS:
@@ -331,10 +332,10 @@ func _slot_card(idx: int, ch: Variant) -> Button:
 	var bonus := Gear.calc_equip_bonus(c, ch)
 	var sr := OKit.hbox(12)
 	v.add_child(sr)
-	for st: Array in [["HP", ch.get("hp"), bonus.get("hp", 0)], ["ATK", ch.get("atk"), bonus.get("atk", 0)], ["DEF", ch.get("def"), bonus.get("def", 0)]]:
+	for st: Array in [[t("gd.stat.hp"), ch.get("hp"), bonus.get("hp", 0)], [t("gd.stat.atk"), ch.get("atk"), bonus.get("atk", 0)], [t("gd.stat.def"), ch.get("def"), bonus.get("def", 0)]]:
 		sr.add_child(_stat_text(str(st[0]), Js.num(st[1]), Js.num(st[2])))
 	var ar := OKit.label(10, Color(1, 1, 1, 0.75), 700)
-	ar.text = "AR %s" % _fixed2(_ar(ch))
+	ar.text = "%s %s" % [t("gd.stat.ar"), _fixed2(_ar(ch))]
 	sr.add_child(ar)
 	b.pressed.connect(func() -> void: open_unit_modal(idx))
 	return b
@@ -576,10 +577,10 @@ func _unit_card(ch: Dictionary, in_party: bool, slots: Array = []) -> Button:
 	# 스탯 (+장비 · (+잠재력))
 	var bonus := Gear.calc_equip_bonus(c, ch)
 	var pot: Dictionary = ch.get("pot", {}) if typeof(ch.get("pot")) == TYPE_DICTIONARY else {}
-	for st: Array in [["HP", "hp"], ["ATK", "atk"], ["DEF", "def"]]:
+	for st: Array in [[t("gd.stat.hp"), "hp"], [t("gd.stat.atk"), "atk"], [t("gd.stat.def"), "def"]]:
 		var k: String = st[1]
-		v.add_child(_stat_row(str(st[0]) + ":", num(ch.get(k, 0)), Js.num(bonus.get(k, 0)), ("(+%s)" % num(pot[k])) if Js.truthy(pot.get(k)) else ""))
-	v.add_child(_stat_row("AR:", _fixed2(_ar(ch)), 0.0, ("(+%s)" % _fixed2(float(pot["actionRec"]))) if Js.truthy(pot.get("actionRec")) else ""))
+		v.add_child(_stat_row(str(st[0]), num(ch.get(k, 0)), Js.num(bonus.get(k, 0)), ("(+%s)" % num(pot[k])) if Js.truthy(pot.get(k)) else ""))
+	v.add_child(_stat_row(t("gd.stat.ar"), _fixed2(_ar(ch)), 0.0, ("(+%s)" % _fixed2(float(pot["actionRec"]))) if Js.truthy(pot.get("actionRec")) else ""))
 	# 장비 8칸 (웹 .unit-card-equips: 4열, 종류 아이콘 — 비었으면 흐리게, 등급 색, +강화)
 	var ep := PanelContainer.new()
 	ep.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -16,6 +16,7 @@ config/version="0.4.2"
 run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.png"
+config/quit_on_go_back=false
 config/use_custom_user_dir=false
 config/use_custom_user_dir.template=true
 config/custom_user_dir_name="DEADLINE 15"
@@ -33,6 +34,7 @@ Billing="*res://scripts/core/billing.gd"
 Ads="*res://scripts/core/ads.gd"
 Sound="*res://scripts/core/sound.gd"
 Display="*res://scripts/core/display.gd"
+Mobile="*res://scripts/core/mobile.gd"
 
 [display]
 
@@ -41,6 +43,7 @@ window/size/viewport_height=720
 window/size/resizable=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=4
 
 [audio]
 

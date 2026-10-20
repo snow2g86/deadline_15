@@ -28,6 +28,8 @@ var icons: Object
 var D: Dictionary
 ## 너비 (격자 칸 수 계산) — 화면이 정함
 var width := 848.0
+## (6a) 모바일: 글자가 커져(최소 12pt) 칸이 넓어지므로 열 수를 정하는 칸 최소 폭을 키움 (PC 1.0 — 그대로)
+var min_scale := 1.0
 ## 직업 타일을 눌렀을 때 (cls) · 글 속 링크를 눌렀을 때 (meta 글)
 var on_class: Callable = Callable()
 var on_link: Callable = Callable()
@@ -323,7 +325,7 @@ func _note(b: Dictionary) -> Control:
 func _cols(kind: int, avail: float) -> int:
 	var mins := {2: 250.0, 3: 165.0, 4: 150.0}
 	var gap := 8.0 if kind == 3 else 10.0
-	return maxi(1, int(floor((avail + gap) / (float(mins.get(kind, 250.0)) + gap))))
+	return maxi(1, int(floor((avail + gap) / (float(mins.get(kind, 250.0)) * min_scale + gap))))
 
 
 func _grid(b: Dictionary) -> Control:

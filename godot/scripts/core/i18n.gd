@@ -26,6 +26,7 @@ const _StoreT := preload("res://scripts/core/store.gd")
 const _DataDBT := preload("res://scripts/core/data_db.gd")
 const _NumT := preload("res://scripts/core/num.gd")
 const _FontsT := preload("res://scripts/core/fonts.gd")
+const Josa := preload("res://scripts/core/josa.gd")
 
 var current_lang: String = FALLBACK_LANG
 
@@ -48,7 +49,12 @@ func t(key: String, params: Dictionary = {}) -> String:
 	var val: Variant = resolve(key)
 	if typeof(val) != TYPE_STRING:
 		return key
-	return interpolate(String(val), params)
+	return _josa(interpolate(String(val), params))
+
+
+## (6a QA) 한국어면 조사 이(가)·은(는)·을(를)·와(과)·(으)로 를 받침에 맞게 (scripts/core/josa.gd) — 다른 언어는 그대로
+func _josa(s: String) -> String:
+	return Josa.fix(s) if current_lang == "ko" else s
 
 
 ## 웹 t() 와 똑같은 동작: 없으면 키, 문자열이면 자리표시자 치환, 배열·사전(battle.loading_tips, character.names)은 값 그대로
@@ -57,7 +63,7 @@ func t_raw(key: String, params: Dictionary = {}) -> Variant:
 	if val == null:
 		return key
 	if typeof(val) == TYPE_STRING:
-		return interpolate(String(val), params)
+		return _josa(interpolate(String(val), params))
 	return val
 
 

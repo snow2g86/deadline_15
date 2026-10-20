@@ -45,6 +45,11 @@ func setup(p_icons: Object) -> void:
 
 ## avoid: 겹치면 안 되는 사각형 (행동 메뉴) — 마우스 오른쪽 아래 → 왼쪽 아래 → 오른쪽 위 → 왼쪽 위 중 겹치지 않는 자리
 func show_tip(m: Dictionary, at: Vector2, avoid: Rect2 = Rect2()) -> void:
+	# (6a) 화면 좌표 → 이 층 좌표 (모바일 안전 영역만큼 밀린 층 — PC 는 같음)
+	var inv := get_global_transform().affine_inverse()
+	at = inv * at
+	if avoid.size.x > 0.0:
+		avoid = Rect2(inv * avoid.position, avoid.size)
 	var sig := HudOrder.sig_of([m])
 	if sig != _tip_sig or not tip.visible:
 		_tip_sig = sig
@@ -53,7 +58,7 @@ func show_tip(m: Dictionary, at: Vector2, avoid: Rect2 = Rect2()) -> void:
 		tip.visible = true
 		tip.reset_size()
 	var sz := tip.get_combined_minimum_size()
-	var vs := get_viewport_rect().size
+	var vs := _area()
 	var cands := [at + Vector2(18, 16), at + Vector2(-sz.x - 14.0, 16), at + Vector2(18, -sz.y - 12.0), at + Vector2(-sz.x - 14.0, -sz.y - 12.0)]
 	if avoid.size.x > 0.0:
 		cands.append(Vector2(avoid.position.x - sz.x - 10.0, avoid.position.y))
@@ -75,6 +80,7 @@ func hide_tip() -> void:
 # ── 적 팝업 ──
 
 func show_popup(id: int, m: Dictionary, at: Vector2) -> void:
+	at = get_global_transform().affine_inverse() * at   # (6a) 안전 영역 층 좌표
 	popup_unit = id
 	var sig := HudOrder.sig_of([m])
 	if sig != _pop_sig or not popup.visible:
@@ -100,8 +106,13 @@ func hide_popup() -> void:
 	_pop_sig = ""
 
 
+## 이 층의 크기 (모바일 안전 영역 안 — PC 는 화면 전체와 같음)
+func _area() -> Vector2:
+	return size if size.x > 0.0 else get_viewport_rect().size
+
+
 func _place(p: Control, pos: Vector2, follow: bool) -> void:
-	var vs := get_viewport_rect().size
+	var vs := _area()
 	var sz := p.get_combined_minimum_size()
 	p.size = sz
 	if follow and pos.x + sz.x > vs.x - 8.0:

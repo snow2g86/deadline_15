@@ -51,6 +51,7 @@ func setup(p_icons: Icons) -> void:
 	add_child(row)
 	# 왼쪽: 차례 표시 (웹 #turn-indicator)
 	var left := HBoxContainer.new()
+	left.name = "Left"
 	left.custom_minimum_size = Vector2(200, 0)
 	row.add_child(left)
 	ti_box = PanelContainer.new()
@@ -92,6 +93,7 @@ func setup(p_icons: Icons) -> void:
 	mid.add_child(chips)
 	# 오른쪽 단추
 	var right := HBoxContainer.new()
+	right.name = "Right"
 	right.custom_minimum_size = Vector2(200, 0)
 	right.alignment = BoxContainer.ALIGNMENT_END
 	right.add_theme_constant_override("separation", 9)
@@ -119,9 +121,39 @@ func setup(p_icons: Icons) -> void:
 	sl.offset_right = -3
 	sl.offset_bottom = 0
 	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# (6a) 글자가 커지면(모바일) 단추 아래로 넘치지 않고 위·왼쪽으로 자람 — PC 는 칸 안이라 그대로
+	sl.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	sl.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	speed_btn.add_child(sl)
 	speed_btn.pressed.connect(func() -> void: speed_pressed.emit())
 	right.add_child(speed_btn)
+
+
+## (6a) 좁은 모바일 논리 화면: 양쪽 칸의 최소 폭(200)을 풀고 간격을 줄임. 칩 줄은 가로 스크롤 안에 넣어(손가락으로 밀어 봄)
+##  언어·스테이지에 따라 칩이 많아도 오른쪽 단추가 화면 밖으로 밀리지 않게
+func compact() -> void:
+	for n: String in ["Left", "Right"]:
+		var c := find_child(n, true, false) as Control
+		if c != null:
+			c.custom_minimum_size.x = 0
+			c.add_theme_constant_override("separation", 6)
+	var mid := chips.get_parent()
+	var sc := ScrollContainer.new()
+	sc.name = "ChipsScroll"
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var idx := chips.get_index()
+	mid.remove_child(chips)
+	mid.add_child(sc)
+	mid.move_child(sc, idx)
+	sc.add_child(chips)
+	chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var fit := func() -> void:
+		if is_instance_valid(sc) and is_instance_valid(chips):
+			sc.custom_minimum_size.y = chips.get_combined_minimum_size().y
+	chips.minimum_size_changed.connect(fit)
+	fit.call()
 
 
 func _process(delta: float) -> void:

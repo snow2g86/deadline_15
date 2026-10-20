@@ -146,7 +146,7 @@ func show_result(m: Dictionary) -> void:
 	await get_tree().process_frame
 	if not is_instance_valid(box):
 		return
-	var vs := get_viewport_rect().size
+	var vs := size if size.x > 0.0 else get_viewport_rect().size   # (6a) 안전 영역 안 (PC 는 화면 전체와 같음)
 	var sz := box.get_combined_minimum_size()
 	# 내용만 스크롤: 창 높이 = 화면 92% 안에서 (단추 줄·여백을 뺀 만큼)
 	var room := vs.y * 0.92 - 36.0 - 12.0 - _btn_row.get_combined_minimum_size().y
@@ -221,6 +221,11 @@ func _stars(st: Dictionary) -> Control:
 		lb.text = str(conds[i2])
 		lb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(lb)
+		# (6a QA) 이번 판 달성(✓/✕)과 이미 얻은 별(위 별 3개)을 구분: 이번엔 못 했지만 이전에 얻은 별이면 '기존 기록' 표시
+		if not ok and i2 < merged.size() and int(merged[i2]) > 0:
+			var kp := Kit.label(10, Color("ca8a04"), 700)
+			kp.text = "★ " + str(st.get("kept_text", ""))
+			r.add_child(kp)
 		if newly.has(i2) or newly.has(float(i2)):
 			var nw := PanelContainer.new()
 			nw.add_theme_stylebox_override("panel", Kit.box(Color("facc15"), Color(0, 0, 0, 0), 999, 0, 6, 0))

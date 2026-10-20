@@ -17,7 +17,7 @@ var cmd_name: Label
 var cmd_pt: Kit.Portrait
 var gold_lbl: Label
 var hideout: Hideout
-var popups: HBoxContainer
+var popups: BoxContainer
 var _popup_labels: Dictionary = {}   # name → [Label, key]
 var resume_btn: Button
 ## "gd" · "old" · "web" · "broken" · "" (ResumeRules.status)
@@ -43,6 +43,39 @@ func has_back() -> bool:
 
 func title_text() -> String:
 	return t("common.game_title")
+
+
+## (6a) 휴대폰: 본문 세로(약 366)에 아지트 아래 단추 줄이 들어가지 않아, 단추 줄(도감·출격·가이드)을 아지트 오른쪽에 세로로 세움 —
+##  아지트는 본문 높이 − 골드 배지 · 간격에 맞춤 (가로세로 비율은 PC 560:380 그대로). 단추·순서는 같음
+func _fit_mobile() -> void:
+	if hideout == null or not is_instance_valid(hideout) or popups == null:
+		return
+	var pw := popups.get_combined_minimum_size().x
+	popups.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	popups.offset_left = -pw - 24.0
+	popups.offset_right = -24.0
+	popups.offset_top = 0.0
+	popups.offset_bottom = 0.0
+	var center := body.get_node_or_null("LobbyContent") as Control
+	if center != null:
+		center.offset_right = -pw - 24.0
+	var h := clampf(body.size.y - 6.0 - 44.0 - 20.0, 180.0, 380.0)
+	var w := minf(roundf(560.0 * h / 380.0), body.size.x - pw - 72.0)
+	hideout.custom_minimum_size = Vector2(w, roundf(w * 380.0 / 560.0))
+
+
+## (6a) 안드로이드 뒤로 단추 — 로비는 돌아갈 곳이 없으므로 게임 종료 확인 (열린 창이 있으면 screen_base 가 먼저 닫음)
+var quit_asked := 0
+
+
+func root_back() -> void:
+	if setup_dialog != null and is_instance_valid(setup_dialog):
+		return
+	quit_asked += 1
+	confirm(t("gd.mobile.quit_confirm"), func() -> void:
+		if store != null:
+			store.call("flush")
+		get_tree().quit())
 
 
 func _build() -> void:
@@ -83,8 +116,13 @@ func _build() -> void:
 	hideout.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	hideout.reduce_motion = bool(SettingsRules.load_settings(store).get("reduceMotion", false))
 	center.add_child(hideout)
+	if is_mobile_ui():
+		# (6a) 휴대폰: 본문 높이(약 366)에 아지트를 맞춤 — 골드 배지 아래에서 본문 끝까지, 아래 단추 줄은 아지트 위에 얹힘
+		center.offset_bottom = -6
+		body.resized.connect(_fit_mobile)
+		_fit_mobile.call_deferred()
 	# 아래 단추 줄 (웹 .lobby-popups: 아래 20px, 가운데)
-	popups = OKit.hbox(12)
+	popups = OKit.vbox(10) if is_mobile_ui() else OKit.hbox(12)   # (6a) 휴대폰은 아지트 오른쪽에 세로로 (_fit_mobile)
 	popups.name = "Popups"
 	popups.alignment = BoxContainer.ALIGNMENT_CENTER
 	popups.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -92,6 +130,8 @@ func _build() -> void:
 	popups.offset_bottom = -46
 	popups.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(popups)
+	if is_mobile_ui():
+		popups.minimum_size_changed.connect(_fit_mobile)   # (6a QA 재검수) 이어하기 줄이 생기거나 글자가 바뀌어 열이 넓어지면 다시 맞춤
 	# 전투 재개 (웹: 저장된 전투가 있으면 맨 앞에 단추)
 	resume_status = ResumeRules.status(c)
 	if resume_status != "":
@@ -154,6 +194,8 @@ func abandon_resume() -> void:
 	if resume_btn != null and is_instance_valid(resume_btn):
 		resume_btn.queue_free()
 		resume_btn = null
+	if abandon_btn != null and is_instance_valid(abandon_btn):
+		abandon_btn.queue_free()
 	abandon_btn = null
 	toast(t("gd.resume.abandoned"))
 	cta.grab_focus.call_deferred()
@@ -162,19 +204,48 @@ func abandon_resume() -> void:
 
 ## (4b-2) 정상 저장 전투 포기 단추 (전투 재개 단추 오른쪽 위 ✕) → 확인 창
 func _add_abandon_btn() -> void:
+	# (6a QA) ✕ 는 '전투 재개' 단추 안이 아니라 그 위쪽 바깥(오른쪽 끝에 맞춤)에 둠 — 모바일의 44pt 최소 크기(큰 원)가 단추 글자를 덮던 것.
+	#  PC·모바일 모두 단추와 겹치지 않고, ✕ 그림은 원 한가운데
 	abandon_btn = OKit.styled_button(OKit.box(Color("1f2937"), Color(OKit.RED, 0.6), 999, 1, 0, 0), OKit.box(Color("7f1d1d"), OKit.RED, 999, 1, 0, 0), null, 999)
 	abandon_btn.name = "AbandonBtn"
 	abandon_btn.custom_minimum_size = Vector2(22, 22)
-	abandon_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	abandon_btn.offset_left = -25
-	abandon_btn.offset_right = -3
-	abandon_btn.offset_top = 3
-	abandon_btn.offset_bottom = 25
 	var xi := OKit.vec_icon("close", 10, Color("fca5a5"))
-	xi.position = Vector2(6, 6)
+	xi.set_anchors_preset(Control.PRESET_CENTER)
+	xi.offset_left = -5
+	xi.offset_right = 5
+	xi.offset_top = -5
+	xi.offset_bottom = 5
+	xi.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	abandon_btn.add_child(xi)
 	abandon_btn.pressed.connect(ask_abandon)
-	resume_btn.add_child(abandon_btn)
+	if is_mobile_ui():
+		# (6a QA 재검수) 휴대폰: 이어하기 단추가 본문 맨 위라 위쪽 바깥에 두면 윗줄 밑으로 잘림 → 단추 오른쪽 옆에 같은 줄로 (단추 열이 조금 넓어짐)
+		var row := OKit.hbox(6)
+		row.name = "ResumeRow"
+		var idx := resume_btn.get_index()
+		popups.remove_child(resume_btn)
+		popups.add_child(row)
+		popups.move_child(row, idx)
+		row.add_child(resume_btn)
+		abandon_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(abandon_btn)
+		return
+	body.add_child(abandon_btn)
+	resume_btn.resized.connect(_place_abandon)
+	body.resized.connect(_place_abandon)
+	popups.sort_children.connect(_place_abandon)
+	_place_abandon.call_deferred()
+
+
+func _place_abandon() -> void:
+	if abandon_btn == null or not is_instance_valid(abandon_btn) or resume_btn == null or not is_instance_valid(resume_btn):
+		return
+	abandon_btn.reset_size()
+	var sz := abandon_btn.get_combined_minimum_size()
+	abandon_btn.size = sz
+	var r := resume_btn.get_global_rect()
+	var o := body.get_global_rect().position
+	abandon_btn.position = Vector2(r.end.x - sz.x - o.x, r.position.y - sz.y - 4.0 - o.y)
 
 
 func ask_abandon() -> void:
@@ -211,6 +282,14 @@ func _data_warning() -> void:
 
 
 ## (타이머) 저장값 점검 결과 알림 — 화면이 이미 바뀌었으면 연결이 저절로 끊김 (메서드 연결)
+## (6a QA) 알림이 아래 단추 줄(도감·출격·가이드)을 덮지 않게 그 줄 위에 — 모바일은 단추가 오른쪽 세로 열이라 아래쪽 가운데
+func toast_y(vs: Vector2, h: float) -> float:
+	var bottom := body.get_global_rect().end.y if body != null else vs.y - 64.0
+	if is_mobile_ui():
+		return bottom - h - 10.0
+	return bottom - 124.0 - h - 8.0
+
+
 func _toast_validate() -> void:
 	var rep: bool = last_validate.get("repaired", false)
 	toast(("⚠ " + t("messages.data_repaired")) if rep else ("✓ " + t("messages.data_ok")), "warn" if rep else "ok")
@@ -395,7 +474,8 @@ func open_commander_setup(first: bool) -> void:
 	# 웹 commander.js 는 처음이든 다시 열었든 닫는 길이 없음(확인으로만). Godot: 첫 설정은 웹처럼 닫을 수 없고,
 	#  로비 단추로 다시 열었을 때만 Esc·바깥 누르기로 닫힘 (바꾸지 않고 나가기 — README '웹판과 다른 점')
 	setup_dialog = open_modal(v, {"name": "CommanderDialog", "width": 480.0, "box": sb, "close_on_bg": not first, "no_esc": first})
-	setup_input.grab_focus.call_deferred()
+	if not is_mobile_ui():   # (6a) 휴대폰은 창이 열리자마자 키보드가 화면을 덮지 않게 — 누르면 입력
+		setup_input.grab_focus.call_deferred()
 	setup_input.select_all.call_deferred()
 
 

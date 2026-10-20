@@ -2502,7 +2502,14 @@
       "bg_lower": "줄이기",
       "bg_mute": "끄기"
     },
-    "result": {"retry": "다시 도전"},
+    "result": {
+      "retry": "다시 도전",
+      "base_reward": "기본 보상",
+      "total_gold": "합계",
+      "star_kept": "기존 기록",
+      "battle_detail": "📈 처치 {kills}체 · 처치 EXP {exp} ({survivors}명이 나눠 받음)",
+      "chest_gold": "보물상자"
+    },
     "resume": {
       "web_notice": "이 전투는 웹판에서 시작된 것이라 이어할 수 없습니다.\n{stage}\n포기하면 저장된 전투를 지웁니다 (클랜원·골드는 그대로).",
       "broken": "저장된 전투를 읽을 수 없어 이어할 수 없습니다.\n포기하면 저장된 전투를 지웁니다 (클랜원·골드는 그대로).",
@@ -2594,6 +2601,9 @@
       "enh_opt": "강화 옵션: 성공했을 때 새 옵션이 붙을 확률",
       "doc_title": "DEADLINE 15 확률 정보",
       "doc_note": "이 문서는 게임 데이터에서 자동으로 만들었습니다 (게임 버전 {ver}). 게임 안 상점·강화 화면의 '확률 정보'와 같은 내용입니다."
-    }
+    },
+    "mobile": {"quit_confirm": "게임을 종료할까요?"},
+    "fx": {"buff_end": "버프 해제"},
+    "stat": {"hp": "체력", "atk": "공격", "def": "방어", "ar": "행동속도"}
   }
 }
