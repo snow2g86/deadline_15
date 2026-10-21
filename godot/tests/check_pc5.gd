@@ -932,7 +932,7 @@ func _newer_sources(t: int) -> Array:
 	for f: String in ["project.godot", "export_presets.cfg", "default_bus_layout.tres", "icon.png"]:
 		if FileAccess.get_modified_time("res://" + f) > t:
 			out.append(f)
-	var stack: Array = ["res://scripts", "res://scenes", "res://data", "res://assets"]
+	var stack: Array = ["res://scripts", "res://scenes", "res://data", "res://assets", "res://addons"]
 	while not stack.is_empty():
 		var d: String = stack.pop_back()
 		var da := DirAccess.open(d)
@@ -998,7 +998,7 @@ func _export() -> void:
 		var need := {"data/manifest.json": false, "data/lang/ko.json": false, "data/story/ko.json": false, "assets/fonts/OFL.txt": false, "assets/audio/bgm_battle.wav.import": false}
 		for p: String in lst:
 			var q := p.trim_prefix("res://")
-			if q.begins_with("tests/") or q.begins_with("tools/") or q.begins_with("build/") or q.begins_with("dev/") or q.begins_with("assets/pilot/") or q.begins_with("android/") or q.contains("baseline") or q.ends_with(".md") or q.contains("/src/"):
+			if q.begins_with("tests/") or q.begins_with("tools/") or q.begins_with("build/") or q.begins_with("dev/") or q.begins_with("assets/pilot/") or q.begins_with("android/") or q.contains("baseline") or q.ends_with(".md") or (q.contains("/src/") and q.begins_with("assets/")) or q.begins_with("third_party/") or q.begins_with("addons/admob/assets/") or q.begins_with("addons/admob/internal/editor/") or q.begins_with("addons/admob/internal/exporters/") or q.begins_with("addons/admob/android/") or q.begins_with("addons/admob/ios/"):   # (6b) 이미지 원본 src 는 assets/ 아래만 — 플러그인 API 폴더 gdscript/src 는 런타임에 필요
 				bad.append(q)
 			if need.has(q):
 				need[q] = true

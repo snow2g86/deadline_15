@@ -24,6 +24,10 @@ extends Node
 ##
 ##  디버그 빌드만: 명령줄 -- --iap <시나리오> (backend_fake.gd 의 SCENARIOS) · -- --iap-env dev|stage|prod|local · -- --iap-server <주소>. 출시 빌드는 무시하고 가짜 가게를 만들지 않음.
 ##   local = 로컬 결제 확인 서버 (server/ 의 wrangler dev, 포트 8951 — 가짜 가게 영수증을 진짜 Worker 가 확인)
+##   (6b) 안드로이드 에뮬레이터에서 호스트 맥의 로컬 서버로: -- --iap-env local 이면 IAP_SERVER.local.android_url (http://10.0.2.2:8951) 을 자동으로 씀,
+##        또는 -- --iap-server emulator (= http://10.0.2.2:8951). 출시 빌드는 http 주소를 쓰지 못함 (verifier.gd — https 만).
+##   (6b) 실제 가게: google = 플러그인 GodotGooglePlayBilling (backend_google.gd) · apple = godot-iap (backend_apple.gd) — 둘 다 플러그인이 없는 환경(PC·편집기)에서는 is_supported 거짓.
+##        백엔드가 스스로 알리는 새 거래(unfinished_changed)는 restore() 로 이어짐.
 
 const Ctx := preload("res://scripts/logic/ctx.gd")
 const StoreCtx := preload("res://scripts/logic/store_ctx.gd")
@@ -50,6 +54,8 @@ const REFUND_GAP_MS := 60000
 var backend: Node = null
 var verifier: Verifier
 var env := "dev"
+## (6b 디버그) 안드로이드 에뮬레이터에서 호스트 맥의 로컬 서버 (wrangler dev 포트 8951) — 10.0.2.2 는 에뮬레이터가 보는 호스트의 주소
+const EMULATOR_SERVER := "http://10.0.2.2:8951"
 ## (디버그) 서버 주소 바꾸기 — -- --iap-server http://127.0.0.1:8951 (check_iap -- --server 가 씀). 출시 빌드는 무시
 var server_override := ""
 var scenario := ""
@@ -83,6 +89,8 @@ func _ready() -> void:
 	var u := args.find("--iap-server")
 	if u >= 0 and u + 1 < args.size():
 		server_override = args[u + 1]
+		if server_override == "emulator":
+			server_override = EMULATOR_SERVER
 	verifier = Verifier.new()
 	verifier.name = "Verifier"
 	add_child(verifier)
@@ -140,19 +148,53 @@ func _ensure_backend() -> void:
 			backend = BackendApple.new()
 		_:
 			backend = BackendNone.new(s)   # steam (맨 뒤로 미룸)
-	backend.name = "Backend"
-	add_child(backend)
+	_wire_backend()
 	if backend is BackendFake and scenario != "":
 		set_scenario(scenario)
+	# (디버그 · 가짜 가게 + 로컬 서버) 가짜 가게 장부를 서버에도 비춤 — fake_files.gd remote
+	var url := _configure_verifier()
+	FakeFiles.remote = url if OS.is_debug_build() and backend is BackendFake and url.begins_with("http") else ""
+
+
+## 만든 백엔드를 자식으로 붙임 (상품 목록 · 신호 연결 — add_child 앞에서 해야 백엔드의 _ready 가 알고 시작)
+func _wire_backend() -> void:
+	backend.name = "Backend"
+	backend.call("set_products", IapRules.products(_ctx()))
+	if backend.has_signal("unfinished_changed"):
+		backend.connect("unfinished_changed", _on_backend_unfinished)
+	add_child(backend)
 	_prices = {}
+
+
+## 서버 주소·환경을 verifier 에 알림 → 쓰는 주소
+func _configure_verifier() -> String:
 	var cfgs: Variant = _D().get("IAP_SERVER")
 	var cfg: Dictionary = (cfgs.get(env, {}) as Dictionary).duplicate() if cfgs is Dictionary and cfgs.get(env) is Dictionary else {}
+	if OS.is_debug_build() and env == "local" and OS.get_name() == "Android" and str(cfg.get("android_url", "")) != "":
+		cfg["url"] = str(cfg["android_url"])   # 에뮬레이터에서는 127.0.0.1 이 에뮬레이터 자신
 	if OS.is_debug_build() and server_override != "":
 		cfg["url"] = server_override
 	var ver := str(ProjectSettings.get_setting("application/config/version", "0"))
-	verifier.configure(env, cfg, IapRules.products(_ctx()), "deadline15/%s (%s; %s)" % [ver, s, OS.get_name()])
-	# (디버그 · 가짜 가게 + 로컬 서버) 가짜 가게 장부를 서버에도 비춤 — fake_files.gd remote
-	FakeFiles.remote = str(cfg.get("url", "")) if OS.is_debug_build() and backend is BackendFake and str(cfg.get("url", "")).begins_with("http") else ""
+	verifier.configure(env, cfg, IapRules.products(_ctx()), "deadline15/%s (%s; %s)" % [ver, _store_name, OS.get_name()])
+	return str(cfg.get("url", ""))
+
+
+## (6b 시험) 만들어 둔 백엔드를 끼움 — 가짜 BillingClient/가짜 어댑터를 단 백엔드로 Billing 의 지급 순서를 그대로 시험할 때. 가게 이름은 백엔드의 것
+func inject_backend(b: Node, env_: String = "") -> void:
+	if backend != null:
+		backend.queue_free()
+		backend = null
+	backend = b
+	_store_name = str(b.get("store_name"))
+	if env_ != "":
+		env = env_
+	_wire_backend()
+	_configure_verifier()
+
+
+func _on_backend_unfinished() -> void:
+	if _started:
+		restore()
 
 
 ## (디버그) 가짜 가게 시나리오 바꾸기 — 출시 빌드에서는 아무것도 안 함
@@ -228,7 +270,11 @@ func products() -> Array:
 ## 가게 가격 받기 (상점 진입 때)
 func refresh_products() -> void:
 	_ensure_backend()
+	if not bool(backend.call("is_supported")):
+		return
+	await backend.prepare()   # (6b) SDK 가 비동기로 연결하는 가게는 연결을 기다림 — 끝나면 카드가 켜지도록 아래에서 products_updated
 	if not is_available():
+		products_updated.emit()
 		return
 	var rows: Array = await backend.query_products(IapRules.products(_ctx()))
 	for r: Variant in rows:
@@ -267,6 +313,14 @@ static func account_token(iid: String) -> String:
 	return iid.sha256_text().substr(0, 32)
 
 
+## (6b) Apple appAccountToken 은 UUID 모양이어야 함 (아니면 StoreKit 이 조용히 버림) → account_token 32자를 8-4-4-4-12 로 끊은 소문자 글.
+##  같은 값을 JWS 의 appAccountToken 필드(소문자)로 서버가 읽음 — 서버가 비교할 때는 대소문자를 구분하지 않을 것 (플러그인이 돌려주는 uuidString 은 대문자).
+##  버전·변종 비트는 건드리지 않음 (Swift 의 UUID(uuidString:) 은 모양만 봄). 재설치하면 iid 가 바뀌어 값도 바뀜 — Google 과 같은 규칙으로 복구 (3.6)
+static func account_uuid(iid: String) -> String:
+	var t := account_token(iid).to_lower()
+	return "%s-%s-%s-%s-%s" % [t.substr(0, 8), t.substr(8, 4), t.substr(12, 4), t.substr(16, 4), t.substr(20, 12)]
+
+
 func is_restoring() -> bool:
 	return _restoring_now
 
@@ -302,7 +356,7 @@ func buy(id: String) -> bool:
 func _buy(id: String) -> void:
 	var c := _ctx()
 	var p: Dictionary = IapRules.product(c, id)
-	var tx: Dictionary = await backend.purchase(id, IapRules.store_product_id(p, _store_name), {"account_token": account_token(_iid(c))})
+	var tx: Dictionary = await backend.purchase(id, IapRules.store_product_id(p, _store_name), {"account_token": account_token(_iid(c)), "account_uuid": account_uuid(_iid(c))})
 	await _finish_buy(id, tx)
 
 
@@ -482,7 +536,10 @@ func _restore_once() -> void:
 		_want_check = true
 		return
 	_want_check = false
-	if not bool(backend.call("is_supported")) or not bool(backend.call("is_available")):
+	if not bool(backend.call("is_supported")):
+		return
+	await backend.prepare()   # (6b) 가게 연결 (Google Play · App Store 는 비동기)
+	if not bool(backend.call("is_available")):
 		return
 	_restoring_now = true
 	var txs: Array = await backend.query_unfinished()

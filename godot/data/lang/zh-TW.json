@@ -2500,7 +2500,10 @@
       "bg_audio_tip": "遊戲視窗失去焦點時，聲音保持、降低或靜音",
       "bg_play": "保持",
       "bg_lower": "降低",
-      "bg_mute": "靜音"
+      "bg_mute": "靜音",
+      "ad_privacy": "廣告隱私設定",
+      "ad_privacy_tip": "檢視或變更廣告隱私選擇",
+      "ad_privacy_none": "您所在的地區沒有可變更的廣告隱私設定。"
     },
     "result": {
       "retry": "重新挑戰",
@@ -2526,7 +2529,11 @@
       "third_party_note": "Godot 引擎包含的第三方元件及其授權條款。",
       "show": "檢視全文",
       "hide": "收合",
-      "v8_note": "遊戲中的排序（Array.prototype.sort）與三十六進位表示移植自 V8 引擎的程式碼。"
+      "v8_note": "遊戲中的排序（Array.prototype.sort）與三十六進位表示移植自 V8 引擎的程式碼。",
+      "mobile_title": "行動版付款與廣告元件",
+      "mobile_note": "行動版中用於付款和廣告的外掛與SDK。授權條款原文不翻譯，按英文原文收錄。",
+      "google_note": "上述Google SDK歸Google LLC所有，依各SDK的服務條款使用。它們以函式庫的形式包含在行動版中，原始碼不屬於本遊戲。",
+      "apache_note": "Android版中包含的AndroidX和Kotlin函式庫遵循Apache License 2.0。"
     },
     "iap": {
       "buy": "購買",
@@ -2569,7 +2576,15 @@
       "fake_wait": "{n} 秒後可領取獎勵",
       "fake_done": "已看完 — {gold} 金幣",
       "close_no_reward": "關閉（無獎勵）",
-      "close_reward": "領取獎勵並關閉"
+      "close_reward": "領取獎勵並關閉",
+      "preparing": "廣告準備中",
+      "retry": "重新載入",
+      "consent_btn": "同意並觀看廣告",
+      "st_loading": "正在準備廣告…",
+      "st_offline": "目前未連上網路。請連線後重新載入。",
+      "st_failed": "暫時無法載入廣告，請稍後再試。",
+      "st_consent": "觀看廣告需要先同意廣告隱私設定。",
+      "st_unconfigured": "目前無法使用廣告功能。"
     },
     "odds": {
       "btn": "機率說明",

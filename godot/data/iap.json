@@ -46,6 +46,27 @@
     "dev": {"url": "fake://local", "timeout": 10},
     "stage": {"url": "", "timeout": 10},
     "prod": {"url": "", "timeout": 10},
-    "local": {"url": "http://127.0.0.1:8951", "timeout": 10, "env": "dev"}
+    "local": {
+      "url": "http://127.0.0.1:8951",
+      "timeout": 10,
+      "env": "dev",
+      "android_url": "http://10.0.2.2:8951"
+    }
+  },
+  "ADMOB": {
+    "test": {
+      "app_id": {
+        "android": "ca-app-pub-3940256099942544~3347511713",
+        "ios": "ca-app-pub-3940256099942544~1458002511"
+      },
+      "rewarded": {
+        "android": "ca-app-pub-3940256099942544/5224354917",
+        "ios": "ca-app-pub-3940256099942544/1712485313"
+      }
+    },
+    "real": {"app_id": {"android": "", "ios": ""}, "rewarded": {"android": "", "ios": ""}},
+    "child_directed": false,
+    "under_age_of_consent": false,
+    "max_ad_content_rating": ""
   }
 }

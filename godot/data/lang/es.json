@@ -2544,7 +2544,10 @@
       "bg_audio_tip": "Mantén, baja o silencia el sonido cuando la ventana pierde el foco",
       "bg_play": "Igual",
       "bg_lower": "Bajar",
-      "bg_mute": "Silenciar"
+      "bg_mute": "Silenciar",
+      "ad_privacy": "Privacidad de anuncios",
+      "ad_privacy_tip": "Revisa o cambia tus opciones de privacidad de anuncios",
+      "ad_privacy_none": "En tu región no hay ajustes de privacidad de anuncios que cambiar."
     },
     "result": {
       "retry": "Reintentar",
@@ -2570,7 +2573,11 @@
       "third_party_note": "Componentes de terceros incluidos en Godot Engine y sus licencias.",
       "show": "Ver texto completo",
       "hide": "Ocultar",
-      "v8_note": "La ordenación (Array.prototype.sort) y el formato en base 36 del juego se han portado del código del motor V8."
+      "v8_note": "La ordenación (Array.prototype.sort) y el formato en base 36 del juego se han portado del código del motor V8.",
+      "mobile_title": "Componentes de pago y anuncios (móvil)",
+      "mobile_note": "Complementos y SDK que se usan para los pagos y los anuncios en las versiones móviles. Los textos de licencia se muestran en inglés, tal como se publicaron.",
+      "google_note": "Los SDK de Google anteriores son propiedad de Google LLC y se usan según sus respectivos términos. Se incluyen en las versiones móviles como bibliotecas; su código fuente no forma parte de este juego.",
+      "apache_note": "Las bibliotecas AndroidX y Kotlin incluidas en la versión de Android se rigen por la Apache License 2.0."
     },
     "iap": {
       "buy": "Comprar",
@@ -2613,7 +2620,15 @@
       "fake_wait": "Recompensa disponible en {n} s",
       "fake_done": "Terminado — {gold} de Oro",
       "close_no_reward": "Cerrar (sin recompensa)",
-      "close_reward": "Recoger y cerrar"
+      "close_reward": "Recoger y cerrar",
+      "preparing": "Preparando anuncio",
+      "retry": "Volver a cargar",
+      "consent_btn": "Aceptar y ver anuncio",
+      "st_loading": "Preparando un anuncio…",
+      "st_offline": "Sin conexión a internet. Conéctate y vuelve a cargar.",
+      "st_failed": "No se pudo cargar un anuncio ahora. Inténtalo de nuevo en un momento.",
+      "st_consent": "Para ver anuncios hace falta aceptar la privacidad de anuncios.",
+      "st_unconfigured": "Los anuncios no están disponibles por ahora."
     },
     "odds": {
       "btn": "Probabilidades",

@@ -732,7 +732,7 @@ Godot --path godot -- --iap-env local                                           
 
 | 프리셋 | 결과물 | 내용 |
 |---|---|---|
-| Android (Google Play) | `build/android/DEADLINE15.aab` | **Gradle 빌드**, 형식 AAB, 기능 태그 `google`, 패키지 `xyz.show4you.deadline15`, minSdk 24 · **targetSdk 36**(2026 Play 요구), arm64-v8a + armeabi-v7a, 권한 인터넷만, 적응형 아이콘, 몰입 모드, 백업 끔 |
+| Android (Google Play) | `build/android/DEADLINE15.aab` | **Gradle 빌드**, 형식 AAB, 기능 태그 `google`, 패키지 `xyz.show4you.deadline15`, minSdk 24 · **targetSdk 36**(2026 Play 요구), arm64-v8a + armeabi-v7a, 프리셋 권한은 인터넷만 (6b 이후 병합 매니페스트에는 결제·광고 SDK 권한이 더해짐 — 아래 6b), 적응형 아이콘, 몰입 모드, 백업 끔 |
 | Android (Google Play) APK | `build/android/DEADLINE15.apk` | 위와 같고 형식만 APK (Godot 은 한 프리셋에 형식 하나 — 시험이 두 프리셋이 같은지 확인) |
 | iOS (App Store) | `build/ios/` Xcode 프로젝트 (`export_project_only`) | 번들 ID 같음, 기능 태그 `apple`, iOS 15.0+, iPhone·iPad, 버전 빈칸 = config/version, **팀 ID 비움**, 아이콘 1024 · 시작 화면 그림 |
 
@@ -806,3 +806,58 @@ Godot --path godot -- --iap-env local                                           
 - **결과 창 합계**: 보물상자에서 얻은 골드(`S._chestGold` — `chest_open` 이 더함, 전투 중 바로 저장되므로 패배·항복에서도)를 '보물상자' 줄로 넣고 합계에 포함 →
   **보상 줄 합 = 실제 골드 증가**가 모든 경우(첫 클리어 · 다시 클리어 · 새 별 · 연습 · 패배, 상자를 연 판 balanced_s05·boss_s10 포함)에서 같음 (시험이 같아야 통과).
 - 시험 보강: float 시험이 실제 전투(legion5_s09 소환 · swamp_s21 저주 · boss_s10 연속 사격)를 끝까지 몰아 엔진의 `p` 와 화면에 실제로 뜬 글자(`float_log`)를 확인 — `d["p"] = params` 를 지우면 실패.
+
+## 6b — 모바일 결제·광고 실제 연결 (2026-10-21)
+
+Google Play 결제 · App Store(StoreKit 2) 결제 · AdMob 보상형 광고(골드 100 × 하루 3회)를 붙임. STOVE·Steam 은 이번 범위 아님. 패키지·번들 ID `xyz.show4you.deadline15`.
+받은 플러그인의 이름·버전·sha256·라이선스·출처·넣고 뺀 것은 **`addons/SOURCES.md`**. 서버 약속은 `docs/server/api.md` (2.1 계정 토큰 · 8장 모바일 클라이언트).
+
+### 구조
+
+| 파일 | 하는 일 |
+|---|---|
+| `scripts/core/billing/backend_google.gd` | 플러그인 `BillingClient` 를 감쌈 — 연결 · 가격 · 구매 · 소모 · 미처리 조회. `obfuscatedAccountId = SHA-256(iid) 앞 32자`. 플러그인이 없으면 `is_supported` 거짓 |
+| `scripts/core/billing/backend_apple.gd` + `apple_iap.gd` | godot-iap 래퍼를 감싼 어댑터(플러그인 타입·신호를 아는 곳은 어댑터뿐) — `appAccountToken = Billing.account_uuid(iid)`, 영수증 = JWS, 환불된 미처리는 finish 로 치움 |
+| `scripts/core/billing/sig_wait.gd` | '신호 하나를 제한 시간 두고 기다림' — SDK 응답이 영영 안 와도 멈추지 않음 |
+| `billing.gd` (추가) | `unfinished_changed`(백엔드가 알리는 새 거래 → restore) · `prepare()`(연결 기다림) · `account_uuid` · `inject_backend`(시험) · `--iap-server emulator` · `IAP_SERVER.local.android_url` |
+| `scripts/core/ads.gd` | 보상형 광고 상태 기계: 동의(UMP) → SDK 초기화 → 불러오기 → ready → 보여 주기 → 보상 획득 때 바로 지급·저장 → 닫으면 `rewarded`/`closed`. 하루 3회·시계 규칙(`ad_rules.gd`)은 그대로 |
+| `scripts/core/ads/admob_bridge.gd` | Poing AdMob 플러그인 API 를 단순한 모양으로 (시험은 같은 모양의 가짜를 끼움) |
+| `shop.gd` · `settings_screen.gd` · `licenses.gd` | 광고 카드 상태별 단추 · 설정 '광고 개인정보 설정' 단추(모바일) · 라이선스 화면의 플러그인·SDK 고지 |
+| `tools/ios_export.sh` · `ios_post_export.py` · `ios_privacy_strings.json` | iOS 내보내기 (아래) |
+
+- **결제 순서**는 변함없음 (서버 verify → 전투 중이면 미룸 → 지급 → 디스크 확정 → consume/finish). PENDING·Ask to Buy 는 지급 없이 안내, 승인되면 저절로 지급. ITEM_ALREADY_OWNED 는 소모하지 않은 그 구매를 찾아 지급 길로.
+- **광고**: 디버그 빌드는 늘 구글 공개 시험 광고 단위(`data/iap.json ADMOB.test`), 출시 빌드는 `ADMOB.real`(지금 비어 있음 → 광고 'failed', 시험 단위로 대신하지 않음).
+  아동 대상 아님(`tag_for_child_directed_treatment` FALSE)·미성년 동의 연령 미만 아님을 SDK 초기화 때 명시. 카드 단추: 준비됨 '광고 보기' · 불러오는 중 · 오프라인/실패 '다시 불러오기' · 동의 필요 '동의하고 광고 보기' · 오늘 다 받음.
+  오프라인·실패는 15초에서 시작해 최대 5분까지 늘리는 재시도 + 앱 복귀·상점 진입 때 다시. 1시간 지난 광고는 버림.
+  PC 가게(stove·steam)와 광고 SDK 가 없는 환경(PC·편집기의 `--store google`)에서는 광고 카드 숨김.
+- **동의/ATT**: 시작할 때 UMP 정보 갱신 → 필요하면 동의 창 → 동의 상태가 not_required/obtained 일 때만 SDK 초기화·광고 요청. 플러그인(5.1.0)은 ATT 추적 허용 창을 직접 부르는 API 가 없음 →
+  iOS 는 Google AdMob 콘솔 '개인정보 및 메시지'의 **IDFA 설명 메시지**를 켜 두면 UMP 흐름에서 ATT 창이 뜸(= 광고 불러오기 전). 문구 `NSUserTrackingUsageDescription` 은 6개 언어(`tools/ios_privacy_strings.json`) — 기본(en)은 프리셋 `additional_plist_content`, 나머지는 `<언어>.lproj/InfoPlist.strings`(ios_post_export.py).
+  디버그: `-- --ump-eea` 로 동의 지역을 EEA 로 흉내.
+- **서버 연결 (개발용)**: 안드로이드 에뮬레이터 → 호스트 맥의 `wrangler dev`: 디버그 빌드에 `-- --store dev --iap-env local` (주소 `http://10.0.2.2:8951`, `IAP_SERVER.local.android_url`) 또는 `-- --iap-server emulator`.
+  출시 빌드는 `https://` 주소만 (http·fake:// ·인자는 무시, `verifier.gd`).
+
+### 안드로이드 내보내기
+
+- 플러그인: `addons/GodotGooglePlayBilling`(Play Billing Library 9.1.0, `billing-ktx`) · `addons/admob`(GMA Next-Gen SDK `ads-mobile-sdk` 1.4.0). 편집기 플러그인 둘 다 켬(`project.godot`). 네이티브 라이브러리 정렬: 플러그인에 `.so` 없음, `zipalign -c -P 16` 통과.
+- **Gradle 의존성**: 이 맥 캐시에 없던 Maven 의존성(플러그인이 선언한 `billing-ktx` · `ads-mobile-sdk` 와 그 하위 67개 파일, 약 16.7MB)이 첫 내보내기 때 내려와짐 — `gradle.properties` 의 `org.gradle.offline=true` 만으로는 막히지 않았음.
+  그 뒤로는 `tools/android_build_template.sh`(기본 OFFLINE=1)가 `gradlew` 를 `--offline` 이 붙는 감싸개로 바꿔 더는 받지 않음 (캐시에 없으면 실패하며 없는 목록을 보임). 새 PC 에서는 처음에 한 번 `OFFLINE=0` 으로 설치해 캐시를 채울 것. 받은 파일 67개의 좌표·sha256 은 `addons/SOURCES.md` 에 기록.
+- 매니페스트(병합 결과)에 광고 앱 ID(`com.google.android.gms.ads.APPLICATION_ID` — 지금 구글 시험 ID, 출시 전에 `project.godot` 의 `admob/general/android/app_id` 와 `data/iap.json ADMOB.real.app_id` 를 실제 ID 로) · `com.android.vending.BILLING` · targetSdk 36 · minSdk 24.
+  권한은 SDK 가 요구하는 것: `INTERNET`(프리셋) · `AD_ID`(`android.permission.AD_ID`·`com.google.android.gms.permission.AD_ID`, 광고 ID — Play Console '광고 ID' 선언 필요) · `ACCESS_NETWORK_STATE` · `READ_BASIC_PHONE_STATE`(GMA SDK) ·
+  `BILLING` · `WAKE_LOCK` · `FOREGROUND_SERVICE`(androidx.work, 광고 SDK 가 끌어옴) · `RECEIVE_BOOT_COMPLETED`(GMA SDK 작업 예약) · `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`(androidx, 앱 안에서만). 위치·연락처·저장소 같은 권한은 없음.
+- 크기: 출시 AAB 157.45MB → **164.43MB (+6.98MB, +4.4%)**, 디버그 APK 약 269MB → 277.6MB. 내보낸 pck: Windows +0.36MB.
+
+### iOS 내보내기
+
+- 플러그인: AdMob(Google Mobile Ads 13.9.0 · UMP 3.1.0 SPM 패키지 + `poing-godot-admob-ads` xcframework) · godot-iap 4.0.3 (iOS **17.0+** 필요 — SwiftGodot 확장이라 프리셋 최소 iOS 15.0 → 17.0).
+- `bash godot/tools/ios_export.sh` — godot-iap 의 GDExtension 을 `third_party/godot-iap-ios` 에서 `addons/godot-iap/bin` 으로 **내보내는 동안만** 복사(평소에 있으면 데스크톱 편집기가 'No GDExtension library found' 오류), 임시 팀 ID 로 Xcode 프로젝트를 내보낸 뒤 `ios_post_export.py` 로 손질:
+  빈 사용 설명 키 지움 · `CFBundleLocalizations` + 6개 언어 `InfoPlist.strings` · godot-iap 프레임워크 2개를 'Embed Frameworks(서명하며 복사)'로(+ Info.plist) · AdMob SPM 연결(플러그인 자신의 연결은 헤드리스 내보내기 중에 실행되지 못함) · `SystemCapabilities com.apple.InAppPurchase` · 임시 팀 ID 비움.
+  (내보내는 중 Godot 이 맥 호스트에서 `godot_iap.gdextension` 의 'No GDExtension library found' 오류를 내는 것은 정상 — iOS 라이브러리만 있기 때문.)
+- Info.plist 에 `GADApplicationIdentifier`(지금 시험 앱 ID) · `SKAdNetworkItems` · `NSUserTrackingUsageDescription` 들어감. 서명 없이 시뮬레이터용 빌드: `xcodebuild -project godot/build/ios/DEADLINE15.xcodeproj -scheme DEADLINE15 -sdk iphonesimulator -arch x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build`
+  (Godot 4.5.1 공식 iOS 템플릿의 시뮬레이터 라이브러리가 x86_64 뿐 — 6a 와 같음). godot-iap 의 네이티브는 기기(arm64)용이라 **시뮬레이터에서는 결제가 동작하지 않음**(래퍼가 '네이티브 없음'으로 처리, 앱은 정상).
+
+### 시험 · 확인한 것
+
+- `tests/check_mobile6b.gd` — 가짜 `BillingClient`(`tests/fake_play_client.gd`) · 가짜 어댑터(`fake_apple_iap.gd`) · 가짜 AdMob 다리(`fake_admob_bridge.gd`) · 대본형 서버(`fake_store_server.gd`)로 모든 경로 + 진짜 `admob_bridge.gd` 를 플러그인의 편집기용 mock 으로 돌림.
+- 안드로이드 에뮬레이터(Pixel_8_API_35, Google Play 이미지, 디버그 APK): 플러그인 포함 앱이 정상 실행, 결제 연결 실패(`BillingClient: Reconnection failed with result: 3`)는 앱을 죽이지 않고 결제 카드만 꺼짐,
+  시험 광고 단위로 **실제 광고가 떠서 끝까지 보고 닫으면 '100 골드를 받았습니다' · 골드 +100 · 오늘 2/3** 확인.
+  못 한 것: 실제 결제(Play Console 상품·라이선스 테스터·서명된 빌드 필요), 서버 확인(서버 배포 전·가짜 서버는 google 영수증을 받지 않음), UMP 동의 창(에뮬레이터 지역이 EEA 가 아님 — `--ump-eea` 로는 시험하지 않음), 에뮬레이터에서의 iOS.

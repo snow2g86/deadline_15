@@ -2500,7 +2500,10 @@
       "bg_audio_tip": "游戏窗口失去焦点时，声音保持、降低或静音",
       "bg_play": "保持",
       "bg_lower": "降低",
-      "bg_mute": "静音"
+      "bg_mute": "静音",
+      "ad_privacy": "广告隐私设置",
+      "ad_privacy_tip": "查看或更改广告隐私选择",
+      "ad_privacy_none": "您所在的地区没有可更改的广告隐私设置。"
     },
     "result": {
       "retry": "重新挑战",
@@ -2526,7 +2529,11 @@
       "third_party_note": "Godot 引擎包含的第三方组件及其许可证。",
       "show": "查看全文",
       "hide": "收起",
-      "v8_note": "游戏中的排序（Array.prototype.sort）和三十六进制表示移植自 V8 引擎的代码。"
+      "v8_note": "游戏中的排序（Array.prototype.sort）和三十六进制表示移植自 V8 引擎的代码。",
+      "mobile_title": "移动版支付与广告组件",
+      "mobile_note": "移动版中用于支付和广告的插件与SDK。许可证原文不翻译，按英文原文收录。",
+      "google_note": "上述Google SDK归Google LLC所有，按各SDK的服务条款使用。它们以库的形式包含在移动版中，源代码不属于本游戏。",
+      "apache_note": "安卓版中包含的AndroidX和Kotlin库遵循Apache License 2.0。"
     },
     "iap": {
       "buy": "购买",
@@ -2569,7 +2576,15 @@
       "fake_wait": "{n}秒后可领取奖励",
       "fake_done": "已看完 — {gold}金币",
       "close_no_reward": "关闭（无奖励）",
-      "close_reward": "领取奖励并关闭"
+      "close_reward": "领取奖励并关闭",
+      "preparing": "广告准备中",
+      "retry": "重新加载",
+      "consent_btn": "同意并观看广告",
+      "st_loading": "正在准备广告…",
+      "st_offline": "当前未连接网络。请联网后重新加载。",
+      "st_failed": "暂时无法加载广告，请稍后再试。",
+      "st_consent": "观看广告需要先同意广告隐私设置。",
+      "st_unconfigured": "目前无法使用广告功能。"
     },
     "odds": {
       "btn": "概率说明",

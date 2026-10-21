@@ -14,7 +14,7 @@ extends SceneTree
 ##  6d) misc   : iid(Crypto) · 초기화 때 game_iap 보존 · 진행 중 창 탈출구 · restore 가 먼저 지급한 구매 = '지급 완료' · 카드 그림 · 해시 · 허용 목록
 ##  6e) errors : 서버 429 rate_limited(verify · consume) · 501 not_implemented(STOVE) → 지급 없이 다시 시도 (가짜 서버 force_429 · 로컬 Worker /v1/dev/force429)
 ##  7) tap      : 상점 화면 진짜 입력(push_input) 같은 프레임 두 번 — 확인 창 1개 · 주문 1개 · 결과 창 1개, 결제 카드 숨김/꺼짐(steam·stove)
-##  8) ads      : 하루 3회(전체 합계) · 날짜 바뀜 · 시계 되돌림 · 가짜 광고 끝까지/중간 닫기 · PC(stove)는 광고 카드 없음 · google 은 꺼진 카드
+##  8) ads      : 하루 3회(전체 합계) · 날짜 바뀜 · 시계 되돌림 · 가짜 광고 끝까지/중간 닫기 · PC(stove)는 광고 카드 없음 · google 도 SDK 없는 PC·편집기에서는 카드 없음 (6b)
 ##  9) odds     : 확률표 = 데이터에서 계산한 값 (등급 합 100%) · 규칙 함수로 뽑아 본 빈도와 맞음 · 창의 글 = 표 · docs/store 6개 파일이 최신
 ## 10) lang     : 6개 언어 × 1280×720 · 1024×576 — 결제 카드·확인 창·진행 창·결과 창 9가지·광고 카드·가짜 광고·확률 창(상점·강화 탭) 넘침 0 · 두부 0
 ##  -- --server http://127.0.0.1:8951 : 가짜 서버 대신 진짜 로컬 Worker (server/ 에서 `npm run dev`) 로 같은 시험을 모두 돌림 (결제층 B)
@@ -500,7 +500,8 @@ func _t_flow() -> void:
 	platform.call("override_os", "Windows")
 	for st: String in ["steam", "stove", "google", "apple"]:
 		platform.call("override_store", st)
-		_check(not billing.buy("gold_500") and billing.is_supported() == (st != "steam") and not billing.is_available(), "%s: buy 거절 · 결제 길 %s · 지금은 못 씀" % [st, "있음" if st != "steam" else "없음"])
+		# (6b) google·apple 은 이제 진짜 백엔드 — 플러그인이 없는 PC·편집기에서는 결제 길 없음 (카드 숨김). stove 는 Windows 에서 길은 있고 SDK 전이라 꺼짐
+		_check(not billing.buy("gold_500") and billing.is_supported() == (st == "stove") and not billing.is_available(), "%s: buy 거절 · 결제 길 %s · 지금은 못 씀" % [st, "있음" if st == "stove" else "없음"])
 	platform.call("override_os", "macOS")
 	platform.call("override_store", "stove")
 	_check(not billing.is_supported(), "STOVE 맥 판: 결제 길 없음 (SDK 는 Windows DLL)")
@@ -1383,11 +1384,8 @@ func _t_ads() -> void:
 			await _frames(1)
 			if sh.find_child("AdCard", true, false) != null:
 				n_card += 1
-		if st == "google":
-			var gb: Button = sh.find_child("AdBtn", true, false)
-			_check(n_card == 6 and gb.disabled and gb.text == i18n.call("t", "common.coming_soon") and not ads.is_available(), "google: 광고 카드는 보이되 SDK 전이라 꺼짐")
-		else:
-			_check(n_card == 0 and not ads.is_supported() and not ads.show_rewarded("x") and (ev["fl"] as Array).has("unsupported"), "%s(PC): 광고 카드 0 · 광고 없음" % st)
+		# (6b) google 도 광고 SDK(AdMob 플러그인)가 없는 PC·편집기에서는 광고 없음 → 카드 숨김 (SDK 가 있는 판의 카드는 check_mobile6b)
+		_check(n_card == 0 and not ads.is_supported() and not ads.show_rewarded("x") and (ev["fl"] as Array).has("unsupported"), "%s(SDK 없음): 광고 카드 0 · 광고 없음" % st)
 	platform.call("override_store", "dev")
 	ads.rewarded.disconnect(on_rw)
 	ads.closed.disconnect(on_cl)

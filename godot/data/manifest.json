@@ -21,7 +21,7 @@
     "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
     "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
     "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}],
-    "iap": [{"file": "iap.json", "sha1": "9e14bce8a88e61f1281dabdf5bae1a22c17b2418"}]
+    "iap": [{"file": "iap.json", "sha1": "f3f6a1c80d171f044e5bc64609964a23afad1d2e"}]
   },
   "modules": {
     "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
@@ -253,7 +253,8 @@
       "globals": {
         "IAP_PRODUCTS": {"type": "array", "count": 4},
         "AD_REWARD": {"type": "object", "count": 2},
-        "IAP_SERVER": {"type": "object", "count": 4}
+        "IAP_SERVER": {"type": "object", "count": 4},
+        "ADMOB": {"type": "object", "count": 5}
       }
     }
   },
@@ -263,43 +264,43 @@
         "file": "lang/ko.json",
         "type": "object",
         "count": 51,
-        "leaves": 2508,
-        "sha1": "336ba24754b4a2a1c1e93d9fec5cabe4603a2323"
+        "leaves": 2523,
+        "sha1": "702ddd1373e63052f9dd36a8c4ed9e36253e14fe"
       },
       "en": {
         "file": "lang/en.json",
         "type": "object",
         "count": 52,
-        "leaves": 2515,
-        "sha1": "a830313bfe1026a9f506507d849f8f5d91795df2"
+        "leaves": 2530,
+        "sha1": "244e8797a5c70e05226e39033b0b48580c115149"
       },
       "es": {
         "file": "lang/es.json",
         "type": "object",
         "count": 52,
-        "leaves": 2515,
-        "sha1": "7fc4cdf515521a1e1e0606b237c583d79544ac8d"
+        "leaves": 2530,
+        "sha1": "a45c33fc7a0729bcf3b370a3bfe50772db6c6aa5"
       },
       "ja": {
         "file": "lang/ja.json",
         "type": "object",
         "count": 51,
-        "leaves": 2508,
-        "sha1": "6a17a49c4a3223800e8c71fdaa45cd6b9cb02e04"
+        "leaves": 2523,
+        "sha1": "9a0d21b5e597900610150465b92cdbd3f52a3bfd"
       },
       "zh-CN": {
         "file": "lang/zh-CN.json",
         "type": "object",
         "count": 51,
-        "leaves": 2508,
-        "sha1": "a55a2f2b19aa2c8388c79ffb5177c53e199deade"
+        "leaves": 2523,
+        "sha1": "462441ee6cdcaddde8d49c904bbd67d30129a2a8"
       },
       "zh-TW": {
         "file": "lang/zh-TW.json",
         "type": "object",
         "count": 51,
-        "leaves": 2508,
-        "sha1": "f58d576680944652ed4781f7b3addd257c318c4f"
+        "leaves": 2523,
+        "sha1": "3a0ad579684c21cf74b22ce0b543709549b433e6"
       }
     }
   },

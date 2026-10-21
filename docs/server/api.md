@@ -67,7 +67,9 @@ IP 제한은 설치 식별자 검사보다 먼저 합니다 (모양이 틀린 �
 | Apple | `appAccountToken` | 확인한 JWS 의 필드 — 게임이 구매 때 넣은 값 |
 | dev | 영수증의 `acct` | 가짜 가게가 서명한 값 |
 
-- Google·Apple 에 넣는 토큰은 게임이 정함: **`SHA-256(iid)` 의 앞 32자** (`Billing.account_token`, Apple 은 이것을 UUID 모양으로 — 모바일 작업 때). 재설치하면 iid 가 바뀌어 토큰도 바뀝니다 → 3.2 의 '24시간 재claim' 규칙으로 복구 (그 전에 iid 를 앱 밖에 보존하는 것이 우선 — 3.6).
+- Google·Apple 에 넣는 토큰은 게임이 정함: **`SHA-256(iid)` 의 앞 32자** (`Billing.account_token`). Google 은 이 글을 그대로 `obfuscatedAccountId` 로,
+  **Apple 은 같은 32자를 8-4-4-4-12 로 끊은 소문자 UUID 글**(`Billing.account_uuid`, 예: `3eb1bd43-9947-eb76-2998-e566ccc2e099`)을 `appAccountToken` 으로 넣습니다
+  (StoreKit 은 UUID 모양이 아니면 값을 조용히 버림. 버전·변종 비트는 건드리지 않음 — Swift `UUID(uuidString:)` 은 모양만 봄. JWS 의 `appAccountToken` 은 소문자, 플러그인이 돌려주는 `uuidString` 은 대문자이므로 **서버가 이 값을 비교·기록할 때는 대소문자를 구분하지 않을 것**). 재설치하면 iid 가 바뀌어 토큰도 바뀝니다 → 3.2 의 '24시간 재claim' 규칙으로 복구 (그 전에 iid 를 앱 밖에 보존하는 것이 우선 — 3.6).
 - 계정 값은 기록·분쟁 대응용입니다. **권한 판단(누가 consume·환불 목록을 볼 수 있나)은 계정 값이 아니라 verify 때 서버가 기록한 `install_id ↔ 주문` 연결로만** 합니다.
 - 영수증의 계정 값은 영수증을 가진 사람이면 누구나 똑같이 내밀 수 있으므로 "같은 계정이면 바로 넘겨줌" 같은 규칙은 두지 않습니다.
   (STOVE 는 요청자의 STOVE 로그인 토큰을 서버가 확인하면 '요청자 = 구매자'를 증명할 수 있음 — 그 경우 즉시 이전 허용 여부는 **확인 필요**, STOVE SDK 작업 때)
@@ -210,7 +212,7 @@ Apple 이 보내는 `{"signedPayload": "<JWS>"}`. 서버는 JWS(와 안의 `sign
 |---|---|---|---|---|
 | STOVE (PC, Windows 64비트) | 결제 **TID** | TID (+ SDK 결제 결과 원본) | STOVE 서버 API 로 TID 조회 → 상태·아이템 id·회원 번호 — **API 이름·인증 방식 확인 필요** (STOVE 개발자 센터 문서 — 2026-10 studio-docs 가 developers-beta.onstove.com 으로 옮겨져 확정 못 함). 서버는 지금 `501 not_implemented` | 환불 내역 조회 API 또는 알림 — **확인 필요** |
 | Google Play | `orderId` (`GPA.…`) — 없으면(시험 결제) `purchaseToken` | `purchaseToken` | Android Publisher `purchases.products.get(packageName, productId, token)`: `purchaseState` 0=구매 1=취소 2=대기, `consumptionState`, `acknowledgementState`, `orderId`, `obfuscatedExternalAccountId` | **Voided Purchases API** (`purchases.voidedpurchases.list`, Cron 주기 조회) + **RTDN**(Pub/Sub, 일회성 상품 `ONE_TIME_PRODUCT_CANCELED`/voided 알림 — 종류 확인 필요) |
-| App Store (StoreKit 2) | `transactionId` | `signedTransaction` (JWS) | **기준: JWS 서명을 x5c 사슬로 Apple Root CA G3(SHA-256 고정값)까지 확인** (Apple 확장 OID · 유효 기간 · ES256) → `bundleId`·`productId`·`transactionId`·`environment`(서버가 받는 목록 `APPLE_ENVIRONMENTS`, 아니면 `400 env_mismatch`)·`type`(Consumable)·`appAccountToken`·`revocationDate`. `.p8` 키가 설정되면 App Store Server API `Get Transaction Info` 로 한 번 더 (환불 여부 최신화) | **App Store Server Notifications V2** `REFUND` (+ `REVOKE`) 웹훅, 놓친 것은 `Get Refund History` API |
+| App Store (StoreKit 2) | `transactionId` | `signedTransaction` (JWS; godot-iap 의 `purchaseToken` — JWS 가 없으면 플러그인이 transactionId 로 채우므로 게임은 점 2개짜리 모양이 아니면 보내지 않음) | **기준: JWS 서명을 x5c 사슬로 Apple Root CA G3(SHA-256 고정값)까지 확인** (Apple 확장 OID · 유효 기간 · ES256) → `bundleId`·`productId`·`transactionId`·`environment`(서버가 받는 목록 `APPLE_ENVIRONMENTS`, 아니면 `400 env_mismatch`)·`type`(Consumable)·`appAccountToken`·`revocationDate`. `.p8` 키가 설정되면 App Store Server API `Get Transaction Info` 로 한 번 더 (환불 여부 최신화) | **App Store Server Notifications V2** `REFUND` (+ `REVOKE`) 웹훅, 놓친 것은 `Get Refund History` API |
 | dev (가짜) | `FAKE.<초>.<번호>` | `{"oid","spid","acct","sig"}` 가짜 서명 JSON | 가짜 서버가 가짜 가게 장부로 확인 | 가짜 장부의 `refunded` |
 
 ## 5. D1 표 (안)
@@ -277,3 +279,24 @@ CREATE TABLE refunds (
 - 설치 식별자: 무작위 128비트 (`Crypto.generate_random_bytes(16)`). 계정 값: HMAC 해시(STOVE) 또는 게임이 iid 로 만든 값(Google·Apple). 이름·이메일·기기 번호는 보내지 않습니다.
 - 영수증 원본은 확인에만 쓰고 저장하지 않습니다 (해시만).
 - 보관 기간: 주문 기록은 환불·분쟁 대응을 위해 5년 (전자상거래법 기록 보존 기준), 그 뒤 지움.
+
+
+## 8. 모바일 클라이언트 (6b) — 가게 SDK 와 이 약속 사이
+
+| | Google Play (`backend_google.gd`) | App Store (`backend_apple.gd` + 어댑터 `apple_iap.gd`) |
+|---|---|---|
+| 플러그인 | GodotGooglePlayBilling 3.3.0 (Play Billing Library 9.1.0) | godot-iap 4.0.3 (OpenIAP, StoreKit 2) — iOS 17+ |
+| 구매 때 넣는 값 | `obfuscatedAccountId` = `account_token` | `appAccountToken` = `account_uuid` (위 2.1) |
+| `order_id` | `orderId` (시험 결제처럼 없으면 `purchaseToken`) | `transactionId` |
+| `receipt` | `purchaseToken` | `signedTransaction` JWS |
+| 미처리 | `queryPurchases(INAPP)` 중 PURCHASED (PENDING 은 건너뜀) | `Transaction.unfinished` (환불·철회된 것은 지급 없이 finish 로 치움) + `Transaction.updates` |
+| 끝냄 (`finish`) | `consumePurchase` (acknowledge 를 겸함. 이미 소모(ITEM_NOT_OWNED)도 성공) | `transaction.finish()` |
+| 대기 | PENDING → 지급 없이 안내. 승인되면 `queryPurchases`/`onPurchasesUpdated` 에 PURCHASED → 게임이 저절로 restore | Ask to Buy(`deferred-payment`) → 같은 방식 (`Transaction.updates`) |
+| 이미 소유 | 소모하지 않은 그 구매를 찾아 지급 길로 (없으면 `already_owned`) | `already-owned` → 끝내지 않은 그 거래를 지급 길로 |
+
+- 구매 결과 코드 → `purchase_finished(id, {status, code})`: 취소 `cancelled` · 대기 `pending` · 그 밖의 가게 오류 `failed` + `code` (`billing_unavailable` · `service_unavailable` · `item_unavailable` · `developer_error` · `network` · `timeout` · `unavailable` …).
+- 플러그인이 없는 환경(PC · 편집기)은 `Billing.is_supported()` 가 거짓 — 결제 카드가 숨고 아무 오류도 내지 않음. 연결이 안 되는 기기(구글 플레이가 없음 · 오프라인)는 `is_supported` 참 · `is_available` 거짓 — 카드는 보이되 꺼짐.
+- 서버는 `receipt` 를 해석하지 않고 가게 API 에 물으므로 클라이언트가 주문 번호를 잘못 보내도 지급되지 않음.
+- 개발 중 서버 접속: 안드로이드 에뮬레이터에서 호스트 맥의 `wrangler dev` 로 가려면 디버그 빌드에 `-- --iap-env local` (주소는 `IAP_SERVER.local.android_url` = `http://10.0.2.2:8951`) 또는 `-- --iap-server emulator`.
+  이때 가게는 가짜(`-- --store dev`) — 로컬 서버(dev 환경)는 `dev`·`stove` 영수증만 받으므로 진짜 Google/Apple 영수증은 stage·prod 서버로.
+  출시 빌드는 `https://` 주소만 씀(`http://` · `fake://` · `--iap-server` 인자는 무시).

@@ -149,12 +149,14 @@ func _build() -> void:
 		ads.connect("rewarded", _on_ad_rewarded)
 		ads.connect("closed", _on_ad_closed)
 		ads.connect("failed", _on_ad_failed)
+		ads.connect("availability_changed", _on_ad_avail)
+		ads.call("refresh")   # (6b) 막혀 있던 광고 불러오기를 다시 (오프라인이었다면)
 
 
 func _exit_tree() -> void:
 	super._exit_tree()
 	for pair: Array in [[billing, ["granted", _on_granted], ["revoked", _on_revoked], ["products_updated", _on_products], ["purchase_finished", _on_purchase_finished]],
-			[ads, ["rewarded", _on_ad_rewarded], ["closed", _on_ad_closed], ["failed", _on_ad_failed]]]:
+			[ads, ["rewarded", _on_ad_rewarded], ["closed", _on_ad_closed], ["failed", _on_ad_failed], ["availability_changed", _on_ad_avail]]]:
 		var n: Node = pair[0]
 		if n == null:
 			continue
@@ -318,6 +320,8 @@ func _ad_card(key: String, key2: String = "") -> Control:
 	if pf != null and not bool(pf.call("has_ads")):
 		return null
 	if ads != null:
+		if not bool(ads.call("is_supported")):
+			return null   # (6b) 광고 SDK 가 없는 판(PC·편집기의 --store google 등)은 카드를 숨김
 		return _gold_ad_card()
 	var p := _card(LIST_W, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.25))
 	p.name = "AdCard"
@@ -352,6 +356,8 @@ func _gold_ad_card() -> Control:
 	var gold := int(float(ads.call("reward_gold")))
 	var mx := int(ads.call("daily_max"))
 	var left := int(ads.call("left_today"))
+	# (6b) 상태: ready · limit · loading · showing · offline · failed · consent (가짜 광고는 늘 ready)
+	var st := str(ads.call("status"))
 	var tv := OKit.vbox(2)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(tv)
@@ -361,24 +367,35 @@ func _gold_ad_card() -> Control:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size = Vector2(320, 0)
 	tv.add_child(l)
-	var avail := bool(ads.call("is_available"))
-	if avail:
-		var ll := OKit.label(10, Color("60a5fa"), 700)
-		ll.name = "AdLeft"
-		ll.text = t("gd.ads.left", {"n": left, "max": mx})
-		tv.add_child(ll)
+	var ll := OKit.label(10, Color("60a5fa"), 700)
+	ll.name = "AdLeft"
+	ll.text = t("gd.ads.left", {"n": left, "max": mx})
+	tv.add_child(ll)
+	if ["loading", "offline", "failed", "consent", "unconfigured"].has(st):
+		var sl := OKit.label(10, OKit.DIM, 600)
+		sl.name = "AdStatus"
+		sl.text = t("gd.ads.st_" + st)
+		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sl.custom_minimum_size = Vector2(320, 0)
+		tv.add_child(sl)
 	var b: Button
-	if not avail:
-		b = OKit.ghost_button(t("common.coming_soon"), 11)
-		b.disabled = true
-		b.modulate.a = 0.5
-	elif left <= 0:
-		b = OKit.ghost_button(t("gd.ads.none_left"), 11)
-		b.disabled = true
-		b.modulate.a = 0.5
-	else:
-		b = _buy_btn(t("gd.ads.btn", {"gold": gold}), true, false, Color("2563eb"), watch_ad, "AdWatch")
+	match st:
+		"ready":
+			b = _buy_btn(t("gd.ads.btn", {"gold": gold}), true, false, Color("2563eb"), watch_ad, "AdWatch")
+		"limit":
+			b = OKit.ghost_button(t("gd.ads.none_left"), 11)
+			b.disabled = true
+			b.modulate.a = 0.5
+		"offline", "failed":
+			b = _buy_btn(t("gd.ads.retry"), true, false, Color("475569"), watch_ad, "AdRetry")
+		"consent":
+			b = _buy_btn(t("gd.ads.consent_btn"), true, false, Color("475569"), watch_ad, "AdConsent")
+		_:
+			b = OKit.ghost_button(t("gd.ads.preparing"), 11)
+			b.disabled = true
+			b.modulate.a = 0.5
 	b.name = "AdBtn"
+	b.set_meta("ad_status", st)   # 시험·접근성: 단추가 어떤 상태의 것인지
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(b)
 	return p
@@ -1016,6 +1033,10 @@ func watch_ad() -> void:
 		return
 	if ads == null or bool(ads.call("showing")):
 		return
+	if ["offline", "failed", "consent"].has(str(ads.call("status"))):
+		ads.call("recover")   # (6b) 다시 불러오기 · 동의 창 다시 — 결과는 availability_changed 로
+		render()
+		return
 	ads.call("show_rewarded", "shop_" + cur_tab)
 
 
@@ -1023,6 +1044,11 @@ func _on_ad_rewarded(_pl: String, gold: float) -> void:
 	refresh_gold()
 	render()
 	alert(t("gd.ads.rewarded", {"gold": grouped(gold)}))
+
+
+func _on_ad_avail() -> void:
+	if is_inside_tree() and _paying == "":
+		render()
 
 
 func _on_ad_closed(_pl: String) -> void:

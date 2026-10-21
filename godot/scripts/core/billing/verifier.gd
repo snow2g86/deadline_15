@@ -32,16 +32,16 @@ var calls: Dictionary = {}
 var debug_hook: Callable = Callable()
 
 
-func configure(env_: String, cfg: Dictionary, products: Array, tag: String) -> void:
+func configure(env_: String, cfg: Dictionary, products: Array, tag: String, debug_build: bool = OS.is_debug_build()) -> void:
 	env = str(cfg.get("env", env_))   # IAP_SERVER.local 은 dev 서버를 로컬에서 띄운 것이라 요청의 env 는 "dev" (api.md 1)
 	base_url = str(cfg.get("url", ""))
 	timeout = float(cfg.get("timeout", 10))
 	client_tag = tag
-	fake = FakeServer.new(products) if base_url.begins_with("fake://") and OS.is_debug_build() else null
+	fake = FakeServer.new(products) if base_url.begins_with("fake://") and debug_build else null
 	if base_url.begins_with("fake://") and fake == null:
 		base_url = ""   # 출시 빌드는 가짜 서버를 쓰지 않음
-	if base_url.begins_with("http://") and not OS.is_debug_build():
-		base_url = ""   # 출시 빌드는 https 만 (로컬 서버 http://127.0.0.1 은 디버그 빌드만)
+	if not debug_build and not base_url.begins_with("https://"):
+		base_url = ""   # 출시 빌드는 https 만 (로컬 서버 http://127.0.0.1 · 에뮬레이터 http://10.0.2.2 는 디버그 빌드만) — (6b) 다른 글머리도 막음
 
 
 func _headers(iid: String) -> Dictionary:

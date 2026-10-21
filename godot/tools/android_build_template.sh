@@ -11,12 +11,15 @@
 #     NDK 28.1 → 27.1.12297006(설치된 것) · androidx.fragment 1.8.6 → 1.8.9 · core-splashscreen 1.0.1 → 1.2.0 · core-ktx 1.16.0 고정 ·
 #     플러그인 id → 모듈 직접 지정(캐시에 플러그인 표식 파일이 없어서)
 #   다운로드가 허용되면 고치지 않은 원본(Godot 기본)으로 돌아가도 됨: 이 스크립트에서 PATCH=0 으로 실행.
-# - 6b(결제·광고 플러그인)에서 aar 플러그인을 넣으면 그 의존성은 받아야 할 수 있음 (그때 판단).
+# - 6b(결제·광고 플러그인): 플러그인 aar 가 선언한 Maven 의존성(billing-ktx · GMA Next-Gen SDK ads-mobile-sdk · constraintlayout …)은 이 맥 캐시에 일부만 있음.
+#   기본(OFFLINE=1)은 gradle.properties 에 org.gradle.offline=true 를 넣어 **아무것도 내려받지 않고** 빌드하며, 캐시에 없으면 없는 목록을 보이고 실패함.
+#   받아도 되는 환경이면 OFFLINE=0 으로 다시 설치 (Maven 에서 플러그인 의존성만 받음).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 VER="4.5.1.stable"
 TPL="${GODOT_TEMPLATES:-$HOME/Library/Application Support/Godot/export_templates}/$VER/android_source.zip"
 PATCH="${PATCH:-1}"
+OFFLINE="${OFFLINE:-1}"
 [ -f "$TPL" ] || { echo "내보내기 템플릿이 없습니다: $TPL"; exit 1; }
 KEEP=""
 if [ -d android/keystore ]; then KEEP=$(mktemp -d); cp -R android/keystore "$KEEP/"; fi
@@ -25,6 +28,14 @@ mkdir -p android/build
 unzip -q "$TPL" -d android/build
 printf '%s' "$VER" > android/.build_version
 touch android/build/.gdignore
+if [ "$OFFLINE" = "1" ]; then
+	# gradle.properties 의 org.gradle.offline=true 만으로는 막히지 않았음(6b 에서 실제로 Maven 의존성 67개가 내려와짐) →
+	# gradlew 를 감싸서 --offline 을 늘 붙임. Godot 이 부르는 것은 android/build/gradlew 이므로 이 파일을 바꿈.
+	printf '\n# 6b: 다운로드 금지 — 캐시에 있는 것만 (tools/android_build_template.sh OFFLINE=0 으로 끔)\norg.gradle.offline=true\n' >> android/build/gradle.properties
+	mv android/build/gradlew android/build/gradlew.orig
+	printf '#!/bin/sh\n# 6b: 항상 --offline (tools/android_build_template.sh)\nexec "$(dirname "$0")/gradlew.orig" --offline "$@"\n' > android/build/gradlew
+	chmod +x android/build/gradlew android/build/gradlew.orig
+fi
 if [ -n "$KEEP" ]; then cp -R "$KEEP/keystore" android/; rm -rf "$KEEP"; fi
 
 if [ "$PATCH" = "1" ]; then

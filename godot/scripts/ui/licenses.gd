@@ -4,6 +4,8 @@ extends "res://scripts/ui/info_page.gd"
 ##  - Godot Engine (MIT/Expat) — Engine.get_license_text() 전체 글
 ##  - (4b-2) V8 (BSD-3-Clause) — js.gd 의 V8 정렬·36진수 표기 이식
 ##  - Godot 에 들어 있는 제3자 구성 요소 — Engine.get_copyright_info() (이름 · 저작권 · 라이선스), 라이선스 전체 글 Engine.get_license_info() (펼치기)
+##  - (6b) 모바일 결제·광고: 플러그인 3종(Godot Google Play Billing · Poing Studios AdMob · godot-iap/OpenIAP, 모두 MIT) + SwiftGodot 런타임(MIT, iOS 판에 들어감) +
+##    Google SDK(Play Billing Library · Mobile Ads SDK · User Messaging Platform — Google LLC, 각 약관) + AndroidX·Kotlin(Apache 2.0). godot/addons/SOURCES.md 와 같은 목록
 ##  웹의 Cinzel 글꼴은 Godot 판이 쓰지 않아 뺌 (godot/assets/fonts 에 없음). 라이선스 글 자체는 번역하지 않음 (법적 원문). 아래 글은 웹과 같음.
 ##  내보내기 때 assets/fonts/OFL.txt 를 넣어야 함 (godot/README.md '내보내기')
 
@@ -37,6 +39,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."""
 
 
+## (6b) 플러그인 3종 + SwiftGodot 의 MIT 본문 (저작권 줄만 다르고 본문은 같음 — addons/*/LICENSE 와 SwiftGodot THIRD_PARTY_NOTICES)
+const MIT_BODY := """Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE."""
+## [이름, 버전 줄, 저작권 줄] — 모두 MIT License
+const MIT_ITEMS := [
+	["Godot Google Play Billing (plugin)", "GodotGooglePlayBilling 3.3.0 — github.com/godot-sdk-integrations/godot-google-play-billing", "Copyright (c) 2020 Godot Engine contributors"],
+	["Godot AdMob Plugin", "Poing Studios, 5.1.0 — github.com/poingstudios/godot-admob-plugin", "Copyright (c) 2020-present Poing Studios"],
+	["godot-iap (OpenIAP)", "4.0.3 — github.com/hyodotdev/openiap", "Copyright (c) 2025 hyo.dev"],
+	["SwiftGodot Runtime", "Bundled with godot-iap (iOS) — github.com/migueldeicaza/SwiftGodot", "Copyright (c) 2020-2024 Miguel de Icaza"],
+]
+const APACHE_NOTICE := """Licensed under the Apache License, Version 2.0 (the "License"); you may not use these libraries except in compliance with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License."""
+
+
 func page_id() -> String:
 	return "licenses"
 
@@ -62,6 +96,30 @@ func fill() -> void:
 	_head(v8, "V8 JavaScript Engine", "Copyright 2006-2018, the V8 project authors", "BSD 3-Clause License")
 	v8.add_child(wrap_label(t("gd.licenses.v8_note"), 11, OKit.DIM2))
 	_expander(v8, "V8Text", V8_LICENSE)
+	# (6b) 모바일 결제·광고 구성 요소
+	var mb := section("Mobile")
+	_head(mb, t("gd.licenses.mobile_title"), "", "")
+	mb.add_child(wrap_label(t("gd.licenses.mobile_note"), 11, OKit.DIM2))
+	var mi := 0
+	for it: Array in MIT_ITEMS:
+		var row := OKit.vbox(3)
+		row.name = "MobileMit%d" % mi
+		mi += 1
+		mb.add_child(row)
+		_head(row, str(it[0]), str(it[2]), "MIT License")
+		row.add_child(wrap_label(str(it[1]), 10, OKit.DIM2))
+		_expander(row, "Text", str(it[2]) + "\n\n" + MIT_BODY)
+	var gs := OKit.vbox(3)
+	gs.name = "MobileGoogle"
+	mb.add_child(gs)
+	_head(gs, "Google Play Billing Library · Google Mobile Ads SDK · Google User Messaging Platform", "© Google LLC", "")
+	gs.add_child(wrap_label(t("gd.licenses.google_note"), 11, OKit.DIM2))
+	var ap := OKit.vbox(3)
+	ap.name = "MobileApache"
+	mb.add_child(ap)
+	_head(ap, "AndroidX · Kotlin", "", "Apache License 2.0")
+	ap.add_child(wrap_label(t("gd.licenses.apache_note"), 11, OKit.DIM2))
+	_expander(ap, "Text", APACHE_NOTICE)
 	var tp := section("ThirdParty")
 	_head(tp, t("gd.licenses.third_party"), "Godot Engine", "")
 	tp.add_child(wrap_label(t("gd.licenses.third_party_note"), 11, OKit.DIM2))

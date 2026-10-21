@@ -2541,7 +2541,10 @@
       "bg_audio_tip": "Keep, lower or mute the sound when the game window loses focus",
       "bg_play": "Keep",
       "bg_lower": "Lower",
-      "bg_mute": "Mute"
+      "bg_mute": "Mute",
+      "ad_privacy": "Ad privacy settings",
+      "ad_privacy_tip": "Review or change your ad privacy choices",
+      "ad_privacy_none": "There are no ad privacy settings to change in your region."
     },
     "result": {
       "retry": "Retry",
@@ -2567,7 +2570,11 @@
       "third_party_note": "Third-party components included in the Godot Engine and their licenses.",
       "show": "Show full text",
       "hide": "Hide",
-      "v8_note": "The game's sorting (Array.prototype.sort) and base-36 number formatting are ported from V8 engine code."
+      "v8_note": "The game's sorting (Array.prototype.sort) and base-36 number formatting are ported from V8 engine code.",
+      "mobile_title": "Mobile payment & ad components",
+      "mobile_note": "Plugins and SDKs used for payments and ads in the mobile versions. License texts are shown in English as published.",
+      "google_note": "The Google SDKs above are owned by Google LLC and used under their respective terms. They are included in the mobile versions as libraries; their source code is not part of this game.",
+      "apache_note": "The AndroidX and Kotlin libraries included in the Android version are licensed under the Apache License 2.0."
     },
     "iap": {
       "buy": "Buy",
@@ -2610,7 +2617,15 @@
       "fake_wait": "Reward available in {n}s",
       "fake_done": "Finished — {gold} Gold",
       "close_no_reward": "Close (no reward)",
-      "close_reward": "Claim and close"
+      "close_reward": "Claim and close",
+      "preparing": "Preparing ad",
+      "retry": "Reload",
+      "consent_btn": "Agree and watch ad",
+      "st_loading": "Getting an ad ready…",
+      "st_offline": "You're offline. Connect to the internet, then reload.",
+      "st_failed": "Couldn't load an ad right now. Try again in a moment.",
+      "st_consent": "Ad privacy consent is needed to watch ads.",
+      "st_unconfigured": "Ads are not available right now."
     },
     "odds": {
       "btn": "Odds",

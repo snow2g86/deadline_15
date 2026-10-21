@@ -132,6 +132,18 @@ func _refresh() -> void:
 		b2.pressed.connect(func() -> void: choose_language(code))
 		lg.add_child(b2)
 	_box.add_child(OKit.divider(0.06))
+	# (6b 모바일) 광고 개인정보 설정 — UMP 개인정보 옵션 창
+	if _has_ad_privacy():
+		var ap := CenterContainer.new()
+		ap.name = "AdPrivacyRow"
+		ap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_box.add_child(ap)
+		var apb := OKit.ghost_button(t("gd.settings.ad_privacy"), 13)
+		apb.name = "AdPrivacy"
+		apb.tooltip_text = t("gd.settings.ad_privacy_tip")
+		apb.pressed.connect(open_ad_privacy)
+		ap.add_child(apb)
+		_box.add_child(OKit.divider(0.06))
 	# 모든 데이터 초기화
 	var rc := CenterContainer.new()
 	rc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -167,6 +179,22 @@ func _refresh() -> void:
 		var dest := str(lk[2])
 		b3.pressed.connect(func() -> void: router.call("go", dest))
 		links.add_child(b3)
+
+
+func _has_ad_privacy() -> bool:
+	var pf := _svc("Platform")
+	var ad := _svc("Ads")
+	return pf != null and bool(pf.call("is_mobile")) and ad != null and bool(ad.call("privacy_entry"))
+
+
+## '광고 개인정보 설정' — 이 지역에서 필요하면 UMP 창, 아니면 안내만
+func open_ad_privacy() -> void:
+	var ad := _svc("Ads")
+	if ad == null:
+		return
+	var r := str(await ad.show_privacy_options())
+	if r == "not_required":
+		alert(t("gd.settings.ad_privacy_none"))
 
 
 func _toggle_row(icon: String, label: String, key: String) -> Control:

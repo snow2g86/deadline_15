@@ -29,3 +29,5 @@ godot/build/*
 !godot/build/.gdignore
 # 6a 안드로이드 Gradle 빌드 틀 (tools/android_build_template.sh 로 다시 만듦 — godot-lib aar 약 200MB) · 디버그 키스토어 (로컬 전용)
 godot/android/
+# 6b iOS 내보내기 때만 third_party/godot-iap-ios 에서 복사했다가 지우는 GDExtension (tools/ios_export.sh) — 데스크톱 편집기에서 오류가 나므로 평소에는 없어야 함
+godot/addons/godot-iap/bin/

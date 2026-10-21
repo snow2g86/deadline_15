@@ -10,6 +10,10 @@ extends Node
 ##     error: 실패 코드 (failed 일 때) }
 ##  지급(골드)은 백엔드가 하지 않는다 — Billing 이 서버 확인 → IapRules.grant → Store.flush 뒤에 finish(tx) 를 부른다.
 
+## (6b) 백엔드가 스스로 '처리할 거래가 생겼음'을 알림 — 앱 밖에서 승인된 대기 결제(Ask to Buy · 편의점 결제) · 다른 길로 들어온 구매 · 프로모션 코드.
+##  Billing 이 받아서 restore() 를 부름 (구매 창 흐름이 기다리는 거래는 알리지 않음)
+signal unfinished_changed
+
 ## 가게 이름 (Platform.store() 와 같은 이름) · 결제 길이 없는 판이면 "none"
 var store_name := "none"
 
@@ -17,6 +21,16 @@ var store_name := "none"
 ## 이 판에 결제 길이 있는가 (없으면 상점 결제 카드를 숨김 — steam·백엔드 없음)
 func is_supported() -> bool:
 	return false
+
+
+## (6b) 상품 목록 [{id, gold, google, apple, …}] (Billing 이 백엔드를 만든 직후 넘김) — query_unfinished 가 가게 상품 id → 게임 안 상품 id 로 바꿀 때 씀
+func set_products(_products: Array) -> void:
+	pass
+
+
+## (6b) 가게 연결을 기다림 (SDK 가 비동기로 연결하는 가게 — Google Play · App Store). 연결되면 true. Billing 이 가격 조회·미처리 확인 앞에서 부름
+func prepare() -> bool:
+	return is_available()
 
 
 ## 지금 결제할 수 있는가 (SDK 초기화 끝 · 로그인 등). 길은 있는데 안 되면 카드는 보이되 꺼짐
