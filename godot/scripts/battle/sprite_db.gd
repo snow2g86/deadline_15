@@ -1,7 +1,7 @@
 extends RefCounted
 ## 그림 창구 — 웹 js/battle/rig.js (Rig.key·fit·sheet·_sheetEl) 의 위치 계산과 그림 불러오기
 ##  캐릭터 그림: res://assets/image/character/<직업>_<01|02>.png (962x1087, 오른쪽을 봄)
-##  동작 시트: SPRITE_SHEETS[키][idle|combat|run|hit|attack] (가로로 frames 칸, 칸 크기 w×h)
+##  동작 시트: SPRITE_SHEETS[키][idle|combat|hit|attack] (가로로 frames 칸, 칸 크기 w×h)
 ##  몸 높이 맞춤 (CHAR_FIG·FIG_H·FIG_FOOT): 화면에서 무기를 뺀 몸이 FIG_H(50px) 가 되게, 발끝을 같은 선에
 ##  뒷모습 시트(<키>_b)는 웹도 꺼 둠 (Rig.BACK_VIEW = false) — 여기도 쓰지 않음
 

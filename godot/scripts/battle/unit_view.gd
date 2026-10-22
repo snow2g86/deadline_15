@@ -194,7 +194,7 @@ func _apply_face() -> void:
 	body.scale.x = -absf(body.scale.x) if _flip else absf(body.scale.x)
 
 
-## 카메라 회전: 이동 중이던 트윈은 옛 화면 좌표로 끝나므로 멈추고 목적지(d.x·y)에 바로 놓음 (달리기 동작·moving 표시는 타이머가 정리)
+## 카메라 회전: 이동 중이던 트윈은 옛 화면 좌표로 끝나므로 멈추고 목적지(d.x·y)에 바로 놓음 (moving 표시는 타이머가 정리)
 func refresh_camera() -> void:
 	if _move_tw != null and _move_tw.is_valid():
 		_move_tw.kill()
@@ -288,7 +288,7 @@ func play_motion(m: Dictionary, dir: Vector2) -> float:
 	return hit
 
 
-## 이동 (웹 animU: transform .32s + 달리기 시트, 420ms 뒤 멈춤)
+## 이동 (transform .32s 로 미끄러지듯 — 달리기 시트는 없앰, 이동 직전 자세(idle/combat)를 그대로 유지, 420ms 뒤 멈춤 표시 해제)
 func move_to(x: int, y: int) -> void:
 	d["x"] = x
 	d["y"] = y
@@ -304,7 +304,6 @@ func move_to(x: int, y: int) -> void:
 	moving = true
 	_move_token += 1
 	var tok := _move_token
-	set_loop("run")
 	_move_tw = create_tween()
 	_move_tw.tween_property(self, "position", target, 0.32 / speed).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	get_tree().create_timer(0.42 / speed).timeout.connect(func() -> void:

@@ -19,7 +19,7 @@
     ],
     "soul": [{"file": "soul.json", "sha1": "024645fc659fbcc0c76a14f1ce05b8d8219a8ba8"}],
     "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
-    "sprites": [{"file": "sprites.json", "sha1": "37dbdff1da3ea74c133ff4b209131b1e5be1ca77"}],
+    "sprites": [{"file": "sprites.json", "sha1": "2b56206613439deaf0cf4630a70497ccdc2cecf6"}],
     "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}],
     "iap": [{"file": "iap.json", "sha1": "f3f6a1c80d171f044e5bc64609964a23afad1d2e"}]
   },

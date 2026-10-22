@@ -1817,16 +1817,6 @@
         "icx": 480.5,
         "dur": 1600
       },
-      "run": {
-        "src": "image/character/anim/knight_01_run.png",
-        "frames": 14,
-        "w": 168,
-        "h": 160,
-        "body": [8, 154],
-        "cx": 95.5,
-        "icx": 480.5,
-        "dur": 1500
-      },
       "hit": {
         "src": "image/character/anim/knight_01_hit.png",
         "frames": 9,
@@ -1881,16 +1871,6 @@
         "cx": 78.5,
         "icx": 479.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/archer_01_run.png",
-        "frames": 14,
-        "w": 151,
-        "h": 160,
-        "body": [7, 156],
-        "cx": 71.5,
-        "icx": 479.5,
-        "dur": 1500
       }
     },
     "archer_02": {
@@ -1935,16 +1915,6 @@
         "cx": 79,
         "icx": 483,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/archer_02_run.png",
-        "frames": 14,
-        "w": 144,
-        "h": 160,
-        "body": [7, 156],
-        "cx": 71.5,
-        "icx": 483,
-        "dur": 1500
       }
     },
     "assassin_01": {
@@ -1989,16 +1959,6 @@
         "cx": 55,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/assassin_01_run.png",
-        "frames": 14,
-        "w": 127,
-        "h": 160,
-        "body": [7, 155],
-        "cx": 63.5,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "assassin_02": {
@@ -2043,16 +2003,6 @@
         "cx": 52,
         "icx": 483.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/assassin_02_run.png",
-        "frames": 14,
-        "w": 111,
-        "h": 160,
-        "body": [6, 152],
-        "cx": 57.5,
-        "icx": 483.5,
-        "dur": 1500
       }
     },
     "brawler_01": {
@@ -2097,16 +2047,6 @@
         "cx": 51,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/brawler_01_run.png",
-        "frames": 14,
-        "w": 127,
-        "h": 160,
-        "body": [8, 153],
-        "cx": 64,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "brawler_02": {
@@ -2151,16 +2091,6 @@
         "cx": 44.5,
         "icx": 480,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/brawler_02_run.png",
-        "frames": 14,
-        "w": 104,
-        "h": 160,
-        "body": [6, 155],
-        "cx": 54.5,
-        "icx": 480,
-        "dur": 1500
       }
     },
     "knight_02": {
@@ -2205,16 +2135,6 @@
         "cx": 87.5,
         "icx": 480,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/knight_02_run.png",
-        "frames": 14,
-        "w": 185,
-        "h": 160,
-        "body": [6, 150],
-        "cx": 90,
-        "icx": 480,
-        "dur": 1500
       }
     },
     "lancer_01": {
@@ -2259,16 +2179,6 @@
         "cx": 55.5,
         "icx": 482.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/lancer_01_run.png",
-        "frames": 14,
-        "w": 110,
-        "h": 160,
-        "body": [7, 156],
-        "cx": 56,
-        "icx": 482.5,
-        "dur": 1500
       }
     },
     "lancer_02": {
@@ -2313,16 +2223,6 @@
         "cx": 54.5,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/lancer_02_run.png",
-        "frames": 14,
-        "w": 129,
-        "h": 160,
-        "body": [7, 155],
-        "cx": 72.5,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "mage_01": {
@@ -2367,16 +2267,6 @@
         "cx": 69.5,
         "icx": 483,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/mage_01_run.png",
-        "frames": 14,
-        "w": 137,
-        "h": 160,
-        "body": [5, 155],
-        "cx": 75,
-        "icx": 483,
-        "dur": 1500
       }
     },
     "mage_02": {
@@ -2421,16 +2311,6 @@
         "cx": 63.5,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/mage_02_run.png",
-        "frames": 14,
-        "w": 131,
-        "h": 160,
-        "body": [7, 154],
-        "cx": 67,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "novice_01": {
@@ -2475,16 +2355,6 @@
         "cx": 64.5,
         "icx": 479,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/novice_01_run.png",
-        "frames": 14,
-        "w": 122,
-        "h": 160,
-        "body": [6, 154],
-        "cx": 66.5,
-        "icx": 479,
-        "dur": 1500
       }
     },
     "novice_02": {
@@ -2529,16 +2399,6 @@
         "cx": 57.5,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/novice_02_run.png",
-        "frames": 14,
-        "w": 115,
-        "h": 160,
-        "body": [8, 155],
-        "cx": 66.5,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "priest_01": {
@@ -2583,16 +2443,6 @@
         "cx": 72.5,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/priest_01_run.png",
-        "frames": 14,
-        "w": 130,
-        "h": 160,
-        "body": [13, 154],
-        "cx": 66.5,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "priest_02": {
@@ -2637,16 +2487,6 @@
         "cx": 59,
         "icx": 482,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/priest_02_run.png",
-        "frames": 14,
-        "w": 132,
-        "h": 160,
-        "body": [8, 155],
-        "cx": 68,
-        "icx": 482,
-        "dur": 1500
       }
     },
     "sapper_01": {
@@ -2691,16 +2531,6 @@
         "cx": 85.5,
         "icx": 484.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/sapper_01_run.png",
-        "frames": 14,
-        "w": 152,
-        "h": 160,
-        "body": [8, 154],
-        "cx": 83.5,
-        "icx": 484.5,
-        "dur": 1500
       }
     },
     "sapper_02": {
@@ -2745,16 +2575,6 @@
         "cx": 63.5,
         "icx": 479.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/sapper_02_run.png",
-        "frames": 14,
-        "w": 123,
-        "h": 160,
-        "body": [5, 154],
-        "cx": 69.5,
-        "icx": 479.5,
-        "dur": 1500
       }
     },
     "shaman_01": {
@@ -2799,16 +2619,6 @@
         "cx": 63.5,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/shaman_01_run.png",
-        "frames": 14,
-        "w": 126,
-        "h": 160,
-        "body": [9, 154],
-        "cx": 61.5,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "shaman_02": {
@@ -2853,16 +2663,6 @@
         "cx": 58,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/shaman_02_run.png",
-        "frames": 14,
-        "w": 126,
-        "h": 160,
-        "body": [8, 155],
-        "cx": 64,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "summoner_01": {
@@ -2907,16 +2707,6 @@
         "cx": 67,
         "icx": 478,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/summoner_01_run.png",
-        "frames": 14,
-        "w": 134,
-        "h": 160,
-        "body": [7, 155],
-        "cx": 70.5,
-        "icx": 478,
-        "dur": 1500
       }
     },
     "summoner_02": {
@@ -2961,16 +2751,6 @@
         "cx": 55.5,
         "icx": 479.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/summoner_02_run.png",
-        "frames": 14,
-        "w": 136,
-        "h": 160,
-        "body": [7, 154],
-        "cx": 70.5,
-        "icx": 479.5,
-        "dur": 1500
       }
     },
     "warrior_01": {
@@ -3015,16 +2795,6 @@
         "cx": 72,
         "icx": 482.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/warrior_01_run.png",
-        "frames": 14,
-        "w": 141,
-        "h": 160,
-        "body": [9, 155],
-        "cx": 70,
-        "icx": 482.5,
-        "dur": 1500
       }
     },
     "warrior_02": {
@@ -3069,16 +2839,6 @@
         "cx": 78.5,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/warrior_02_run.png",
-        "frames": 14,
-        "w": 140,
-        "h": 160,
-        "body": [12, 156],
-        "cx": 68.5,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "commander_01": {
@@ -3123,16 +2883,6 @@
         "cx": 66,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/commander_01_run.png",
-        "frames": 14,
-        "w": 130,
-        "h": 160,
-        "body": [5, 155],
-        "cx": 64,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "commander_02": {
@@ -3177,16 +2927,6 @@
         "cx": 61,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/commander_02_run.png",
-        "frames": 14,
-        "w": 122,
-        "h": 160,
-        "body": [5, 153],
-        "cx": 57.5,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "knight_01_b": {
@@ -3231,16 +2971,6 @@
         "cx": 75.5,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/knight_01_b_run.png",
-        "frames": 14,
-        "w": 159,
-        "h": 160,
-        "body": [32, 154],
-        "cx": 79,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "archer_01_b": {
@@ -3285,16 +3015,6 @@
         "cx": 52,
         "icx": 479,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/archer_01_b_run.png",
-        "frames": 14,
-        "w": 103,
-        "h": 160,
-        "body": [9, 156],
-        "cx": 47,
-        "icx": 479,
-        "dur": 1500
       }
     },
     "archer_02_b": {
@@ -3339,16 +3059,6 @@
         "cx": 66.5,
         "icx": 483.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/archer_02_b_run.png",
-        "frames": 14,
-        "w": 115,
-        "h": 160,
-        "body": [26, 156],
-        "cx": 58,
-        "icx": 483.5,
-        "dur": 1500
       }
     },
     "assassin_01_b": {
@@ -3393,16 +3103,6 @@
         "cx": 80.5,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/assassin_01_b_run.png",
-        "frames": 14,
-        "w": 171,
-        "h": 160,
-        "body": [22, 157],
-        "cx": 79,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "assassin_02_b": {
@@ -3447,16 +3147,6 @@
         "cx": 64.5,
         "icx": 483.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/assassin_02_b_run.png",
-        "frames": 14,
-        "w": 147,
-        "h": 160,
-        "body": [14, 157],
-        "cx": 74.5,
-        "icx": 483.5,
-        "dur": 1500
       }
     },
     "brawler_01_b": {
@@ -3501,16 +3191,6 @@
         "cx": 49,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/brawler_01_b_run.png",
-        "frames": 14,
-        "w": 118,
-        "h": 160,
-        "body": [12, 156],
-        "cx": 63.5,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "brawler_02_b": {
@@ -3555,16 +3235,6 @@
         "cx": 61.5,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/brawler_02_b_run.png",
-        "frames": 14,
-        "w": 105,
-        "h": 160,
-        "body": [6, 156],
-        "cx": 54,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "knight_02_b": {
@@ -3609,16 +3279,6 @@
         "cx": 67.5,
         "icx": 480.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/knight_02_b_run.png",
-        "frames": 14,
-        "w": 131,
-        "h": 160,
-        "body": [12, 157],
-        "cx": 65,
-        "icx": 480.5,
-        "dur": 1500
       }
     },
     "lancer_01_b": {
@@ -3663,16 +3323,6 @@
         "cx": 60,
         "icx": 470,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/lancer_01_b_run.png",
-        "frames": 14,
-        "w": 120,
-        "h": 160,
-        "body": [6, 156],
-        "cx": 56.5,
-        "icx": 470,
-        "dur": 1500
       }
     },
     "lancer_02_b": {
@@ -3717,16 +3367,6 @@
         "cx": 72.5,
         "icx": 480,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/lancer_02_b_run.png",
-        "frames": 14,
-        "w": 140,
-        "h": 160,
-        "body": [21, 158],
-        "cx": 52,
-        "icx": 480,
-        "dur": 1500
       }
     },
     "mage_01_b": {
@@ -3771,16 +3411,6 @@
         "cx": 73,
         "icx": 483.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/mage_01_b_run.png",
-        "frames": 14,
-        "w": 136,
-        "h": 160,
-        "body": [6, 156],
-        "cx": 71,
-        "icx": 483.5,
-        "dur": 1500
       }
     },
     "mage_02_b": {
@@ -3825,16 +3455,6 @@
         "cx": 78,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/mage_02_b_run.png",
-        "frames": 14,
-        "w": 137,
-        "h": 160,
-        "body": [20, 154],
-        "cx": 70.5,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "novice_01_b": {
@@ -3879,16 +3499,6 @@
         "cx": 81,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/novice_01_b_run.png",
-        "frames": 14,
-        "w": 140,
-        "h": 160,
-        "body": [8, 156],
-        "cx": 78.5,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "novice_02_b": {
@@ -3933,16 +3543,6 @@
         "cx": 68.5,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/novice_02_b_run.png",
-        "frames": 14,
-        "w": 132,
-        "h": 160,
-        "body": [7, 149],
-        "cx": 67,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "priest_01_b": {
@@ -3987,16 +3587,6 @@
         "cx": 66.5,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/priest_01_b_run.png",
-        "frames": 14,
-        "w": 128,
-        "h": 160,
-        "body": [20, 156],
-        "cx": 61,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "priest_02_b": {
@@ -4041,16 +3631,6 @@
         "cx": 71,
         "icx": 482,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/priest_02_b_run.png",
-        "frames": 14,
-        "w": 133,
-        "h": 160,
-        "body": [8, 155],
-        "cx": 60.5,
-        "icx": 482,
-        "dur": 1500
       }
     },
     "sapper_01_b": {
@@ -4095,16 +3675,6 @@
         "cx": 62.5,
         "icx": 484,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/sapper_01_b_run.png",
-        "frames": 14,
-        "w": 128,
-        "h": 160,
-        "body": [9, 156],
-        "cx": 69,
-        "icx": 484,
-        "dur": 1500
       }
     },
     "sapper_02_b": {
@@ -4149,16 +3719,6 @@
         "cx": 60.5,
         "icx": 479.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/sapper_02_b_run.png",
-        "frames": 14,
-        "w": 124,
-        "h": 160,
-        "body": [9, 154],
-        "cx": 65,
-        "icx": 479.5,
-        "dur": 1500
       }
     },
     "shaman_01_b": {
@@ -4203,16 +3763,6 @@
         "cx": 70,
         "icx": 481.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/shaman_01_b_run.png",
-        "frames": 14,
-        "w": 127,
-        "h": 160,
-        "body": [9, 156],
-        "cx": 65.5,
-        "icx": 481.5,
-        "dur": 1500
       }
     },
     "shaman_02_b": {
@@ -4257,16 +3807,6 @@
         "cx": 72,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/shaman_02_b_run.png",
-        "frames": 14,
-        "w": 149,
-        "h": 160,
-        "body": [18, 156],
-        "cx": 77,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "summoner_01_b": {
@@ -4311,16 +3851,6 @@
         "cx": 63,
         "icx": 478.5,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/summoner_01_b_run.png",
-        "frames": 14,
-        "w": 118,
-        "h": 160,
-        "body": [11, 157],
-        "cx": 60,
-        "icx": 478.5,
-        "dur": 1500
       }
     },
     "summoner_02_b": {
@@ -4365,16 +3895,6 @@
         "cx": 68,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/summoner_02_b_run.png",
-        "frames": 14,
-        "w": 140,
-        "h": 160,
-        "body": [6, 147],
-        "cx": 69,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "warrior_01_b": {
@@ -4419,16 +3939,6 @@
         "cx": 77.5,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/warrior_01_b_run.png",
-        "frames": 14,
-        "w": 146,
-        "h": 160,
-        "body": [10, 153],
-        "cx": 73,
-        "icx": 481,
-        "dur": 1500
       }
     },
     "warrior_02_b": {
@@ -4473,16 +3983,6 @@
         "cx": 78,
         "icx": 481,
         "dur": 2400
-      },
-      "run": {
-        "src": "image/character/anim/warrior_02_b_run.png",
-        "frames": 14,
-        "w": 125,
-        "h": 160,
-        "body": [9, 154],
-        "cx": 62.5,
-        "icx": 481,
-        "dur": 1500
       }
     }
   },
