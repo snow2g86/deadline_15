@@ -142,17 +142,45 @@ func compact() -> void:
 	sc.name = "ChipsScroll"
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# 칩 줄이 넘치면 오른쪽 끝을 흐리게 해서 '더 있다(밀어 보라)'는 것을 보임 (잘린 칩이 깨진 것처럼 보이지 않게)
+	var wrap := Control.new()
+	wrap.name = "ChipsWrap"
+	wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wrap.clip_contents = true
 	var idx := chips.get_index()
 	mid.remove_child(chips)
-	mid.add_child(sc)
-	mid.move_child(sc, idx)
+	mid.add_child(wrap)
+	mid.move_child(wrap, idx)
+	wrap.add_child(sc)
 	sc.add_child(chips)
 	chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var fade := TextureRect.new()
+	fade.name = "ChipsFade"
+	var gr := Gradient.new()
+	gr.colors = PackedColorArray([Color("1a2340", 0.0), Color("1a2340", 0.95)])
+	var gt := GradientTexture2D.new()
+	gt.gradient = gr
+	gt.fill_from = Vector2(0, 0)
+	gt.fill_to = Vector2(1, 0)
+	gt.width = 32
+	gt.height = 4
+	fade.texture = gt
+	fade.stretch_mode = TextureRect.STRETCH_SCALE
+	fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fade.anchor_left = 1.0
+	fade.anchor_right = 1.0
+	fade.anchor_bottom = 1.0
+	fade.offset_left = -30.0
+	fade.visible = false
+	wrap.add_child(fade)
 	var fit := func() -> void:
-		if is_instance_valid(sc) and is_instance_valid(chips):
-			sc.custom_minimum_size.y = chips.get_combined_minimum_size().y
+		if is_instance_valid(wrap) and is_instance_valid(chips):
+			wrap.custom_minimum_size.y = chips.get_combined_minimum_size().y
+			fade.visible = chips.get_combined_minimum_size().x > wrap.size.x + 1.0
 	chips.minimum_size_changed.connect(fit)
+	wrap.resized.connect(fit)
 	fit.call()
 
 

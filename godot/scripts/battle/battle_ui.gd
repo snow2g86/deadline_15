@@ -540,7 +540,10 @@ func place_menu(at: Vector2) -> void:
 	_menu_flip = pos.x + sz.x > limit
 	if _menu_flip:
 		pos.x = at.x - 38.0 - sz.x
-	pos.y = clampf(pos.y, TOP_H + 8.0, vs.y - CARDS_H - sz.y - 8.0)
+	# (모바일) 글자가 커져 윗줄·카드가 기준(58·130)보다 높으면 실제 높이를 씀 — 메뉴가 클랜원 카드를 덮지 않게
+	var top_h := maxf(TOP_H, top.position.y + top.size.y)
+	var cards_h := maxf(CARDS_H, vs.y - cards.position.y) if cards != null and cards.size.y > 0.0 else CARDS_H
+	pos.y = clampf(pos.y, top_h + 8.0, maxf(top_h + 8.0, vs.y - cards_h - sz.y - 8.0))
 	pos.x = clampf(pos.x, 8.0, vs.x - sz.x - 8.0)
 	menu.position = pos
 	menu.pivot_offset = Vector2(sz.x if _menu_flip else 0.0, 22.0)

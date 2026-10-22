@@ -285,6 +285,7 @@ func _slot_card(idx: int, ch: Variant) -> Button:
 	b.name = "Slot%d" % idx
 	b.custom_minimum_size = Vector2(0, 90)
 	var v := OKit.vbox(6)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER   # 카드가 최소 높이(90)보다 크면 내용을 가운데로 (아래만 비던 것)
 	OKit.set_content(b, v, Vector4(10, 8, 10, 8))
 	var h := OKit.hbox(8)
 	v.add_child(h)
