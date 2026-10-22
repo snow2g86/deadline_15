@@ -1,4 +1,5 @@
 extends RefCounted
+const TerrainTex := preload("res://scripts/battle/terrain_tex.gd")
 ## 아이소메트릭 좌표 — 웹 js/battle/grid.js (g2v·v2g·isoX·isoY·tSX·tSY·uSX·uSY·depth·isoHit) 와 같은 식
 ##  격자 (c, r) = (x, y) — 엔진 유닛의 x·y 와 같음. 카메라 방향 cam_dir 0~3 (웹 GameStore.camDir)
 ##  화면 좌표는 웹 #iso-world 안의 px 와 같음 (TW 48 · TH 24 · ZH 10)
@@ -17,7 +18,12 @@ var cols: int = 8
 var rows: int = 15
 var cam_dir: int = 0
 ## 지형 (엔진 S.ter 와 같은 모양: [행][열] = 종류 문자열) — 높이 계산용 (화면 쪽 사본)
-var ter: Array = []
+var ter: Array = []:
+	set(v):
+		ter = v
+		_shape_cache.clear()
+## 칸 모양 캐시 (카메라 방향·칸 → {sh: 화면 모양, o: 원점}) — 클릭 판정용. 지형이 바뀌면 비움
+var _shape_cache: Dictionary = {}
 ## TI (타일 정보: z 높이 등)
 var TI: Dictionary = {}
 
@@ -83,11 +89,19 @@ func tile_type(c: int, r: int) -> String:
 	return str(row[c])
 
 
+## 바위는 절벽 느낌으로 그림만 조금 더 높게 (규칙·데이터의 z 는 그대로 — 화면 높이 배율)
+const ROCK_K := 1.3
+
+
+static func vis_z(tp: String, z: float) -> float:
+	return z * ROCK_K if tp == "rock" else z
+
+
 func tile_z(c: int, r: int) -> float:
 	var tp := tile_type(c, r)
 	if tp == "" or not TI.has(tp):
 		return 0.0
-	return float(TI[tp]["z"])
+	return vis_z(tp, float(TI[tp]["z"]))
 
 
 ## 타일 윗면 가운데 (높이 반영)
@@ -98,6 +112,26 @@ func top_center(c: int, r: int) -> Vector2:
 ## 유닛 발 위치 (웹: 아이콘 아래 = 타일 윗면 가운데, 발끝은 FIG_FOOT 3px 위)
 func foot(c: int, r: int) -> Vector2:
 	return top_center(c, r) + Vector2(0, -3)
+
+
+## 이동 중 발 높이 (px): 높이 h0 칸 → h1 칸, 경로 진행 t (0..1), dist = 경로 길이(칸).
+##  높이는 칸 경계(경로 중간 0.5칸 지점)에서 시작해 경사 폭(HILL_A 칸) 동안만 바뀜 — 윗면(고원)은 평평하고 평지는 바닥
+static func slope_h(h0: float, h1: float, t: float, dist: float) -> float:
+	if is_equal_approx(h0, h1):
+		return h1
+	var d := maxf(dist, 0.01)
+	var a := TerrainTex.HILL_A
+	var s0: float
+	var s1: float
+	if h1 > h0:
+		s0 = 1.0 - 0.5 / d
+		s1 = 1.0 - (0.5 - a) / d
+	else:
+		s0 = (0.5 - a) / d
+		s1 = 0.5 / d
+	var k := clampf((t - s0) / (s1 - s0), 0.0, 1.0)
+	k = k * k * (3.0 - 2.0 * k)
+	return lerpf(h0, h1, k)
 
 
 ## 앞뒤 순서 (웹 Grid.depth): 화면 앞쪽 칸일수록 위. layer 0 보물상자 < 1 맵 오브젝트 < 2 유닛
@@ -116,28 +150,88 @@ func diag_count() -> int:
 	return cols + rows - 1
 
 
-## 화면 좌표 → 칸 (웹 isoHit: 높이 없는 바닥 평면 기준). 없으면 (-1, -1)
+## 화면 이웃 칸이 언덕인지 묻는 함수 (경사 모양 계산용) — 화면 기준 (u = vc, v = vr) 이웃 (du, dv)
+func hill_probe(c: int, r: int) -> Callable:
+	return type_probe(c, r, "hill")
+
+
+func type_probe(c: int, r: int, tp: String) -> Callable:
+	var v0 := g2v(c, r)
+	var d := vdim()
+	return func(du: int, dv: int) -> bool:
+		var vc := v0.x + du
+		var vr := v0.y + dv
+		if vc < 0 or vr < 0 or vc >= d.x or vr >= d.y:
+			return false
+		var g := v2g(vc, vr)
+		return tile_type(g.x, g.y) == tp
+
+
+## 칸이 화면에서 덮는 모양 (높이·언덕 경사 반영, 월드 화면 좌표) — 클릭 판정용. 캐시됨
+func cell_shape(c: int, r: int) -> PackedVector2Array:
+	var key := cam_dir * 1000000 + r * 1000 + c
+	if _shape_cache.has(key):
+		return _shape_cache[key]
+	var out := PackedVector2Array()
+	var tp := tile_type(c, r)
+	if tp != "" and TI.has(tp):
+		var z := tile_z(c, r)
+		var o := Vector2(tsx(c, r), tsy(c, r, z))
+		if tp == "hill":
+			out = TerrainTex.hill_shape(o, z * ZH, TerrainTex.hill_flags(hill_probe(c, r)))
+		else:
+			out = hl_shape(o, z * ZH)
+	_shape_cache[key] = out
+	return out
+
+
+## 화면 좌표 → 칸. 높이 있는 칸(언덕·바위·성벽)은 그려진 윗면·옆면 모양으로 판정하고, 겹치면 앞쪽(그려지는 순서 위) 칸.
+##  어느 모양에도 안 들어가면 높이 없는 바닥 평면 기준 (웹 isoHit). 없으면 (-1, -1)
 func iso_hit(p: Vector2) -> Vector2i:
 	var d := vdim()
 	var o_x := float(d.y) * TW
 	var fvc := ((p.x - o_x) / TW + p.y / TH) / 2.0
 	var fvr := (p.y / TH - (p.x - o_x) / TW) / 2.0
 	var best := Vector2i(-1, -1)
-	var best_d := INF
-	for dvc in range(-1, 2):
-		for dvr in range(-1, 2):
+	# 높이 있는 칸은 그림이 위로 솟아 있어, 바닥 평면 칸보다 뒤(화면 아래쪽 평면 좌표가 큰 쪽)에 있는 칸도 후보
+	var best_k := -1
+	for dvc in range(-1, 3):
+		for dvr in range(-1, 3):
 			var vc := floori(fvc) + dvc
 			var vr := floori(fvr) + dvr
 			if vc < 0 or vr < 0 or vc >= d.x or vr >= d.y:
 				continue
-			var cx := iso_x(vc, vr) + TW
-			var cy := iso_y(vc, vr, 0) + TH
+			var g := v2g(vc, vr)
+			if tile_z(g.x, g.y) <= 0.0:
+				continue   # 높이 없는 칸은 아래 바닥 평면 판정
+			var sh := cell_shape(g.x, g.y)
+			if not sh.is_empty() and Geometry2D.is_point_in_polygon(p, sh) and vc + vr > best_k:
+				best_k = vc + vr
+				best = g
+	# 높이 없는 칸 (바닥 평면 마름모) — 높이 있는 칸이 같은 점을 가렸다면 그쪽이 앞인 경우만 양보
+	var best_d := INF
+	var flat := Vector2i(-1, -1)
+	var flat_k := -1
+	for dvc in range(-1, 2):
+		for dvr in range(-1, 2):
+			var vc2 := floori(fvc) + dvc
+			var vr2 := floori(fvr) + dvr
+			if vc2 < 0 or vr2 < 0 or vc2 >= d.x or vr2 >= d.y:
+				continue
+			var cx := iso_x(vc2, vr2) + TW
+			var cy := iso_y(vc2, vr2, 0) + TH
 			var dx := absf(p.x - cx) / TW
 			var dy := absf(p.y - cy) / TH
 			if dx + dy <= 1.0 and dx + dy < best_d:
 				best_d = dx + dy
-				best = v2g(vc, vr)
-	return best
+				flat = v2g(vc2, vr2)
+				flat_k = vc2 + vr2
+	if best.x >= 0:
+		# 바닥 칸이 높이 있는 칸보다 앞(대각선 번호가 큼)이면 바닥 칸이 위에 그려짐. 단, 바닥 칸이 높이 있는 칸이면 이미 위에서 처리
+		if flat.x >= 0 and tile_z(flat.x, flat.y) <= 0.0 and flat_k > best_k:
+			return flat
+		return best
+	return flat
 
 
 ## 화면 좌표 → 격자 실수 좌표 (카메라 회전 때 화면 가운데 칸을 유지하려고)

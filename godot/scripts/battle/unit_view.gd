@@ -56,6 +56,13 @@ var _shake_t := 9.0
 var _hop_t := 9.0
 var _glow_t := 9.0
 var _move_tw: Tween
+## 지금 발이 올라가 있는 지형 높이 (px) — 이동 중에는 경사를 따라 바뀜 (position = 바닥 위치 − 높이)
+var _elev := 0.0
+var _mv_from := Vector2.ZERO
+var _mv_to := Vector2.ZERO
+var _mv_h0 := 0.0
+var _mv_h1 := 0.0
+var _mv_dist := 1.0
 var _move_token := 0
 var _t := 0.0
 ## 연출 속도 배율 (0 = 즉시)
@@ -139,6 +146,7 @@ func setup(p_iso: Iso, p_sdb: SpriteDB, data: Dictionary, p_speed: float, p_icon
 ## 칸 위치로 바로
 func place_now() -> void:
 	position = iso.foot(int(d["x"]), int(d["y"]))
+	_elev = iso.tile_z(int(d["x"]), int(d["y"])) * Iso.ZH
 	z_index = iso.depth(int(d["x"]), int(d["y"]), 2)
 	_in_forest = iso.tile_type(int(d["x"]), int(d["y"])) == "forest"
 
@@ -290,26 +298,41 @@ func play_motion(m: Dictionary, dir: Vector2) -> float:
 
 ## 이동 (transform .32s 로 미끄러지듯 — 달리기 시트는 없앰, 이동 직전 자세(idle/combat)를 그대로 유지, 420ms 뒤 멈춤 표시 해제)
 func move_to(x: int, y: int) -> void:
+	var ox := int(d["x"])
+	var oy := int(d["y"])
 	d["x"] = x
 	d["y"] = y
 	var target := iso.foot(x, y)
+	var h1 := iso.tile_z(x, y) * Iso.ZH
 	z_index = iso.depth(x, y, 2)
 	_in_forest = iso.tile_type(x, y) == "forest"
 	if _move_tw != null and _move_tw.is_valid():
 		_move_tw.kill()
 	if speed <= 0.0:
 		position = target
+		_elev = h1
 		moving = false
 		return
 	moving = true
 	_move_token += 1
 	var tok := _move_token
+	# 바닥 위치는 직선으로, 높이는 경사 구간에서만 바뀜 (언덕 가장자리에서 올라가고 내려옴 — 발이 허공에 뜨거나 파묻히지 않게)
+	_mv_from = position + Vector2(0, _elev)
+	_mv_to = target + Vector2(0, h1)
+	_mv_h0 = _elev
+	_mv_h1 = h1
+	_mv_dist = maxf(0.01, Vector2(x - ox, y - oy).length())
 	_move_tw = create_tween()
-	_move_tw.tween_property(self, "position", target, 0.32 / speed).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_move_tw.tween_method(_mv_step, 0.0, 1.0, 0.32 / speed).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	get_tree().create_timer(0.42 / speed).timeout.connect(func() -> void:
 		if tok == _move_token:
 			moving = false
 			queue_redraw())
+
+
+func _mv_step(t: float) -> void:
+	_elev = Iso.slope_h(_mv_h0, _mv_h1, t, _mv_dist)
+	position = _mv_from.lerp(_mv_to, t) - Vector2(0, _elev)
 
 
 func shake() -> void:

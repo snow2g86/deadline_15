@@ -10,6 +10,11 @@ const TH := 24.0
 const VARIANTS := 3
 ## 성벽 성가퀴 높이(px) — 윗면보다 이만큼 위로 솟음
 const CAP := {"wall": 9.0}
+## 언덕 경사: 열린 변에서 윗면(고원)이 안쪽으로 물러나는 정도 (칸 변 길이의 비율) — 경사면이 이만큼의 폭으로 평지까지 내려옴
+const HILL_A := 0.2
+## 언덕 모양 비트: 1·2·4·8 = 열린 변 (u=0 뒤-왼쪽 · v=0 뒤-오른쪽 · v=1 앞-왼쪽 · u=1 앞-오른쪽, 성가퀴 open 과 같은 번호),
+##  16<<i (i=0..7) = 이웃 언덕과 맞닿는 닫힌 변의 끝에서 높이가 어긋나는 곳에 세우는 삼각 옆벽 (GAP_DEFS 순서)
+const GAP_BASE := 16
 
 
 ## 웹 _rand: s = s*1664525 + 1013904223 (32비트)
@@ -135,6 +140,13 @@ static func draw_tile(ci: CanvasItem, o: Vector2, tp: String, clr: Dictionary, v
 	var rnd := Lcg.new(seed)
 	var top := PackedVector2Array([o + Vector2(TW, 0.5), o + Vector2(W - 0.5, TH), o + Vector2(TW, TH * 2 - 0.5), o + Vector2(0.5, TH)])
 
+	if tp == "hill":
+		_draw_hill(ci, o, clr, v, h, open, rnd)
+		return
+	if tp == "rock":
+		_draw_rock(ci, o, clr, v, h, open, rnd)
+		return
+
 	# 다이아몬드 안 무작위 점 (웹 pt)
 	var pt := func(m: float) -> Vector2:
 		while true:
@@ -185,42 +197,6 @@ static func draw_tile(ci: CanvasItem, o: Vector2, tp: String, clr: Dictionary, v
 				var p2: Vector2 = pt.call(0.7)
 				var fc: Color = _rgba(250, 230, 140, 0.75) if v == 2 else (_rgba(255, 255, 255, 0.55) if v == 1 else lit(tc, 0.3))
 				ci.draw_circle(p2, 0.9, fc, true, -1.0, true)
-		"hill":
-			# 등고선 + 자갈
-			for i in range(1, 3):
-				var k := 0.25 * i + 0.1
-				ci.draw_polyline(ellipse_pts(o + Vector2(TW, TH), TW * k, TH * k, 0.0, 3.4, 6.0, 16), lit(tc, 0.22), 0.7, true)
-			for i in 4:
-				var p3: Vector2 = pt.call(0.75)
-				_fill_ellipse(ci, p3, 1.6, 1.0, dk(tc, 0.3))
-		"rock":
-			for i in 3:
-				var p4: Vector2 = pt.call(0.8)
-				_fill_ellipse(ci, p4, 2.2, 1.4, lit(tc, 0.15))
-			var cx := TW + (rnd.next() - 0.5) * 6.0
-			var cy := TH - 1.0
-			var R := 20.0 + v * 2.0
-			var blob := PackedVector2Array()
-			for i in 7:
-				var a := float(i) / 7.0 * 6.283 + rnd.next() * 0.4
-				var bx := cx + cos(a) * R * (0.8 + rnd.next() * 0.3)
-				var by := cy + sin(a) * R * 0.55 * (0.8 + rnd.next() * 0.3)
-				blob.append(o + Vector2(bx, by))
-			_fill_ellipse(ci, o + Vector2(cx + 2, cy + 5), R, R * 0.4, _rgba(0, 0, 0, 0.3))
-			ci.draw_polygon(blob, _lin(blob, o + Vector2(cx - R, cy - R), o + Vector2(cx + R, cy + R), lit(tc, 0.3), dk(tc, 0.25)))
-			var sc := dk(tc, 0.45)
-			_stroke(ci, blob, sc, 0.7, true)
-			# 불규칙한 균열 2줄 + 윗면 하이라이트
-			for k in 2:
-				var x := cx + (rnd.next() - 0.5) * R
-				var y := cy - R * 0.35 + rnd.next() * 3.0
-				var crack := PackedVector2Array([o + Vector2(x, y)])
-				for i in 3:
-					x += (rnd.next() - 0.3) * R * 0.3
-					y += R * 0.12 + rnd.next() * 2.0
-					crack.append(o + Vector2(x, y))
-				ci.draw_polyline(crack, sc, 0.7, true)
-			_fill_ellipse(ci, o + Vector2(cx - R * 0.25, cy - R * 0.25), R * 0.35, R * 0.15, _rgba(255, 255, 255, 0.10), -0.3)
 		"water":
 			# 깊이 그라디언트 + 물결
 			_radial_fill(ci, top, o + Vector2(TW, TH), 2.0, TW, dk(tc, 0.15), lit(tc, 0.12))
@@ -373,3 +349,420 @@ static func _merlons(ci: CanvasItem, o: Vector2, tc: Color, lc: Color, rc: Color
 			topp.append(o + p3)
 		ci.draw_colored_polygon(topp, t_col)
 		_stroke(ci, topp, sc, 0.6, true)
+
+
+# ═══════════ 언덕 (경사) ═══════════
+##  언덕 칸은 이웃이 언덕이 아닌 변마다 윗면(고원)을 HILL_A 만큼 안쪽으로 물리고, 그 사이를 평지 높이까지 내려오는 경사면으로 잇는다.
+##  이웃도 언덕인 변은 그대로 이어져(능선) 평평하다. 모서리 둘이 모두 열리면 두 경사면이 모서리 선(hip)에서 만나 둔덕 모서리가 된다.
+##  점 (u, v, z): u = 화면 가로 칸 방향(vc), v = 세로 칸 방향(vr) — 0..1, z = 0 평지 · 1 언덕 윗면. 타일 그림 원점 o 는 윗면 기준.
+
+## 닫힌 변 끝의 삼각 옆벽 정의: [조건 변 비트 대신 인덱스 순서] — {pts: 삼각형 (u, v, z) 3점, right: 오른쪽 면(어두운 쪽) 여부}
+static func _gap_defs() -> Array:
+	var a := HILL_A
+	return [
+		{"p": [[0, 0, 0], [0, a, 1], [0, 0, 1]], "right": true},
+		{"p": [[0, 1, 0], [0, 1.0 - a, 1], [0, 1, 1]], "right": true},
+		{"p": [[0, 0, 0], [a, 0, 1], [0, 0, 1]], "right": false},
+		{"p": [[1, 0, 0], [1.0 - a, 0, 1], [1, 0, 1]], "right": false},
+		{"p": [[1, 0, 0], [1, a, 1], [1, 0, 1]], "right": true},
+		{"p": [[1, 1, 0], [1, 1.0 - a, 1], [1, 1, 1]], "right": true},
+		{"p": [[0, 1, 0], [a, 1, 1], [0, 1, 1]], "right": false},
+		{"p": [[1, 1, 0], [1.0 - a, 1, 1], [1, 1, 1]], "right": false},
+	]
+
+
+## 언덕 모양 비트 (위 설명). is_hill: Callable(du: int, dv: int) -> bool — 화면 기준 칸 (u=vc, v=vr) 이웃이 언덕인가
+static func hill_flags(is_hill: Callable) -> int:
+	var f := 0
+	var ou0 := not bool(is_hill.call(-1, 0))
+	var ov0 := not bool(is_hill.call(0, -1))
+	var ov1 := not bool(is_hill.call(0, 1))
+	var ou1 := not bool(is_hill.call(1, 0))
+	if ou0:
+		f |= 1
+	if ov0:
+		f |= 2
+	if ov1:
+		f |= 4
+	if ou1:
+		f |= 8
+	var g := [
+		(not ou0) and ov0 and bool(is_hill.call(-1, -1)),
+		(not ou0) and ov1 and bool(is_hill.call(-1, 1)),
+		(not ov0) and ou0 and bool(is_hill.call(-1, -1)),
+		(not ov0) and ou1 and bool(is_hill.call(1, -1)),
+		(not ou1) and (not ov0) and not bool(is_hill.call(1, -1)),
+		(not ou1) and (not ov1) and not bool(is_hill.call(1, 1)),
+		(not ov1) and (not ou0) and not bool(is_hill.call(-1, 1)),
+		(not ov1) and (not ou1) and not bool(is_hill.call(1, 1)),
+	]
+	for i in 8:
+		if g[i]:
+			f |= GAP_BASE << i
+	return f
+
+
+## (u, v, z) → 타일 그림 좌표. 가장자리 선이 잘리지 않게 칸 가장자리를 0.5px 안쪽으로 (윗면 마름모의 0.5 안쪽과 같음)
+static func _hp(o: Vector2, h: float, u: float, v: float, z: float) -> Vector2:
+	var uu := 0.0105 + 0.979 * u
+	var vv := 0.0105 + 0.979 * v
+	return o + Vector2((uu - vv) * TW + TW, (uu + vv) * TH + (1.0 - z) * h)
+
+
+## 언덕 칸의 면들 {name, pts (화면 좌표), kind: "top"|"slope"|"gap", right(어두운 쪽 면), g0·g1(경사: 바닥 두 점) t0·t1(꼭대기 두 점)} — 뒤에서 앞 순서
+static func hill_faces(o: Vector2, h: float, flags: int) -> Array:
+	var a := HILL_A
+	var ou0 := (flags & 1) != 0
+	var ov0 := (flags & 2) != 0
+	var ov1 := (flags & 4) != 0
+	var ou1 := (flags & 8) != 0
+	var ua := a if ou0 else 0.0
+	var ub := 1.0 - a if ou1 else 1.0
+	var va := a if ov0 else 0.0
+	var vb := 1.0 - a if ov1 else 1.0
+	var back: Array = []
+	var front: Array = []
+	# 경사: 바닥 변 (두 점) → 꼭대기 변 (두 점)
+	if ou0:
+		back.append(_slope(o, h, [[0, 0], [0, 1]], [[ua, va], [ua, vb]], false))
+	if ov0:
+		back.append(_slope(o, h, [[0, 0], [1, 0]], [[ua, va], [ub, va]], true))
+	if ou1:
+		front.append(_slope(o, h, [[1, 0], [1, 1]], [[ub, va], [ub, vb]], true))
+	if ov1:
+		front.append(_slope(o, h, [[0, 1], [1, 1]], [[ua, vb], [ub, vb]], false))
+	var faces: Array = []
+	faces.append_array(back)
+	var top := {"kind": "top", "pts": PackedVector2Array([_hp(o, h, ua, vb, 1), _hp(o, h, ua, va, 1), _hp(o, h, ub, va, 1), _hp(o, h, ub, vb, 1)])}
+	var gaps_back: Array = []
+	var gaps_front: Array = []
+	var gd := _gap_defs()
+	for i in 8:
+		if (flags & (GAP_BASE << i)) == 0:
+			continue
+		var pp: Array = gd[i]["p"]
+		var f := {"kind": "gap", "right": gd[i]["right"], "pts": PackedVector2Array([_hp(o, h, pp[0][0], pp[0][1], pp[0][2]), _hp(o, h, pp[1][0], pp[1][1], pp[1][2]), _hp(o, h, pp[2][0], pp[2][1], pp[2][2])])}
+		if i < 4:
+			gaps_back.append(f)
+		else:
+			gaps_front.append(f)
+	faces.append_array(gaps_back)
+	faces.append(top)
+	faces.append_array(gaps_front)
+	faces.append_array(front)
+	return faces
+
+
+static func _slope(o: Vector2, h: float, g: Array, t: Array, right: bool) -> Dictionary:
+	var g0 := _hp(o, h, g[0][0], g[0][1], 0)
+	var g1 := _hp(o, h, g[1][0], g[1][1], 0)
+	var t0 := _hp(o, h, t[0][0], t[0][1], 1)
+	var t1 := _hp(o, h, t[1][0], t[1][1], 1)
+	return {"kind": "slope", "right": right, "g0": g0, "g1": g1, "t0": t0, "t1": t1, "pts": PackedVector2Array([g0, g1, t1, t0])}
+
+
+## 언덕이 화면에서 덮는 모양 (경사 포함) — 하이라이트·클릭 판정용. 타일 그림 원점 기준
+static func hill_shape(o: Vector2, h: float, flags: int) -> PackedVector2Array:
+	var polys: Array = []
+	for f: Dictionary in hill_faces(o, h, flags):
+		polys.append(f["pts"])
+	var acc: Array = [polys[0]]
+	for i in range(1, polys.size()):
+		var next: Array = []
+		var merged := false
+		for q: PackedVector2Array in acc:
+			var m := Geometry2D.merge_polygons(q, polys[i])
+			if not merged and m.size() == 1:
+				next.append(m[0])
+				merged = true
+			else:
+				next.append(q)
+		if not merged:
+			next.append(polys[i])
+		acc = next
+	# 가장 큰 바깥 모양 하나 (구멍·조각 무시)
+	var best: PackedVector2Array = acc[0]
+	var best_a := 0.0
+	for q2: PackedVector2Array in acc:
+		var ar := absf(_area(q2))
+		if ar > best_a:
+			best_a = ar
+			best = q2
+	return best
+
+
+static func _area(p: PackedVector2Array) -> float:
+	var s := 0.0
+	for i in p.size():
+		var q := p[(i + 1) % p.size()]
+		s += p[i].x * q.y - q.x * p[i].y
+	return s / 2.0
+
+
+static func _draw_hill(ci: CanvasItem, o: Vector2, clr: Dictionary, v: int, h: float, flags: int, rnd: Lcg) -> void:
+	var tc: Color = clr["tc"]
+	var lc: Color = clr["lc"]
+	var rc: Color = clr["rc"]
+	var gc: Color = clr.get("gc", dk(tc, 0.12))
+	var faces := hill_faces(o, h, flags)
+	var plateau := PackedVector2Array()
+	for f: Dictionary in faces:
+		match f["kind"]:
+			"top":
+				plateau = f["pts"]
+				_hill_plateau(ci, o, tc, v, flags, plateau, rnd)
+			"slope":
+				_hill_slope(ci, f, tc, lc, rc, gc, rnd)
+			"gap":
+				var side: Color = rc if f["right"] else lc
+				var pts: PackedVector2Array = f["pts"]
+				# 옆면(수직 벽) — 기존 언덕 옆면과 같은 위 밝고 아래 어두운 색
+				ci.draw_polygon(pts, PackedColorArray([dk(side, 0.30), lit(side, 0.06), lit(side, 0.06)]))
+
+
+static func _hill_slope(ci: CanvasItem, f: Dictionary, tc: Color, lc: Color, rc: Color, gc: Color, rnd: Lcg) -> void:
+	# 왼쪽 면은 lc(밝은 쪽), 오른쪽 면은 rc(어두운 쪽) — 기존 옆면과 같은 빛 방향.
+	# 위(윗면 색) → 아래(평지 색)로 부드럽게: 평지와 이어지게 아래쪽은 평지 색 쪽으로
+	var right: bool = f["right"]
+	var side: Color = rc if right else lc
+	var top_c := _mix(tc, side, 0.14)
+	var bot_c := _mix(gc, side, 0.10)
+	if right:
+		top_c = dk(top_c, 0.10)
+		bot_c = dk(bot_c, 0.10)
+	var g0: Vector2 = f["g0"]
+	var g1: Vector2 = f["g1"]
+	var t0: Vector2 = f["t0"]
+	var t1: Vector2 = f["t1"]
+	ci.draw_polygon(f["pts"], PackedColorArray([bot_c, bot_c, top_c, top_c]))
+	# 등고선 두 줄 (경사를 따라 가로로) + 풀 몇 포기
+	var lcol := dk(top_c, 0.22)
+	lcol.a = 0.55
+	lcol.a = 0.35
+	ci.draw_line(g0.lerp(t0, 0.55), g1.lerp(t1, 0.55), lcol, 0.6, true)
+	var blade := lit(top_c, 0.22)
+	blade.a = 0.8
+	for i in 5:
+		var s1 := rnd.next()
+		var s2 := 0.15 + rnd.next() * 0.7
+		var base := g0.lerp(g1, s1).lerp(t0.lerp(t1, s1), s2)
+		ci.draw_line(base, base + Vector2((rnd.next() - 0.5) * 2.0, -2.2), blade, 0.8, true)
+
+
+static func _hill_plateau(ci: CanvasItem, o: Vector2, tc: Color, v: int, flags: int, pl: PackedVector2Array, rnd: Lcg) -> void:
+	# pl: L, T, R, B 순서 (왼·위·오른·아래 꼭짓점)
+	ci.draw_polygon(pl, _lin(pl, o + Vector2(TW * 0.6, 0), o + Vector2(TW * 1.3, TH * 2), lit(tc, 0.10), dk(tc, 0.12)))
+	var W := TW * 2.0
+	var pt := func(m: float) -> Vector2:
+		while true:
+			var x := rnd.next() * W
+			var y := rnd.next() * TH * 2.0
+			if absf(x - TW) / TW + absf(y - TH) / TH <= m:
+				return o + Vector2(x, y)
+		return o
+	for i in 70:
+		var p: Vector2 = pt.call(1.0)
+		var col: Color
+		if rnd.next() < 0.5:
+			col = lit(tc, 0.08 + rnd.next() * 0.08)
+		else:
+			col = dk(tc, 0.08 + rnd.next() * 0.1)
+		if Geometry2D.is_point_in_polygon(p + Vector2(0.5, 0.5), pl) and Geometry2D.is_point_in_polygon(p, pl):
+			ci.draw_rect(Rect2(p, Vector2.ONE), col)
+	# 등고선 (고원 크기에 맞춰) + 자갈
+	var ctr := (pl[0] + pl[2]) * 0.5
+	var sc := ((pl[2].x - pl[0].x) / W + (pl[3].y - pl[1].y) / (TH * 2.0)) * 0.5
+	for i in range(1, 3):
+		var k := 0.25 * i + 0.1
+		ci.draw_polyline(ellipse_pts(ctr, TW * k * sc, TH * k * sc, 0.0, 3.4, 6.0, 16), lit(tc, 0.22), 0.7, true)
+	for i in 4:
+		var p3: Vector2 = pt.call(0.75)
+		if Geometry2D.is_point_in_polygon(p3, pl):
+			_fill_ellipse(ci, p3, 1.6, 1.0, dk(tc, 0.3))
+	# 가장자리: 이웃 언덕과 이어지는(닫힌) 변은 격자 선, 열린 변은 마루선(밝게)
+	var hi := _rgba(255, 255, 255, 0.10)
+	var lo := _rgba(0, 0, 0, 0.28)
+	var crest := _rgba(255, 255, 255, 0.13)
+	var edges := [[0, 1, 1], [1, 2, 2], [0, 3, 4], [3, 2, 8]]   # L→T(u0) · T→R(v0) · L→B(v1) · B→R(u1)
+	for e: Array in edges:
+		var open := (flags & int(e[2])) != 0
+		var back: bool = int(e[2]) <= 2
+		var col: Color
+		if back:
+			col = crest if open else hi
+		else:
+			col = _rgba(0, 0, 0, 0.12) if open else lo
+		ci.draw_line(pl[int(e[0])], pl[int(e[1])], col, 1.0, true)
+
+
+# ═══════════ 바위 (절벽) ═══════════
+##  이웃이 바위가 아닌 변(open 비트 1·2·4·8 — 언덕과 같은 번호)만 들쭉날쭉한 능선·밝은 마루선을 그리고,
+##  바위끼리 맞닿는 변은 매끈하게 이어 하나의 큰 절벽처럼 보이게 한다. 지층선은 칸 높이만의 함수라 이웃 칸과 높이가 맞는다.
+
+const ROCK_STRATA := [0.17, 0.33, 0.48, 0.68, 0.83]
+const ROCK_TINT := [0.05, -0.07, 0.02, -0.09, 0.04, -0.06]
+
+
+## p→q 꺾은선: 안쪽(inward)으로 0~amp px 들쭉날쭉 (닫힌 변은 직선이지만 난수는 똑같이 씀 — 모양이 변 열림과 무관하게 같은 순서)
+static func _jag(p: Vector2, q: Vector2, inward: Vector2, rnd: Lcg, amp: float, closed: bool) -> PackedVector2Array:
+	var out := PackedVector2Array([p])
+	for i in range(1, 6):
+		var a := rnd.next()
+		var b := rnd.next()
+		var d := a * amp * (1.0 if b < 0.65 else 0.35)
+		if closed:
+			d = 0.0
+		out.append(p.lerp(q, float(i) / 6.0) + inward * d)
+	out.append(q)
+	return out
+
+
+static func _draw_rock(ci: CanvasItem, o: Vector2, clr: Dictionary, v: int, h: float, open: int, rnd: Lcg) -> void:
+	var tc: Color = clr["tc"]
+	var lc: Color = clr["lc"]
+	var rc: Color = clr["rc"]
+	var W := TW * 2.0
+	var Lp := o + Vector2(0.5, TH)
+	var Tp := o + Vector2(TW, 0.5)
+	var Rp := o + Vector2(W - 0.5, TH)
+	var Bp := o + Vector2(TW, TH * 2.0 - 0.5)
+	var ctr := o + Vector2(TW, TH)
+	var amp := 2.2
+	var inw := func(p: Vector2, q: Vector2) -> Vector2: return (ctr - (p + q) * 0.5).normalized()
+	var e_u0 := _jag(Lp, Tp, inw.call(Lp, Tp), rnd, amp, (open & 1) == 0)
+	var e_v0 := _jag(Tp, Rp, inw.call(Tp, Rp), rnd, amp, (open & 2) == 0)
+	var e_u1 := _jag(Rp, Bp, inw.call(Rp, Bp), rnd, amp, (open & 8) == 0)
+	var e_v1 := _jag(Lp, Bp, inw.call(Lp, Bp), rnd, amp, (open & 4) == 0)
+	# ── 불투명 밑판: 칸 윗면 마름모 + 옆면 직사각 영역을 먼저 꽉 채움 → 들쭉날쭉한 능선 틈으로 뒤 칸이 비치지 않음 ──
+	var under := dk(tc, 0.22)
+	ci.draw_colored_polygon(PackedVector2Array([Lp, Tp, Rp, Rp + Vector2(0, h), Bp + Vector2(0, h), Lp + Vector2(0, h)]), under)
+	# ── 옆면: 왼쪽(v1 변) · 오른쪽(u1 변) ──
+	for side in 2:
+		var is_left := side == 0
+		var edge: PackedVector2Array = e_v1 if is_left else e_u1
+		var base: Color = lc if is_left else rc
+		var face := PackedVector2Array()
+		for ep: Vector2 in edge:
+			face.append(ep + Vector2(0, -1.5))
+		for k in range(edge.size() - 1, -1, -1):
+			face.append(edge[k] + Vector2(0, h))
+		ci.draw_polygon(face, _lin(face, o + Vector2(0, TH), o + Vector2(0, TH * 2.0 + h), lit(base, 0.12), dk(base, 0.5)))
+		# 지층 띠 (칸 높이에만 따라 위치가 정해져 이웃 칸과 이어짐) — 띠마다 밝기가 다름
+		var ys: Array = [0.0]
+		ys.append_array(ROCK_STRATA)
+		ys.append(1.0)
+		for i in ys.size() - 1:
+			var y0: float = float(ys[i]) * h
+			var y1: float = float(ys[i + 1]) * h
+			var tint: float = ROCK_TINT[(i + (0 if is_left else 2)) % ROCK_TINT.size()]
+			var tcol := Color(1, 1, 1, tint) if tint > 0.0 else Color(0, 0, 0, -tint)
+			var q := PackedVector2Array()
+			if is_left:
+				q = PackedVector2Array([o + Vector2(0.5, TH + y0), o + Vector2(TW, TH * 2.0 + y0), o + Vector2(TW, TH * 2.0 + y1), o + Vector2(0.5, TH + y1)])
+			else:
+				q = PackedVector2Array([o + Vector2(TW, TH * 2.0 + y0), o + Vector2(W - 0.5, TH + y0), o + Vector2(W - 0.5, TH + y1), o + Vector2(TW, TH * 2.0 + y1)])
+			ci.draw_colored_polygon(q, tcol)
+		var lcol := dk(base, 0.6)
+		lcol.a = 0.75
+		var hcol := lit(base, 0.3)
+		hcol.a = 0.22
+		for i in range(1, ys.size() - 1):
+			var k: float = float(ys[i]) * h
+			if is_left:
+				ci.draw_line(o + Vector2(0.5, TH + k), o + Vector2(TW, TH * 2.0 + k), lcol, 0.8, true)
+				ci.draw_line(o + Vector2(0.5, TH + k + 1.0), o + Vector2(TW, TH * 2.0 + k + 1.0), hcol, 0.6, true)
+			else:
+				ci.draw_line(o + Vector2(TW, TH * 2.0 + k), o + Vector2(W - 0.5, TH + k), lcol, 0.8, true)
+				ci.draw_line(o + Vector2(TW, TH * 2.0 + k + 1.0), o + Vector2(W - 0.5, TH + k + 1.0), hcol, 0.6, true)
+		# 바위 결: 가는 세로 줄 + 위에서 내려오는 균열 몇 개
+		var fy := func(x: float) -> float:
+			return (TH + x * 0.5) if is_left else (TH * 2.0 - x * 0.5)
+		var ox := 0.0 if is_left else TW
+		var vcol := dk(base, 0.5)
+		vcol.a = 0.18
+		for i in 6:
+			var x := 3.0 + rnd.next() * (TW - 6.0)
+			var y0: float = fy.call(x)
+			ci.draw_line(o + Vector2(ox + x, y0 + rnd.next() * h * 0.3), o + Vector2(ox + x, y0 + h * (0.5 + rnd.next() * 0.5)), vcol, 0.6, true)
+		var ccol := dk(base, 0.7)
+		ccol.a = 0.85
+		for i in 2 + v % 2:
+			var x2 := 4.0 + rnd.next() * (TW - 8.0)
+			var y2: float = fy.call(x2) + 1.0
+			var pts := PackedVector2Array([o + Vector2(ox + x2, y2)])
+			var depth := h * (0.35 + rnd.next() * 0.55)
+			var yy := 0.0
+			while yy < depth:
+				x2 += (rnd.next() - 0.5) * 3.5
+				yy += 3.0 + rnd.next() * 4.0
+				pts.append(o + Vector2(ox + clampf(x2, 1.0, TW - 1.0), y2 + yy))
+			ci.draw_polyline(pts, ccol, 0.8, true)
+		# 접지: 아래쪽 어두운 띠 + 바위 부스러기
+		var base_a := edge[0] + Vector2(0, h)
+		var base_b := edge[edge.size() - 1] + Vector2(0, h)
+		var sh := PackedVector2Array([base_a + Vector2(0, -5), base_b + Vector2(0, -5), base_b, base_a])
+		ci.draw_polygon(sh, PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0, 0, 0, 0.38), Color(0, 0, 0, 0.38)]))
+		for i in 4:
+			var x3 := 3.0 + rnd.next() * (TW - 6.0)
+			var yb: float = fy.call(x3) + h - 0.5
+			_fill_ellipse(ci, o + Vector2(ox + x3, yb), 1.2 + rnd.next() * 1.5, 0.8 + rnd.next() * 0.6, dk(base, 0.15 + rnd.next() * 0.2))
+	# 앞쪽 모서리(왼·오른 면이 만나는 선) 어둡게
+	ci.draw_line(Bp, Bp + Vector2(0, h), _rgba(0, 0, 0, 0.35), 0.8, true)
+	# ── 윗면 ──
+	var top := PackedVector2Array()
+	for e: PackedVector2Array in [e_v0, e_u1]:
+		for i in e.size() - 1:
+			top.append(e[i])
+	var rv := PackedVector2Array(e_v1)
+	rv.reverse()
+	for i in rv.size() - 1:
+		top.append(rv[i])
+	for i in e_u0.size() - 1:   # L → T
+		top.append(e_u0[i])
+	if Geometry2D.triangulate_polygon(top).is_empty():
+		top = PackedVector2Array([Tp, Rp, Bp, Lp])   # 능선이 꼬였을 때의 안전장치 (곧은 마름모)
+	ci.draw_polygon(top, _lin(top, o + Vector2(TW * 0.6, 0), o + Vector2(TW * 1.3, TH * 2.0), lit(tc, 0.22), dk(tc, 0.04)))
+	var pt := func(m: float) -> Vector2:
+		while true:
+			var x := rnd.next() * W
+			var y := rnd.next() * TH * 2.0
+			if absf(x - TW) / TW + absf(y - TH) / TH <= m:
+				return o + Vector2(x, y)
+		return o
+	for i in 50:
+		var p: Vector2 = pt.call(0.95)
+		var col: Color = lit(tc, 0.06 + rnd.next() * 0.08) if rnd.next() < 0.5 else dk(tc, 0.08 + rnd.next() * 0.1)
+		if Geometry2D.is_point_in_polygon(p, top):
+			ci.draw_rect(Rect2(p, Vector2.ONE), col)
+	# 이끼 조각 · 풀 · 돌 부스러기 · 균열
+	var moss := _mix(tc, Color8(90, 130, 60), 0.45)
+	for i in 3:
+		var p2: Vector2 = pt.call(0.6)
+		if Geometry2D.is_point_in_polygon(p2, top):
+			var mc := moss
+			mc.a = 0.5
+			_fill_ellipse(ci, p2, 3.0 + rnd.next() * 3.0, 1.4 + rnd.next() * 1.2, mc, -0.2)
+			for j in 2:
+				var b := p2 + Vector2((rnd.next() - 0.5) * 5.0, 0)
+				ci.draw_line(b, b + Vector2((rnd.next() - 0.5) * 1.5, -2.5), lit(moss, 0.2), 0.8, true)
+	for i in 5:
+		var p3: Vector2 = pt.call(0.8)
+		if Geometry2D.is_point_in_polygon(p3, top):
+			_fill_ellipse(ci, p3, 1.0 + rnd.next() * 1.4, 0.6 + rnd.next() * 0.6, lit(tc, 0.12 + rnd.next() * 0.12) if i % 2 == 0 else dk(tc, 0.3))
+	var kc := dk(tc, 0.5)
+	kc.a = 0.8
+	for k in 2:
+		var cp: Vector2 = pt.call(0.55)
+		var crack := PackedVector2Array([cp])
+		for i in 3:
+			cp += Vector2((rnd.next() - 0.4) * 9.0, (rnd.next() - 0.5) * 4.0)
+			crack.append(cp)
+		ci.draw_polyline(crack, kc, 0.7, true)
+	# 마루선: 이웃이 바위가 아닌 변만 밝게 (이어지는 변은 선 없음 → 하나의 큰 절벽)
+	var rim := lit(tc, 0.28)
+	rim.a = 0.7
+	var rim_d := dk(tc, 0.35)
+	rim_d.a = 0.5
+	for e2: Array in [[e_u0, 1, true], [e_v0, 2, true], [e_v1, 4, false], [e_u1, 8, false]]:
+		if (open & int(e2[1])) != 0:
+			ci.draw_polyline(e2[0], rim if e2[2] else lit(tc, 0.3), 1.4, true)

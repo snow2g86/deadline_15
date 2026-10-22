@@ -154,6 +154,9 @@ func setup(p_iso: Iso, D: Dictionary, p_theme: String, p_sdb: SpriteDB, p_lava: 
 	for tp: String in TI.keys():
 		var src: Dictionary = tcol[tp] if tcol.has(tp) else TI[tp]
 		_clr[tp] = {"tc": Color(str(src["tc"])), "lc": Color(str(src["lc"])), "rc": Color(str(src["rc"]))}
+	# 언덕 경사 아래쪽이 이어질 평지 색 (같은 테마의 평지 윗면)
+	if _clr.has("hill") and _clr.has("plain"):
+		_clr["hill"]["gc"] = _clr["plain"]["tc"]
 	_prop_mat = ShaderMaterial.new()
 	_prop_mat.shader = PropShader
 	var filt: String = str((D.get("PROP_THEME_FILTER", {}) as Dictionary).get(p_theme, ""))
@@ -309,6 +312,8 @@ func _build_set(dir: int) -> void:
 	var hls: Array = []
 	var nd := iso.diag_count()
 	var tdiag: Array = []
+	var rtiles: Dictionary = {}   # 대각선 k → 바위 타일 노드 (유닛·나무와 같은 깊이 기준으로 그려 뒤쪽 것을 가림)
+	var rhls: Dictionary = {}
 	var gdiag: Array = []
 	var wdiag: Array = []
 	for k in nd:
@@ -344,16 +349,35 @@ func _build_set(dir: int) -> void:
 			if tp == "" or not TI.has(tp):
 				continue
 			var k2 := iso.diag(c, r)
-			var h2 := float(TI[tp]["z"]) * Iso.ZH
-			var o := Vector2(iso.tsx(c, r), iso.tsy(c, r, float(TI[tp]["z"])))
+			var z2 := Iso.vis_z(tp, float(TI[tp]["z"]))
+			var h2 := z2 * Iso.ZH
+			var o := Vector2(iso.tsx(c, r), iso.tsy(c, r, z2))
 			var v2 := TerrainTex.variant_of(c, r)
-			var op2 := _wall_open(c, r) if tp == "wall" else 0
-			(tdiag[k2] as TileDiag).tiles.append({"o": o, "tp": tp, "clr": _clr[tp], "v": v2, "h": h2, "open": op2, "key": "%s|%s|%d|%d|%d" % [tp, theme_name, v2, int(h2), op2]})
+			var op2 := _wall_open(c, r) if tp == "wall" else (_hill_flags(c, r) if tp == "hill" else (_rock_open(c, r) if tp == "rock" else 0))
+			var tnode: TileDiag = tdiag[k2]
+			if tp == "rock":
+				# 바위는 높이가 있어 뒤쪽 나무·유닛이 그 윗면 위에 그려지면 속이 빈 것처럼 보임 → 깊이(100+3k)로 그림
+				if not rtiles.has(k2):
+					var rt := TileDiag.new()
+					rt.map = self
+					rt.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+					rt.z_index = iso.depth(c, r, 0)
+					rt.name = "Rocks%d" % k2
+					rtiles[k2] = rt
+					var rh := HlDiag.new()
+					rh.z_index = iso.depth(c, r, 0)
+					rh.map = self
+					rhls[k2] = rh
+				tnode = rtiles[k2]
+			tnode.tiles.append({"o": o, "tp": tp, "clr": _clr[tp], "v": v2, "h": h2, "open": op2, "key": "%s|%s|%d|%d|%d" % [tp, theme_name, v2, int(h2), op2]})
 			if tp == "water":
 				var uv := PackedVector2Array([Vector2(TW, 0), Vector2(TW * 2, TH), Vector2(TW, TH * 2), Vector2(0, TH)])
 				(wdiag[k2] as WaterDiag).polys.append([Iso.diamond(o), uv])
-			(hls[k2] as HlDiag).cells.append({"key": "%d,%d" % [c, r], "c": c, "r": r, "o": o, "h": h2,
-				"shape": Iso.hl_shape(o, h2), "inset": _inset(Iso.hl_shape(o, h2))})
+			# 언덕은 경사까지 포함한 모양 (칸 다이아몬드·옆면 육각형이 아님)
+			var shp := TerrainTex.hill_shape(o, h2, op2) if tp == "hill" else Iso.hl_shape(o, h2)
+			var hnode: HlDiag = rhls[k2] if tp == "rock" else hls[k2]
+			hnode.cells.append({"key": "%d,%d" % [c, r], "c": c, "r": r, "o": o, "h": h2,
+				"shape": shp, "inset": _inset(shp)})
 			_place_props(c, r, tp, gdiag[k2])
 	for k3 in nd:
 		root.add_child(tdiag[k3])
@@ -366,6 +390,11 @@ func _build_set(dir: int) -> void:
 		else:
 			(wdiag[k3] as Node).free()
 		root.add_child(hls[k3])
+	for k4: int in rtiles.keys():
+		root.add_child(rtiles[k4])
+		root.add_child(rhls[k4])
+		tdiag.append(rtiles[k4])
+		hls.append(rhls[k4])
 	for key: String in _tree_nodes.keys():
 		root.add_child(_tree_nodes[key])
 	_sets[dir] = {"root": root, "tiles": tdiag, "hls": hls, "trees": _tree_nodes}
@@ -385,6 +414,21 @@ func _wall_open(c: int, r: int) -> int:
 			var g := iso.v2g(vc, vr)
 			is_wall = iso.tile_type(g.x, g.y) == "wall"
 		if not is_wall:
+			open |= int(e[0])
+	return open
+
+
+## 언덕 경사 모양 비트 (TerrainTex.hill_flags) — 화면 기준 이웃 칸이 언덕인지로
+func _hill_flags(c: int, r: int) -> int:
+	return TerrainTex.hill_flags(iso.hill_probe(c, r))
+
+
+## 바위 열린 변 (이웃이 바위가 아닌 변, 성가퀴와 같은 비트)
+func _rock_open(c: int, r: int) -> int:
+	var probe := iso.type_probe(c, r, "rock")
+	var open := 0
+	for e: Array in [[1, -1, 0], [2, 0, -1], [4, 0, 1], [8, 1, 0]]:
+		if not bool(probe.call(int(e[1]), int(e[2]))):
 			open |= int(e[0])
 	return open
 
