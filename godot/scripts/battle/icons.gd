@@ -115,11 +115,24 @@ func char_tex(cls: String, gender: String, sdb: Object = null) -> Texture2D:
 	return _cached_load(IMG + "character/" + cls + ("_02" if gender == "f" else "_01") + ".png")
 
 
-## 얼굴 크롭 (웹 .ic-portrait: background-size 210%, position 50% 12%) → 원본 그림 안의 사각 영역
-##  가로 = 962/2.1 ≈ 458, 왼쪽 = (2.1-1)/2 × 458 ≈ 252, 위 = 0.12 × (1087/962×2.1 - 1) × 458 ≈ 75.6
+## 초상화 그림 (image/character/portrait/<직업>_01|02.png — 512×512 가슴 위 반신 일러스트). 없으면 전신 그림으로 되돌림.
+##  소환수는 도트 그림 (sdb.summon_tex). 원형 초상화(Kit.Portrait)에 넣을 그림은 모두 이 함수로 얻는다.
+func portrait_tex(cls: String, gender: String, sdb: Object = null) -> Texture2D:
+	if cls.begins_with("summon_"):
+		return char_tex(cls, gender, sdb)
+	var t := _cached_load(IMG + "character/portrait/" + cls + ("_02" if gender == "f" else "_01") + ".png")
+	return t if t != null else char_tex(cls, gender, sdb)
+
+
+## 초상화 크롭 → 그림 안의 사각 영역 (원형 마스크가 이 사각에 내접)
+##  정사각 초상화(512×512): 위쪽 400px 정사각, 가로 가운데 — 얼굴이 크게, 어깨 일부만
+##  전신 그림(폴백): 웹 .ic-portrait (background-size 210%, position 50% 12%) 와 같은 얼굴 크롭
 static func portrait_region(tex: Texture2D) -> Rect2:
 	var w := float(tex.get_width())
 	var h := float(tex.get_height())
+	if absf(w - h) < 1.0:
+		var sq := w * 0.78125
+		return Rect2((w - sq) * 0.5, 0.0, sq, sq)
 	var side := w / 2.1
 	var left := (w - side) * 0.5
 	var top := (h - side) * 0.12

@@ -369,7 +369,7 @@ func _refresh_commander() -> void:
 		return
 	cmd_btn.tooltip_text = t("commander_setup.edit")
 	cmd_name.text = LobbyRules.commander_display_name(c, default_commander_name())
-	cmd_pt.set_unit(icons.call("char_tex", "commander", str(ch.get("gender", "m"))), false)
+	cmd_pt.set_unit(icons.call("portrait_tex", "commander", str(ch.get("gender", "m"))), false)
 	cmd_btn.reset_size()
 
 

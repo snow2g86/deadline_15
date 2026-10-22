@@ -3,6 +3,7 @@ extends RefCounted
 ##  Portrait(원형 얼굴 크롭) · IconRect(아이콘 + 등급 테두리) · Bar(막대) · VecIcon(웹 SVG 단추 그림을 선으로) · Kit.box/label/button
 
 const Fonts := preload("res://scripts/core/fonts.gd")
+const Icons := preload("res://scripts/battle/icons.gd")
 const GOLD := Color("f0c040")
 const GOLD_D := Color("b8860b")
 const TEXT := Color("e5e7eb")
@@ -123,13 +124,9 @@ class Portrait extends Control:
 	func set_unit(t: Texture2D, is_summon: bool) -> void:
 		tex = t
 		pixel = is_summon
-		texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if is_summon else CanvasItem.TEXTURE_FILTER_LINEAR
+		texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if is_summon else CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		if t != null and not is_summon:
-			region = Rect2(Vector2.ZERO, Vector2(t.get_width(), t.get_height()))
-			var w := float(t.get_width())
-			var h := float(t.get_height())
-			var side := w / 2.1
-			region = Rect2((w - side) * 0.5, (h - side) * 0.12, side, side)
+			region = Icons.portrait_region(t)
 		queue_redraw()
 
 	func _draw() -> void:

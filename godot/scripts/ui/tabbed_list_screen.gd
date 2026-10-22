@@ -173,7 +173,7 @@ func portrait(ch: Dictionary, sz: float) -> Control:
 	pt.ring_w = 1.0
 	pt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	pt.set_unit(icons.call("char_tex", cls, str(ch.get("gender", "m"))), false)
+	pt.set_unit(icons.call("portrait_tex", cls, str(ch.get("gender", "m"))), false)
 	return pt
 
 

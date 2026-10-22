@@ -1305,7 +1305,7 @@ func _refresh_hud() -> void:
 			"tip": "%s · HP %s/%s · AP %.1f/5 (%.1fx)" % [nm, _num(u.d["hp"]), _num(u.d["mhp"]), float(r["ap"]), float(r["rec"])],
 			"hp_ratio": maxf(0.0, float(u.d["hp"]) / maxf(1.0, float(u.d["mhp"]))), "ap_ratio": minf(1.0, float(r["ap"]) / 5.0),
 			"eta": _t("battle.acting") if cur else ("✓" if ready else "%.1f" % float(r["ticks"])), "ready": ready,
-			"tex": icons.char_tex(str(u.d["cls"]), str(u.d.get("gender", "m")), sdb), "summon": str(u.d["cls"]).begins_with("summon_")})
+			"tex": icons.portrait_tex(str(u.d["cls"]), str(u.d.get("gender", "m")), sdb), "summon": str(u.d["cls"]).begins_with("summon_")})
 	ui.order.update(order_rows)
 	# 클랜원 카드 (웹 rInfoPanel)
 	var cards: Array = []
@@ -1324,7 +1324,7 @@ func _refresh_hud() -> void:
 			"res_label": str(RL.get(rt, "")), "res_color": Kit.RES_COLOR.get(rt, Color.WHITE),
 			"atk": _num(dd.get("atk", 0)), "def": _num(dd.get("def", 0)), "rng": _num(dd.get("range", 0)), "buffs": bl,
 			"sel": uv3.id == cur_id and view_phase == "player", "cur": uv3.id == cur_id, "done": bool(dd.get("ha", false)),
-			"tex": icons.char_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_")})
+			"tex": icons.portrait_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_")})
 	ui.cards.update(cards)
 	ui.minimap.set_units(_minimap_units())
 
@@ -1347,7 +1347,7 @@ func _unit_model(uv: UnitView, full: bool) -> Dictionary:
 	var st: Variant = eng.S["cStage"]
 	var m := {"title_icon": icons.emoji("💀") if boss else null, "title": info.unit_name(dd, st), "title_color": Color("fbbf24") if boss else (Color("f87171") if team == "enemy" else Color("93c5fd")),
 		"sub": "Lv.%s %s" % [_num(dd.get("lv", 1)), info.class_name_of(str(dd["cls"]))],
-		"portrait": {"tex": icons.char_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_"),
+		"portrait": {"tex": icons.portrait_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_"),
 			"ring": Color("ef4444") if team == "enemy" else Color("3b82f6")},
 		"border": Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.4) if team == "enemy" else Color(59 / 255.0, 130 / 255.0, 246 / 255.0, 0.4)}
 	var hp := float(dd["hp"])
@@ -2169,7 +2169,7 @@ func _result_model() -> Dictionary:
 	if win:
 		var fcu: Variant = S.get("_firstClearUnit")
 		if typeof(fcu) == TYPE_DICTIONARY:
-			rw.append({"tex": icons.char_tex(str(fcu["cls"]), str(fcu.get("gender", "m")), sdb), "portrait": true, "label": _t("messages.first_clear_unit", {"cls": _t("classes." + str(fcu["cls"]))}), "value": ""})
+			rw.append({"tex": icons.portrait_tex(str(fcu["cls"]), str(fcu.get("gender", "m")), sdb), "portrait": true, "label": _t("messages.first_clear_unit", {"cls": _t("classes." + str(fcu["cls"]))}), "value": ""})
 		if Js.truthy(S.get("_droppedBook")):
 			rw.append({"tex": icons.item("skillbook"), "frame": icons.rarity_frame("skillbook"), "label": _t("academy.skillbook_drop", {"skill": _t("skills." + str(S["_droppedBook"]))}), "value": ""})
 		if Js.truthy(S.get("_runeDrop")):
@@ -2200,7 +2200,7 @@ func _result_model() -> Dictionary:
 			var lv := float(ch.get("lv", 1))
 			var need := 0.0 if lv >= Profile.max_level_of(eng.c, ch) else Profile.exp_for_level(eng.c, lv)
 			var leveled := Js.num(r.get("leveled")) > 0.0
-			(m["exp"] as Array).append({"tex": icons.char_tex(str(ch["cls"]), str(ch.get("gender", "m")), sdb), "summon": false, "name": nm,
+			(m["exp"] as Array).append({"tex": icons.portrait_tex(str(ch["cls"]), str(ch.get("gender", "m")), sdb), "summon": false, "name": nm,
 				"ratio": minf(1.0, Js.num(ch.get("exp")) / need) if need > 0.0 else 1.0, "exp_text": "+%s EXP" % _num(r["exp"]),
 				"lv_text": ("LV %s → %s" % [_num(r.get("prevLv", lv)), _num(lv)]) if leveled else "Lv.%s" % _num(lv), "lvup": leveled})
 	var btns: Array = m["buttons"]
