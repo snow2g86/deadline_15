@@ -50,6 +50,9 @@ var compass_arrow: Label
 var compass_label: Label
 var menu: PanelContainer
 var menu_box: VBoxContainer
+## 단추 칸 (세로 공간이 모자라면 2열 — place_menu 가 정함) · 사이 구분선
+var menu_grid: GridContainer
+var menu_seps: Array = []
 var hint: Label
 var banner: Control            # 웹 #wave-banner
 var banner_lbl: Label
@@ -205,6 +208,10 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 	menu_box = VBoxContainer.new()
 	menu_box.add_theme_constant_override("separation", 3)
 	menu.add_child(menu_box)
+	menu_grid = GridContainer.new()
+	menu_grid.columns = 1
+	menu_grid.add_theme_constant_override("h_separation", 6)
+	menu_grid.add_theme_constant_override("v_separation", 3)
 
 	# 안내 줄
 	hint = Kit.label(14, Color("fde68a"), 800)
@@ -396,9 +403,16 @@ func hide_menu() -> void:
 ## items: [{op, tex?, frame?, glyph, label, sub, key, ac, enabled, warn, tip, idx?, kind?}] — at: 유닛 화면 위치 (메뉴는 오른쪽, 행동 순서 패널과 겹치면 왼쪽)
 func show_menu(head: String, items: Array, at: Vector2) -> void:
 	var was := menu.visible
+	if menu_grid.get_parent() != null:
+		menu_box.remove_child(menu_grid)
 	for c: Node in menu_box.get_children():
 		menu_box.remove_child(c)
 		c.queue_free()
+	for c2: Node in menu_grid.get_children():
+		menu_grid.remove_child(c2)
+		c2.queue_free()
+	menu_grid.columns = 1
+	menu_seps.clear()
 	menu_buttons.clear()
 	if head != "":
 		var h := Kit.label(10, GOLD, 900)
@@ -415,6 +429,7 @@ func show_menu(head: String, items: Array, at: Vector2) -> void:
 		hp.add_theme_stylebox_override("panel", hsb)
 		hp.add_child(h)
 		menu_box.add_child(hp)
+	menu_box.add_child(menu_grid)   # 단추를 만들기 전에 트리에 붙여야 글꼴 크기가 맞게 재어짐
 	for it: Dictionary in items:
 		var b := Button.new()
 		b.focus_mode = Control.FOCUS_NONE
@@ -505,8 +520,9 @@ func show_menu(head: String, items: Array, at: Vector2) -> void:
 			sep.color = Color(1, 1, 1, 0.06)
 			sep.custom_minimum_size = Vector2(0, 1)
 			sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			menu_box.add_child(sep)
-		menu_box.add_child(b)
+			menu_grid.add_child(sep)
+			menu_seps.append(sep)
+		menu_grid.add_child(b)
 		menu_buttons.append({"op": op, "button": b, "key": key.to_lower(), "item": it})
 	# 단추 폭: 가장 긴 이름·보조 줄에 맞춤 (스페인어 등 긴 글이 잘리지 않게, 최소 184) — 줄(HBox)의 최소 폭 + 좌우 여백
 	var need := 184.0
@@ -531,10 +547,22 @@ func show_menu(head: String, items: Array, at: Vector2) -> void:
 ## 메뉴 자리: 유닛 오른쪽 → 행동 순서 패널과 겹치면 유닛 왼쪽 (웹 _placeAM), 위아래는 윗줄·카드 사이
 func place_menu(at: Vector2) -> void:
 	_menu_at = at
+	var vs := root.size
+	# (모바일 낮은 화면) 1열이 윗줄·클랜원 카드 사이에 안 들어가면 2열 (항목 4개 이상) — 위아래 구분선은 숨김
+	var top_h0 := maxf(TOP_H, top.position.y + top.size.y)
+	var cards_h0 := maxf(CARDS_H, vs.y - cards.position.y) if cards != null and cards.size.y > 0.0 else CARDS_H
+	menu_grid.columns = 1
+	for sp: Control in menu_seps:
+		sp.visible = true
 	menu.reset_size()
 	var sz := menu.get_combined_minimum_size()
+	if menu_buttons.size() >= 4 and sz.y > vs.y - top_h0 - cards_h0 - 16.0:
+		menu_grid.columns = 2
+		for sp2: Control in menu_seps:
+			sp2.visible = false
+		menu.reset_size()
+		sz = menu.get_combined_minimum_size()
 	menu.size = sz
-	var vs := root.size
 	var limit := vs.x - 200.0 - 8.0
 	var pos := at + Vector2(38, -22)
 	_menu_flip = pos.x + sz.x > limit

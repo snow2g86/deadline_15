@@ -165,17 +165,27 @@ func _refresh() -> void:
 	rb.pressed.connect(ask_reset)
 	rc.add_child(rb)
 	_box.add_child(OKit.divider(0.06))
-	var links := OKit.vbox(2)
+	var links := OKit.vbox(8)
 	_box.add_child(links)
+	# (b) 라이선스·Credits: 글자 링크가 아니라 경계 있는 단추 + 화살표 (기존 OKit 단추 스타일)
 	for lk: Array in [["Licenses", t("settings.licenses"), "licenses"], ["Credits", "Credits", "credits"]]:
-		var b3 := OKit.styled_button(StyleBoxEmpty.new(), StyleBoxEmpty.new(), null, 4)
+		var b3 := OKit.styled_button(OKit.box(Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.12), 8, 1, 14, 10), OKit.box(Color(1, 1, 1, 0.09), OKit.GOLD, 8, 1, 14, 10), null, 8)
 		b3.name = str(lk[0])
 		b3.text = str(lk[1])
-		b3.add_theme_font_size_override("font_size", 12)
-		b3.add_theme_color_override("font_color", OKit.DIM2)
+		var ar := OKit.label(18, OKit.DIM2, 700)
+		ar.text = "›"
+		ar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ar.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+		ar.offset_left = -30
+		ar.offset_right = -12
+		ar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		b3.add_child(ar)
+		b3.add_theme_font_size_override("font_size", 14)
+		b3.add_theme_color_override("font_color", OKit.TEXT)
 		b3.add_theme_color_override("font_hover_color", OKit.GOLD)
 		b3.add_theme_color_override("font_focus_color", OKit.GOLD)
-		b3.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		b3.custom_minimum_size = Vector2(0, 40)
+		b3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var dest := str(lk[2])
 		b3.pressed.connect(func() -> void: router.call("go", dest))
 		links.add_child(b3)

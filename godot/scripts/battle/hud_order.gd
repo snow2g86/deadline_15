@@ -62,7 +62,7 @@ func _make_row() -> Row:
 	r.mouse_filter = Control.MOUSE_FILTER_STOP
 	r.custom_minimum_size = Vector2(180, 42)
 	var hb := HBoxContainer.new()
-	hb.add_theme_constant_override("separation", 7)
+	hb.add_theme_constant_override("separation", 5)   # 일본어 '行動中' 태그 때문에 이름이 잘리지 않게 이름 칸 폭 +6
 	hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	r.add_child(hb)
 	r.order = Kit.label(11, Kit.DIM, 900)

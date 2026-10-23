@@ -20,6 +20,8 @@ const OddsView := preload("res://scripts/ui/odds_view.gd")
 
 const LIST_W := 600.0
 const HALF_W := 295.0
+## 탭 한 줄(6열) 최대 폭 — 넓은 화면은 가운데 정렬, 좁은 화면(모바일)은 화면 폭 전부
+const TABS_W := 820.0
 const TAB_KEYS := ["mercenary", "consumable", "equip", "skill", "scroll", "gold"]
 const GREEN := Color("22c55e")
 const PURPLE := Color("8b5cf6")
@@ -76,12 +78,12 @@ func _build() -> void:
 	hud.add_child(gb)
 	gold_lbl = gb.find_child("Gold", true, false)
 	var tw := OKit.MaxWidth.new()
-	tw.max_w = LIST_W
+	tw.max_w = TABS_W
 	tw.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(tw)
 	var tg := GridContainer.new()
 	tg.name = "Tabs"
-	tg.columns = 3
+	tg.columns = TAB_KEYS.size()
 	tg.add_theme_constant_override("h_separation", 6)
 	tg.add_theme_constant_override("v_separation", 6)
 	tw.add_child(tg)
@@ -91,6 +93,8 @@ func _build() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.add_theme_font_size_override("font_size", 13)
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.clip_text = true
+		b.custom_minimum_size = Vector2(0, 40)
 		b.pressed.connect(switch_tab.bind(k))
 		tg.add_child(b)
 		tab_btns[k] = b
@@ -103,9 +107,15 @@ func _build() -> void:
 	iw.custom_minimum_size = Vector2(0, 40)
 	iw.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(iw)
+	# (c) 확률 안내 단추가 구분선·목록에 붙지 않게 위아래 여백
+	var im := MarginContainer.new()
+	im.add_theme_constant_override("margin_top", 5)
+	im.add_theme_constant_override("margin_bottom", 5)
+	im.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	iw.add_child(im)
 	var ir := OKit.hbox(8)
 	ir.name = "InfoRow"
-	iw.add_child(ir)
+	im.add_child(ir)
 	info_title = OKit.label(15, OKit.TEXT, 800)
 	info_title.name = "InfoTitle"
 	info_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -170,6 +180,8 @@ func _refresh() -> void:
 	for k: String in TAB_KEYS:
 		var b: Button = tab_btns[k]
 		b.text = t("shop.tab_" + k)
+		b.tooltip_text = b.text
+		_fit_tab_font(b)
 		var on := k == cur_tab
 		b.add_theme_stylebox_override("normal", OKit.box(Color(OKit.GOLD, 0.12) if on else Color(1, 1, 1, 0.04), OKit.GOLD if on else Color(1, 1, 1, 0.08), 8, 1, 8, 9))
 		b.add_theme_color_override("font_color", Color.WHITE if on else OKit.DIM)
@@ -177,6 +189,16 @@ func _refresh() -> void:
 		b.add_theme_color_override("font_hover_color", OKit.TEXT)
 	odds_btn.text = t("gd.odds.btn")
 	render()
+
+
+## 탭 글자: 6열 한 칸에 안 들어가는 긴 글(es·ja 등)은 13 → 11 까지 줄여 잘리지 않게 (칸 폭은 6등분 — 화면 폭 기준 추정)
+func _fit_tab_font(b: Button) -> void:
+	var f: Font = b.get_theme_font("font")
+	var avail := (minf(body.size.x if body != null and body.size.x > 0.0 else 1280.0, TABS_W) - 5.0 * 6.0) / float(TAB_KEYS.size()) - 18.0
+	var fs := 13
+	while fs > 11 and f.get_string_size(b.text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > avail:
+		fs -= 1
+	b.add_theme_font_size_override("font_size", fs)
 
 
 func refresh_gold() -> void:
@@ -601,22 +623,24 @@ func _rune_card(gold: float) -> Control:
 func _iap_card(pk: Dictionary) -> Control:
 	var p := _card(HALF_W, Color(240 / 255.0, 192 / 255.0, 64 / 255.0, 0.2))
 	p.name = "Iap_" + str(pk["id"])
-	var v := OKit.vbox(4)
+	var v := OKit.vbox(6)
 	p.add_child(v)
 	var amt := float(pk["gold"])
 	# 양마다 다른 기존 그림 (💰·🪙 는 같은 그림이라 가장 작은 꾸러미는 골드 배지의 금화 그림)
 	var tex: Texture2D = emoji_tex("💰") if amt >= 6500.0 else (emoji_tex("🏆") if amt >= 3000.0 else (emoji_tex("💎") if amt >= 1200.0 else icons.call("image", "icon/64x64/fc131.png")))
-	var ic := OKit.tex_rect(tex, Vector2(36, 36))
+	var ic := OKit.tex_rect(tex, Vector2(60, 60))
 	ic.name = "IapIcon"
 	v.add_child(_icon_box(ic))
-	v.add_child(_center_label(t(str(pk["key"])), 14, OKit.GOLD, 900, HALF_W - 28))
-	var pl := _center_label(str(pk["price"]), 12, OKit.TEXT, 700, HALF_W - 28)
+	v.add_child(_center_label(t(str(pk["key"])), 17, OKit.GOLD, 900, HALF_W - 28))
+	var pl := _center_label(str(pk["price"]), 15, OKit.TEXT, 700, HALF_W - 28)
 	pl.name = "Price"
 	v.add_child(pl)
 	var avail := billing != null and bool(billing.call("is_available"))
 	var bz := billing != null and bool(billing.call("busy"))
 	var pend := billing != null and bool(billing.call("purchase_pending", str(pk["id"])))
 	var b := _buy_btn(t("gd.iap.processing_short") if pend else t("gd.iap.buy"), avail and not bz and not pend, false, Color("d97706"), buy_iap.bind(str(pk["id"])), "Buy")
+	b.add_theme_font_size_override("font_size", 15)
+	b.custom_minimum_size = Vector2(120, 38)
 	v.add_child(_icon_box(b))
 	if not avail:
 		var nl := _center_label(t("gd.iap.unavailable_short"), 10, OKit.DIM, 600, HALF_W - 28)
