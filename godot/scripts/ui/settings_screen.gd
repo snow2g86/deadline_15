@@ -12,6 +12,7 @@ extends "res://scripts/ui/screen_base.gd"
 const SettingsRules := preload("res://scripts/logic/settings_rules.gd")
 const Fonts := preload("res://scripts/core/fonts.gd")
 const I18nT := preload("res://scripts/core/i18n.gd")
+const OddsView := preload("res://scripts/ui/odds_view.gd")
 
 var s: Dictionary = {}
 var _box: VBoxContainer
@@ -168,7 +169,7 @@ func _refresh() -> void:
 	var links := OKit.vbox(8)
 	_box.add_child(links)
 	# (b) 라이선스·Credits: 글자 링크가 아니라 경계 있는 단추 + 화살표 (기존 OKit 단추 스타일)
-	for lk: Array in [["Licenses", t("settings.licenses"), "licenses"], ["Credits", "Credits", "credits"]]:
+	for lk: Array in [["OddsInfo", t("gd.odds.title"), "odds"], ["Licenses", t("settings.licenses"), "licenses"], ["Credits", "Credits", "credits"]]:
 		var b3 := OKit.styled_button(OKit.box(Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.12), 8, 1, 14, 10), OKit.box(Color(1, 1, 1, 0.09), OKit.GOLD, 8, 1, 14, 10), null, 8)
 		b3.name = str(lk[0])
 		b3.text = str(lk[1])
@@ -187,8 +188,18 @@ func _refresh() -> void:
 		b3.custom_minimum_size = Vector2(0, 40)
 		b3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var dest := str(lk[2])
-		b3.pressed.connect(func() -> void: router.call("go", dest))
+		if dest == "odds":
+			b3.pressed.connect(open_odds)   # (확률형 아이템 표시) 구매와 상관없이 언제든 확률 정보
+		else:
+			b3.pressed.connect(func() -> void: router.call("go", dest))
 		links.add_child(b3)
+
+
+## 설정 > 확률 정보 — 상점·강화 탭과 같은 확률 창
+func open_odds() -> void:
+	if not act_once():
+		return
+	OddsView.open(self)
 
 
 func _has_ad_privacy() -> bool:

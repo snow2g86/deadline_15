@@ -17,6 +17,7 @@ const EquipRules := preload("res://scripts/logic/equip_rules.gd")
 const Profile := preload("res://scripts/logic/profile.gd")
 const ItemView := preload("res://scripts/ui/item_view.gd")
 const OddsView := preload("res://scripts/ui/odds_view.gd")
+const OddsRules := preload("res://scripts/logic/odds_rules.gd")
 
 const LIST_W := 600.0
 const HALF_W := 295.0
@@ -232,7 +233,7 @@ func render() -> void:
 		ch.queue_free()
 	_grid = null
 	info_title.text = t("shop.subtitle_" + cur_tab)
-	odds_btn.visible = cur_tab == "equip" or cur_tab == "consumable"
+	odds_btn.visible = cur_tab == "equip" or cur_tab == "consumable" or cur_tab == "gold"
 	_update_timer()
 	var gold := ShopRules.gold(c)
 	match cur_tab:
@@ -241,6 +242,7 @@ func render() -> void:
 			return
 		"gold":
 			_full(_ad_card("shop.gold_ad_title", "shop.gold_ad_desc"))
+			_full(_gold_use_card())
 			# 결제 길이 없는 판(steam · 출시 빌드 dev)은 결제 카드를 숨김
 			if billing != null and bool(billing.call("is_supported")):
 				var gg := GridContainer.new()
@@ -599,6 +601,7 @@ func _rune_card(gold: float) -> Control:
 	v.add_child(_icon_box(OKit.tex_rect(emoji_tex("🔮"), Vector2(40, 40))))
 	v.add_child(_center_label(t("enchant.rune_gacha"), 14, Color.WHITE, 800, HALF_W - 28))
 	v.add_child(_center_label(t("enchant.rune_gacha_desc"), 10, OKit.DIM2, 500, HALF_W - 28))
+	_odds_near_buy(v, t("gd.odds.card_rune", {"n": OddsRules.rune(c)["rows"].size(), "p": OddsRules.pct(float(OddsRules.rune(c)["rows"][0]["rate"]))}))
 	# 가진 룬 수 (웹은 세로로 흩어져 보임 — 같은 정보를 그림 + 수로 줄 맞춤)
 	var rg := GridContainer.new()
 	rg.name = "Runes"
@@ -668,16 +671,23 @@ func _render_gacha(gold: float) -> void:
 	_full(pp)
 	var rp := _card(LIST_W, Color(1, 1, 1, 0.08))
 	rp.name = "Rates"
-	var rh := OKit.hbox(10)
-	rh.alignment = BoxContainer.ALIGNMENT_CENTER
+	# 좁은 화면(모바일·긴 번역)에서도 카드 폭 안에서 줄바꿈 (가로로 넘치지 않게)
+	var rh := HFlowContainer.new()
+	rh.name = "RateFlow"
+	rh.alignment = FlowContainer.ALIGNMENT_CENTER
+	rh.add_theme_constant_override("h_separation", 10)
+	rh.add_theme_constant_override("v_separation", 2)
 	rp.add_child(rh)
 	for r: Array in ShopRules.gacha_rates(c):
 		var l := OKit.label(11, ItemView.rarity_color(D, r[0]), 700)
-		l.text = "%s %s%%" % [t("equip.rarity." + str(r[0])), r[1]]
+		l.text = "%s %s" % [t("equip.rarity." + str(r[0])), r[1]]
 		rh.add_child(l)
 	_full(rp)
-	_half(_gacha_card("🎲", "shop.gacha_single", "shop.gacha_single_desc", t("shop.gacha_pull_1", {"gold": num(D["GACHA_COST_1"])}), gold >= float(D["GACHA_COST_1"]), GREEN, do_gacha.bind(1), "Gacha1"))
-	_half(_gacha_card("🎱", "shop.gacha_multi", "shop.gacha_multi_desc", t("shop.gacha_pull_10", {"gold": num(D["GACHA_COST_10"])}), gold >= float(D["GACHA_COST_10"]), PURPLE, do_gacha.bind(10), "Gacha10"))
+	var tfo := func(k: String, p: Dictionary) -> String: return t(k, p)
+	var odds1 := t("gd.odds.card_single", {"rates": OddsRules.rate_line(c, tfo), "n": pmax})
+	var odds10 := t("gd.odds.card_multi", {"j": int(D["GACHA_MULTI_COUNT"]) - 1, "k": int(D["GACHA_MULTI_COUNT"]), "rates": OddsRules.rate_line(c, tfo, "rare"), "n": pmax})
+	_half(_gacha_card("🎲", "shop.gacha_single", "shop.gacha_single_desc", t("shop.gacha_pull_1", {"gold": num(D["GACHA_COST_1"])}), gold >= float(D["GACHA_COST_1"]), GREEN, do_gacha.bind(1), "Gacha1", odds1))
+	_half(_gacha_card("🎱", "shop.gacha_multi", "shop.gacha_multi_desc", t("shop.gacha_pull_10", {"gold": num(D["GACHA_COST_10"])}), gold >= float(D["GACHA_COST_10"]), PURPLE, do_gacha.bind(10), "Gacha10", odds10))
 	var mp := _card(LIST_W, Color(OKit.GOLD, 0.2))
 	mp.name = "Mats"
 	mp.add_child(_center_label("🔩 " + t("gear.shop_title") + " — " + t("gear.mats", {"stone": num(EquipRules.mats_get(c, "stone")), "protect": num(EquipRules.mats_get(c, "protect")), "shard": num(EquipRules.mats_get(c, "shard"))}), 11, OKit.GOLD, 700, LIST_W - 28))
@@ -733,7 +743,7 @@ func _render_gacha(gold: float) -> void:
 	list.add_child(sp)
 
 
-func _gacha_card(emoji: String, title_key: String, desc_key: String, btn_text: String, ok: bool, col: Color, cb: Callable, nm: String) -> Control:
+func _gacha_card(emoji: String, title_key: String, desc_key: String, btn_text: String, ok: bool, col: Color, cb: Callable, nm: String, odds_text: String = "") -> Control:
 	var p := _card(HALF_W, Color(167 / 255.0, 139 / 255.0, 250 / 255.0, 0.3) if nm == "Gacha10" else Color(34 / 255.0, 197 / 255.0, 94 / 255.0, 0.15))
 	p.name = nm
 	var v := OKit.vbox(6)
@@ -751,7 +761,38 @@ func _gacha_card(emoji: String, title_key: String, desc_key: String, btn_text: S
 	v.add_child(ib)
 	v.add_child(_center_label(t(title_key), 14, Color.WHITE, 800, HALF_W - 28))
 	v.add_child(_center_label(t(desc_key), 10, OKit.DIM2, 500, HALF_W - 28))
+	if odds_text != "":
+		_odds_near_buy(v, odds_text)
 	v.add_child(_icon_box(_buy_btn(btn_text, ok, false, col, cb, "Buy")))
+	return p
+
+
+## 구매 단추 바로 위: 확률 요약 + '확률 보기' 단추 (Google Play 결제 정책 7항 · 게임산업법 — 구매 지점 가까이에서 공개)
+func _odds_near_buy(v: VBoxContainer, summary: String) -> void:
+	var l := _center_label(summary, 10, OKit.GOLD, 600, HALF_W - 28)
+	l.name = "OddsLine"
+	v.add_child(l)
+	var b := OKit.ghost_button(t("gd.odds.view_btn"), 11)
+	b.name = "OddsLink"
+	b.custom_minimum_size = Vector2(0, 30)
+	b.pressed.connect(open_odds)
+	v.add_child(_icon_box(b))
+
+
+## 골드 탭 안내: 골드는 확률형 뽑기·강화에 쓰임 + 확률 보기
+func _gold_use_card() -> Control:
+	var p := _card(LIST_W, Color(OKit.GOLD, 0.25))
+	p.name = "GoldUse"
+	var v := OKit.vbox(6)
+	p.add_child(v)
+	var l := _center_label(t("gd.iap.gold_use"), 11, OKit.GOLD, 700, LIST_W - 28)
+	l.name = "GoldUseNote"
+	v.add_child(l)
+	var b := OKit.ghost_button(t("gd.odds.view_btn"), 11)
+	b.name = "OddsLink"
+	b.custom_minimum_size = Vector2(0, 30)
+	b.pressed.connect(open_odds)
+	v.add_child(_icon_box(b))
 	return p
 
 
@@ -931,6 +972,9 @@ func buy_iap(id: String) -> void:
 	var pr := _center_label(str(p["price"]), 16, Color.WHITE, 800, 380)
 	pr.name = "Price"
 	v.add_child(pr)
+	var gu := _center_label(t("gd.iap.gold_use"), 12, OKit.GOLD, 700, 380)
+	gu.name = "GoldUseNote"
+	v.add_child(gu)
 	var nb := PanelContainer.new()
 	nb.name = "Notice"
 	nb.add_theme_stylebox_override("panel", OKit.box(Color(1, 1, 1, 0.03), Color(1, 1, 1, 0.08), 8, 1, 12, 10))

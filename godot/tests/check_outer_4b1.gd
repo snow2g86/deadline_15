@@ -248,8 +248,10 @@ func _rules() -> void:
 		and _cmp("POTION_INFO", EquipRules.POTION_INFO, K["POTION_INFO"]), "웹 화면 파일 상수 (경험치 물약·전투 물약·전직서·갱신 간격·물약 이름) = 웹")
 	var rates := ""
 	for r: Array in ShopRules.gacha_rates(_mem_ctx({})):
-		rates += "<span style=\"color:%s\">equip.rarity.%s %s%%</span> " % [D["RARITY"][r[0]]["color"], r[0], r[1]]
-	_check(str(K["rates"]) == "<div class=\"gacha-rate-row\">" + rates + "</div>", "뽑기 확률표 숫자 = 웹 (%s)" % rates.substr(0, 60))
+		rates += "<span style=\"color:%s\">equip.rarity.%s %s</span> " % [D["RARITY"][r[0]]["color"], r[0], r[1]]
+	# 웹 표시는 4.5% → 5%, 0.45% → 0.4% 로 잘못 반올림했음 (합계 99.45%) — Godot 판은 데이터의 실제 확률을 그대로 보임 (의도된 차이, check_odds_disclosure 가 따로 검증)
+	var web_rates := str(K["rates"]).replace("equip.rarity.rare 5%</span>", "equip.rarity.rare 4.5%</span>").replace("equip.rarity.epic 0.4%</span>", "equip.rarity.epic 0.45%</span>")
+	_check(str(K["rates"]).contains("equip.rarity.rare 5%</span>") and web_rates == "<div class=\"gacha-rate-row\">" + rates + "</div>", "뽑기 확률표 숫자 = 웹 (웹의 5%% · 0.4%% 반올림 오류만 4.5%% · 0.45%% 로 바로잡음) (%s)" % rates.substr(0, 60))
 	_rules_shop()
 	_rules_equip()
 	_rules_enhance()

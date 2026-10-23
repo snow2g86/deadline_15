@@ -23,6 +23,7 @@ const Js := preload("res://scripts/logic/js.gd")
 const Num := preload("res://scripts/core/num.gd")
 const EquipRules := preload("res://scripts/logic/equip_rules.gd")
 const Gear := preload("res://scripts/logic/gear.gd")
+const OddsRules := preload("res://scripts/logic/odds_rules.gd")
 const Hazards := preload("res://scripts/logic/hazards.gd")
 const StageRules := preload("res://scripts/logic/stage_rules.gd")
 const PartyRules := preload("res://scripts/logic/party_rules.gd")
@@ -437,16 +438,16 @@ func comp_gear(filter: String) -> Array:
 			var rate := float(D["GACHA_RATE"][r])
 			rows.append([cell(rarity_label(r), false, {"color": str(D["RARITY"][r]["color"])}), cell("×" + num(D["RARITY_MULT"][r]), true), cell(num(D["SUB_COUNT"][r]), true),
 				cell("○" if float(D["RARITY"][r]["tier"]) >= 2.0 else "−"), cell(T("c.legend_fx") if r == "legendary" else (T("c.random1") if r == "epic" else "−")),
-				cell(EquipRules.fixed_str(rate * 100.0, 2 if rate < 0.01 else 0) + "%", true)])
+				cell(OddsRules.pct(rate / _gacha_total()), true)])
 		var enh: Array = []
 		var ER: Array = D["ENHANCE_RATES"]
 		for lv in ER.size():
-			enh.append([cell("+%d → +%d" % [lv, lv + 1]), cell(num(Js.round_js(float(ER[lv]) * 100.0)) + "%", true), cell(T("c.keep") if float(lv) < float(D["ENHANCE_SAFE_BELOW"]) else T("c.drop1")),
+			enh.append([cell("+%d → +%d" % [lv, lv + 1]), cell(OddsRules.pct(minf(1.0, float(ER[lv]))), true), cell(T("c.keep") if float(lv) < float(D["ENHANCE_SAFE_BELOW"]) else T("c.drop1")),
 				cell(num(D["ENHANCE_STONES"][lv]), true), cell("+" + num(D["ENHANCE_STAT_PCT"][lv + 1]) + "%", true)])
 		out.append(sec(T("c.s_rarity"), "rarity", [table([T("c.th_grade"), T("c.th_stats"), T("c.th_sub"), T("c.th_copt"), T("c.th_unique"), T("c.th_gacha")], rows)]))
 		out.append(sec(T("c.s_enh"), "+1 ~ +10", [table([T("c.th_step"), T("c.th_success"), T("c.th_onfail"), T("c.th_stones"), T("c.th_stat")], enh),
 			note("warn", "💥", T("c.break_note", {"p": float(D["ENHANCE_BREAK_CHANCE"]) * 100.0, "b": D["ENHANCE_FAIL_BONUS"], "m": D["ENHANCE_FAIL_BONUS_MAX"]})),
-			note("tip", "✨", T("c.eopt_note"))]))
+			note("tip", "✨", T("c.eopt_note", _eopt_params()))]))
 	if out.is_empty():
 		out.append({"t": "empty", "text": T("c.empty")})
 	return [{"t": "filters", "items": fl0}] + out
@@ -571,8 +572,26 @@ func comp_panel(tab: String, gear_filter: String = "all") -> Array:
 
 # ═══════════ 가이드 (guide.html) ═══════════
 
-func gcard(ic: String, h: String, p: String) -> Dictionary:
-	return card([ph({"text": ic} if ic.length() <= 1 and ic.unicode_at(0) < 128 else emo(ic), T(h)), pp(T(p))])
+## 강화 옵션 단계(+1~3 …)별 붙는 확률 — 문구의 {r1}·{p1} … 자리 (데이터 ENHANCE_OPT 에서)
+func _eopt_params() -> Dictionary:
+	var out: Dictionary = {}
+	var bands := OddsRules.enhance_opt_bands(c)
+	for i in bands.size():
+		out["r%d" % (i + 1)] = bands[i]["range"]
+		out["p%d" % (i + 1)] = bands[i]["p"]
+	return out
+
+
+## 뽑기 등급 확률의 합 (확률 창·상점과 같은 식: 등급 확률 ÷ 합)
+func _gacha_total() -> float:
+	var t := 0.0
+	for v: Variant in (D["GACHA_RATE"] as Dictionary).values():
+		t += float(v)
+	return t
+
+
+func gcard(ic: String, h: String, p: String, params: Dictionary = {}) -> Dictionary:
+	return card([ph({"text": ic} if ic.length() <= 1 and ic.unicode_at(0) < 128 else emo(ic), T(h)), pp(T(p, params))])
 
 
 func guide_panel(tab: String) -> Array:
@@ -601,7 +620,7 @@ func guide_panel(tab: String) -> Array:
 			var enh: Array = []
 			var ER: Array = D["ENHANCE_RATES"]
 			for lv in ER.size():
-				enh.append([cell("+%d→+%d" % [lv, lv + 1]), cell(num(Js.round_js(float(ER[lv]) * 100.0)) + "%", true), cell(T("c.keep") if float(lv) < float(D["ENHANCE_SAFE_BELOW"]) else T("c.drop1")),
+				enh.append([cell("+%d→+%d" % [lv, lv + 1]), cell(OddsRules.pct(minf(1.0, float(ER[lv]))), true), cell(T("c.keep") if float(lv) < float(D["ENHANCE_SAFE_BELOW"]) else T("c.drop1")),
 					cell(num(D["ENHANCE_STONES"][lv]), true), cell("+" + num(D["ENHANCE_STAT_PCT"][lv + 1]) + "%", true)])
 			var picks: Array = []
 			for k: String in ["unyielding", "saint_tear", "king_seal", "dragon_scale"]:
@@ -613,7 +632,7 @@ func guide_panel(tab: String) -> Array:
 			return [sec(T("g.s_gearstruct"), "equipment", [grid([gcard("🗡️", "g.wpn_h", "g.wpn_p"), gcard("🥋", "g.arm_h", "g.arm_p")]),
 					table([T("c.th_grade"), T("c.th_sub"), T("c.th_copt"), T("c.th_unique")], rar), note("tip", "🎯", T("g.copt_tip"))]),
 				sec(T("g.s_enh"), "enhance", [table([T("c.th_step"), T("c.th_success"), T("c.th_onfail"), T("c.th_stones"), T("c.th_stat")], enh),
-					grid([gcard("💥", "g.break_h", "g.break_p"), gcard("✨", "g.eopt_h", "g.eopt_p")]), card([ph(emo("💡"), T("g.tips_h")), {"k": "ul", "items": tips}])]),
+					grid([gcard("💥", "g.break_h", "g.break_p", {"p": OddsRules.pct(float(D["ENHANCE_BREAK_CHANCE"]))}), gcard("✨", "g.eopt_h", "g.eopt_p")]), card([ph(emo("💡"), T("g.tips_h")), {"k": "ul", "items": tips}])]),
 				sec(T("g.s_legset"), "legend · set", [grid([card([ph({"text": "★"}, T("g.leg_h")), pp(T("g.leg_p")), pills(picks)]), gcard("🔗", "g.set_h", "g.set_p")]), lead(T("g.more_gear"))])]
 		"battle":
 			var syn: Array = []

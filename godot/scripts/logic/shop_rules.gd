@@ -12,6 +12,7 @@ const Js := preload("res://scripts/logic/js.gd")
 const Profile := preload("res://scripts/logic/profile.gd")
 const Gear := preload("res://scripts/logic/gear.gd")
 const EquipRules := preload("res://scripts/logic/equip_rules.gd")
+const OddsRules := preload("res://scripts/logic/odds_rules.gd")
 
 const SHOP_KEY := "game_shop"
 ## 웹 shop.js 의 상수 (data/*.js 가 아니라 화면 파일 안에 있음 — 웹 정답 파일과 같은지 시험이 확인)
@@ -336,11 +337,9 @@ static func exchange_legend(c: Object, id: String) -> Variant:
 	return Gear.give(c, Gear.make_legend(c, id))
 
 
-## 확률표 [[rarity, "60"]] (웹 gachaRatesHtml 의 숫자 글)
+## 확률표 [[rarity, "60%"]] — 확률 정보 창(odds_rules.gd)과 같은 pct() 로 데이터에서 계산 (등급 확률 ÷ 합). 4.5% 를 5% 로 반올림하던 웹 표시를 바로잡음
 static func gacha_rates(c: Object) -> Array:
 	var out: Array = []
-	var GR: Dictionary = c.D["GACHA_RATE"]
-	for r: String in GR.keys():
-		var pct := float(GR[r]) * 100.0
-		out.append([r, EquipRules.fixed_str(pct, 0 if pct >= 1.0 else (1 if pct >= 0.1 else 2))])
+	for r: Dictionary in OddsRules.rarity_rates(c):
+		out.append([r["rarity"], OddsRules.pct(float(r["rate"]))])
 	return out

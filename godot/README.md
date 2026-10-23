@@ -229,6 +229,10 @@ godot/
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_scene.gd
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --script res://tests/check_battle_ui.gd
 ```
+확률형 아이템 표시 시험 (게임산업법 · Google Play · App Store): `... --script res://tests/check_odds_disclosure.gd` — 상점 인라인 확률 = 확률 창 = 데이터(합계 100%) · 구매 카드 근처 '확률 보기' · 골드 안내 · 설정 진입점 · 새 구역(천장·종류별·전설별·강화 옵션·고유 효과·능력치 범위)을 규칙 코드로 뽑은 빈도와 비교 · 6개 언어 키·자리표시자.
+화면 사진: `HOME=<임시> Godot --path godot --resolution 1280x720 --script res://tests/shots_odds.gd -- --lang ko [--dev pixel8] --out <폴더>` (창 모드).
+확률 문구의 숫자는 번역에 적지 말고 `{p}` 같은 자리표시자로 두고 `scripts/logic/odds_rules.gd` 의 `pct()` 로 채웁니다. 확률표를 바꾸면 `tools/odds_export.gd` 로 `docs/store/probabilities.*.md` 도 다시 만드세요.
+
 시험은 `user://test_foundation_save.json` 을 쓰고 지우므로 진짜 저장(`user://save.json`)은 건드리지 않습니다.
 
 ## 글꼴 (6개 언어)

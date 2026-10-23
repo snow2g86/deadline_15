@@ -641,7 +641,9 @@ func _codex() -> void:
 		var c := _mem_ctx({})
 		var R := CodexRules.new(c, func(k: String, p: Dictionary) -> String: return i18n.call("t", k, p), func(k: String) -> bool: return bool(i18n.call("has_key", k)))
 		var bad: Array = []
-		var cmp := func(what: String, mine: Array, web: Array) -> void:
+		var cmp := func(what: String, mine: Array, web0: Array) -> void:
+			# 웹 도감 등급표 '뽑기' 열은 희귀 4.5% 를 '5%' 로 반올림했음 — Godot 판은 확률 창과 같은 값(4.5%)을 보임 (의도된 차이, check_odds_disclosure 가 따로 검증)
+			var web: Array = web0.map(func(x: Variant) -> Variant: return "4.5%" if (what.begins_with("도감.장비") and x is String and x == "5%") else x)
 			total[0] += web.size()
 			if not _same(mine, web):
 				var at := 0

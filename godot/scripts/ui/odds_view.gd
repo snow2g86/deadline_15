@@ -15,7 +15,7 @@ static func build(scr: Control) -> Control:
 	v.name = "OddsBody"
 	v.custom_minimum_size = Vector2(W, 0)
 	var src := OKit.label(11, OKit.DIM, 600)
-	src.text = scr.t("gd.odds.source")
+	src.text = scr.t("gd.odds.source") + "  " + scr.t("gd.odds.version", {"ver": str(ProjectSettings.get_setting("application/config/version", ""))})
 	src.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	src.custom_minimum_size = Vector2(W, 0)
 	v.add_child(src)
@@ -37,12 +37,20 @@ static func build(scr: Control) -> Control:
 		g.columns = head.size()
 		g.add_theme_constant_override("h_separation", 10)
 		g.add_theme_constant_override("v_separation", 4)
-		var colw := (W - 28.0 - 10.0 * float(head.size() - 1)) / float(head.size())
-		for h: Variant in head:
-			g.add_child(_cell(str(h), 11, OKit.DIM2, 800, colw))
+		# 칸 폭: 구역이 "cw" (칸 비율)를 주면 그 비율, 아니면 같은 폭
+		var avail := W - 28.0 - 10.0 * float(head.size() - 1)
+		var cw: Array = sec.get("cw", [])
+		var wsum := 0.0
+		for i in head.size():
+			wsum += float(cw[i]) if i < cw.size() else 1.0
+		var widths: Array = []
+		for i in head.size():
+			widths.append(avail * (float(cw[i]) if i < cw.size() else 1.0) / wsum)
+		for i in head.size():
+			g.add_child(_cell(str(head[i]), 11, OKit.DIM2, 800, float(widths[i])))
 		for row: Array in sec["rows"]:
 			for i in row.size():
-				g.add_child(_cell(str(row[i]), 12, OKit.TEXT if i > 0 else Color.WHITE, 700 if i > 0 else 800, colw))
+				g.add_child(_cell(str(row[i]), 12, OKit.TEXT if i > 0 else Color.WHITE, 700 if i > 0 else 800, float(widths[i])))
 		sv.add_child(g)
 		for n: Variant in sec["notes"]:
 			var nl := OKit.label(10, OKit.DIM, 500)

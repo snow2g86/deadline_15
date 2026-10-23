@@ -15,6 +15,7 @@ const PartyRules := preload("res://scripts/logic/party_rules.gd")
 const Gear := preload("res://scripts/logic/gear.gd")
 const ItemView := preload("res://scripts/ui/item_view.gd")
 const OddsView := preload("res://scripts/ui/odds_view.gd")
+const OddsRules := preload("res://scripts/logic/odds_rules.gd")
 
 const MODAL_W := 1060.0
 const INV_CARD_W := 300.0
@@ -955,7 +956,7 @@ func open_enhance(eid: Variant) -> void:
 	var fv: VBoxContainer = s3.get_child(0)
 	var fail_txt := t("gear.enh_fail_keep") if pv["fail_keep"] else t("gear.enh_fail_drop", {"lv": num(lv - 1.0)})
 	fv.add_child(_wl("⚠️ " + t("gear.enh_on_fail") + ": " + fail_txt, 12, Color("ef4444"), 800, W))
-	fv.add_child(_wl("💥 " + t("gear.enh_break"), 10, OKit.DIM2, 600, W))
+	fv.add_child(_wl("💥 " + t("gear.enh_break", {"p": OddsRules.pct(float(D["ENHANCE_BREAK_CHANCE"]))}), 10, OKit.DIM2, 600, W))
 	var cb := CheckBox.new()
 	cb.name = "Protect"
 	cb.text = _strip(t("gear.enh_protect_use", {"n": num(pv["have_protect"])}))
