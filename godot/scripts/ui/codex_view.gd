@@ -662,7 +662,7 @@ func _person(b: Dictionary) -> Control:
 		pc.custom_minimum_size = Vector2(64, 72)
 		pc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var tr := OKit.tex_rect(icons.call("image", "character/story/%s.png" % k), Vector2(64, 72))
+		var tr := OKit.tex_rect(icons.call("image", "character/story/%s.webp" % k), Vector2(64, 72))
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		pc.add_child(tr)
 		h.add_child(pc)

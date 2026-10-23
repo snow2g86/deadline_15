@@ -280,7 +280,7 @@ def main():
           '## 아이템 그림 스타일', '', '아이템만 초록 단색 바탕에 그린다 (테두리·배경 없음). 등급 느낌은 게임이 등급 테두리를 겹쳐서 낸다: D 없음 · C 은장 · B 금장 · A 에메랄드 · S 루비.', '', '```', STYLE.strip(), '```', '',
           '## 등급 테두리 스타일 (frame_ 묶음만)', '', '```', FRAME_STYLE.strip(), '```', '',
           '## 직업 아이콘 스타일 (0번 묶음만)', '', '```', JAB_STYLE.strip(), '```', '']
-    have = set(os.path.splitext(f)[0] for f in os.listdir(os.path.join(ROOT, 'godot/assets/image/icon/item'))) if os.path.isdir(os.path.join(ROOT, 'godot/assets/image/icon/item')) else set()
+    have = set(os.path.splitext(f)[0] for f in os.listdir(os.path.join(ROOT, 'godot/assets/image/icon/item_src'))) if os.path.isdir(os.path.join(ROOT, 'godot/assets/image/icon/item_src')) else set()
     total = done = 0
     emap = {}
     for title, rows in GROUPS:

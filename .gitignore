@@ -15,6 +15,10 @@ tools/_work/
 #  Godot 이 읽지 않게 각 src/ 에 .gdignore 가 있음)
 godot/assets/image/icon/src/
 godot/assets/image/character/story/src/
+# 정면·스토리 일러스트의 무손실 PNG 원본 (godot/tools/webp_art.py 가 WebP 로 변환하며 옮겨 둠 — Godot 은 .gdignore 로 읽지 않음, 변환 직전 커밋 ad48239 의 기록에도 있음)
+godot/assets/image/character/art_src/
+# 글꼴 원본 전체(47MB, OFL) — godot/tools/subset_fonts.py 가 부분 집합을 만드는 입력. 변환 직전 커밋 ad48239 의 git 기록에도 있음 (git show ad48239:godot/assets/fonts/NotoSansKR-VariableFont_wght.ttf)
+godot/assets/fonts/src/
 
 # Godot (godot/README.md) — 그림 원본은 godot/assets/image/ (git 에 올림, *.import 옆파일도), 저장소 맨 위 image 는 웹판용 심볼릭 링크. .godot/ 는 편집기 캐시
 # 작업 중 미리보기 그림(*.prev.png)을 Godot 이 가져오며 만드는 옆파일은 올리지 않음

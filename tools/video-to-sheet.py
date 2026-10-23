@@ -2,7 +2,7 @@
 """개발용: 초록 배경 캐릭터 영상 → 배경 제거된 스프라이트 시트 PNG
 
 사용: python3 tools/video-to-sheet.py <영상.mp4> <출력.png> [--frames 12] [--height 128] [--start 0] [--end 영상끝]
-     [--char godot/assets/image/character/knight_01.png]  ← 주면 이펙트 제거: 원본 캐릭터에 없는 색 + 몸에서 떨어진 작은 조각을 지움
+     [--char godot/assets/image/character/art_src/front/knight_01.png]  ← 주면 이펙트 제거: 원본 캐릭터에 없는 색 + 몸에서 떨어진 작은 조각을 지움
   1) ffmpeg로 영상 전체에서 프레임을 고르게 N장 추출
   2) 초록(크로마키) 배경을 투명으로, 가장자리 초록 번짐 제거
   3) 모든 프레임에 공통인 영역으로 잘라(위치 흔들림 방지) 높이를 맞춰 가로로 이어 붙임

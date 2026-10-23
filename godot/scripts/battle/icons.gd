@@ -112,7 +112,7 @@ func emoji(e: String) -> Texture2D:
 func char_tex(cls: String, gender: String, sdb: Object = null) -> Texture2D:
 	if cls.begins_with("summon_"):
 		return sdb.call("summon_tex", cls, gender) if sdb != null else null
-	return _cached_load(IMG + "character/" + cls + ("_02" if gender == "f" else "_01") + ".png")
+	return _cached_load(IMG + "character/" + cls + ("_02" if gender == "f" else "_01") + ".webp")
 
 
 ## 초상화 그림 (image/character/portrait/<직업>_01|02.png — 512×512 가슴 위 반신 일러스트). 없으면 전신 그림으로 되돌림.

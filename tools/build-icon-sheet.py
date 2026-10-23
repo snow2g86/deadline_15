@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""개발용: godot/assets/image/icon/item/*.png (256px 일러스트) → 아이템 아이콘 시트 godot/assets/image/icon/item-sprite.webp + js 좌표표
+"""개발용: godot/assets/image/icon/item_src/*.png (256px 일러스트) → 아이템 아이콘 시트 godot/assets/image/icon/item-sprite.webp + js 좌표표
 
 사용: python3 tools/build-icon-sheet.py
 - 64px 칸, 가로 8칸. 파일 이름(확장자 제외)이 아이콘 키 (예: siege_ladder, rune_fire, legend_blood_oath)
@@ -10,7 +10,7 @@ import os, glob, math
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, 'godot/assets/image/icon/item')
+SRC = os.path.join(ROOT, 'godot/assets/image/icon/item_src')
 OUT = os.path.join(ROOT, 'godot/assets/image/icon/item-sprite.webp')
 JS = os.path.join(ROOT, 'js/common/item-icons.js')
 CELL, COLS = 64, 8

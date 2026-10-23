@@ -417,7 +417,7 @@ func open_commander_setup(first: bool) -> void:
 		var cv := OKit.vbox(4)
 		cv.alignment = BoxContainer.ALIGNMENT_CENTER
 		OKit.set_content(b, cv, Vector4(6, 8, 6, 10))
-		var img := OKit.tex_rect(icons.call("image", "character/commander_0%d.png" % (1 if g == "m" else 2)), Vector2(150, 150))
+		var img := OKit.tex_rect(icons.call("image", "character/commander_0%d.webp" % (1 if g == "m" else 2)), Vector2(150, 150))
 		img.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		cv.add_child(img)
 		var gl := OKit.label(16, Color("cbd5e1"), 700)

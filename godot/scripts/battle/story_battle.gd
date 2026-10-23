@@ -15,7 +15,7 @@ const SEEN_KEY := "game_story_seen"
 ## 전투 중 대사 종류 (웹에 있던 'last' — 마지막 적 하나 — 는 2026-10-18 사용자 요청으로 발동을 지웠고, 대본 6개 언어에서도 지움)
 const BATTLE_KINDS := ["start", "wave", "boss", "danger"]
 const PRIORITY := {"start": 0, "boss": 1, "wave": 2, "danger": 3}
-## 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.png)
+## 전용 보스 초상화가 있는 스테이지 (image/character/story/boss_<id>.webp)
 const BOSS_ART := [10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 92, 93, 94, 95, 99, 100]
 
 var D: Dictionary
@@ -277,9 +277,9 @@ func _speaker(line: Dictionary) -> Dictionary:
 			sp["art"] = bb["art"]
 			sp["boss"] = true
 	elif Js.truthy(c.get("portrait")):
-		var tx: Texture2D = icons.call("image", "character/" + str(c["portrait"]) + ".png")
+		var tx: Texture2D = icons.call("image", "character/" + str(c["portrait"]) + ".webp")
 		if tx == null and Js.truthy(c.get("fallback")):
-			tx = icons.call("image", "character/" + str(c["fallback"]) + ".png")
+			tx = icons.call("image", "character/" + str(c["fallback"]) + ".webp")
 		sp["tex"] = tx
 		sp["ghost"] = Js.truthy(c.get("ghost"))
 	return sp
@@ -288,9 +288,9 @@ func _speaker(line: Dictionary) -> Dictionary:
 func _boss_img() -> Dictionary:
 	if stage == null or not Js.truthy(stage.get("boss")):
 		return {"tex": null, "art": false}
-	var cls_img := "character/" + str(stage["boss"]["cls"]) + "_01.png"
+	var cls_img := "character/" + str(stage["boss"]["cls"]) + "_01.webp"
 	if BOSS_ART.has(int(stage["id"])):
-		var t2: Texture2D = icons.call("image", "character/story/boss_%d.png" % int(stage["id"]))
+		var t2: Texture2D = icons.call("image", "character/story/boss_%d.webp" % int(stage["id"]))
 		if t2 != null:
 			return {"tex": t2, "art": true}
 	return {"tex": icons.call("image", cls_img), "art": false}
@@ -326,9 +326,9 @@ func _commander_img() -> Texture2D:
 	var ch: Variant = _commander()
 	var f: bool = ch != null and ch.get("gender") == "f"
 	if ch == null:
-		return icons.call("image", "character/novice_%s.png" % ("02" if f else "01"))
-	var t1: Texture2D = icons.call("image", "character/story/commander_%s.png" % ("f" if f else "m"))
-	return t1 if t1 != null else icons.call("image", "character/commander_%s.png" % ("02" if f else "01"))
+		return icons.call("image", "character/novice_%s.webp" % ("02" if f else "01"))
+	var t1: Texture2D = icons.call("image", "character/story/commander_%s.webp" % ("f" if f else "m"))
+	return t1 if t1 != null else icons.call("image", "character/commander_%s.webp" % ("02" if f else "01"))
 
 
 func _fmt(text: String) -> String:

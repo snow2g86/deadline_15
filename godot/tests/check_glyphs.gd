@@ -107,7 +107,8 @@ func _run() -> void:
 		_check(tofu.is_empty(), "%s: 섞인 이름(한글·가나·간체·번체·악센트) 두부 없음 %s" % [lang, str(tofu)])
 
 	# 같은 한자가 언어마다 다른 글꼴(글자 모양)로: 直 은 ja→JP, zh-CN→SC, zh-TW→TC, ko→KR
-	var want := {"ko": 0, "ja": 0, "zh-CN": 0, "zh-TW": 0}
+	# (ko 는 뺌: 한국어 한자(KS X 1001)는 부분 집합 글꼴에 남기지 않음 — 데이터에 한자가 없고 용량이 큼. 한자 이름은 사슬 뒤 글꼴(일본·중국 상용 한자)로 두부 없이 나옴, 아래 '한자 이름')
+	var want := {"ja": 0, "zh-CN": 0, "zh-TW": 0}
 	var ok_var := true
 	for lang: String in want.keys():
 		var f: Font = Fonts.for_lang(lang, 400)
@@ -116,7 +117,31 @@ func _run() -> void:
 		for g: Dictionary in ts.shaped_text_get_glyphs(tl2.get_rid()):
 			if g.get("font_rid") != f.get_rids()[0]:
 				ok_var = false
-	_check(ok_var, "直骨 이 ko·ja·zh-CN·zh-TW 각자 맨 앞 글꼴(KR·JP·SC·TC)로 그려짐")
+	_check(ok_var, "直骨 이 ja·zh-CN·zh-TW 각자 맨 앞 글꼴(JP·SC·TC)로 그려짐")
+	# 이름 입력 허용 범위: 한글 완성형 11,172자 전부 · 히라가나·가타카나 전부 · 라틴 악센트 — 6개 언어 사슬 모두에 (부분 집합 글꼴이 이 범위를 남김)
+	var rng_miss := []
+	for lang2: String in LANGS:
+		var n_miss := 0
+		for ch2: int in range(0xAC00, 0xD7A4):
+			if not Fonts.chain_has_char(lang2, ch2):
+				n_miss += 1
+		for ch3: int in range(0x3041, 0x30FB):   # 원본 Noto 에도 없는 빈 코드(3097·3098)는 뺌
+			if ch3 != 0x3097 and ch3 != 0x3098 and not Fonts.chain_has_char(lang2, ch3):
+				n_miss += 1
+		for ch4: int in range(0x20, 0x100):       # 기본 라틴 + 라틴-1 (악센트·¿¡ñ). 라틴 확장-A 는 원본 Noto CJK 에도 없음
+			if ch4 >= 0x7F and ch4 < 0xA0:
+				continue
+			if not Fonts.chain_has_char(lang2, ch4):
+				n_miss += 1
+		if n_miss > 0:
+			rng_miss.append("%s:%d" % [lang2, n_miss])
+	_check(rng_miss.is_empty(), "이름 입력 범위(한글 11,172 · 가나 · 라틴-1)가 6개 언어 사슬 모두에 있음 %s" % str(rng_miss))
+	var han_miss := []
+	for lang: String in LANGS:
+		for ch: String in "直骨李王金":   # 흔한 한자 이름 글자 — 어느 언어 화면에서도 사슬 안에 있어야 함 (없으면 시스템 글꼴 몫)
+			if not Fonts.chain_has_char(lang, ch.unicode_at(0)):
+				han_miss.append("%s:%s" % [lang, ch])
+	_check(han_miss.is_empty(), "한자 이름(直骨李王金)이 6개 언어 사슬 모두에 있음 %s" % str(han_miss))
 	# 언어 이름 라벨: 각자 자기 언어 사슬 맨 앞 글꼴에 다 있음 (설정 창 단추)
 	var lbl_bad := []
 	var ko_pack: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/lang/ko.json"))

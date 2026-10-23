@@ -967,9 +967,9 @@ func _export() -> void:
 		_check(exc.contains("tests/*") and exc.contains("tools/*") and exc.contains("build/*"), "%s: 빼기 tests/* · tools/* · build/*" % plat)
 		_check(str(cf.get_value(sec, "export_path")).begins_with("build/"), "%s: 결과물은 build/" % plat)
 		if plat == "macOS":
-			_check(str(cf.get_value(opt, "binary_format/architecture")) == "universal" and str(cf.get_value(opt, "application/bundle_identifier")) == "xyz.show4you.deadline15"
+			_check(str(cf.get_value(opt, "binary_format/architecture")) == "arm64" and str(cf.get_value(opt, "application/bundle_identifier")) == "xyz.show4you.deadline15"
 				and str(cf.get_value(opt, "application/short_version")) == "" and str(cf.get_value(opt, "application/version")) == "" and int(cf.get_value(opt, "notarization/notarization")) == 0,
-				"macOS: universal · 번들 ID xyz.show4you.deadline15 · 버전 = project config/version (빈칸) · 공증 안 함")
+				"macOS: arm64 전용 · 번들 ID xyz.show4you.deadline15 · 버전 = project config/version (빈칸) · 공증 안 함")
 		else:
 			_check(str(cf.get_value(opt, "binary_format/architecture")) == "x86_64" and str(cf.get_value(opt, "application/company_name")) == "show4you"
 				and str(cf.get_value(opt, "application/product_name")) == "DEADLINE 15" and str(cf.get_value(opt, "application/file_version")) == ""

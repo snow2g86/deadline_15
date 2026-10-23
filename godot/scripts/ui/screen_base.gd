@@ -648,7 +648,7 @@ func cls_icon(cls: String, sz: float) -> TextureRect:
 	return OKit.tex_rect(icons.call("image", "icon/jab/%s.png" % cls), Vector2(sz, sz))
 
 
-## 캐릭터 그림 (웹 charSprite: image/character/<직업>_01|02.png)
+## 캐릭터 그림 (웹 charSprite: image/character/<직업>_01|02.webp)
 func char_sprite(cls: String, gender: String, sz: float) -> TextureRect:
 	var r := OKit.tex_rect(icons.call("char_tex", cls, gender), Vector2(sz, sz * 1087.0 / 962.0))
 	return r

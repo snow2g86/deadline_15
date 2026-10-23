@@ -553,7 +553,7 @@ func _rebuild_chests() -> void:
 	for n: Node in _chest_nodes:
 		n.queue_free()
 	_chest_nodes.clear()
-	var tex := sdb.tex(SpriteDB.IMG + "icon/item/chest.png")
+	var tex := sdb.tex(SpriteDB.IMG + "map/chest.png")
 	for ch: Array in chests:
 		var c: int = int(ch[0])
 		var r: int = int(ch[1])

@@ -28,8 +28,8 @@
 | 프리셋 | 기능 태그 | 결과물 | 주요 설정 | 현재 상태 |
 |---|---|---|---|---|
 | Windows (STOVE) | `stove` | `build/windows/DEADLINE 15.exe` (+ pck) | x86_64, 회사 show4you, 아이콘 icon.png, **코드 서명 안 함** | 이 맥에서 실행해 보지 못함 (Windows PC 필요) |
-| macOS (STOVE) | `stove` | `build/macos/DEADLINE 15.zip` (.app 안에) | universal(x86_64+arm64), 번들 ID `xyz.show4you.deadline15`, ad-hoc 서명, **공증 안 함** | 이 맥에서만 바로 실행됨. 배포하려면 Developer ID 서명+공증 필요 |
-| Android (Google Play) | `google` | `build/android/DEADLINE15.aab` | Gradle 빌드, minSdk 24, targetSdk 36, arm64-v8a + armeabi-v7a, 적응형 아이콘, 몰입 모드, versionCode 402 | **출시용 업로드 키 없음**(디버그 키로만 시험 서명) |
+| macOS (STOVE) | `stove` | `build/macos/DEADLINE 15.zip` (.app 안에) | **arm64 전용**(인텔 맥 불가, 맞춤 템플릿 `tools/macos_arm64_template.sh`), 번들 ID `xyz.show4you.deadline15`, ad-hoc 서명, **공증 안 함** | 이 맥에서만 바로 실행됨. 배포하려면 Developer ID 서명+공증 필요 |
+| Android (Google Play) | `google` | `build/android/DEADLINE15.aab` | Gradle 빌드, minSdk 24, targetSdk 36, **arm64-v8a 만**(armeabi-v7a 제외), 적응형 아이콘, 몰입 모드, versionCode 402 | **출시용 업로드 키 없음**(디버그 키로만 시험 서명) |
 | Android (Google Play) APK | `google` | `build/android/DEADLINE15.apk` | 위와 같고 형식만 APK (시험용) | 에뮬레이터(Pixel 8)에서 실행 확인 |
 | iOS (App Store) | `apple` | `build/ios/` Xcode 프로젝트 | 번들 ID 같음, iOS **17.0+**, iPhone·iPad, **팀 ID 비어 있음** | 시뮬레이터용 빌드 성공, **실행은 못 해 봄** (Rosetta 필요) |
 
@@ -111,17 +111,22 @@
 
 ## 6. 용량 현황과 축소 계획
 
-**내려받는 크기 (2026-10-23 `godot/build/` 실측)**
+**내려받는 크기 — 용량 줄이기 전 → 후 (2026-10-23 `godot/build/` 실측, MB = 10^6 바이트)**
 
-| 결과물 | 크기 |
-|---|---|
-| Windows `DEADLINE 15.exe` + `DEADLINE 15.pck` | 약 96.8MB + 107.3MB (합계 약 204MB) |
-| macOS `DEADLINE 15.zip` | 약 170.2MB |
-| Android 출시용 AAB `DEADLINE15-release-debugkey.aab` (디버그 키로 서명한 시험본) | 약 164.0MB |
-| Android 디버그 APK | 약 278.0MB |
-| iOS `DEADLINE15.pck` (Xcode 프로젝트 안, 앱 전체 크기는 Xcode 보관 후 확인 [확인 필요]) | 약 107.3MB |
+| 결과물 | 전 | 후 |
+|---|---|---|
+| Windows `DEADLINE 15.exe` + `.pck` | 96.8 + 107.4 = 204.1MB | 96.8 + 43.4 = 140.2MB |
+| macOS `DEADLINE 15.zip` | 170.2MB (universal) | 73.3MB (arm64 전용) |
+| Android 출시용 AAB `DEADLINE15-release-debugkey.aab` (디버그 키 서명 시험본) | 164.0MB | 74.6MB (arm64-v8a 만) |
+| Android 디버그 APK | 278.0MB | 130.7MB |
+| iOS `DEADLINE15.pck` (Xcode 프로젝트 안) | 107.4MB | 43.4MB |
 
-**원본 저장소 용량 (git에 올라간 `godot/` 파일 기준, 약 159MB)**
+항목별 (pck 기준): 뒷모습 `_b` 그림 삭제 -10.5MB · 아이콘 개별 원본(`icon/item`·`icon/skill`) 내보내기 제외 -13.6MB · 정면·스토리 일러스트 손실 WebP(q85) -16.0MB · 글꼴 부분 집합 -23.7MB (글꼴 파일 49.7 → 17.5MB) ·
+안드로이드 armeabi-v7a 제외 AAB -25.6MB · macOS arm64 전용 zip -33.3MB. **방법·재생성 절차: `godot/README.md` '용량 줄이기'.**
+주의: macOS 는 **인텔 맥에서 실행 안 됨**, 안드로이드는 **32비트 전용 구형 폰 설치 불가**(2026 Play 는 64비트 필수 — Play 는 기기에 맞는 ABI 만 내려 주므로 arm64 폰의 다운로드 크기는 원래 AAB 전체가 아니었음).
+글꼴 부분 집합은 이름 입력 범위(한글 전부·가나·라틴·일본/간체/번체 상용 한자)만 번들하고 나머지 글자는 OS 시스템 글꼴이 그림.
+
+**원본 저장소 용량 (git에 올라간 `godot/` 파일 기준 — 아래 표는 용량 줄이기 전 값 약 159MB. 줄인 뒤: 글꼴 17.5MB · 캐릭터 그림 약 15MB 로 약 -65MB, 아이콘 개별 원본은 `item_src`·`skill_src`로 이름만 바뀌어 그대로)**
 
 | 항목 | 용량 | 비고 |
 |---|---|---|
@@ -133,7 +138,7 @@
 | 아이콘 (`assets/image/icon`) | 약 17.7MB | |
 | 앱 아이콘 | 약 2.4MB | |
 
-- 디스크에만 있고 git에 안 올리는 **그림 원본**: `icon/src` 약 161MB, `character/story/src` 약 16MB — **따로 백업 필요**(`.gdignore`로 Godot은 읽지 않음).
+- 디스크에만 있고 git에 안 올리는 **그림·글꼴 원본**: `icon/src` 약 161MB, `character/story/src` 약 16MB, `character/art_src`(정면·스토리 무손실 PNG) 약 28MB, `fonts/src`(전체 글꼴) 약 50MB — **따로 백업 필요**(`.gdignore`로 Godot은 읽지 않음. art_src·fonts/src 는 변환 직전 커밋 `ad48239`의 git 기록에도 있음).
 - 지금까지 한 축소: 미사용 개별 이미지(`icon/64x64`) 2,191장+시트 삭제(커밋 457e9f1), 이동 중 달리기(run) 모션 시트 100장 삭제로 약 3.7MB 감소(커밋 fc5af8c).
-- **계획(출시 때 결정, 코드 그대로)**: ① `armeabi-v7a` 아키텍처를 빼면(`architectures/armeabi-v7a=false`, 2026 Play는 64비트만 필수) 안드로이드 용량 **약 83MB 감소**, ② 글꼴을 쓰는 글자만 남긴 부분 집합으로 줄이면 **약 30MB 감소**. 둘 다 `godot/README.md` 6a 노트의 어림값이고, 부분 집합 글꼴은 사용자가 입력하는 이름 글자 문제(두부) 검토가 필요합니다 [확인 필요].
-- 메모리 참고: 글꼴 4개를 시작할 때 모두 읽어 정적 메모리 약 +80MB (모바일 부담 시 필요한 언어만 늦게 읽기 — 아직 미구현).
+- **적용 완료(2026-10-23)**: `armeabi-v7a` 제외 · 글꼴 부분 집합 · 그림 WebP · 뒷모습 삭제 · macOS arm64 — 위 표. 남은 후보: 글꼴 4개를 모두 읽는 메모리(이제 약 +28MB) 늦게 읽기, 소리 wav 압축(2.7MB), 초상화·동작 시트 WebP.
+- 메모리 참고: 글꼴 4개를 시작할 때 모두 읽음 — 부분 집합으로 정적 메모리 약 +80MB → +28MB.

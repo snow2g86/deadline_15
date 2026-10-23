@@ -2,7 +2,7 @@
 """개발용: godot/assets/image/icon/src 의 일러스트를 게임 아이콘으로 한 번에 적용
 
 사용: python3 tools/import-icons.py
-1) godot/assets/image/icon/src/<키>.png|webp|jpg → godot/assets/image/icon/item/<키>.png (256px, 테두리 여백·생성 표시 정리 — tools/make-icon.py)
+1) godot/assets/image/icon/src/<키>.png|webp|jpg → godot/assets/image/icon/item_src/<키>.png (256px, 테두리 여백·생성 표시 정리 — tools/make-icon.py)
    jab_<직업> 키는 직업 아이콘 godot/assets/image/icon/jab/<직업>.png (64px) 로 교체
    이미 변환된 것은 원본이 더 새로울 때만 다시 변환
 2) 아이콘 시트 다시 만들기 (tools/build-icon-sheet.py → godot/assets/image/icon/item-sprite.webp, js/common/item-icons.js)
@@ -11,7 +11,7 @@
 """
 import os, glob, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC, DST = os.path.join(ROOT, 'godot/assets/image/icon/src'), os.path.join(ROOT, 'godot/assets/image/icon/item')
+SRC, DST = os.path.join(ROOT, 'godot/assets/image/icon/src'), os.path.join(ROOT, 'godot/assets/image/icon/item_src')
 os.makedirs(SRC, exist_ok=True); os.makedirs(DST, exist_ok=True)
 n = 0
 for f in sorted(glob.glob(os.path.join(SRC, '*'))):

@@ -2,7 +2,7 @@
 """개발용: 맵 오브젝트(나무·바위·둔덕·평지 장식) 로컬 생성 — Qwen-Image-Edit-2509 + Lightning 8스텝 (mflux, 크로노 엘레멘탈과 같은 방식)
 
 화풍 기준 = 우리 캐릭터 그림(기본 knight_01) → 같은 16비트 픽셀 화풍으로 오브젝트만 그림
-사용: python3 tools/gen-props.py <이름 ...> [--seeds 1,2] [--ref godot/assets/image/character/knight_01.png]
+사용: python3 tools/gen-props.py <이름 ...> [--seeds 1,2] [--ref godot/assets/image/character/art_src/front/knight_01.png]
   이름: tree_a tree_b pine rock_a rock_b mound grass stones (아래 P 참고, all = 전부)
 출력: tools/_work/props/<이름>_<시드>.png (크로마키 바탕: 초록 #00FF00, 초록 물체는 자홍 #FF00FF)
 한 번에 하나씩 순서대로 (메모리 많이 씀 — 영상 서버와 동시에 돌리지 말 것)
@@ -46,7 +46,7 @@ def main():
     names = [a for a in sys.argv[1:] if not a.startswith('--') and a not in (arg('--seeds', ''), arg('--ref', ''))]
     if names == ['all']: names = list(P)
     seeds = [int(s) for s in arg('--seeds', '1,2').split(',')]
-    ref = ref_image(os.path.join(ROOT, arg('--ref', 'godot/assets/image/character/knight_01.png')))
+    ref = ref_image(os.path.join(ROOT, arg('--ref', 'godot/assets/image/character/art_src/front/knight_01.png')))
     for n in names:
         bg, what = P[n]
         prompt = (f"Using exactly the same retro 16-bit pixel art style, palette and dark outline as this character sprite, "

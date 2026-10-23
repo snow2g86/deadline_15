@@ -6,6 +6,7 @@
 - 다른 캐릭터 그림과 같은 자리에 맞춤: 인물 높이 900px, 가운데, 발끝 y=1030 (지휘관 그림과 같음)
 - 발밑에 남은 바탕색 그림자는 지우고, 왼쪽을 보는 원본(FLIP)은 뒤집음
 - 원본이 더 새로울 때만 다시 만듦
+- 결과 PNG 는 배포용으로 손실 WebP 로 바꿈: python3 godot/tools/webp_art.py (2026-10-23, godot/README.md '용량')
 """
 import os, glob, subprocess, sys, tempfile
 from PIL import Image
@@ -34,7 +35,8 @@ for f in sorted(glob.glob(os.path.join(SRC, '*'))):
     key, ext = os.path.splitext(os.path.basename(f))
     if ext.lower() not in ('.png', '.jpg', '.jpeg', '.webp'): continue
     out = os.path.join(DST, key + '.png')
-    if os.path.exists(out) and os.path.getmtime(out) >= os.path.getmtime(f): continue
+    done = [o for o in (out, os.path.join(DST, key + '.webp')) if os.path.exists(o)]   # 변환된 .webp 도 완료로 침
+    if done and os.path.getmtime(done[0]) >= os.path.getmtime(f): continue
     tmp = os.path.join(tempfile.gettempdir(), 'portrait_' + key + '.png')
     subprocess.run([sys.executable, os.path.join(ROOT, 'tools/make-icon.py'), f, tmp, '1024', '1024'], check=True, capture_output=True)
     im = drop_ground_shadow(Image.open(tmp).convert('RGBA'))
@@ -47,4 +49,4 @@ for f in sorted(glob.glob(os.path.join(SRC, '*'))):
     can.save(out, optimize=True)
     n += 1
     print(out, im.size)
-print('converted', n)
+print('converted', n, '— 이어서 `python3 godot/tools/webp_art.py` 로 WebP 변환 (PNG 는 art_src 로 옮겨짐)')

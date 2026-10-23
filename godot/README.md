@@ -53,11 +53,13 @@ godot/
     story/{ko,en,es,ja,zh-CN,zh-TW,sample}.json   스토리 대본
     manifest.json      자동 생성 (data_tool) — 파일별 전역 개수·값 개수·sha1·특수값 위치 (DataDB 가 읽을 때 검증)
   tools/data_tool.gd   데이터 도구 CLI: 점검(--check) · 모양 맞춤 + manifest(--write) · 기준 잠금(--relock). 규칙은 tools/data_format.gd
-  assets/image/        그림 원본 (git 에 올림 · *.import 포함). icon/src · character/story/src 는 일러스트 원본(git 제외 · .gdignore 로 Godot 도 안 읽음)
-  assets/fonts/        Noto Sans KR·JP·SC·TC (가변 굵기, OFL — OFL.txt 하나가 넷 모두의 라이선스, 같은 글). git 에 올림 (약 50MB).
+  assets/image/        그림 원본 (git 에 올림 · *.import 포함). icon/src · character/story/src · character/art_src 는 일러스트 원본(git 제외 · .gdignore 로 Godot 도 안 읽음),
+                       icon/item_src · icon/skill_src 는 아이콘 시트를 만드는 256px 개별 그림(git 에 올림 · .gdignore — 내보내기에 안 들어감). 정면·스토리 일러스트는 .webp (아래 '용량 줄이기')
+  assets/fonts/        Noto Sans KR·JP·SC·TC **부분 집합**(쓰는 글자만 남김, 가변 굵기, 합계 17.5MB — OFL.txt 하나가 넷 모두의 라이선스). 원본 전체 글꼴(49.7MB)은 fonts/src/(git 제외 · .gdignore — ad48239 의 git 기록에서 복구).
                        project.godot 기본 글꼴은 KR, 실행 중에는 scripts/core/fonts.gd 가 언어별 사슬로 바꿈 (아래 '글꼴')
   tests/check_foundation.gd   머리 없는 시험 (6개 언어: 팩·대본·gd.* 키 맞춤 · 데이터 원본 모양·manifest·기준 잠금, 언어 감지, 글꼴 사슬)
   tests/check_glyphs.gd        6개 언어 데이터의 모든 글자가 글꼴 사슬에 있는지 + 한자·가나가 그 언어 글꼴로 그려지는지 (두부 0)
+  tests/check_back_view.gd     뒷모습 삭제 뒤: `_b` 그림 0개 · back 요청 = 앞모습 대신 · UnitView 켜기/끄기 오류 0 (아래 '용량 줄이기 6')
   tests/shots_lang6.gd         ja·zh-CN·zh-TW 전투 HUD·설정·대사 화면 사진 (창 모드 → tests/screens/lang6_godot_*.png)
   tests/golden/        전투 황금 기록 (웹 코드로 만든 고정 기준 — 보관: tools/legacy-web/battle-sim.js, tests/golden/README.md)
   tests/baseline/      기준 데이터 data/ (2026-10-18 옮긴 시점 godot/data 사본 — 기준 시험이 읽음) · LOCK.json (golden·fixtures·baseline sha1 잠금)
@@ -185,8 +187,8 @@ godot/
 **원본은 `godot/assets/image/`** 입니다 (2026-10-18 `git mv image godot/assets/image` — 이력 그대로, 그림 2,791개 약 70MB + Godot `*.import` 2,790개).
 - 저장소 맨 위 `image` 는 `godot/assets/image` 를 가리키는 **상대 경로 심볼릭 링크** — 웹판(동결)이 폐기 전까지 그대로 열리게. 웹을 지울 때 함께 지우면 됩니다.
 - 예전 `tools/sync-godot-assets.sh`(웹 image/ → 사본 복사)는 지웠습니다. 소리 등 다른 자원 폴더는 웹판에 없었습니다 (배경음은 합성).
-- 일러스트 원본 `assets/image/icon/src/`(199개 · 약 161MB) · `assets/image/character/story/src/`(23개 · 약 16MB)는 git 에 넣지 않고(.gitignore),
-  각 폴더의 `.gdignore` 로 Godot 도 가져오지 않습니다. **디스크에만 있으므로 따로 백업**하세요.
+- 일러스트 원본 `assets/image/icon/src/`(199개 · 약 161MB) · `assets/image/character/story/src/`(23개 · 약 16MB) · `assets/image/character/art_src/`(정면·스토리 무손실 PNG 49개)는 git 에 넣지 않고(.gitignore),
+  각 폴더의 `.gdignore` 로 Godot 도 가져오지 않습니다. **디스크에만 있으므로 따로 백업**하세요 (art_src 는 변환 직전 커밋 ad48239 의 git 기록에도 있음).
 - 작업 중 미리보기 `*.prev.png` 는 Godot 이 가져오며 옆파일을 만들지만 그 `.import` 는 올리지 않습니다 (.gitignore).
 - 그림 도구(`tools/import-icons.py` · `make-portrait.py` · `make-back.py` · `make-props.py` · `build-icon-sheet.py` …)도 새 경로를 씁니다.
 - 새 그림을 넣거나 처음 받은 저장소: `Godot --headless --path godot --editor --quit` 로 가져오기 (`.godot/` 없이 처음부터 약 13초 · 5,592개 · 113MB 캐시,
@@ -250,10 +252,57 @@ godot/
 - `Kit.font()`·`Kit.bold(w)` 는 `Fonts.weight(w)` — 굵기마다 **같은 객체**이고, 언어가 바뀌면 그 안의 `base_font`·`fallbacks` 만 바꿔 `changed` 를 보내므로
   `add_theme_font_override` 로 붙인 글꼴도 바로 다시 그려집니다. 대체 글꼴도 같은 굵기(wght)로 만듭니다. 루트 창 테마 기본 글꼴도 같이 바뀌어 테마 없는 화면(시작 화면)도 언어 글꼴.
 - 화면 언어와 상관없이 특정 언어 글자 모양이 필요하면 `Fonts.for_lang("ja", 700)` (설정 창의 언어 이름 단추).
-- 비용 (M3 Max 실측): 파일 4개 47MB(KR 10 · JP 9 · SC 17 · TC 12). **시작할 때 4개를 모두 읽음**, 약 83ms.
-  정적 메모리는 약 **+80MB**(KR 16 · JP 16 · SC 32 · TC 16 — 파일 크기보다 큼).
+- 비용 (M3 Max 실측): 파일 4개 **17.5MB**(KR 4.6 · JP 4.5 · SC 4.5 · TC 3.9 — 부분 집합, 원본 49.7MB. 아래 '용량 줄이기 2'). **시작할 때 4개를 모두 읽음**, 약 30ms.
+  정적 메모리는 약 **+28MB**(KR 8 · JP 8 · SC 8 · TC 4 — 원래 +80MB).
 - 남은 과제(모바일): ko·en·es 데이터 글자는 KR 하나로 다 그려지므로, 모바일에서 메모리가 문제면 현재 언어에 필요 없는 대체 글꼴(JP·SC·TC)을
   필요할 때(예: 그 언어로 바꿀 때·이름 입력 화면) 늦게 읽도록 바꿀 것. 아직 코드에는 없음.
+
+## 용량 줄이기 (2026-10-23) — 규칙·데이터 수치 불변
+
+결과 (Windows pck 기준, `--export-pack` 으로 단계마다 잼, MB = 10^6 바이트): **107.4MB → 43.4MB (-64.0MB)**. 항목별:
+
+| 항목 | pck 전 → 후 | 내용 |
+|---|---|---|
+| 6 뒷모습 삭제 | -10.5MB | `character/**/*_b*.png` 120개(정지 24 + 동작 시트 96) 삭제 — 아래 '뒷모습' |
+| 1 도구용 원본 제외 | -13.6MB | `icon/item` 197+1 · `icon/skill` 51 개별 PNG → `icon/item_src` · `icon/skill_src`(.gdignore). 게임이 쓰는 `chest.png` 는 `map/chest.png` 로 |
+| 5 정면·스토리 일러스트 WebP | -16.0MB (26.1 → 10.1) | 정면 26 + 스토리 23 → 손실 WebP q85 (저장소 파일은 PNG 28.2MB → WebP 3.3MB) |
+| 2 글꼴 부분 집합 | -23.7MB (35.8 → 12.2) | 글꼴 파일 49.7MB → 17.5MB |
+| 3 안드로이드 arm64 만 | AAB 100.2 → 74.6MB (-25.6MB, 위 항목들로 164.0 → 100.2) | 아래 |
+| 4 macOS arm64 전용 | zip 106.6 → 73.3MB (-33.3MB, 위 항목들로 170.2 → 106.6) | 아래 |
+
+**1. 도구용 원본 제외.** 아이콘 시트(`item-sprite.webp` · `skill-sprite.png`)만 게임이 읽고, 개별 256px 그림은 시트를 만드는 도구(`tools/build-icon-sheet.py` · `import-icons.py` · `icon-catalog.py`)의 입력.
+`.gdignore` 가 있는 폴더는 Godot 이 가져오지도(.import 없음) 내보내지도 않음 — 기존 `icon/src` · `story/src` 와 같은 방식이라 프리셋 exclude 는 따로 안 씀. 폴더 이름만 `item` → `item_src`, `skill` → `skill_src`.
+`battle_map.gd` 의 보물상자 그림은 `map/chest.png`(복사본 — 상자 그림을 바꾸면 `item_src/chest.png` 와 둘 다).
+
+**2. 글꼴 부분 집합.** `python3 godot/tools/subset_fonts.py` (`--report` 는 크기만, `--out` 은 다른 폴더). 원본은 `assets/fonts/src/*.ttf`(git 제외 · .gdignore, 같은 OFL — 없으면 `git show ad48239:godot/assets/fonts/<파일>` 로 꺼냄), 결과는 같은 이름으로 `assets/fonts/`.
+- 남기는 글자: 언어별 사슬(`fonts.gd CHAINS`)을 따라 — 공통(`data/*.json` · 코드·장면의 문자열 글) ∪ 그 언어 팩·대본 ∪ **이름 입력 허용 범위**(한글 완성형 11,172 · 히라가나·가타카나 · 라틴 악센트 · 전각/반각 · 문장부호·기호 ·
+  한자는 일본 JIS 제1수준 2,965 · 간체 GB2312 일급 3,755 · 번체 Big5 상용 5,401 — 파이썬 코덱에서 뽑음, 다운로드 없음) 를 '사슬에서 원본에 그 글자가 있는 첫 글꼴'에 남김 → 원본일 때와 같은 글꼴·글자 모양.
+  GSUB/GPOS 기능은 kern·liga·locl·ccmp·mark·vert 등만 남김. 굵기 축(wght)은 그대로.
+- **이름 입력 두부 대책**: ① 범위 안(위)은 번들 글꼴이 그림 ② 범위 밖(희귀 한자·키릴·그리스·이모지 등)은 **시스템 대체 글꼴** — 4개 파일 모두 `allow_system_fallback=true`(원래 기본값)라 macOS·Windows·Android·iOS 의 CJK 시스템 글꼴이 그림
+  (실제 창에서 `𠮷野家 鑫 龘 Ñandú ¿¡` 확인 — 두부 아님, 글자 모양만 시스템 것). ③ 한국어 한자(KS X 1001)는 남기지 않음(데이터에 한자 없음, +2.4MB) → 한자 이름은 일본·중국 상용 한자 글꼴로 나옴.
+  입력 글자 제한은 하지 않음(기존 동작 그대로). 시험: `check_glyphs` — 데이터 글자 · 한글 11,172 · 가나 · 라틴-1 · 섞인 이름 · 한자 이름(直骨李王金) 이 6개 언어 사슬에 모두 있음 + 견본 문장 글리프가 전부 우리 사슬에서 옴.
+- **다시 만들기**: 번역·대본·데이터·코드 문구가 바뀌어 새 글자가 생기면(`check_glyphs` 가 두부를 알려 줌) `python3 godot/tools/subset_fonts.py` → `Godot --headless --path godot --editor --quit` → `check_glyphs`. 필요: `fonttools`(`brew install fonttools`, pyftsubset 과 같은 파이썬). OFL: 수정본이며 예약 글꼴 이름('Source')을 쓰지 않음.
+- 모바일 메모리: 글꼴 4개 정적 메모리 약 +80MB → 약 +28MB(KR 8 · JP 8 · SC 8 · TC 4, check_glyphs 출력) — '늦게 읽기' 과제는 많이 줄었음.
+
+**3. 안드로이드.** 두 프리셋 모두 `architectures/armeabi-v7a=false` (arm64-v8a 만). x86 · x86_64 는 원래 꺼져 있었고 **켜지 않음**: Play 는 64비트 ARM 이 필수이고, 애플 실리콘 맥의 에뮬레이터(`Pixel_8_API_35` arm64)도 arm64,
+x86_64 는 인텔 에뮬레이터·일부 크롬북 전용이라 AAB 에 libgodot 을 하나 더(약 +70MB) 넣을 값어치가 없음 (필요하면 프리셋 한 줄). 참고: Play 는 기기에 맞는 ABI 만 내려 주므로 **arm64 기기의 다운로드 크기는 원래도 AAB 전체가 아니었음** —
+armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형 폰이 설치 불가**가 되는 쪽의 결정 (2026 Play 64비트 필수·minSdk 24 와 맞음). 시험: `check_mobile6a`(두 프리셋 arm64-v8a 만).
+
+**4. macOS arm64 전용.** `binary_format/architecture="arm64"` + 맞춤 템플릿(위 5단계 — `bash godot/tools/macos_arm64_template.sh`). **인텔 맥에서는 실행되지 않음.** 시험: `check_pc5`.
+
+**5. 정면·스토리 WebP.** `character/<직업>_01|02.webp`(26) · `character/story/*.webp`(23): 손실 q85(`-sharp_yuv`, 알파는 무손실 `-alpha_q 100`). 가져오기 설정은 '손실 0.85'(`*.webp.import` — 기본 무손실이면 Godot 이 풀어서 다시 무손실로 넣어 커짐).
+화질: 가져온 결과를 원본 PNG 와 비교해 PSNR 33~38dB, 알파가 8 넘게 다른 픽셀 0 (가장자리 깨짐 없음, 비교 그림은 보고서 참고). 참조 갱신: `story_battle.gd` · `sprite_db.gd` · `icons.gd char_tex` · `lobby.gd` · `codex_view.gd` 의 `.png` → `.webp`.
+`portrait/`(512px 초상화)와 `anim/` 동작 시트는 그대로 PNG(칸 경계가 있는 시트는 무손실 유지).
+- **원본·재생성**: 무손실 PNG 는 `assets/image/character/art_src/{front,story}/`(git 제외 · .gdignore)로 옮겨 두고 변환 직전 커밋 `ad48239` 의 git 기록에도 있음. `python3 godot/tools/webp_art.py`(새 PNG 변환) · `--rebuild`(art_src 로 전부 다시) · `--check`(PSNR 점검).
+  새 스토리 그림은 `tools/make-portrait.py` → `webp_art.py`. 필요: `cwebp`(`brew install webp`).
+- 도구가 앞모습 PNG 를 읽을 때는 `art_src/front/<키>.png` (gen-props · video-to-sheet 의 기본값 갱신).
+
+**6. 뒷모습.** `_b` 그림 120개 삭제 (3D 로 교체할 예정, 사용자 지시 2026-10-23 — git 기록에서 복구: `git checkout ad48239 -- godot/assets/image/character` 처럼 필요한 것만). 웹판도 꺼 두었던(`Rig.BACK_VIEW=false`) 그림이라 화면에는 원래 안 쓰임.
+**뒷모습을 읽는 자리** (3D 로 다시 연결할 때 여기만):
+- `scripts/battle/sprite_db.gd` — `sheet(cls, gender, kind, back)` · `still(cls, gender, back)`: back=true 면 `data/sprites.json SPRITE_SHEETS["<키>_b"]` 시트 / `character/<키>_b.webp` 를 찾고, **데이터에 없거나 파일이 없으면 앞모습으로 대신**.
+- `scripts/battle/unit_view.gd` — `facing_back` · `set_facing_back(on)`: 유닛 하나를 뒷모습으로 (지금은 아무도 안 부름, 기본 false). 카메라 방향(`iso.cam_dir`)에 따라 켜는 코드는 아직 없음 — 3D 전환 때 이 한 줄.
+- `data/sprites.json` 의 `*_b` 시트 24개 항목은 **그대로 남김**(기준 잠금·수치 불변 — 가리키는 파일이 없으면 위 대체 규칙으로 무시됨). 3D 로 바꿀 때 데이터 정리 때 지움.
+- 시험: `tests/check_back_view.gd` — `_b` 파일 0개 · 13직업×남녀×4동작 back 요청 = 앞모습 · UnitView 켜기/끄기 · 소환수 포함 오류 0.
 
 ## 오토로드 사용법
 
@@ -550,7 +599,7 @@ Store 는 오토로드 순서상 닫기 알림을 먼저 받아 쓰므로, 뒤�
 | 프리셋 | 결과물 | 내용 |
 |---|---|---|
 | Windows (STOVE) | `build/windows/DEADLINE 15.exe` + `.pck` | x86_64, 기능 태그 stove, 회사 show4you · 제품 DEADLINE 15 · 파일/제품 버전 빈칸 = `config/version`, 아이콘 icon.png, 서명 안 함 |
-| macOS (STOVE) | `build/macos/DEADLINE 15.zip` (안에 `DEADLINE 15.app`) | universal(x86_64 + arm64), 번들 ID `xyz.show4you.deadline15`, 버전 빈칸 = `config/version`, 분류 Games, 서명 = 내장 ad-hoc(로컬 실행만), 공증 안 함 |
+| macOS (STOVE) | `build/macos/DEADLINE 15.zip` (안에 `DEADLINE 15.app`) | **arm64(애플 실리콘) 전용**(2026-10-23, 인텔 맥은 못 돌림 — 맞춤 템플릿 `build/templates/macos_arm64.zip`, `tools/macos_arm64_template.sh`), 번들 ID `xyz.show4you.deadline15`, 버전 빈칸 = `config/version`, 분류 Games, 서명 = 내장 ad-hoc(로컬 실행만), 공증 안 함 |
 
 ```bash
 HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --export-release "macOS (STOVE)" "build/macos/DEADLINE 15.zip"
@@ -561,8 +610,9 @@ HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godo
   check_pc5 는 build/ 의 pck(맥은 zip 안)가 **소스보다 오래되었으면 실패** (scripts·scenes·data·assets·project.godot·export_presets.cfg 의 수정 시각 비교 — build/ 가 없으면 건너뜀).
   확인(2026-10-18, 검수 뒤 마지막 내보내기): 두 pck 모두 파일 5,877개, `tests/`·`tools/`·`tests/baseline`·src·`*.prev.png` 없음, `data/*`·`OFL.txt`·소리 있음 (check_pc5 '9) export' 가 build/ 의 pck 를 직접 읽어 확인).
   (pck 안에 `res://tests/...` 글자가 보이는 것은 uid 캐시의 경로 문자열일 뿐 파일은 없음)
-- 크기: pck 106MB (글꼴 47MB · 그림 · 소리 2.6MB), Windows exe 97MB, macOS zip 167MB.
-- `rendering/textures/vram_compression/import_etc2_astc=true` — macOS universal·arm64 내보내기의 필수 조건 (그림은 모두 무손실이라 다시 가져온 것 없음).
+- 크기(2026-10-23, 용량 줄이기 뒤): pck 43.4MB (글꼴 12.2MB · 그림 · 소리 2.7MB), Windows exe 97MB, macOS zip 73MB (이전 pck 107MB · macOS 170MB — 아래 '용량 줄이기').
+- macOS arm64 전용은 공식 템플릿(universal 실행 파일 하나뿐)으로는 '`godot_macos_release.arm64` 를 찾을 수 없음' 으로 실패하므로, 처음 한 번(Godot 버전을 올릴 때도) `bash godot/tools/macos_arm64_template.sh` 로 lipo 로 얇게 만든 템플릿을 `build/templates/` 에 만들어 둠 (프리셋 `custom_template/*` 가 가리킴).
+- `rendering/textures/vram_compression/import_etc2_astc=true` — macOS universal·arm64 내보내기의 필수 조건 (정면·스토리 일러스트 49장은 손실 WebP q85, 나머지 그림은 무손실).
 - 버전 올리기: `project.godot` 의 `application/config/version` 하나만 (두 프리셋이 빈칸이라 이 값을 씀). 전투 이어하기 저장도 이 값을 봄.
 
 **코드 서명 · 공증 (사용자 계정·인증서가 필요해 하지 않음 — 절차만)**
@@ -755,7 +805,8 @@ Godot --path godot -- --iap-env local                                           
   Godot --headless --path godot --export-release "Android (Google Play)"     build/android/DEADLINE15.aab     # 출시 키스토어 필요 (아래)
   Godot --headless --path godot --export-debug   "iOS (App Store)"           build/ios/DEADLINE15.ipa         # 팀 ID 필요 (아래)
   ```
-- 크기: **디버그 APK 269MB**(두 아키텍처, 디버그 템플릿 — 내보내기 폴더의 `DEADLINE15-debug.apk`) · **출시 AAB 157MB**(출시 템플릿, 디버그 키로 서명해 시험한 것 — Play 가 설치 때 기기에 맞는 아키텍처만 내려 줌) — 대부분 libgodot(×2 아키텍처) · 글꼴 47MB · 그림.
+- 크기: (2026-10-23, armeabi-v7a 제외 · 용량 줄이기 뒤) **디버그 APK 131MB**(arm64-v8a 만, 디버그 템플릿 — 내보내기 폴더의 `DEADLINE15-debug.apk`) · **출시 AAB 74.6MB**(출시 템플릿, 디버그 키로 서명해 시험한 것) — libgodot 70MB(arm64) + pck 43MB. 이전: APK 269MB · AAB 157MB.
+  ABI 는 프리셋 `architectures/*` 가 Godot → Gradle(`export_enabled_abis` → `abiFilters`)로 넘어가므로 gradle 파일을 따로 고칠 것이 없음. **arm64-v8a 만**(armeabi-v7a · x86 · x86_64 끔) — 이유는 아래 '용량 줄이기 3'.
 
 ### 서명 — 사용자가 할 일
 
@@ -789,8 +840,7 @@ Godot --path godot -- --iap-env local                                           
   5개 프리셋 모두 `exclude_filter` 에 **`dev/*` · `assets/pilot/*`** (다른 작업의 시범 파일이 빌드에 안 들어감 — check_mobile6a 가 확인, 내보낸 APK·pck 목록으로도 확인).
 - **iOS Info.plist 의 빈 사용 설명 키** (카메라·사진·마이크): Godot 4.5.1 은 프리셋이 비어 있어도 키를 늘 써 넣음(프리셋 옵션으로는 못 지움) →
   내보낸 뒤 **`bash godot/tools/ios_fix_plist.sh godot/build/ios`** 로 지움 (내보낼 때마다, Xcode 에서 열기 전에).
-- **앱 크기 안내** (지금은 코드 그대로): 디버그 APK 269MB · 출시 AAB 157MB 중 `armeabi-v7a`(약 83MB: libgodot 75 + libc++ 1)를 빼면(프리셋 `architectures/armeabi-v7a=false`, 2026 Play 는 64비트만 필수) APK 가 약 83MB 줄고,
-  글꼴(Noto KR·JP·SC·TC 47MB)을 쓰는 글자만 남긴 부분 집합으로 줄이면 약 30MB 가 더 줄어듦 — 두 가지 모두 출시 때 결정.
+- **앱 크기 안내** → 2026-10-23 에 둘 다 적용함 (`armeabi-v7a` 제외 · 글꼴 부분 집합) — 아래 '용량 줄이기'.
 - **QA 에서 나온 것 (PC·모바일 공통)**: 소환사 `{name}` 소환 글자(엔진 `fx_float` 에 `params` — 기록(golden)에는 안 들어가고 화면 글자에만, 같은 꼴이던 저주 `{n}`·연속 사격 `{hits}`도) ·
   결과 창 골드 줄을 기본 / 새 별 / 첫 클리어 / 합계로 나눔 (합계 = 줄 합 — 상자 골드는 전투 중에 따로 더해짐) · 한국어 조사(`scripts/core/josa.gd`, `I18n.t` 가 ko 일 때만) ·
   처치 EXP 글(`gd.result.battle_detail` — '총 N EXP' 가 아니라 '처치 EXP N (M명이 나눠 받음)') · 결과가 뜨면 윗줄 턴 표시 숨김 · 별 '이번 판 ✓/✕' 와 '기존 기록 ★' 구분 ·

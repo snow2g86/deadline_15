@@ -1,9 +1,10 @@
 extends RefCounted
 ## 그림 창구 — 웹 js/battle/rig.js (Rig.key·fit·sheet·_sheetEl) 의 위치 계산과 그림 불러오기
-##  캐릭터 그림: res://assets/image/character/<직업>_<01|02>.png (962x1087, 오른쪽을 봄)
+##  캐릭터 그림: res://assets/image/character/<직업>_<01|02>.webp (손실 WebP q85, 원본 PNG 는 art_src) (962x1087, 오른쪽을 봄)
 ##  동작 시트: SPRITE_SHEETS[키][idle|combat|hit|attack] (가로로 frames 칸, 칸 크기 w×h)
 ##  몸 높이 맞춤 (CHAR_FIG·FIG_H·FIG_FOOT): 화면에서 무기를 뺀 몸이 FIG_H(50px) 가 되게, 발끝을 같은 선에
-##  뒷모습 시트(<키>_b)는 웹도 꺼 둠 (Rig.BACK_VIEW = false) — 여기도 쓰지 않음
+##  뒷모습(<키>_b 시트·정지 그림)은 웹도 꺼 둠 (Rig.BACK_VIEW = false) — 화면은 쓰지 않음. 그림 파일은 3D 교체를 위해 2026-10-23 삭제(git 기록에서 복구).
+##  sheet()/still() 의 back 인자는 '뒷모습을 읽는 자리' — 파일이 없으면 앞모습으로 대신 (UnitView.facing_back, godot/README.md '뒷모습')
 
 const IMG := "res://assets/image/"
 ## 웹 UI (캐릭터 아이콘 기본 폭) — CHAR_FIG 가 없는 그림(소환수)
@@ -41,8 +42,14 @@ func tex(path: String) -> Texture2D:
 	return t
 
 
-## 동작 시트 (없으면 idle, 그것도 없으면 null)
-func sheet(cls: String, gender: String, kind: String) -> Variant:
+## 동작 시트 (없으면 null). back = true 면 뒷모습 시트(<키>_b)를 찾고, 데이터에 없거나 그림 파일이 없으면 앞모습 시트로 대신
+func sheet(cls: String, gender: String, kind: String, back: bool = false) -> Variant:
+	if back:
+		var b: Variant = SHEETS.get(key_of(cls, gender) + "_b")
+		if typeof(b) == TYPE_DICTIONARY and (b as Dictionary).has(kind):
+			var bs: Variant = b[kind]
+			if typeof(bs) == TYPE_DICTIONARY and ResourceLoader.exists(IMG + str(bs["src"]).trim_prefix("image/")):
+				return bs
 	var a: Variant = SHEETS.get(key_of(cls, gender))
 	if typeof(a) != TYPE_DICTIONARY:
 		return null
@@ -76,8 +83,8 @@ func sheet_place(cls: String, gender: String, sh: Dictionary) -> Variant:
 	return {"pos": Vector2(left, -float(body[1]) * z), "scale": z, "w": float(sh["w"]), "h": float(sh["h"])}
 
 
-## 정지 그림 (시트가 없을 때): { tex, rect(발 기준) }
-func still(cls: String, gender: String) -> Variant:
+## 정지 그림 (시트가 없을 때): { tex, rect(발 기준) }. back = true 면 character/<키>_b.webp (삭제됨 — 3D 교체 전 임시), 없으면 앞모습
+func still(cls: String, gender: String, back: bool = false) -> Variant:
 	if cls.begins_with("summon_"):
 		var t := summon_tex(cls, gender)
 		if t == null:
@@ -86,7 +93,11 @@ func still(cls: String, gender: String) -> Variant:
 		var h := roundf(UI_SIZE * float(t.get_height()) / float(t.get_width()))
 		# 아이콘 아래 = 타일 가운데 = 발 + 3
 		return {"tex": t, "rect": Rect2(-w / 2.0, 3.0 - h, w, h)}
-	var t2 := tex(IMG + "character/" + key_of(cls, gender) + ".png")
+	var t2: Texture2D = null
+	if back:
+		t2 = tex(IMG + "character/" + key_of(cls, gender) + "_b.webp")
+	if t2 == null:
+		t2 = tex(IMG + "character/" + key_of(cls, gender) + ".webp")
 	if t2 == null:
 		return null
 	var ft: Variant = fit(cls, gender)

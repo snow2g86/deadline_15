@@ -251,7 +251,8 @@ func _export() -> void:
 	_check(str(cf.get_value(a, "custom_features")) == "google" and str(cf.get_value(io, "custom_features")) == "apple", "기능 태그 google · apple")
 	_check(str(cf.get_value(ao, "package/unique_name")) == "xyz.show4you.deadline15" and str(cf.get_value(io + ".options", "application/bundle_identifier")) == "xyz.show4you.deadline15", "패키지·번들 ID xyz.show4you.deadline15")
 	_check(bool(cf.get_value(ao, "gradle_build/use_gradle_build")) and str(cf.get_value(ao, "gradle_build/target_sdk")) == "36" and int(str(cf.get_value(ao, "gradle_build/min_sdk"))) >= 24, "Gradle 빌드 · targetSdk 36 · minSdk ≥ 24")
-	_check(bool(cf.get_value(ao, "architectures/arm64-v8a")) and not bool(cf.get_value(ao, "architectures/x86_64")), "arm64-v8a (+ armeabi-v7a)")
+	_check(bool(cf.get_value(ao, "architectures/arm64-v8a")) and not bool(cf.get_value(ao, "architectures/x86_64")) and not bool(cf.get_value(ao, "architectures/armeabi-v7a")) and not bool(cf.get_value(ao, "architectures/x86")), "arm64-v8a 만 (armeabi-v7a · x86 · x86_64 끔)")
+	_check(bool(cf.get_value(bo, "architectures/arm64-v8a")) and not bool(cf.get_value(bo, "architectures/armeabi-v7a")), "APK 프리셋도 arm64-v8a 만")
 	var perms: Array = []
 	for k3: String in cf.get_section_keys(ao):
 		if k3.begins_with("permissions/") and k3 != "permissions/custom_permissions" and bool(cf.get_value(ao, k3)):

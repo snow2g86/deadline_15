@@ -27,6 +27,8 @@ var id: int = 0
 var d: Dictionary = {}          # 화면 상태: team, cls, gender, x, y, hp, mhp, res, maxRes, resType, face[gdx,gdy], stealthed, ha, stunned …
 var iso: Iso
 var sdb: SpriteDB
+## 뒷모습으로 그릴지 (지금은 항상 false — 웹도 꺼 둠. 3D 교체 전까지 임시 연결점, 뒷모습 그림이 없으면 앞모습)
+var facing_back := false
 var icons: Object
 
 var body: Body
@@ -256,13 +258,25 @@ func set_loop(kind: String) -> void:
 	_refresh_frame()
 
 
+## 뒷모습 켜기/끄기 (그림이 없으면 앞모습 그대로 — 오류·빈 화면 없음). 시트 캐시를 비우고 다시 그림
+func set_facing_back(on: bool) -> void:
+	if on == facing_back:
+		return
+	facing_back = on
+	_sheet_cache.clear()
+	_cur_sheet = null
+	if body != null:
+		body.tex = null
+	_refresh_frame()
+
+
 ## 시트 + 자리 + 텍스처를 한 번 찾아 둠
 func _sheet(kind: String) -> Variant:
 	if _sheet_cache.has(kind):
 		return _sheet_cache[kind]
 	var cls := str(d["cls"])
 	var g := str(d.get("gender", "m"))
-	var sh: Variant = sdb.sheet(cls, g, kind)
+	var sh: Variant = sdb.sheet(cls, g, kind, facing_back)
 	var out: Variant = null
 	if sh != null:
 		var tx := sdb.sheet_tex(sh)
@@ -580,7 +594,7 @@ func _refresh_frame() -> void:
 	# 정지 그림 (시트 없음 — 소환수 등)
 	if _cur_sheet != null or body.tex == null:
 		_cur_sheet = null
-		var st: Variant = sdb.still(str(d["cls"]), str(d.get("gender", "m")))
+		var st: Variant = sdb.still(str(d["cls"]), str(d.get("gender", "m")), facing_back)
 		if st != null and body.tex != st["tex"]:
 			var t2: Texture2D = st["tex"]
 			body.tex = t2
