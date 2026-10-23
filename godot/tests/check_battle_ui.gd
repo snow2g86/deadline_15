@@ -536,7 +536,7 @@ func _input_details() -> void:
 	await _frames(2)
 	# Space = 대기 (방향 고르기), Backspace = 취소
 	await _key(KEY_SPACE)
-	# (도입 2) 이동·행동 없이 대기하려 하면 '행동하지 않은 클랜원이 N명…' 확인이 먼저 — 한 번 더(턴 종료) 눌러야 방향 고르기
+	# (도입 2) 이동·행동 없이 대기하려 하면 '이번 턴에 아직 행동하지 않은 클랜원 N명…' 확인이 먼저 — 한 번 더(예) 눌러야 방향 고르기
 	_check(ui.end_confirm_open() and sc.mode == "menu", "Space → 대기 확인 창 (%s)" % sc.mode)
 	ui.end_yes.pressed.emit()
 	await _frames(1)

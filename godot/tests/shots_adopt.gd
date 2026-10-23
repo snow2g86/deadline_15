@@ -82,9 +82,32 @@ func _main() -> void:
 	await _shot("hud_menu")
 	if str(_opt["phase"]) == "all":
 		await _features(sc)
+	elif str(_opt["phase"]) == "turn":
+		await _turn_shots(sc)
 	sc.queue_free()
 	await _frames(3)
 	quit(0)
+
+
+## 턴·확인창 장면: 대기·방어 태세·경계 확인 창 + 황금 기록을 따라 간 뒤 '다음 턴' 구분선이 보이는 순서 바
+func _turn_shots(sc: Node) -> void:
+	for op: String in ["wait", "defend", "overwatch"]:
+		sc._user_action(op)
+		await _secs(0.4)
+		await _shot("turn_confirm_" + op)
+		sc.ui.close_end_confirm()
+		sc.ui.end_turn_canceled.emit()
+		await _frames(3)
+	var cmds := _cmds("legion5_s09")
+	var i := 0
+	while i < cmds.size() and i < 16:
+		_drive(sc, cmds[i])
+		i += 1
+		await _wait_menu(sc)
+		await _secs(0.3)
+	await _secs(0.6)
+	print("  구분선 줄 %d · 턴 %s" % [sc.ui.order.divider_before, str(sc.eng.S["turn"])])
+	await _shot("turn_order_divider")
 
 
 func _cmds(name: String) -> Array:
@@ -144,6 +167,12 @@ func _features(sc: Node) -> void:
 	sc._user_action("wait")
 	await _secs(0.4)
 	await _shot("2_end_confirm")
+	sc.ui.close_end_confirm()
+	sc.ui.end_turn_canceled.emit()
+	await _frames(3)
+	sc._user_action("defend")
+	await _secs(0.4)
+	await _shot("2_end_confirm_defend")
 	sc.ui.close_end_confirm()
 	sc.ui.end_turn_canceled.emit()
 	await _frames(3)

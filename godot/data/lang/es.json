@@ -2706,8 +2706,8 @@
     "adopt": {
       "order_more": "+{n} más",
       "order_less": "Contraer",
-      "order_next_round": "Siguiente ronda",
-      "end_confirm": "Hay {n} miembro(s) del clan sin actuar. ¿Terminar el turno?",
+      "order_next_turn": "Siguiente turno",
+      "end_confirm": "Miembros del clan que aún no han actuado este turno: {n} (incluido este)\nAcción elegida: {act} — termina el turno de este miembro sin moverse ni atacar.",
       "end_back": "Volver",
       "undo_move": "Cancelar movimiento",
       "undo_blocked_reveal": "Un nuevo enemigo entró en la vista; no se puede cancelar el movimiento",

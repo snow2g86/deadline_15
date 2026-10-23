@@ -43,6 +43,53 @@ func _initialize() -> void:
 	_main.call_deferred()
 
 
+## 턴 구분선 정의 = 엔진 라운드 정의: 엔진과 같은 틱 규칙(advance_tick·get_next_unit)을 복사본으로 돌려
+##  '아직 행동 안 한 클랜원이 모두 한 번씩 행동하는 마지막 클랜원' 이 구분선 바로 앞 줄(turn_boundary_index)의 유닛과 같아야 함
+func _boundary_vs_engine(sc: Node) -> void:
+	var eng: BattleEngine = sc.eng
+	var acted: Dictionary = (eng.S.get("_turnActed", {}) as Dictionary).duplicate()
+	var rows: Array = []
+	for uv: Node in sc._visible_units():
+		var ap := Js.num(uv.d.get("ap"))
+		var rec := Js.num(uv.d.get("actionRec"))
+		if rec <= 0.0:
+			rec = 1.0
+		rows.append({"uv": uv, "ticks": 0.0 if ap >= 4.999 else (5.0 - ap) / rec})
+	rows = Js.stable_sort(rows, func(p: Dictionary, q: Dictionary) -> float: return float(p["ticks"]) - float(q["ticks"]))
+	var tb: int = BattleScene.turn_boundary_index(rows, acted)
+	var sim: Array = []
+	for u: Dictionary in eng.S["units"]:
+		if float(u["hp"]) > 0.0:
+			sim.append({"id": u["id"], "ally": u["team"] == "ally" and not Js.truthy(u.get("isSummon")), "ap": float(u["actionPow"]), "rec": maxf(0.0001, float(Js.num(u.get("actionRec")) if Js.num(u.get("actionRec")) > 0.0 else 1.0))})
+	var need := {}
+	for m: Dictionary in sim:
+		if m["ally"] and not acted.has(m["id"]):
+			need[m["id"]] = true
+	var last_id: Variant = null
+	var guard := 0
+	while not need.is_empty() and guard < 200:
+		guard += 1
+		var ready := false
+		for m2: Dictionary in sim:
+			if m2["ap"] >= 4.999:
+				ready = true
+		if not ready:
+			var md := INF
+			for m3: Dictionary in sim:
+				md = minf(md, (5.0 - m3["ap"]) / m3["rec"])
+			for m4: Dictionary in sim:
+				m4["ap"] = m4["ap"] + m4["rec"] * md
+		var best: Variant = null
+		for m5: Dictionary in sim:
+			if m5["ap"] >= 4.999 and (best == null or m5["ap"] > best["ap"] + 1e-9 or (absf(m5["ap"] - best["ap"]) <= 1e-9 and m5["rec"] > best["rec"])):
+				best = m5
+		best["ap"] = maxf(0.0, best["ap"] - 5.0)
+		if need.has(best["id"]):
+			need.erase(best["id"])
+			last_id = best["id"]
+	_check(tb >= 0 and last_id != null and (rows[tb]["uv"] as Node).id == last_id, "턴 구분선 앞 줄 = 엔진 규칙으로 이번 턴을 마치는 마지막 클랜원 (줄 %d, 유닛 %s / 엔진 %s)" % [tb, str((rows[tb]["uv"] as Node).id) if tb >= 0 else "-", str(last_id)])
+
+
 func _check(ok: bool, what: String) -> void:
 	if ok:
 		_passes += 1
@@ -351,21 +398,22 @@ func _scene_part() -> void:
 	ui.order.expanded = false
 	ui.order._sig = ""
 	sc._refresh_hud()
-	# 라운드 구분선
+	# 턴 구분선 (표시)
 	var fake: Array = []
 	for i in 4:
 		fake.append({"id": 900 + i, "team": "ally" if i % 2 == 0 else "enemy", "boss": false, "cur": i == 0, "name": "t%d" % i, "tip": "", "hp_ratio": 1.0, "ap_ratio": 0.5,
 			"eta": "1.0", "ready": false, "tex": null, "summon": false, "round2": i >= 2})
 	ui.order._sig = ""
 	ui.order.update(fake)
-	_check(ui.order.divider_before == 2 and ui.order._div.visible, "라운드 구분선이 3번째 줄 앞에 (round2 첫 줄)")
+	_check(ui.order.divider_before == 2 and ui.order._div.visible, "턴 구분선이 3번째 줄 앞에 (round2 첫 줄)")
 	ui.order.update(fake.map(func(m: Dictionary) -> Dictionary:
 		var c := m.duplicate()
 		c["round2"] = false
 		return c))
-	_check(not ui.order._div.visible, "다음 라운드 유닛이 없으면 구분선 없음")
+	_check(not ui.order._div.visible, "다음 턴 유닛이 없으면 구분선 없음")
 	ui.order._sig = ""
 	sc._refresh_hud()
+	_boundary_vs_engine(sc)
 
 	# ── C) 도입 2 ──
 	print("[C) 이동 취소 · 턴 종료 확인]")
@@ -383,7 +431,8 @@ func _scene_part() -> void:
 	sc._user_action("wait")
 	await _frames(2)
 	_check(ui.end_confirm_open() and sc.end_confirms == ec0 + 1 and sc.mode == "menu", "이동·행동 없이 대기 → 확인 창 (아직 턴은 그대로)")
-	_check(ui.end_msg.text.contains(str(n_un)), "확인 문구에 인원 %d 포함: %s" % [n_un, ui.end_msg.text])
+	_check(ui.end_msg.text.contains(str(n_un)) and ui.end_msg.text.contains(sc._t("battle.wait")) and ui.end_yes.text == sc._t("battle.wait"), "확인 문구에 인원 %d · 행동 이름(대기) 포함: %s" % [n_un, ui.end_msg.text])
+	_check(not ui.end_msg.text.contains("{"), "확인 문구에 자리표가 남지 않음")
 	_check(sc.eng.save_text() == fp_before, "확인 창이 떠 있는 동안 엔진 상태 불변")
 	_check(ui.end_yes.custom_minimum_size.y >= 44.0 and ui.end_no.custom_minimum_size.y >= 44.0, "확인 단추 터치 44 이상")
 	# 회귀: 확인창이 열린 동안 Space·중복 호출은 무시, Esc·뒤로가기·우클릭은 '돌아가기'
@@ -424,6 +473,23 @@ func _scene_part() -> void:
 	sc.ui_cancel()
 	await _frames(2)
 	_check(sc.mode == "menu", "방향 고르기 취소 → 메뉴")
+	# 방어 태세·경계도 같은 확인 (고른 행동 이름이 문구·'예' 단추에 나오고, '예' 하면 그 행동으로 진행)
+	for op3: String in ["defend", "overwatch"]:
+		var ec3: int = sc.end_confirms
+		var fp3: String = sc.eng.save_text()
+		sc._user_action(op3)
+		await _frames(2)
+		var act3: String = sc._t("battle." + op3)
+		_check(ui.end_confirm_open() and sc.end_confirms == ec3 + 1 and sc.mode == "menu", "%s → 확인 창" % op3)
+		_check(ui.end_msg.text.contains(act3) and ui.end_msg.text.contains(str(n_un)) and ui.end_yes.text == act3, "%s 문구에 행동 이름·인원: %s" % [op3, ui.end_msg.text])
+		_check(not ui.end_msg.text.contains("{") and sc.eng.save_text() == fp3, "%s 확인 중 엔진 불변 · 자리표 남지 않음" % op3)
+		ui.end_yes.pressed.emit()
+		await _frames(2)
+		_check(not ui.end_confirm_open() and sc.mode == "face", "%s '예' → 방향 고르기" % op3)
+		sc.ui_cancel()
+		await _frames(2)
+		_check(sc.mode == "menu", "%s 방향 고르기 취소 → 메뉴" % op3)
+	# 이동만 한 클랜원은 확인 없음 (이동은 행동 끝이 아니고, 이미 뭔가 한 차례)
 	# 이동 취소
 	u = sc.eng.awaiting_unit()
 	var cells: Array = sc.eng.q.move_cells(u)

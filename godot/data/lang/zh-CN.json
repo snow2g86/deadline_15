@@ -2662,8 +2662,8 @@
     "adopt": {
       "order_more": "+{n}名",
       "order_less": "收起",
-      "order_next_round": "下一回合",
-      "end_confirm": "还有{n}名战队成员未行动。要结束回合吗？",
+      "order_next_turn": "下一回合",
+      "end_confirm": "本回合尚未行动的战队成员：{n}名（含当前成员）\n所选行动：{act} — 不移动、不攻击，直接结束该成员的行动。",
       "end_back": "返回",
       "undo_move": "取消移动",
       "undo_blocked_reveal": "新的敌人进入视野，无法取消移动",

@@ -371,7 +371,7 @@ func _build_end_confirm() -> void:
 	cw.add_child(pc)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
-	v.custom_minimum_size = Vector2(300, 0)
+	v.custom_minimum_size = Vector2(400, 0)
 	pc.add_child(v)
 	end_msg = Kit.label(14, Kit.TEXT, 600)
 	end_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -398,10 +398,13 @@ func _build_end_confirm() -> void:
 	root.add_child(end_wrap)
 
 
-func ask_end_turn(n: int) -> void:
-	end_msg.text = _t("gd.adopt.end_confirm", {"n": n})
+## n = 이번 턴에 아직 행동하지 않은 클랜원 수(지금 클랜원 포함), act = 고른 행동 이름 (대기 · 방어 태세 · 경계)
+func ask_end_turn(n: int, act: String = "") -> void:
+	if act == "":
+		act = _t("battle.wait")
+	end_msg.text = _t("gd.adopt.end_confirm", {"n": n, "act": act})
 	end_no.text = _t("gd.adopt.end_back")
-	end_yes.text = _t("battle.end_turn")
+	end_yes.text = act
 	hide_menu()
 	end_wrap.visible = true
 
@@ -447,7 +450,7 @@ func _t(key: String, p: Dictionary = {}) -> String:
 func relabel() -> void:
 	top.set_tooltips(_t)
 	order.set_head(_t("battle.turn_order"))
-	order.set_labels(_t("gd.adopt.order_more", {"n": "{n}"}), _t("gd.adopt.order_less"), _t("gd.adopt.order_next_round"))
+	order.set_labels(_t("gd.adopt.order_more", {"n": "{n}"}), _t("gd.adopt.order_less"), _t("gd.adopt.order_next_turn"))
 	if calc_btn != null:
 		calc_btn.text = ("▾ " if calc_open else "▸ ") + _t("gd.adopt.calc_title")
 	settings.relabel()

@@ -23,7 +23,7 @@ var focus_id := -1
 var expanded := false
 var more_fmt := "+{n}"
 var less_text := "-"
-var round_text := "다음 라운드"
+var round_text := "다음 턴"
 var _div: Control
 var _more: PanelContainer
 var _more_lbl: Label
@@ -280,7 +280,7 @@ func update(all_rows: Array) -> void:
 		r.tooltip_text = str(m["tip"])
 		r.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		r.queue_redraw()
-	# 라운드 구분선 (다음 라운드 = 지금 차례 유닛이 다시 돌아오기 뒤에 움직이는 유닛부터) · '+N명'
+	# 턴 구분선 (다음 턴 = 이번 턴에 아직 행동 안 한 클랜원이 모두 행동한 뒤 첫 행동부터 — 엔진 턴 정의) · '+N명'
 	divider_before = -1
 	for i2 in rows.size():
 		if bool((rows[i2] as Dictionary).get("round2", false)):

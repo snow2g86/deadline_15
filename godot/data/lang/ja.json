@@ -2662,8 +2662,8 @@
     "adopt": {
       "order_more": "+{n}人",
       "order_less": "たたむ",
-      "order_next_round": "次のラウンド",
-      "end_confirm": "行動していないクランメンバーが{n}人います。ターンを終了しますか？",
+      "order_next_turn": "次のターン",
+      "end_confirm": "このターンにまだ行動していないクランメンバー：{n}人（このメンバーを含む）\n選んだ行動：{act} — 移動も攻撃もせず、このメンバーの番を終えます。",
       "end_back": "戻る",
       "undo_move": "移動取消",
       "undo_blocked_reveal": "新たな敵が見えたため、移動を取り消せません",

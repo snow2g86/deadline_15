@@ -16,7 +16,7 @@ DEADLINE 15: Tactics Defense
 ## 2. Short description (max 80 characters, Google Play)
 
 ```
-Turn-based pixel-art defense RPG. Lead 5 clan members and hold the gate.
+15 tiles, end to end. Block that end. Pixel-art turn-based defense RPG.
 ```
 
 ## 3. App Store only
@@ -33,6 +33,8 @@ turn-based,strategy,defense,tactics,RPG,pixel,isometric,SRPG,clan,dungeon,fantas
 
 ```
 Hold the line before the gate falls.
+
+The name DEADLINE 15: the map is 15 tiles from one end to the other, and your job is to block that end and hold it.
 
 DEADLINE 15 is a turn-based tactical defense RPG. Build a party of five clan members and defend your castle on isometric pixel-art maps, moving one tile at a time to stop the enemy from breaking through. You play as the Commander, who leads the clan from the rear and does not fight.
 
@@ -70,7 +72,7 @@ ALSO
 ITEM DROP RATES (RANDOM ITEMS)
 This game contains random items.
 - Equipment draw (shop): rates differ by grade, with a pity system (the 100th draw without a Legendary guarantees one).
-- Enchanting rune draw (Sanctuary): all 12 runes have the same chance.
+- Enchant Rune Draw (shop): all 12 runes have the same chance.
 - Equipment enhancement: each level has success, failure and breakage rates.
 The full table is in the shop and enhancement screens ("Drop Rates") and at the address below.
 Drop rates: [rates page URL -- the published address of docs/store/probabilities.en.md [확인 필요]]
@@ -161,9 +163,9 @@ See `age_rating_notes.md` for the full explanation. Draft answers:
 | Item | Characters | Limit | Result |
 |---|---|---|---|
 | App name | 28 | 30 | OK |
-| Short description | 72 | 80 | OK |
+| Short description | 71 | 80 | OK |
 | Keywords (App Store) | 95 | 100 | OK |
-| Full description | 3823 | 4000 | OK |
+| Full description | 3932 | 4000 | OK |
 | Release notes (Play) | 317 | 500 | OK |
 | Subtitle (App Store) | 29 | 30 | OK |
 | Promotional text | 153 | 170 | OK |

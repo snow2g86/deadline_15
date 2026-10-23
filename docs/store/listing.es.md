@@ -17,7 +17,7 @@ DEADLINE 15 - RPG por turnos
 ## 2. Descripción corta (máx. 80 caracteres, Google Play)
 
 ```
-RPG de defensa por turnos en píxel art. Lidera a 5 miembros del clan y defiende.
+15 casillas de punta a punta: bloquea ese extremo. RPG de defensa por turnos.
 ```
 
 ## 3. Solo para App Store
@@ -35,20 +35,22 @@ por turnos,estrategia,defensa,tactica,RPG,pixel,isometrico,SRPG,clan,mazmorra,fa
 ```
 Resiste antes de que caiga la puerta.
 
+El nombre DEADLINE 15: el mapa mide 15 casillas de punta a punta, y debes bloquear ese extremo y defenderlo.
+
 DEADLINE 15 es un RPG táctico de defensa por turnos. Forma un equipo de cinco miembros del clan y defiende tu castillo en mapas isométricos de píxel art, avanzando casilla a casilla para impedir que el enemigo irrumpa. Tú eres el Comandante: diriges al clan desde la retaguardia y no combates.
 
 CÓMO SE JUEGA
-- Tácticas por turnos: elige movimiento, ataque o habilidad de cada miembro del clan.
+- Tácticas por turnos: elige movimiento, ataque o habilidad de cada miembro.
 - Si demasiados enemigos cruzan la muralla ("irrupciones"), pierdes. Bloquea la puerta con un Caballero y apoya desde atrás.
-- 100 fases en 10 episodios, con un jefe cada 10 fases.
+- 100 fases en 10 episodios, con un jefe cada 10.
 
 COMBATE
-- Usa el terreno: en el bosque hay probabilidad de esquivar los ataques normales, las unidades a distancia en una colina disparan más lejos y con más fuerza, y los enemigos en aguas poco profundas reciben más daño.
+- Usa el terreno: el bosque permite esquivar ataques normales, las unidades a distancia en una colina disparan más lejos y con más fuerza, y los enemigos en aguas poco profundas reciben más daño.
 - Tácticas de posición: ataques por la espalda y por el flanco, ataques combinados, cobertura y empujones.
 - Cada tipo de mapa tiene su propio efecto negativo del entorno (calor, frío, veneno, maldiciones y más) que puedes bloquear con la runa de encantamiento adecuada.
 - Bonificaciones de sinergia según las clases del equipo.
 - Objetos de asedio, cofres del tesoro y pociones de combate.
-- Los enemigos son cada vez más fuertes: el nivel por sí solo no basta.
+- Los enemigos se fortalecen: el nivel por sí solo no basta.
 
 12 CLASES PARA ENTRENAR
 Guerrero, Caballero, Asesino, Mago, Arquero, Sacerdote, Novato, Invocador, Chamán, Peleador, Lancero y Zapador. Los Novatos pueden cambiar de clase en la Academia.
@@ -68,8 +70,8 @@ ADEMÁS
 
 PROBABILIDADES DE OBJETOS ALEATORIOS
 Este juego contiene objetos aleatorios.
-- Sorteo de equipo (tienda): las probabilidades varían según el grado y hay una garantía (el sorteo número 100 sin legendario asegura uno).
-- Sorteo de runa de encantamiento (Santuario): las 12 runas tienen la misma probabilidad.
+- Sorteo de equipo (tienda): las probabilidades varían según el grado y hay una garantía (el sorteo 100 sin legendario asegura uno).
+- Sorteo de runa (tienda): las 12 runas tienen la misma probabilidad.
 - Mejora de equipo: cada nivel tiene probabilidades de éxito, fallo y rotura.
 La tabla completa está en las pantallas de tienda y mejora ("Probabilidades") y en esta dirección.
 Tabla de probabilidades: [URL de la tabla -- dirección publicada de docs/store/probabilities.es.md [확인 필요]]
@@ -160,9 +162,9 @@ Consulta `age_rating_notes.md` para la explicación completa. Respuestas en borr
 | Elemento | Caracteres | Límite | Resultado |
 |---|---|---|---|
 | Nombre de la app | 28 | 30 | OK |
-| Descripción corta | 80 | 80 | OK |
+| Descripción corta | 77 | 80 | OK |
 | Palabras clave (App Store) | 93 | 100 | OK |
-| Descripción completa | 3954 | 4000 | OK |
+| Descripción completa | 3992 | 4000 | OK |
 | Novedades (Play) | 337 | 500 | OK |
 | Subtítulo (App Store) | 25 | 30 | OK |
 | Texto promocional | 151 | 170 | OK |

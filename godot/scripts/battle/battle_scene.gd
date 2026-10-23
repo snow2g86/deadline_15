@@ -413,7 +413,7 @@ func _build_world() -> void:
 		fx.queue_redraw())
 	ui.end_turn_confirmed.connect(func() -> void:
 		_end_confirmed = true
-		ui_action("wait")
+		ui_action(_end_op)
 		_end_confirmed = false)
 	ui.end_turn_canceled.connect(func() -> void:
 		if mode == "menu" and eng.awaiting_unit() != null:
@@ -1344,15 +1344,11 @@ func _refresh_hud() -> void:
 			"hp_ratio": maxf(0.0, float(u.d["hp"]) / maxf(1.0, float(u.d["mhp"]))), "ap_ratio": minf(1.0, float(r["ap"]) / 5.0),
 			"eta": _t("battle.acting") if cur else ("✓" if ready else "%.1f" % float(r["ticks"])), "ready": ready,
 			"tex": icons.portrait_tex(str(u.d["cls"]), str(u.d.get("gender", "m")), sdb), "summon": str(u.d["cls"]).begins_with("summon_")})
-	# 라운드 구분: 지금 차례 유닛이 다시 돌아오는 시각(5 ÷ 회복 속도) 뒤에 움직이는 유닛부터 '다음 라운드'
-	if not rows.is_empty():
-		var base_row: Dictionary = rows[0]
-		for rr: Dictionary in rows:
-			if (rr["uv"] as UnitView).id == cur_id:
-				base_row = rr
-		var t_round := 5.0 / float(base_row["rec"])
-		for oi in order_rows.size():
-			order_rows[oi]["round2"] = float(rows[oi]["ticks"]) > t_round + 0.0001 and (rows[oi]["uv"] as UnitView).id != cur_id
+	# 턴 구분선: 엔진의 턴(=라운드) 정의 그대로 — 살아 있는 클랜원(소환수 제외)이 모두 한 번씩 행동하면 한 턴이 끝난다.
+	#  이번 턴에 아직 행동하지 않은 클랜원 중 가장 늦게 차례가 오는 줄 '뒤'가 다음 턴 (화면 전용 계산, 엔진 규칙 불변)
+	var tb := turn_boundary_index(rows, eng.S.get("_turnActed", {}))
+	for oi in order_rows.size():
+		order_rows[oi]["round2"] = tb >= 0 and oi > tb
 	if focus_id >= 0 and (not units.has(focus_id) or not (units[focus_id] as UnitView).visible or float((units[focus_id] as UnitView).d["hp"]) <= 0.0):
 		set_focus(-1)
 	ui.order.update(order_rows)
@@ -1376,6 +1372,22 @@ func _refresh_hud() -> void:
 			"tex": icons.portrait_tex(str(dd["cls"]), str(dd.get("gender", "m")), sdb), "summon": str(dd["cls"]).begins_with("summon_")})
 	ui.cards.update(cards)
 	ui.minimap.set_units(_minimap_units())
+
+
+## 행동 순서 줄(다음 행동까지 틱 오름차순)에서 '이번 턴이 끝나는 줄'의 번호 (-1 = 없음).
+##  엔진 _count_turn: 살아 있는 클랜원(소환수 제외) 모두가 한 번씩 행동하면 turn+1.
+##  → 아직 한 번도 행동하지 않은 클랜원 중 가장 뒤에 오는 줄이 그 턴의 마지막. 그 뒤 줄은 다음 턴의 첫 행동.
+##  (한 줄은 유닛의 '다음 한 번'만 보여 주므로, 이미 행동한 빠른 클랜원의 다음 행동은 이번 턴 안쪽에 놓일 수 있음)
+static func turn_boundary_index(rows: Array, acted: Dictionary) -> int:
+	var last := -1
+	for i in rows.size():
+		var uvr: UnitView = rows[i]["uv"]
+		var d: Dictionary = uvr.d
+		if d.get("team") != "ally" or Js.truthy(d.get("isSummon")) or str(d.get("cls", "")).begins_with("summon_") or float(d.get("hp", 0)) <= 0.0:
+			continue
+		if not acted.has(uvr.id):
+			last = i
+	return last
 
 
 func _units_d() -> Array:
@@ -1740,30 +1752,28 @@ func _hide_intents() -> void:
 # ═══════════ UI 수준 입구 (마우스·단축키·메뉴·시험이 모두 여기로) ═══════════
 
 var _end_confirmed := false
+var _end_op := "wait"   # 확인창이 물어보는 행동 (wait · defend · overwatch)
 
 
 ## 사람이 단추·단축키로 고른 행동 (시험·자동 재생은 ui_action 을 직접 부름 — 확인 창 없음)
-##  (도입 2) 대기 = 이 클랜원의 턴 종료. 이동도 행동도 안 한 채 끝내려 하면 '행동하지 않은 클랜원이 N명…' 확인을 한 번 더 받음
+##  (도입 2) 대기·방어 태세·경계 = 이 클랜원의 차례가 끝나는 행동. 이동도 행동도 안 한 채 고르면
+##  '이번 턴에 아직 행동하지 않은 클랜원 N명 …' 확인을 한 번 더 받음 (고른 행동을 기억했다가 '예' 에서 그대로 실행)
 func _user_action(op: String) -> void:
 	if ui.end_confirm_open():
 		return   # 확인창이 떠 있는 동안 중복 호출 무시 (end_confirms 도 안 늘어남)
-	if op == "wait" and not _end_confirmed and mode == "menu":
+	if (op == "wait" or op == "defend" or op == "overwatch") and not _end_confirmed and mode == "menu":
 		var n := unacted_allies()
 		if n > 0:
 			end_confirms += 1
-			ui.ask_end_turn(n)
+			_end_op = op
+			ui.ask_end_turn(n, _t("battle." + op))
 			return
 	ui_action(op)
 
 
-## 이 라운드에 아직 행동하지 않은 클랜원 수 — 지금 차례 클랜원이 이동도 행동도 안 했으면 확인 대상 (그때만 > 0).
-##  = (이동·행동을 안 한 지금 클랜원) + (이번 턴 아직 차례가 오지 않은 다른 클랜원)
-## 턴 종료 확인창 '돌아가기' (Esc·뒤로가기·우클릭도 같음)
-func end_confirm_back() -> void:
-	if ui.end_confirm_open():
-		ui.end_no.pressed.emit()
-
-
+## 이번 턴(=엔진 라운드: 살아 있는 클랜원이 모두 한 번씩 행동할 때까지)에 아직 한 번도 행동하지 않은 클랜원 수 — 지금 차례 클랜원 포함.
+##  지금 차례 클랜원이 이동도 행동도 안 했을 때만 확인 대상이라, 그때만 > 0 (이미 움직였거나 행동했으면 0).
+##  = (이동·행동을 안 한 지금 클랜원) + (이번 턴 아직 차례가 오지 않은 다른 클랜원, 엔진 _turnActed 기준)
 func unacted_allies() -> int:
 	var u: Variant = eng.awaiting_unit()
 	if u == null or u["team"] != "ally" or Js.truthy(u.get("ha")) or Js.truthy(u.get("hm")):
@@ -1774,6 +1784,12 @@ func unacted_allies() -> int:
 		if v["team"] == "ally" and v["hp"] > 0 and not Js.truthy(v.get("isSummon")) and int(v["id"]) != int(u["id"]) and not done.has(v["id"]):
 			n += 1
 	return n
+
+
+## 턴 종료 확인창 '돌아가기' (Esc·뒤로가기·우클릭도 같음)
+func end_confirm_back() -> void:
+	if ui.end_confirm_open():
+		ui.end_no.pressed.emit()
 
 
 ## 메뉴 단추 (move · attack · shove · skill · item · wait · defend · overwatch · undo)
