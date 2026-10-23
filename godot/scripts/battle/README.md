@@ -22,7 +22,7 @@ Battle (Node2D, battle_scene.gd)          엔진 소유 · 신호 대기열 · �
 └─ UI (CanvasLayer 10, battle_ui.gd)
    ├─ TurnFlash                            차례 번쩍임·큰 번쩍임 (셰이더 원형 빛)
    ├─ TopBar (hud_top.gd)                  차례 표시 · 스테이지 제목·턴 · 칩 · 위협/회전/속도 단추
-   ├─ Minimap (hud_minimap.gd) · TurnOrder (hud_order.gd) · ClanCards (hud_cards.gd) · CamDir
+   ├─ Minimap (hud_minimap.gd) · TurnOrder (hud_order.gd) · ClanCards (hud_cards.gd, 왼쪽 세로 패널) · CamDir · CalcPanel · EndTurnConfirm
    ├─ WaveBanner · StageBanner · ActionMenu · Hint
    ├─ Info (hud_info.gd)                   툴팁 · 적 정보 팝업
    ├─ Settings (hud_settings.gd)           톱니 단추 · 설정 창 · 항복 확인
@@ -41,7 +41,7 @@ Battle (Node2D, battle_scene.gd)          엔진 소유 · 신호 대기열 · �
 | `battle_ui.gd` | `battle.html` 화면 부품, `render.js` showAM·_amBtn·_placeAM·showWv, `vfx.js` turnFlash·vfxFlash | UI 층 (부품 배치·행동 메뉴·띠·번쩍임) |
 | `hud_top.gd` | `render.js` uUI, `css/battle.css` #top-bar·.si-chip·.cam-btn | 윗줄 |
 | `hud_order.gd` | `render.js` rTurnOrder | 행동 순서 (다음 행동까지 틱 = (5 − 행동력) / 회복 속도) |
-| `hud_cards.gd` | `render.js` rInfoPanel | 클랜원 카드 |
+| `hud_cards.gd` | `render.js` rInfoPanel | 클랜원 카드 (왼쪽 세로 패널) |
 | `hud_minimap.gd` | `render.js` rMM·rMMvp·mmClick | 미니맵 |
 | `hud_info.gd` | `render.js` showEnemyPopup (+ Godot 툴팁) | 툴팁·적 팝업 |
 | `hud_settings.gd` | `render.js` toggleSettings·syncSettingsUI·saveSett·surrender, `battle.html` #settings-panel | 설정 |
@@ -122,7 +122,7 @@ UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
 - 윗줄: 차례 표시(점이 깜빡임), `STAGE n` + 이름 + 턴, 칩 — 증원 진행 막대(끝나면 초록) · 남은 적 · 돌파(한도 1 전부터 경고) · 환경(툴팁 = `Hazard.describe`) · 조합 버프(툴팁 = `Synergy.describe`) · 연습 모드.
 - 이름: 클랜원은 로스터(uid)의 customName → character.names[nameId] → 직업 이름 (결과 화면과 같음, `unit_info.unit_name`).
 - 행동 순서: 숨은 적 제외, 다음 행동까지 틱 순서 (현재 = '행동 중', 준비 = ✓). 클랜원 줄을 누르면 카메라 이동, 마우스를 올리면 맵의 그 유닛이 하얗게 빛남. 화면 높이에 맞춰 줄 수 제한.
-- 클랜원 카드: 초상화 · 이름 · Lv·직업 · HP/자원 막대와 값 · ATK/DEF/RNG · 버프 아이콘(남은 턴 숫자, 툴팁 = 이름). 지금 차례 금빛, 행동 끝 흐림. 누르면 카메라 이동.
+- 클랜원 카드: (왼쪽 세로 패널로 옮김 — 아래 '왼쪽 클랜원 패널') 초상화 · 이름 · Lv·직업 · HP/자원 막대 · 선택된 카드만 값·ATK/DEF/RNG · 버프 아이콘. 지금 차례 금빛, 행동 끝 흐림. 누르면 맵 링 강조.
 - 미니맵: 누르거나 끌면 그 자리로 카메라. 카메라 방향(▲ N)은 오른쪽 아래.
 - 툴팁(0.25초 머물면): 유닛 = 이름·Lv·직업·HP·자원·ATK/DEF/RNG/MOV·버프(남은 턴)·지형·노리는 대상 / 칸 = 지형·이동 비용·높이·지형 효과·보물상자·냉기 결계·용암·위협·안개.
 - 적 정보 팝업(적을 누르면, 다음 누르기에 닫힘 — HUD 위 누르기 포함): 툴팁 내용 + 스킬 목록(그림·비용) + AI 성향(`AI_PROFILES` style·targetPriority) + 노리는 대상.
@@ -230,3 +230,36 @@ cmd 사건은 `u·op·ok·idx·rng` 만 비교합니다.
 - **바위 절벽**: 화면 높이만 1.3배(`Iso.ROCK_K`, 규칙·데이터 z 는 그대로). 옆면 지층 띠·선·세로 균열·접지 그림자, 윗면은 불투명 밑판 위에 들쭉날쭉한 능선·밝은 마루선·이끼·자갈. 이웃 바위와 맞닿은 변은 매끈하게 이어짐.
   바위 타일·하이라이트 노드는 깊이 `100+3k` 로 그려 뒤쪽 나무·유닛이 윗면 위에 비치지 않음.
 - 시험: `tests/check_hill_slope.gd` (클릭 판정·발 위치·경사 비트·이동 높이).
+
+
+## 왼쪽 클랜원 패널 (레이아웃 개편)
+
+- 아래 가로 카드줄(130px)을 없애고 **왼쪽 세로 패널**로: 맨 위 미니맵 → 그 아래 카드 세로 스택(넘치면 세로 스크롤) → 맨 아래 설정 톱니. 아래 여백은 안내 줄 + 톱니용 64px 뿐 (`BOTTOM_PAD`).
+- 일반(PC·태블릿): 너비 158px 카드 — 초상 · 이름 · Lv·직업 · HP/자원 막대 · 버프. **선택된 카드만** 값(HP 129/129)·ATK/DEF/RNG 를 펼침.
+- 얇은 모드: 논리 높이 < 600 또는 너비 < 900(= 모바일 가로 pixel8·iphone·low)이면 너비 56px 아이콘형 — 초상 + 막대만 (이름·값은 탭하면 맵 링 + 순서 바 + 툴팁).
+- 행동 메뉴(`place_menu`)는 아래 카드 높이 대신 12px 만 비우고, 왼쪽은 패널 오른쪽 끝 + 6px 안으로 (`cards.offset_right`). 윗줄·왼쪽 패널·오른쪽 순서 바 사이 가운데가 맵 영역이고, 카메라는 `_view_off()` 로 그 가운데가 화면 가운데에 오게 보정.
+- 터치 높이: 카드·순서 줄·'+N명' 칩은 `Kit.touch_min()` (PC 44, 모바일은 실제 44pt = `Mobile.min_target()`).
+
+## 전투 UI 도입 1~4 (규칙·데이터·엔진 결과는 그대로 — replay_golden 22/22)
+
+유사 게임 UI 조사에서 승인된 네 가지. 다른 게임의 아이콘·연출·이름은 쓰지 않고 우리 UI 키트(`Kit`)로만 그렸음.
+
+1. **행동 순서 바 강화** (`hud_order.gd`, `battle_ui.gd`, `unit_view.gd`)
+   - 줄을 탭(마우스 올리면 하이라이트 · 누르면 고정)하면 `set_focus(id)` — 맵 유닛 발밑에 하이라이트 링(아군 파랑·적 빨강, 안쪽 흰 선), 순서 바 그 줄 흰 테두리, 카드 흰 테두리가 한꺼번에. 반대로 맵에서 유닛(아군·적)을 탭해도 같은 `focus_id`. 빈 칸을 탭하면 해제.
+   - 카메라: 그 유닛이 화면 가운데 영역 안이면 **안 움직임**(링만), 화면 밖일 때만 부드럽게 이동 (`_ensure_visible`).
+   - 팀 테두리: 아군 파랑·적 빨강(현재 차례 금빛), 줄마다 HP·행동력 막대(기존).
+   - **라운드 구분선**: 지금 차례 유닛이 다시 돌아오는 시각(5 ÷ 회복 속도) 뒤에 움직이는 유닛부터 '다음 라운드' 선 (엔진에 라운드 개념이 없어 이 정의 — 화면 전용).
+   - 표시 한도(화면 높이)를 넘으면 '+N명' 칩(탭하면 전부 펼침/접기). 강조된 유닛이 숨은 줄이면 칩이 흰 테두리.
+2. **이동 취소 + 턴 종료 확인** (`battle_ui.gd`, `battle_scene.gd`)
+   - '이동 취소' 단추: 이동 직후(공격·스킬·대기 전) 행동 메뉴 **맨 아래**. 누르면 **이동 직전 엔진 저장(`save_state`)을 `load_state` 로 되돌림** → 위치·방향(`_gdx/_gdy`)·이동 거리(`_movedDist`)·경험치·**난수 상태**·저장소가 이동 전과 완전히 같음.
+     (엔진의 기존 `undo` 명령은 웹 그대로라 방향·이동 거리를 이동 전으로 못 돌리고 골든 `firstclear_s02` 가 쓰므로 **고치지 않음**; `ui_action("undo")` 는 저장이 없거나 기록을 켠 시험에서만 그쪽으로 감.)
+   - **취소 불가 규칙**: ① 이동 뒤 행동하면 엔진이 이미 불가 ② 이동으로 이전에 안 보이던 적이 시야에 들어오면 `reveal` ③ HP·상태·상자 수가 바뀌면(함정 등) `event` — 단추는 꺼지고 이유 글, Esc 도 안 됨.
+   - **턴 종료 확인**: 이 게임은 틱 방식이라 '라운드 끝내기' 명령이 없음. 사람이 단추·Space 로 **이동도 행동도 안 한 채 대기(= 이 클랜원 턴 종료)** 하려 하면 '행동하지 않은 클랜원이 N명 있습니다. 턴을 종료할까요?'(N = 이 클랜원 + 이번 라운드 아직 차례 안 온 클랜원) 확인 창 — 한 번 더 눌러야 방향 고르기로. '다시 묻지 않기' 없음. `ui_action("wait")` (시험·자동 재생)는 확인 없음.
+3. **상성·피해 예측 근거** (`fx_layer.gd`, `battle_scene.gd`, `battle_ui.gd`, `battle_query.gd`)
+   - 이 게임 데이터에는 직업 상성·속성·약점 표가 **없음** — 만들지 않고 실제 계산 요소만: 전술 보정(등 뒤·옆·협공·고지, 상한), 여울 취약, 방어막(×0.5), 숲 회피, 회피 상태.
+   - 예상 상자 기본 = 숫자 하나 + **▲유리 / －보통 / ▼불리** 마크. 유리 = 전술 보정(+%)·여울, 불리 = 방어막·회피, 둘 다 있거나 없으면 보통. **약점**(여울에 서 있거나 등 뒤)이면 대상 체력바가 번쩍임.
+   - 아래 가운데 **접힘 패널**(`▸ 계산 내역`, 44pt 단추): 펼치면 대상마다 공격력 · 방어력 · 기본 피해 · 격노/고양/마나 쇄도 · 전술 보정 · 고지 사거리 · 지형 · 여울 · 방어막 · 숲 회피 · 지원 사격 · 반격 · 예상 피해. 펼치면 예상 상자에도 계산 한 줄. 값은 `preview_attack`(기존) + `preview_parts`(새 순수 조회 — `combat._calc_parts`·`tactic_bonus` 를 읽기만)로 **식은 안 바뀜**.
+4. **적별 범위** (`battle_map.gd`, `battle_scene.gd`, `battle_query.enemy_range`)
+   - 적을 탭하면 그 적의 이동 가능 칸(파랑)과 이동 뒤 공격 가능 칸(빨강, 이동·공격 둘 다는 파랑 + 빨간 테두리) — `threat_cells` 와 같은 규칙을 한 명에게만(합집합 = 전체 위협, API 시험). 같은 적을 다시 탭하면 해제, 다른 적을 탭하면 교체(한 번에 한 명), 켤 때만 정보 팝업.
+   - **우선순위**: ① 아군이 이동·공격·방향을 고르는 중(target·face)에는 그리지 않음(선택은 유지, 메뉴로 돌아오면 다시) ② 전체 위협('위협' 단추)은 별도 층 — 둘 다 켤 수 있고 개별 범위가 위에 더 진하게 ③ 명령을 내리면(상태 변화) 해제 ④ 기절·빙결은 '지금 행동할 수 없음', 공격 안 하는 유닛은 '공격하지 않음' 안내.
+- 시험: `tests/check_battle_ui_adopt.gd` (엔진 이동 취소 동일성 80회 · 상호 강조 · +N명 · 구분선 · 확인 흐름 · 취소 불가 · 접힘 패널 값 = query · 적 범위 · 우선순위 · pixel8 터치), `tests/check_battle_api.gd` (새 조회 순수성·일치). 화면 사진: `tests/shots_adopt.gd`.

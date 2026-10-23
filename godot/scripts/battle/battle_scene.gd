@@ -125,6 +125,20 @@ var view_espwn := 0
 var view_actcount := 0
 var view_breached := 0
 var cur_id := -1
+## (도입 1) 눌러 고른 유닛 — 맵 링 · 순서 바 · 카드 테두리가 같이 강조 (아군·적 모두). -1 = 없음
+var focus_id := -1
+## (도입 4) 범위를 보여 주는 적 (-1 = 없음). 맵의 erange 층에 이동(파랑)·공격(빨강)
+var enemy_range_id := -1
+## (도입 2) 이동 직후 취소 가능 여부 판단용 — 이동 직전 상태와 취소 불가 이유("" | "reveal" | "event")
+var undo_block := ""
+var _undo_uid := -1
+var _mv_snap: Dictionary = {}
+## (도입 2) 이동 직전 엔진 상태 저장(eng.save_state — 난수·유닛·전투 변수·저장소 전부) — '이동 취소'는 이걸로 되돌림
+##  (엔진의 undo 명령은 웹 그대로라 방향(_gdx/_gdy)과 이동 거리(_movedDist)를 이동 전으로 못 돌려서, 규칙은 그대로 두고 화면 단추는 이 방식을 씀)
+var _undo_snap: Dictionary = {}
+var undo_exact_count := 0
+## 턴 종료 확인 창을 띄운 횟수 (시험)
+var end_confirms := 0
 var show_threat := false
 var _hud_dirty := true
 var _badges_dirty := true
@@ -393,7 +407,17 @@ func _build_world() -> void:
 		mob.connect("layout_changed", func() -> void:
 			if ui != null and is_instance_valid(ui.root):
 				mob.call("fit_safe", ui.root))
-	ui.action_pressed.connect(func(op: String) -> void: ui_action(op))
+	ui.action_pressed.connect(_user_action)
+	ui.calc_toggled.connect(func(on: bool) -> void:
+		fx.preview_detail = on
+		fx.queue_redraw())
+	ui.end_turn_confirmed.connect(func() -> void:
+		_end_confirmed = true
+		ui_action("wait")
+		_end_confirmed = false)
+	ui.end_turn_canceled.connect(func() -> void:
+		if mode == "menu" and eng.awaiting_unit() != null:
+			_show_main_menu(eng.awaiting_unit()))
 	ui.skill_pressed.connect(func(idx: int) -> void: ui_pick_skill(idx))
 	ui.item_pressed.connect(func(k: String, idx: int) -> void: ui_pick_item(k, idx))
 	ui.cancel_pressed.connect(func() -> void: ui_cancel())
@@ -427,6 +451,7 @@ func _build_world() -> void:
 	_refresh_loops()
 	_refresh_fade()
 	ui.minimap.rebuild(_minimap_units())
+	ui.relayout()
 	_refresh_hud()
 
 
@@ -1109,6 +1134,7 @@ func _apply_snap(sn: Variant) -> void:
 		for uv2: UnitView in units.values():
 			uv2.refresh_camera()
 		ui.minimap.rebuild(_minimap_units())
+		ui.relayout()
 	if sn["chests"] != view_chests:
 		view_chests = sn["chests"]
 		map.set_chests(view_chests)
@@ -1170,9 +1196,21 @@ func _update_shake(delta: float) -> void:
 		_shake_t += delta * maxf(speed, 1.0)
 		var k := clampf(_shake_t / _shake_dur, 0.0, 1.0)
 		var a := _shake_amp * (1.0 - k)
-		cam.offset = Vector2(sin(k * 31.0) * a, cos(k * 23.0) * a * 0.75)
-	elif cam.offset != Vector2.ZERO:
-		cam.offset = Vector2.ZERO
+		cam.offset = _view_off() + Vector2(sin(k * 31.0) * a, cos(k * 23.0) * a * 0.75)
+	elif cam.offset != _view_off():
+		cam.offset = _view_off()
+
+
+## 왼쪽 클랜원 패널·오른쪽 행동 순서 바를 뺀 가운데 영역이 화면 가운데로 오게 하는 카메라 보정 (전장 좌표)
+##  가운데 영역 중심 = 화면 가운데 + (왼 − 오른)/2 → 카메라는 반대로 (오른 − 왼)/2 만큼
+func _view_off() -> Vector2:
+	if ui == null or ui.cards == null:
+		return Vector2.ZERO
+	var l := ui.cards_rect.size.x
+	var r := 190.0
+	if ui.order != null and ui.order.size.x > 1.0:
+		r = get_viewport().get_visible_rect().size.x - ui.order.get_global_rect().position.x   # 순서 바 실제 폭(+오른쪽 여백)
+	return Vector2((r - l) * 0.5 / maxf(0.1, cam.zoom.x), 0.0)
 
 
 # ── 화면 상태 계산 (재생 중에는 화면 사본으로) ──
@@ -1306,6 +1344,17 @@ func _refresh_hud() -> void:
 			"hp_ratio": maxf(0.0, float(u.d["hp"]) / maxf(1.0, float(u.d["mhp"]))), "ap_ratio": minf(1.0, float(r["ap"]) / 5.0),
 			"eta": _t("battle.acting") if cur else ("✓" if ready else "%.1f" % float(r["ticks"])), "ready": ready,
 			"tex": icons.portrait_tex(str(u.d["cls"]), str(u.d.get("gender", "m")), sdb), "summon": str(u.d["cls"]).begins_with("summon_")})
+	# 라운드 구분: 지금 차례 유닛이 다시 돌아오는 시각(5 ÷ 회복 속도) 뒤에 움직이는 유닛부터 '다음 라운드'
+	if not rows.is_empty():
+		var base_row: Dictionary = rows[0]
+		for rr: Dictionary in rows:
+			if (rr["uv"] as UnitView).id == cur_id:
+				base_row = rr
+		var t_round := 5.0 / float(base_row["rec"])
+		for oi in order_rows.size():
+			order_rows[oi]["round2"] = float(rows[oi]["ticks"]) > t_round + 0.0001 and (rows[oi]["uv"] as UnitView).id != cur_id
+	if focus_id >= 0 and (not units.has(focus_id) or not (units[focus_id] as UnitView).visible or float((units[focus_id] as UnitView).d["hp"]) <= 0.0):
+		set_focus(-1)
 	ui.order.update(order_rows)
 	# 클랜원 카드 (웹 rInfoPanel)
 	var cards: Array = []
@@ -1520,6 +1569,11 @@ func _enter_menu() -> void:
 	_show_intents()
 	if show_threat:
 		map.set_threat(eng.q.threat_cells())
+	var had_snap := not _mv_snap.is_empty()
+	_eval_undo_block(u)
+	if not had_snap and int(u["id"]) != _undo_uid:
+		undo_block = ""
+	_undo_uid = int(u["id"])
 	mode = "menu"
 	_show_main_menu(u)
 	if _select_sfx:
@@ -1595,7 +1649,9 @@ func _show_main_menu(u: Dictionary) -> void:
 		items.append({"op": "overwatch", "tex": _e("👁"), "glyph": "◉", "label": _t("battle.overwatch"), "sub": _t("battle.am_overwatch_sub"), "key": "O", "ac": "wait"})
 	items.append({"op": "wait", "glyph": "Ⅱ", "label": _t("battle.wait"), "sub": _t("battle.am_wait_sub"), "key": "W", "ac": "wait"})
 	if acts["undo"]["ok"]:
-		items.append({"op": "undo", "glyph": "↩", "label": _t("battle.undo_move"), "key": "Esc", "ac": "cancel"})
+		var blocked := undo_block != ""
+		items.append({"op": "undo", "glyph": "↩", "label": _t("gd.adopt.undo_move"), "key": "Esc", "ac": "cancel", "enabled": not blocked,
+			"sub": _t("gd.adopt.undo_blocked_" + undo_block) if blocked else ""})
 	ui.show_menu("", items, _unit_screen(int(u["id"])))
 	map.set_hl({"%d,%d" % [int(u["x"]), int(u["y"])]: "selected"})
 
@@ -1683,6 +1739,43 @@ func _hide_intents() -> void:
 
 # ═══════════ UI 수준 입구 (마우스·단축키·메뉴·시험이 모두 여기로) ═══════════
 
+var _end_confirmed := false
+
+
+## 사람이 단추·단축키로 고른 행동 (시험·자동 재생은 ui_action 을 직접 부름 — 확인 창 없음)
+##  (도입 2) 대기 = 이 클랜원의 턴 종료. 이동도 행동도 안 한 채 끝내려 하면 '행동하지 않은 클랜원이 N명…' 확인을 한 번 더 받음
+func _user_action(op: String) -> void:
+	if ui.end_confirm_open():
+		return   # 확인창이 떠 있는 동안 중복 호출 무시 (end_confirms 도 안 늘어남)
+	if op == "wait" and not _end_confirmed and mode == "menu":
+		var n := unacted_allies()
+		if n > 0:
+			end_confirms += 1
+			ui.ask_end_turn(n)
+			return
+	ui_action(op)
+
+
+## 이 라운드에 아직 행동하지 않은 클랜원 수 — 지금 차례 클랜원이 이동도 행동도 안 했으면 확인 대상 (그때만 > 0).
+##  = (이동·행동을 안 한 지금 클랜원) + (이번 턴 아직 차례가 오지 않은 다른 클랜원)
+## 턴 종료 확인창 '돌아가기' (Esc·뒤로가기·우클릭도 같음)
+func end_confirm_back() -> void:
+	if ui.end_confirm_open():
+		ui.end_no.pressed.emit()
+
+
+func unacted_allies() -> int:
+	var u: Variant = eng.awaiting_unit()
+	if u == null or u["team"] != "ally" or Js.truthy(u.get("ha")) or Js.truthy(u.get("hm")):
+		return 0
+	var n := 1
+	var done: Dictionary = eng.S.get("_turnActed", {})
+	for v: Dictionary in eng.S["units"]:
+		if v["team"] == "ally" and v["hp"] > 0 and not Js.truthy(v.get("isSummon")) and int(v["id"]) != int(u["id"]) and not done.has(v["id"]):
+			n += 1
+	return n
+
+
 ## 메뉴 단추 (move · attack · shove · skill · item · wait · defend · overwatch · undo)
 ##  단추를 보일지(가능한 행동인지)는 메뉴가 정함 — 여기서는 막지 않음 (실패한 명령도 엔진이 웹처럼 기록·거절)
 func ui_action(op: String) -> bool:
@@ -1731,10 +1824,52 @@ func ui_action(op: String) -> bool:
 		"wait", "defend", "overwatch":
 			_enter_face(op, u)
 		"undo":
-			_send({"op": "undo"})
+			_undo_move()
 		_:
 			return false
 	return true
+
+
+## 이동 취소 — 이동 직전 저장(_undo_snap)이 있으면 엔진 상태를 그대로 되돌림 (난수·방향·이동력·경험치까지 이동 전과 같음),
+##  없으면(기록 켠 시험·이어하기 직후 등) 엔진의 undo 명령
+func _undo_move() -> void:
+	var u: Variant = eng.awaiting_unit()
+	if u == null:
+		return
+	if _undo_snap.is_empty() or int(_undo_snap["uid"]) != int(u["id"]) or not eng.q.can_undo() or eng.record_enabled:
+		_send({"op": "undo"})
+		return
+	var uid := int(u["id"])
+	var state: Dictionary = _undo_snap["state"]
+	_undo_snap = {}
+	if not eng.load_state(state):
+		_send({"op": "undo"})
+		return
+	undo_exact_count += 1
+	last_result = {"ok": true, "reason": ""}
+	_sfx("uiclick")
+	_select_sfx = true
+	undo_block = ""
+	_mv_snap = {}
+	enemy_range_id = -1
+	map.set_erange({})
+	_clear_target()
+	_hide_intents()
+	map.set_threat([])
+	for uv: UnitView in units.values():
+		uv.face_hidden = false
+		uv.selected = false
+	ui.hide_menu()
+	ui.info.hide_popup()
+	fail_hint = ""
+	ui.show_hint("")
+	var back: Variant = eng.unit_by_id(uid)
+	var uvv: UnitView = units.get(uid)
+	if uvv != null and back != null:
+		uvv.move_to(int(back["x"]), int(back["y"]))   # 원래 자리로 부드럽게 (menu 는 돌아온 뒤)
+	mode = "busy"
+	_eng_status = "input"
+	_schedule(0.4, _after_move)
 
 
 ## 스킬 고르기 — 즉시형은 바로 명령, 대상형은 칸 고르기
@@ -1816,8 +1951,8 @@ func ui_cancel() -> bool:
 			_back_to_menu(true)
 			return true
 		"menu":
-			if eng.q.can_undo():
-				_send({"op": "undo"})
+			if eng.q.can_undo() and undo_block == "":
+				_undo_move()
 				return true
 	return false
 
@@ -1831,6 +1966,7 @@ func _back_to_menu(show: bool) -> void:
 	if show:
 		_show_intents()
 		_show_main_menu(eng.awaiting_unit())
+	_refresh_erange()
 
 
 func _enter_target(op: String, idx: int, cells: Dictionary, heals: Dictionary, hint: String) -> void:
@@ -1845,6 +1981,7 @@ func _enter_target(op: String, idx: int, cells: Dictionary, heals: Dictionary, h
 	map.set_hl(hl)
 	ui.hide_menu()
 	ui.show_hint(hint)
+	_refresh_erange()
 
 
 func _clear_target() -> void:
@@ -1856,6 +1993,10 @@ func _clear_target() -> void:
 	fx.picker = {}
 	fx.previews = []
 	fx.queue_redraw()
+	for uvw: UnitView in units.values():
+		uvw.weak = false
+	if ui != null and ui.calc_panel != null:
+		ui.set_calc([])
 	var u: Variant = eng.awaiting_unit()
 	if u != null:
 		map.set_hl({"%d,%d" % [int(u["x"]), int(u["y"])]: "selected"})
@@ -1867,6 +2008,9 @@ func _clear_target() -> void:
 ##  Godot: 실제 공격처럼 계산(as_exec) — 주술사 고양 마지막 공격 차이를 바로잡음 (scripts/logic/battle/battle_query.gd)
 func _show_previews(u: Dictionary, at: Dictionary) -> void:
 	var list: Array = []
+	var sections: Array = []
+	for uv0: UnitView in units.values():
+		uv0.weak = false
 	for c: Dictionary in at["attack"]:
 		var v: Variant = null
 		for w: Dictionary in eng.S["units"]:
@@ -1877,8 +2021,11 @@ func _show_previews(u: Dictionary, at: Dictionary) -> void:
 			continue
 		var p: Dictionary = eng.q.preview_attack(u, v, true)
 		var pos := iso.foot(int(v["x"]), int(v["y"])) + Vector2(0, -64)
+		var tname := info.unit_name((units[int(v["id"])] as UnitView).d, eng.S["cStage"]) if units.has(int(v["id"])) else ""
 		if p["intercept"] != null:
-			list.append({"pos": pos, "main": "-" + _num(p["intercept_dmg"]), "sub": _t("battle.preview_intercept"), "kind": "block", "icon": _e("🛡️")})
+			list.append({"pos": pos, "main": "-" + _num(p["intercept_dmg"]), "sub": _t("battle.preview_intercept"), "kind": "block", "icon": _e("🛡️"), "mark": "", "mark_text": "", "weak": false})
+			sections.append({"name": tname, "dmg": _num(p["intercept_dmg"]), "mark": "even", "mark_text": _mark_text("even"), "weak_text": "",
+				"rows": [[_t("battle.preview_intercept"), "-" + _num(p["intercept_dmg"])]]})
 			continue
 		var sub: Array = []
 		if float(p["pct"]) != 0.0:
@@ -1896,8 +2043,80 @@ func _show_previews(u: Dictionary, at: Dictionary) -> void:
 			sub.append(_t("battle.preview_support", {"n": p["support"]}))
 		if float(p["counter"]) > 0.0:
 			sub.append(_t("battle.preview_counter", {"n": p["counter"]}))
-		list.append({"pos": pos, "main": "-" + _num(p["dmg"]), "sub": "  ".join(sub), "kind": "kill" if p["kill"] else "dmg", "icon": _e("💀") if p["kill"] else null})
+		# (도입 3) 유리/불리/보통 마크 + 약점이면 체력바 번쩍임 — 이 게임에서 실제 계산에 들어가는 요소만 (직업·속성 상성은 데이터에 없음)
+		var verdict := preview_verdict(p)
+		var weak := preview_weak(p)
+		if weak and units.has(int(v["id"])):
+			(units[int(v["id"])] as UnitView).weak = true
+		list.append({"pos": pos, "main": "-" + _num(p["dmg"]), "sub": "  ".join(sub), "kind": "kill" if p["kill"] else "dmg", "icon": _e("💀") if p["kill"] else null,
+			"mark": verdict, "mark_text": _mark_text(verdict), "weak": weak})
+		sections.append({"name": tname, "dmg": _num(p["dmg"]), "mark": verdict, "mark_text": _mark_text(verdict), "weak_text": _t("gd.adopt.mark_weak") if weak else "",
+			"rows": preview_rows(u, v, p)})
 	fx.set_previews(list)
+	ui.set_calc(sections)
+
+
+## 유리/불리/보통 — preview_attack 값만 읽음. 유리: 전술 보정(+%)·여울 취약, 불리: 방어막·회피(숲·회피 상태). 둘 다 있거나 없으면 보통
+func preview_verdict(p: Dictionary) -> String:
+	var fav := float(p["pct"]) > 0.0 or bool(p["shallow"])
+	var unf := bool(p["shield"]) or float(p["evade"]) > 0.0 or bool(p["evade_buff"])
+	if fav and not unf:
+		return "adv"
+	if unf and not fav:
+		return "dis"
+	return "even"
+
+
+## 약점: 여울에 서 있어 더 아프게 맞거나(여울 취약) 등 뒤를 침 (전술 'back')
+func preview_weak(p: Dictionary) -> bool:
+	return bool(p["shallow"]) or (p["tags"] as Array).has("back")
+
+
+func _mark_text(verdict: String) -> String:
+	match verdict:
+		"adv":
+			return "▲ " + _t("gd.adopt.mark_adv")
+		"dis":
+			return "▼ " + _t("gd.adopt.mark_dis")
+	return "－ " + _t("gd.adopt.mark_even")
+
+
+## 접힘 패널 한 대상의 계산 내역 줄 [[라벨, 값]…] — preview_attack(p)·preview_parts 가 이미 계산한 값을 그대로 적음
+func preview_rows(a: Dictionary, t: Dictionary, p: Dictionary) -> Array:
+	var pr: Dictionary = eng.q.preview_parts(a, t)
+	var rows: Array = []
+	rows.append([_t("gd.adopt.calc_atk"), _num(pr["atk"])])
+	rows.append([_t("gd.adopt.calc_def"), _num(pr["def"])])
+	rows.append([_t("gd.adopt.calc_base"), _num(pr["base"])])
+	for m: String in pr["mods"]:
+		for pre: String in ["fury", "exalt", "manasurge"]:
+			if m.begins_with(pre):
+				rows.append([_t("gd.adopt.calc_" + pre), "×" + m.substr(pre.length())])
+		if m == "gear":
+			rows.append([_t("gd.adopt.calc_gear"), "✓"])
+	if not (pr["tags"] as Array).is_empty():
+		var tags: Array = []
+		for tg: String in pr["tags"]:
+			tags.append(_t("battle.tactic_" + tg))
+		rows.append([_t("gd.adopt.calc_tactic") + " (" + "·".join(tags) + ")", "×" + _num(pr["tactic_mul"])])
+	if bool(pr["high"]):
+		rows.append([_t("gd.adopt.calc_high"), "+1"])
+	if str(pr["tile"]) != "":
+		rows.append([_t("gd.adopt.calc_terrain"), _t("terrain." + str(pr["tile"]))])
+	if p["shallow"]:
+		rows.append([_t("gd.adopt.calc_shallow"), "+%s%%" % _num(Js.round_js(float(D["TACTIC"]["shallowVuln"]) * 100.0))])
+	if p["shield"]:
+		rows.append([_t("gd.adopt.calc_shield"), "×0.5"])
+	if float(p["evade"]) > 0.0:
+		rows.append([_t("gd.adopt.calc_forest"), "%s%%" % _num(p["evade"])])
+	if p["evade_buff"]:
+		rows.append([_t("gd.adopt.calc_evade_buff"), "✓"])
+	if float(p["support"]) > 0.0:
+		rows.append([_t("gd.adopt.calc_support"), "%s%%" % _num(p["support"])])
+	if float(p["counter"]) > 0.0:
+		rows.append([_t("gd.adopt.calc_counter"), "-" + _num(p["counter"])])
+	rows.append([_t("gd.adopt.calc_final"), "-" + _num(p["dmg"])])
+	return rows
 
 
 ## 방향 고르기 (웹 showFacePicker: 유닛 둘레 네 칸 + 그 방향일 때 등 뒤·옆 적 수)
@@ -1918,6 +2137,7 @@ func _enter_face(op: String, u: Dictionary) -> void:
 	fx.queue_redraw()
 	ui.hide_menu()
 	ui.show_hint(_t("battle." + op))
+	_refresh_erange()
 
 
 ## 엔진에 명령 하나 → 바로 진행 (적 차례까지 엔진은 끝까지 돌고, 화면은 대기열을 재생)
@@ -1928,6 +2148,20 @@ func _send(cmd: Dictionary) -> void:
 	# 명령 전 상태 — 실패 안내는 명령 뒤에도 같은 클랜원이 같은 상태로 입력을 기다릴 때만
 	#  (엔진 cmd.ok 는 행동 직후 ha 기준이라, 공격이 회피되면 실제로는 행동했어도 ok=false 가 됨 — 엔진은 그대로 둠)
 	var before := _act_state(u)
+	var op0 := str(cmd.get("op", ""))
+	if op0 == "move":
+		_mv_snap = _undo_snapshot(u)
+		_undo_snap = {}
+		if not eng.record_enabled and eng.can_save():
+			_undo_snap = {"uid": int(u["id"]), "state": eng.save_state()}
+	else:
+		_mv_snap = {}
+		if op0 != "undo":
+			undo_block = ""
+			_undo_snap = {}
+	enemy_range_id = -1
+	if map != null:
+		map.set_erange({})
 	last_result = eng.command(cmd)
 	if bool(last_result.get("ok", false)):
 		match str(cmd.get("op", "")):
@@ -1948,10 +2182,48 @@ func _send(cmd: Dictionary) -> void:
 		uv.selected = false
 	ui.hide_menu()
 	ui.info.hide_popup()
+	if op0 == "undo" and bool(last_result.get("ok", false)):
+		undo_block = ""
 	fail_hint = _fail_text(str(last_result["reason"])) if really_failed else ""
 	ui.show_hint(fail_hint)
 	mode = "busy"
 	_eng_status = eng.run()
+
+
+## (도입 2) 이동 직전 상태 — 이동으로 새로 드러난 적·함정·상자가 있으면 취소 불가
+func _undo_snapshot(u: Dictionary) -> Dictionary:
+	return {"uid": int(u["id"]), "vis_enemies": _visible_enemy_ids(), "hp": float(u["hp"]), "buffs": (u["buffs"] as Array).size(),
+		"chests": (eng.S.get("chests", []) as Array).size() if eng.S.has("chests") else view_chests.size(), "x": int(u["x"]), "y": int(u["y"])}
+
+
+func _visible_enemy_ids() -> Array:
+	var vis: Dictionary = eng.q.fog_visible()
+	var ids: Array = []
+	for e: Dictionary in eng.S["units"]:
+		if e["team"] == "enemy" and float(e["hp"]) > 0.0 and not eng.is_stealthed(e) and vis.has("%d,%d" % [int(e["x"]), int(e["y"])]):
+			ids.append(int(e["id"]))
+	return ids
+
+
+## 이동이 끝나 다시 입력을 기다릴 때 불림 — 취소 불가 이유를 정함.
+##  규칙: 이동 뒤 행동(공격·스킬·아이템·대기…)을 하면 엔진이 원래 취소 불가. 그 전이라도 ① 이동으로 이전에 안 보이던 적이 시야에 들어왔거나
+##  ② 함정·상자 등으로 HP·상태·상자 수가 바뀌었으면(정보·결과가 이미 드러남) 화면은 '이동 취소'를 막음 (reveal · event)
+func _eval_undo_block(u: Dictionary) -> void:
+	if _mv_snap.is_empty() or int(_mv_snap["uid"]) != int(u["id"]):
+		return
+	var snap := _mv_snap
+	_mv_snap = {}
+	undo_block = ""
+	if not eng.q.can_undo():
+		return
+	var before: Array = snap["vis_enemies"]
+	for id: int in _visible_enemy_ids():
+		if not before.has(id):
+			undo_block = "reveal"
+			return
+	var chests_now := (eng.S.get("chests", []) as Array).size() if eng.S.has("chests") else view_chests.size()
+	if float(u["hp"]) != float(snap["hp"]) or (u["buffs"] as Array).size() != int(snap["buffs"]) or chests_now != int(snap["chests"]):
+		undo_block = "event"
 
 
 ## command() 실패 이유 → 안내 (gd.fail.* — Godot 전용 번역 키)
@@ -2434,11 +2706,80 @@ func _on_unit_nav_click(id: int) -> void:
 	var uv: UnitView = units.get(id)
 	if uv == null:
 		return
-	var tw := create_tween()
-	tw.tween_property(cam, "position", uv.position + Vector2(0, -20), 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	# (도입 1) 맵에 하이라이트 링 + 순서 바·카드 강조. 카메라는 그 유닛이 화면 밖일 때만 부드럽게 옮김
+	set_focus(id)
+	_ensure_visible(uv.position + Vector2(0, -20))
 	if mode == "menu" and id == awaiting_unit_id():
 		_show_main_menu(eng.awaiting_unit())
 		_sfx("select")   # 웹 render.js 카드 누르기 → ActionManager.selU
+
+
+## (도입 1) 유닛 하나를 눌러 고름 (-1 = 해제) — 맵 링 · 순서 바 · 카드 테두리가 한꺼번에
+func set_focus(id: int) -> void:
+	if focus_id >= 0 and units.has(focus_id):
+		(units[focus_id] as UnitView).focus = false
+	focus_id = id
+	if id >= 0 and units.has(id):
+		(units[id] as UnitView).focus = true
+	if ui != null:
+		ui.order.set_focus(id)
+		ui.cards.focus_id = id
+	_hud_dirty = true
+
+
+## 맵에서 보이는 가운데 영역 (왼쪽 패널·오른쪽 순서 바·윗줄·아래를 뺀) 안인가 → 아니면 부드럽게 옮김
+func _ensure_visible(world_p: Vector2) -> void:
+	if speed <= 0.0 or ui == null:
+		cam.position = world_p
+		return
+	var vs := get_viewport().get_visible_rect().size
+	var sp := get_viewport().get_canvas_transform() * world_p
+	var area := Rect2(ui.cards_rect.size.x + 12.0, BattleUI.TOP_H + 8.0, vs.x - ui.cards_rect.size.x - 200.0 - 12.0, vs.y - BattleUI.TOP_H - 60.0)
+	if area.grow(-area.size.x * 0.08).has_point(sp) and sp.y > area.position.y + 70.0:
+		return
+	var tw := create_tween()
+	tw.tween_property(cam, "position", world_p, 0.3 / maxf(speed, 0.5)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## (도입 4) 적 한 명의 이동(파랑)·공격(빨강) 범위 켜기/끄기 — 같은 적을 다시 누르면 해제
+##  우선순위: ① 아군이 이동·공격·방향을 고르는 중(target·face)에는 그리지 않음(고르는 칸과 안 섞이게 — 돌아오면 다시 나옴)
+##   ② 전체 위협('위협' 단추)은 별도 층이라 같이 켜져도 됨(개별 범위가 위에 더 진하게) ③ 한 번에 한 명 ④ 상태가 바뀌면(명령·적 차례) 해제
+func toggle_enemy_range(id: int) -> void:
+	enemy_range_id = -1 if enemy_range_id == id else id
+	_refresh_erange()
+
+
+func clear_enemy_range() -> void:
+	if enemy_range_id != -1:
+		enemy_range_id = -1
+		_refresh_erange()
+
+
+func _refresh_erange() -> void:
+	if map == null:
+		return
+	var eu: Variant = eng.unit_by_id(enemy_range_id) if enemy_range_id >= 0 else null
+	if eu == null or float(eu["hp"]) <= 0.0 or not units.has(enemy_range_id) or not (units[enemy_range_id] as UnitView).visible:
+		enemy_range_id = -1
+		map.set_erange({})
+		return
+	if not (mode == "menu" or mode == "skills" or mode == "items"):
+		map.set_erange({})   # 고르는 중·재생 중에는 숨김 (enemy_range_id 는 유지 — 메뉴로 돌아오면 다시)
+		return
+	var r: Dictionary = eng.q.enemy_range(eu)
+	var m: Dictionary = {}
+	for k: String in r["attack"]:
+		m[k] = "a"
+	for k2: String in r["move"]:
+		m[k2] = "ma" if m.has(k2) else "m"
+	map.set_erange(m)
+	var nm := info.unit_name((units[enemy_range_id] as UnitView).d, eng.S["cStage"])
+	if bool(r["cc"]):
+		ui.show_hint(_t("gd.adopt.erange_cc", {"name": nm}))
+	elif bool(r["passive"]):
+		ui.show_hint(_t("gd.adopt.erange_passive", {"name": nm}))
+	else:
+		ui.show_hint(_t("gd.adopt.erange_hint", {"name": nm}))
 
 
 func _on_nav_hover(id: int) -> void:
@@ -2468,6 +2809,13 @@ func _input(ev: InputEvent) -> void:
 
 func _unhandled_input(ev: InputEvent) -> void:
 	if eng == null or ui == null:
+		return
+	# 턴 종료 확인창이 떠 있으면 뒤쪽 조작은 막음: Esc·우클릭 = 돌아가기, 그 밖의 키·누르기는 무시
+	if ui.end_confirm_open():
+		if ev is InputEventKey and ev.pressed and not ev.echo and (ev as InputEventKey).keycode == KEY_ESCAPE:
+			end_confirm_back()
+		elif ev is InputEventMouseButton and ev.pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
+			end_confirm_back()
 		return
 	# (6a) 손가락: 두 손가락 확대·이동 (PC 마우스에는 오지 않는 사건)
 	if ev is InputEventScreenTouch or ev is InputEventScreenDrag:
@@ -2634,7 +2982,7 @@ func _key(k: Key) -> void:
 			if mode == "face":
 				ui_pick_face(0, 0)
 			elif mode == "menu":
-				ui_action("wait")
+				_user_action("wait")
 			return
 		KEY_ENTER, KEY_KP_ENTER:
 			if mode == "face":
@@ -2676,8 +3024,20 @@ func _click(p: Vector2) -> void:
 				return
 			if hk.begins_with("u:"):
 				var uv: UnitView = units.get(hk.substr(2).to_int())
+				if uv != null:
+					set_focus(uv.id)   # (도입 1) 아군·적 모두 링 + 순서 바 강조
 				if uv != null and uv.d.get("team") == "enemy":
-					show_enemy_popup(uv.id)
+					# (도입 4) 적을 누르면 그 적의 범위 켜기, 다시 누르면 해제 (켤 때만 정보 팝업)
+					toggle_enemy_range(uv.id)
+					if enemy_range_id == uv.id:
+						show_enemy_popup(uv.id)
+			elif mode == "menu" or mode == "skills" or mode == "items":
+				# 빈 칸 누르기 = 강조·적 범위 해제
+				if focus_id >= 0:
+					set_focus(-1)
+				clear_enemy_range()
+				if mode == "menu":
+					ui.show_hint(fail_hint)
 
 
 # ═══════════ 자동 진행 (화면 확인용) ═══════════
@@ -2892,6 +3252,9 @@ func on_system_back() -> void:
 		ui.story.skip()
 		return
 	if ui.result_view.visible or _loading_on:
+		return
+	if ui.end_confirm_open():
+		end_confirm_back()
 		return
 	if ui.settings.is_open():
 		ui.settings.close()

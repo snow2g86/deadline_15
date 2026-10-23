@@ -333,6 +333,58 @@ func threat_cells(only_visible: bool = true) -> Array:
 	return set.keys()
 
 
+## (도입 4) 적 한 명의 범위 — threat_cells 와 같은 규칙(이동 가능 칸 + 이동 뒤 사거리, 언덕 위 원거리 +highRange)을 그 적 하나에만
+##  → { move: ["x,y"…](제자리 포함), attack: ["x,y"…], cc: 행동 불가(기절·빙결 등), passive: 적극 공격 안 함(targetPriority never) }
+##  순수 (난수·상태 불변 — tests/check_battle_api.gd 순수성 시험에 포함)
+func enemy_range(e: Dictionary) -> Dictionary:
+	var out := {"move": [], "attack": [], "cc": false, "passive": false}
+	if e["team"] != "enemy" or e["hp"] <= 0:
+		return out
+	E.pure_begin()
+	var prof: Variant = (D["AI_PROFILES"] as Dictionary).get(e["cls"])
+	if E.gu.is_cc(e):
+		out["cc"] = true
+	elif prof != null and prof["targetPriority"] == "never":
+		out["passive"] = true
+	else:
+		var mv: Dictionary = {str(e["x"]) + "," + str(e["y"]): true}
+		var spots: Array = [{"x": e["x"], "y": e["y"]}]
+		if not E.buff_has(e, "root"):
+			for p: Dictionary in E.gu.e_mv_cells(e):
+				mv[str(p["x"]) + "," + str(p["y"])] = true
+				spots.append({"x": p["x"], "y": p["y"]})
+		var at: Dictionary = {}
+		for p2: Dictionary in spots:
+			var tl: Variant = E.gu.tile(p2["x"], p2["y"])
+			var rng: int = int(float(e["range"]) + (float(D["TACTIC"]["highRange"]) if tl == "hill" and float(e["range"]) > 1.0 else 0.0))
+			for dy in range(-rng, rng + 1):
+				for dx in range(-rng, rng + 1):
+					var x: int = p2["x"] + dx
+					var y: int = p2["y"] + dy
+					if (dx != 0 or dy != 0) and absi(dx) + absi(dy) <= rng and x >= 0 and x < int(D["COLS"]) and y >= 0 and y < int(D["ROWS"]):
+						at[str(x) + "," + str(y)] = true
+		out["move"] = mv.keys()
+		out["attack"] = at.keys()
+	E.pure_end()
+	return out
+
+
+## (도입 3) 예상 피해의 계산 내역 — 엔진이 쓰는 같은 함수(combat._calc_parts · grid_units.tactic_bonus)를 읽기만 함 (식은 안 바뀜)
+##  → { atk, def, base(=max(1, atk−def)), mods(["fury1.5"…]), tactic_mul, tags, pct, tile(대상 지형), high(공격자가 언덕 위 원거리) }
+func preview_parts(a: Dictionary, t: Dictionary) -> Dictionary:
+	E.pure_begin()
+	var saved := _keep([a, t])
+	var parts: Dictionary = E.cb._calc_parts(a, t)
+	var tb: Dictionary = E.gu.tactic_bonus(a, t)
+	var tile_t: Variant = E.gu.tile(t["x"], t["y"])
+	var tile_a: Variant = E.gu.tile(a["x"], a["y"])
+	_restore(saved)
+	E.pure_end()
+	return {"atk": parts["atk"], "def": parts["def"], "base": parts["base"], "mods": (parts["mods"] as Array).duplicate(),
+		"tactic_mul": tb["mul"], "tags": (tb["tags"] as Array).duplicate(), "pct": Js.round_js((float(tb["mul"]) - 1.0) * 100.0),
+		"tile": tile_t if tile_t != null else "", "high": tile_a == "hill" and float(a["range"]) > 1.0}
+
+
 ## 전투 끝 장비 보상의 실제 물건 (3b 결과 화면용, 순수) — before_eids: 전투 시작 때 인벤토리의 eid 들 {eid: true}
 ##  S._gearDrops 는 templateId·legend 만 담으므로, 이번 전투에 새로 생긴 물건(시작 때 없던 eid) 중 끝에서부터
 ##  드랍 수만큼을 _gearDrops 순서대로 짝지음 (보물상자 장비는 전투 중에 먼저 들어가므로 앞쪽, 끝 보상은 마지막에 들어감)

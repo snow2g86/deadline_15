@@ -1,5 +1,5 @@
 extends PanelContainer
-## 아래 클랜원 카드 — 웹 #info-panel (render.js rInfoPanel): 초상화 · 이름 · Lv·직업 · HP·자원 막대와 값 · ATK/DEF/RNG · 버프 아이콘
+## 왼쪽 클랜원 카드 (세로 패널; 예전엔 아래 가로줄) — 웹 #info-panel (render.js rInfoPanel): 초상화 · 이름 · Lv·직업 · HP·자원 막대와 값 · ATK/DEF/RNG · 버프 아이콘
 ##  지금 차례(ip-cur 금빛 테두리)·선택(ip-sel)·행동 끝(ip-done 흐림). 누르면 unit_clicked (장면이 카메라를 그 유닛으로)
 ##  카드 노드는 다시 쓰고 바뀐 내용만 고침. 버프 아이콘에 마우스를 올리면 이름·남은 턴 (웹은 아이콘만)
 
@@ -10,7 +10,7 @@ signal unit_clicked(id: int)
 signal unit_hover(id: int)
 
 var icons: Object
-var row: HBoxContainer
+var row: VBoxContainer
 var _cards: Array = []
 var _sig := ""
 
@@ -22,48 +22,73 @@ class Card extends PanelContainer:
 	var cl: Label
 	var hp: Kit.Bar
 	var hpv: Label
+	var hpl: Label
+	var nmv: VBoxContainer
+	var top_row: HBoxContainer
 	var res_row: HBoxContainer
 	var resl: Label
 	var res: Kit.Bar
 	var resv: Label
 	var stats: Label
 	var buffs: HBoxContainer
+	var focused := false
+	var down := false
+	var moved := false
+	var press_at := Vector2.ZERO
+
+	func _draw() -> void:
+		if focused:
+			draw_rect(Rect2(Vector2(-1, -1), size + Vector2(2, 2)), Color(1, 1, 1, 0.9), false, 2.0)
+
+
+## 왼쪽 세로 패널 너비 (일반 · 얇은 아이콘형)
+const W_NORMAL := 158.0
+const W_COMPACT := 56.0
+
+var compact := false
+var scroll: ScrollContainer
+var col: VBoxContainer
+var focus_id := -1   # 순서 바·맵에서 눌러 강조한 유닛 (카드 테두리)
 
 
 func setup(p_icons: Object) -> void:
 	icons = p_icons
 	name = "ClanCards"
-	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	offset_top = -130
-	grow_vertical = Control.GROW_DIRECTION_BEGIN   # (6a) 내용이 130 보다 크면(모바일 글자) 위로 자람 — 화면 아래로 잘리지 않게
+	set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	var sb := StyleBoxEmpty.new()
-	sb.content_margin_left = 10
-	sb.content_margin_right = 10
-	sb.content_margin_top = 6
-	sb.content_margin_bottom = 4
 	add_theme_stylebox_override("panel", sb)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	# 웹: linear-gradient(0deg,#0d1117,var(--panel)) + 위 2px #1e293b
-	draw.connect(func() -> void:
-		var w := size.x
-		var h := size.y
-		draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]),
-			PackedColorArray([Color("111827"), Color("111827"), Color("0d1117"), Color("0d1117")]))
-		draw_rect(Rect2(0, 0, w, 2), Color("1e293b")))
-	var sc := ScrollContainer.new()
-	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.mouse_filter = Control.MOUSE_FILTER_PASS
-	add_child(sc)
-	row = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sc.add_child(row)
+	mouse_filter = Control.MOUSE_FILTER_PASS
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(scroll)
+	col = VBoxContainer.new()
+	col.add_theme_constant_override("separation", 4)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(col)
+	row = col   # 예전 이름 호환 (카드 부모)
+
+
+## 자리: 왼쪽 위 (x, y) 에서 너비 w, 아래 끝 bottom_y 까지. 얇은 모드는 아이콘 위주
+func place(x: float, y: float, bottom_y: float, p_compact: bool) -> void:
+	if p_compact != compact:
+		compact = p_compact
+		_sig = ""
+	var w := W_COMPACT if compact else W_NORMAL
+	set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	offset_left = x
+	offset_top = y
+	offset_right = x + w
+	offset_bottom = maxf(y + 60.0, bottom_y)
+	custom_minimum_size = Vector2(w, 0)
 
 
 func _make() -> Card:
 	var c := Card.new()
-	c.custom_minimum_size = Vector2(150, 0)
-	c.mouse_filter = Control.MOUSE_FILTER_STOP
+	c.custom_minimum_size = Vector2(0, Kit.touch_min())   # 터치 44pt
+	# PASS: 끌기(스크롤)는 위 ScrollContainer 로 넘어가고, 탭 판정은 아래 gui_input 이 직접 함
+	c.mouse_filter = Control.MOUSE_FILTER_PASS
 	c.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 3)
@@ -74,10 +99,12 @@ func _make() -> Card:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(top)
 	c.por = Kit.Portrait.new()
-	c.por.custom_minimum_size = Vector2(32, 32)
+	c.por.custom_minimum_size = Vector2(30, 30)
 	c.por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(c.por)
 	var nmv := VBoxContainer.new()
+	c.nmv = nmv
+	c.top_row = top
 	nmv.add_theme_constant_override("separation", -2)
 	nmv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nmv.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -91,6 +118,7 @@ func _make() -> Card:
 	var hr := _bar_row(v, "HP", Kit.DIM)
 	c.hp = hr[1]
 	c.hpv = hr[2]
+	c.hpl = hr[0]
 	var rr := _bar_row(v, "", Kit.DIM)
 	c.res_row = rr[3]
 	c.resl = rr[0]
@@ -102,12 +130,31 @@ func _make() -> Card:
 	c.buffs.add_theme_constant_override("separation", 3)
 	v.add_child(c.buffs)
 	c.gui_input.connect(func(ev: InputEvent) -> void:
-		if ev is InputEventMouseButton and ev.pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-			unit_clicked.emit(c.id))
+		if ev is InputEventMouseButton and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+			var mbe := ev as InputEventMouseButton
+			c.accept_event()   # 누르기·떼기는 여기서 끝냄 (맵으로 새어 '빈 칸 탭' 이 되지 않게). 스크롤은 터치 끌기 사건이 따로 위 ScrollContainer 로 감
+			if mbe.pressed:
+				c.down = true
+				c.moved = false
+				c.press_at = mbe.global_position
+			else:
+				# 문턱(터치는 실제 2mm) 안에서 떼면 탭, 넘었으면 스크롤이었으니 무시
+				if c.down and not c.moved and mbe.global_position.distance_to(c.press_at) <= _slop(mbe):
+					unit_clicked.emit(c.id)
+				c.down = false
+		elif ev is InputEventMouseMotion and c.down and (ev as InputEventMouseMotion).global_position.distance_to(c.press_at) > _slop(ev):
+			c.moved = true)
 	c.mouse_entered.connect(func() -> void: unit_hover.emit(c.id))
 	c.mouse_exited.connect(func() -> void: unit_hover.emit(-1))
-	row.add_child(c)
+	col.add_child(c)
 	return c
+
+
+## 끌기 문턱 (논리 px): Mobile 오토로드가 있으면 터치는 실제 2mm, 아니면 6
+static func _slop(ev: InputEvent) -> float:
+	var ml := Engine.get_main_loop()
+	var mob: Node = (ml as SceneTree).root.get_node_or_null("Mobile") if ml is SceneTree else null
+	return float(mob.call("slop_for", ev)) if mob != null else 6.0
 
 
 func _bar_row(parent: Control, lab: String, col: Color) -> Array:
@@ -134,7 +181,7 @@ func _bar_row(parent: Control, lab: String, col: Color) -> Array:
 
 ## cards: [{id, name, cls, hp, mhp, res, maxres, res_label, res_color, atk, def, rng, buffs[{icon,label,turns,type}], sel, cur, done, tex, summon}]
 func update(cards: Array) -> void:
-	var sig := HudOrder.sig_of(cards)
+	var sig := HudOrder.sig_of(cards) + "|c%s|f%d" % [compact, focus_id]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -150,11 +197,11 @@ func update(cards: Array) -> void:
 		c.id = int(m["id"])
 		var sel: bool = m["sel"]
 		var cur: bool = m["cur"]
-		var sb := Kit.box(Color(1, 1, 1, 0.04), Color(59 / 255.0, 130 / 255.0, 246 / 255.0, 0.25), 8, 1, 8, 6)
+		var sb := Kit.box(Color(13 / 255.0, 17 / 255.0, 23 / 255.0, 0.88), Color(59 / 255.0, 130 / 255.0, 246 / 255.0, 0.35), 8, 1, 5 if compact else 7, 4)
 		if sel:
 			sb.border_color = Kit.GOLD
 			sb.set_border_width_all(2)
-			sb.bg_color = Color(250 / 255.0, 204 / 255.0, 21 / 255.0, 0.05)
+			sb.bg_color = Color(40 / 255.0, 36 / 255.0, 18 / 255.0, 0.92)
 		if cur:
 			sb.shadow_color = Color(250 / 255.0, 204 / 255.0, 21 / 255.0, 0.22)
 			sb.shadow_size = 7
@@ -178,12 +225,24 @@ func update(cards: Array) -> void:
 			c.res.set_value(float(m["res"]) / mr, m["res_color"], m["res_color"])
 			c.resv.text = "%s/%s" % [m["res_text"], m["maxres_text"]]
 		c.stats.text = "ATK %s   DEF %s   RNG %s" % [m["atk"], m["def"], m["rng"]]
+		# 얇은 모드: 이름·값 숨김(초상+막대만). 일반: 선택된 카드만 값·능력치를 펼침
+		var expanded: bool = sel and not compact
+		c.nmv.visible = not compact
+		c.hpl.visible = not compact
+		c.resl.visible = not compact
+		c.hpv.visible = expanded
+		c.resv.visible = expanded
+		c.stats.visible = expanded
+		c.top_row.alignment = BoxContainer.ALIGNMENT_CENTER if compact else BoxContainer.ALIGNMENT_BEGIN
+		c.tooltip_text = "%s · %s" % [m["name"], m["cls"]] if compact else ""
+		c.focused = c.id == focus_id
 		for ch: Node in c.buffs.get_children():
 			c.buffs.remove_child(ch)
 			ch.queue_free()
 		for b: Dictionary in m["buffs"]:
 			c.buffs.add_child(buff_icon(icons, b, 16))
-		c.buffs.visible = not (m["buffs"] as Array).is_empty()
+		c.buffs.visible = not (m["buffs"] as Array).is_empty() and not compact
+		c.queue_redraw()
 
 
 ## 버프 아이콘 하나 (그림 + 남은 턴 작은 숫자, 툴팁 = 이름·남은 턴)

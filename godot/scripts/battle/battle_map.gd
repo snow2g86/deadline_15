@@ -30,6 +30,9 @@ var hl: Dictionary = {}
 var fog_vis: Dictionary = {}      # "x,y" → true (보이는 칸). 비어 있으면 안개 없음 취급 안 함 — fog_on 으로
 var fog_on := true
 var threat: Dictionary = {}
+## 적 한 명의 범위 (탭해서 켬): "x,y" → "m"(이동만 · 파랑) · "a"(공격만 · 빨강) · "ma"(이동 가능 + 공격 가능 · 파랑 + 빨간 테두리)
+##  전체 위협(threat)과 별도 층 — 아군 행동 하이라이트(hl)와도 섞이지 않음
+var erange: Dictionary = {}
 var safe: Dictionary = {}
 var chests: Array = []            # [[x, y], …]
 var move_color := Color("3b82f6")
@@ -587,6 +590,13 @@ func set_threat(cells: Array) -> void:
 	_redraw_hl()
 
 
+func set_erange(m: Dictionary) -> void:
+	if m == erange:
+		return
+	erange = m
+	_redraw_hl()
+
+
 func set_safe(cells: Array) -> void:
 	safe = {}
 	for k: String in cells:
@@ -684,6 +694,16 @@ func _draw_hl_diag(n: HlDiag) -> void:
 					n.draw_polyline(inset, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.85), 2.0, true)
 				"cover":
 					n.draw_polyline(inset, Color(148 / 255.0, 163 / 255.0, 184 / 255.0, 0.6), 2.0, true)
+		if erange.has(k):
+			var er := str(erange[k])
+			var blue := Color(59 / 255.0, 130 / 255.0, 246 / 255.0)
+			var red := Color(239 / 255.0, 68 / 255.0, 68 / 255.0)
+			if er == "a":
+				n.draw_colored_polygon(shape, Color(red, 0.30))
+				n.draw_polyline(inset, Color(red, 0.95), 2.0, true)
+			else:
+				n.draw_colored_polygon(shape, Color(blue, 0.30))
+				n.draw_polyline(inset, Color(red if er == "ma" else blue, 0.95), 2.0, true)
 		if n.stripes.has(k):
 			for s: Array in n.stripes[k]:
 				# 안개 칸에서는 위협 줄무늬만 (웹: fow-dark 가 하이라이트 배경을 덮지만 ::after 위협은 남음)

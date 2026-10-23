@@ -47,6 +47,19 @@ var face_hidden := false       # 방향 고르는 중
 var cur_turn := false
 var selected := false
 var hover := false             # 행동 순서·카드에 마우스 (웹 .nav-hover)
+## 순서 바·카드·맵에서 눌러 고른 유닛 — 발밑 하이라이트 링 (아군 파랑·적 빨강, 카메라는 안 움직임)
+var focus := false:
+	set(v):
+		if focus != v:
+			focus = v
+			queue_redraw()
+## 공격 예상 중 약점이 드러난 대상 — 체력바 번쩍임 (여울 취약·등 뒤)
+var weak := false:
+	set(v):
+		if weak != v:
+			weak = v
+			if bars != null:
+				bars.queue_redraw()
 var in_fog := false
 var dying := false
 var reduce_motion := false
@@ -376,6 +389,10 @@ func _process(delta: float) -> void:
 	if absf(res_disp - rv) > 0.01:
 		res_disp = move_toward(res_disp, rv, maxf(1.0, absf(rv - res_disp)) * dt / 0.3 + 0.5)
 		redraw_bars = true
+	if weak or focus:
+		redraw_bars = redraw_bars or weak
+		if focus:
+			queue_redraw()
 	if redraw_bars:
 		bars.queue_redraw()
 	_refresh_frame()
@@ -584,6 +601,18 @@ func _draw() -> void:
 		var a := TAU * i / 16.0
 		pts.append(sc + Vector2(cos(a) * 20.0, sin(a) * 3.0))
 	draw_colored_polygon(pts, Color(0, 0, 0, 0.35))
+	if focus:
+		# 하이라이트 링: 발밑 타원 두 겹 (바깥 팀 색, 안쪽 흰색), 숨 쉬듯 살짝 밝아짐
+		var ph := 0.5 - 0.5 * cos(_t / 1.2 * TAU)
+		var rc := Color("ef4444") if _is_enemy else Color("3b82f6")
+		var ring := PackedVector2Array()
+		var ring2 := PackedVector2Array()
+		for i in 25:
+			var a2 := TAU * i / 24.0
+			ring.append(sc + Vector2(cos(a2) * 29.0, sin(a2) * 14.5))
+			ring2.append(sc + Vector2(cos(a2) * 25.0, sin(a2) * 12.5))
+		draw_polyline(ring, Color(rc, lerpf(0.75, 1.0, ph)), 3.0, true)
+		draw_polyline(ring2, Color(1, 1, 1, lerpf(0.55, 0.9, ph)), 1.5, true)
 	# 발밑 방향 삼각형 (이동 중·방향 고르는 중·쓰러지는 중엔 숨김)
 	var f: Array = d.get("face", [0, 0])
 	if not moving and not face_hidden and not dying and f[0] != null and f[1] != null and (int(f[0]) != 0 or int(f[1]) != 0):
@@ -601,6 +630,11 @@ func _draw_bars(ci: CanvasItem) -> void:
 	ci.draw_rect(Rect2(-24, y0, 48, 4), Color("222222"))
 	var mhp := maxf(1.0, float(d.get("mhp", 1.0)))
 	ci.draw_rect(Rect2(-24, y0, 48.0 * clampf(hp_disp / mhp, 0.0, 1.0), 4), HP_ENEMY if _is_enemy else HP_ALLY)
+	if weak:
+		# 약점 번쩍임: 체력바 위에 노란 빛이 빠르게 깜빡임
+		var f := 0.5 - 0.5 * cos(_t / 0.5 * TAU)
+		ci.draw_rect(Rect2(-24, y0, 48, 4), Color(1, 0.93, 0.45, lerpf(0.15, 0.85, f)))
+		ci.draw_rect(Rect2(-26, y0 - 2, 52, 8), Color(1, 0.8, 0.2, lerpf(0.5, 1.0, f)), false, 1.5)
 	var mr := float(d.get("maxRes", 0.0))
 	ci.draw_rect(Rect2(-24, y0 + 6, 48, 3), Color("181818"))
 	if mr > 0.0:

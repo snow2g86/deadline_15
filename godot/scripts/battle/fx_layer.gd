@@ -29,6 +29,8 @@ var intents: Array = []
 var intent_badges: Array = []
 ## 공격 예상 [{pos, main, sub, kind(dmg|kill|block), icon}]
 var previews: Array = []
+## (도입 3) 접힘 패널이 펼쳐지면 예상 상자에 계산 한 줄(전술 보정·방어막 등)도 보임. 기본은 숫자 + 유리/불리 마크만
+var preview_detail := false
 var _prev_t := 0.0
 ## 방향 고르기 {center, opts:[{dx,dy,back,side,cur,best,pos,label}], tip, tip_pos} (없으면 빈 사전)
 var picker: Dictionary = {}
@@ -452,7 +454,9 @@ func _draw_intents() -> void:
 ## 공격 예상 (웹 .dmg-prev: 대상 머리 위 '-피해', 처치면 💀·금빛, 차단이면 🛡️·파랑, 아래 보조 줄)
 func _draw_preview(pv: Dictionary) -> void:
 	var main: String = pv["main"]
-	var sub: String = pv["sub"]
+	var sub: String = pv["sub"] if preview_detail else ""
+	var mark: String = str(pv.get("mark_text", ""))
+	var mark_key: String = str(pv.get("mark", ""))
 	var kind: String = pv["kind"]
 	var icon: Variant = pv.get("icon")
 	var k := clampf(_prev_t / 0.15, 0.0, 1.0)
@@ -460,8 +464,9 @@ func _draw_preview(pv: Dictionary) -> void:
 	var ms := 14
 	var mw := font_bold.get_string_size(main, HORIZONTAL_ALIGNMENT_LEFT, -1, ms).x + (16.0 if icon != null else 0.0)
 	var sw := font_tactic.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x if sub != "" else 0.0
-	var w := maxf(mw, sw) + 14.0
-	var h := 21.0 + (12.0 if sub != "" else 0.0)
+	var kw := font_bold.get_string_size(mark, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x if mark != "" else 0.0
+	var w := maxf(maxf(mw, sw), kw) + 14.0
+	var h := 21.0 + (13.0 if mark != "" else 0.0) + (12.0 if sub != "" else 0.0)
 	var r := Rect2(p.x - w / 2.0, p.y - h, w, h)
 	var sb := _prev_sb
 	sb.bg_color = Color(10 / 255.0, 14 / 255.0, 26 / 255.0, 0.9 * k)
@@ -484,8 +489,13 @@ func _draw_preview(pv: Dictionary) -> void:
 		draw_texture_rect(icon, Rect2(x, r.position.y + 3.0, 14, 14), false, Color(1, 1, 1, k))
 		x += 16.0
 	draw_string(font_bold, Vector2(x, r.position.y + 16.0), main, HORIZONTAL_ALIGNMENT_LEFT, -1, ms, Color(mc, k))
+	var ty := r.position.y + 29.0
+	if mark != "":
+		var mcol := Color("86efac") if mark_key == "adv" else (Color("fca5a5") if mark_key == "dis" else Color("cbd5e1"))
+		draw_string(font_bold, Vector2(p.x - kw / 2.0, r.position.y + 28.0), mark, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(mcol, k))
+		ty += 13.0
 	if sub != "":
-		draw_string(font_tactic, Vector2(p.x - sw / 2.0, r.position.y + 29.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(203 / 255.0, 213 / 255.0, 225 / 255.0, k))
+		draw_string(font_tactic, Vector2(p.x - sw / 2.0, ty), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(203 / 255.0, 213 / 255.0, 225 / 255.0, k))
 
 
 ## 방향 고르기 (웹 #face-picker: 유닛 둘레 네 칸에 64x40 타원 단추 + 바닥 삼각형 + 아래 글)

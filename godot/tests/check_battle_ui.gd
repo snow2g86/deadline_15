@@ -536,7 +536,11 @@ func _input_details() -> void:
 	await _frames(2)
 	# Space = 대기 (방향 고르기), Backspace = 취소
 	await _key(KEY_SPACE)
-	_check(sc.mode == "face", "Space → 대기(방향 고르기) (%s)" % sc.mode)
+	# (도입 2) 이동·행동 없이 대기하려 하면 '행동하지 않은 클랜원이 N명…' 확인이 먼저 — 한 번 더(턴 종료) 눌러야 방향 고르기
+	_check(ui.end_confirm_open() and sc.mode == "menu", "Space → 대기 확인 창 (%s)" % sc.mode)
+	ui.end_yes.pressed.emit()
+	await _frames(1)
+	_check(sc.mode == "face", "확인 → 대기(방향 고르기) (%s)" % sc.mode)
 	await _key(KEY_BACKSPACE)
 	_check(sc.mode == "menu", "Backspace → 취소 (%s)" % sc.mode)
 	# 적 팝업이 떠 있어도 다음 누르기가 그대로 처리됨: 이동 칸 고르기 중 칸을 누르면 팝업 닫힘 + 이동

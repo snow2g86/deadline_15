@@ -31,6 +31,9 @@ func _process(_d: float) -> bool:
 	return false
 
 
+var _cons_bad := 0   # 도입 3·4 조회 값 일치 위반 수
+
+
 func _check(cond: bool, label: String) -> void:
 	if cond:
 		_pass += 1
@@ -108,6 +111,13 @@ func _query_all(eng: Object) -> int:
 				# 3b: 실제 공격처럼 계산하는 미리보기(고양 버프를 잠시 뺌)도 순수해야 함
 				var p2: Dictionary = eng.q.preview_attack(a, t, true)
 				n += int(p2["dmg"])
+				# 도입 3: 계산 내역 조회도 순수 + preview_attack 의 값과 맞아야 함 (식 불변 확인)
+				var pp: Dictionary = eng.q.preview_parts(a, t)
+				n += int(pp["base"])
+				if p["intercept"] == null and not (float(pp["pct"]) == float(p["pct"]) and (pp["tags"] as Array) == (p["tags"] as Array)):
+					_cons_bad += 1
+		if a["team"] == "enemy":
+			n += (eng.q.enemy_range(a)["attack"] as Array).size()
 		n += eng.q.face_options(a).size()
 		if a["team"] == "ally":
 			for st: Dictionary in eng.q.skill_status(a):
@@ -125,6 +135,18 @@ func _query_all(eng: Object) -> int:
 			n += (eng.q.siege_targets(u, i3)["cells"] as Array).size()
 	n += eng.q.threat_cells().size()
 	n += eng.q.threat_cells(false).size()
+	# 도입 4: 적 한 명 범위들의 공격 칸 합집합(보이는 적)이 전체 위협과 같아야 함
+	var uni: Dictionary = {}
+	var vis: Dictionary = eng.q.fog_visible()
+	for e: Dictionary in units:
+		if e["team"] == "enemy" and e["hp"] > 0 and not eng.is_stealthed(e) and vis.has("%d,%d" % [e["x"], e["y"]]):
+			for k: String in eng.q.enemy_range(e)["attack"]:
+				uni[k] = true
+	var thr: Dictionary = {}
+	for k2: String in eng.q.threat_cells():
+		thr[k2] = true
+	if uni != thr:
+		_cons_bad += 1
 	return n
 
 
@@ -152,6 +174,8 @@ func _test_purity() -> void:
 			eng.command(cmds[ci])
 			ci += 1
 			st = eng.run()
+		_check(_cons_bad == 0, "%s: 도입 3·4 조회 일치 (preview_parts 전술 보정 = preview_attack · 적 범위 합집합 = 전체 위협) 위반 %d" % [name, _cons_bad])
+		_cons_bad = 0
 		var end: Dictionary = eng.finish(st)
 		var gend: Dictionary = mk[2]["end"]
 		_check(bad == 0 and points > 10 and end["rngCalls"] == gend["rngCalls"] and end["result"] == gend["result"] and eng.trace.size() == (mk[2]["events"] as Array).size(),

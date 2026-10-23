@@ -13,6 +13,13 @@ const PANEL := Color(17 / 255.0, 24 / 255.0, 39 / 255.0, 0.96)
 const RES_COLOR := {"mana": Color("4488ff"), "energy": Color("f0c040"), "fury": Color("ff6644")}
 
 ## 글꼴은 언어별 사슬 (scripts/core/fonts.gd) — 언어가 바뀌면 같은 객체 안의 사슬이 바뀌어 바로 다시 그려짐
+## 터치 대상 최소 높이 (논리 px): PC 44, 모바일은 실제 44pt(≈6.9mm) 이상 (Mobile.min_target)
+static func touch_min() -> float:
+	var ml := Engine.get_main_loop()
+	var mob: Node = (ml as SceneTree).root.get_node_or_null("Mobile") if ml is SceneTree else null
+	return maxf(44.0, float(mob.call("min_target")) if mob != null else 0.0)
+
+
 static func font() -> Font:
 	return Fonts.weight(Fonts.REGULAR)
 

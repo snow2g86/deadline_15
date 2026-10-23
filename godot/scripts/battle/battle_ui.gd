@@ -26,12 +26,31 @@ signal rotate_pressed(dir: int)
 signal threat_pressed
 signal speed_pressed
 signal back_pressed
+signal calc_toggled(open: bool)
+signal end_turn_confirmed
+signal end_turn_canceled
 
 const GOLD := Color("f0c040")
 ## 버튼 강조색 (웹 .ac-move · ac-attack · ac-skill · ac-item · ac-wait · ac-cancel)
 const AC := {"move": Color("3b82f6"), "attack": Color("ef4444"), "skill": Color("a855f7"), "item": Color("22c55e"), "wait": Color("9ca3af"), "cancel": Color("64748b")}
 const TOP_H := 58.0
-const CARDS_H := 130.0
+## (옛 이름) 아래 카드줄 높이 — 지금 클랜원 카드는 왼쪽 세로 패널. 아래 여백은 설정 톱니 + 여유만
+const CARDS_H := 0.0
+const BOTTOM_PAD := 64.0
+## 왼쪽 패널 위 (미니맵 아래) 간격 · 얇은 패널로 바꾸는 화면 한계
+const COMPACT_H := 600.0
+const COMPACT_W := 900.0
+## (도입 3) 계산 내역 접힘 패널 · (도입 2) 턴 종료 확인 창
+var calc_panel: PanelContainer
+var calc_btn: Button
+var calc_scroll: ScrollContainer
+var calc_box: VBoxContainer
+var calc_open := false
+var end_wrap: Control
+var end_msg: Label
+var end_yes: Button
+var end_no: Button
+var cards_rect := Rect2()   # 왼쪽 패널(미니맵 포함) 실제 영역 — 행동 메뉴·시험이 읽음
 
 var i18n: Node
 var icons: Icons
@@ -147,8 +166,8 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 	compass.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	compass.offset_left = -50
 	compass.offset_right = -14
-	compass.offset_top = -CARDS_H - 62.0
-	compass.offset_bottom = -CARDS_H - 14.0
+	compass.offset_top = -BOTTOM_PAD - 48.0
+	compass.offset_bottom = -BOTTOM_PAD
 	root.add_child(compass)
 	compass_arrow = Kit.label(24, GOLD, 800)
 	compass_arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -217,8 +236,8 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 	hint = Kit.label(14, Color("fde68a"), 800)
 	hint.name = "Hint"
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	hint.offset_top = -CARDS_H - 40.0
-	hint.offset_bottom = -CARDS_H - 12.0
+	hint.offset_top = -44.0
+	hint.offset_bottom = -14.0
 	hint.offset_left = -400
 	hint.offset_right = 400
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -229,9 +248,12 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 	info.setup(icons)
 	root.add_child(info)
 
+	_build_calc()
+
 	settings = HudSettings.new()
 	settings.setup(store, i18n)
 	root.add_child(settings)
+	_build_end_confirm()
 
 	result_view = ResultView.new()
 	result_view.setup(icons)
@@ -251,14 +273,168 @@ func setup(p_i18n: Node, p_icons: Icons, store: Node) -> void:
 
 
 
+# ═══════════ (도입 3) 계산 내역 접힘 패널 ═══════════
+
+func _build_calc() -> void:
+	calc_panel = PanelContainer.new()
+	calc_panel.name = "CalcPanel"
+	calc_panel.visible = false
+	calc_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	calc_panel.add_theme_stylebox_override("panel", Kit.box(Color(10 / 255.0, 14 / 255.0, 26 / 255.0, 0.94), Color(239 / 255.0, 68 / 255.0, 68 / 255.0, 0.45), 10, 1, 6, 4))
+	calc_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	calc_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	calc_panel.offset_left = -170
+	calc_panel.offset_right = 170
+	calc_panel.offset_bottom = -52
+	root.add_child(calc_panel)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	calc_panel.add_child(v)
+	calc_btn = Kit.button("", Color("fca5a5"), 13, Vector2(0, 44))   # 터치 44
+	calc_btn.name = "CalcToggle"
+	calc_btn.pressed.connect(func() -> void: set_calc_open(not calc_open))
+	v.add_child(calc_btn)
+	calc_scroll = ScrollContainer.new()
+	calc_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	calc_scroll.custom_minimum_size = Vector2(0, 160)
+	calc_scroll.visible = false
+	v.add_child(calc_scroll)
+	calc_box = VBoxContainer.new()
+	calc_box.add_theme_constant_override("separation", 8)
+	calc_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	calc_scroll.add_child(calc_box)
+
+
+func set_calc_open(on: bool) -> void:
+	calc_open = on
+	calc_scroll.visible = on and calc_panel.visible
+	calc_btn.text = ("▾ " if on else "▸ ") + _t("gd.adopt.calc_title")
+	calc_toggled.emit(on)
+
+
+## sections: [{name, dmg, mark("adv"|"dis"|"even"), mark_text, weak_text, rows: [[라벨, 값], …]}] — 비면 패널을 숨김
+func set_calc(sections: Array) -> void:
+	for c: Node in calc_box.get_children():
+		calc_box.remove_child(c)
+		c.queue_free()
+	calc_panel.visible = not sections.is_empty()
+	calc_btn.text = ("▾ " if calc_open else "▸ ") + _t("gd.adopt.calc_title")
+	var vs := root.size
+	calc_scroll.custom_minimum_size.y = clampf(vs.y * 0.26, 90.0, 190.0)
+	calc_scroll.visible = calc_open and calc_panel.visible
+	for sec: Dictionary in sections:
+		var sv := VBoxContainer.new()
+		sv.add_theme_constant_override("separation", 1)
+		calc_box.add_child(sv)
+		var hd := Kit.label(13, Kit.TEXT, 800)
+		hd.text = "%s  -%s" % [sec["name"], sec["dmg"]]
+		hd.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sv.add_child(hd)
+		var mk := Kit.label(11, MARK_COL.get(str(sec["mark"]), Kit.DIM), 800)
+		mk.text = str(sec["mark_text"]) + (("   ◆ " + str(sec["weak_text"])) if str(sec.get("weak_text", "")) != "" else "")
+		sv.add_child(mk)
+		for r: Array in sec["rows"]:
+			var hb := HBoxContainer.new()
+			sv.add_child(hb)
+			var l := Kit.label(11, Kit.DIM)
+			l.text = str(r[0])
+			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			hb.add_child(l)
+			var val := Kit.label(11, Kit.TEXT, 700)
+			val.text = str(r[1])
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			hb.add_child(val)
+
+
+const MARK_COL := {"adv": Color("86efac"), "dis": Color("fca5a5"), "even": Color("cbd5e1")}
+
+
+# ═══════════ (도입 2) 턴 종료 확인 ═══════════
+
+func _build_end_confirm() -> void:
+	end_wrap = Control.new()
+	end_wrap.name = "EndTurnConfirm"
+	end_wrap.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	end_wrap.mouse_filter = Control.MOUSE_FILTER_STOP
+	end_wrap.visible = false
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.5)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	end_wrap.add_child(dim)
+	var cw := CenterContainer.new()
+	cw.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	cw.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	end_wrap.add_child(cw)
+	var pc := PanelContainer.new()
+	pc.add_theme_stylebox_override("panel", Kit.box(Kit.PANEL, Color(240 / 255.0, 192 / 255.0, 64 / 255.0, 0.55), 12, 2, 22, 18))
+	cw.add_child(pc)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 14)
+	v.custom_minimum_size = Vector2(300, 0)
+	pc.add_child(v)
+	end_msg = Kit.label(14, Kit.TEXT, 600)
+	end_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	end_msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(end_msg)
+	var br := HBoxContainer.new()
+	br.alignment = BoxContainer.ALIGNMENT_CENTER
+	br.add_theme_constant_override("separation", 10)
+	v.add_child(br)
+	end_no = Kit.button("", Kit.GOLD, 13, Vector2(120, 44))
+	end_no.name = "No"
+	end_no.pressed.connect(func() -> void:
+		close_end_confirm()
+		end_turn_canceled.emit())
+	br.add_child(end_no)
+	end_yes = Kit.button("", Kit.GOLD, 13, Vector2(120, 44))
+	end_yes.name = "Yes"
+	end_yes.pressed.connect(func() -> void:
+		if not end_wrap.visible:
+			return   # 같은 프레임 두 번 누름 → 한 번만
+		close_end_confirm()
+		end_turn_confirmed.emit())
+	br.add_child(end_yes)
+	root.add_child(end_wrap)
+
+
+func ask_end_turn(n: int) -> void:
+	end_msg.text = _t("gd.adopt.end_confirm", {"n": n})
+	end_no.text = _t("gd.adopt.end_back")
+	end_yes.text = _t("battle.end_turn")
+	hide_menu()
+	end_wrap.visible = true
+
+
+func close_end_confirm() -> void:
+	end_wrap.visible = false
+
+
+func end_confirm_open() -> bool:
+	return end_wrap != null and end_wrap.visible
+
+
+## 미니맵 크기가 정해진 뒤·언어가 바뀐 뒤 왼쪽 패널 자리를 다시 계산
+func relayout() -> void:
+	_on_resized()
+
+
 func _on_resized() -> void:
 	var vs := root.size
 	if vs.x <= 0.0:
 		return
-	settings.place(vs.y - CARDS_H - 16.0)
+	settings.place(vs.y - 12.0)
+	# 왼쪽: 미니맵 → 클랜원 카드 세로 패널 → (아래) 설정 톱니. 화면이 낮거나 좁으면 얇은 아이콘형
+	var tight := vs.y < COMPACT_H or vs.x < COMPACT_W
+	var top_h1 := maxf(TOP_H, top.position.y + top.size.y)
+	minimap.position = Vector2(12, top_h1 + 8.0)
+	var mm_bottom := minimap.position.y + maxf(minimap.size.y, minimap.get_combined_minimum_size().y)
+	cards.place(12, mm_bottom + 6.0, vs.y - BOTTOM_PAD - 4.0, tight)
+	cards_rect = Rect2(Vector2(0, top_h1), Vector2(12 + cards.offset_right - cards.offset_left, vs.y - top_h1))
 	# 행동 순서: 윗줄 아래부터 카메라 방향 표시 위까지 (현재 줄 50px + 나머지 46px)
-	var avail := vs.y - (TOP_H + 14.0) - 18.0 - CARDS_H - 70.0
-	order.max_rows = maxi(3, 1 + int(floorf((avail - 54.0) / 46.0)))
+	# 순서 바 높이: 윗줄 아래(TOP_H+14)부터 나침반(아래 BOTTOM_PAD+48) 위까지 — 머리글·라운드 구분선·'+N명' 칩 높이는 order.fit_rows 가 뺌
+	order.avail_h = vs.y - BOTTOM_PAD - 48.0 - 6.0 - (TOP_H + 14.0)
+	order.refit()
 	banner.offset_top = vs.y * 0.4 - 32.0
 	banner.offset_bottom = vs.y * 0.4 + 32.0
 
@@ -271,6 +447,9 @@ func _t(key: String, p: Dictionary = {}) -> String:
 func relabel() -> void:
 	top.set_tooltips(_t)
 	order.set_head(_t("battle.turn_order"))
+	order.set_labels(_t("gd.adopt.order_more", {"n": "{n}"}), _t("gd.adopt.order_less"), _t("gd.adopt.order_next_round"))
+	if calc_btn != null:
+		calc_btn.text = ("▾ " if calc_open else "▸ ") + _t("gd.adopt.calc_title")
 	settings.relabel()
 
 
@@ -550,7 +729,7 @@ func place_menu(at: Vector2) -> void:
 	var vs := root.size
 	# (모바일 낮은 화면) 1열이 윗줄·클랜원 카드 사이에 안 들어가면 2열 (항목 4개 이상) — 위아래 구분선은 숨김
 	var top_h0 := maxf(TOP_H, top.position.y + top.size.y)
-	var cards_h0 := maxf(CARDS_H, vs.y - cards.position.y) if cards != null and cards.size.y > 0.0 else CARDS_H
+	var cards_h0 := 12.0   # 아래 카드줄 없음 (왼쪽 패널로 이동)
 	menu_grid.columns = 1
 	for sp: Control in menu_seps:
 		sp.visible = true
@@ -568,11 +747,16 @@ func place_menu(at: Vector2) -> void:
 	_menu_flip = pos.x + sz.x > limit
 	if _menu_flip:
 		pos.x = at.x - 38.0 - sz.x
+		if pos.x < (cards.offset_right + 6.0 if cards != null else 8.0):
+			_menu_flip = false
+			pos.x = at.x + 38.0
 	# (모바일) 글자가 커져 윗줄·카드가 기준(58·130)보다 높으면 실제 높이를 씀 — 메뉴가 클랜원 카드를 덮지 않게
 	var top_h := maxf(TOP_H, top.position.y + top.size.y)
-	var cards_h := maxf(CARDS_H, vs.y - cards.position.y) if cards != null and cards.size.y > 0.0 else CARDS_H
+	var cards_h := 12.0
 	pos.y = clampf(pos.y, top_h + 8.0, maxf(top_h + 8.0, vs.y - cards_h - sz.y - 8.0))
-	pos.x = clampf(pos.x, 8.0, vs.x - sz.x - 8.0)
+	# 왼쪽 패널·오른쪽 순서 바를 가리지 않게 가로 범위를 안쪽으로
+	var left_w := cards.offset_right + 6.0 if cards != null else 8.0
+	pos.x = clampf(pos.x, left_w, maxf(left_w, vs.x - sz.x - 8.0))
 	menu.position = pos
 	menu.pivot_offset = Vector2(sz.x if _menu_flip else 0.0, 22.0)
 	menu.queue_redraw()
@@ -602,10 +786,10 @@ func press_key(k: String) -> bool:
 
 ## 마우스가 HUD 위에 있는가 (그럼 맵 툴팁·클릭을 하지 않음)
 func over_hud(p: Vector2) -> bool:
-	for c: Control in [top, order, cards, minimap, menu, settings.btn, settings.panel, info.popup]:
+	for c: Control in [top, order, cards, minimap, menu, settings.btn, settings.panel, info.popup, calc_panel]:
 		if c.is_visible_in_tree() and c.get_global_rect().has_point(p):
 			return true
-	if settings.backdrop.visible or result_view.visible or story.visible or loading.visible:
+	if settings.backdrop.visible or end_confirm_open() or result_view.visible or story.visible or loading.visible:
 		return true
 	return false
 

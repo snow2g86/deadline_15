@@ -66,6 +66,8 @@ godot/
   tests/check_battle_api.gd  엔진 조회 API 순수성·command 결과 시험,  tests/fixtures/js_numbers.json  JS 실수 표기 정답 (node 로 만든 것)
   tests/check_battle_scene.gd  3a·3b: 전투 장면을 머리 없이 띄워 황금 기록을 화면 입구(UI 수준)로 재생 (HUD·연출·스토리 켬) → 결과가 같은지
   tests/check_battle_ui.gd     3b: UI 연기 시험 (모든 패널·팝업·툴팁·결과·스토리·언어 바꾸기, Godot 오류 0)
+  tests/check_battle_ui_adopt.gd  전투 UI 도입 1~4 + 왼쪽 클랜원 패널: 이동 취소(상태 되돌리기) 동일성 · 순서 바↔맵 강조 · 턴 종료 확인 · 접힘 패널 = battle_query · 적 범위 · pixel8 터치 (scripts/battle/README.md '전투 UI 도입')
+  tests/shots_adopt.gd         도입 화면 사진 (창 모드, -- --tag after --lang ko --dev pixel8 --phase all --out <폴더>)
   tests/perf_battle_scene.gd   창 모드 성능 측정 (유닛 40·맵 오브젝트 ~340·HUD·연출·회전)
   tests/check_outer_4a.gd      4a: 규칙을 웹 정답(tests/fixtures/outer_4a_web.json — 고정 기준, 보관: tools/legacy-web/outer-4a-expect.js)과 비교 · 편성 저장 · 설정 키 ·
                                진짜 장면 흐름 · 6개 언어 넘침·두부 · 창 크기

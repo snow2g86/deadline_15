@@ -264,43 +264,43 @@
         "file": "lang/ko.json",
         "type": "object",
         "count": 51,
-        "leaves": 2523,
-        "sha1": "f69d7fd9e11a0a8aed132e23f0c77174ee7492c5"
+        "leaves": 2556,
+        "sha1": "4d94d724d0e3fac7469a217ede4195974b14ba29"
       },
       "en": {
         "file": "lang/en.json",
         "type": "object",
         "count": 52,
-        "leaves": 2530,
-        "sha1": "aa18f74e4a8e9c72b04013d4a70c5bf9f339c35c"
+        "leaves": 2563,
+        "sha1": "e0598dbd1c0c35281dcea651feedb108e8957b05"
       },
       "es": {
         "file": "lang/es.json",
         "type": "object",
         "count": 52,
-        "leaves": 2530,
-        "sha1": "69846ce7cad22a31bcc0e6065fa2569fe505bd33"
+        "leaves": 2563,
+        "sha1": "ce31b9e66d2990d2b625fdb94df09f135abec49f"
       },
       "ja": {
         "file": "lang/ja.json",
         "type": "object",
         "count": 51,
-        "leaves": 2523,
-        "sha1": "cb1e85bd092d4a1773fc06c9fe5e3189f1341e7a"
+        "leaves": 2556,
+        "sha1": "ca5d0d4e4a334f46abe2d52aff2722b32c0ff6de"
       },
       "zh-CN": {
         "file": "lang/zh-CN.json",
         "type": "object",
         "count": 51,
-        "leaves": 2523,
-        "sha1": "dfb23f562afd6b3af898deec14890524baa6fddd"
+        "leaves": 2556,
+        "sha1": "dcd26da44ce596fc33ab8add11367850028d4bd0"
       },
       "zh-TW": {
         "file": "lang/zh-TW.json",
         "type": "object",
         "count": 51,
-        "leaves": 2523,
-        "sha1": "2b6bcace9eb131f3038864f0ac3df6cc9c6a400a"
+        "leaves": 2556,
+        "sha1": "58abd04ba34b18b4e156e9f59c7e2d1390552145"
       }
     }
   },
