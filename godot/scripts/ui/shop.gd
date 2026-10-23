@@ -241,7 +241,7 @@ func render() -> void:
 			_render_gacha(gold)
 			return
 		"gold":
-			_full(_ad_card("shop.gold_ad_title", "shop.gold_ad_desc"))
+			_full(_ad_card())
 			_full(_gold_use_card())
 			# 결제 길이 없는 판(steam · 출시 빌드 dev)은 결제 카드를 숨김
 			if billing != null and bool(billing.call("is_supported")):
@@ -254,8 +254,7 @@ func render() -> void:
 					gg.add_child(_iap_card(pk))
 				list.add_child(gg)
 			return
-	var ad_key := {"mercenary": "shop.ad_merc_desc", "consumable": "shop.ad_item_desc", "skill": "shop.ad_skill_desc", "scroll": "shop.ad_scroll_desc"}
-	_full(_ad_card(ad_key[cur_tab]))
+	_full(_ad_card())
 	if cur_tab == "consumable":
 		_half(_rune_card(gold))
 	for idx: int in ShopRules.tab_items(data, cur_tab):
@@ -338,35 +337,14 @@ func _icon_box(ctl: Control) -> CenterContainer:
 
 
 ## 광고 카드 (광고가 없는 판이면 null — _full 이 건너뜀). (결제층 A) 보상은 탭과 상관없이 골드 — 하루 횟수는 전체 합계.
-##  광고를 띄울 수 있으면(dev 가짜 광고) '광고 보기 (+100G)' + 오늘 남은 횟수, 아직 SDK 가 없으면(google·apple 빈 틀) 예전처럼 꺼진 '추후 개발' 단추
-func _ad_card(key: String, key2: String = "") -> Control:
+##  광고를 띄울 수 있는 판(dev 가짜 광고·실제 SDK)이면 '광고 보기 (+100G)' + 오늘 남은 횟수 (_gold_ad_card)
+func _ad_card() -> Control:
 	var pf := get_node_or_null("/root/Platform")
 	if pf != null and not bool(pf.call("has_ads")):
 		return null
-	if ads != null:
-		if not bool(ads.call("is_supported")):
-			return null   # (6b) 광고 SDK 가 없는 판(PC·편집기의 --store google 등)은 카드를 숨김
-		return _gold_ad_card()
-	var p := _card(LIST_W, Color(96 / 255.0, 165 / 255.0, 250 / 255.0, 0.25))
-	p.name = "AdCard"
-	var h := OKit.hbox(12)
-	p.add_child(h)
-	var ad_tex := emoji_tex("🎬")
-	if ad_tex != null:
-		h.add_child(OKit.tex_rect(ad_tex, Vector2(28, 28)))
-	var l := OKit.label(12, OKit.TEXT, 900)
-	l.text = t(key) + ((" " + t(key2)) if key2 != "" else "")
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	l.custom_minimum_size = Vector2(360, 0)
-	h.add_child(l)
-	var b := OKit.ghost_button(t("common.coming_soon"), 11)
-	b.name = "AdBtn"
-	b.disabled = true
-	b.modulate.a = 0.5
-	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	h.add_child(b)
-	return p
+	if ads == null or not bool(ads.call("is_supported")):
+		return null   # (6b) 광고 SDK 가 없는 판(PC·편집기의 --store google 등)은 카드를 숨김
+	return _gold_ad_card()
 
 
 func _gold_ad_card() -> Control:
@@ -655,7 +633,7 @@ func _iap_card(pk: Dictionary) -> Control:
 # ── 장비 탭 (뽑기) ──
 
 func _render_gacha(gold: float) -> void:
-	_full(_ad_card("shop.ad_equip_desc"))
+	_full(_ad_card())
 	var pity := Profile.load_pity(c)
 	var pmax := int(D["GACHA_PITY_MAX"])
 	var pp := _card(LIST_W, Color(OKit.GOLD, 0.2))

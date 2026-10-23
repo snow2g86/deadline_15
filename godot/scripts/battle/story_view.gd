@@ -9,7 +9,6 @@ const Kit := preload("res://scripts/battle/ui_kit.gd")
 const PortraitShader := preload("res://scripts/battle/shaders/portrait.gdshader")
 
 signal closed
-signal line_shown(idx: int)
 
 const TYPE_MS := 28.0
 
@@ -280,7 +279,6 @@ func _next() -> void:
 	text_lbl.text = ""
 	text_lbl.visible_characters = -1
 	box.queue_redraw()
-	line_shown.emit(_idx)
 
 
 func _set_portrait(side: String, ln: Dictionary) -> void:

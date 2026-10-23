@@ -841,7 +841,3 @@ static func _block_tokens(b: Dictionary, out: Array) -> void:
 			for it3: Dictionary in b["items"]:
 				_push_tok(out, str(it3["text"]))
 
-
-## 검색 (웹 applySearch: data-q 에 소문자로 들어 있으면 보임, 접는 칸은 맞는 것이 있으면 폄) → 블록마다 보임 여부를 meta 로
-static func matches(b: Dictionary, q: String) -> bool:
-	return q == "" or str(b.get("q", "")).to_lower().contains(q)

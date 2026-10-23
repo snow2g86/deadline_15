@@ -48,8 +48,6 @@ func _ready() -> void:
 	get_tree().scene_changed.connect(func() -> void: _changing = false)
 
 
-func is_changing() -> bool:
-	return _changing
 
 
 ## 한 번만 쓰는 값 꺼내기 (꺼내면 지움)

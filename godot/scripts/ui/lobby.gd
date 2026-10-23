@@ -491,9 +491,6 @@ func _paint_setup_cards() -> void:
 		(_setup_cards[g][1] as Label).add_theme_color_override("font_color", Color("f5c45a") if on else Color("cbd5e1"))
 
 
-func commander_setup_pick(g: String) -> void:
-	_setup_gender = g
-	_paint_setup_cards()
 
 
 ## 확인 (Enter 도): 이름 다듬기(앞뒤 공백·10자·비면 기본 이름) → 성별·이름·setup 저장

@@ -304,6 +304,15 @@ armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형
 - `data/sprites.json` 의 `*_b` 시트 24개 항목은 **그대로 남김**(기준 잠금·수치 불변 — 가리키는 파일이 없으면 위 대체 규칙으로 무시됨). 3D 로 바꿀 때 데이터 정리 때 지움.
 - 시험: `tests/check_back_view.gd` — `_b` 파일 0개 · 13직업×남녀×4동작 back 요청 = 앞모습 · UnitView 켜기/끄기 · 소환수 포함 오류 0.
 
+## 죽은 코드 정리 (2026-10-24) — 규칙·수치 불변 (replay_golden 22/22)
+
+참조를 전수 검색(코드·tscn·json·tools·tests·"문자열" 조립 조각)해 어디서도 안 쓰임을 확인한 것만 지움. 목록·근거: 작업 폴더의 `deadcode/CANDIDATES.md`.
+- **지휘관 전투 코드**: 패배 판정(`chk_end` · `_commanderFallen`) · 일반 공격 1% ×10 · 상자 소울 조각의 지휘관 예외 · `commander_msg.fallen` · 음표 투사체/임팩트(`pixel_fx.gd` 의 commander·note). 지휘관은 파티 배치(`battle_engine` 의 `COMMANDER_CLS` 건너뜀)와 `party_rules` 로 전투에 못 나감. 지휘관 `JAB`·그림·스토리는 그대로.
+- **데이터**: `stages.json` 상수 6개(`ENEMY_HP_EXP`·`ENEMY_ATK_EXP`·`STAGE_TOT_CAP_BASE`·`STAGE_TOT_CAP_PER`·`STAGE_COMP_HP`·`STAGE_COMP_ATK` — 웹 시절 생성식 상수, 결과는 `sm`·`tot` 에 구워짐). 기준 사본 `tests/baseline/data` 는 고치지 않음(LOCK 그대로, 'last 대사' 때와 같은 방식) → `data_tool --write` 로 manifest 갱신.
+- **번역 키**: 6개 언어 동일하게 약 118개(웹 시절 인벤토리·강화·전직 창·상점 광고·`stage.*` 등 참조 0).
+- **상점 광고 대체 카드**(Ads 오토로드가 없을 때만 나오던 꺼진 '추후 개발' 단추) · 안 쓰는 함수·상수·신호(`input_ready`·`battle_over`·`line_shown`·`back_pressed`).
+- **남긴 것(코드에만 남은 것)**: `jab.json` 의 `summon_spirit`·`summon_golem`(세이브 점검이 `JAB.has(직업)` 로 읽음 — 지우면 변조 세이브 결과가 달라짐), `STAGE_MAX_WAVES`(시험이 읽음), 동적 접두어로 조립되는 번역 그룹(codex·stages·skills·messages 등 — 키별 증명 불가), 미사용 이미지 `assets/image/character/commander_02.prev.png`·`assets/image/icon/src/jab_commander.jpg`(이미지는 건드리지 않음).
+
 ## 오토로드 사용법
 
 ```gdscript
@@ -436,7 +445,7 @@ Store.get_json("game_roster", {})
 
 - **'준비 중' 없음**: 로비 도감·가이드, 아래 탭 성소·아카데미, 설정 라이선스·Credits 가 모두 진짜 화면. `gd.outer.coming_soon` 키와 `coming_soon()` 을 지움.
   일부러 남긴 것 (웹 js/shop.js 와 같은 화면, Godot '준비 중' 알림이 아님 — 출시 전에 숨길지는 사용자 결정):
-  - 상점 각 탭 맨 위 광고 카드의 꺼진 '추후 개발'(`common.coming_soon`) 단추 (광고 기능 자체가 웹에도 없음)
+  - (삭제됨 2026-10-24) 상점 광고 카드의 꺼진 '추후 개발' 단추(`common.coming_soon`) — Ads 오토로드가 항상 있어 나올 수 없는 경로라 지움
   - 상점 골드 탭의 결제 꾸러미 카드 4개 — 가격 아래 '추후 오픈 예정'(`shop.gold_iap_coming`), 흐리게 표시되고 누를 수 없음
 - **웹판과 다른 점 (웹 버그 — 웹은 고치지 않음)**:
   - 승급 제물 후보의 '파티 편성 제외'를 웹은 옛 키 `game_party`(마이그레이션 때 지워진 레거시)로 봐서 늘 비어 있음 → Godot 은 **지금 활성 파티**(game_parties)의 클랜원과
@@ -568,7 +577,7 @@ PC 판은 **스토브(STOVE) 인디**로 먼저 냅니다. 스팀 설정은 아�
 
 - `Platform.store()` = `"stove"` · `"steam"` · `"google"` · `"apple"` · `"dev"` — **내보내기 프리셋의 기능 태그**(custom_features)로 정함. 태그가 없으면(편집기·명령줄·시험) `"dev"`.
   디버그 실행에서는 `-- --store stove` 로 바꿔 볼 수 있음 (시험: `override_store()`).
-- `is_pc()`(기능 태그 pc) · `is_mobile()` · `has_ads()` · `has_iap()` · `is_release_build()`(template).
+- `is_pc()`(기능 태그 pc) · `is_mobile()` · `has_ads()` · `has_iap()`.
 - **상점 광고 카드**(`shop.gd _ad_card`): `has_ads()` 가 거짓이면(stove·steam) 6개 탭 모두에서 숨김. dev 는 웹 화면 그대로 보임(기존 시험·사진과 같게).
   **결제 카드 4개는 그대로**('추후 오픈 예정' — 결제 연동은 다음 단계). 성소의 무료 부활(웹 '광고 보기' 자리)은 광고 없이 30분마다라 그대로.
 - 스팀 판을 만들 때: 프리셋을 복사해 `custom_features="steam"` 으로 (사용자가 말할 때까지 만들지 않음).

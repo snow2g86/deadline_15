@@ -328,7 +328,7 @@ func next_float() -> float:
 2b 재생: 클랜원 차례가 시작될 때마다(`selU` 순간) 그 유닛의 다음 `cmd` 들을 위 타이밍(100ms / move 뒤 400ms)으로 차례가 끝날 때까지 실행. 정책(`policy.js`)은 옮길 필요 없음.
 
 ### end
-`result('win'|'lose'|'stalled'|'stuck'|'max_steps'), reason(win/lose 의 메시지 키: stage_clear·all_defeated·enemy_breached·commander_msg.fallen), rounds(S.turn), actCount, rngCalls, virtualMs, allies[id], enemies[id], kills, breached, chestLog, rewards`.
+`result('win'|'lose'|'stalled'|'stuck'|'max_steps'), reason(win/lose 의 메시지 키: stage_clear·all_defeated·enemy_breached), rounds(S.turn), actCount, rngCalls, virtualMs, allies[id], enemies[id], kills, breached, chestLog, rewards`.
 `end` 에는 끝으로 `saveAfter` 가 붙습니다. `rewards`(onBattleEnd 결과): `win, exp[{uid, exp, actExp, killExp, leveled}], killPool, kills, gold(전투 끝 소지금), baseReward, bonusReward, stars{flags, merged, newly, limit, turn, bonus}, soul, rune, book, newUnit(직업), gearDrops(개수), deadAllies[uid], autoRevived`.
 `saveAfter` = 전투 뒤 저장소 전체 (Store 키 이름순, 값은 JSON 해석) — 경험치·레벨업, 골드·별점·클리어, 신규 클랜원(로스터 보정 후), 사망 표시, 상자·드랍 아이템, 영혼석.
 `stalled` = 라운드가 `maxRounds` 를 넘음 (기본 120; 자동 플레이 `tools/autoplay.js` 의 250라운드 항복과 같은 역할). 전투가 끝나면(`battle_end`) 남은 타이머는 실행하지 않고 멈춥니다 (보상은 이미 계산됨).

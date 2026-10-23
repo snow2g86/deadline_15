@@ -582,8 +582,6 @@ func rm_dead() -> void:
 		if u["team"] == "ally" and Js.truthy(u.get("uid")) and not Js.truthy(u.get("_counted")):
 			u["_counted"] = true
 			(S["_deadAllyUids"] as Array).append(u["uid"])
-			if u["cls"] == D["COMMANDER_CLS"]:
-				S["_commanderFallen"] = true
 	var left: Array = []
 	for u2: Dictionary in S["units"]:
 		if u2["hp"] > 0:

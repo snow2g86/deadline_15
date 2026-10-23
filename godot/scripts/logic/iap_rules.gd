@@ -80,8 +80,6 @@ static func order(c: Object, store: String, oid: String) -> Variant:
 	return load_iap(c)["orders"].get(order_key(store, oid))
 
 
-static func has_order(c: Object, store: String, oid: String) -> bool:
-	return order(c, store, oid) != null
 
 
 ## 지급 (골드 + 기록 한 번에) → {ok:true, gold, total} | {dup:true, st} | {err:"product"|"order"}

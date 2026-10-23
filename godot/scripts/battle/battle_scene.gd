@@ -9,9 +9,6 @@ extends Node2D
 ##  (마우스·단축키·메뉴 단추도 모두 이 함수들을 거침 — tests/check_battle_scene.gd 가 황금 기록을 이 입구로 재생)
 ##  자세한 구조는 scripts/battle/README.md
 
-signal input_ready(unit_id: int)
-signal battle_over(result: Dictionary)
-
 const Ctx := preload("res://scripts/logic/ctx.gd")
 const BattleEngine := preload("res://scripts/logic/battle/battle_engine.gd")
 const Profile := preload("res://scripts/logic/profile.gd")
@@ -424,7 +421,6 @@ func _build_world() -> void:
 	ui.rotate_pressed.connect(rotate_cam)
 	ui.threat_pressed.connect(toggle_threat)
 	ui.speed_pressed.connect(_cycle_speed)
-	ui.back_pressed.connect(_go_back)
 	ui.order.unit_clicked.connect(_on_unit_nav_click)
 	ui.order.unit_hover.connect(_on_nav_hover)
 	ui.cards.unit_clicked.connect(_on_unit_nav_click)
@@ -1593,7 +1589,6 @@ func _enter_menu() -> void:
 		_sfx("select")   # 웹 ActionManager.selU 끝의 Fx.sfx('Select')
 	ui.show_hint(fail_hint)   # 방금 명령이 진짜 실패했으면 메뉴로 돌아와도 안내를 남김 (다음 조작 때 지움)
 	_autosave()
-	input_ready.emit(int(u["id"]))
 
 
 ## 지금 아래 안내 줄 글 (시험용)
@@ -2383,7 +2378,6 @@ func _finish() -> void:
 		_write_back()
 		if _rc != null:
 			ResumeRules.clear_gd(_rc)   # 끝난 전투는 이어할 것이 없음
-	battle_over.emit(result)
 	if result.get("result") == "win" and story.enabled:
 		_story_play(story.outro(), _show_result)
 	else:

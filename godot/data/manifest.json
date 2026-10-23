@@ -6,7 +6,7 @@
     "jab": [{"file": "jab.json", "sha1": "a025eee12321f439cb9c71bf28e8cb3416d8b734"}],
     "constants": [{"file": "constants.json", "sha1": "0f7f5d6330c8baf843cd61bc84acf8a7e9d377a0"}],
     "daily": [{"file": "daily.json", "sha1": "be8a636daca2c01ef0ad5cdb98c2b911187398b4"}],
-    "stages": [{"file": "stages.json", "sha1": "76fc3a7b49a17cd6e36f1f73a77f787d0415b0ab"}],
+    "stages": [{"file": "stages.json", "sha1": "0b87590be46d03735bf769bc7c66b99a910a7e01"}],
     "synergy": [{"file": "synergy.json", "sha1": "7a77cc09ee720f5deb38df89a2f8aecd4784239a"}],
     "hazards": [{"file": "hazards.json", "sha1": "dfeb7b9b71578a798d89149f21cbb5b894b1f411"}],
     "tiles": [{"file": "tiles.json", "sha1": "0fa27ade208ee74c0ac76c153fb3e80900381680"}],
@@ -70,16 +70,10 @@
         "ENEMY_LV_PER_STAGE": {"type": "number", "count": null},
         "ENEMY_BOSS_LV": {"type": "number", "count": null},
         "ENEMY_SKILL_EVERY": {"type": "number", "count": null},
-        "ENEMY_HP_EXP": {"type": "number", "count": null},
-        "ENEMY_ATK_EXP": {"type": "number", "count": null},
         "ENEMY_HP_GROWTH_MUL": {"type": "number", "count": null},
         "ENEMY_DEF_GROWTH_MUL": {"type": "number", "count": null},
         "STAGE_TOT_CAP_MAX": {"type": "number", "count": null},
         "STAGE_TOT_CAP_BOSS": {"type": "number", "count": null},
-        "STAGE_TOT_CAP_BASE": {"type": "number", "count": null},
-        "STAGE_TOT_CAP_PER": {"type": "number", "count": null},
-        "STAGE_COMP_HP": {"type": "number", "count": null},
-        "STAGE_COMP_ATK": {"type": "number", "count": null},
         "STAGE_MAX_WAVES": {"type": "number", "count": null},
         "MAX_ENEMIES_ON_FIELD": {"type": "number", "count": null}
       }
@@ -263,44 +257,44 @@
       "ko": {
         "file": "lang/ko.json",
         "type": "object",
-        "count": 51,
-        "leaves": 2595,
-        "sha1": "4d8249e254c0b8938ecf47b12468cbbecae3629e"
+        "count": 46,
+        "leaves": 2477,
+        "sha1": "c9e1fd4fb8a1a06d1304ecf4ca214141e2873328"
       },
       "en": {
         "file": "lang/en.json",
         "type": "object",
-        "count": 52,
-        "leaves": 2602,
-        "sha1": "6f8902a926b89bea8ca0452719e661cf018679b0"
+        "count": 47,
+        "leaves": 2485,
+        "sha1": "81a3f458925d293af81da6a53a332b4d7ea41822"
       },
       "es": {
         "file": "lang/es.json",
         "type": "object",
-        "count": 52,
-        "leaves": 2602,
-        "sha1": "b966343f42c2c68695f9f343983ab9dccfe3a81a"
+        "count": 47,
+        "leaves": 2485,
+        "sha1": "b07e451b99db76ab85a8d5c080cc383675a32342"
       },
       "ja": {
         "file": "lang/ja.json",
         "type": "object",
-        "count": 51,
-        "leaves": 2595,
-        "sha1": "78c40bb5b67580ba5008ea2ebd46ff4f00594057"
+        "count": 46,
+        "leaves": 2477,
+        "sha1": "46611f761dcb88e736b5e0cef653575c9b485478"
       },
       "zh-CN": {
         "file": "lang/zh-CN.json",
         "type": "object",
-        "count": 51,
-        "leaves": 2595,
-        "sha1": "4f4571dc50bbf90f06ab339b298af2d950f8842e"
+        "count": 46,
+        "leaves": 2477,
+        "sha1": "7b0b24780ad57b10d9c6daa328f1ce6752d944f6"
       },
       "zh-TW": {
         "file": "lang/zh-TW.json",
         "type": "object",
-        "count": 51,
-        "leaves": 2595,
-        "sha1": "f30b1ae44eba98c5883d4d6128861b1fa2cd85f8"
+        "count": 46,
+        "leaves": 2477,
+        "sha1": "ce0dcd9b7e2454e4310e56bb6404f3000162d38c"
       }
     }
   },

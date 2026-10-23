@@ -139,12 +139,6 @@ func set_focus(id: int) -> void:
 	update(_last_rows)
 
 
-## id 의 줄이 지금 화면에 그려졌는가 (한도에 걸려 '+N명' 으로 숨었으면 false)
-func row_visible(id: int) -> bool:
-	for r: Row in _rows:
-		if r.visible and r.id == id:
-			return true
-	return false
 
 
 func row_of(id: int) -> Row:

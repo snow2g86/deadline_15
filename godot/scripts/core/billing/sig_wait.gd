@@ -63,8 +63,3 @@ func _unlink() -> void:
 			sg.disconnect(l[1])
 	_links.clear()
 
-
-## 한 번에: 준비 + 기다림 (요청을 먼저 해도 되는 경우)
-static func wait_any(host: Node, sigs: Array, secs: float, accept: Callable = Callable()) -> Dictionary:
-	var w: RefCounted = arm(host, sigs, secs, accept)
-	return await w.join()

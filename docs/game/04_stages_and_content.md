@@ -79,8 +79,8 @@
 | 체력 성장 보정 | 성장 평균 × 0.65 |
 | 방어 성장 보정 | 성장 평균 × 0.6 |
 | 요일 던전 배율 | 0.6 × 1.0127^(적 강함−1) (`ENEMY_SM_BASE` 0.6, `ENEMY_SM_GROWTH` 1.0127) — 코드가 실제로 쓰는 곳은 요일 던전 스테이지 생성뿐 |
-| 일반 스테이지 배율 | 스테이지마다 `sm.hp`/`sm.atk`가 데이터에 직접 적혀 있음 (아래 표). `ENEMY_HP_EXP` 0.6, `ENEMY_ATK_EXP` 1.15, `STAGE_COMP_HP` 0.15, `STAGE_COMP_ATK` 0.55는 데이터에 있으나 규칙 코드에서는 읽지 않음 [확인 필요: 도감 "난이도 분석" 설명용인지] |
-| 적 총수 상한 | 보스 스테이지 12, 그 밖 최대 16 (`STAGE_TOT_CAP_*`) |
+| 일반 스테이지 배율 | 스테이지마다 `sm.hp`/`sm.atk`가 데이터에 직접 적혀 있음 (아래 표). 웹 시절 생성식(체력 = k^0.6, 공격 = k^1.15, 총수를 줄인 만큼 남은 적을 체력 ×(원래/상한)^0.15, 공격 ×(원래/상한)^0.55 로 강화)의 상수 6개(`ENEMY_HP_EXP`·`ENEMY_ATK_EXP`·`STAGE_COMP_HP`·`STAGE_COMP_ATK`·`STAGE_TOT_CAP_BASE`·`STAGE_TOT_CAP_PER`)는 결과가 이미 `sm`·`tot`에 구워져 있고 규칙·도감 코드가 읽지 않아 2026-10-24 `godot/data/stages.json`에서 지웠음 (기준 사본 `tests/baseline/data`에는 남아 있음) |
+| 적 총수 상한 | 보스 스테이지 12, 그 밖 최대 16 (`STAGE_TOT_CAP_MAX`·`STAGE_TOT_CAP_BOSS`) |
 | 웨이브 | 최대 3 (`STAGE_MAX_WAVES`) / 동시 최대 14체 |
 
 **구간별 요약**

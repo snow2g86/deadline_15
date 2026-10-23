@@ -105,9 +105,6 @@ func has_iap() -> bool:
 	return true
 
 
-## 내보낸 빌드인가 (편집기·명령줄 실행이 아님)
-func is_release_build() -> bool:
-	return OS.has_feature("template")
 
 
 ## (결제층 A) 운영체제 이름 (OS.get_name — "Windows" · "macOS" …). 시험·개발은 override_os("Windows") 또는 -- --os Windows (디버그만)

@@ -153,7 +153,7 @@ func _reset_store() -> void:
 		"mvT": [], "atkT": [], "healT": [], "coverT": [], "blockT": [],
 		"cStage": null, "eSpwn": 0, "eQ": [], "cleared": [], "gold": 0.0, "party": [],
 		"battleExp": {}, "allyPos": {}, "traps": [], "poisonMists": [],
-		"_killCount": 0, "_killExpPool": 0.0, "_deadAllyUids": [], "_commanderFallen": false,
+		"_killCount": 0, "_killExpPool": 0.0, "_deadAllyUids": [],
 		"preMv": null, "_curSkill": null, "breached": 0, "gateHP": {}, "wallHP": {}, "practiceMode": false,
 		"_battlePotions": [], "_battlePotionIndices": [], "_siegeItems": [], "_siegeInvIndices": [],
 		"_synergies": [], "_hazard": null, "safeZones": [], "chests": [],
@@ -1103,15 +1103,6 @@ func chk_end() -> void:
 		return
 	var al := gu.alive("ally")
 	var en := gu.alive("enemy")
-	var cmd_down := Js.truthy(S.get("_commanderFallen"))
-	if not cmd_down:
-		for u: Dictionary in S["units"]:
-			if u["team"] == "ally" and u["cls"] == D["COMMANDER_CLS"] and u["hp"] <= 0:
-				cmd_down = true
-	if cmd_down:
-		transition(BATTLE_END)
-		emit("battle_end", {"win": false, "message": "commander_msg.fallen"})
-		return
 	var dead_summoners: Array = []
 	for u2: Dictionary in S["units"]:
 		if u2["cls"] == "summoner" and u2["hp"] <= 0:

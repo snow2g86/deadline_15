@@ -25,7 +25,6 @@ signal cancel_pressed
 signal rotate_pressed(dir: int)
 signal threat_pressed
 signal speed_pressed
-signal back_pressed
 signal calc_toggled(open: bool)
 signal end_turn_confirmed
 signal end_turn_canceled
@@ -34,8 +33,6 @@ const GOLD := Color("f0c040")
 ## 버튼 강조색 (웹 .ac-move · ac-attack · ac-skill · ac-item · ac-wait · ac-cancel)
 const AC := {"move": Color("3b82f6"), "attack": Color("ef4444"), "skill": Color("a855f7"), "item": Color("22c55e"), "wait": Color("9ca3af"), "cancel": Color("64748b")}
 const TOP_H := 58.0
-## (옛 이름) 아래 카드줄 높이 — 지금 클랜원 카드는 왼쪽 세로 패널. 아래 여백은 설정 톱니 + 여유만
-const CARDS_H := 0.0
 const BOTTOM_PAD := 64.0
 ## 왼쪽 패널 위 (미니맵 아래) 간격 · 얇은 패널로 바꾸는 화면 한계
 const COMPACT_H := 600.0
@@ -91,10 +88,6 @@ var _menu_flip := false
 var _menu_pop := 9.0
 var menu_buttons: Array = []   # 시험·단축키용: {op, button, key, item}
 var reduce_motion := false
-## 결과 화면 호환 (3a 시험이 result_panel.visible 을 볼 수 있게)
-var result_panel: Control:
-	get:
-		return result_view
 
 
 func _init() -> void:

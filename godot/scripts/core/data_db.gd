@@ -149,8 +149,6 @@ func module_names() -> PackedStringArray:
 	return PackedStringArray(_modules.keys())
 
 
-func has_module(name: String) -> bool:
-	return _modules.has(name)
 
 
 ## 모듈 하나 (stages, tiles …) — { 전역 이름 → 값 }

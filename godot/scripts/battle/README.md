@@ -159,7 +159,7 @@ UI 에는 이모지 대신 일러스트 시트를 씁니다 (`icons.gd`).
 - 키: M 이동 · A 공격 · S 스킬 · I 아이템 · P 밀치기 · D 방어 · O 경계 · W·Space 대기 · 1~9 하위 메뉴 · Esc·Backspace 취소/되돌리기(설정 창이면 닫기) · Q/E 회전 · T 위협 범위 · 화살표 카메라.
 - 적 정보 팝업은 다음 누르기에 닫히고 그 누르기도 그대로 처리됨 — 맵이든 HUD(단추·미니맵·설정)든 (`battle_scene._input`, 웹 pointerdown capture 처럼 GUI 보다 먼저 보고 먹지 않음. 팝업·툴팁 안 부품은 마우스를 받지 않음). 툴팁은 다른 칸·유닛으로 옮기면 바로 숨고, 행동 메뉴와 겹치지 않는 자리에.
   로딩·대사·결과 화면 중에는 맵 단축키를 받지 않습니다 (대사 창은 Space·Enter·→·Esc 를 먼저 받음).
-- 시험용 상태: `is_awaiting()`, `is_over()`, `awaiting_unit_id()`, `last_result`, `result`, `story_log`(재생한 장면 키), `is_story_playing()`, 신호 `input_ready(id)`·`battle_over(result)`.
+- 시험용 상태: `is_awaiting()`, `is_over()`, `awaiting_unit_id()`, `last_result`, `result`, `story_log`(재생한 장면 키), `is_story_playing()`. (신호 `input_ready`·`battle_over` 는 듣는 곳이 없어 2026-10-24 지움 — 시험은 `is_awaiting()`·`is_over()` 를 봄.)
 
 ## 움직임 줄이기 · 속도
 

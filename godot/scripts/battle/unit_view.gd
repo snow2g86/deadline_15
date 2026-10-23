@@ -62,7 +62,6 @@ var weak := false:
 			weak = v
 			if bars != null:
 				bars.queue_redraw()
-var in_fog := false
 var dying := false
 var reduce_motion := false
 var _die_t := 0.0
@@ -305,10 +304,6 @@ func play_once(kind: String) -> float:
 	return float(s["hit"])
 
 
-## 시트 공격 동작의 타격 시점 (움직임 줄이기로 재생하지 않을 때도 타이밍은 같게 — 웹 atkHitDelay)
-func sheet_hit(kind: String) -> float:
-	var s: Variant = _sheet(kind)
-	return float(s["hit"]) if s != null else 0.0
 
 
 ## 키프레임 공격 동작 (웹 motion.js playAtkMotion — 시트가 없는 유닛). m = ATK_MOTIONS[cls], dir = 화면에서 대상 쪽 단위 벡터

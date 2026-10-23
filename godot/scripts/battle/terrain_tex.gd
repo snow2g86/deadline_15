@@ -297,9 +297,6 @@ static func _side(ci: CanvasItem, o: Vector2, tp: String, base: Color, shade: fl
 
 # ── 성가퀴: 윗면 가장자리 중 open 쪽에 돌 톱니 3개씩 (웹 _merlons·_edgeBox·_box) ──
 
-const _EDGE_BITS := [1, 2, 4, 8]
-
-
 static func _edges() -> Array:
 	var W := TW * 2.0
 	return [[1, Vector2(0, TH), Vector2(TW, 0)], [2, Vector2(TW, 0), Vector2(W, TH)], [4, Vector2(0, TH), Vector2(TW, TH * 2)], [8, Vector2(TW, TH * 2), Vector2(W, TH)]]

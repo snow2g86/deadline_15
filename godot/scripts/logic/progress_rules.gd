@@ -164,8 +164,6 @@ static func find_stage(c: Object, id: int) -> Variant:
 	return null
 
 
-static func next_stage_of(c: Object, id: int) -> Variant:
-	return find_stage(c, id + 1)
 
 
 # ── 요일 던전 (daily.js) ──

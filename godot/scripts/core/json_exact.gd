@@ -15,8 +15,6 @@ extends RefCounted
 const Num := preload("res://scripts/core/num.gd")
 const NumParse := preload("res://scripts/core/num_parse.gd")
 
-const MARK := "\u0001"   # 숫자를 잠시 문자열로 바꿔 둘 때의 표시 (JSON 문자열 안에 원래 나올 수 없는 제어 문자)
-
 static var _re: RegEx = null
 
 

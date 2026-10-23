@@ -44,8 +44,6 @@ func _init(p_scr: Control) -> void:
 
 # ── 글 ──
 
-static func _bb_escape(s: String) -> String:
-	return s.replace("[", "[lb]")
 
 
 static func _decode(s: String) -> String:
@@ -117,9 +115,6 @@ func rich(html: String, px: int, col: Color = BODY, w: int = 500, min_w: float =
 	return rt
 
 
-## 글 한 줄 (이모지는 그림) — 길면 줄바꿈되도록 RichText
-func text_line(s: String, px: int, col: Color, w: int = 700) -> Control:
-	return rich(_bb_escape_html(s), px, col, w)
 
 
 static func _bb_escape_html(s: String) -> String:

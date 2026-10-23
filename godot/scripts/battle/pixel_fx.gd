@@ -19,9 +19,6 @@ const SPOKES := [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0], [0.7, 0.7], [
 # 스프라이트 (문자 격자, 가운데 기준)
 const ORB := ["..bbb..", ".bcccb.", "bcwwwcb", "bcwwwcb", "bcwwwcb", ".bcccb.", "..bbb.."]
 const ORB2 := ["...b...", ".bbcbb.", ".ccwcc.", "bcwwwcb", ".ccwcc.", ".bbcbb.", "...b..."]
-const NOTE := ["...wc.", "...wwc", "...w.c", "...w..", ".ggw..", "gggg..", ".gg..."]
-const NOTE2 := ["...ww.", "...wcc", "...w.c", "...w.c", ".ggw..", "gggg..", ".gg..."]
-const MINI := [".wc", ".w.", "gw.", "gg."]
 const HOLY := ["..w..", ".wyw.", "wyWyw", ".wyw.", "..w.."]
 const HOLY2 := ["w...w", ".wyw.", ".yWy.", ".wyw.", "w...w"]
 const RUNE := ["...a...", "..aba..", ".abcba.", "abcwcba", ".abcba.", "..aba..", "...a..."]
@@ -33,7 +30,6 @@ const WISP2 := ["..b..", ".bcb.", "bcwcb", ".bcb.", "..b.."]
 const KINDS := {
 	"archer": {"fl": 220.0, "arc": 0.14, "draw": "arrow", "hist": true, "impact": "archer", "burst": "archer", "up": 4.0},
 	"mage": {"fl": 240.0, "draw": "orb", "trail": "mage", "impact": "mage", "burst": "mage", "up": 10.0},
-	"commander": {"fl": 260.0, "wave": 3.0, "draw": "note", "trail": "note", "impact": "commander", "burst": "commander", "up": 8.0},
 	"priest": {"fl": 230.0, "draw": "holy", "trail": "holy", "impact": "priest", "burst": "priest", "up": 10.0},
 	"summoner": {"fl": 250.0, "wave": 4.0, "draw": "rune", "trail": "rune", "impact": "summoner", "burst": "summoner", "up": 8.0},
 	"summon_spirit": {"fl": 250.0, "wave": 4.0, "draw": "rune", "trail": "rune", "impact": "summoner", "burst": "summoner", "up": 8.0},
@@ -248,9 +244,6 @@ func _trail(kind: String, s: Dictionary) -> void:
 	match kind:
 		"mage":
 			_emit(s["x"] - 3.0 * c, s["y"] + _rnd(-1.5, 1.5), -c * _rnd(0.4, 0.8), _rnd(-0.2, 0.2), _rnd(14, 22), 2)
-		"note":
-			if t % 3 == 0:
-				_emit(s["x"] - 3.0 * c, s["y"] + _rnd(-2, 2), _rnd(-0.3, 0.3), _rnd(-0.5, -0.2), _rnd(14, 20), 4)
 		"holy":
 			if t % 2 == 0:
 				_emit(s["x"] + _rnd(-2, 2), s["y"] + _rnd(-1, 2), _rnd(-0.2, 0.2), _rnd(-0.7, -0.3), _rnd(16, 24), 4)
@@ -267,9 +260,6 @@ func _burst(kind: String, x: float, y: float) -> void:
 			for i in 12:
 				var a := float(i) / 12.0 * TAU
 				_emit(x, y, cos(a) * 1.8, sin(a) * 1.8, _rnd(18, 28), 2)
-		"commander":
-			for i in 9:
-				_emit(x + _rnd(-4, 4), y + _rnd(-3, 3), _rnd(-0.8, 0.8), _rnd(-1.4, -0.3), _rnd(18, 28), 4, -0.01)
 		"priest":
 			for i in 12:
 				_emit(x + _rnd(-7, 7), y + _rnd(-2, 6), _rnd(-0.15, 0.15), _rnd(-1.1, -0.4), _rnd(26, 38), 4, -0.01)
@@ -390,8 +380,6 @@ func _draw_shot(s: Dictionary) -> void:
 				_px(x - c * i2 + sn, y - sn * i2 - c, f)
 		"orb":
 			_sprite(ORB if (t >> 2) % 2 == 1 else ORB2, x, y, {"w": COL.m0, "c": COL.m1, "b": COL.m3})
-		"note":
-			_sprite(NOTE if (t >> 3) % 2 == 1 else NOTE2, x, y, {"w": COL.y0, "c": COL.y1, "g": COL.y2}, true)
 		"holy":
 			_sprite(HOLY if (t >> 2) % 2 == 1 else HOLY2, x, y, {"W": COL.w, "w": COL.y0, "y": COL.y1}, true)
 		"rune":
@@ -453,20 +441,6 @@ func _draw_impact(kind: String, cx: float, cy: float, f: int) -> void:
 					_ring(cx, cy, MR[f] - 2, COL.m0)
 				if f == 1:
 					_px(cx, cy, COL.m0)
-		"commander":
-			if f == 0:
-				_filled(cx, cy, 1, COL.w)
-				_px(cx + 2, cy, COL.y0); _px(cx - 2, cy, COL.y0); _px(cx, cy + 2, COL.y0); _px(cx, cy - 2, COL.y0)
-			if f >= 1 and f <= 5:
-				_ring(cx, cy, 1 + f * 2, [COL.y0, COL.y1, COL.y1, COL.y2, COL.y3][f - 1], f > 3)
-				if f <= 2:
-					_ring(cx, cy, f * 2 - 1, COL.w)
-				if f <= 4:
-					var degs := [-130.0, -90.0, -50.0]
-					for i in 3:
-						var a := deg_to_rad(degs[i])
-						var r2 := 4.0 + f * 2.5 + i
-						_sprite(MINI, cx + cos(a) * r2, cy + sin(a) * r2 - f, {"w": COL.y0, "c": COL.y1, "g": COL.y2}, true)
 		"priest":
 			if f == 0:
 				_filled(cx, cy, 2, COL.w)

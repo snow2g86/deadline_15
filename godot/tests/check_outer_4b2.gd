@@ -2156,6 +2156,6 @@ func _nosoon() -> void:
 	for k: String in need:
 		ok = ok and R.has(k) and ResourceLoader.exists(R[k])
 	_check(ok, "Router 화면 6개 (성소 · 아카데미 · 도감 · 가이드 · 크레딧 · 라이선스) 장면 있음")
-	# 상점 광고 단추의 '추후 개발'(common.coming_soon)은 웹과 같은 꺼진 단추 — 일부러 남김 (보고서)
+	# 상점 광고 카드는 Ads 오토로드가 있으면 늘 실제 카드 — 예전 '추후 개발' 꺼진 단추(common.coming_soon, Ads 가 없을 때만 나오던 길)는 2026-10-24 죽은 코드 정리로 지움
 	var shop_src := FileAccess.get_file_as_string("res://scripts/ui/shop.gd")
-	_check(shop_src.contains("common.coming_soon"), "상점 광고 단추 '추후 개발'은 웹(js/shop.js)과 같은 꺼진 단추로 남김 (Godot '준비 중' 안내 아님)")
+	_check(not shop_src.contains("common.coming_soon"), "상점에 '추후 개발' 꺼진 광고 단추 코드 없음 (Ads 오토로드 없는 길은 없앰)")

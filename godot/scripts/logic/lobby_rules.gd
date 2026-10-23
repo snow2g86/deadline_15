@@ -316,12 +316,6 @@ static func hideout_chars(c: Object) -> Array:
 	return list.slice(0, 10)
 
 
-## 저장된 전투(game_battle)가 있으면 그 스테이지 (전투 재개 단추)
-static func saved_battle_stage(c: Object) -> Variant:
-	var bd: Variant = c.store.get_json("game_battle")
-	if typeof(bd) == TYPE_DICTIONARY and Js.truthy(bd.get("stage")):
-		return bd["stage"]
-	return null
 
 
 static func gold(c: Object) -> float:

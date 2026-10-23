@@ -230,9 +230,6 @@ func _calc_dmg_raw(a: Dictionary, t: Dictionary) -> float:
 	if E.gu.tile(t["x"], t["y"]) == "shallow":
 		dmg = maxf(1.0, Js.round_js(dmg * (1.0 + float(D["TACTIC"]["shallowVuln"]))))
 	a["_lastCrit"] = false
-	if a["cls"] == "commander" and E.c.rand("calcDmg.commander") < 0.01:
-		dmg = maxf(1.0, Js.round_js(dmg * 10.0))
-		a["_lastCrit"] = true
 	if a["cls"] == "archer" and Js.num(a["skillLv"].get("archer_weakspot")) >= 1:
 		if E.c.rand("calcDmg.weakspot") < 0.3:
 			dmg = maxf(1.0, Js.round_js(dmg * 1.5))
@@ -456,7 +453,7 @@ func chest_open(chest: Dictionary, opener: Dictionary) -> Dictionary:
 	if r < acc:
 		Profile.mats_add(c, "protect", 1.0)
 		return {"kind": "protect"}
-	var cls: String = opener["cls"] if opener != null and opener["cls"] != "commander" else "novice"
+	var cls: String = opener["cls"] if opener != null else "novice"
 	var nf := Synergy.frags(S.get("_synergies"), 2.0)
 	Profile.soul_add(c, "frag", cls, nf)
 	return {"kind": "soul"}
