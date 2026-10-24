@@ -64,7 +64,16 @@
         "ios": "ca-app-pub-3940256099942544/1712485313"
       }
     },
-    "real": {"app_id": {"android": "", "ios": ""}, "rewarded": {"android": "", "ios": ""}},
+    "real": {
+      "app_id": {
+        "android": "ca-app-pub-4890210203619076~8395804188",
+        "ios": "ca-app-pub-4890210203619076~3043405158"
+      },
+      "rewarded": {
+        "android": "ca-app-pub-4890210203619076/5003354082",
+        "ios": "ca-app-pub-4890210203619076/8080109412"
+      }
+    },
     "child_directed": false,
     "under_age_of_consent": false,
     "max_ad_content_rating": ""

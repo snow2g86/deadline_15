@@ -48,12 +48,12 @@ window/handheld/orientation=4
 [admob]
 
 general/android/enabled=true
-general/android/app_id="ca-app-pub-3940256099942544~3347511713"
+general/android/app_id="ca-app-pub-4890210203619076~8395804188"
 general/android/enable_r8_optimization=false
 general/android/disable_initialization_optimization=false
 general/android/disable_ad_loading_optimization=false
 general/ios/enabled=true
-general/ios/app_id="ca-app-pub-3940256099942544~1458002511"
+general/ios/app_id="ca-app-pub-4890210203619076~3043405158"
 mediation/applovin=false
 mediation/bidmachine=false
 mediation/chartboost=false

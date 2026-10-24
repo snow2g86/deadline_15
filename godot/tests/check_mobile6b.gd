@@ -1,7 +1,7 @@
 extends SceneTree
 ## 6b 시험 — 모바일 결제(Google Play · App Store)와 광고(AdMob)를 가짜 SDK 객체로 모든 길을 시험
 ##   Godot --headless --path godot --script res://tests/check_mobile6b.gd   [-- --only google,apple,ads,ui,config,bridge,lang]
-##  1) config  : data/iap.json 의 ADMOB(구글 공개 시험 ID · 실제 ID 자리는 비어 있음 · 아동 대상 아님) · 광고 단위 고르기(디버그=시험, 출시=real) · project.godot 앱 ID 일치 ·
+##  1) config  : data/iap.json 의 ADMOB(구글 공개 시험 ID · 실제 ID 채워짐(형식·시험 ID 혼입 없음) · 아동 대상 아님) · 광고 단위 고르기(디버그=시험, 출시=real) · project.godot 앱 ID 일치 ·
 ##               출시 빌드는 https 만(http·fake:// 거절) · 에뮬레이터 주소 · appAccountToken UUID 규칙
 ##  2) google  : BackendGoogle 단독(연결 성공·실패·무응답, 가격, 구매 성공·취소·대기·오류·이미 소유, 미처리 조회, 소모, 직렬화, 플러그인 없음) +
 ##               Billing 전체 순서(서버 verify → 전투 중 미룸 → 지급 → 디스크 확정 → consume): 앱이 죽었다 다시 켜짐 2곳 · 서버 5xx·429·거절 · 소모 실패 · 서버가 이미 소모
@@ -224,19 +224,37 @@ func _t_config() -> void:
 	var A: Dictionary = D["ADMOB"]
 	_check(A["test"]["app_id"] == {"android": "ca-app-pub-3940256099942544~3347511713", "ios": "ca-app-pub-3940256099942544~1458002511"}, "ADMOB.test.app_id = 구글 공개 시험 앱 ID (안드로이드·iOS)")
 	_check(A["test"]["rewarded"] == {"android": "ca-app-pub-3940256099942544/5224354917", "ios": "ca-app-pub-3940256099942544/1712485313"}, "ADMOB.test.rewarded = 구글 공개 시험 보상형 단위")
-	_check(A["real"]["app_id"] == {"android": "", "ios": ""} and A["real"]["rewarded"] == {"android": "", "ios": ""}, "ADMOB.real 은 비어 있음 (사용자가 AdMob 에서 만든 뒤 채움 — 추측해서 넣지 않음)")
+	var rx_app := RegEx.create_from_string("^ca-app-pub-[0-9]{16}~[0-9]{10}$")
+	var rx_unit := RegEx.create_from_string("^ca-app-pub-[0-9]{16}/[0-9]{10}$")
+	var real_ok := true
+	for pl: String in ["android", "ios"]:
+		real_ok = real_ok and rx_app.search(str(A["real"]["app_id"][pl])) != null and rx_unit.search(str(A["real"]["rewarded"][pl])) != null
+	_check(real_ok, "ADMOB.real 앱 ID 는 ca-app-pub-<16자리>~<10자리> · 보상형 단위는 ca-app-pub-<16자리>/<10자리> (안드로이드·iOS)")
+	var pub_a: String = str(A["real"]["app_id"]["android"]).split("~")[0]
+	var same_pub := true
+	for pl: String in ["android", "ios"]:
+		same_pub = same_pub and str(A["real"]["app_id"][pl]).split("~")[0] == pub_a and str(A["real"]["rewarded"][pl]).split("/")[0] == pub_a
+	_check(same_pub and not pub_a.contains("3940256099942544"), "실제 ID 4개는 같은 게시자 ID, 구글 시험 게시자(3940256099942544)가 아님")
+	var no_test_mix := true
+	for pl: String in ["android", "ios"]:
+		no_test_mix = no_test_mix and not str(A["real"]["app_id"][pl]).contains("3940256099942544") and not str(A["real"]["rewarded"][pl]).contains("3940256099942544") \
+			and A["real"]["app_id"][pl] != A["test"]["app_id"][pl] and A["real"]["rewarded"][pl] != A["test"]["rewarded"][pl]
+	_check(no_test_mix, "실제 ID 는 어느 것도 시험 ID 와 같거나 시험 게시자를 포함하지 않음")
 	_check(A["child_directed"] == false and A["under_age_of_consent"] == false and A["max_ad_content_rating"] == "", "아동 대상 앱 아님(false) 명시 · 미성년 동의 연령 미만 아님 · 콘텐츠 등급 제한 없음")
 	_check(AdsT.unit_for(A, true, "android") == A["test"]["rewarded"]["android"] and AdsT.unit_for(A, true, "ios") == A["test"]["rewarded"]["ios"], "디버그 빌드 → 시험 광고 단위 (안드로이드·iOS)")
-	_check(AdsT.unit_for(A, false, "android") == "" and AdsT.unit_for(A, false, "ios") == "", "출시 빌드 + real 비어 있음 → 광고 단위 없음 (시험 단위로 대신하지 않음)")
-	var A2: Dictionary = A.duplicate(true)
-	A2["real"]["rewarded"]["android"] = "ca-app-pub-1/2"
-	_check(AdsT.unit_for(A2, false, "android") == "ca-app-pub-1/2" and AdsT.unit_for(A2, true, "android") == A["test"]["rewarded"]["android"], "real 을 채우면 출시 빌드만 그것을 씀 (디버그는 여전히 시험 단위)")
+	_check(AdsT.unit_for(A, false, "android") == A["real"]["rewarded"]["android"] and AdsT.unit_for(A, false, "ios") == A["real"]["rewarded"]["ios"]
+		and AdsT.unit_for(A, false, "android") != AdsT.unit_for(A, true, "android"), "출시 빌드 + real 채워짐 → 실제 광고 단위 (안드로이드·iOS), 시험 단위가 섞이지 않음")
+	var A_empty: Dictionary = A.duplicate(true)
+	for k: String in ["app_id", "rewarded"]:
+		A_empty["real"][k] = {"android": "", "ios": ""}
+	_check(AdsT.unit_for(A_empty, false, "android") == "" and AdsT.unit_for(A_empty, false, "ios") == "" and AdsT.unit_for(A_empty, true, "android") == A["test"]["rewarded"]["android"],
+		"(복사본) real 이 비면 출시 빌드 → 광고 단위 없음 (시험 단위로 대신하지 않음), 디버그는 시험 단위")
 	_check(AdsT.unit_for(null, true, "android") == "" and AdsT.unit_for({}, true, "android") == "", "ADMOB 이 없어도 오류 없음")
 	# project.godot 앱 ID (플러그인이 AndroidManifest · Info.plist 에 넣음) = 데이터
-	var want_a: String = A["real"]["app_id"]["android"] if A["real"]["app_id"]["android"] != "" else A["test"]["app_id"]["android"]
-	var want_i: String = A["real"]["app_id"]["ios"] if A["real"]["app_id"]["ios"] != "" else A["test"]["app_id"]["ios"]
-	_check(str(ProjectSettings.get_setting("admob/general/android/app_id", "")) == want_a and str(ProjectSettings.get_setting("admob/general/ios/app_id", "")) == want_i,
-		"project.godot 의 admob 앱 ID = data/iap.json (real 이 비어 있으면 시험 ID)")
+	var pg_a := str(ProjectSettings.get_setting("admob/general/android/app_id", ""))
+	var pg_i := str(ProjectSettings.get_setting("admob/general/ios/app_id", ""))
+	_check(pg_a == A["real"]["app_id"]["android"] and pg_i == A["real"]["app_id"]["ios"] and pg_a != A["test"]["app_id"]["android"] and pg_i != A["test"]["app_id"]["ios"],
+		"project.godot 의 admob 앱 ID = data/iap.json 의 ADMOB.real.app_id (시험 ID 아님, 안드로이드·iOS)")
 	_check(bool(ProjectSettings.get_setting("admob/general/android/enabled", false)) and bool(ProjectSettings.get_setting("admob/general/ios/enabled", false)), "admob 안드로이드·iOS 켜짐")
 	var mediation_on: Array = []
 	for lib: String in ["applovin", "bidmachine", "chartboost", "dtexchange", "imobile", "inmobi", "ironsource", "line", "maio", "meta", "mintegral", "moloco", "mytarget", "pangle", "pubmatic", "unity_ads", "vungle"]:
@@ -1172,6 +1190,11 @@ func _t_ads() -> void:
 	# 출시 빌드(ADMOB.real 이 비어 있음): 다시 해도 소용없으니 '이용 불가' 안내만
 	var fb12: Node = FakeBridge.new()
 	_ads_setup(fb12)
+	# 시험 안에서만 메모리의 ADMOB.real 을 비움 (파일은 안 건드림) — 끝나면 원래 값으로 되돌림
+	var live_admob: Dictionary = db.call("global", "ADMOB")
+	var real_backup: Dictionary = (live_admob["real"] as Dictionary).duplicate(true)
+	for k: String in ["app_id", "rewarded"]:
+		live_admob["real"][k] = {"android": "", "ios": ""}
 	ads.debug_build = false
 	ads.start()
 	await _until(func() -> bool: return ads.status() == "unconfigured", 3.0)
@@ -1184,9 +1207,24 @@ func _t_ads() -> void:
 	var ub: Button = shu.find_child("AdBtn", true, false)
 	_check(ub != null and ub.disabled and ub.text == i18n.call("t", "gd.ads.preparing") and str(ub.get_meta("ad_status", "")) == "unconfigured" and (shu.find_child("AdStatus", true, false) as Label).text == i18n.call("t", "gd.ads.st_unconfigured")
 		and shu.find_child("AdRetry", true, false) == null, "카드: '다시 불러오기' 대신 꺼진 단추 + '지금은 광고를 이용할 수 없습니다' 안내")
+	_check(AdsT.unit_for(Ctx.globals_from_db(db)["ADMOB"], false, "android") == "" and ads.ad_unit_id() == "", "출시 빌드 + real 비어 있음 → 광고 단위 '' (불러오기 안 함)")
+	live_admob["real"] = real_backup   # 되돌림
+	_check(AdsT.unit_for(Ctx.globals_from_db(db)["ADMOB"], false, "android") == real_backup["rewarded"]["android"] and real_backup["rewarded"]["android"] != "", "시험 뒤 ADMOB.real 원래 값으로 복구")
+	# 출시 빌드 + real 채워짐 → 불러오기에 실제 광고 단위를 씀 (시험 단위 아님), iOS 도
+	for pl: Array in [["google", "android", "5003354082"], ["apple", "ios", "8080109412"]]:
+		var fb13: Node = FakeBridge.new()
+		_ads_setup(fb13)
+		platform.call("override_store", pl[0])
+		ads.debug_build = false
+		ads.start()
+		await _until(func() -> bool: return ads.status() == "ready", 3.0)
+		_check(ads.status() == "ready" and fb13.units.size() >= 1 and fb13.units[0] == real_backup["rewarded"][pl[1]] and str(fb13.units[0]).ends_with(pl[2]) and not str(fb13.units[0]).contains("3940256099942544"),
+			"출시 빌드 + real 채워짐 → 실제 광고 단위로 불러옴 (%s), 시험 단위 혼입 없음" % pl[1])
+		_ads_disconnect_all()
+		ads.bridge = null
+		ads.set("state", "off")
+	platform.call("override_store", "dev")
 	ads.debug_build = true
-	# 출시 빌드에서 광고 단위가 비어 있으면 failed (시험 단위로 대신하지 않음)
-	_check(AdsT.unit_for(Ctx.globals_from_db(db)["ADMOB"], false, "android") == "", "출시 빌드 + real 비어 있음 → 광고 단위 '' (불러오기 안 함)")
 	_ads_disconnect_all()
 	_stat("ads.stats", ads.stats.duplicate())
 	ads.bridge = null

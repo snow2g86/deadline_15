@@ -901,7 +901,7 @@ Google Play 결제 · App Store(StoreKit 2) 결제 · AdMob 보상형 광고(골
 | `tools/ios_export.sh` · `ios_post_export.py` · `ios_privacy_strings.json` | iOS 내보내기 (아래) |
 
 - **결제 순서**는 변함없음 (서버 verify → 전투 중이면 미룸 → 지급 → 디스크 확정 → consume/finish). PENDING·Ask to Buy 는 지급 없이 안내, 승인되면 저절로 지급. ITEM_ALREADY_OWNED 는 소모하지 않은 그 구매를 찾아 지급 길로.
-- **광고**: 디버그 빌드는 늘 구글 공개 시험 광고 단위(`data/iap.json ADMOB.test`), 출시 빌드는 `ADMOB.real`(지금 비어 있음 → 광고 'failed', 시험 단위로 대신하지 않음).
+- **광고**: 디버그 빌드는 늘 구글 공개 시험 광고 단위(`data/iap.json ADMOB.test`), 출시 빌드는 `ADMOB.real`(실제 광고 단위 채워짐; 비면 광고 'unconfigured'=이용 불가, 시험 단위로 대신하지 않음).
   아동 대상 아님(`tag_for_child_directed_treatment` FALSE)·미성년 동의 연령 미만 아님을 SDK 초기화 때 명시. 카드 단추: 준비됨 '광고 보기' · 불러오는 중 · 오프라인/실패 '다시 불러오기' · 동의 필요 '동의하고 광고 보기' · 오늘 다 받음.
   오프라인·실패는 15초에서 시작해 최대 5분까지 늘리는 재시도 + 앱 복귀·상점 진입 때 다시. 1시간 지난 광고는 버림.
   PC 가게(stove·steam)와 광고 SDK 가 없는 환경(PC·편집기의 `--store google`)에서는 광고 카드 숨김.
@@ -916,7 +916,7 @@ Google Play 결제 · App Store(StoreKit 2) 결제 · AdMob 보상형 광고(골
 - 플러그인: `addons/GodotGooglePlayBilling`(Play Billing Library 9.1.0, `billing-ktx`) · `addons/admob`(GMA Next-Gen SDK `ads-mobile-sdk` 1.4.0). 편집기 플러그인 둘 다 켬(`project.godot`). 네이티브 라이브러리 정렬: 플러그인에 `.so` 없음, `zipalign -c -P 16` 통과.
 - **Gradle 의존성**: 이 맥 캐시에 없던 Maven 의존성(플러그인이 선언한 `billing-ktx` · `ads-mobile-sdk` 와 그 하위 67개 파일, 약 16.7MB)이 첫 내보내기 때 내려와짐 — `gradle.properties` 의 `org.gradle.offline=true` 만으로는 막히지 않았음.
   그 뒤로는 `tools/android_build_template.sh`(기본 OFFLINE=1)가 `gradlew` 를 `--offline` 이 붙는 감싸개로 바꿔 더는 받지 않음 (캐시에 없으면 실패하며 없는 목록을 보임). 새 PC 에서는 처음에 한 번 `OFFLINE=0` 으로 설치해 캐시를 채울 것. 받은 파일 67개의 좌표·sha256 은 `addons/SOURCES.md` 에 기록.
-- 매니페스트(병합 결과)에 광고 앱 ID(`com.google.android.gms.ads.APPLICATION_ID` — 지금 구글 시험 ID, 출시 전에 `project.godot` 의 `admob/general/android/app_id` 와 `data/iap.json ADMOB.real.app_id` 를 실제 ID 로) · `com.android.vending.BILLING` · targetSdk 36 · minSdk 24.
+- 매니페스트(병합 결과)에 광고 앱 ID(`com.google.android.gms.ads.APPLICATION_ID` — 실제 앱 ID, `project.godot` 의 `admob/general/android/app_id` 와 `data/iap.json ADMOB.real.app_id` 가 일치해야 하며 시험이 확인. UMP 동의 메시지·app-ads.txt·스토어 연결은 아직 남음) · `com.android.vending.BILLING` · targetSdk 36 · minSdk 24.
   권한은 SDK 가 요구하는 것: `INTERNET`(프리셋) · `AD_ID`(`android.permission.AD_ID`·`com.google.android.gms.permission.AD_ID`, 광고 ID — Play Console '광고 ID' 선언 필요) · `ACCESS_NETWORK_STATE` · `READ_BASIC_PHONE_STATE`(GMA SDK) ·
   `BILLING` · `WAKE_LOCK` · `FOREGROUND_SERVICE`(androidx.work, 광고 SDK 가 끌어옴) · `RECEIVE_BOOT_COMPLETED`(GMA SDK 작업 예약) · `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`(androidx, 앱 안에서만). 위치·연락처·저장소 같은 권한은 없음.
 - 크기: 출시 AAB 157.45MB → **164.43MB (+6.98MB, +4.4%)**, 디버그 APK 약 269MB → 277.6MB. 내보낸 pck: Windows +0.36MB.
