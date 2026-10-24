@@ -35,3 +35,6 @@ godot/build/*
 godot/android/
 # 6b iOS 내보내기 때만 third_party/godot-iap-ios 에서 복사했다가 지우는 GDExtension (tools/ios_export.sh) — 데스크톱 편집기에서 오류가 나므로 평소에는 없어야 함
 godot/addons/godot-iap/bin/
+
+# 미디어 인계용 영구 사본(대용량) — 커밋하지 않음
+docs/art/story_portraits/
