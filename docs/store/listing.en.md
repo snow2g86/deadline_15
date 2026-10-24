@@ -75,7 +75,7 @@ This game contains random items.
 - Enchant Rune Draw (shop): all 12 runes have the same chance.
 - Equipment enhancement: each level has success, failure and breakage rates.
 The full table is in the shop and enhancement screens ("Drop Rates") and at the address below.
-Drop rates: [rates page URL -- the published address of docs/store/probabilities.en.md [확인 필요]]
+Drop rates: https://show4you.xyz/apps/deadline-15/odds.html?lang=en
 
 PAID ITEMS AND ADS
 - Gold packages (in-app purchase, consumable): 500 / 1,200 / 3,000 / 6,500 gold. Gold is spent in game on recruiting mercenaries, revives, equipment draws, enhancement and more. You can also earn gold by playing.
@@ -84,7 +84,7 @@ PAID ITEMS AND ADS
 - On iOS you may be asked for permission to track using your device identifier. The game plays exactly the same if you decline.
 - To verify purchases, a randomly generated install ID and purchase receipt information are sent to our purchase verification server. See the Privacy Policy for details.
 
-Privacy Policy: [privacy policy URL [확인 필요]]
+Privacy Policy: https://show4you.xyz/apps/deadline-15/privacy.html?lang=en
 Contact: [support email [확인 필요]]
 ```
 

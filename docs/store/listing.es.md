@@ -74,7 +74,7 @@ Este juego contiene objetos aleatorios.
 - Sorteo de runa (tienda): las 12 runas tienen la misma probabilidad.
 - Mejora de equipo: cada nivel tiene probabilidades de éxito, fallo y rotura.
 La tabla completa está en las pantallas de tienda y mejora ("Probabilidades") y en esta dirección.
-Tabla de probabilidades: [URL de la tabla -- dirección publicada de docs/store/probabilities.es.md [확인 필요]]
+Tabla de probabilidades: https://show4you.xyz/apps/deadline-15/odds.html?lang=es
 
 OBJETOS DE PAGO Y ANUNCIOS
 - Paquetes de oro (compra dentro de la app, consumible): 500 / 1.200 / 3.000 / 6.500 de oro. El oro sirve para reclutar mercenarios, resucitar, sortear equipo, mejorar y más. También se consigue jugando.
@@ -83,7 +83,7 @@ OBJETOS DE PAGO Y ANUNCIOS
 - En iOS se te puede pedir permiso para el seguimiento mediante el identificador de tu dispositivo. El juego funciona exactamente igual si no lo permites.
 - Para verificar las compras, se envían a nuestro servidor de verificación un ID de instalación generado al azar y los datos del recibo de compra. Consulta la Política de privacidad para más detalles.
 
-Política de privacidad: [URL de la política de privacidad [확인 필요]]
+Política de privacidad: https://show4you.xyz/apps/deadline-15/privacy.html?lang=es
 Contacto: [correo de soporte [확인 필요]]
 ```
 
@@ -124,7 +124,7 @@ Número de versión de la primera publicación: [확인 필요] (la versión int
 | Dónde | Texto |
 |---|---|
 | Descripción completa, párrafo "PROBABILIDADES DE OBJETOS ALEATORIOS" | El texto de arriba más la URL de la tabla [확인 필요] |
-| Última línea de la descripción de Google Play | `Probabilidades de los objetos aleatorios (sorteo de equipo, sorteo de runas, mejora de equipo): [URL de la tabla]` |
+| Última línea de la descripción de Google Play | `Probabilidades de los objetos aleatorios (sorteo de equipo, sorteo de runas, mejora de equipo): https://show4you.xyz/apps/deadline-15/odds.html?lang=es` |
 | Última línea de la descripción de App Store y la página de la URL de soporte | La misma frase. La descripción de App Store no convierte las URL en enlaces, así que escribe la dirección como texto y pon también la tabla en la página de la URL de soporte. |
 | En el juego | "Probabilidades" en las pantallas de tienda y de mejora (ya implementado; mismo contenido que `docs/store/probabilities.es.md`) |
 
