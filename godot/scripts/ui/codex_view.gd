@@ -644,6 +644,35 @@ func role_pill(role: String, text: String) -> Control:
 	return p
 
 
+## 스토리 그림(962x1087 칸 · 투명 여백 큼 — 허리 위 반신은 아래쪽 약 1/3 이 비어 있음)을 그림이 있는 부분만 잘라
+## 작은 칸(64x72, 화면 배율 2배 = 128x144 에 맞춤)에 '통째로 들어가게' 줄인 그림으로 바꿈 (가운데 정렬은 TextureRect 가 함).
+## 줄일 때 계단이 생기지 않게 Lanczos 로 한 번 줄여 둠. 같은 그림은 다시 만들지 않음 (규칙·데이터 무관)
+const THUMB_PX := Vector2(128, 144)
+static var _thumb_cache: Dictionary = {}
+
+
+static func _story_thumb(tex: Texture2D) -> Texture2D:
+	if tex == null:
+		return null
+	var key := tex.get_rid()
+	if _thumb_cache.has(key):
+		return _thumb_cache[key]
+	var out: Texture2D = tex
+	var img := tex.get_image()
+	if img != null and not img.is_empty():
+		if img.is_compressed():
+			img.decompress()
+		var r := img.get_used_rect()
+		if r.size.x > 0 and r.size.y > 0:
+			var c := img.get_region(r)
+			c.fix_alpha_edges()   # 투명 쪽 색을 가장자리 색으로 채워 줄일 때 어두운 테두리가 안 생기게
+			var k := minf(THUMB_PX.x / float(c.get_width()), THUMB_PX.y / float(c.get_height()))
+			c.resize(maxi(1, roundi(c.get_width() * k)), maxi(1, roundi(c.get_height() * k)), Image.INTERPOLATE_LANCZOS)
+			out = ImageTexture.create_from_image(c)
+	_thumb_cache[key] = out
+	return out
+
+
 func _person(b: Dictionary) -> Control:
 	var p := PanelContainer.new()
 	p.name = "Person"
@@ -657,7 +686,7 @@ func _person(b: Dictionary) -> Control:
 		pc.custom_minimum_size = Vector2(64, 72)
 		pc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var tr := OKit.tex_rect(icons.call("image", "character/story/%s.webp" % k), Vector2(64, 72))
+		var tr := OKit.tex_rect(_story_thumb(icons.call("image", "character/story/%s.webp" % k)), Vector2(64, 72))
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		pc.add_child(tr)
 		h.add_child(pc)

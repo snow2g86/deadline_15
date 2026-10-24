@@ -296,6 +296,16 @@ armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형
 - **원본·재생성**: 무손실 PNG 는 `assets/image/character/art_src/{front,story}/`(git 제외 · .gdignore)로 옮겨 두고 변환 직전 커밋 `ad48239` 의 git 기록에도 있음. `python3 godot/tools/webp_art.py`(새 PNG 변환) · `--rebuild`(art_src 로 전부 다시) · `--check`(PSNR 점검).
   새 스토리 그림은 `tools/make-portrait.py` → `webp_art.py`. 필요: `cwebp`(`brew install webp`).
 - 도구가 앞모습 PNG 를 읽을 때는 `art_src/front/<키>.png` (gen-props · video-to-sheet 의 기본값 갱신).
+- **스토리 새 그림(허리 위 반신) 적용 절차 (2026-10-24 17장 적용, 나머지 6장 — boss_60 · boss_90 · boss_93 · boss_100 · kasha · commander_f — 은 재생성 뒤 같은 방식으로):**
+  1. 새 그림은 962x1087 RGBA PNG (그림은 위쪽 약 2/3 에 있고 아래 1/3 은 투명 — 허리에서 서서히 사라짐). 작업 폴더(git 밖) 예: `<scratchpad>/portrait/story/final/<키>.png` 와 적용 스크립트 `apply_story.sh`.
+  2. `bash apply_story.sh <키> <키> ...` — 기존 `art_src/story/<키>.png` 를 `backup_old/` 로 보관, 새 PNG 를 `art_src/story/<키>.png` 로 복사(무손실 원본, git 제외),
+     `cwebp -q 85 -m 6 -sharp_yuv -alpha_q 100` 으로 `assets/image/character/story/<키>.webp` 생성 — 옵션은 `tools/webp_art.py` 와 같음. `.webp.import` 는 이미 있으므로 그대로 둠(없으면 `webp_art.IMPORT_TEMPLATE` 로 만듦).
+     (apply_story.sh 없이 하려면: 새 PNG 를 `assets/image/character/story/<키>.png` 에 놓고 `python3 godot/tools/webp_art.py` — PNG 는 art_src 로 옮겨 가고 .webp 가 생김)
+  3. 다시 가져오기: `HOME=<임시> Godot --headless --path godot --editor --quit` (한 번이면 됨, `.godot/imported` 캐시만 바뀌고 `.import` 옆파일은 그대로). 임시 HOME 이 없으면 그냥 `Godot --headless --path godot --editor --quit`.
+  3-1. 생성 그림의 후처리(스티커 흰 테두리 · 크로마키 초록 찌꺼기 · 상단 여백)는 PNG 단계에서(PIL/numpy) 한 뒤 2번을 다시 실행. 원본 PNG 는 작업 폴더 `backup_clean/`. `apply_story.sh` 는 `set -e` 라 이미 보관본이 있으면 `cp -n` 이 실패해 조용히 멈추므로 `|| true` 가 필요함(고쳐 둠).
+  4. 확인: `git status` 가 `story/*.webp` (+ 코드 수정이 있었다면 그것) 만 보이고, `python3 godot/tools/webp_art.py --check` 로 PSNR, 도감 '스토리' 탭(`guide` 화면, 인물·보스 카드) · 스토리 대사창 · 전투 중 보스 등장을 1280x720·pixel8 으로 눈으로 확인.
+  - 반신 그림의 배치: 대사창(`story_view.gd`)은 위쪽만 보이는 틀(그림 칸 210x230 · 전투 중 150x160 + 아래쪽 흐림 마스크)이라 그대로 맞음(얼굴·어깨가 대사 상자 위로 솟음). 도감 인물 카드(64x72)는 투명 여백이 커서 `codex_view.gd _story_thumb()` 가 그림이 있는 부분(`Image.get_used_rect`)만 잘라 128x144 안에 통째로 들어가게 Lanczos 로 줄인 `ImageTexture` 로 보여 줌(가운데 정렬, 계단 없음) — 전신·반신 모두 자동.
+  - 크기(17장 적용 전 → 후): Windows pck 43,349,204 → 42,992,468 B (-0.36MB) · macOS zip 73.31 → 72.94MB · AAB 74.57 → 74.20MB · 디버그 APK 130.71 → 130.34MB. 나머지 6장도 비슷하게 바뀌어 전체 약 -0.5MB 예상.
 
 **6. 뒷모습.** `_b` 그림 120개 삭제 (3D 로 교체할 예정, 사용자 지시 2026-10-23 — git 기록에서 복구: `git checkout ad48239 -- godot/assets/image/character` 처럼 필요한 것만). 웹판도 꺼 두었던(`Rig.BACK_VIEW=false`) 그림이라 화면에는 원래 안 쓰임.
 **뒷모습을 읽는 자리** (3D 로 다시 연결할 때 여기만):
