@@ -3,7 +3,7 @@
 Cloudflare Workers + D1 로 만든 결제 확인 서버입니다. 게임과의 약속은 [`docs/server/api.md`](../docs/server/api.md) 이고, 이 서버는 그 약속을 그대로 따릅니다.
 게임 쪽 가짜 서버(`godot/scripts/core/billing/fake_server.gd`)와 같은 요청에 같은 HTTP 상태 · 같은 JSON 을 돌려줍니다 (`godot/tests/check_iap_parity.gd` 로 비교).
 
-> **아직 배포하지 않았습니다.** 아래 '처음 배포하기'는 사용자가 직접 Cloudflare 에 로그인한 뒤 따라 하는 절차입니다.
+> **stage 는 2026-10-24 배포됨** (계정 snow2g86, 무료 플랜, D1 `deadline15-iap-stage`, https://deadline15-iap-stage.snow2g86.workers.dev — `/v1/health` 확인). 구글·애플·스토브 비밀값은 아직 없음(스토어 계정 준비 후 `wrangler secret put`). **prod 는 아직 배포하지 않았습니다.** 아래 '처음 배포하기'는 같은 순서로 prod 를 만들 때의 절차입니다.
 
 ## 구조
 

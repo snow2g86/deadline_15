@@ -258,7 +258,7 @@ func _t_config() -> void:
 	v.queue_free()
 	var cfg: Dictionary = D["IAP_SERVER"]["local"]
 	_check(str(cfg["url"]) == "http://127.0.0.1:8951" and str(cfg["android_url"]) == "http://10.0.2.2:8951" and BillingT.EMULATOR_SERVER == "http://10.0.2.2:8951", "개발용 로컬 서버 주소: 맥 127.0.0.1 · 안드로이드 에뮬레이터 10.0.2.2:8951 (IAP_SERVER.local.android_url)")
-	_check(str(D["IAP_SERVER"]["prod"]["url"]) == "" and str(D["IAP_SERVER"]["stage"]["url"]) == "", "stage·prod 서버 주소는 아직 비어 있음 (서버 배포 전)")
+	_check(str(D["IAP_SERVER"]["prod"]["url"]) == "" and str(D["IAP_SERVER"]["stage"]["url"]).begins_with("https://"), "prod 서버 주소는 아직 비어 있고(배포 전), stage 는 https 주소 (2026-10-24 배포)")
 	# appAccountToken (Apple) · obfuscatedAccountId (Google)
 	var iid := "0123456789abcdef0123456789abcdef"
 	var tok := BillingT.account_token(iid)

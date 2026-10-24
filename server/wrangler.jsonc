@@ -51,7 +51,7 @@
         {
           "binding": "DB",
           "database_name": "deadline15-iap-stage",
-          "database_id": "REPLACE_WITH_STAGE_DATABASE_ID",
+          "database_id": "cee6d59c-5f59-4481-9177-5b4cfe0c514c",
           "migrations_dir": "migrations"
         }
       ],

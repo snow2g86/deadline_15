@@ -44,7 +44,7 @@
   "AD_REWARD": {"gold": 100, "daily": 3},
   "IAP_SERVER": {
     "dev": {"url": "fake://local", "timeout": 10},
-    "stage": {"url": "", "timeout": 10},
+    "stage": {"url": "https://deadline15-iap-stage.snow2g86.workers.dev", "timeout": 10},
     "prod": {"url": "", "timeout": 10},
     "local": {
       "url": "http://127.0.0.1:8951",

@@ -21,7 +21,7 @@
     "icons": [{"file": "icons.json", "sha1": "807ef3c5ab3c8f1aed40bf9e3405ea93953c3cb1"}],
     "sprites": [{"file": "sprites.json", "sha1": "2b56206613439deaf0cf4630a70497ccdc2cecf6"}],
     "ui": [{"file": "ui.json", "sha1": "c9b548eae929bc86355a79a717763cc63754adba"}],
-    "iap": [{"file": "iap.json", "sha1": "f3f6a1c80d171f044e5bc64609964a23afad1d2e"}]
+    "iap": [{"file": "iap.json", "sha1": "1c1a4ae5a544977a48b34243a536da419c48008a"}]
   },
   "modules": {
     "jab": {"file": "jab.json", "globals": {"JAB": {"type": "object", "count": 15}}},
