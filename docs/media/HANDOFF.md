@@ -3,6 +3,8 @@
 > 작성 2026-10-25 · 게임 0.4.2 · 다른 세션이 이어서 작업할 수 있게 현재 상태, 결정, 도구, 절차, 남은 일을 한 곳에 정리했습니다.
 > 사용자는 비개발자 디렉터입니다. **모든 답변은 한국어**로 하고, 큰 작업은 계획 → 구현 에이전트 → 독립 검수 → 수정 → 커밋·푸시 순서로 진행합니다. (메모리: `~/.claude/projects/-Users-2z-Desktop-workspace-game-deadline-15/memory/`)
 
+미디어 작업 규칙을 모은 에이전트 지침: `.claude/agents/media-producer.md` (git 제외, 이 PC에만 있음).
+
 ## 0. 먼저 알아 둘 것 (규칙)
 
 | 규칙 | 내용 |
@@ -27,32 +29,34 @@
 | 스토리 초상화 17장 교체 | **적용·커밋 완료** (`d155d4a`) | `godot/assets/image/character/story/*.webp` |
 | 용량 절감 | 완료: pck 107→43MB, AAB 164→75MB | `godot/README.md` '용량 줄이기' |
 
-적용된 스토리 17장: bark, boss_10, boss_20, boss_30, boss_40, boss_45, boss_50, boss_70, boss_80, boss_92, boss_94, boss_95, boss_99, bram, commander_m, ordin, sera.
+스토리 초상화 23장 모두 치비 애니풍 반신으로 적용 완료 (17장 `d155d4a` 2026-10-24, 나머지 6장 2026-10-25).
 
-## 2. 진행 중이던 작업: 스토리 초상화 나머지 6장
+## 2. 스토리 초상화 23장 (완료, 다시 만들 때 참고)
 
-### 2-1. 상태 (사용자가 "이미지 생성 잠시 중단"을 지시해 중단됨)
+### 2-1. 나머지 6장 결과 (2026-10-25~26)
 
-사용자 결정: **모든 스토리 초상화를 같은 그림체(치비)로 통일**. 현재 6장은 아직 **옛 도트 그림이 게임에 들어 있음** (새 그림과 섞여 나옴, 위치는 일관됨).
-
-| 이름 | 현재 final/ 상태 | 할 일 |
+| 이름 | 적용본 | 메모 |
 |---|---|---|
-| boss_90 | 합격 (투구 안 어둡고 붉은 눈, 붉은 스카프, 도끼) | 적용 가능. 후처리 점검 |
-| boss_100 | 합격 (뿔 사이 가시 왕관, 붉은 눈) | 적용 가능. 몸이 어깨 위까지만 보임 |
-| boss_60 | 깨끗한 애니풍이나 **투구가 원래보다 밝은 은색**. 치비 질감은 맞음 | 어두운 강철 투구 후보(v12, 시드 91·92) 생성·비교 후 선택. 불발이면 현재 것 적용 |
-| boss_93 | 현실 비율 전신(작게 나옴). **불합격(체형 불일치)** | 치비로 재생성 |
-| commander_f | 현실 비율, 포니테일·입 벌림·흰 허리띠. **불합격** | 치비로 재생성 (풀어 내린 긴 머리) |
-| kasha | 현실 비율, 검 안 보임. **불합격** | 치비로 재생성 (붉은 리본 포니테일, 허리춤 검자루) |
+| boss_60 | v12 시드 91 (`gen_b60d.py`, 어두운 강철 투구) | 위 여백 맞추려고 0.894배 축소(아래 끝 722 유지) |
+| boss_90 | 이전 합격본 | 몸과 떨어진 창끝 조각 제거 |
+| boss_93 | **v13 시드 112** (`gen_chibi13.py`) | CAST대로 악마 마술사: 은발·검은 뿔·뾰족 귀·금테 외눈 안경·보라 숫자 고리. v11본(둥근 안경·초록 넥타이)은 해리 포터 연상으로 검수 탈락 |
+| boss_100 | 이전 합격본 | 0.95배 축소로 위 여백 맞춤. 어깨 위 구도 |
+| kasha | **v13 시드 113** | 검은 깃털 망토·붉은 줄 한 가닥·쌍단검·비웃음 (v11본은 흰 털 깃·리본·장검이라 탈락) |
+| commander_f | **v13 시드 112** (사용자 선택) | 은색 지휘봉. 머리 윤곽 밝은 선·흰 조각·초록 번짐 손 정리 |
 
-재생성 방법(v11, 중단 직전 설계): 이미 승인된 치비 결과(raw)를 **스타일 참조**로 이식합니다. `gen_chibi.py <이름> <시드>` → `out/v11/<이름>_<시드>_raw.png`.
-- boss_93 참조: boss_94, boss_20, boss_80 / commander_f 참조: commander_m, sera / kasha 참조: boss_94, bram, boss_95
-- 시드 101~104, 캐릭터당 최대 4개. **v8(아주 흐린 도트 참조)과 v10(전투 초상화 참조)은 쓰지 말 것** — v8은 더 픽셀화, v10은 현실 비율이 나옴.
+- 머리 위 여백 기준: 기존 17장 맨 위 불투명 픽셀 중앙값 107px, 아래 끝 약 722. 새 그림은 아래 끝을 고정하고 축소해 맞춤.
+- v13 은 12장 중 10장이 전신으로 나와 허리 위로 자름(1.3~1.4배 확대). `post_story.py`·`clean_v13.py` 는 높이 기준을 옛 도트 그림(`backup_old/`)에서 읽게 고침 — `art_src/story/` 는 이제 새 그림이라 기준이 틀어짐.
+- 비교 시트 `compare/v11_*`·`v13_*`, 이전 final 은 `backup_old/final_prev{,2,3}/`, 옛 도트 원본 `backup_old/<키>.png`.
+- 검수: 1차 '수정 필요'(위 탈락 사유 + boss_90 조각 + 여백) → 수정 후 재검수 '통과'. 시험 19개·내보내기 5개·check_pc5 105 통과.
+
+재생성 방법(v11): 이미 승인된 치비 결과(raw, `out_selected/`)를 **스타일 참조**로 이식합니다. `gen_chibi.py <이름> <시드>` → `out/v11/<이름>_<시드>_raw.png`.
+- **v8(아주 흐린 도트 참조)과 v10(전투 초상화 참조)은 쓰지 말 것** — v8은 더 픽셀화, v10은 현실 비율이 나옴.
 - 프롬프트에 `chibi, 2 to 2.5 head-tall proportions, big head, large glossy anime eyes, thick clean outlines, waist-up bust composition` 를 넣고 `realistic proportions, tall slim body, full body` 는 배제.
+- 다른 프로젝트(chrono_elemental·deck_tactics)의 영상 배치가 MLX-Serve 에 요청 중이면 메모리 다툼이 나므로 끝날 때까지 기다림. 끝났는지는 **프로세스가 살아 있는지**(`pgrep -fl run_video_batch\|b3_runner`)로 볼 것 — deck_tactics `queue.txt` 는 처리 뒤에도 줄이 지워지지 않아 '비었는지'로 판단하면 영원히 기다림(2026-10-25 밤 16시간 헛대기).
 
 ### 2-2. 생성 도구와 명령 (요약)
 
-작업 폴더(원본, 휘발성): `/private/tmp/claude-501/-Users-2z-Desktop-workspace-game-deadline-15/ce3e70d8-eb69-421f-8fca-6ab19ac5743e/scratchpad/portrait/story/`
-**영구 사본: `docs/art/story_portraits/`** (git 제외 대상으로 두거나 커밋하지 말 것, 약 27MB)
+**작업 폴더: `docs/art/story_portraits/`** (2026-10-25 스크립트 경로를 이 폴더로 고침, 출력 `out/<버전>/`·후처리 `out/<버전>_final/`) (git 제외 대상으로 두거나 커밋하지 말 것, 약 27MB)
 
 | 파일 | 역할 |
 |---|---|
@@ -63,13 +67,14 @@
 | `scripts/sheet_story.py` | 기존 그림 / 새 그림 나란히 보는 비교 시트 → `compare/` |
 | `scripts/run_all.sh` | 순차 배치 (대기 루프 없음. 최대 개수만큼만) |
 | `scripts/apply_story.sh` | **게임에 적용**: 크기 검사(962x1087) → `art_src/story/` 원본 보관 → `cwebp -q 85 -m 6 -sharp_yuv -alpha_q 100` → `.webp.import` 확인 |
-| `final/` | 현재 최종 후보 23장 (17장은 이미 적용된 후처리본, 6장은 위 표 상태) |
+| `final/` | 게임에 들어간 23장의 후처리본 |
+| `scripts/check_clean.py`, `sheet_v11.py` | 흰 테두리·초록 번짐 점검·정리 / 번호 붙인 비교 시트 |
 | `out_selected/` | 스타일 참조로 쓰는 승인된 치비 raw 7장 |
 | `compare/` | 비교 시트 |
 | `backup_old/` | 적용 전 옛 원본 |
 
 mflux 핵심 인자 (gen_story.py 에서): `mflux-generate-qwen-edit --model qwen-image-edit -q 8 --lora Qwen-Image-Edit-2509-Lightning-8steps-V1.0-bf16.safetensors 1.0 --image-paths <참조> --prompt <…> --width 768 --height <16배수> --steps 8 --guidance 1.0 --seed N`. 실행 파일 `~/.local/bin/mflux-generate-qwen-edit`, LoRA 는 `~/.cache/huggingface/hub/models--lightx2v--Qwen-Image-Lightning/...`.
-참조 이미지는 기존 도트 그림(`art_src/story/<이름>.png` 의 상단 66%)을 흰 배경에 얹고 강하게 흐려서(`SMOOTH_D=8`, `SMOOTH_B=3`) 질감 전달을 막습니다. **스크립트의 `D` 경로는 `godot/assets/image/character/story/` 로 되어 있어 옛 PNG 를 읽던 시절 값입니다. 지금은 원본 무손실 PNG가 `art_src/story/` 에 있으니 경로를 확인하고 쓰세요.**
+참조 이미지는 기존 도트 그림(`art_src/story/<이름>.png` 의 상단 66%)을 흰 배경에 얹고 강하게 흐려서(`SMOOTH_D=8`, `SMOOTH_B=3`) 질감 전달을 막습니다. 원본 무손실 PNG 는 `godot/assets/image/character/art_src/story/` 에서 읽습니다.
 
 ### 2-3. 적용 절차 (사용자 승인 후)
 
@@ -83,7 +88,7 @@ mflux 핵심 인자 (gen_story.py 에서): `mflux-generate-qwen-edit --model qwe
 
 | 순서 | 항목 | 상태 | 메모 |
 |---|---|---|---|
-| 1 | 스토리 초상화 6장 마무리 | 위 2번 | 사용자: "이미지 생성 잠시 중단" 후 재개 대기. "이미지 생성 다시 진행해" 가 오면 시작 |
+| 1 | (완료) 스토리 초상화 23장 | 완료 | 위 2번 |
 | 2 | 500골드 코인 아이콘 | **화풍 불일치** (다른 골드 패키지 아이콘과 그림체가 다름) | 새 그림 필요. `godot/assets/image/icon/` 상점 골드 카드 4종과 나란히 비교 |
 | 3 | 정식 앱 아이콘 | 임시 아이콘 사용 중 | 사용자가 도형·일러스트 엠블럼 모두 불만족. 시안 방향을 먼저 사용자와 다시 정할 것 (참고 이미지: 채색풍 원형 엠블럼). `godot/tools/make_mobile_icons.py` 로 플랫폼별 아이콘 생성 |
 | 4 | 스토어 그래픽 (Google Play) | **미준비** | 아이콘 512x512, 대표 이미지 1024x500, 스크린샷 최소 2장(권장 휴대폰 가로/세로). 스크린샷은 게임을 실행해 직접 찍을 수 있음(`godot/tests/shots_*.gd`) |
