@@ -17,7 +17,7 @@
 ```
 godot/
   project.godot        렌더러 gl_compatibility, 1280×720 · 창 크기 조절 · canvas_items 늘이기
-  icon.png             앱 아이콘 1024×1024 (5단계: assets/image/character/story/commander_m.png 지휘관 상반신을 잘라 키움 — 새 그림 아님, 전용 아이콘은 남은 일)
+  icon.png             앱 아이콘 1024×1024 — 방패 엠블럼 '15' (2026-10 디렉터 확정, 코드로 그림. docs/store/graphics/make_icon_shield.py → tools/make_mobile_icons.py, 아래 '앱 아이콘')
   export_presets.cfg   내보내기 프리셋 Windows (STOVE) · macOS (STOVE) — 아래 '5단계' · 결과물은 build/ (git 제외, .gdignore)
   default_bus_layout.tres  오디오 버스 Master · BGM · SFX
   assets/audio/        소리 (5단계: 웹 합성 소리를 구운 wav — tools/legacy-web/audio-bake/README.md)
@@ -30,7 +30,7 @@ godot/
   scripts/battle/      전투 화면 (3a: 지형·유닛·카메라·조작·엔진 사건 재생, 3b: HUD·툴팁·연출·결과·로딩·스토리 대사 — scripts/battle/README.md)
   scripts/core/sound.gd · display.gd · platform.gd  (5단계) 오토로드 Sound(배경음·효과음·버스) · Display(창 모드·크기) · Platform(가게·기기 구분)
   scripts/core/mobile.gd  (6a) 오토로드 Mobile — 모바일 배율 · 안전 영역 · 뒤로 단추 · 길게 누르기 · 목록 끌기 (아래 '6a')
-  assets/app_icon/     (6a) 모바일 아이콘·시작 화면 (tools/make_mobile_icons.py 가 icon.png 로 만듦)
+  assets/app_icon/     (6a) 모바일 아이콘·시작 화면 (tools/make_mobile_icons.py 가 방패 엠블럼 레이어로 만듦 — 아래 '앱 아이콘')
   android/             (6a, git 제외) Gradle 빌드 틀 + 디버그 키스토어 — tools/android_build_template.sh 로 만듦
   tests/check_mobile6a.gd  (6a) 모바일 흉내 시험 (배치 4기기×6언어 · 터치 · 뒤로 · 백그라운드 · 설정 · 프리셋)
   scripts/core/router.gd  오토로드 Router — 화면 전환 한 곳 (go · back · launch_battle), Esc·마우스 뒤로 단추 → 화면의 on_back()
@@ -296,7 +296,7 @@ armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형
 - **원본·재생성**: 무손실 PNG 는 `assets/image/character/art_src/{front,story}/`(git 제외 · .gdignore)로 옮겨 두고 변환 직전 커밋 `ad48239` 의 git 기록에도 있음. `python3 godot/tools/webp_art.py`(새 PNG 변환) · `--rebuild`(art_src 로 전부 다시) · `--check`(PSNR 점검).
   새 스토리 그림은 `tools/make-portrait.py` → `webp_art.py`. 필요: `cwebp`(`brew install webp`).
 - 도구가 앞모습 PNG 를 읽을 때는 `art_src/front/<키>.png` (gen-props · video-to-sheet 의 기본값 갱신).
-- **스토리 새 그림(허리 위 반신) 적용 절차 (2026-10-24 17장 적용, 나머지 6장 — boss_60 · boss_90 · boss_93 · boss_100 · kasha · commander_f — 은 재생성 뒤 같은 방식으로):**
+- **스토리 새 그림(허리 위 반신) 적용 절차 (2026-10-24 17장, 2026-10-25 나머지 6장 — boss_60 · boss_90 · boss_93 · boss_100 · kasha · commander_f — 적용, 23장 모두 완료):**
   1. 새 그림은 962x1087 RGBA PNG (그림은 위쪽 약 2/3 에 있고 아래 1/3 은 투명 — 허리에서 서서히 사라짐). 작업 폴더(git 밖) 예: `<scratchpad>/portrait/story/final/<키>.png` 와 적용 스크립트 `apply_story.sh`.
   2. `bash apply_story.sh <키> <키> ...` — 기존 `art_src/story/<키>.png` 를 `backup_old/` 로 보관, 새 PNG 를 `art_src/story/<키>.png` 로 복사(무손실 원본, git 제외),
      `cwebp -q 85 -m 6 -sharp_yuv -alpha_q 100` 으로 `assets/image/character/story/<키>.webp` 생성 — 옵션은 `tools/webp_art.py` 와 같음. `.webp.import` 는 이미 있으므로 그대로 둠(없으면 `webp_art.IMPORT_TEMPLATE` 로 만듦).
@@ -305,7 +305,7 @@ armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형
   3-1. 생성 그림의 후처리(스티커 흰 테두리 · 크로마키 초록 찌꺼기 · 상단 여백)는 PNG 단계에서(PIL/numpy) 한 뒤 2번을 다시 실행. 원본 PNG 는 작업 폴더 `backup_clean/`. `apply_story.sh` 는 `set -e` 라 이미 보관본이 있으면 `cp -n` 이 실패해 조용히 멈추므로 `|| true` 가 필요함(고쳐 둠).
   4. 확인: `git status` 가 `story/*.webp` (+ 코드 수정이 있었다면 그것) 만 보이고, `python3 godot/tools/webp_art.py --check` 로 PSNR, 도감 '스토리' 탭(`guide` 화면, 인물·보스 카드) · 스토리 대사창 · 전투 중 보스 등장을 1280x720·pixel8 으로 눈으로 확인.
   - 반신 그림의 배치: 대사창(`story_view.gd`)은 위쪽만 보이는 틀(그림 칸 210x230 · 전투 중 150x160 + 아래쪽 흐림 마스크)이라 그대로 맞음(얼굴·어깨가 대사 상자 위로 솟음). 도감 인물 카드(64x72)는 투명 여백이 커서 `codex_view.gd _story_thumb()` 가 그림이 있는 부분(`Image.get_used_rect`)만 잘라 128x144 안에 통째로 들어가게 Lanczos 로 줄인 `ImageTexture` 로 보여 줌(가운데 정렬, 계단 없음) — 전신·반신 모두 자동.
-  - 크기(17장 적용 전 → 후): Windows pck 43,349,204 → 42,992,468 B (-0.36MB) · macOS zip 73.31 → 72.94MB · AAB 74.57 → 74.20MB · 디버그 APK 130.71 → 130.34MB. 나머지 6장도 비슷하게 바뀌어 전체 약 -0.5MB 예상.
+  - 크기(17장 적용 전 → 후): Windows pck 43,349,204 → 42,992,468 B (-0.36MB) · macOS zip 73.31 → 72.94MB · AAB 74.57 → 74.20MB · 디버그 APK 130.71 → 130.34MB. 나머지 6장: story webp 6개 합계 448K → 212K.
 
 **6. 뒷모습.** `_b` 그림 120개 삭제 (3D 로 교체할 예정, 사용자 지시 2026-10-23 — git 기록에서 복구: `git checkout ad48239 -- godot/assets/image/character` 처럼 필요한 것만). 웹판도 꺼 두었던(`Rig.BACK_VIEW=false`) 그림이라 화면에는 원래 안 쓰임.
 **뒷모습을 읽는 자리** (3D 로 다시 연결할 때 여기만):
@@ -322,6 +322,30 @@ armeabi-v7a 제외는 AAB 업로드 크기를 줄이고 **32비트 전용 구형
 - **번역 키**: 6개 언어 동일하게 약 118개(웹 시절 인벤토리·강화·전직 창·상점 광고·`stage.*` 등 참조 0).
 - **상점 광고 대체 카드**(Ads 오토로드가 없을 때만 나오던 꺼진 '추후 개발' 단추) · 안 쓰는 함수·상수·신호(`input_ready`·`battle_over`·`line_shown`·`back_pressed`).
 - **남긴 것(코드에만 남은 것)**: `jab.json` 의 `summon_spirit`·`summon_golem`(세이브 점검이 `JAB.has(직업)` 로 읽음 — 지우면 변조 세이브 결과가 달라짐), `STAGE_MAX_WAVES`(시험이 읽음), 동적 접두어로 조립되는 번역 그룹(codex·stages·skills·messages 등 — 키별 증명 불가), 미사용 이미지 `assets/image/character/commander_02.prev.png`·`assets/image/icon/src/jab_commander.jpg`(이미지는 건드리지 않음).
+
+## 앱 아이콘 (방패 엠블럼 '15')
+
+디렉터 확정 시안 `docs/store/graphics/icon_shield_1024.png` 를 **코드로만** 그린 것(AI 이미지 생성·외부 서비스 없음) — 원본 스크립트 `docs/store/graphics/make_icon_shield.py`(`render_layers()`)가 레이어를 만들고,
+`godot/tools/make_mobile_icons.py` 가 그 레이어를 아래 파일에 저장합니다. 같은 이름·크기·형식이라 `export_presets.cfg`·`project.godot` 은 그대로입니다.
+
+```bash
+python3 docs/store/graphics/make_icon_shield.py      # 확정 시안 icon_shield_1024.png / _512.png 만 (같은 그림, 픽셀 동일)
+python3 godot/tools/make_mobile_icons.py             # godot/icon.png + godot/assets/app_icon/*.png 전부
+HOME=<임시 HOME> Godot --headless --path godot --editor --quit    # 바뀐 그림 다시 가져오기 (.import 는 그대로, .godot 캐시만)
+```
+
+| 파일 | 크기·형식 | 내용 |
+|---|---|---|
+| `icon.png` | 1024 RGBA(전부 불투명) | 전체 합성 — Windows(.exe) · macOS(.icns) · 프로젝트 아이콘 |
+| `assets/app_icon/ios_1024.png` | 1024 RGB(알파 없음) | 전체 합성, 모서리 직각 (iOS 가 둥글게 자름) |
+| `android_192.png` | 192 RGB | 전체 합성을 줄인 기본(레거시) 아이콘 |
+| `android_bg_432.png` | 432 RGB | 적응형 배경 — 남색 바탕 + 후광 + 광선 + 불씨 (방패·숫자 없음) |
+| `android_fg_432.png` | 432 RGBA | 적응형 전경 — 방패 + 숫자 + 작은 그림자만. 방패(그림자 포함)가 가운데 지름 280px 원 안(안전 영역 66% = 285px 안) |
+| `android_mono_432.png` | 432 RGBA | 테마 아이콘 — 방패 테두리 띠 + 방패 면 흰색 단색, 숫자는 뚫음. 전경과 같은 크기·자리 |
+| `launch_400.png` · `launch_600.png` | 400·600 RGBA | iOS 시작 화면 그림 — 투명 바탕에 방패(+그림자), 바탕색은 프리셋의 #0a0e1a |
+
+- 적응형 전경에는 방패 바깥 금빛 번짐을 넣지 않음(번짐이 안전 영역을 넘고, `check_mobile6a` 의 '테마 아이콘 윤곽 = 전경 윤곽' 조건도 지킴). 번짐은 전체 합성(icon.png·iOS·192)에만 있음.
+- 시안을 고치려면 `make_icon_shield.py` 만 고치고 위 명령 두 줄을 다시 돌리면 모든 아이콘이 같이 바뀜.
 
 ## 오토로드 사용법
 
@@ -652,7 +676,6 @@ HOME=<임시 HOME — export_templates 를 그 안에 연결> /Applications/Godo
 
 ### 남은 일 (5단계 뒤)
 
-- 전용 앱 아이콘 (지금은 지휘관 그림을 잘라 키운 것 — 작은 크기(16·32px)에서는 얼굴만 보임).
 - Windows 빌드는 이 맥에서 실행해 보지 못함 (wine 없음) — Windows PC 에서 실행·세이브 위치·Alt+Enter·배율 125/150% 확인 필요.
 - 전체 화면: play_pc5 가 실제 창에서 확인(pc5_03_fullscreen.png). 단, 시험 창이 앞에 없으면 macOS 가 전체 화면으로 바꾸지 않아 '되돌림' 길로 가고 경고를 남김.
 - 서명·공증 (위 절차), 스토브 결제 SDK·광고(모바일), 스팀 프리셋 (사용자가 말할 때).
@@ -819,7 +842,7 @@ Godot --path godot -- --iap-env local                                           
 - 내보내기 명령 (임시 HOME 이면 `GRADLE_USER_HOME=~/.gradle` 와 `ANDROID_HOME`·`JAVA_HOME`(JDK 17) 을 넘길 것):
   ```bash
   bash godot/tools/android_build_template.sh          # 처음 한 번 (godot/android/ 만듦 + 디버그 키스토어)
-  python3 godot/tools/make_mobile_icons.py            # 아이콘을 다시 만들 때만
+  python3 godot/tools/make_mobile_icons.py            # 아이콘을 다시 만들 때만 (방패 엠블럼 — 아래 '앱 아이콘')
   Godot --headless --path godot --export-debug   "Android (Google Play) APK" build/android/DEADLINE15-debug.apk
   Godot --headless --path godot --export-release "Android (Google Play)"     build/android/DEADLINE15.aab     # 출시 키스토어 필요 (아래)
   Godot --headless --path godot --export-debug   "iOS (App Store)"           build/ios/DEADLINE15.ipa         # 팀 ID 필요 (아래)
